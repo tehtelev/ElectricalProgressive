@@ -1,0 +1,537 @@
+﻿[
+	{
+		"file": "game:itemtypes/resource/crystalizedore-graded.json",
+		"op": "addmerge",
+		"path": "/crushingPropsByType",
+		"value": {
+			"crystalizedore-poor-ilmenite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-ilmenite",
+					"stacksize": 8
+				},
+				"hardnessTier": 4
+			},
+			"crystalizedore-medium-ilmenite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-ilmenite",
+					"stacksize": 10
+				},
+				"hardnessTier": 4
+			},
+			"crystalizedore-rich-ilmenite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-ilmenite",
+					"stacksize": 12
+				},
+				"hardnessTier": 4
+			},
+			"crystalizedore-bountiful-ilmenite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-ilmenite",
+					"stacksize": 16
+				},
+				"hardnessTier": 4
+			},
+			"crystalizedore-poor-chromite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-chromite",
+					"stacksize": 8
+				},
+				"hardnessTier": 4
+			},
+			"crystalizedore-medium-chromite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-chromite",
+					"stacksize": 10
+				},
+				"hardnessTier": 4
+			},
+			"crystalizedore-rich-chromite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-chromite",
+					"stacksize": 12
+				},
+				"hardnessTier": 4
+			},
+			"crystalizedore-bountiful-chromite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-chromite",
+					"stacksize": 16
+				},
+				"hardnessTier": 4
+			},
+			"crystalizedore-poor-pentlandite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-pentlandite",
+					"stacksize": 8
+				},
+				"hardnessTier": 3
+			},
+			"crystalizedore-medium-pentlandite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-pentlandite",
+					"stacksize": 10
+				},
+				"hardnessTier": 3
+			},
+			"crystalizedore-rich-pentlandite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-pentlandite",
+					"stacksize": 12
+				},
+				"hardnessTier": 3
+			},
+			"crystalizedore-bountiful-pentlandite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-pentlandite",
+					"stacksize": 16
+				},
+				"hardnessTier": 3
+			},
+			"crystalizedore-poor-uranium-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-uranium",
+					"stacksize": 8
+				},
+				"hardnessTier": 4
+			},
+			"crystalizedore-medium-uranium-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-uranium",
+					"stacksize": 10
+				},
+				"hardnessTier": 4
+			},
+			"crystalizedore-rich-uranium-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-uranium",
+					"stacksize": 12
+				},
+				"hardnessTier": 4
+			},
+			"crystalizedore-bountiful-uranium-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-uranium",
+					"stacksize": 16
+				},
+				"hardnessTier": 4
+			},
+			"crystalizedore-poor-rhodochrosite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-rhodochrosite",
+					"stacksize": 8
+				},
+				"hardnessTier": 3
+			},
+			"crystalizedore-medium-rhodochrosite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-rhodochrosite",
+					"stacksize": 10
+				},
+				"hardnessTier": 3
+			},
+			"crystalizedore-rich-rhodochrosite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-rhodochrosite",
+					"stacksize": 12
+				},
+				"hardnessTier": 3
+			},
+			"crystalizedore-bountiful-rhodochrosite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-rhodochrosite",
+					"stacksize": 16
+				},
+				"hardnessTier": 3
+			},
+			"crystalizedore-poor-cassiterite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-cassiterite",
+					"stacksize": 6
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-medium-cassiterite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-cassiterite",
+					"stacksize": 8
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-rich-cassiterite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-cassiterite",
+					"stacksize": 10
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-bountiful-cassiterite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-cassiterite",
+					"stacksize": 12
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-poor-quartz_nativegold-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-nativegold",
+					"stacksize": 6
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-medium-quartz_nativegold-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-nativegold",
+					"stacksize": 8
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-rich-quartz_nativegold-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-nativegold",
+					"stacksize": 10
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-bountiful-quartz_nativegold-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-nativegold",
+					"stacksize": 12
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-poor-quartz_nativesilver-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-nativesilver",
+					"stacksize": 8
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-medium-quartz_nativesilver-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-nativesilver",
+					"stacksize": 10
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-rich-quartz_nativesilver-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-nativesilver",
+					"stacksize": 12
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-bountiful-quartz_nativesilver-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-nativesilver",
+					"stacksize": 14
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-poor-galena_nativesilver-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-nativesilver",
+					"stacksize": 8
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-medium-galena_nativesilver-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-nativesilver",
+					"stacksize": 10
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-poor-hematite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-hematite",
+					"stacksize": 12
+				},
+				"hardnessTier": 3
+			},
+			"crystalizedore-medium-hematite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-hematite",
+					"stacksize": 14
+				},
+				"hardnessTier": 3
+			},
+			"crystalizedore-rich-hematite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-hematite",
+					"stacksize": 16
+				},
+				"hardnessTier": 3
+			},
+			"crystalizedore-bountiful-hematite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-hematite",
+					"stacksize": 20
+				},
+				"hardnessTier": 3
+			},
+			"crystalizedore-poor-bismuthinite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-bismuthinite",
+					"stacksize": 10
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-medium-bismuthinite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-bismuthinite",
+					"stacksize": 12
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-rich-bismuthinite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-bismuthinite",
+					"stacksize": 14
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-bountiful-bismuthinite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-bismuthinite",
+					"stacksize": 18
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-poor-sphalerite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-sphalerite",
+					"stacksize": 10
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-medium-sphalerite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-sphalerite",
+					"stacksize": 12
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-rich-sphalerite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-sphalerite",
+					"stacksize": 14
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-bountiful-sphalerite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-sphalerite",
+					"stacksize": 18
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-poor-nativecopper-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-nativecopper",
+					"stacksize": 10
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-medium-nativecopper-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-nativecopper",
+					"stacksize": 12
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-rich-nativecopper-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-nativecopper",
+					"stacksize": 14
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-bountiful-nativecopper-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-nativecopper",
+					"stacksize": 18
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-poor-malachite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-malachite",
+					"stacksize": 10
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-medium-malachite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-malachite",
+					"stacksize": 12
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-rich-malachite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-malachite",
+					"stacksize": 14
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-bountiful-malachite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-malachite",
+					"stacksize": 18
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-poor-galena-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-galena",
+					"stacksize": 10
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-medium-galena-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-galena",
+					"stacksize": 12
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-rich-galena-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-galena",
+					"stacksize": 14
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-bountiful-galena-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-galena",
+					"stacksize": 18
+				},
+				"hardnessTier": 2
+			},
+			"crystalizedore-poor-limonite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-limonite",
+					"stacksize": 12
+				},
+				"hardnessTier": 3
+			},
+			"crystalizedore-medium-limonite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-limonite",
+					"stacksize": 14
+				},
+				"hardnessTier": 3
+			},
+			"crystalizedore-rich-limonite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-limonite",
+					"stacksize": 16
+				},
+				"hardnessTier": 3
+			},
+			"crystalizedore-bountiful-limonite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-limonite",
+					"stacksize": 20
+				},
+				"hardnessTier": 3
+			},
+			"crystalizedore-poor-magnetite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-magnetite",
+					"stacksize": 12
+				},
+				"hardnessTier": 3
+			},
+			"crystalizedore-medium-magnetite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-magnetite",
+					"stacksize": 14
+				},
+				"hardnessTier": 3
+			},
+			"crystalizedore-rich-magnetite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-magnetite",
+					"stacksize": 16
+				},
+				"hardnessTier": 3
+			},
+			"crystalizedore-bountiful-magnetite-*": {
+				"crushedStack": {
+					"type": "item",
+					"code": "nugget-magnetite",
+					"stacksize": 20
+				},
+				"hardnessTier": 3
+			}
+		}
+	}
+]

@@ -1,0 +1,143 @@
+﻿{
+	"code": "static-helmet",
+	"class": "EArmor",
+	"behaviors": [
+	],
+
+	"shapeByType": {
+		"*": { "base": "entity/armor/static-helmet" }
+	},
+	"heldTpIdleAnimation": "holdunderarm",
+	"storageFlags": 128,
+	"durability": 1000,
+	"attributes": {
+		"chargable": true,
+		"consume": 20,
+		"wearableAttachment": true,
+		"handbook": {
+			"groupBy": [ "static-helmet-*" ],
+			"extraSections": [
+				{
+					"title": "electricalprogressiveequipment:item-handbooktitle-static-helmet",
+					"text": "electricalprogressiveequipment:item-handbooktext-static-helmet"
+				}
+			]
+		},
+		"clothescategoryByType": {
+			"*": "armorhead"
+		},
+		"disableElementsByType": {
+			"*": [ "hidehat", "Hood", "hoodupperover", "Hair tile upper part", "ponytailhigh", "ponytaillow", "Hair", "hair-uncovered", "hidefacialhair", "sidehigh", "sidelow", "bangs" ]
+		},
+		"defaultProtLoss": {
+			"perTierRelativeProtectionLoss": [ 0.025, 0.15 ],
+			"perTierFlatDamageReductionLoss": [ 0.1, 0.2 ]
+		},
+		"protectionModifiersByType": {
+			"*": {
+				"relativeProtection": 0.97,
+				"flatDamageReduction": 1.8,
+				"highDamageTierResistant": true,
+				"protectionTier": 4
+			}
+		},
+		"statModifiersByType": {
+			"*": {
+				"rangedWeaponsAcc": 1,
+				"rangedWeaponsSpeed": 0.5,
+				"hungerrate": 0.05,
+				"walkSpeed": -0.05
+			}
+		},
+		"scaleX": 0.5,
+		"scaleY": 0.5,
+		"scaleZ": 0.5,
+		"translateX": 0.15,
+		"translateY": 0.4,
+		"translateZ": 0.17,
+		"rotateX": 0,
+		"rotateY": 0,
+		"rotateZ": 0
+	},
+
+	"creativeinventory": {
+		"general": [ "*" ],
+		"electricity": [ "*" ]
+	},
+	"renderAlphaTest": 0.25,
+
+	"fpHandTransform": {
+		"translation": {
+			"x": 0.4,
+			"y": -1.5,
+			"z": -0.5
+		},
+		"rotation": {
+			"x": 163,
+			"y": 97,
+			"z": -180
+		},
+		"origin": {
+			"x": 0.5,
+			"y": 1.8,
+			"z": 0.5
+		},
+		"scale": 3
+	},
+	"tpHandTransformByType": {
+		"*": {
+			"translation": {
+				"x": -0.82,
+				"y": -2.2,
+				"z": -0.5
+			},
+			"rotation": {
+				"x": 18,
+				"y": 169,
+				"z": 30
+			},
+			"origin": {
+				"x": 0.5,
+				"y": 1.7,
+				"z": 0.5
+			},
+			"scale": 0.64
+		}
+	},
+	"guiTransform": {
+		"translation": {
+			"x": 1,
+			"y": 0,
+			"z": 0
+		},
+		"rotation": {
+			"x": -26,
+			"y": -46,
+			"z": -180
+		},
+		"origin": {
+			"x": 0.55,
+			"y": 1.7,
+			"z": 0.5
+		},
+		"scale": 2.2
+	},
+	"groundTransform": {
+		"translation": {
+			"x": 0,
+			"y": 0,
+			"z": 0
+		},
+		"rotation": {
+			"x": 0,
+			"y": 0,
+			"z": 0
+		},
+		"origin": {
+			"x": 0.34,
+			"y": 1.52,
+			"z": 0.5
+		},
+		"scale": 4
+	}
+}

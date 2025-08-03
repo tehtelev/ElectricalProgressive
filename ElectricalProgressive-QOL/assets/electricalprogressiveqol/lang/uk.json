@@ -1,0 +1,117 @@
+﻿{
+  "block-charger-*": "Станція заряджання",
+  "block-charger-burned-south": "Станція заряджання (згоріла)",
+
+  "block-estove-*": "Електрична плита",
+  "block-estove-burned-south": "Електрична плита (згоріла)",
+
+
+
+  "block-eoven-*": "Електрична духовка",
+  "block-eoven-burned-north": "Електрична духовка (згоріла)",
+
+  "block-nasteniy_fonar-*": "Настінний вуличний ліхтар",
+  "block-nasteniy_fonar-burned": "Настінний вуличний ліхтар (згорів)",
+
+  "block-stolb_fonar-*": "Стовпний вуличний ліхтар",
+  "block-stolb_fonar-2-i-burned": "Стовпний вуличний ліхтар (згорів)",
+  "block-stolb_fonar-3-i-burned": "Стовпний вуличний ліхтар (згорів)",
+  "block-stolb_fonar-3-r-burned": "Стовпний вуличний ліхтар (згорів)",
+  "block-stolb_fonar-3-t-burned": "Стовпний вуличний ліхтар (згорів)",
+  "block-stolb_fonar-3-x-burned": "Стовпний вуличний ліхтар (згорів)",
+  "block-stolb_fonar-4-i-burned": "Стовпний вуличний ліхтар (згорів)",
+  "block-stolb_fonar-4-r-burned": "Стовпний вуличний ліхтар (згорів)",
+  "block-stolb_fonar-4-t-burned": "Стовпний вуличний ліхтар (згорів)",
+  "block-stolb_fonar-4-x-burned": "Стовпний вуличний ліхтар (згорів)",
+
+  "block-ehorn-*": "Електрична горн",
+  "block-ehorn-burned-south": "Електрична горн (згоріла)",
+
+  "block-heater-*": "Електричний обігрівач",
+  "block-heater-burned": "Електричний обігрівач (згорів)",
+
+  "block-elamp-3000-*": "Електрична лампа: тепло‑оранжевий (3000K)",
+  "block-elamp-4000-*": "Електрична лампа: тепло‑жовтий (4000K)",
+  "block-elamp-5000-*": "Електрична лампа: теплий білий (5000K)",
+  "block-elamp-6000-*": "Електрична лампа: нейтральний білий (6000K)",
+  "block-elamp-7000-*": "Електрична лампа: холодно‑блакитний (7000K)",
+  "block-elamp-8000-*": "Електрична лампа: холодний білий (8000K)",
+  "block-elamp-9000-*": "Електрична лампа: синьо‑холодний (9000K)",
+
+  "block-elamp-3000-burned": "Електрична лампа (згоріла)",
+  "block-elamp-4000-burned": "Електрична лампа (згоріла)",
+  "block-elamp-5000-burned": "Електрична лампа (згоріла)",
+  "block-elamp-6000-burned": "Електрична лампа (згоріла)",
+  "block-elamp-7000-burned": "Електрична лампа (згоріла)",
+  "block-elamp-8000-burned": "Електрична лампа (згоріла)",
+  "block-elamp-9000-burned": "Електрична лампа (згоріла)",
+
+  "block-elamp_small-3000-*": "Мала електрична лампа: тепло‑оранжевий (3000K)",
+  "block-elamp_small-4000-*": "Мала електрична лампа: тепло‑жовтий (4000K)",
+  "block-elamp_small-5000-*": "Мала електрична лампа: теплий білий (5000K)",
+  "block-elamp_small-6000-*": "Мала електрична лампа: нейтральний білий (6000K)",
+  "block-elamp_small-7000-*": "Мала електрична лампа: холодно‑блакитний (7000K)",
+  "block-elamp_small-8000-*": "Мала електрична лампа: холодний білий (8000K)",
+  "block-elamp_small-9000-*": "Мала електрична лампа: синьо‑холодний (9000K)",
+
+  "block-elamp_small-3000-burned": "Мала електрична лампа (згоріла)",
+  "block-elamp_small-4000-burned": "Мала електрична лампа (згоріла)",
+  "block-elamp_small-5000-burned": "Мала електрична лампа (згоріла)",
+  "block-elamp_small-6000-burned": "Мала електрична лампа (згоріла)",
+  "block-elamp_small-7000-burned": "Мала електрична лампа (згоріла)",
+  "block-elamp_small-8000-burned": "Мала електрична лампа (згоріла)",
+  "block-elamp_small-9000-burned": "Мала електрична лампа (згоріла)",
+
+
+  "block-handbooktitle-eoven": "Використання",
+  "block-handbooktext-eoven": "Електрична духовка повністю замінює традиційну піч. Вимикається автоматично, коли процес випікання завершується. Жодних пригарів!<br>Підтримує автоматичне завантаження та розвантаження за допомогою жолобів.",
+
+
+  "block-handbooktitle-heater": "Використання",
+  "block-handbooktext-heater": "Невелике джерело тепла.",
+
+  "block-handbooktitle-elamp": "Використання",
+  "block-handbooktext-elamp": "Добре освітлює, споживаючи електроенергію.",
+
+  "block-handbooktitle-elamp_small": "Використання",
+  "block-handbooktext-elamp_small": "Джерело світла, що споживає електроенергію.",
+
+  "block-handbooktitle-nasteniy_fonar": "Використання",
+  "block-handbooktext-nasteniy_fonar": "Настінний варіант електричного ліхтаря.",
+
+  "block-handbooktitle-stolb_fonar": "Використання",
+  "block-handbooktext-stolb_fonar": "Стовпний варіант вуличного освітлення.",
+
+  "block-handbooktitle-ehorn": "Використання",
+  "block-handbooktext-ehorn": "Електрична горн повністю замінює кузнечний горн.<br><br>Максимальна температура: 1100 °C.",
+
+  "block-handbooktitle-charger": "Використання",
+  "block-handbooktext-charger": "Станція заряджання для акумуляторів та пристроїв із вбудованим акумулятором.",
+
+  "block-handbooktitle-estove": "Використання",
+  "block-handbooktext-estove": "Електрична піч дозволяє повністю замінити звичайне вогнище.<br>Підтримує автоматичне завантаження та розвантаження за допомогою жолобів.<br><br>Максимальна температура нагрівання печі: 1325 °C.",
+
+
+
+
+  "game:BlockEStove": "Електрична плита",
+  "game:freezer-title-gui": "Холодильник",
+  "game:freezer-over-sneak-help": "Відкрити/закрити дверцята.",
+  "game:freezer-over-help": "Відкрийте дверцята та покладіть їжу для збереження.",
+
+  "game:Put-into-1-items": "Потрібно мінімум 1 предмет для випікання.",
+
+
+  "game:max-light": "Максимальне світло",
+  "game:height": "Висота",
+
+
+  "block-efreezer2-*": "Електричний холодильник",
+  "block-efreezer2-burned-north": "Електричний холодильник (згорілий)",
+  "block-handbooktitle-efreezer2": "Використовується",
+  "block-handbooktext-efreezer2": "Електричний холодильник дозволяє довше зберігати продукти. <br><br>Слоти для зберігання: 6.<br>Швидкість псування їжі: 0,05×"
+
+
+
+
+}

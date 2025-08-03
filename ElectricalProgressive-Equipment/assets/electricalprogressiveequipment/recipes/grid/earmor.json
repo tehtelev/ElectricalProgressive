@@ -1,0 +1,46 @@
+﻿[
+  {
+    "ingredientPattern": "LPL,PCP,EBE",
+    "recipeGroup": 1,
+    "ingredients": {
+      "P": { "type": "item", "code": "game:metalplate-steel" },
+      "C": { "type": "item", "code": "game:armor-head-chain-steel"},
+      "L": { "type": "item", "code": "game:leather-normal-plain" },
+      "B": {"type": "item", "code": "game:gear-temporal"},
+      "E": {"type": "item", "code": "electricalprogressivebasics:coil", "quantity": 8}
+    },
+    "width": 3,
+    "height": 3,
+    "name": "plate electric helmet",
+    "output": { "type": "item", "code": "electricalprogressiveequipment:static-helmet"  }
+  },
+  {
+    "ingredientPattern": "PCP,EZE,PBP",
+    "recipeGroup": 1,
+    "ingredients": {
+      "P": { "type": "item", "code": "game:metalplate-steel"},
+      "C": { "type": "item", "code": "game:armor-body-chain-steel"},
+      "B": {"type": "item", "code": "game:glider"},
+      "E": {"type": "item", "code": "electricalprogressivebasics:coil", "quantity": 8},
+      "Z": {"type": "block", "code": "electricalprogressivebasics:accumulator-tier1-normal"}
+    },
+    "width": 3,
+    "height": 3,
+    "name": "plate body electric armor",
+    "output": { "type": "item", "code": "electricalprogressiveequipment:static-armor"  }
+  },
+  {
+    "ingredientPattern": "EBE,PCP",
+    "recipeGroup": 1,
+    "ingredients": {
+      "P": { "type": "item", "code": "game:metalplate-steel"},
+      "C": { "type": "item", "code": "game:armor-legs-chain-steel"},
+      "B": {"type": "item", "code": "game:gear-temporal"},
+      "E": {"type": "item", "code": "electricalprogressivebasics:coil", "quantity": 8}
+    },
+    "width": 3,
+    "height": 2,
+    "name": "plate leg electric armor",
+    "output": { "type": "item", "code": "electricalprogressiveequipment:static-boots"  }
+  }
+]

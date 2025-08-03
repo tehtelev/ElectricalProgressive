@@ -1,0 +1,156 @@
+[
+  {
+    "ingredientPattern": "MS",
+    "width": 2,
+    "height": 1,
+    "ingredients": {
+      "M": {
+        "type": "block",
+        "code": "electricalprogressiveqol:elamp-3000-disabled"
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 16
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:elamp_small-3000-disabled",
+      "quantity": 4
+    }
+  },
+  {
+    "ingredientPattern": "MS",
+    "width": 2,
+    "height": 1,
+    "ingredients": {
+      "M": {
+        "type": "block",
+        "code": "electricalprogressiveqol:elamp-4000-disabled"
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 16
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:elamp_small-4000-disabled",
+      "quantity": 4
+    }
+  },
+  {
+    "ingredientPattern": "MS",
+    "width": 2,
+    "height": 1,
+    "ingredients": {
+      "M": {
+        "type": "block",
+        "code": "electricalprogressiveqol:elamp-5000-disabled"
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 16
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:elamp_small-5000-disabled",
+      "quantity": 4
+    }
+  },
+  {
+    "ingredientPattern": "MS",
+    "width": 2,
+    "height": 1,
+    "ingredients": {
+      "M": {
+        "type": "block",
+        "code": "electricalprogressiveqol:elamp-6000-disabled"
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 16
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:elamp_small-6000-disabled",
+      "quantity": 4
+    }
+  },
+  {
+    "ingredientPattern": "MS",
+    "width": 2,
+    "height": 1,
+    "ingredients": {
+      "M": {
+        "type": "block",
+        "code": "electricalprogressiveqol:elamp-7000-disabled"
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 16
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:elamp_small-7000-disabled",
+      "quantity": 4
+    }
+  },
+  {
+    "ingredientPattern": "MS",
+    "width": 2,
+    "height": 1,
+    "ingredients": {
+      "M": {
+        "type": "block",
+        "code": "electricalprogressiveqol:elamp-8000-disabled"
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 16
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:elamp_small-8000-disabled",
+      "quantity": 4
+    }
+  },
+  {
+    "ingredientPattern": "MS",
+    "width": 2,
+    "height": 1,
+    "ingredients": {
+      "M": {
+        "type": "block",
+        "code": "electricalprogressiveqol:elamp-9000-disabled"
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 16
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:elamp_small-9000-disabled",
+      "quantity": 4
+    }
+  }
+]

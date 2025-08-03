@@ -1,0 +1,218 @@
+﻿[
+  {
+    "ingredientPattern": "OSH,ZP_,IC_",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "P": {
+        "type": "item",
+        "code": "game:plank-*",
+        "quantity": 4
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 32
+      },
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "I": {
+        "type": "item",
+        "code": "game:metalplate-iron",
+        "quantity": 1
+      },
+      "O": {
+        "type": "item",
+        "code": "game:metalplate-copper",
+        "quantity": 1
+      },
+      "Z": {
+        "type": "item",
+        "code": "game:metalplate-zinc",
+        "quantity": 1
+      },
+      "C": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-32v-copper-single-part",
+        "quantity": 8
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:accumulator-tier1-normal",
+      "quantity": 1
+    }
+  },
+
+  {
+    "ingredientPattern": "OSH,ZPE,ICE",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "P": {
+        "type": "item",
+        "code": "game:plank-*",
+        "quantity": 4
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 32
+      },
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "I": {
+        "type": "item",
+        "code": "game:metalplate-iron",
+        "quantity": 4
+      },
+      "O": {
+        "type": "item",
+        "code": "game:metalplate-copper",
+        "quantity": 4
+      },
+      "Z": {
+        "type": "item",
+        "code": "game:metalplate-zinc",
+        "quantity": 4
+      },
+      "C": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-128v-copper-single-part",
+        "quantity": 16
+      },
+      "E": {
+        "type": "item",
+        "code": "game:ore-bituminouscoal",
+        "quantity": 16
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:accumulator-tier2-normal",
+      "quantity": 1
+    }
+  },
+
+  {
+    "ingredientPattern": "OSH,ZPE,ICE",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "P": {
+        "type": "item",
+        "code": "game:plank-*",
+        "quantity": 4
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 32
+      },
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "I": {
+        "type": "item",
+        "code": "game:metalplate-iron",
+        "quantity": 4
+      },
+      "O": {
+        "type": "item",
+        "code": "game:metalplate-copper",
+        "quantity": 4
+      },
+      "Z": {
+        "type": "item",
+        "code": "game:metalplate-zinc",
+        "quantity": 4
+      },
+      "C": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-128v-copper-single-part",
+        "quantity": 16
+      },
+      "E": {
+        "type": "item",
+        "code": "game:ore-graphite",
+        "quantity": 8
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:accumulator-tier2-normal",
+      "quantity": 1
+    }
+  },
+
+
+
+  {
+    "ingredientPattern": "OSH,ZPE,ICE",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "P": {
+        "type": "item",
+        "code": "game:plank-*",
+        "quantity": 4
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 32
+      },
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "I": {
+        "type": "item",
+        "code": "game:metalplate-iron",
+        "quantity": 4
+      },
+      "O": {
+        "type": "item",
+        "code": "game:metalplate-copper",
+        "quantity": 4
+      },
+      "Z": {
+        "type": "item",
+        "code": "game:metalplate-zinc",
+        "quantity": 4
+      },
+      "C": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-128v-copper-single-part",
+        "quantity": 16
+      },
+      "E": {
+        "type": "item",
+        "code": "game:powder-charcoal",
+        "quantity": 64
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:accumulator-tier2-normal",
+      "quantity": 1
+    }
+  }
+]

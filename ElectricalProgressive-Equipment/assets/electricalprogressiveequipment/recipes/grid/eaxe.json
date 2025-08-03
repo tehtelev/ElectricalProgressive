@@ -1,0 +1,31 @@
+﻿{
+  "ingredientPattern": "_BZ,EPM,PE_",
+  "ingredients": {
+    "M": {
+      "type": "block",
+      "code": "game:metal-parts", "quantity": 2
+    },
+    "B": {
+      "type": "item",
+      "code": "game:gear-temporal", "quantity": 1
+    },
+    "P": {
+      "type": "item",
+      "code": "electricalprogressivebasics:coil", "quantity": 4
+    },
+    "E": {
+      "type": "item",
+      "code": "electricalprogressivebasics:engineshaft", "quantity": 1
+    },
+    "Z": {
+      "type": "item",
+      "code": "game:axehead-steel", "quantity": 1
+    }
+  },
+  "width": 3,
+  "height": 3,
+  "output": {
+    "type": "item",
+    "code": "electricalprogressiveequipment:eaxe"
+  }
+}

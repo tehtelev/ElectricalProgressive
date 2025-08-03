@@ -1,0 +1,188 @@
+﻿{
+  "code": "accumulator",
+  "class": "BlockEAccumulator",
+  "entityClass": "BlockEntityEAccumulator",
+  "entityBehaviors": [
+    {
+      "name": "BEBehaviorEAccumulator"
+    },
+    {
+      "name": "ElectricalProgressive"
+    }
+  ],
+
+  "variantGroups": [
+    {
+      "code": "tier",
+      "states": [
+        "tier1",
+        "tier2"
+      ]
+    },
+    {
+      "code": "state",
+      "states": [
+        "normal",
+        "burned"
+      ]
+    }
+  ],
+
+  "behaviorsByType": {
+    "*-tier2-*": [
+      {
+        "name": "Multiblock",
+        "properties": {
+          "sizex": 1,
+          "sizey": 2,
+          "sizez": 1,
+          "cposition": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        }
+      }
+    ]
+  },
+
+  "storageFlagsByType": {
+    "*-tier2-*": 3
+  },
+
+
+  "creativeInventory": {
+    "general": [
+      "*-normal",
+      "*-burned"
+    ],
+    "electricity": [
+      "*-normal"
+    ]
+  },
+
+  "attributes": {
+    "handbook": {
+      "groupBy": [ "accumulator-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivebasics:block-handbooktitle-accumulator-{tier}",
+          "text": "electricalprogressivebasics:block-handbooktext-accumulator-{tier}"
+        }
+      ]
+    }
+  },
+
+  "durabilityByType": {
+    "*-tier1-normal": 3200,
+    "*-tier2-normal": 12800,
+    "*-burned": 0
+  },
+
+  "attributesByType": {
+    "*-tier1-normal": {
+      "maxcapacity": 64000,
+      "voltage": 32,
+      "maxCurrent": 20.0,
+      "isolated": true,
+      "isolatedEnvironment": false,
+      "power": 128.0,
+      "chargable": true,
+      "consume": 20
+    },
+    "*-tier2-normal": {
+      "maxcapacity": 256000,
+      "voltage": 128,
+      "maxCurrent": 20.0,
+      "isolated": true,
+      "isolatedEnvironment": false,
+      "power": 512.0,
+      "chargable": false,
+      "consume": 20     
+    },
+    "*": {
+      "chargable": false
+    }
+  },
+
+  "shape": {
+    "base": "block/accumulator/accumulator-{tier}-{state}"
+  },
+
+  "resistance": 1,
+  
+  "drawType": "JSON",
+  "lightAbsorption": 0.0,
+  "faceCullMode": "NeverCull",
+  "renderPass": "OpaqueNoCull",
+  "emitSideAo": {
+    "all": false
+  },
+  "sideAo": {
+    "all": false
+  },
+  "sideOpaque": {
+    "all": false
+  },
+  "sideSolid": {
+    "all": false
+  },
+
+
+  "heldTpIdleAnimation": "holdbothhandslarge",
+  "heldRightReadyAnimation": "heldblockready",
+  "heldTpUseAnimation": "twohandplaceblock",
+
+
+  "tpHandTransformByType": {
+    "*-tier1-*": {
+      "translation": {
+        "x": -1.23,
+        "y": -0.91,
+        "z": -0.8
+      },
+      "rotation": {
+        "x": -2,
+        "y": 25,
+        "z": -78
+      },
+      "scale": 0.4
+    },
+    "*-tier2-*": {
+      "translation": {
+        "x": -0.7,
+        "y": -0.91,
+        "z": -0.8
+      },
+      "rotation": {
+        "x": -2,
+        "y": 25,
+        "z": -78
+      },
+      "scale": 0.4
+    }
+  },
+
+
+  "guiTransformByType": {
+    "*-tier2-*": {
+      "rotation": {
+        "x": -22.6,
+        "y": -145,
+        "z": 0
+      },
+      "origin": {
+        "x": 0.5,
+        "y": 0.9,
+        "z": 0.5
+      },
+      "scale": 0.72
+    }
+  },
+
+
+  "sounds": {
+    "place": "game:block/anvil",
+    "walk": "game:walk/stone"
+  }
+}

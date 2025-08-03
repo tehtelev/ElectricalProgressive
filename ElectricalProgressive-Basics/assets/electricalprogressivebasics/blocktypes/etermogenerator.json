@@ -1,0 +1,96 @@
+﻿{
+  "code": "etermogenerator",
+  "class": "BlockETermoGenerator",
+  "entityClass": "BlockEntityETermoGenerator",
+  "behaviors": [
+    { "name": "Container" },
+    {
+      "name": "HorizontalOrientable",
+      "properties": {
+        "dropBlockFace": "south"
+      }
+    }
+  ],
+
+  "entityBehaviors": [
+    {
+      "name": "Animatable"
+    },
+    {
+      "name": "BEBehaviorTermoEGenerator"
+    },
+    {
+      "name": "ElectricalProgressive"
+    }
+  ],
+
+  "attributes": {
+    "voltage": 32,
+    "maxCurrent": 1024.0,
+    "isolated": true,
+    "isolatedEnvironment": true,
+    "maxHeat": 10.0, // достигает при 1300 градусах
+    "handbook": {
+      "groupBy": [ "etermogenerator-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivebasics:block-handbooktitle-etermogenerator",
+          "text": "electricalprogressivebasics:block-handbooktext-etermogenerator"
+        }
+      ]
+    }
+  },
+
+  "creativeinventory": {
+    "general": [ "*-south" ],
+    "electricity": [ "*-south" ]
+  },
+
+  "variantgroups": [
+    {
+      "code": "side",
+      "loadFromProperties": "abstract/horizontalorientation"
+    }
+  ],
+
+
+
+
+  "shapebytype": {
+    "*-north": {
+      "base": "block/termogenerator/termogenerator",
+      "rotateY": 0
+    },
+    "*-east": {
+      "base": "block/termogenerator/termogenerator",
+      "rotateY": 270
+    },
+    "*-south": {
+      "base": "block/termogenerator/termogenerator",
+      "rotateY": 180
+    },
+    "*-west": {
+      "base": "block/termogenerator/termogenerator",
+      "rotateY": 90
+    }
+  },
+
+
+
+  "blockmaterial": "Stone",
+  "sidesolid": {
+    "all": false
+  },
+  "sideopaque": {
+    "all": false
+  },
+  "resistance": 3.5,
+  "lightAbsorption": 0,
+
+  "sounds": {
+    "walk": "game:walk/stone"
+  },
+
+  "heldTpIdleAnimation": "holdbothhandslarge",
+  "heldTpUseAnimation": "twohandplaceblock"
+}

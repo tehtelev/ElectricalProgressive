@@ -1,0 +1,118 @@
+﻿{
+  "block-charger-*": "Estação de Carregamento",
+  "block-charger-burned-south": "Estação de Carregamento (Queimada)",
+
+  "block-estove-*": "Fogão Elétrico",
+  "block-estove-burned-south": "Fogão Elétrico (Queimado)",
+
+
+
+  "block-eoven-*": "Forno Elétrico",
+  "block-eoven-burned-north": "Forno Elétrico (Queimado)",
+
+  "block-ehorn-*": "Forja Elétrica",
+  "block-ehorn-burned-south": "Forja Elétrica (Queimada)",
+
+  "block-heater-*": "Aquecedor Elétrico",
+  "block-heater-burned": "Aquecedor Elétrico (Queimado)",
+
+  "block-nasteniy_fonar-*": "Luminária de Parede",
+  "block-nasteniy_fonar-burned": "Luminária de Parede (Queimada)",
+
+  "block-stolb_fonar-*": "Luminária de Rua",
+  "block-stolb_fonar-2-i-burned": "Luminária de Rua (Queimada)",
+  "block-stolb_fonar-3-i-burned": "Luminária de Rua (Queimada)",
+  "block-stolb_fonar-3-r-burned": "Luminária de Rua (Queimada)",
+  "block-stolb_fonar-3-t-burned": "Luminária de Rua (Queimada)",
+  "block-stolb_fonar-3-x-burned": "Luminária de Rua (Queimada)",
+  "block-stolb_fonar-4-i-burned": "Luminária de Rua (Queimada)",
+  "block-stolb_fonar-4-r-burned": "Luminária de Rua (Queimada)",
+  "block-stolb_fonar-4-t-burned": "Luminária de Rua (Queimada)",
+  "block-stolb_fonar-4-x-burned": "Luminária de Rua (Queimada)",
+
+  "block-elamp-3000-*": "Lâmpada Elétrica: Laranja-Quente (3000K)",
+  "block-elamp-4000-*": "Lâmpada Elétrica: Amarelo-Quente (4000K)",
+  "block-elamp-5000-*": "Lâmpada Elétrica: Branco Quente (5000K)",
+  "block-elamp-6000-*": "Lâmpada Elétrica: Branco Neutro (6000K)",
+  "block-elamp-7000-*": "Lâmpada Elétrica: Branco Frio (7000K)",
+  "block-elamp-8000-*": "Lâmpada Elétrica: Branco Gelado (8000K)",
+  "block-elamp-9000-*": "Lâmpada Elétrica: Azul-Frio (9000K)",
+
+  "block-elamp-3000-burned": "Lâmpada Elétrica (Queimada)",
+  "block-elamp-4000-burned": "Lâmpada Elétrica (Queimada)",
+  "block-elamp-5000-burned": "Lâmpada Elétrica (Queimada)",
+  "block-elamp-6000-burned": "Lâmpada Elétrica (Queimada)",
+  "block-elamp-7000-burned": "Lâmpada Elétrica (Queimada)",
+  "block-elamp-8000-burned": "Lâmpada Elétrica (Queimada)",
+  "block-elamp-9000-burned": "Lâmpada Elétrica (Queimada)",
+
+  "block-elamp_small-3000-*": "Lâmpada Elétrica Pequena: Laranja-Quente (3000K)",
+  "block-elamp_small-4000-*": "Lâmpada Elétrica Pequena: Amarelo-Quente (4000K)",
+  "block-elamp_small-5000-*": "Lâmpada Elétrica Pequena: Branco Quente (5000K)",
+  "block-elamp_small-6000-*": "Lâmpada Elétrica Pequena: Branco Neutro (6000K)",
+  "block-elamp_small-7000-*": "Lâmpada Elétrica Pequena: Branco Frio (7000K)",
+  "block-elamp_small-8000-*": "Lâmpada Elétrica Pequena: Branco Gelado (8000K)",
+  "block-elamp_small-9000-*": "Lâmpada Elétrica Pequena: Azul-Frio (9000K)",
+
+  "block-elamp_small-3000-burned": "Lâmpada Elétrica Pequena (Queimada)",
+  "block-elamp_small-4000-burned": "Lâmpada Elétrica Pequena (Queimada)",
+  "block-elamp_small-5000-burned": "Lâmpada Elétrica Pequena (Queimada)",
+  "block-elamp_small-6000-burned": "Lâmpada Elétrica Pequena (Queimada)",
+  "block-elamp_small-7000-burned": "Lâmpada Elétrica Pequena (Queimada)",
+  "block-elamp_small-8000-burned": "Lâmpada Elétrica Pequena (Queimada)",
+  "block-elamp_small-9000-burned": "Lâmpada Elétrica Pequena (Queimada)",
+
+
+  "block-handbooktitle-eoven": "Uso",
+  "block-handbooktext-eoven": "O forno elétrico substitui completamente o forno tradicional. Desliga-se automaticamente quando o processo de assamento é concluído. Chega de queimar alimentos!<br>Suporta carregamento e descarregamento automáticos por meio de calhas.",
+
+
+  "block-handbooktitle-heater": "Uso",
+  "block-handbooktext-heater": "Uma pequena fonte de calor.",
+
+  "block-handbooktitle-elamp": "Uso",
+  "block-handbooktext-elamp": "Uma fonte de luz confiável que consome eletricidade.",
+
+  "block-handbooktitle-elamp_small": "Uso",
+  "block-handbooktext-elamp_small": "Uma fonte de luz compacta que consome eletricidade.",
+
+  "block-handbooktitle-nasteniy_fonar": "Uso",
+  "block-handbooktext-nasteniy_fonar": "Uma variante de lâmpada elétrica montada na parede.",
+
+  "block-handbooktitle-stolb_fonar": "Uso",
+  "block-handbooktext-stolb_fonar": "Uma variante de lâmpada elétrica para iluminação pública.",
+
+  "block-handbooktitle-ehorn": "Uso",
+  "block-handbooktext-ehorn": "A forja elétrica substitui totalmente a forja tradicional.<br><br>Temperatura máxima de aquecimento: 1100 °C.",
+
+  "block-handbooktitle-charger": "Uso",
+  "block-handbooktext-charger": "A estação de carregamento permite recarregar baterias e dispositivos com baterias embutidas.",
+
+  "block-handbooktitle-estove": "Uso",
+  "block-handbooktext-estove": "O fogão elétrico permite substituir completamente uma fogueira comum.<br>Suporta carregamento e descarregamento automáticos por meio de calhas.<br><br>Temperatura máxima de aquecimento da chapa: 1325 °C.",
+
+
+
+
+
+  "game:BlockEStove": "Fogão Elétrico",
+  "game:freezer-title-gui": "Freezer",
+  "game:freezer-over-sneak-help": "Abrir/fechar porta.",
+  "game:freezer-over-help": "Abra a porta e coloque alimentos para preservá-los.",
+
+  "game:Put-into-1-items": "É necessário no mínimo 1 item para assar.",
+
+  "game:max-light": "Luz máxima",
+  "game:height": "Altura",
+
+
+  "block-efreezer2-*": "Geladeira Elétrica",
+  "block-efreezer2-burned-north": "Geladeira Elétrica (queimada)",
+  "block-handbooktitle-efreezer2": "Em uso",
+  "block-handbooktext-efreezer2": "A geladeira elétrica permite conservar os alimentos por mais tempo. <br><br>Slots de armazenamento: 6.<br>Taxa de deterioração dos alimentos: 0,05×"
+
+
+
+
+
+}
