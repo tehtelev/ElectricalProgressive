@@ -2,7 +2,7 @@
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<OutputPath>$(OutputModPath)</OutputPath>
+        <OutputPath>bin\$(Configuration)\Mods\mod</OutputPath>
         <Nullable>enable</Nullable>
         <RootNamespace>ElectricalProgressive</RootNamespace>
     </PropertyGroup>
@@ -15,7 +15,11 @@
         <HintPath>$(VINTAGE_STORY)/Lib/Newtonsoft.Json.dll</HintPath>
         <Private>False</Private>
       </Reference>
-           <Reference Include="VintagestoryAPI">
+      <Reference Include="ElectricalProgressive-Core">
+			<HintPath>..\Releases\electricalprogressivecore\ElectricalProgressive-Core.dll</HintPath>
+        <Private>False</Private>
+      </Reference>
+      <Reference Include="VintagestoryAPI">
             <HintPath>$(VINTAGE_STORY)/VintagestoryAPI.dll</HintPath>
             <Private>False</Private>
         </Reference>
@@ -36,9 +40,6 @@
             <Private>False</Private>
         </Reference>
     </ItemGroup>
-	<ItemGroup>
-    <ProjectReference Include="../ElectricalProgressive-Core/ElectricalProgressive-Core.csproj" />
-	</ItemGroup>
     <ItemGroup>
         <Content Include="assets\**">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

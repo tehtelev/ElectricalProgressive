@@ -1,229 +1,112 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
+using System.Collections.Generic;
 using Cake.Common;
 using Cake.Common.IO;
 using Cake.Common.Tools.DotNet;
-using Cake.Common.Tools.DotNet.Build;
-using Cake.Common.Tools.DotNet.Restore;
+using Cake.Common.Tools.DotNet.Clean;
+using Cake.Common.Tools.DotNet.Publish;
 using Cake.Core;
-using Cake.Core.Diagnostics;
 using Cake.Frosting;
 using Cake.Json;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Vintagestory.API.Common;
 
-public static class Program
-{
-    public static int Main(string[] args) => new CakeHost()
-        .UseContext<BuildContext>()
-        .UseWorkingDirectory("..")
-        .Run(args);
+public static class Program {
+    public static int Main(string[] args) {
+        return new CakeHost()
+            .UseContext<BuildContext>()
+            .Run(args);
+    }
 }
 
-public class BuildContext : FrostingContext
-{
-    public string[] ModProjects => new[] 
-    {
+public class BuildContext : FrostingContext {
+    public List<string> ProjectNames = new List<string> { 
         "ElectricalProgressive-Core",
+        "ElectricalProgressive-Basics",
         "ElectricalProgressive-Equipment",
         "ElectricalProgressive-QOL",
-        "ElectricalProgressive-Basics"
+        // Add other project names here
     };
 
-    public string OutputDir => "./ModReleases";
-    public string Configuration { get; }
-    public string Version { get; }
-
-    public BuildContext(ICakeContext context) : base(context) 
-    {
-        Configuration = context.Arguments.GetArgument("configuration") ?? "Release";
-        Version = GetModVersion(context);
+    public BuildContext(ICakeContext context) : base(context) {
+        this.BuildConfiguration = context.Argument("configuration", "Release");
+        this.SkipJsonValidation = context.Argument("skipJsonValidation", false);
     }
 
-    private string GetModVersion(ICakeContext context)
-    {
-        try
-        {
-            var modInfo = context.DeserializeJsonFromFile<ModInfo>($"./ElectricalProgressive-Core/modinfo.json");
-            return modInfo.Version ?? "1.0.0";
-        }
-        catch
-        {
-            return "1.0.0";
-        }
-    }
+    public string BuildConfiguration { get; set; }
+    public bool SkipJsonValidation { get; set; }
 }
 
-public class ModInfo
-{
-    public string Version { get; set; }
-}
-
-[TaskName("Clean")]
-public sealed class CleanTask : FrostingTask<BuildContext>
-{
-    public override void Run(BuildContext context)
-    {
-        context.CleanDirectory(context.OutputDir);
-        
-        foreach (var project in context.ModProjects)
-        {
-            var binDir = $"./{project}/bin";
-            var objDir = $"./{project}/obj";
-            
-            if (context.DirectoryExists(binDir))
-                context.CleanDirectory(binDir);
-            
-            if (context.DirectoryExists(objDir))
-                context.CleanDirectory(objDir);
+[TaskName("ValidateJson")]
+public sealed class ValidateJsonTask : FrostingTask<BuildContext> {
+    public override void Run(BuildContext context) {
+        if (context.SkipJsonValidation) {
+            return;
         }
-    }
-}
 
-[TaskName("Restore")]
-[IsDependentOn(typeof(CleanTask))]
-public sealed class RestoreTask : FrostingTask<BuildContext>
-{
-    public override void Run(BuildContext context)
-    {
-        foreach (var project in context.ModProjects)
-        {
-            var projPath = $"./{project}/{project}.csproj";
-            
-            if (!context.FileExists(projPath))
-            {
-                context.Log.Warning($"Project {project} not found");
-                continue;
+        foreach (var projectName in context.ProjectNames) {
+            var jsonFiles = context.GetFiles($"../{projectName}/assets/**/*.json");
+
+            foreach (var file in jsonFiles) {
+                try {
+                    var json = File.ReadAllText(file.FullPath);
+                    JToken.Parse(json);
+                }
+                catch (JsonException ex) {
+                    throw new Exception($"Validation failed for JSON file in project {projectName}: {file.FullPath}{Environment.NewLine}{ex.Message}", ex);
+                }
             }
-
-            context.DotNetRestore(projPath);
         }
     }
 }
 
 [TaskName("Build")]
-[IsDependentOn(typeof(RestoreTask))]
-public sealed class BuildTask : FrostingTask<BuildContext>
-{
-    public override void Run(BuildContext context)
-    {
-        foreach (var project in context.ModProjects)
-        {
-            var projPath = $"./{project}/{project}.csproj";
-            
-            if (!context.FileExists(projPath))
-            {
-                context.Log.Warning($"Project {project} not found");
-                continue;
-            }
+[IsDependentOn(typeof(ValidateJsonTask))]
+public sealed class BuildTask : FrostingTask<BuildContext> {
+    public override void Run(BuildContext context) {
+        foreach (var projectName in context.ProjectNames) {
+            context.DotNetClean(
+                $"../{projectName}/{projectName}.csproj",
+                new DotNetCleanSettings {
+                    Configuration = context.BuildConfiguration
+                }
+            );
 
-            context.DotNetBuild(projPath, new DotNetBuildSettings
-            {
-                Configuration = context.Configuration,
-                NoRestore = true
-            });
+            context.DotNetPublish(
+                $"../{projectName}/{projectName}.csproj",
+                new DotNetPublishSettings {
+                    Configuration = context.BuildConfiguration
+                }
+            );
         }
     }
 }
 
 [TaskName("Package")]
 [IsDependentOn(typeof(BuildTask))]
-public sealed class PackageTask : FrostingTask<BuildContext>
-{
-    public override void Run(BuildContext context)
-    {
-        context.EnsureDirectoryExists(context.OutputDir);
+public sealed class PackageTask : FrostingTask<BuildContext> {
+    public override void Run(BuildContext context) {
+        context.EnsureDirectoryExists("../Releases");
+        context.CleanDirectory("../Releases");
 
-        foreach (var project in context.ModProjects)
-        {
-            try
-            {
-                PackageSingleProject(context, project);
-            }
-            catch (Exception ex)
-            {
-                context.Log.Error($"Failed to package {project}: {ex.Message}");
-            }
-        }
-    }
+        foreach (var projectName in context.ProjectNames) {
+            var modInfo = context.DeserializeJsonFromFile<ModInfo>($"../{projectName}/modinfo.json");
+            var version = modInfo.Version;
+            var name = modInfo.ModID;
 
-    private void PackageSingleProject(BuildContext context, string project)
-    {
-        // Создаем временную папку
-        var tempDir = $"./temp_package_{project}";
-        context.EnsureDirectoryExists(tempDir);
-        context.CleanDirectory(tempDir);
-
-        // Копируем DLL
-        var dllPath = FindDllFile(context, project);
-        if (dllPath != null)
-        {
-            context.CopyFile(dllPath, $"{tempDir}/{Path.GetFileName(dllPath)}");
-        }
-
-        // Копируем assets
-        var assetsDir = $"./{project}/assets";
-        if (context.DirectoryExists(assetsDir))
-        {
-            context.CopyDirectory(assetsDir, $"{tempDir}/assets");
-        }
-
-        // Копируем обязательные файлы
-        CopyRequiredFiles(context, project, tempDir);
-
-        // Создаем архив с версией
-        var zipPath = $"{context.OutputDir}/{project}_{context.Version}.zip";
-        context.Zip(tempDir, zipPath);
-        context.Log.Information($"Created: {zipPath}");
-
-        // Очищаем временную папку
-        context.DeleteDirectory(tempDir, new DeleteDirectorySettings { Recursive = true });
-    }
-
-    private string FindDllFile(BuildContext context, string project)
-    {
-        var possiblePaths = new[]
-        {
-            $"./{project}/bin/{context.Configuration}/Mods/mod/{project}.dll",
-            $"./{project}/bin/{context.Configuration}/{project}.dll",
-            $"./{project}/bin/{project}.dll",
-            $"./{project}/{project}.dll"
-        };
-
-        foreach (var path in possiblePaths)
-        {
-            if (context.FileExists(path))
-            {
-                context.Log.Debug($"Found DLL at: {path}");
-                return path;
-            }
-        }
-
-        context.Log.Warning($"DLL not found for {project}");
-        return null;
-    }
-
-    private void CopyRequiredFiles(BuildContext context, string project, string targetDir)
-    {
-        var requiredFiles = new[]
-        {
-            "modinfo.json",
-            "modicon.png",
-            "README.md",
-            "LICENSE"
-        };
-
-        foreach (var file in requiredFiles)
-        {
-            var sourcePath = $"./{project}/{file}";
-            if (context.FileExists(sourcePath))
-            {
-                context.CopyFile(sourcePath, $"{targetDir}/{file}");
-            }
+            context.EnsureDirectoryExists($"../Releases/{name}");
+            context.CopyFiles($"../{projectName}/bin/{context.BuildConfiguration}/Mods/mod/publish/*", $"../Releases/{name}");
+            context.CopyDirectory($"../{projectName}/assets", $"../Releases/{name}/assets");
+            context.CopyFile($"../{projectName}/modinfo.json", $"../Releases/{name}/modinfo.json");
+            context.CopyFile($"../{projectName}/modicon.png", $"../Releases/{name}/modicon.png");
+            context.Zip($"../Releases/{name}", $"../Releases/{name}_{version}.zip");
         }
     }
 }
 
 [TaskName("Default")]
 [IsDependentOn(typeof(PackageTask))]
-public class DefaultTask : FrostingTask { }
+public class DefaultTask : FrostingTask {
+}

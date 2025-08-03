@@ -7,6 +7,14 @@
         <RootNamespace>ElectricalProgressive</RootNamespace>
     </PropertyGroup>
     <ItemGroup>
+      <Reference Include="ElectricalProgressive-Core">
+        <HintPath>..\Releases\electricalprogressivecore\ElectricalProgressive-Core.dll</HintPath>
+        <Private>False</Private>
+      </Reference>
+      <Reference Include="ElectricalProgressive-Basics">
+        <HintPath>..\Releases\electricalprogressivebasics\ElectricalProgressive-Basics.dll</HintPath>
+        <Private>False</Private>
+      </Reference>
         <Reference Include="protobuf-net">
             <HintPath>$(VINTAGE_STORY)/Lib/protobuf-net.dll</HintPath>
             <Private>False</Private>
@@ -36,10 +44,6 @@
             <Private>False</Private>
         </Reference>
     </ItemGroup>
-	<ItemGroup>
-    <ProjectReference Include="../ElectricalProgressive-Core/ElectricalProgressive-Core.csproj" />
-	<ProjectReference Include="../ElectricalProgressive-Basics/ElectricalProgressive-Basics.csproj" />
-	</ItemGroup>
     <ItemGroup>
         <Content Include="assets\**">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
