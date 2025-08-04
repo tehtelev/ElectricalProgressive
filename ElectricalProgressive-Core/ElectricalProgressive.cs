@@ -17,7 +17,7 @@ using Vintagestory.API.Util;
 [assembly: ModInfo(
     "Electrical Progressive: Core",
     "electricalprogressivecore",
-    Website = "https://github.com/tehtelev/ElectricalProgressiveCore",
+    Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Electrical logic library.",
     Version = "2.1.0-rc.2",
     Authors = new[] { "Tehtelev", "Kotl" }

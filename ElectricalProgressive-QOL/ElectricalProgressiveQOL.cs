@@ -18,7 +18,7 @@ using ElectricalProgressive.Content.Block.EFreezer2;
 [assembly: ModInfo(
     "Electrical Progressive: QoL",
     "electricalprogressiveqol",
-    Website = "https://github.com/tehtelev/ElectricalProgressiveQOL",
+    Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Additional electrical devices.",
     Version = "2.1.0-rc.2",
     Authors = new[] {

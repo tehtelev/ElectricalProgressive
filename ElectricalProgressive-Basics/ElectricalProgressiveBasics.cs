@@ -21,7 +21,7 @@ using System.Collections.Generic;
 [assembly: ModInfo(
     "Electrical Progressive: Basics",
     "electricalprogressivebasics",
-    Website = "https://github.com/tehtelev/ElectricalProgressiveBasics",
+    Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Basic electrical devices.",
     Version = "2.1.0-rc.2",
     Authors = new[] {
