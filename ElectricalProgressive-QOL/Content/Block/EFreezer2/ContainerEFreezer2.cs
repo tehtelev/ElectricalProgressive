@@ -276,7 +276,8 @@ public abstract class ContainerEFreezer2 : BlockEntityEBase, IBlockEntityContain
     {
         base.GetBlockInfo(forPlayer, dsc);
 
-        room = roomReg!.GetRoomForPosition(Pos);
+        var room = Api.ModLoader.GetModSystem<RoomRegistry>()?.GetRoomForPosition(Pos);
+        if (room == null) return; // или добавить альтернативную логику
         float rate = GetPerishRate();
 
         if (Inventory is InventoryGeneric)

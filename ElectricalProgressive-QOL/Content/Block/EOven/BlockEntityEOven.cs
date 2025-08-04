@@ -11,7 +11,7 @@ using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
 
 namespace ElectricalProgressive.Content.Block.EOven;
-public class BlockEntityEOven : BlockEntityDisplay, IHeatSource
+public class    BlockEntityEOven : BlockEntityDisplay, IHeatSource
 {
     public static readonly int BakingStageThreshold = 100;
     public static readonly int maxBakingTemperatureAccepted = 260;
