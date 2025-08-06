@@ -562,7 +562,7 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
     /// </summary>
     private void CanDoBurn()
     {
-        CombustibleProperties fuelProps = FuelSlot.Itemstack.Collectible.CombustibleProps ?? null!;
+        CombustibleProperties fuelProps = FuelSlot.Itemstack?.Collectible?.CombustibleProps ?? null!;
         if (fuelProps == null)
             return;
 

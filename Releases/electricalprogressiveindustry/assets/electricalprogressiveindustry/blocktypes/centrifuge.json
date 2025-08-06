@@ -85,30 +85,6 @@
       "rotateY": 90
     }
   },
-  "textures": {
-    "bismuthbronze": { "base": "block/bismuthbronze" },
-    "brass": { "base": "block/brass" },
-    "coke": { "base": "block/coke" },
-    "copper": { "base": "block/copper" },
-    "copper-hot": { "base": "block/copper-hot" },
-    "emeral": { "base": "block/emeral" },
-    "iron": { "base": "block/iron" },
-    "iron96x96": { "base": "block/iron96x96" },
-    "stainlesssteel3": { "base": "block/plate/stainlesssteel3" },
-    "stainlesssteel3-96x96": { "base": "block/plate/stainlesssteel3-96x96" },
-    "steel3": { "base": "block/plate/steel3" },
-    "steel4-96x96": { "base": "block/plate/steel4-96x96" },
-    "quartzglass": { "base": "block/quartzglass" },
-    "stainlesssteel": { "base": "block/stainlesssteel" },
-    "steel": { "base": "block/steel" },
-    "steel96x96": { "base": "block/steel96x96" },
-    "tinbronze": { "base": "block/tinbronze" },
-    "topaz": { "base": "block/topaz" },
-    "uranium": { "base": "block/uranium" },
-    "zinc": { "base": "block/zinc" }
-  },
-
-
   "lightAbsorption": 0,
   "sidesolidByType": {
     "*-north": {

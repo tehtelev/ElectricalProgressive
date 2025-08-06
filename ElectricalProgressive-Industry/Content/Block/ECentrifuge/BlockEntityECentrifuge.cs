@@ -38,7 +38,9 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
     private BEBehaviorElectricalProgressive? ElectricalProgressive => GetBehavior<BEBehaviorElectricalProgressive>();
 
     private BlockEntityAnimationUtil animUtil => this.GetBehavior<BEBehaviorAnimatable>()?.animUtil;
-    
+
+
+
     public Facing Facing
     {
         get => this.facing;
@@ -52,23 +54,25 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
         }
     }
 
+    //передает значения из Block в BEBehaviorElectricalProgressive
     public (EParams, int) Eparams
     {
         get => this.ElectricalProgressive?.Eparams ?? (new EParams(), 0);
         set => this.ElectricalProgressive!.Eparams = value;
     }
 
+    //передает значения из Block в BEBehaviorElectricalProgressive
     public EParams[] AllEparams
     {
         get => this.ElectricalProgressive?.AllEparams ?? new EParams[]
-        {
-            new EParams(),
-            new EParams(),
-            new EParams(),
-            new EParams(),
-            new EParams(),
-            new EParams()
-        };
+                    {
+                        new EParams(),
+                        new EParams(),
+                        new EParams(),
+                        new EParams(),
+                        new EParams(),
+                        new EParams()
+                    };
         set
         {
             if (this.ElectricalProgressive != null)
@@ -77,13 +81,16 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
             }
         }
     }
-    
+
+
     public BlockEntityECentrifuge()
     { 
         _maxConsumption = MyMiniLib.GetAttributeInt(this.Block, "maxConsumption", 100);
         this.inventory = new InventoryCentrifuge((string)null, (ICoreAPI)null);
         this.inventory.SlotModified += new Action<int>(this.OnSlotModifid);
     }
+
+
 
     public override void Initialize(ICoreAPI api)
     {
@@ -196,6 +203,7 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
         else if (_wasCraftingLastTick)
         {
             StopAnimation();
+            MarkDirty(true);
         }
 
         _wasCraftingLastTick = isCraftingNow;

@@ -5,8 +5,10 @@
     "ingredients": [
       {
         "type": "item",
-        "code": "game:vegetable-carrot",
-        "quantity": 8
+        "code": "game:vegetable-*",
+        "name": "vegetable",
+        "quantity": 8,
+        "allowedVariants": ["carrot","cabbage","onion","turnip","parsnip" ]
       }
     ],
     "output": {
@@ -21,8 +23,8 @@
     "ingredients": [
       {
         "type": "item",
-        "code": "game:vegetable-turnip",
-        "quantity": 8
+        "code": "game:bushmeat-raw",
+        "quantity": 1
       }
     ],
     "output": {
