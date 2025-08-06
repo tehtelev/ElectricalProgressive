@@ -1,0 +1,106 @@
+﻿{
+  "block-charger-*": "Nabíjecí Stanice",
+  "block-charger-burned-south": "Nabíjecí Stanice (Spálená)",
+
+  "block-estove-*": "Elektrický Sporák",
+  "block-estove-burned-south": "Elektrický Sporák (Spálený)",
+
+  "block-eoven-*": "Elektrická Trouba",
+  "block-eoven-burned-north": "Elektrická Trouba (Spálená)",
+
+  "block-ehorn-*": "Elektrická Kovárna",
+  "block-ehorn-burned-south": "Elektrická Kovárna (Spálená)",
+
+  "block-heater-*": "Elektrický Ohřívač",
+  "block-heater-burned": "Elektrický Ohřívač (Spálený)",
+
+  "block-nasteniy_fonar-*": "Nástěnná Pouliční Lampa",
+  "block-nasteniy_fonar-burned": "Nástěnná Pouliční Lampa (Spálená)",
+
+  "block-stolb_fonar-*": "Stojací Pouliční Lampa",
+  "block-stolb_fonar-2-i-burned": "Stojací Pouliční Lampa (Spálená)",
+  "block-stolb_fonar-3-i-burned": "Stojací Pouliční Lampa (Spálená)",
+  "block-stolb_fonar-3-r-burned": "Stojací Pouliční Lampa (Spálená)",
+  "block-stolb_fonar-3-t-burned": "Stojací Pouliční Lampa (Spálená)",
+  "block-stolb_fonar-3-x-burned": "Stojací Pouliční Lampa (Spálená)",
+  "block-stolb_fonar-4-i-burned": "Stojací Pouliční Lampa (Spálená)",
+  "block-stolb_fonar-4-r-burned": "Stojací Pouliční Lampa (Spálená)",
+  "block-stolb_fonar-4-t-burned": "Stojací Pouliční Lampa (Spálená)",
+  "block-stolb_fonar-4-x-burned": "Stojací Pouliční Lampa (Spálená)",
+
+  "block-elamp-3000-*": "Elektrická Lampa: Oranžově-Teplá (3000K)",
+  "block-elamp-4000-*": "Elektrická Lampa: Žlutě-Teplá (4000K)",
+  "block-elamp-5000-*": "Elektrická Lampa: Teplá Bílá (5000K)",
+  "block-elamp-6000-*": "Elektrická Lampa: Neutrální Bílá (6000K)",
+  "block-elamp-7000-*": "Elektrická Lampa: Chladná Bílá (7000K)",
+  "block-elamp-8000-*": "Elektrická Lampa: Studená Bílá (8000K)",
+  "block-elamp-9000-*": "Elektrická Lampa: Modře-Studená (9000K)",
+
+  "block-elamp-3000-burned": "Elektrická Lampa (Spálená)",
+  "block-elamp-4000-burned": "Elektrická Lampa (Spálená)",
+  "block-elamp-5000-burned": "Elektrická Lampa (Spálená)",
+  "block-elamp-6000-burned": "Elektrická Lampa (Spálená)",
+  "block-elamp-7000-burned": "Elektrická Lampa (Spálená)",
+  "block-elamp-8000-burned": "Elektrická Lampa (Spálená)",
+  "block-elamp-9000-burned": "Elektrická Lampa (Spálená)",
+
+  "block-elamp_small-3000-*": "Malá Elektrická Lampa: Oranžově-Teplá (3000K)",
+  "block-elamp_small-4000-*": "Malá Elektrická Lampa: Žlutě-Teplá (4000K)",
+  "block-elamp_small-5000-*": "Malá Elektrická Lampa: Teplá Bílá (5000K)",
+  "block-elamp_small-6000-*": "Malá Elektrická Lampa: Neutrální Bílá (6000K)",
+  "block-elamp_small-7000-*": "Malá Elektrická Lampa: Chladná Bílá (7000K)",
+  "block-elamp_small-8000-*": "Malá Elektrická Lampa: Studená Bílá (8000K)",
+  "block-elamp_small-9000-*": "Malá Elektrická Lampa: Modře-Studená (9000K)",
+
+  "block-elamp_small-3000-burned": "Malá Elektrická Lampa (Spálená)",
+  "block-elamp_small-4000-burned": "Malá Elektrická Lampa (Spálená)",
+  "block-elamp_small-5000-burned": "Malá Elektrická Lampa (Spálená)",
+  "block-elamp_small-6000-burned": "Malá Elektrická Lampa (Spálená)",
+  "block-elamp_small-7000-burned": "Malá Elektrická Lampa (Spálená)",
+  "block-elamp_small-8000-burned": "Malá Elektrická Lampa (Spálená)",
+  "block-elamp_small-9000-burned": "Malá Elektrická Lampa (Spálená)",
+
+  "block-handbooktitle-eoven": "Použití",
+  "block-handbooktext-eoven": "Elektrická trouba plně nahrazuje tradiční pec. Automaticky se vypne, když je proces pečení dokončen. Žádné připálení!<br>Podporuje automatické nakládání a vykládání pomocí žlabů.",
+
+
+  "block-handbooktitle-heater": "Použití",
+  "block-handbooktext-heater": "Malý zdroj tepla.",
+
+  "block-handbooktitle-elamp": "Použití",
+  "block-handbooktext-elamp": "Spolehlivý zdroj světla, který spotřebovává elektřinu.",
+
+  "block-handbooktitle-elamp_small": "Použití",
+  "block-handbooktext-elamp_small": "Kompaktní zdroj světla, který spotřebovává elektřinu.",
+
+  "block-handbooktitle-nasteniy_fonar": "Použití",
+  "block-handbooktext-nasteniy_fonar": "Nástěnná varianta elektrické lampy.",
+
+  "block-handbooktitle-stolb_fonar": "Použití",
+  "block-handbooktext-stolb_fonar": "Varianta elektrické lampy pro pouliční osvětlení.",
+
+  "block-handbooktitle-ehorn": "Použití",
+  "block-handbooktext-ehorn": "Elektrická kovárna plně nahrazuje tradiční kovárnu.<br><br>Maximální teplota ohřevu: 1100 °C.",
+
+  "block-handbooktitle-charger": "Použití",
+  "block-handbooktext-charger": "Nabíjecí stanice umožňuje dobíjení baterií a zařízení s vestavěnými bateriemi.",
+
+  "block-handbooktitle-estove": "Použití",
+  "block-handbooktext-estove": "Elektrosporák umožňuje plně nahradit klasický táborák.<br>Podporuje automatické nakládání a vykládání pomocí žlabů.<br><br>Maximální teplota ohřevu plotny: 1325 °C.",
+
+
+  "game:BlockEStove": "Elektrický Sporák",
+  "game:freezer-title-gui": "Mrazák",
+  "game:freezer-over-sneak-help": "Otevřít/zavřít dveře.",
+  "game:freezer-over-help": "Otevřete dveře a vložte jídlo pro jeho konzervaci.",
+
+  "game:Put-into-1-items": "Pro pečení je potřeba alespoň 1 předmět.",
+
+  "game:max-light": "Max světlo",
+  "game:height": "Výška",
+
+  "block-efreezer2-*": "Elektrická Chladnička",
+  "block-efreezer2-burned-north": "Elektrická Chladnička (Spálená)",
+  "block-handbooktitle-efreezer2": "Použití",
+  "block-handbooktext-efreezer2": "Elektrická chladnička vám umožňuje udržet jídlo čerstvé déle. <br><br>Úložných slotů: 6.<br>Rychlost kažení jídla: 0,05×"
+}

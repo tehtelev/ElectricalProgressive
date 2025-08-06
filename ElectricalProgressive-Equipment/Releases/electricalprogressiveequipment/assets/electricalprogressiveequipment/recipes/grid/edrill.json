@@ -1,0 +1,40 @@
+﻿{
+  "ingredientPattern": "BC_,PEM,_ID",
+  "ingredients": {
+	"M": {
+      "type": "item",
+      "code": "game:gem-diamond-rough", "quantity": 2
+    },
+	"B": {
+      "type": "item",
+      "code": "game:gear-temporal", "quantity": 1
+    },
+	"C": {
+      "type": "item",
+      "code": "electricalprogressivebasics:coil", "quantity": 2
+    },
+	"P": {
+      "type": "item",
+      "code": "electricalprogressivebasics:coil", "quantity": 2
+    },
+	"E": {
+      "type": "item",
+      "code": "electricalprogressivebasics:engineshaft", "quantity": 1
+    },
+	"I": {
+      "type": "item",
+      "code": "game:ingot-cupronickel", "quantity": 2
+    },
+    "D": {
+      "type": "item",
+      "code": "electricalprogressiveequipment:edrilltip",
+      "quantity": 1
+    }
+  },
+  "width": 3,
+  "height": 3,
+  "output": {
+    "type": "item",
+    "code": "electricalprogressiveequipment:edrill"
+  }
+}

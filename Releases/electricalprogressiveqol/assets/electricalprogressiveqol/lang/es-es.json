@@ -1,0 +1,116 @@
+﻿{
+  "block-charger-*": "Estación de carga",
+  "block-charger-burned-south": "Estación de carga (quemada)",
+
+  "block-estove-*": "Cocina eléctrica",
+  "block-estove-burned-south": "Cocina eléctrica (quemada)",
+
+
+
+  "block-eoven-*": "Horno eléctrico",
+  "block-eoven-burned-north": "Horno eléctrico (quemado)",
+
+  "block-nasteniy_fonar-*": "Lámpara de pared exterior",
+  "block-nasteniy_fonar-burned": "Lámpara de pared exterior (quemada)",
+
+  "block-stolb_fonar-*": "Farola exterior",
+  "block-stolb_fonar-2-i-burned": "Farola exterior (quemada)",
+  "block-stolb_fonar-3-i-burned": "Farola exterior (quemada)",
+  "block-stolb_fonar-3-r-burned": "Farola exterior (quemada)",
+  "block-stolb_fonar-3-t-burned": "Farola exterior (quemada)",
+  "block-stolb_fonar-3-x-burned": "Farola exterior (quemada)",
+  "block-stolb_fonar-4-i-burned": "Farola exterior (quemada)",
+  "block-stolb_fonar-4-r-burned": "Farola exterior (quemada)",
+  "block-stolb_fonar-4-t-burned": "Farola exterior (quemada)",
+  "block-stolb_fonar-4-x-burned": "Farola exterior (quemada)",
+
+  "block-ehorn-*": "Horno eléctrico",
+  "block-ehorn-burned-south": "Horno eléctrico (quemado)",
+
+  "block-heater-*": "Calentador eléctrico",
+  "block-heater-burned": "Calentador eléctrico (quemado)",
+
+  "block-elamp-3000-*": "Lámpara eléctrica: cálido naranja (3000K)",
+  "block-elamp-4000-*": "Lámpara eléctrica: cálido amarillo (4000K)",
+  "block-elamp-5000-*": "Lámpara eléctrica: blanco cálido (5000K)",
+  "block-elamp-6000-*": "Lámpara eléctrica: blanco neutro (6000K)",
+  "block-elamp-7000-*": "Lámpara eléctrica: blanco azulado (7000K)",
+  "block-elamp-8000-*": "Lámpara eléctrica: blanco frío (8000K)",
+  "block-elamp-9000-*": "Lámpara eléctrica: blanco azul intenso (9000K)",
+
+  "block-elamp-3000-burned": "Lámpara eléctrica (quemada)",
+  "block-elamp-4000-burned": "Lámpara eléctrica (quemada)",
+  "block-elamp-5000-burned": "Lámpara eléctrica (quemada)",
+  "block-elamp-6000-burned": "Lámpara eléctrica (quemada)",
+  "block-elamp-7000-burned": "Lámpara eléctrica (quemada)",
+  "block-elamp-8000-burned": "Lámpara eléctrica (quemada)",
+  "block-elamp-9000-burned": "Lámpara eléctrica (quemada)",
+
+  "block-elamp_small-3000-*": "Lámpara pequeña eléctrica: cálido naranja (3000K)",
+  "block-elamp_small-4000-*": "Lámpara pequeña eléctrica: cálido amarillo (4000K)",
+  "block-elamp_small-5000-*": "Lámpara pequeña eléctrica: blanco cálido (5000K)",
+  "block-elamp_small-6000-*": "Lámpara pequeña eléctrica: blanco neutro (6000K)",
+  "block-elamp_small-7000-*": "Lámpara pequeña eléctrica: blanco azulado (7000K)",
+  "block-elamp_small-8000-*": "Lámpara pequeña eléctrica: blanco frío (8000K)",
+  "block-elamp_small-9000-*": "Lámpara pequeña eléctrica: blanco azul intenso (9000K)",
+
+  "block-elamp_small-3000-burned": "Lámpara pequeña eléctrica (quemada)",
+  "block-elamp_small-4000-burned": "Lámpara pequeña eléctrica (quemada)",
+  "block-elamp_small-5000-burned": "Lámpara pequeña eléctrica (quemada)",
+  "block-elamp_small-6000-burned": "Lámpara pequeña eléctrica (quemada)",
+  "block-elamp_small-7000-burned": "Lámpara pequeña eléctrica (quemada)",
+  "block-elamp_small-8000-burned": "Lámpara pequeña eléctrica (quemada)",
+  "block-elamp_small-9000-burned": "Lámpara pequeña eléctrica (quemada)",
+
+  "block-handbooktitle-eoven": "Uso",
+  "block-handbooktext-eoven": "El horno eléctrico reemplaza por completo el horno tradicional. Se apaga automáticamente cuando termina el proceso de horneado. ¡Nada más de quemarse!<br>Admite carga y descarga automáticas mediante canaletas.",
+
+
+  "block-handbooktitle-heater": "Uso",
+  "block-handbooktext-heater": "Pequeña fuente de calor.",
+
+  "block-handbooktitle-elamp": "Uso",
+  "block-handbooktext-elamp": "Buena fuente de luz que consume energía eléctrica.",
+
+  "block-handbooktitle-elamp_small": "Uso",
+  "block-handbooktext-elamp_small": "Fuente de luz que consume energía eléctrica.",
+
+  "block-handbooktitle-nasteniy_fonar": "Uso",
+  "block-handbooktext-nasteniy_fonar": "Variante de lámpara para montaje en pared exterior.",
+
+  "block-handbooktitle-stolb_fonar": "Uso",
+  "block-handbooktext-stolb_fonar": "Variante de farola para iluminación exterior.",
+
+  "block-handbooktitle-ehorn": "Uso",
+  "block-handbooktext-ehorn": "El horno eléctrico reemplaza al horno de fragua tradicional.<br><br>Temperatura máxima de calentamiento: 1100 °C.",
+
+  "block-handbooktitle-charger": "Uso",
+  "block-handbooktext-charger": "La estación de carga permite cargar baterías y dispositivos con batería integrada.",
+
+  "block-handbooktitle-estove": "Uso",
+  "block-handbooktext-estove": "La placa eléctrica permite reemplazar por completo una hoguera tradicional.<br>Admite carga y descarga automáticas mediante canaletas.<br><br>Temperatura máxima de calentamiento de la placa: 1325 °C.",
+
+
+
+
+  "game:BlockEStove": "Cocina eléctrica",
+  "game:freezer-title-gui": "Refrigerador",
+  "game:freezer-over-sneak-help": "Abrir/cerrar puerta",
+  "game:freezer-over-help": "Abre la puerta y coloca comida para conservarla.",
+
+  "game:Put-into-1-items": "Se necesita al menos 1 objeto para hornear.",
+
+
+  "game:max-light": "Luz máxima",
+  "game:height": "Altura",
+
+
+  "block-efreezer2-*": "Nevera eléctrica",
+  "block-efreezer2-burned-north": "Nevera eléctrica (quemada)",
+  "block-handbooktitle-efreezer2": "En uso",
+  "block-handbooktext-efreezer2": "La nevera eléctrica permite conservar los alimentos durante más tiempo. <br><br>Ranuras de almacenamiento: 6.<br>Tasa de descomposición de los alimentos: 0,05×"
+
+
+
+
+}

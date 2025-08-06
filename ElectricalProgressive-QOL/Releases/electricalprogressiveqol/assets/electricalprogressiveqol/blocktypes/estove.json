@@ -1,0 +1,146 @@
+﻿{
+  "code": "estove",
+  "class": "BlockEStove",
+  "entityClass": "BlockEntityEStove",
+  "attributes": {
+    "maxConsumption": 150,
+    "voltage": 128,
+    "maxCurrent": 20.0,
+    "isolated": true,
+    "isolatedEnvironment": false,
+    "maxHeat": 7.0,
+    "handbook": {
+      "groupBy": [ "estove-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressiveqol:block-handbooktitle-estove",
+          "text": "electricalprogressiveqol:block-handbooktext-estove"
+        }
+      ]
+    }
+  },
+
+  "behaviors": [
+    { "name": "Container" },
+    {
+      "name": "HorizontalOrientable",
+      "properties": {
+        "dropBlockFace": "south"
+      }
+    }
+  ],
+
+  "entityBehaviors": [
+    {
+      "name": "BEBehaviorEStove"
+    },
+    {
+      "name": "ElectricalProgressive"
+    }
+  ],
+
+  "shape": {
+    "base": "block/estove/estove-{state}"
+  },
+
+  "creativeInventory": {
+    "general": [
+      "*-disabled-south",
+      "*-burned-south"
+    ],
+    "electricity": [
+      "*-disabled-south"
+    ]
+  },
+
+
+  "variantgroups": [
+    {
+      "code": "state",
+      "states": [ "disabled", "enabled", "burned" ]
+    },
+    {
+      "code": "side",
+      "loadFromProperties": "abstract/horizontalorientation"
+    }
+  ],
+
+
+
+
+  "shapebytype": {
+    "*-north": {
+      "base": "block/estove/estove-{state}",
+      "rotateY": 0
+    },
+    "*-east": {
+      "base": "block/estove/estove-{state}",
+      "rotateY": 270
+    },
+    "*-south": {
+      "base": "block/estove/estove-{state}",
+      "rotateY": 180
+    },
+    "*-west": {
+      "base": "block/estove/estove-{state}",
+      "rotateY": 90
+    }
+  },
+
+  "blockmaterial": "Stone",
+  "sidesolidByType": {
+    "*-north": {
+      "all": false,
+      "east": true,
+      "west": true,
+      "north": true
+    },
+    "*-east": {
+      "all": false,
+      "east": true,
+      "south": true,
+      "north": true
+    },
+    "*-south": {
+      "all": false,
+      "east": true,
+      "west": true,
+      "south": true
+    },
+    "*-west": {
+      "all": false,
+      "south": true,
+      "west": true,
+      "north": true
+    }
+  },
+
+    "sideopaque": {
+      "all": false
+    },
+    "resistance": 3.5,
+    "lightAbsorption": 0,
+    "lightHsvByType": {
+      "*-disabled-*": [ 0, 0, 0 ],
+      "*-enabled-*": [ 7, 7, 11 ]
+    },
+    "sounds": {
+      "walk": "game:walk/stone"
+    },
+    "heldTpIdleAnimation": "holdbothhandslarge",
+    "heldRightReadyAnimation": "heldblockready",
+    "heldTpUseAnimation": "twohandplaceblock",
+    "tpHandTransform": {
+      "translation": {
+        "x": -1.23,
+        "y": -0.91,
+        "z": -0.8
+      },
+      "rotation": {
+        "x": -2,
+        "y": 25,
+        "z": -78
+      },
+      "scale": 0.4
+    }
+  }

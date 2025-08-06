@@ -1,0 +1,176 @@
+﻿{
+  "code": "elamp_small",
+  "class": "BlockESmallLamp",
+  "entityClass": "BlockEntityELamp",
+  "entityBehaviors": [
+    {
+      "name": "BEBehaviorELamp"
+    },
+    {
+      "name": "ElectricalProgressive"
+    }
+  ],
+  "attributes": {
+    "maxConsumption": 4, //максимальное потребление
+    "voltage": 32,
+    "maxCurrent": 20.0,
+    "isolated": true,
+    "isolatedEnvironment": false,
+    "HSV": 14, //яркость свечения по умолчанию
+    "handbook": {
+      "groupBy": [ "elamp_small-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressiveqol:block-handbooktitle-elamp_small",
+          "text": "electricalprogressiveqol:block-handbooktext-elamp_small"
+        }
+      ]
+    }
+  },
+
+  "lightHsvByType": {
+    "*-disabled": [ 0, 0, 0 ],
+    "*-burned": [ 0, 0, 0 ],
+    "*-3000-enabled": [ 10, 7, 14 ],
+    "*-4000-enabled": [ 10, 5, 14 ],
+    "*-5000-enabled": [ 10, 3, 14 ],
+    "*-6000-enabled": [ 0, 0, 14 ],
+    "*-7000-enabled": [ 34, 2, 14 ],
+    "*-8000-enabled": [ 34, 4, 14 ],
+    "*-9000-enabled": [ 33, 7, 14 ]
+  },
+
+
+  "creativeInventory": {
+    "general": [
+      "*-disabled",
+      "*-burned"
+    ],
+    "electricity": [
+      "*-disabled"
+    ]
+  },
+
+  "variantGroups": [
+    {
+      "code": "tempK",
+      "states": [ "3000", "4000", "5000", "6000", "7000", "8000", "9000" ]
+    },
+    {
+      "code": "state",
+      "states": [ "disabled", "enabled", "burned" ]
+    }
+  ],
+
+
+  "shape": {
+    "base": "block/elamp_small/elamp_small-{state}"
+  },
+
+  "resistance": 1,
+  "drawType": "JSON",
+  "lightAbsorption": 0.0,
+  "faceCullMode": "NeverCull",
+  "renderPass": "OpaqueNoCull",
+  "emitSideAo": {
+    "all": false
+  },
+  "sideAo": {
+    "all": false
+  },
+  "sideOpaque": {
+    "all": false
+  },
+  "sideSolid": {
+    "all": false
+  },
+  "sounds": {
+    "place": "game:block/anvil",
+    "walk": "game:walk/stone"
+  },
+  "collisionBox": {
+    "x1": 0.0,
+    "y1": 0.0,
+    "z1": 0.0,
+    "x2": 1.0,
+    "y2": 0.25,
+    "z2": 1.0
+  },
+  "selectionBox": {
+    "x1": 0.0,
+    "y1": 0.0,
+    "z1": 0.0,
+    "x2": 1.0,
+    "y2": 0.25,
+    "z2": 1.0
+  },
+  "guiTransform": {
+    "translation": {
+      "x": 0,
+      "y": 3,
+      "z": 0
+    },
+    "rotation": {
+      "x": -51,
+      "y": -63,
+      "z": 0
+    },
+    "origin": {
+      "x": 0.5,
+      "y": 0.0,
+      "z": 0.5
+    }
+  },
+  "fpHandTransform": {
+    "translation": {
+      "x": 0,
+      "y": 0.75,
+      "z": 0.5
+    },
+    "rotation": {
+      "x": -39,
+      "y": -35,
+      "z": 27
+    },
+    "origin": {
+      "x": 0.5,
+      "y": 0,
+      "z": 0.5
+    }
+  },
+  "tpHandTransform": {
+    "translation": {
+      "x": -1.8,
+      "y": -0.6,
+      "z": -1.75
+    },
+    "rotation": {
+      "x": -83,
+      "y": -2,
+      "z": -19
+    },
+    "origin": {
+      "x": 0.5,
+      "y": 0,
+      "z": 0.5
+    }
+  },
+  "groundTransform": {
+    "translation": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "rotation": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "origin": {
+      "x": 0.5,
+      "y": 0.0,
+      "z": 0.5
+    },
+    "scale": 2.0
+  }
+}

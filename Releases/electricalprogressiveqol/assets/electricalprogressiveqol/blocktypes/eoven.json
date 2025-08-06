@@ -1,0 +1,153 @@
+﻿{
+  "code": "eoven",
+  "class": "BlockEOven",
+  "entityClass": "BlockEntityEOven",
+  "entityBehaviors": [
+    { "name": "BEBehaviorEOven" },
+    { "name": "ElectricalProgressive" }
+  ],
+
+
+  "blockmaterial": "Ceramic",
+  "behaviors": [
+    { "name": "Lockable" },
+    {
+      "name": "HorizontalOrientable",
+      "properties": {
+        "dropBlockFace": "north"
+      }
+    }
+  ],
+
+  "variantgroups": [
+    {
+      "code": "state",
+      "states": [ "disabled", "enabled", "burned" ]
+    },
+    {
+      "code": "side",
+      "loadFromProperties": "abstract/horizontalorientation"
+    }
+  ],
+
+
+
+  "shapebytype": {
+    "*-north": {
+      "base": "block/eoven/eoven-{state}",
+      "rotateY": 0
+    },
+    "*-east": {
+      "base": "block/eoven/eoven-{state}",
+      "rotateY": 270
+    },
+    "*-south": {
+      "base": "block/eoven/eoven-{state}",
+      "rotateY": 180
+    },
+    "*-west": {
+      "base": "block/eoven/eoven-{state}",
+      "rotateY": 90
+    }
+
+  },
+
+  "attributes": {
+    "maxConsumption": 100,
+    "voltage": 128,
+    "maxCurrent": 20.0,
+    "isolated": true,
+    "isolatedEnvironment": false,
+    "reinforcable": true,
+    "handbook": {
+      "groupBy": [ "eoven-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressiveqol:block-handbooktitle-eoven",
+          "text": "electricalprogressiveqol:block-handbooktext-eoven"
+        }
+      ]
+    }
+  },
+
+
+  "creativeinventory": {
+    "general": [
+      "*-disabled-north",
+      "*-burned-north"
+    ],
+    "electricity": [ "*-disabled-north" ]
+  },
+
+  "replaceable": 500,
+  "resistance": 3.5,
+  "lightAbsorption": 0,
+  "lightHsvByType": {
+    "*-disabled-*": [ 0, 0, 0 ],
+    "*-enabled-*": [ 7, 7, 11 ]
+  },
+
+  "sounds": {
+    "walk": "game:walk/stone",
+    "place": "game:block/ceramicplace",
+    "byTool": {
+      "Pickaxe": {
+        "hit": "game:block/rock-hit-pickaxe",
+        "break": "game:block/rock-break-pickaxe"
+      }
+    }
+  },
+  "sideopaque": {
+    "all": false
+  },
+  "sidesolidByType": {
+    "*-north": {
+      "all": false,
+      "east": true,
+      "west": true,
+      "north": true
+    },
+    "*-east": {
+      "all": false,
+      "east": true,
+      "south": true,
+      "north": true
+    },
+    "*-south": {
+      "all": false,
+      "east": true,
+      "west": true,
+      "south": true
+    },
+    "*-west": {
+      "all": false,
+      "south": true,
+      "west": true,
+      "north": true
+    }
+  },
+
+  "heldTpIdleAnimation": "holdbothhandslarge",
+  "heldRightReadyAnimation": "heldblockready",
+  "heldTpUseAnimation": "twohandplaceblock",
+  "tpHandTransform": {
+    "translation": {
+      "x": -1.23,
+      "y": -0.91,
+      "z": -0.8
+    },
+    "rotation": {
+      "x": -2,
+      "y": 25,
+      "z": -78
+    },
+    "scale": 0.4
+  },
+  "guiTransform": {
+    "rotation": {
+      "x": -33,
+      "y": 135,
+      "z": 1
+    }
+  }
+}

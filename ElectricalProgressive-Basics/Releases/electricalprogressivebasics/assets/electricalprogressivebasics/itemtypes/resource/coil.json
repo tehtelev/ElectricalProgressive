@@ -1,0 +1,115 @@
+﻿{
+	"code": "coil",
+	"maxstacksize": 64,
+	"attributes": {
+		"displaycaseable": true,
+		"shelvable": true,
+		"handbook": {
+			"groupBy": [ "coil-*" ],
+			"extraSections": [
+				{
+					"title": "electricalprogressivebasics:item-handbooktitle-coil",
+					"text": "electricalprogressivebasics:item-handbooktext-coil"
+				}
+			]
+		}
+	},
+	"materialDensity": 8960,
+	"storageFlags": 5,
+	"shape": { "base": "item/coil" },
+	"textures": {
+		"copper_coil": { "base": "block/copper_coil" }
+	},
+	"creativeinventory": {
+		"general": [ "*" ],
+		"electricity": [ "*" ]
+	},
+	"dimensions": {
+		"width": 0.0625,
+		"height": 0.0625,
+		"length": 0.0625
+	},
+	"combustibleProps": {
+		"meltingPoint": 1084,
+		"meltingDuration": 30,
+		"smeltingType": "bake",
+		"requiresContainer": true,
+		"smeltedRatio": 8,
+		"smeltedStack": {
+			"type": "item",
+			"code": "game:ingot-copper"
+		}
+	},
+	"guiTransform": {
+		"translation": {
+			"x": 2,
+			"y": 0,
+			"z": 0
+		},
+		"rotation": {
+			"x": 149,
+			"y": -36,
+			"z": 0
+		},
+		"origin": {
+			"x": 0.5,
+			"y": 0.1,
+			"z": 0.5
+		},
+		"scale": 2
+	},
+	"fpHandTransform": {
+		"translation": {
+			"x": 0,
+			"y": 0.1,
+			"z": 0
+		},
+		"rotation": {
+			"x": 65,
+			"y": 21,
+			"z": -6
+		},
+		"origin": {
+			"x": 0.5,
+			"y": 0.1,
+			"z": 0.5
+		},
+		"scale": 1.5
+	},
+	"tpHandTransform": {
+		"translation": {
+			"x": -0.77,
+			"y": -0.15,
+			"z": -0.64
+		},
+		"rotation": {
+			"x": 0,
+			"y": -71,
+			"z": 18
+		},
+		"origin": {
+			"x": 0.5,
+			"y": 0.1,
+			"z": 0.5
+		},
+		"scale": 0.75
+	},
+	"groundTransform": {
+		"translation": {
+			"x": 0,
+			"y": 0,
+			"z": 0
+		},
+		"rotation": {
+			"x": 0,
+			"y": 0,
+			"z": 0
+		},
+		"origin": {
+			"x": 0.5,
+			"y": 0,
+			"z": 0.5
+		},
+		"scale": 2.8
+	}
+}

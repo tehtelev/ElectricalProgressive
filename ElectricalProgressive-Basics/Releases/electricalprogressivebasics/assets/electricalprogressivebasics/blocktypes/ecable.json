@@ -1,0 +1,529 @@
+﻿{
+  "code": "ecable",
+  "class": "BlockECable",
+  "entityClass": "BlockEntityECable",
+  "entityBehaviors": [
+    {
+      "name": "BEBehaviorECable"
+    },
+    {
+      "name": "ElectricalProgressive"
+    }
+  ],
+
+  "variantGroups": [
+    {
+      "code": "voltage",
+      "states": [
+        "32v",
+        "128v"
+      ]
+    },
+    {
+      "code": "material",
+      "states": [
+        "copper",
+        "silver",
+        "lead",
+        "gold",
+        "steel",
+        "iron",
+        "tinbronze",
+        "brass",
+        "electrum"
+      ]
+    },
+    {
+      "code": "quantity",
+      "states": [
+        "single",
+        "double",
+        "triple",
+        "quadruple"
+      ]
+    },
+    {
+      "code": "type",
+      "states": [
+        "dot",
+        "part",
+        "block",
+        "burned",
+        "fix",
+        "block_isolated",
+        "isolated",
+        "dot_isolated"
+      ]
+    }
+  ],
+
+  "skipVariants": [
+    "*-128v-*-triple-*",
+    "*-128v-*-quadruple-*"
+  ],
+
+  "creativeInventory": {
+    "general": [
+      "*-single-part",
+      "*-single-isolated"
+    ],
+    "electricity": [
+      "*-single-part",
+      "*-single-isolated"
+    ]
+  },
+
+  "shapeInventoryByType": {
+    "*-isolated": {
+      "base": "block/ecable/ecable-single/ecable-{voltage}-single-block_isolated"
+    },
+
+    "*": {
+      "base": "block/ecable/ecable-single/ecable-{voltage}-single-block"
+    }
+  },
+
+
+  "shapeByType": {
+    "*": {
+      "base": "block/ecable/ecable-{quantity}/ecable-{voltage}-{quantity}-{type}"
+    }
+  },
+
+
+  "texturesByType": {
+    "*-32v-*": {
+      "coke": { "base": "block/coke" },
+      "material": { "base": "block/{material}" },
+      "fix": { "base": "block/rubber" },
+      "isolation": { "base": "block/liquid/dye/gray" }
+    },
+    "*-128v-*": {
+      "coke": { "base": "block/coke" },
+      "material": { "base": "block/{material}" },
+      "fix": { "base": "block/rubber" },
+      "isolation": { "base": "block/liquid/dye/gray" }
+    }
+  },
+
+
+  "collisionSelectionBoxesByType": {
+    "*-32v-*-single-fix": [
+      {
+        "x1": 0.45625,
+        "y1": 0,
+        "z1": 0.45625,
+        "x2": 0.54375,
+        "y2": 0.04375,
+        "z2": 0.534375
+      }
+    ],
+    "*-128v-*-single-fix": [
+      {
+        "x1": 0.45625,
+        "y1": 0,
+        "z1": 0.45625,
+        "x2": 0.54375,
+        "y2": 0.075,
+        "z2": 0.534375
+      }
+    ],
+    "*-32v-*-double-fix": [
+      {
+        "x1": 0.41875,
+        "y1": 0,
+        "z1": 0.41875,
+        "x2": 0.58125,
+        "y2": 0.04375,
+        "z2": 0.58125
+      }
+    ],
+    "*-128v-*-double-fix": [
+      {
+        "x1": 0.41875,
+        "y1": 0,
+        "z1": 0.41875,
+        "x2": 0.58125,
+        "y2": 0.075,
+        "z2": 0.58125
+      }
+    ],
+    "*-32v-*-triple-fix": [
+      {
+        "x1": 0.41875,
+        "y1": 0,
+        "z1": 0.41875,
+        "x2": 0.58125,
+        "y2": 0.0875,
+        "z2": 0.58125
+      }
+    ],
+    "*-32v-*-quadruple-fix": [
+      {
+        "x1": 0.41875,
+        "y1": 0,
+        "z1": 0.41875,
+        "x2": 0.58125,
+        "y2": 0.0875,
+        "z2": 0.58125
+      }
+    ],
+    "*-32v-*-single-part": [
+      {
+        "x1": 0.4625,
+        "y1": 0,
+        "z1": 0,
+        "x2": 0.5375,
+        "y2": 0.0375,
+        "z2": 0.46875
+      }
+    ],
+    "*-32v-*-single-burned": [
+      {
+        "x1": 0.4625,
+        "y1": 0,
+        "z1": 0,
+        "x2": 0.5375,
+        "y2": 0.0375,
+        "z2": 0.46875
+      }
+    ],
+    "*-32v-*-single-isolated": [
+      {
+        "x1": 0.4625,
+        "y1": 0,
+        "z1": 0,
+        "x2": 0.5375,
+        "y2": 0.0375,
+        "z2": 0.46875
+      }
+    ],
+    "*-128v-*-single-part": [
+      {
+        "x1": 0.4625,
+        "y1": 0,
+        "z1": 0,
+        "x2": 0.5375,
+        "y2": 0.06875,
+        "z2": 0.46875
+      }
+    ],
+    "*-128v-*-single-burned": [
+      {
+        "x1": 0.4625,
+        "y1": 0,
+        "z1": 0,
+        "x2": 0.5375,
+        "y2": 0.06875,
+        "z2": 0.46875
+      }
+    ],
+    "*-128v-*-single-isolated": [
+      {
+        "x1": 0.4625,
+        "y1": 0,
+        "z1": 0,
+        "x2": 0.5375,
+        "y2": 0.06875,
+        "z2": 0.46875
+      }
+    ],
+    "*-32v-*-double-part": [
+      {
+        "x1": 0.425,
+        "y1": 0,
+        "z1": 0,
+        "x2": 0.575,
+        "y2": 0.0375,
+        "z2": 0.46875
+      }
+    ],
+    "*-32v-*-double-burned": [
+      {
+        "x1": 0.425,
+        "y1": 0,
+        "z1": 0,
+        "x2": 0.575,
+        "y2": 0.0375,
+        "z2": 0.46875
+      }
+    ],
+    "*-32v-*-double-isolated": [
+      {
+        "x1": 0.425,
+        "y1": 0,
+        "z1": 0,
+        "x2": 0.575,
+        "y2": 0.0375,
+        "z2": 0.46875
+      }
+    ],
+    "*-128v-*-double-part": [
+      {
+        "x1": 0.425,
+        "y1": 0,
+        "z1": 0,
+        "x2": 0.575,
+        "y2": 0.06875,
+        "z2": 0.46875
+      }
+    ],
+    "*-128v-*-double-burned": [
+      {
+        "x1": 0.425,
+        "y1": 0,
+        "z1": 0,
+        "x2": 0.575,
+        "y2": 0.06875,
+        "z2": 0.46875
+      }
+    ],
+    "*-128v-*-double-isolated": [
+      {
+        "x1": 0.425,
+        "y1": 0,
+        "z1": 0,
+        "x2": 0.575,
+        "y2": 0.06875,
+        "z2": 0.46875
+      }
+    ],
+
+    "*-32v-*-triple-part": [
+      {
+        "x1": 0.425,
+        "y1": 0,
+        "z1": 0,
+        "x2": 0.575,
+        "y2": 0.08125,
+        "z2": 0.46875
+      }
+    ],
+    "*-32v-*-triple-burned": [
+      {
+        "x1": 0.425,
+        "y1": 0,
+        "z1": 0,
+        "x2": 0.575,
+        "y2": 0.08125,
+        "z2": 0.46875
+      }
+    ],
+    "*-32v-*-triple-isolated": [
+      {
+        "x1": 0.425,
+        "y1": 0,
+        "z1": 0,
+        "x2": 0.575,
+        "y2": 0.08125,
+        "z2": 0.46875
+      }
+    ],
+    "*-32v-*-quadruple-part": [
+      {
+        "x1": 0.425,
+        "y1": 0,
+        "z1": 0,
+        "x2": 0.575,
+        "y2": 0.08125,
+        "z2": 0.46875
+      }
+    ],
+    "*-32v-*-quadruple-burned": [
+      {
+        "x1": 0.425,
+        "y1": 0,
+        "z1": 0,
+        "x2": 0.575,
+        "y2": 0.08125,
+        "z2": 0.46875
+      }
+    ],
+    "*-32v-*-quadruple-isolated": [
+      {
+        "x1": 0.425,
+        "y1": 0,
+        "z1": 0,
+        "x2": 0.575,
+        "y2": 0.08125,
+        "z2": 0.46875
+      }
+    ]
+  },
+
+
+  "resistance": 1,
+  "drawType": "JSON",
+  "lightAbsorption": 0.0,
+  "faceCullMode": "NeverCull",
+  "renderPass": "OpaqueNoCull",
+
+  "attributes": {
+    "handbook": {
+      "groupBy": [ "ecable-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivebasics:block-handbooktitle-ecable",
+          "text": "electricalprogressivebasics:block-handbooktext-ecable"
+        }
+      ]
+    },
+    "material": "{material}"
+  },
+
+  "attributesByType": {
+    "*-32v-copper-*": {
+      "res": 1,
+      "maxCurrent": 5,
+      "crosssectional": 1
+    },
+    "*-32v-silver-*": {
+      "res": 0.6,
+      "maxCurrent": 7,
+      "crosssectional": 1
+    },
+    "*-32v-lead-*": {
+      "res": 2,
+      "maxCurrent": 3,
+      "crosssectional": 1
+    },
+    "*-32v-electrum-*": {
+      "res": 0.65,
+      "maxCurrent": 6.8,
+      "crosssectional": 1
+    },
+    "*-128v-electrum-*": {
+      "res": 0.65,
+      "maxCurrent": 13.6,
+      "crosssectional": 2
+    },
+    "*-32v-brass-*": {
+      "res": 0.8,
+      "maxCurrent": 6.0,
+      "crosssectional": 1
+    },
+    "*-128v-brass-*": {
+      "res": 0.8,
+      "maxCurrent": 12.0,
+      "crosssectional": 2
+    },
+
+    "*-32v-tinbronze-*": {
+      "res": 0.9,
+      "maxCurrent": 5.5,
+      "crosssectional": 1
+    },
+    "*-128v-tinbronze-*": {
+      "res": 0.9,
+      "maxCurrent": 11.0,
+      "crosssectional": 2
+    },
+    "*-32v-iron-*": {
+      "res": 1.5,
+      "maxCurrent": 4.0,
+      "crosssectional": 1
+    },
+    "*-128v-iron-*": {
+      "res": 1.5,
+      "maxCurrent": 8.0,
+      "crosssectional": 2
+    },
+    "*-32v-steel-*": {
+      "res": 1.2,
+      "maxCurrent": 4.5,
+      "crosssectional": 1
+    },
+    "*-128v-steel-*": {
+      "res": 1.2,
+      "maxCurrent": 9.0,
+      "crosssectional": 2
+    },
+    "*-32v-gold-*": {
+      "res": 0.7,
+      "maxCurrent": 6.5,
+      "crosssectional": 1
+    },
+    "*-128v-gold-*": {
+      "res": 0.7,
+      "maxCurrent": 13,
+      "crosssectional": 2
+    },
+    "*-128v-copper-*": {
+      "res": 1,
+      "maxCurrent": 10,
+      "crosssectional": 2
+    },
+    "*-128v-silver-*": {
+      "res": 0.6,
+      "maxCurrent": 14,
+      "crosssectional": 2
+    },
+    "*-128v-lead-*": {
+      "res": 2,
+      "maxCurrent": 6,
+      "crosssectional": 2
+    }
+  },
+
+
+  "emitSideAo": {
+    "all": false
+  },
+  "sideAo": {
+    "all": false
+  },
+  "sideOpaque": {
+    "all": false
+  },
+  "sideSolid": {
+    "all": false
+  },
+  "sounds": {
+    "place": "game:block/anvil",
+    "walk": "game:walk/stone"
+  },
+  "fpHandTransform": {
+    "translation": {
+      "x": 0.0,
+      "y": 1.25,
+      "z": 0.0
+    },
+    "rotation": {
+      "x": 64,
+      "y": -40,
+      "z": 0
+    },
+    "origin": {
+      "x": 0.5,
+      "y": -0.5,
+      "z": 0.5
+    },
+    "scale": 1.5
+  },
+  "tpHandTransform": {
+    "translation": {
+      "x": -1.0,
+      "y": -0.076,
+      "z": -0.776
+    },
+    "rotation": {
+      "x": 35,
+      "y": 84,
+      "z": 41
+    },
+    "origin": {
+      "x": 0.5,
+      "y": 0.0,
+      "z": 0.5
+    },
+    "scale": 0.64
+  },
+  "guiTransform": {
+    "origin": {
+      "x": 0.5,
+      "y": 0.05,
+      "z": 0.5
+    },
+    "scale": 2.0
+  }
+}

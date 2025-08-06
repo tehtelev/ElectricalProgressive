@@ -1,0 +1,53 @@
+﻿{
+  "item-static-saber-*": "Sabre Elétrico",
+  "item-static-spear": "Lança Elétrica",
+  "item-static-shield": "Escudo Elétrico",
+  "item-static-helmet": "Capacete Elétrico",
+  "item-static-armor": "Peitoral Elétrico",
+  "item-static-boots": "Grevas Elétricas",
+
+  "item-handbooktitle-static-saber": "Uso",
+  "item-handbooktext-static-saber": "Uma boa escolha para cortar inimigos com eficiência. A lâmina pode ser aquecida até ficar em brasa para incendiar os inimigos.<br>Quando descarregado, para de causar dano. Não se esqueça de recarregar!",
+
+  "item-handbooktitle-static-spear": "Uso",
+  "item-handbooktext-static-spear": "Uma ótima escolha para perfurar inimigos. Possui dois modos de arremesso: padrão e lança ionizante. No segundo modo, a lança causa forte ionização do ar ao atingir qualquer criatura viva, desencadeando um raio e incendiando o alvo. Isso consome 10% da carga.<br>Brincar com raios é perigoso — tome cuidado.<br>Quando totalmente descarregada, para de causar dano. Não se esqueça de recarregar!",
+
+  "item-handbooktitle-static-shield": "Uso",
+  "item-handbooktext-static-shield": "Excelente proteção com lanterna embutida.<br>Deixa de absorver dano quando descarregado. Lembre-se de recarregar!",
+
+  "item-handbooktitle-static-helmet": "Uso",
+  "item-handbooktext-static-helmet": "Defesa e funcionalidade superiores.<br>Deixa de absorver dano quando descarregado. Lembre-se de recarregar!",
+
+  "item-handbooktitle-static-armor": "Uso",
+  "item-handbooktext-static-armor": "Defesa e funcionalidade superiores. Permite voar pressionando a tecla R.<br>Deixa de absorver dano e desativa o modo de voo quando descarregado. Lembre-se de recarregar!",
+
+  "item-handbooktitle-static-boots": "Uso",
+  "item-handbooktext-static-boots": "Defesa e funcionalidade superiores.<br>Deixa de absorver dano quando descarregado. Lembre-se de recarregar!",
+
+  "game:spear_common": "Lança comum",
+  "game:spear_flash": "Lança ionizante",
+  "game:saber_right": "Aquecer/Resfriar a lâmina",
+
+
+  "item-edrill": "Broca elétrica",
+  "item-echisel": "Martelo perfurador elétrico",
+  "item-edrilltip": "Ponta de broca",
+  "item-eaxe": "Machado elétrico",
+
+  "game:drill1": "Escava um bloco 1×1",
+  "game:drill2": "Escava uma área de 1×3 blocos",
+
+  "item-handbooktitle-edrill": "Uso",
+  "item-handbooktext-edrill": "A mineração atinge um novo nível. Permite operar em dois modos: 1×1 e 1×3.<br>Quando a carga acabar, ele para de funcionar. Não se esqueça de recarregar!",
+
+  "item-handbooktitle-echisel": "Uso",
+  "item-handbooktext-echisel": "Desempenha funções de cinzel movido a bateria. Martelo na mão secundária não é necessário. Não usado em receitas.<br>Quando a carga acabar, ele para de funcionar. Não se esqueça de recarregar!",
+
+  "item-handbooktitle-edrilltip": "Uso",
+  "item-handbooktext-edrilltip": "Componente base para a broca elétrica.",
+
+  "item-handbooktitle-eaxe": "Uso",
+  "item-handbooktext-eaxe": "Perfeito para cortar troncos. Não usado em receitas.<br>Quando a carga acabar, ele para de funcionar. Não se esqueça de recarregar!"
+
+
+}

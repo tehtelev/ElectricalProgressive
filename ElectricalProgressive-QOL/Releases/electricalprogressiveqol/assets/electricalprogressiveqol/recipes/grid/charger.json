@@ -1,0 +1,24 @@
+{
+  "ingredientPattern": "_G_,PBP",
+  "ingredients": {
+    "B": {
+      "type": "item",
+      "code": "electricalprogressivebasics:coil"
+    },
+    "G": {
+      "type": "block",
+      "code": "game:glass-plain"
+    },
+    "P": {
+      "type": "item",
+      "code": "game:metalplate-iron",
+      "quantity": 1
+    }
+  },
+  "width": 3,
+  "height": 2,
+  "output": {
+    "type": "block",
+    "code": "electricalprogressiveqol:charger-disabled-south"
+  }
+}

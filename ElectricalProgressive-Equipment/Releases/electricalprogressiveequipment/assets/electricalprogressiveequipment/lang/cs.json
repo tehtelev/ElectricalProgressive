@@ -1,0 +1,50 @@
+{
+  "item-static-saber-*": "Elektrická Šavle",
+  "item-static-spear": "Elektrické Kopí",
+  "item-static-shield": "Elektrický Štít",
+  "item-static-helmet": "Elektrická Helma",
+  "item-static-armor": "Elektrické Brnění",
+  "item-static-boots": "Elektrické Nákolenice",
+
+  "item-handbooktitle-static-saber": "Použití",
+  "item-handbooktext-static-saber": "Dobrá volba pro efektivní sekání nepřátel. Čepel lze rozžhavit do červena a podpálit tak protivníky.<br>Po vybití přestane způsobovat poškození. Nezapomeňte dobít!",
+
+  "item-handbooktitle-static-spear": "Použití",
+  "item-handbooktext-static-spear": "Skvělá volba pro probodávání nepřátel. Má dva režimy házení: standardní a ionizující kopí. Ve druhém režimu kopí při zásahu jakékoliv živé bytosti způsobí silnou ionizaci vzduchu, která spustí úder blesku a zapálí cíl. To spotřebuje 10% kapacity nabití.<br>Hraní si s blesky je nebezpečné—buďte opatrní.<br>Po úplném vybití přestane způsobovat poškození. Nezapomeňte dobít!",
+
+  "item-handbooktitle-static-shield": "Použití",
+  "item-handbooktext-static-shield": "Výborná ochrana s vestavěnou baterkou.<br>Po vybití přestane pohlcovat poškození. Nezapomeňte dobít!",
+
+  "item-handbooktitle-static-helmet": "Použití",
+  "item-handbooktext-static-helmet": "Vynikající obrana a funkcionalita.<br>Po vybití přestane pohlcovat poškození. Nezapomeňte dobít!",
+
+  "item-handbooktitle-static-armor": "Použití",
+  "item-handbooktext-static-armor": "Vynikající obrana a funkcionalita. Umožňuje létání stisknutím klávesy R.<br>Po vybití přestane pohlcovat poškození a deaktivuje režim létání. Nezapomeňte dobít!",
+
+  "item-handbooktitle-static-boots": "Použití",
+  "item-handbooktext-static-boots": "Vynikající obrana a funkcionalita.<br>Po vybití přestane pohlcovat poškození. Nezapomeňte dobít!",
+
+  "game:spear_common": "Běžné kopí",
+  "game:spear_flash": "Ionizující kopí",
+  "game:saber_right": "Rozžhavit/Ochladit čepel",
+
+  "item-edrill": "Elektrická Vrtačka",
+  "item-echisel": "Elektrické Kladivo",
+  "item-edrilltip": "Vrták",
+  "item-eaxe": "Elektrická Sekera",
+
+  "game:drill1": "Vrtá blok 1×1",
+  "game:drill2": "Vrtá oblast 1×3 bloků",
+
+  "item-handbooktitle-edrill": "Použití",
+  "item-handbooktext-edrill": "Těžba dosahuje nové úrovně. Umožňuje provoz ve dvou režimech: 1×1 a 1×3.<br>Po vybití přestane fungovat. Nezapomeňte dobít!",
+
+  "item-handbooktitle-echisel": "Použití",
+  "item-handbooktext-echisel": "Funguje jako dláto na baterie. Ve druhé ruce nepotřebujete kladivo. Nepoužívá se v receptech.<br>Po vybití přestane fungovat. Nezapomeňte dobít!",
+
+  "item-handbooktitle-edrilltip": "Použití",
+  "item-handbooktext-edrilltip": "Základní komponenta pro elektrickou vrtačku.",
+
+  "item-handbooktitle-eaxe": "Použití",
+  "item-handbooktext-eaxe": "Skvělá na sekání. Nepoužívá se v receptech.<br>Po vybití přestane fungovat. Nezapomeňte dobít!"
+}

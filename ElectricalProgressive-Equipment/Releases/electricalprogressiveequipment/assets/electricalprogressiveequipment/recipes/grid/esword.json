@@ -1,0 +1,35 @@
+﻿{
+  "ingredientPattern": "_PZ,MEP,KB_",
+  "ingredients": {
+    "M": {
+      "type": "block",
+      "code": "game:metal-parts", "quantity": 3
+    },
+    "B": {
+      "type": "item",
+      "code": "game:gear-temporal", "quantity": 1
+    },
+    "P": {
+      "type": "item",
+      "code": "electricalprogressivebasics:coil", "quantity": 6
+    },
+    "E": {
+      "type": "item",
+      "code": "game:stick", "quantity": 1
+    },
+    "Z": {
+      "type": "item",
+      "code": "game:bladehead-falx-steel", "quantity": 1
+    },
+    "K": {
+      "type": "item",
+      "code": "game:leather-normal-plain", "quantity": 16
+    }
+  },
+  "width": 3,
+  "height": 3,
+  "output": {
+    "type": "item",
+    "code": "electricalprogressiveequipment:static-saber-common"
+  }
+}

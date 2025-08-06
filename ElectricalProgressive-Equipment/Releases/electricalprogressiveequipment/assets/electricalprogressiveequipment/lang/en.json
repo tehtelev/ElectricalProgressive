@@ -1,0 +1,54 @@
+﻿{
+  "item-static-saber-*": "Electric Saber",
+  "item-static-spear": "Electric Spear",
+  "item-static-shield": "Electric Shield",
+  "item-static-helmet": "Electric Helmet",
+  "item-static-armor": "Electric Chestplate",
+  "item-static-boots": "Electric Greaves",
+
+  "item-handbooktitle-static-saber": "Usage",
+  "item-handbooktext-static-saber": "A good choice for efficiently slicing up enemies. The blade can be heated until red-hot to set foes on fire.<br>When depleted, it will stop dealing damage. Don't forget to recharge!",
+
+
+  "item-handbooktitle-static-spear": "Usage",
+  "item-handbooktext-static-spear": "A great choice for piercing enemies. It has two throwing modes: standard and ionizing spear. In the second mode, the spear causes strong air ionization upon hitting any living creature, triggering a lightning strike and igniting the target. This consumes 10% of the charge capacity.<br>Playing with lightning is dangerous—be careful.<br>When fully discharged, it stops dealing damage. Don’t forget to recharge!",
+
+  "item-handbooktitle-static-shield": "Usage",
+  "item-handbooktext-static-shield": "Excellent protection with a built-in flashlight.<br>Stops absorbing damage when discharged. Remember to recharge!",
+
+  "item-handbooktitle-static-helmet": "Usage",
+  "item-handbooktext-static-helmet": "Superior defense and functionality.<br>Stops absorbing damage when discharged. Remember to recharge!",
+
+  "item-handbooktitle-static-armor": "Usage",
+  "item-handbooktext-static-armor": "Superior defense and functionality. Allows flying by pressing the R key.<br>Stops absorbing damage and disables flight mode when discharged. Remember to recharge!",
+
+  "item-handbooktitle-static-boots": "Usage",
+  "item-handbooktext-static-boots": "Superior defense and functionality.<br>Stops absorbing damage when discharged. Remember to recharge!",
+
+  "game:spear_common": "Common spear",
+  "game:spear_flash": "Ionizing spear",
+  "game:saber_right": "Heat up/Cool down the blade",
+
+
+  "item-edrill": "Electric Drill",
+  "item-echisel": "Electric Jackhammer",
+  "item-edrilltip": "Drill Bit",
+  "item-eaxe": "Electric Axe",
+
+  "game:drill1": "Digs a 1×1 block",
+  "game:drill2": "Digs a 1×3 block area",
+
+  "item-handbooktitle-edrill": "Usage",
+  "item-handbooktext-edrill": "Mining reaches a new level. Allows operation in two modes: 1×1 and 1×3.<br>When it runs out of charge, it stops working. Don’t forget to recharge!",
+
+  "item-handbooktitle-echisel": "Usage",
+  "item-handbooktext-echisel": "Functions as a battery-powered chisel. No hammer needed in your off-hand. Not used in recipes.<br>When it runs out of charge, it stops working. Don’t forget to recharge!",
+
+  "item-handbooktitle-edrilltip": "Usage",
+  "item-handbooktext-edrilltip": "Base component for the electric drill.",
+
+  "item-handbooktitle-eaxe": "Usage",
+  "item-handbooktext-eaxe": "Great for chopping. Not used in recipes.<br>When it runs out of charge, it stops working. Don’t forget to recharge!"
+
+
+}

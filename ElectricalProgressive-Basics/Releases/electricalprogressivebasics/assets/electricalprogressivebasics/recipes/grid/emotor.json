@@ -1,0 +1,206 @@
+﻿[
+  {
+    "ingredientPattern": "G",
+    "width": 1,
+    "height": 1,
+    "ingredients": {
+      "G": {
+        "type": "block",
+        "code": "electricalprogressivebasics:egenerator-*-stator",
+        "name": "tier",
+        "allowedVariants": [
+          "tier1",
+          "tier2",
+          "tier3"
+        ]
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:emotor-{tier}-stator"
+    }
+  },
+
+  {
+    "ingredientPattern": "HS,XM,LC",
+    "width": 2,
+    "height": 3,
+    "ingredients": {
+      "L": {
+        "type": "block",
+        "code": "game:log-*"
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 32
+      },
+      "X": {
+        "type": "item",
+        "code": "game:chisel-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "M": {
+        "type": "item",
+        "code": "game:metalplate-iron",
+        "quantity": 4
+      },
+      "C": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-32v-copper-single-part",
+        "quantity": 32
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:emotor-tier1-stator",
+      "quantity": 4
+    }
+  },
+
+  {
+    "ingredientPattern": "HS_,XMC,_G_",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "S": {
+        "type": "item",
+        "code": "game:solderingiron",
+        "isTool": true,
+        "toolDurabilityCost": 50
+      },
+      "H": {
+        "type": "block",
+        "code": "electricalprogressivebasics:emotor-tier1-stator",
+        "quantity": 1
+      },
+      "X": {
+        "type": "item",
+        "code": "game:metalplate-zinc",
+        "quantity": 1
+      },
+      "M": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 100
+      },
+      "G": {
+        "type": "item",
+        "code": "game:metalplate-steel",
+        "quantity": 1
+      },
+      "C": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-32v-copper-single-part",
+        "quantity": 16
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:emotor-tier2-stator",
+      "quantity": 1
+    }
+  },
+  {
+    "ingredientPattern": "HS_,XMC,_G_",
+    "requiresTrait": "tinkerer",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "S": {
+        "type": "item",
+        "code": "game:solderingiron",
+        "isTool": true,
+        "toolDurabilityCost": 25
+      },
+      "H": {
+        "type": "block",
+        "code": "electricalprogressivebasics:emotor-tier1-stator",
+        "quantity": 1
+      },
+      "X": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-32v-copper-single-part",
+        "quantity": 8
+      },
+      "M": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 100
+      },
+      "G": {
+        "type": "item",
+        "allowedVariants": [
+          "bismuth",
+          "bismuthbronze",
+          "tin",
+          "blackbronze",
+          "steel",
+          "iron",
+          "tinbronze",
+          "brass"          
+        ],
+        "code": "game:metalplate-*",
+        "quantity": 1
+      },
+      "C": {
+        "type": "block",
+        "code": "game:metal-parts",
+        "quantity": 2
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:emotor-tier2-stator",
+      "quantity": 1
+    }
+  },
+  {
+    "ingredientPattern": "HS_,XGC",
+    "width": 3,
+    "height": 2,
+    "ingredients": {
+      "S": {
+        "type": "item",
+        "code": "game:solderingiron",
+        "isTool": true,
+        "toolDurabilityCost": 50
+      },
+      "H": {
+        "type": "block",
+        "code": "electricalprogressivebasics:emotor-tier2-stator",
+        "quantity": 1
+      },
+      "X": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-128v-silver-single-part",
+        "quantity": 4
+      },
+      "G": {
+        "type": "item",
+        "code": "game:metalplate-steel",
+        "quantity": 1
+      },
+      "C": {
+        "type": "item",
+        "code": "game:metalplate-zinc",
+        "quantity": 1
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:emotor-tier3-stator",
+      "quantity": 1
+    }
+  }
+]

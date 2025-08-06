@@ -1,0 +1,117 @@
+﻿{
+  "block-charger-*": "Ladestation",
+  "block-charger-burned-south": "Ladestation (verbrannt)",
+
+  "block-estove-*": "Elektrische Kochplatte",
+  "block-estove-burned-south": "Elektrische Kochplatte (verbrannt)",
+
+
+
+  "block-eoven-*": "Elektrischer Ofen",
+  "block-eoven-burned-north": "Elektrischer Ofen (verbrannt)",
+
+  "block-nasteniy_fonar-*": "Außenwandleuchte",
+  "block-nasteniy_fonar-burned": "Außenwandleuchte (verbrannt)",
+
+  "block-stolb_fonar-*": "Laternenmast",
+  "block-stolb_fonar-2-i-burned": "Laternenmast (verbrannt)",
+  "block-stolb_fonar-3-i-burned": "Laternenmast (verbrannt)",
+  "block-stolb_fonar-3-r-burned": "Laternenmast (verbrannt)",
+  "block-stolb_fonar-3-t-burned": "Laternenmast (verbrannt)",
+  "block-stolb_fonar-3-x-burned": "Laternenmast (verbrannt)",
+  "block-stolb_fonar-4-i-burned": "Laternenmast (verbrannt)",
+  "block-stolb_fonar-4-r-burned": "Laternenmast (verbrannt)",
+  "block-stolb_fonar-4-t-burned": "Laternenmast (verbrannt)",
+  "block-stolb_fonar-4-x-burned": "Laternenmast (verbrannt)",
+
+  "block-ehorn-*": "Elektrischer Schmiedehafen",
+  "block-ehorn-burned-south": "Elektrischer Schmiedehafen (verbrannt)",
+
+  "block-heater-*": "Elektrischer Heizkörper",
+  "block-heater-burned": "Elektrischer Heizkörper (verbrannt)",
+
+  "block-elamp-3000-*": "Elektrische Lampe: warmorange (3000K)",
+  "block-elamp-4000-*": "Elektrische Lampe: warmgelb (4000K)",
+  "block-elamp-5000-*": "Elektrische Lampe: warmweiß (5000K)",
+  "block-elamp-6000-*": "Elektrische Lampe: neutralweiß (6000K)",
+  "block-elamp-7000-*": "Elektrische Lampe: kaltbläulich (7000K)",
+  "block-elamp-8000-*": "Elektrische Lampe: kaltweiß (8000K)",
+  "block-elamp-9000-*": "Elektrische Lampe: bläulich-kalt (9000K)",
+
+  "block-elamp-3000-burned": "Elektrische Lampe (verbrannt)",
+  "block-elamp-4000-burned": "Elektrische Lampe (verbrannt)",
+  "block-elamp-5000-burned": "Elektrische Lampe (verbrannt)",
+  "block-elamp-6000-burned": "Elektrische Lampe (verbrannt)",
+  "block-elamp-7000-burned": "Elektrische Lampe (verbrannt)",
+  "block-elamp-8000-burned": "Elektrische Lampe (verbrannt)",
+  "block-elamp-9000-burned": "Elektrische Lampe (verbrannt)",
+
+  "block-elamp_small-3000-*": "Kleine elektrische Lampe: warmorange (3000K)",
+  "block-elamp_small-4000-*": "Kleine elektrische Lampe: warmgelb (4000K)",
+  "block-elamp_small-5000-*": "Kleine elektrische Lampe: warmweiß (5000K)",
+  "block-elamp_small-6000-*": "Kleine elektrische Lampe: neutralweiß (6000K)",
+  "block-elamp_small-7000-*": "Kleine elektrische Lampe: kaltbläulich (7000K)",
+  "block-elamp_small-8000-*": "Kleine elektrische Lampe: kaltweiß (8000K)",
+  "block-elamp_small-9000-*": "Kleine elektrische Lampe: bläulich-kalt (9000K)",
+
+  "block-elamp_small-3000-burned": "Kleine elektrische Lampe (verbrannt)",
+  "block-elamp_small-4000-burned": "Kleine elektrische Lampe (verbrannt)",
+  "block-elamp_small-5000-burned": "Kleine elektrische Lampe (verbrannt)",
+  "block-elamp_small-6000-burned": "Kleine elektrische Lampe (verbrannt)",
+  "block-elamp_small-7000-burned": "Kleine elektrische Lampe (verbrannt)",
+  "block-elamp_small-8000-burned": "Kleine elektrische Lampe (verbrannt)",
+  "block-elamp_small-9000-burned": "Kleine elektrische Lampe (verbrannt)",
+
+
+
+  "block-handbooktitle-eoven": "Verwendung",
+  "block-handbooktext-eoven": "Der Elektrobackofen ersetzt den traditionellen Ofen vollständig. Er schaltet sich automatisch ab, wenn der Backvorgang abgeschlossen ist. Kein Anbrennen mehr!<br>Unterstützt automatisches Be- und Entladen über Rutschen.",
+
+
+  "block-handbooktitle-heater": "Verwendung",
+  "block-handbooktext-heater": "Kleine Wärmequelle.",
+
+  "block-handbooktitle-elamp": "Verwendung",
+  "block-handbooktext-elamp": "Gute Lichtquelle, die Strom verbraucht.",
+
+  "block-handbooktitle-elamp_small": "Verwendung",
+  "block-handbooktext-elamp_small": "Lichtquelle, die Strom verbraucht.",
+
+  "block-handbooktitle-nasteniy_fonar": "Verwendung",
+  "block-handbooktext-nasteniy_fonar": "An der Wand montierte Außenleuchte.",
+
+  "block-handbooktitle-stolb_fonar": "Verwendung",
+  "block-handbooktext-stolb_fonar": "Außenleuchte auf Mast.",
+
+  "block-handbooktitle-ehorn": "Verwendung",
+  "block-handbooktext-ehorn": "Der elektrische Schmiedehafen ersetzt den herkömmlichen Schmiedehafen.<br><br>Maximale Temperatur: 1100 °C.",
+
+  "block-handbooktitle-charger": "Verwendung",
+  "block-handbooktext-charger": "Ladestation für Akkus und Geräte mit integriertem Akku.",
+
+  "block-handbooktitle-estove": "Verwendung",
+  "block-handbooktext-estove": "Der Elektroherd ermöglicht den vollständigen Ersatz eines herkömmlichen Lagerfeuers.<br>Unterstützt automatisches Be- und Entladen über Rutschen.<br><br>Maximale Heiztemperatur des Herdes: 1325 °C.",
+
+
+
+  "game:BlockEStove": "Elektrische Kochplatte",
+  "game:freezer-title-gui": "Kühlschrank",
+  "game:freezer-over-sneak-help": "Tür öffnen/schließen.",
+  "game:freezer-over-help": "Öffne die Tür und lege Lebensmittel hinein, um sie aufzubewahren.",
+
+  "game:Put-into-1-items": "Benötigt mindestens 1 Gegenstand zum Backen.",
+
+
+  "game:max-light": "Maximales Licht",
+  "game:height": "Höhe",
+
+
+  "block-efreezer2-*": "Elektrischer Kühlschrank",
+  "block-efreezer2-burned-north": "Elektrischer Kühlschrank (verbrannt)",
+  "block-handbooktitle-efreezer2": "In Gebrauch",
+  "block-handbooktext-efreezer2": "Der elektrische Kühlschrank ermöglicht es, Lebensmittel länger aufzubewahren. <br><br>Stauraum: 6 Plätze.<br>Verderbensgeschwindigkeit: 0,05×"
+
+
+
+
+}

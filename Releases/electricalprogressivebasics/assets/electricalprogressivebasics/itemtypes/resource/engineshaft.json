@@ -1,0 +1,65 @@
+﻿{
+    "code": "engineshaft",
+    "maxstacksize": 16,
+    "attributes": {
+        "displaycaseable": true,
+        "shelvable": true,
+		"handbook": {
+			"groupBy": [ "engineshaft-*" ],
+			"extraSections": [{
+				"title": "electricalprogressivebasics:item-handbooktitle-engineshaft",
+				"text": "electricalprogressivebasics:item-handbooktext-engineshaft"
+            }]
+		}
+    },
+    "materialDensity": 3000,
+    "storageFlags": 1,
+    "shape": { "base": "item/engine_shaft" },
+    "textures": {
+        "iron": { "base": "game:block/metal/ingot/iron" },
+        "oak": { "base": "game:block/wood/planks/generic" },
+        "copper_coil": { "base": "block/copper_coil" }
+    },
+    "creativeinventory": {
+        "general": [ "*" ],
+        "electricity": [ "*" ]
+    },
+    "guiTransform": {
+        "rotation": {
+            "x": 45,
+            "y": 45,
+            "z": 23
+        },
+        "origin": {
+            "x": 0.5,
+            "y": 0.5,
+            "z": 0.5
+        },
+        "scale": 1.8
+    },
+    "fpHandTransform": {
+        "translation": {
+            "x": 0,
+            "y": -0.2,
+            "z": 0.2
+        },
+        "rotation": {
+            "x": 180,
+            "y": 180,
+            "z": -30
+        }
+    },
+    "groundTransform": {
+        "translation": {
+            "x": 0,
+            "y": 0.13,
+            "z": 0
+        },
+        "rotation": {
+            "x": 45,
+            "y": 0,
+            "z": 0
+        },
+        "scale": 3
+    }
+}

@@ -1,0 +1,132 @@
+[
+    {
+        "file": "electricprogressiveequipment:itemtypes/armor/static-helmet.json",
+        "op":"add",
+        "path": "behaviors/-",
+        "value": {
+			"name": "CombatOverhaul:Armor",
+			"properties": {
+				"Layers": [ "Outer" ],
+				"Zones": [ "Head", "Face", "Neck" ],
+				"Resists": {
+					"PiercingAttack": 10,
+					"SlashingAttack": 10,
+					"BluntAttack": 5
+				},
+				"FlatReduction": {
+					"PiercingAttack": 1,
+					"SlashingAttack": 1,
+					"BluntAttack": 1
+				},
+				"PlayerStats": {
+					"walkspeed": 0,
+					"manipulationSpeed": 0,
+					"steadyAim": 0.20,
+					"healingeffectivness": -0.03,
+					"hungerrate": 0.03
+				}
+			}
+		},
+        "dependsOn": [{"modid": "combatoverhaul"}]
+    },
+    {
+        "file":"electricprogressiveequipment:itemtypes/armor/static-helmet.json",
+        "op":"remove",
+        "path": "attributes/protectionModifiersByType",
+        "dependsOn": [{"modid": "combatoverhaul"}]
+    },
+    {
+        "file":"electricprogressiveequipment:itemtypes/armor/static-helmet.json",
+        "op":"remove",
+        "path": "attributes/statModifiersByType",
+        "dependsOn": [{"modid": "combatoverhaul"}]
+    },
+
+
+    {
+        "file": "electricprogressiveequipment:itemtypes/armor/static-armor.json",
+        "op":"add",
+        "path": "behaviors/-",
+        "value": {
+			"name": "CombatOverhaul:Armor",
+			"properties": {
+				"Layers": [ "Outer" ],
+				"Zones": [ "Torso", "Arms", "Hands" ],
+				"Resists": {
+					"PiercingAttack": 10,
+					"SlashingAttack": 10,
+					"BluntAttack": 5
+				},
+				"FlatReduction": {
+					"PiercingAttack": 1,
+					"SlashingAttack": 1,
+					"BluntAttack": 1
+				},
+				"PlayerStats": {
+					"walkspeed": -0.15,
+					"manipulationSpeed": 0.12,
+					"steadyAim": -0.1,
+					"healingeffectivness": -0.06,
+					"hungerrate": 0.03
+				}
+			}
+		},
+        "dependsOn": [{"modid": "combatoverhaul"}]
+    },
+    {
+        "file":"electricprogressiveequipment:itemtypes/armor/static-armor.json",
+        "op":"remove",
+        "path": "attributes/protectionModifiersByType",
+        "dependsOn": [{"modid": "combatoverhaul"}]
+    },
+    {
+        "file":"electricprogressiveequipment:itemtypes/armor/static-armor.json",
+        "op":"remove",
+        "path": "attributes/statModifiersByType",
+        "dependsOn": [{"modid": "combatoverhaul"}]
+    },
+
+
+    {
+        "file": "electricprogressiveequipment:itemtypes/armor/static-boots.json",
+        "op":"add",
+        "path": "behaviors/-",
+        "value": {
+			"name": "CombatOverhaul:Armor",
+			"properties": {
+				"Layers": [ "Outer" ],
+				"Zones": [ "Legs", "Feet" ],
+				"Resists": {
+					"PiercingAttack": 10,
+					"SlashingAttack": 10,
+					"BluntAttack": 5
+				},
+				"FlatReduction": {
+					"PiercingAttack": 1,
+					"SlashingAttack": 1,
+					"BluntAttack": 1
+				},
+				"PlayerStats": {
+					"walkspeed": 0.2,
+					"manipulationSpeed": 0,
+					"steadyAim": 0,
+					"healingeffectivness": -0.03,
+					"hungerrate": 0.03
+				}
+			}
+		},
+        "dependsOn": [{"modid": "combatoverhaul"}]
+    },
+    {
+        "file":"electricprogressiveequipment:itemtypes/armor/static-boots.json",
+        "op":"remove",
+        "path": "attributes/protectionModifiersByType",
+        "dependsOn": [{"modid": "combatoverhaul"}]
+    },
+    {
+        "file":"electricprogressiveequipment:itemtypes/armor/static-boots.json",
+        "op":"remove",
+        "path": "attributes/statModifiersByType",
+        "dependsOn": [{"modid": "combatoverhaul"}]
+    }
+]

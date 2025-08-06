@@ -1,0 +1,139 @@
+﻿{
+  "code": "echisel",
+  "class": "EChisel",
+  "attributes": {
+    "chargable": true,
+    "consume": 20,
+    "handbook": {
+      "groupBy": [ "echisel-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressiveequipment:item-handbooktitle-echisel",
+          "text": "electricalprogressiveequipment:item-handbooktext-echisel"
+        }
+      ]
+    },
+
+
+
+    "toolrackTransform": {
+      "translation": {
+        "x": -0.1,
+        "y": -0.43,
+        "z": 0
+      },
+      "rotation": {
+        "x": 180,
+        "y": 180,
+        "z": 0
+      },
+      "scale": 1
+    },
+    "groundStorageTransform": {
+      "translation": {
+        "x": 0,
+        "y": -0.13,
+        "z": 0
+      },
+      "rotation": {
+        "x": 30,
+        "y": 90,
+        "z": 270
+      },
+      "scale": 0.7
+    }
+  },
+  "shape": { "base": "item/echisel" },
+  "creativeinventory": {
+    "general": [ "*" ],
+    "electricity": [ "*" ]
+  },
+  "tool": "Chisel",
+  "durability": 1000,
+  "enabled": true,
+  "heldRightReadyAnimation": "chiselready",
+  "heldTpHitAnimation": "chiselhit",
+  "heldTpUseAnimation": "chiselhit",
+  "behaviors": [
+    {
+      "name": "GroundStorable",
+      "properties": {
+        "layout": "WallHalves",
+        "wallOffY": 1,
+        "ctrlKey": true
+      }
+    }
+  ],
+  "guiTransform": {
+    "translation": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "rotation": {
+      "x": 9,
+      "y": 137,
+      "z": -53
+    },
+    "origin": {
+      "x": 0.44,
+      "y": 0,
+      "z": 0.38
+    },
+    "scale": 2.92
+  },
+  "fpHandTransform": {
+    "translation": {
+      "x": -0.1,
+      "y": 0.2,
+      "z": 0
+    },
+    "rotation": {
+      "x": 90,
+      "y": 99,
+      "z": -42
+    },
+    "origin": {
+      "x": 0.5,
+      "y": 0,
+      "z": 0.5
+    },
+    "scale": 2.15
+  },
+  "groundTransform": {
+    "translation": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "rotation": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "origin": {
+      "x": 0.5,
+      "y": 0,
+      "z": 0.5
+    },
+    "scale": 3
+  },
+  "tpHandTransform": {
+    "translation": {
+      "x": -0.5599,
+      "y": 0.04,
+      "z": -0.65
+    },
+    "rotation": {
+      "x": -3,
+      "y": 0,
+      "z": -170
+    },
+    "origin": {
+      "x": 0.5,
+      "y": 0,
+      "z": 0.5
+    },
+    "scale": 0.76
+  }
+}

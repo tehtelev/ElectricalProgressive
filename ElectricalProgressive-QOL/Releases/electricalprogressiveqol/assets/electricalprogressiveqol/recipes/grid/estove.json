@@ -1,0 +1,35 @@
+[
+  {
+    "ingredientPattern": "MXM,EEE,MHM",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "E": {
+        "type": "item",
+        "code": "electricalprogressivebasics:coil",
+        "quantity": 2
+      },
+      "X": {
+        "type": "block",
+        "code": "electricalprogressiveqol:heater-disabled",
+        "quantity": 1
+      },
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "M": {
+        "type": "item",
+        "code": "game:metalplate-iron",
+        "quantity": 1
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:estove-disabled-south",
+      "quantity": 1
+    }
+  }
+]

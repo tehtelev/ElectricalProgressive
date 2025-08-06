@@ -1,0 +1,21 @@
+{
+  "ingredientPattern": "MC",
+  "width": 2,
+  "height": 1,
+  "ingredients": {
+    "M": {
+      "type": "item",
+      "code": "game:metalplate-iron"
+    },
+    "C": {
+      "type": "block",
+      "code": "electricalprogressivebasics:ecable-32v-copper-single-part",
+      "quantity": 16
+    }
+  },
+  "output": {
+    "type": "block",
+    "code": "electricalprogressiveqol:heater-disabled",
+    "quantity": 4
+  }
+}

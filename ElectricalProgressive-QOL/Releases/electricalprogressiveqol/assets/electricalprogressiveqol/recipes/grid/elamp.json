@@ -1,0 +1,481 @@
+[
+  {
+    "ingredientPattern": "GS,MC,AB",
+    "width": 2,
+    "height": 3,
+    "ingredients": {
+      "G": {
+        "type": "block",
+        "code": "game:glass-plain"
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 16
+      },
+      "M": {
+        "type": "item",
+        "code": "game:metalplate-iron"
+      },
+      "C": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-128v-copper-single-part",
+        "quantity": 16
+      },
+      "A": {
+        "type": "item",
+        "code": "game:metalplate-tinbronze"
+      },
+      "B": {
+        "type": "item",
+        "code": "game:metalplate-copper"
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:elamp-3000-disabled",
+      "quantity": 4
+    }
+  },
+  {
+    "ingredientPattern": "L_,AB",
+    "width": 2,
+    "height": 2,
+    "ingredients": {
+      "L": {
+        "type": "block",
+        "code": "electricalprogressiveqol:elamp-6000-disabled",
+        "quantity": 4
+      },
+      "A": {
+        "type": "item",
+        "code": "game:metalplate-tinbronze"
+      },
+      "B": {
+        "type": "item",
+        "code": "game:metalplate-copper"
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:elamp-3000-disabled",
+      "quantity": 4
+    }
+  },
+  {
+    "ingredientPattern": "GS,MC,AB",
+    "width": 2,
+    "height": 3,
+    "ingredients": {
+      "G": {
+        "type": "block",
+        "code": "game:glass-plain"
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 16
+      },
+      "M": {
+        "type": "item",
+        "code": "game:metalplate-iron"
+      },
+      "C": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-128v-copper-single-part",
+        "quantity": 16
+      },
+      "A": {
+        "type": "item",
+        "code": "game:metalplate-tinbronze"
+      },
+      "B": {
+        "type": "item",
+        "code": "game:metalplate-tinbronze"
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:elamp-4000-disabled",
+      "quantity": 4
+    }
+  },
+  {
+    "ingredientPattern": "L_,AB",
+    "width": 2,
+    "height": 2,
+    "ingredients": {
+      "L": {
+        "type": "block",
+        "code": "electricalprogressiveqol:elamp-6000-disabled",
+        "quantity": 4
+      },
+      "A": {
+        "type": "item",
+        "code": "game:metalplate-tinbronze"
+      },
+      "B": {
+        "type": "item",
+        "code": "game:metalplate-tinbronze"
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:elamp-4000-disabled",
+      "quantity": 4
+    }
+  },
+  {
+    "ingredientPattern": "GS,MC,AB",
+    "width": 2,
+    "height": 3,
+    "ingredients": {
+      "G": {
+        "type": "block",
+        "code": "game:glass-plain"
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 16
+      },
+      "M": {
+        "type": "item",
+        "code": "game:metalplate-iron"
+      },
+      "C": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-128v-copper-single-part",
+        "quantity": 16
+      },
+      "A": {
+        "type": "item",
+        "code": "game:metalplate-tinbronze"
+      },
+      "B": {
+        "type": "item",
+        "code": "game:metalplate-meteoriciron"
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:elamp-5000-disabled",
+      "quantity": 4
+    }
+  },
+  {
+    "ingredientPattern": "L_,AB",
+    "width": 2,
+    "height": 2,
+    "ingredients": {
+      "L": {
+        "type": "block",
+        "code": "electricalprogressiveqol:elamp-6000-disabled",
+        "quantity": 4
+      },
+      "A": {
+        "type": "item",
+        "code": "game:metalplate-tinbronze"
+      },
+      "B": {
+        "type": "item",
+        "code": "game:metalplate-meteoriciron"
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:elamp-5000-disabled",
+      "quantity": 4
+    }
+  },
+  {
+    "ingredientPattern": "GS,MC,AB",
+    "width": 2,
+    "height": 3,
+    "ingredients": {
+      "G": {
+        "type": "block",
+        "code": "game:glass-plain"
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 16
+      },
+      "M": {
+        "type": "item",
+        "code": "game:metalplate-iron"
+      },
+      "C": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-128v-copper-single-part",
+        "quantity": 16
+      },
+      "A": {
+        "type": "item",
+        "code": "game:metalplate-tinbronze"
+      },
+      "B": {
+        "type": "item",
+        "code": "game:metalplate-silver"
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:elamp-5000-disabled",
+      "quantity": 4
+    }
+  },
+  {
+    "ingredientPattern": "L_,AB",
+    "width": 2,
+    "height": 2,
+    "ingredients": {
+      "L": {
+        "type": "block",
+        "code": "electricalprogressiveqol:elamp-6000-disabled",
+        "quantity": 4
+      },
+      "A": {
+        "type": "item",
+        "code": "game:metalplate-tinbronze"
+      },
+      "B": {
+        "type": "item",
+        "code": "game:metalplate-silver"
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:elamp-5000-disabled",
+      "quantity": 4
+    }
+  },
+  {
+    "ingredientPattern": "GS,MC",
+    "width": 2,
+    "height": 2,
+    "ingredients": {
+      "G": {
+        "type": "block",
+        "code": "game:glass-plain"
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 16
+      },
+      "M": {
+        "type": "item",
+        "code": "game:metalplate-iron"
+      },
+      "C": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-128v-copper-single-part",
+        "quantity": 16
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:elamp-6000-disabled",
+      "quantity": 4
+    }
+  },
+  {
+    "ingredientPattern": "GS,MC,AB",
+    "width": 2,
+    "height": 3,
+    "ingredients": {
+      "G": {
+        "type": "block",
+        "code": "game:glass-plain"
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 16
+      },
+      "M": {
+        "type": "item",
+        "code": "game:metalplate-iron"
+      },
+      "C": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-128v-copper-single-part",
+        "quantity": 16
+      },
+      "A": {
+        "type": "item",
+        "code": "game:metalplate-bismuth"
+      },
+      "B": {
+        "type": "item",
+        "code": "game:metalplate-meteoriciron"
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:elamp-7000-disabled",
+      "quantity": 4
+    }
+  },
+  {
+    "ingredientPattern": "L_,AB",
+    "width": 2,
+    "height": 2,
+    "ingredients": {
+      "L": {
+        "type": "block",
+        "code": "electricalprogressiveqol:elamp-6000-disabled",
+        "quantity": 4
+      },
+      "A": {
+        "type": "item",
+        "code": "game:metalplate-bismuth"
+      },
+      "B": {
+        "type": "item",
+        "code": "game:metalplate-meteoriciron"
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:elamp-7000-disabled",
+      "quantity": 4
+    }
+  },
+  {
+    "ingredientPattern": "GS,MC,AB",
+    "width": 2,
+    "height": 3,
+    "ingredients": {
+      "G": {
+        "type": "block",
+        "code": "game:glass-plain"
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 16
+      },
+      "M": {
+        "type": "item",
+        "code": "game:metalplate-iron"
+      },
+      "C": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-128v-copper-single-part",
+        "quantity": 16
+      },
+      "A": {
+        "type": "item",
+        "code": "game:metalplate-bismuth"
+      },
+      "B": {
+        "type": "item",
+        "code": "game:metalplate-silver"
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:elamp-8000-disabled",
+      "quantity": 4
+    }
+  },
+  {
+    "ingredientPattern": "L_,AB",
+    "width": 2,
+    "height": 2,
+    "ingredients": {
+      "L": {
+        "type": "block",
+        "code": "electricalprogressiveqol:elamp-6000-disabled",
+        "quantity": 4
+      },
+      "A": {
+        "type": "item",
+        "code": "game:metalplate-bismuth"
+      },
+      "B": {
+        "type": "item",
+        "code": "game:metalplate-silver"
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:elamp-8000-disabled",
+      "quantity": 4
+    }
+  },
+  {
+    "ingredientPattern": "GS,MC,AB",
+    "width": 2,
+    "height": 3,
+    "ingredients": {
+      "G": {
+        "type": "block",
+        "code": "game:glass-plain"
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 16
+      },
+      "M": {
+        "type": "item",
+        "code": "game:metalplate-iron"
+      },
+      "C": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-128v-copper-single-part",
+        "quantity": 16
+      },
+      "A": {
+        "type": "item",
+        "code": "game:metalplate-bismuth"
+      },
+      "B": {
+        "type": "item",
+        "code": "game:metalplate-zinc"
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:elamp-9000-disabled",
+      "quantity": 4
+    }
+  },
+  {
+    "ingredientPattern": "L_,AB",
+    "width": 2,
+    "height": 2,
+    "ingredients": {
+      "L": {
+        "type": "block",
+        "code": "electricalprogressiveqol:elamp-6000-disabled",
+        "quantity": 4
+      },
+      "A": {
+        "type": "item",
+        "code": "game:metalplate-bismuth"
+      },
+      "B": {
+        "type": "item",
+        "code": "game:metalplate-zinc"
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:elamp-9000-disabled",
+      "quantity": 4
+    }
+  }
+]

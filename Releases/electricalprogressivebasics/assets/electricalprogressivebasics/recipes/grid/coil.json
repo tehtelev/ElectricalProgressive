@@ -1,0 +1,23 @@
+﻿{
+	"ingredientPattern": "WWW,WSW,WWW",
+	"width": 3,
+	"height": 3,
+	"ingredients": {
+		"W": {
+			"type": "block",
+			"code": "electricalprogressivebasics:ecable-32v-copper-single-part",
+			"quantity": 1
+		},
+		"S": {
+			"type": "item",
+			"code": "game:hammer-*",
+			"isTool": true,
+			"toolDurabilityCost": 8
+		}
+	},
+	"output": {
+		"type": "item",
+		"code": "electricalprogressivebasics:coil",
+		"quantity": 8
+	}
+}

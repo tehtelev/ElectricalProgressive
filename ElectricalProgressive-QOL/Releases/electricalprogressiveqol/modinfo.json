@@ -1,0 +1,16 @@
+﻿{
+  "type": "code",
+  "modid": "electricalprogressiveqol",
+  "name": "Electrical Progressive: QoL",
+  "authors": [
+    "Tehtelev",
+    "Kotl"
+  ],
+  "description": "Additional electrical devices!",
+  "Version": "2.1.0-rc.2",
+  "dependencies": {
+    "game": "1.21.0-rc.2",
+    "electricalprogressivecore": "2.1.0-rc.2",
+    "electricalprogressivebasics": "2.1.0-rc.2"
+  }
+}

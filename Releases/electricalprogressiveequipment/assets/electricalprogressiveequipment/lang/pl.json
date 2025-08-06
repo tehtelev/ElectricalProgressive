@@ -1,0 +1,54 @@
+﻿{
+  "item-static-saber-*": "Miecz elektryczny",
+  "item-static-spear": "Włócznia elektryczna",
+  "item-static-shield": "Tarcza elektryczna",
+  "item-static-helmet": "Hełm elektryczny",
+  "item-static-armor": "Napierśnik elektryczny",
+  "item-static-boots": "Nagolenniki elektryczne",
+
+  "item-handbooktitle-static-saber": "Użycie",
+  "item-handbooktext-static-saber": "Dobry wybór do efektywnego cięcia wrogów. Można rozgrzać ostrze na czerwono i podpalać przeciwników.<br>Gdy energia się wyczerpie, miecz przestanie zadawać obrażenia. Nie zapomnij ładować!",
+
+  "item-handbooktitle-static-spear": "Użycie",
+  "item-handbooktext-static-spear": "Dobry wybór do przebijania wrogów. Posiada dwa tryby rzutu: zwykły i jonizujący. W drugim trybie włócznia jonizuje powietrze przy trafieniu żywej istoty, wywołując wyładowanie piorunowe i podpalenie. Zużywa 10% energii.<br>Zabawy z piorunami są niebezpieczne – zachowaj ostrożność.<br>Gdy energia się wyczerpie, włócznia przestanie zadawać obrażenia. Nie zapomnij ładować!",
+
+  "item-handbooktitle-static-shield": "Użycie",
+  "item-handbooktext-static-shield": "Doskonała ochrona z wbudowaną latarką.<br>Gdy energia się wyczerpie, tarcza przestanie pochłaniać obrażenia. Nie zapomnij ładować!",
+
+  "item-handbooktitle-static-helmet": "Użycie",
+  "item-handbooktext-static-helmet": "Doskonała ochrona i funkcje.<br>Gdy energia się wyczerpie, hełm przestanie pochłaniać obrażenia. Nie zapomnij ładować!",
+
+  "item-handbooktitle-static-armor": "Użycie",
+  "item-handbooktext-static-armor": "Doskonała ochrona i możliwości. Pozwala latać po naciśnięciu R.<br>Gdy energia się wyczerpie, ochrona i tryb lotu wyłączą się. Nie zapomnij ładować!",
+
+  "item-handbooktitle-static-boots": "Użycie",
+  "item-handbooktext-static-boots": "Doskonała ochrona i funkcje.<br>Gdy energia się wyczerpie, nagolenniki przestaną pochłaniać obrażenia. Nie zapomnij ładować!",
+
+  "game:spear_common": "Zwykła włócznia",
+  "game:spear_flash": "Jonizująca włócznia",
+
+  "game:saber_right": "Rozgrzej/Zgasić ostrze",
+
+
+  "item-edrill": "Wiertło elektryczne",
+  "item-echisel": "Młot udarowy elektryczny",
+  "item-edrilltip": "Końcówka wiertła",
+  "item-eaxe": "Elektryczna siekiera",
+
+  "game:drill1": "Wydobywa blok 1×1",
+  "game:drill2": "Wydobywa obszar 1×3 bloków",
+
+  "item-handbooktitle-edrill": "Użycie",
+  "item-handbooktext-edrill": "Wydobycie surowców wchodzi na nowy poziom. Pozwala pracować w dwóch trybach: 1×1 i 1×3.<br>Gdy się rozładuje, przestaje działać. Nie zapomnij naładować!",
+
+  "item-handbooktitle-echisel": "Użycie",
+  "item-handbooktext-echisel": "Pełni funkcję dłuta zasilanego baterią. Młot w lewej ręce nie jest potrzebny. Nie używane w recepturach.<br>Gdy się rozładuje, przestaje działać. Nie zapomnij naładować!",
+
+  "item-handbooktitle-edrilltip": "Użycie",
+  "item-handbooktext-edrilltip": "Podstawowy element wiertła elektrycznego.",
+
+  "item-handbooktitle-eaxe": "Użycie",
+  "item-handbooktext-eaxe": "Świetnie radzi sobie z rąbaniem. Nie używane w recepturach.<br>Gdy się rozładuje, przestaje działać. Nie zapomnij naładować!"
+
+
+}

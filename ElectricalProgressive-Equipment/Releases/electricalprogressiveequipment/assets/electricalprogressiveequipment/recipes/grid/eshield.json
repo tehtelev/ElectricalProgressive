@@ -1,0 +1,35 @@
+﻿{
+  "ingredientPattern": "PMP,ZEZ,KBK",
+  "ingredients": {
+    "M": {
+      "type": "block",
+      "code": "electricalprogressiveqol:elamp_small-*", "quantity": 1
+    },
+    "B": {
+      "type": "item",
+      "code": "game:gear-temporal", "quantity": 1
+    },
+    "P": {
+      "type": "item",
+      "code": "electricalprogressivebasics:coil", "quantity": 8
+    },
+    "E": {
+      "type": "item",
+      "code": "game:boss-steel", "quantity": 1
+    },
+    "Z": {
+      "type": "item",
+      "code": "game:metalplate-steel", "quantity": 2
+    },
+    "K": {
+      "type": "item",
+      "code": "game:leather-normal-plain", "quantity": 8
+    }
+  },
+  "width": 3,
+  "height": 3,
+  "output": {
+    "type": "item",
+    "code": "electricalprogressiveequipment:static-shield"
+  }
+}
