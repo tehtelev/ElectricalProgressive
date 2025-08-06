@@ -297,15 +297,18 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
 
 
 
-    public override void OnReceivedClientPacket(IPlayer fromPlayer, int packetid, byte[] data)
+    public override void OnReceivedClientPacket(IPlayer player, int packetid, byte[] data)
     {
-        base.OnReceivedClientPacket(fromPlayer, packetid, data);
-    }
+        base.OnReceivedClientPacket(player, packetid, data);
 
+        ElectricalProgressive?.OnReceivedClientPacket(player, packetid, data);
+    }
 
     public override void OnReceivedServerPacket(int packetid, byte[] data)
     {
         base.OnReceivedServerPacket(packetid, data);
+
+        ElectricalProgressive?.OnReceivedServerPacket(packetid, data);
     }
 
 

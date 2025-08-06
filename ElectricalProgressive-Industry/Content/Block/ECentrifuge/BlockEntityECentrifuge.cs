@@ -306,10 +306,21 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
             }));
         return true;
     }
-    
+
+
+    public override void OnReceivedClientPacket(IPlayer player, int packetid, byte[] data)
+    {
+        base.OnReceivedClientPacket(player, packetid, data);
+
+        ElectricalProgressive?.OnReceivedClientPacket(player, packetid, data);
+    }
+
     public override void OnReceivedServerPacket(int packetid, byte[] data)
     {
         base.OnReceivedServerPacket(packetid, data);
+
+        ElectricalProgressive?.OnReceivedServerPacket(packetid, data);
+
         if (packetid != 1001)
             return;
         (this.Api.World as IClientWorldAccessor).Player.InventoryManager.CloseInventory((IInventory)this.Inventory);
