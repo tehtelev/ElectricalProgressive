@@ -1,4 +1,5 @@
-﻿using Vintagestory.API.Common;
+﻿using ElectricalProgressive.Content.Block.ECentrifuge;
+using Vintagestory.API.Common;
 using Vintagestory.API.Client;
 
 
@@ -31,7 +32,9 @@ public class ElectricalProgressiveIndustry : ModSystem
         base.Start(api);
 
         this.api = api;
-
+        api.RegisterBlockClass("BlockECentrifuge", typeof(BlockECentrifuge));
+        api.RegisterBlockEntityClass("BlockEntityECentrifuge", typeof(BlockEntityECentrifuge));
+        api.RegisterBlockEntityBehaviorClass("BEBehaviorECentrifuge", typeof(BEBehaviorECentrifuge));
 
     }
 

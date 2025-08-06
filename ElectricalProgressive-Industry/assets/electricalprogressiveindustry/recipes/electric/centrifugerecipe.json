@@ -1,7 +1,7 @@
 ﻿[
   {
     "code": "compost",
-    "EnergyOperation": 10000,
+    "EnergyOperation": 1000,
     "ingredients": [
       {
         "type": "item",
@@ -17,7 +17,7 @@
   },
   {
     "code": "compost",
-    "EnergyOperation": 10000,
+    "EnergyOperation": 1000,
     "ingredients": [
       {
         "type": "item",
