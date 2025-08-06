@@ -1,5 +1,6 @@
 ﻿using ElectricalProgressive.Utils;
 using Vintagestory.API.Client;
+using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 
 namespace ElectricalProgressive.Content.Block.EWoodcutter;
@@ -7,11 +8,10 @@ namespace ElectricalProgressive.Content.Block.EWoodcutter;
 public class GuiBlockEntityEWoodcutter : GuiDialogBlockEntity
 {
     public GuiBlockEntityEWoodcutter(
-        string dialogTitle,
         InventoryEWoodcutter inventory,
         BlockPos blockEntityPos,
         ICoreClientAPI capi
-    ) : base(dialogTitle, inventory, blockEntityPos, capi)
+    ) : base(Lang.Get("ewoodcutter-title-gui"), inventory, blockEntityPos, capi)
     {
         if (IsDuplicate)
             return;
@@ -33,8 +33,7 @@ public class GuiBlockEntityEWoodcutter : GuiDialogBlockEntity
     {
         var window = ElementStdBounds.AutosizedMainDialog
             .WithAlignment(EnumDialogArea.RightMiddle)
-            .WithFixedAlignmentOffset(-GuiStyle.DialogToScreenPadding, 0)
-            .AddImmersiveOffset(capi.Settings.Bool["immersiveMouseMode"]);
+            .WithFixedAlignmentOffset(-GuiStyle.DialogToScreenPadding, 0);
 
         var dialog = ElementBounds.Fill.WithFixedPadding(20);
 
@@ -51,10 +50,10 @@ public class GuiBlockEntityEWoodcutter : GuiDialogBlockEntity
             outputGrid
         });
 
-        SingleComposer = capi.Gui.CreateCompo("Woodcutter" + BlockEntityPosition, window)
+        SingleComposer = capi.Gui.CreateCompo("ewoodcutter" + BlockEntityPosition, window)
             .AddShadedDialogBG(dialog)
-            //TODO: Локаль
-            .AddDialogTitleBar("Электро лесоруб", OnTitleBarClose)
+            
+            .AddDialogTitleBar(DialogTitle, OnTitleBarClose)
             .BeginChildElements(dialog)
 
             .AddItemSlotGrid(Inventory, SendInvPacket, 1, new[] { 0 }, inputGrid, "inputSlot")

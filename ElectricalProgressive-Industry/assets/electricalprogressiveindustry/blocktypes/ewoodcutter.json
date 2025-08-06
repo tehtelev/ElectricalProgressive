@@ -25,11 +25,16 @@
     ]
   },
   "attributes": {
-    "maxConsumption": 100,
+    "maxConsumption": 300,
     "voltage": 32,
     "maxCurrent": 20.0,
     "isolated": true,
-    "isolatedEnvironment": false
+    "isolatedEnvironment": true,
+
+    "plantSaplingRadius": 3,
+    "treeChopRadius": 5,
+    "flyTreeRadius": 5,
+    "maxBlocksPerBatch": 10
   },
   "variantgroups": [
     {

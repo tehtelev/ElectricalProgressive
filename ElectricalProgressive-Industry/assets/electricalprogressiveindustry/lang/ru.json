@@ -1,3 +1,7 @@
 ﻿{
-  "electricalprogressiveindustry:recipeloading": "Рецепт успешно загружен"
+  "electricalprogressiveindustry:recipeloading": "Рецепт успешно загружен",
+
+  "game:ewoodcutter-title-gui": "Электрический лесоруб",
+  "block-ewoodcutter-normal": "Электрический лесоруб",
+  "block-ewoodcutter-normal-burned": "Электрический лесоруб (сгоревший)"
 }

@@ -1,12 +1,13 @@
 ﻿using ElectricalProgressive.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
-using Vintagestory.API.Server;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
 
@@ -14,11 +15,28 @@ namespace ElectricalProgressive.Content.Block.EWoodcutter;
 
 public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
 {
-    private ICoreClientAPI? _clientApi;
-    private ICoreServerAPI? _serverApi;
-
     private BlockPos? _currentTreePos;
-    private Stack<BlockPos>? _allTreePos;
+    private Stack<BlockPos> _allTreePos = new();
+
+    /// <summary>
+    /// Радиус посадки саженцев
+    /// </summary>
+    private int _plantSaplingRadius;
+    /// <summary>
+    /// Радиус поиска деревьев
+    /// </summary>
+    /// <remarks>Больше радиуса посадки, чтобы гарантировать срубание деревьев больше 1 блока</remarks>
+    private int _treeChopRadius;
+    /// <summary>
+    /// Радиус поиска летающих деревьев
+    /// </summary>
+    /// <remarks>Иногда деревья не полностью срубаются и остаются висеть в воздухе</remarks>
+    private int _flyTreeRadius;
+
+    /// <summary>
+    /// Сколько блоков ломает за 1 тик
+    /// </summary>
+    private int _maxBlocksPerBatch;
 
     public bool IsNotEnoughEnergy { get; set; }
     public int WoodTier { get; private set; }
@@ -81,17 +99,26 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
     {
         base.Initialize(api);
 
-        if (api.Side.IsClient())
-            _clientApi = api as ICoreClientAPI;
-
-        if (Api.Side.IsServer())
-            _serverApi = api as ICoreServerAPI;
+        _plantSaplingRadius = MyMiniLib.GetAttributeInt(Block, "plantSaplingRadius", 3);
+        _treeChopRadius = MyMiniLib.GetAttributeInt(Block, "treeChopRadius", 5);
+        _flyTreeRadius = MyMiniLib.GetAttributeInt(Block, "flyTreeRadius", 5);
+        _maxBlocksPerBatch = MyMiniLib.GetAttributeInt(Block, "maxBlocksPerBatch", 10);
 
         _inventory.Pos = Pos;
         _inventory.LateInitialize($"{InventoryClassName}-{Pos.X}/{Pos.Y}/{Pos.Z}", api);
 
-        RegisterGameTickListener(StageWatcher, 100);
-        RegisterGameTickListener(ChopTreeUpdate, 300);
+        if (Api.Side.IsClient())
+            return;
+
+        var canPlantAndChop = _treeChopRadius != 0 && _plantSaplingRadius != 0;
+        if (canPlantAndChop)
+        {
+            RegisterGameTickListener(StageWatcher, 500);
+            RegisterGameTickListener(ChopTreeUpdate, 500);
+        }
+
+        if (canPlantAndChop && _flyTreeRadius != 0)
+            RegisterGameTickListener(ChopFlyingTreeUpdate, 5000);
     }
 
     /// <summary>
@@ -99,64 +126,123 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
     /// </summary>
     private void StageWatcher(float dt)
     {
-        // Поиск ближайшего дерева
-        if (_currentTreePos is null && !TryFindNearbyTree(out _currentTreePos))
+        var newTreePos = default(BlockPos?);
+
+        // Если сейчас нет дерева на рубку и не нашли новое, то занимаемся посадкой или ожиданием
+        if (_currentTreePos is null && !TryFindNearbyTree(Pos, out newTreePos))
         {
-            // Если деревьев и семян нет, то ждем
-            if (!HasSeed)
+            // Придется постоянно искать саженцы, чтобы корректно отрабатывать стадии сна и ожидания роста
+            var (canPlantSapling, anySaplingExists) = TryFindPlantingPosition(Pos, out var plantPos);
+
+            // Если есть семена и есть куда сажать, то сажаем
+            if (HasSeed && canPlantSapling)
             {
-                Stage = WoodcutterStage.WaitFullGrowth;
+                ChangeStage(WoodcutterStage.PlantTree);
+                PlantSapling(plantPos!);
                 return;
             }
 
-            var canPlantSapling = TryFindPlantingPosition(out var plantPos);
-
-            // Если семена есть, но нет свободных мест, то ждем
-            if (!canPlantSapling)
+            // Если сажать нечего или не было места, но есть хоть один саженец, то ждем роста
+            if (anySaplingExists)
             {
-                Stage = WoodcutterStage.WaitFullGrowth;
+                ChangeStage(WoodcutterStage.WaitFullGrowth);
                 return;
             }
 
-            Stage = WoodcutterStage.PlantTree;
-            PlantSapling(plantPos);
+            // Если нет семян, места или ничего не растет, то спим
+            ChangeStage(WoodcutterStage.None);
             return;
         }
 
-        var currentTreeBlock = Api.World.BlockAccessor.GetBlock(_currentTreePos);
-        if (currentTreeBlock.Id == 0 || currentTreeBlock is BlockSapling)
+        if (_currentTreePos is not null)
         {
-            // Обнуляем позицию дерева, если она стала не актуальной
-            _currentTreePos = null;
+            var currentTreeBlock = Api.World.BlockAccessor.GetBlock(_currentTreePos);
+            if (currentTreeBlock.Id == 0 || currentTreeBlock is BlockSapling)
+            {
+                // Обнуляем позицию дерева, если она стала не актуальной
+                _currentTreePos = null;
+                Stage = WoodcutterStage.None;
 
-            Stage = HasSeed
-                ? WoodcutterStage.PlantTree
-                : WoodcutterStage.None;
+                MarkDirty();
+                return;
+            }
+
+            // Если можем срубить текущее дерево, то рубим
+            if (CanBreakBlock(currentTreeBlock))
+            {
+                ChangeStage(WoodcutterStage.ChopTree);
+                return;
+            }
+        }
+
+        // Если позиции совпадают, но мы не можем срубить текущее, то спим
+        if (_currentTreePos == newTreePos)
+        {
+            ChangeStage(WoodcutterStage.None);
             return;
         }
 
-        if (CanBreakBlock(currentTreeBlock))
-            Stage = WoodcutterStage.ChopTree;
+        var newTreeBlock = Api.World.BlockAccessor.GetBlock(newTreePos);
+        // Если и новую позицию не можем срубить, то это очень странно...
+        if (!CanBreakBlock(newTreeBlock))
+        {
+            ChangeStage(WoodcutterStage.None);
+            return;
+        }
+
+        // Можем начинать срубать новое дерево
+        _currentTreePos = newTreePos;
+        Stage = WoodcutterStage.ChopTree;
+
+        MarkDirty();
+    }
+
+    private void ChangeStage(WoodcutterStage newStage)
+    {
+        if (newStage == Stage)
+            return;
+
+        Stage = newStage;
+
+        MarkDirty();
     }
 
     /// <summary>
-    /// Ищет подходящее место для посадки саженца в радиусе
+    /// Ищет подходящее место для посадки саженца в радиусе <see cref="_plantSaplingRadius"/>
     /// </summary>
-    private bool TryFindPlantingPosition(out BlockPos plantPos)
+    /// <returns>canPlantSapling - Есть свободное место <br/> anySaplingExists - Есть хотя бы 1 саженец</returns>
+    private (bool canPlantSapling, bool anySaplingExists) TryFindPlantingPosition(BlockPos centerPos, out BlockPos? plantPos)
     {
         plantPos = null!;
 
+        var canPlantSapling = false;
+        var anySaplingExists = false;
+
         var blockAccessor = Api.World.BlockAccessor;
-        var radius = 3;
-        var center = Pos;
+        var radius = _plantSaplingRadius;
 
         for (var dx = -radius; dx <= radius; dx++)
         {
             for (var dz = -radius; dz <= radius; dz++)
             {
-                var candidate = center.AddCopy(dx, 0, dz);
+                var candidate = centerPos.AddCopy(dx, 0, dz);
+                if (candidate == centerPos)
+                    continue;
 
-                if (blockAccessor.GetBlock(candidate).Id != 0)
+                var block = blockAccessor.GetBlock(candidate);
+                if (block.Id != 0)
+                {
+                    var isSapling = block is BlockSapling
+                         || block.Class == "BlockSapling"
+                         || (block.Attributes?.KeyExists("treeGen") ?? false);
+                    if (isSapling)
+                        anySaplingExists = true;
+
+                    continue;
+                }
+
+                // Если нашли место под посадку, то искать его больше не нужно, только проверять на саженцы
+                if (canPlantSapling)
                     continue;
 
                 var underPos = candidate.DownCopy();
@@ -166,34 +252,33 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
                     continue;
 
                 plantPos = candidate;
-                return true;
+                canPlantSapling = true;
             }
         }
 
-        return false;
+        return (canPlantSapling, anySaplingExists);
     }
 
     /// <summary>
-    /// Ищет ближайшее дерево или саженец в радиусе 4 блоков на том же уровне Y
+    /// Ищет ближайшее дерево или саженец в радиусе <see cref="_treeChopRadius"/> блоков на том же уровне Y
     /// </summary>
-    private bool TryFindNearbyTree(out BlockPos treePos)
+    private bool TryFindNearbyTree(BlockPos centerPos, out BlockPos treePos)
     {
         treePos = null!;
 
         var blockAccessor = Api.World.BlockAccessor;
-
-        // Радиус поиска деревьев больше радиуса посадки, чтобы гарантировать срубание деревьев больше 1 блока
-        var radius = 5;
-        var center = Pos;
+        var radius = _treeChopRadius;
         var closestDist = double.MaxValue;
 
         for (int dx = -radius; dx <= radius; dx++)
         {
             for (int dz = -radius; dz <= radius; dz++)
             {
-                var candidate = center.AddCopy(dx, 0, dz);
-                var block = blockAccessor.GetBlock(candidate);
+                var candidate = centerPos.AddCopy(dx, 0, dz);
+                if (candidate == centerPos)
+                    continue;
 
+                var block = blockAccessor.GetBlock(candidate);
                 if (block.Id == 0)
                     continue;
 
@@ -218,6 +303,9 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
     /// </summary>
     private void PlantSapling(BlockPos pos)
     {
+        if (Api.Side.IsClient())
+            return;
+
         if (IsNotEnoughEnergy || !HasSeed)
             return;
 
@@ -238,7 +326,6 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
 
         _inventory[0].TakeOut(1);
         _inventory[0].MarkDirty();
-        MarkDirty();
     }
 
     private int _blocksBroken;
@@ -253,21 +340,18 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
         if (Stage != WoodcutterStage.ChopTree || IsNotEnoughEnergy)
             return;
 
-        // Завершение обработки при отсутствии блоков
-        if (_allTreePos is { Count: 0 })
-        {
-            ResetChoppingState();
-            return;
-        }
-
-        if (_allTreePos == null && _currentTreePos != null)
+        if (_currentTreePos != null && _allTreePos.Count == 0)
         {
             _allTreePos = FindTree(Api.World, _currentTreePos, out int resistance, out int woodTier);
 
             TreeResistance = resistance;
             WoodTier = woodTier;
 
-            if (Api.Side.IsServer() && _allTreePos.Count == 0)
+            MarkDirty();
+
+            // Если FindTree не нашел дерево, то скорее всего это бревна поставленные игроком.
+            // Это проблемно, рубка таких блоков почти ничего не стоит
+            if (_allTreePos.Count == 0)
             {
                 var singleTree = Api.World.BlockAccessor.GetBlock(_currentTreePos);
                 BreakBlockAndCollect(singleTree, _currentTreePos, 1f);
@@ -275,25 +359,17 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
             }
         }
 
-        if (Api.Side.IsClient() || _allTreePos == null)
-            return;
-
-        var maxBlocksPerBatch = 10;
         var blocksProcessed = 0;
 
-        while (blocksProcessed < maxBlocksPerBatch && _allTreePos.Count > 0)
+        while (blocksProcessed < _maxBlocksPerBatch && _allTreePos.Count > 0)
         {
-            if (IsNotEnoughEnergy)
-                break;
-
-            if (!_allTreePos.TryPop(out var pos))
+            if (IsNotEnoughEnergy || !_allTreePos.TryPop(out var pos))
                 break;
 
             var block = Api.World.BlockAccessor.GetBlock(pos);
             if (block.BlockMaterial == EnumBlockMaterial.Air)
                 continue;
 
-            // Обработка блока
             _blocksBroken++;
             blocksProcessed++;
 
@@ -321,6 +397,31 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
     }
 
     /// <summary>
+    /// Ищет и рубит "летающие" деревья 
+    /// </summary>
+    private void ChopFlyingTreeUpdate(float dt)
+    {
+        if (Stage == WoodcutterStage.ChopTree || IsNotEnoughEnergy)
+            return;
+
+        var centerPos = Pos.Copy();
+        var radius = _flyTreeRadius;
+
+        for (var y = 1; y <= radius; y++)
+        {
+            var yOffsetPos = centerPos.AddCopy(0, y, 0);
+
+            if (TryFindNearbyTree(yOffsetPos, out var existTreePos))
+            {
+                _currentTreePos = existTreePos;
+                Stage = WoodcutterStage.ChopTree;
+                MarkDirty();
+                break;
+            }
+        }
+    }
+
+    /// <summary>
     /// Сбрасывает состояние рубки
     /// </summary>
     private void ResetChoppingState()
@@ -331,7 +432,6 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
         _blocksBroken = 0;
         _leavesMul = 1;
         _leavesBranchyMul = 0.8f;
-        _allTreePos = null;
         _currentTreePos = null;
 
         MarkDirty();
@@ -342,6 +442,9 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
     /// </summary>
     private void BreakBlockAndCollect(Vintagestory.API.Common.Block block, BlockPos pos, float dropQuantityMultiplier = 1f)
     {
+        if (Api.Side.IsClient())
+            return;
+
         var drops = block.GetDrops(Api.World, pos, null, dropQuantityMultiplier);
         if (drops == null)
             return;
@@ -353,11 +456,10 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
 
             var remainingStack = stack.Clone();
             if (!TryPutStackToInventory(remainingStack))
-            {
                 Api.World.SpawnItemEntity(remainingStack, pos.ToVec3d());
-            }
         }
 
+        block.SpawnBlockBrokenParticles(pos);
         Api.World.BlockAccessor.SetBlock(0, pos);
         Api.World.PlaySoundAt(block.Sounds.Break, pos, 0, null, false, 16);
     }
@@ -393,14 +495,16 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
                 continue;
 
             var moveAmount = Math.Min(stack.StackSize, availableSpace);
+            if (moveAmount == 0)
+                continue;
+
             slot.Itemstack.StackSize += moveAmount;
             stack.StackSize -= moveAmount;
 
+            slot.MarkDirty();
+
             if (stack.StackSize <= 0)
-            {
-                slot.MarkDirty();
                 return true;
-            }
         }
 
         return false;
@@ -409,39 +513,34 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
     /// <summary>
     /// Может ли блок быть срублен
     /// </summary>
-    private bool CanBreakBlock(Vintagestory.API.Common.Block? block)
+    private bool CanBreakBlock([NotNullWhen(true)] Vintagestory.API.Common.Block? block)
     {
-        var isBasicTree = block switch
-        {
-            BlockLog => true,
-            BlockLogSection => true,
-
-            _ => false
-        };
-        if (isBasicTree)
-            return true;
-
-        if (block is null || block.BlockMaterial == EnumBlockMaterial.Air)
+        if (block?.Attributes is null || block.Id == 0)
             return false;
 
-        // Скорее всего есть способ лучше
-        var isModdedTree = block.BlockMaterial == EnumBlockMaterial.Wood
-           && (block.Attributes.KeyExists("treeFellingGroupSpreadIndex") ||
-               block.Attributes.KeyExists("treeFellingGroupCode"));
+        var treeFellingGroupCode = block.Attributes["treeFellingGroupCode"].AsString();
+        if (treeFellingGroupCode is null)
+            return false;
 
-        return isModdedTree;
+        var spreadIndex = block.Attributes["treeFellingGroupSpreadIndex"].AsInt(0);
+        if (spreadIndex < 2)
+            return false;
+
+        if (!block.Attributes["treeFellingCanChop"].AsBool(true))
+            return false;
+
+        return true;
     }
 
     #region BlockEntityCode
 
     public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
     {
-        if (Api.Side.IsClient() && _clientApi is not null)
+        if (Api.Side.IsClient())
         {
             toggleInventoryDialogClient(byPlayer, delegate
             {
-                // TODO: Перевод для заголовка диалога
-                invDialog = new GuiBlockEntityEWoodcutter("Инвентарь лесоруба", _inventory, Pos, _clientApi);
+                invDialog = new GuiBlockEntityEWoodcutter(_inventory, Pos, Api as ICoreClientAPI);
                 return invDialog;
             });
         }
@@ -453,8 +552,18 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
     {
         base.OnBlockPlaced(byItemStack);
 
-        if (ElectricalProgressive != null)
-            ElectricalProgressive.Connection = Facing.DownAll;
+        if (ElectricalProgressive == null || byItemStack is null)
+            return;
+
+        var voltage = MyMiniLib.GetAttributeInt(byItemStack.Block, "voltage", 32);
+        var maxCurrent = MyMiniLib.GetAttributeFloat(byItemStack.Block, "maxCurrent", 5.0F);
+        var isolated = MyMiniLib.GetAttributeBool(byItemStack.Block, "isolated", true);
+        var isolatedEnvironment = MyMiniLib.GetAttributeBool(byItemStack.Block, "isolatedEnvironment", true);
+
+        var faceIndex = FacingHelper.Faces(Facing.DownAll).First().Index;
+
+        ElectricalProgressive.Connection = Facing.DownAll;
+        ElectricalProgressive.Eparams = (new(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), faceIndex);
     }
 
     public override void OnBlockRemoved()
@@ -481,10 +590,16 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
         base.ToTreeAttributes(tree);
 
         var inventoryTree = new TreeAttribute();
-        Inventory.ToTreeAttributes(inventoryTree);
+        _inventory.ToTreeAttributes(inventoryTree);
         tree["inventory"] = inventoryTree;
 
         tree.SetInt("stage", (int)Stage);
+        tree.SetInt("woodTier", WoodTier);
+        tree.SetInt("treeResistance", TreeResistance);
+        tree.SetBool("isNotEnoughEnergy", IsNotEnoughEnergy);
+
+        if (_currentTreePos != null)
+            tree.SetBlockPos("currentTreePos", _currentTreePos);
     }
 
 
@@ -497,20 +612,15 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
     {
         base.FromTreeAttributes(tree, worldForResolving);
 
-        Stage = (WoodcutterStage)tree.GetInt("stage", 0);
-
         _inventory.FromTreeAttributes(tree.GetTreeAttribute("inventory"));
+        if (Api != null)
+            _inventory.AfterBlocksLoaded(worldForResolving);
 
-        if (Api is null)
-            return;
-
-        Inventory.AfterBlocksLoaded(Api.World);
-
-        if (Api.Side.IsClient() && invDialog is GuiBlockEntityEWoodcutter guiBlockEntityEWoodcutter)
-        {
-            guiBlockEntityEWoodcutter.Update();
-            MarkDirty(true);
-        }
+        Stage = (WoodcutterStage)tree.GetInt("stage");
+        WoodTier = tree.GetInt("woodTier");
+        TreeResistance = tree.GetInt("treeResistance");
+        IsNotEnoughEnergy = tree.GetBool("isNotEnoughEnergy");
+        _currentTreePos = tree.GetBlockPos("currentTreePos");
     }
 
     #endregion
@@ -574,10 +684,11 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
             var pos = queue.Dequeue();
             foundPositions.Push(new(pos.X, pos.Y, pos.Z));   // dimension-correct because pos.Y contains the dimension
             resistance += pos.W + 1;      // leaves -> 1; branchyleaves -> 2; softwood -> 4 etc.
+
             if (woodTier == 0)
                 woodTier = pos.W;
 
-            if (foundPositions.Count > 5000)
+            if (foundPositions.Count > 10000)
                 break;
 
             block = world.BlockAccessor.GetBlockRaw(pos.X, pos.Y, pos.Z, BlockLayersAccess.Solid);
@@ -587,7 +698,15 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
             if (bh == EnumTreeFellingBehavior.NoChop)
                 continue;
 
-            onTreeBlock(pos, world.BlockAccessor, checkedPositions, startPos, bh == EnumTreeFellingBehavior.ChopSpreadVertical, treeFellingGroupCode, queue, leafqueue, adjacentLeafGroupsCounts);
+            onTreeBlock(pos,
+                world.BlockAccessor,
+                checkedPositions,
+                startPos,
+                bh == EnumTreeFellingBehavior.ChopSpreadVertical,
+                treeFellingGroupCode,
+                queue,
+                leafqueue,
+                adjacentLeafGroupsCounts);
         }
 
         // Find which is the most prevalent of the 7 possible adjacentLeafGroups
@@ -612,8 +731,9 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
             var pos = leafqueue.Dequeue();
             foundPositions.Push(new(pos.X, pos.Y, pos.Z));   // dimension-correct because pos.Y contains the dimension
             resistance += pos.W + 1;      // leaves -> 1; branchyleaves -> 2; softwood -> 4 etc.
-            if (foundPositions.Count > 2500)
+            if (foundPositions.Count > 10000)
                 break;
+
 
             onTreeBlock(pos, world.BlockAccessor, checkedPositions, startPos, bh == EnumTreeFellingBehavior.ChopSpreadVertical, treeFellingGroupCode, leafqueue, null!, null!);
         }
@@ -621,7 +741,17 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
         return foundPositions;
     }
 
-    private void onTreeBlock(Vec4i pos, IBlockAccessor blockAccessor, HashSet<BlockPos> checkedPositions, BlockPos startPos, bool chopSpreadVertical, string treeFellingGroupCode, Queue<Vec4i> queue, Queue<Vec4i> leafqueue, int[] adjacentLeaves)
+    private void onTreeBlock(
+        Vec4i pos,
+        IBlockAccessor blockAccessor,
+        HashSet<BlockPos> checkedPositions,
+        BlockPos startPos,
+        bool chopSpreadVertical,
+        string treeFellingGroupCode,
+        Queue<Vec4i> queue,
+        Queue<Vec4i> leafqueue,
+        int[] adjacentLeaves
+    )
     {
         Queue<Vec4i> outqueue;
         for (var i = 0; i < Vec3i.DirectAndIndirectNeighbours.Length; i++)
@@ -629,15 +759,15 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
             var facing = Vec3i.DirectAndIndirectNeighbours[i];
             var neibPos = new BlockPos(pos.X + facing.X, pos.Y + facing.Y, pos.Z + facing.Z);
 
+            if (checkedPositions.Contains(neibPos))
+                continue;
+
             var hordist = GameMath.Sqrt(neibPos.HorDistanceSqTo(startPos.X, startPos.Z));
             var vertdist = (neibPos.Y - startPos.Y);
 
             // "only breaks blocks inside an upside down square base pyramid"
-            var f = chopSpreadVertical ? 0.5f : 2;
-            if (hordist - 1 >= f * vertdist)
-                continue;
-
-            if (checkedPositions.Contains(neibPos))
+            var horFactor = chopSpreadVertical ? 0.5f : 2;
+            if (hordist - 1 >= horFactor * vertdist)
                 continue;
 
             var block = blockAccessor.GetBlock(neibPos, BlockLayersAccess.Solid);

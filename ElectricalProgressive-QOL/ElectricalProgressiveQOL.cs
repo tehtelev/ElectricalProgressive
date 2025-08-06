@@ -8,7 +8,6 @@ using Vintagestory.API.Client;
 using ElectricalProgressive.Content.Block.EHeater;
 using ElectricalProgressive.Content.Block.EFonar;
 using ElectricalProgressive.Content.Block.ESFonar;
-using ElectricalProgressive.Content.Block.EWoodcutter;
 using ElectricalProgressive.Content.Block.EFreezer2;
 
 
@@ -84,9 +83,6 @@ public class ElectricalProgressiveQOL : ModSystem
         api.RegisterBlockEntityClass("BlockEntityEOven", typeof(BlockEntityEOven));
         api.RegisterBlockEntityBehaviorClass("BEBehaviorEOven", typeof(BEBehaviorEOven));
 
-        api.RegisterBlockClass("BlockEWoodcutter", typeof(BlockEWoodcutter));
-        api.RegisterBlockEntityClass("BlockEntityEWoodcutter", typeof(BlockEntityEWoodcutter));
-        api.RegisterBlockEntityBehaviorClass("BEBehaviorEWoodcutter", typeof(BEBehaviorEWoodcutter));
 
 
 

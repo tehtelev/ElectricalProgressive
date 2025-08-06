@@ -1,8 +1,4 @@
-﻿using ElectricalProgressive.Content.Block.ETermoGenerator;
-using ElectricalProgressive.Content.Block.Termoplastini;
-using ElectricalProgressive.Utils;
-using System.Linq;
-using Vintagestory.API.Common;
+﻿using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
 
@@ -26,15 +22,12 @@ public class BlockEWoodcutter : BlockEBase
         blockSel.Block = this;
 
         var blockEntity = world.BlockAccessor.GetBlockEntity(blockSel.Position);
-        if (blockEntity is null)
-            return true;
-
         if (blockEntity is BlockEntityOpenableContainer openableContainer)
             openableContainer.OnPlayerRightClick(byPlayer, blockSel);
 
         return true;
     }
-    
+
     public override void OnNeighbourBlockChange(IWorldAccessor world, BlockPos pos, BlockPos neibpos)
     {
         base.OnNeighbourBlockChange(world, pos, neibpos);

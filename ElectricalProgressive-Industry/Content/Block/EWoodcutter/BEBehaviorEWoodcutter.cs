@@ -1,5 +1,4 @@
-﻿using ElectricalProgressive.Content.Block.EStove;
-using ElectricalProgressive.Interface;
+﻿using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
 using System;
 using System.Linq;
@@ -22,8 +21,10 @@ public class BEBehaviorEWoodcutter : BEBehaviorBase, IElectricConsumer
 
     public BEBehaviorEWoodcutter(BlockEntity blockentity) : base(blockentity)
     {
-        _maxConsumption = MyMiniLib.GetAttributeInt(Block, "maxConsumption", 100);
-        _entityEWoodcutter = (blockentity as BlockEntityEWoodcutter)!;
+
+        _maxConsumption = MyMiniLib.GetAttributeInt(Block, "maxConsumption", 300);
+        _entityEWoodcutter = blockentity as BlockEntityEWoodcutter;
+
     }
 
     private float CalculateRequest()
@@ -43,8 +44,17 @@ public class BEBehaviorEWoodcutter : BEBehaviorBase, IElectricConsumer
                 var woodTier = _entityEWoodcutter.WoodTier;
                 var treeResistance = _entityEWoodcutter.TreeResistance;
 
-                // TODO: Нужен баланс
-                request = Math.Clamp(woodTier * treeResistance * 0.5f, 0, _maxConsumption);
+                const float basePower = 10f;
+
+                if (treeResistance == 0 && woodTier == 0)
+                    return basePower;
+
+                const float resistanceFactor = 0.8f;
+                const float tierFactor = 1.2f;
+                const float nonlinearity = 0.7f;
+
+                var power = basePower + (MathF.Pow(treeResistance, nonlinearity) * resistanceFactor * (1 + woodTier * tierFactor));
+                request = Math.Clamp(power, 0, _maxConsumption);
                 break;
 
             case BlockEntityEWoodcutter.WoodcutterStage.None:
@@ -65,7 +75,13 @@ public class BEBehaviorEWoodcutter : BEBehaviorBase, IElectricConsumer
     {
         var request = CalculateRequest();
 
-        _entityEWoodcutter.IsNotEnoughEnergy = amount < request;
+        var newValue = amount < request;
+        if (newValue != _entityEWoodcutter.IsNotEnoughEnergy)
+        {
+            _entityEWoodcutter.IsNotEnoughEnergy = newValue;
+            _entityEWoodcutter.MarkDirty();
+        }
+
         PowerSetting = (int)amount;
     }
 

@@ -68,7 +68,6 @@
     <ItemGroup>
       <Folder Include="assets\electricalprogressiveindustry\lang\" />
       <Folder Include="assets\electricalprogressiveindustry\recipes\" />
-      <Folder Include="assets\electricalprogressiveindustry\shapes\block\" />
       <Folder Include="Content\Block\ECentrifuge\" />
     </ItemGroup>
     <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
