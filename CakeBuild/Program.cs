@@ -27,7 +27,7 @@ public class BuildContext : FrostingContext {
         "ElectricalProgressive-Basics",
         "ElectricalProgressive-Equipment",
         "ElectricalProgressive-Industry",
-        
+        "ElectricalProgressive-QOL"
         // Add other project names here
     };
 
