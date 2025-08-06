@@ -1,0 +1,141 @@
+﻿{
+  "code": "emotor",
+  "class": "BlockEMotor",
+  "entityClass": "BlockEntityEMotor",
+
+  "variantGroups": [
+    {
+      "code": "tier",
+      "states": [
+        "tier1",
+        "tier2",
+        "tier3"
+      ]
+    },
+    {
+      "code": "type",
+      "states": [
+        "rotor",
+        "stator",
+        "normal",
+        "burned"
+      ]
+    }
+  ],
+
+
+  "entityBehaviors": [
+    {
+      "name": "BEBehaviorEMotor"
+    },
+    {
+      "name": "ElectricalProgressive"
+    }
+  ],
+
+  "attributes": {
+    "handbook": {
+      "groupBy": [ "emotor-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivebasics:block-handbooktitle-emotor-{tier}",
+          "text": "electricalprogressivebasics:block-handbooktext-emotor-{tier}"
+        }
+      ]
+    }
+  },
+
+
+  "attributesByType": { //params - параметры двигателя: I_min , I_max, torque_max, kpd_max, speed_max, resistance_factor, base_resistance 
+    "*-tier1-*": {
+      "params": [ 10.0, 128.0, 0.5, 0.75, 0.5, 0.125, 0.05 ],
+      "voltage": 32,
+      "maxCurrent": 20.0,
+      "isolated": true,
+      "isolatedEnvironment": false
+    },
+    "*-tier2-*": {
+      "params": [ 10.0, 256.0, 1.0, 0.85, 0.5, 0.25, 0.05 ],
+      "voltage": 32,
+      "maxCurrent": 20.0,
+      "isolated": true,
+      "isolatedEnvironment": false
+    },
+    "*-tier3-*": {
+      "params": [ 10.0, 512.0, 2.0, 0.95, 1.0, 0.5, 0.05 ],
+      "voltage": 128,
+      "maxCurrent": 20.0,
+      "isolated": true,
+      "isolatedEnvironment": true
+    }
+  },
+
+
+  "creativeInventory": {
+    "general": [
+      "*-stator",
+      "*-burned"
+    ],
+    "mechanics": [
+      "*-stator"
+    ],
+    "electricity": [
+      "*-stator"
+    ]
+  },
+
+
+
+  "shapeInventoryByType": {
+    "*-burned": {
+      "base": "block/emotor/emotor-{tier}-burned"
+    },
+    "*": {
+      "base": "block/emotor/emotor-{tier}-normal"
+    }
+  },
+
+  "shape": {
+    "base": "block/emotor/emotor-{tier}-{type}"
+  },
+
+
+  "resistance": 1,
+  "drawType": "JSON",
+  "lightAbsorption": 0.0,
+  "faceCullMode": "NeverCull",
+  "renderPass": "OpaqueNoCull",
+  "emitSideAo": {
+    "all": false
+  },
+  "sideAo": {
+    "all": false
+  },
+  "sideOpaque": {
+    "all": false
+  },
+  "sideSolid": {
+    "all": false
+  },
+  "sounds": {
+    "place": "game:block/anvil",
+    "walk": "game:walk/stone"
+  },
+
+  "heldTpIdleAnimation": "holdbothhandslarge",
+  "heldRightReadyAnimation": "heldblockready",
+  "heldTpUseAnimation": "twohandplaceblock",
+  "tpHandTransform": {
+    "translation": {
+      "x": -1.23,
+      "y": -0.91,
+      "z": -0.8
+    },
+    "rotation": {
+      "x": -2,
+      "y": 25,
+      "z": -78
+    },
+    "scale": 0.4
+  }
+}

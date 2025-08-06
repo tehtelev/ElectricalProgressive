@@ -1,0 +1,56 @@
+﻿{
+  "item-static-saber": "Épée électrique",
+  "item-static-spear": "Lance électrique",
+  "item-static-shield": "Bouclier électrique",
+  "item-static-helmet": "Casque électrique",
+  "item-static-armor": "Plastron électrique",
+  "item-static-boots": "Jambières électriques",
+
+  "item-handbooktitle-static-saber": "Utilisation",
+  "item-handbooktext-static-saber": "Un bon choix pour trancher efficacement vos ennemis. La lame peut être chauffée à blanc pour les enflammer.<br>Une fois déchargée, elle ne infligera plus de dégâts. N’oubliez pas de la recharger !",
+
+
+  "item-handbooktitle-static-spear": "Utilisation",
+  "item-handbooktext-static-spear": "Un excellent choix pour percer les ennemis. Elle dispose de deux modes de lancer : standard et lance ionisante. Dans le second mode, la lance provoque une forte ionisation de l'air lorsqu'elle touche une créature vivante, déclenchant un éclair et enflammant la cible. Cela consomme 10 % de la capacité de charge.<br>Jouer avec la foudre est dangereux, soyez prudent.<br>Lorsqu'elle est complètement déchargée, elle cesse d'infliger des dégâts. N'oubliez pas de la recharger !",
+
+  "item-handbooktitle-static-shield": "Utilisation",
+  "item-handbooktext-static-shield": "Une protection excellente avec une lampe intégrée.<br>Cesse d'absorber les dégâts lorsqu'il est déchargé. N'oubliez pas de le recharger !",
+
+  "item-handbooktitle-static-helmet": "Utilisation",
+  "item-handbooktext-static-helmet": "Protection et fonctionnalités supérieures.<br>Cesse d'absorber les dégâts lorsqu'il est déchargé. N'oubliez pas de le recharger !",
+
+  "item-handbooktitle-static-armor": "Utilisation",
+  "item-handbooktext-static-armor": "Protection et fonctionnalités supérieures. Permet de voler en appuyant sur la touche R.<br>Cesse d'absorber les dégâts et désactive le mode vol lorsqu'il est déchargé. N'oubliez pas de le recharger !",
+
+  "item-handbooktitle-static-boots": "Utilisation",
+  "item-handbooktext-static-boots": "Protection et fonctionnalités supérieures.<br>Cesse d'absorber les dégâts lorsqu'il est déchargé. N'oubliez pas de le recharger !",
+
+
+  "game:spear_common": "Lance commune",
+  "game:spear_flash": "Lance ionisante",
+  "game:saber_right": "Chauffer/Refroidir la lame",
+
+
+
+  "item-edrill": "Perceuse électrique",
+  "item-echisel": "Marteau-perforateur électrique",
+  "item-edrilltip": "Mèche de forage",
+  "item-eaxe": "Hache électrique",
+
+  "game:drill1": "Creuse un bloc 1×1",
+  "game:drill2": "Creuse une zone 1×3 blocs",
+
+  "item-handbooktitle-edrill": "Utilisation",
+  "item-handbooktext-edrill": "L’exploitation minière passe à un nouveau niveau. Permet deux modes : 1×1 et 1×3.<br>Quand la batterie est vide, il cesse de fonctionner. N’oubliez pas de recharger !",
+
+  "item-handbooktitle-echisel": "Utilisation",
+  "item-handbooktext-echisel": "Fonctionne comme un burin alimenté par batterie. Un marteau en main secondaire n’est pas nécessaire. Non utilisé dans les recettes.<br>Quand la batterie est vide, il cesse de fonctionner. N’oubliez pas de recharger !",
+
+  "item-handbooktitle-edrilltip": "Utilisation",
+  "item-handbooktext-edrilltip": "Composant de base pour la perceuse électrique.",
+
+  "item-handbooktitle-eaxe": "Utilisation",
+  "item-handbooktext-eaxe": "Idéal pour le débitage. Non utilisé dans les recettes.<br>Quand la batterie est vide, il cesse de fonctionner. N’oubliez pas de recharger !"
+
+
+}

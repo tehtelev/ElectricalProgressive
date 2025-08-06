@@ -1,0 +1,34 @@
+﻿[
+  {
+    "code": "compost",
+    "EnergyOperation": 10000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:vegetable-carrot",
+        "quantity": 8
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "game:compost",
+      "stackSize": 1
+    }
+  },
+  {
+    "code": "compost",
+    "EnergyOperation": 10000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:vegetable-turnip",
+        "quantity": 8
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "game:compost",
+      "stackSize": 1
+    }
+  }
+]

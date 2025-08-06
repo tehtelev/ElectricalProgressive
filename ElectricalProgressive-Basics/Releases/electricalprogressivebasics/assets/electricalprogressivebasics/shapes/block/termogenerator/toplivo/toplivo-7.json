@@ -1,0 +1,53 @@
+﻿{
+	"editor": {
+		"collapsedPaths": "Root/termo-generator/Dveri/Rdver,Root/termo-generator/plastini,Root/termo-generator/Dveri,Root/plastini,Root/termo-generator/Dveri/Ldver,Root/termo-generator/Korpus",
+		"allAngles": false,
+		"entityTextureMode": false
+	},
+	"textureWidth": 16,
+	"textureHeight": 16,
+	"textureSizes": {
+	},
+	"textures": {
+		"copper-hot": "block/ember"
+	},
+	"elements": [
+		{
+			"name": "toplivo",
+			"from": [ 3.5, 2.5, 3.5 ],
+			"to": [ 12.5, 9.5, 12.5 ],
+			"rotationOrigin": [ 8.0, 0.0, 8.0 ],
+			"faces": {
+				"north": {
+					"texture": "#copper-hot",
+					"uv": [ 0.0, 0.0, 16.0, 16.0 ],
+					"glow": 220
+				},
+				"east": {
+					"texture": "#copper-hot",
+					"uv": [ 0.0, 0.0, 16.0, 16.0 ],
+					"glow": 220
+				},
+				"south": {
+					"texture": "#copper-hot",
+					"uv": [ 0.0, 0.0, 16.0, 16.0 ],
+					"glow": 220
+				},
+				"west": {
+					"texture": "#copper-hot",
+					"uv": [ 0.0, 0.0, 16.0, 16.0 ],
+					"glow": 220
+				},
+				"up": {
+					"texture": "#copper-hot",
+					"uv": [ 0.0, 0.0, 16.0, 16.0 ],
+					"glow": 220
+				},
+				"down": {
+					"texture": "#copper-hot",
+					"uv": [ 0.0, 0.0, 16.0, 16.0 ],
+					"glow": 220
+				}
+			}
+		}
+	]}

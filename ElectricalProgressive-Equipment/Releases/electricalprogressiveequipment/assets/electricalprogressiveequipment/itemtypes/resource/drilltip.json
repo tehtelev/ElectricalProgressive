@@ -1,0 +1,92 @@
+﻿{
+	"code": "edrilltip",
+	"attributes": {
+		"handbook": {
+			"groupBy": [ "edrilltip-*" ],
+			"extraSections": [
+				{
+					"title": "electricalprogressiveequipment:item-handbooktitle-edrilltip",
+					"text": "electricalprogressiveequipment:item-handbooktext-edrilltip"
+				}
+			]
+		}
+	},
+	"heldTpIdleAnimation": "holdbothhands",
+	"shape": {
+		"base": "item/electricaldrilltip"
+	},
+	"creativeinventory": {
+		"general": [ "*" ],
+		"items": [ "*" ],
+		"electricity": [ "*" ]
+	},
+	"maxstacksize": 64,
+	"materialDensity": 8960,
+	"fpHandTransform": {
+		"translation": {
+			"x": 0,
+			"y": -0.2,
+			"z": 0.5
+		},
+		"rotation": {
+			"x": 99,
+			"y": 1,
+			"z": -33
+		},
+		"scale": 1.9
+	},
+	"tpHandTransform": {
+		"translation": {
+			"x": 0.1,
+			"y": 0.5,
+			"z": 0.4
+		},
+		"rotation": {
+			"x": 41,
+			"y": 102,
+			"z": -104
+		},
+		"origin": {
+			"x": 0,
+			"y": 0,
+			"z": 0
+		},
+		"scale": 1.2
+	},
+	"guiTransform": {
+		"translation": {
+			"x": 0,
+			"y": 0,
+			"z": 0
+		},
+		"rotation": {
+			"x": -133,
+			"y": -5,
+			"z": -128
+		},
+		"origin": {
+			"x": 0.4,
+			"y": 0.1,
+			"z": 0.4
+		},
+		"scale": 2.88
+	},
+	"groundTransform": {
+		"translation": {
+			"x": 0,
+			"y": -0.13,
+			"z": 0
+		},
+		"rotation": {
+			"x": 90,
+			"y": 0,
+			"z": 0
+		},
+		"origin": {
+			"x": 0.5,
+			"y": 0.5,
+			"z": 0.5299
+		},
+		"scale": 6
+	}
+}

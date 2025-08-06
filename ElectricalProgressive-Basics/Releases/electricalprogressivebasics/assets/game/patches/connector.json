@@ -1,0 +1,27 @@
+﻿[
+  {
+    "file": "game:blocktypes/metal/metalblock",
+    "path": "/entityBehaviors",
+    "op": "add",
+    "value": [
+      {
+        "name": "BEBehaviorECable"
+      },
+      {
+        "name": "ElectricalProgressive"
+      }
+    ]
+  },
+  {
+    "file": "game:blocktypes/metal/metalblock",
+    "path": "/entityClass",
+    "op": "add",
+    "value": "BlockEntityEConnector"
+  },
+  {
+    "file": "game:blocktypes/metal/metalblock",
+    "path": "/class",
+    "op": "add",
+    "value": "BlockConnector"
+  }
+]

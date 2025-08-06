@@ -1,0 +1,60 @@
+﻿{
+  "code": "ewoodcutter",
+  "class": "BlockEWoodcutter",
+  "entityClass": "BlockEntityEWoodcutter",
+  "behaviors": [
+    {
+      "name": "Container"
+    }
+  ],
+  "entityBehaviors": [
+    {
+      "name": "BEBehaviorEWoodcutter"
+    },
+    {
+      "name": "ElectricalProgressive"
+    }
+  ],
+  "creativeInventory": {
+    "general": [
+      "*-normal",
+      "*-burned"
+    ],
+    "electricity": [
+      "*-normal"
+    ]
+  },
+  "attributes": {
+    "maxConsumption": 100,
+    "voltage": 32,
+    "maxCurrent": 20.0,
+    "isolated": true,
+    "isolatedEnvironment": false
+  },
+  "variantgroups": [
+    {
+      "code": "status",
+      "states": [
+        "normal",
+        "burned"
+      ]
+    }
+  ],
+  "shape": {
+    "base": "block/ewoodcutter/ewoodcutter-{status}"
+  },
+  "blockmaterial": "Stone",
+  "sidesolid": {
+    "all": false
+  },
+  "sideopaque": {
+    "all": false
+  },
+  "resistance": 3.5,
+  "lightAbsorption": 0,
+  "sounds": {
+    "walk": "game:walk/stone"
+  },
+  "heldTpIdleAnimation": "holdbothhandslarge",
+  "heldTpUseAnimation": "twohandplaceblock"
+}

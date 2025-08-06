@@ -1,0 +1,117 @@
+﻿{
+  "block-charger-*": "Station de charge",
+  "block-charger-burned-south": "Station de charge (brûlée)",
+
+  "block-estove-*": "Plaque électrique",
+  "block-estove-burned-south": "Plaque électrique (brûlée)",
+
+
+  "block-eoven-*": "Four électrique",
+  "block-eoven-burned-north": "Four électrique (brûlé)",
+
+  "block-ehorn-*": "Forge électrique",
+  "block-ehorn-burned-south": "Forge électrique (brûlée)",
+
+  "block-heater-*": "Radiateur électrique",
+  "block-heater-burned": "Radiateur électrique (brûlé)",
+
+
+  "block-nasteniy_fonar-*": "Lampadaire mural extérieur",
+  "block-nasteniy_fonar-burned": "Lampadaire mural extérieur (brûlé)",
+
+  "block-stolb_fonar-*": "Lampadaire au sol extérieur",
+  "block-stolb_fonar-2-i-burned": "Lampadaire au sol extérieur (brûlé)",
+  "block-stolb_fonar-3-i-burned": "Lampadaire au sol extérieur (brûlé)",
+  "block-stolb_fonar-3-r-burned": "Lampadaire au sol extérieur (brûlé)",
+  "block-stolb_fonar-3-t-burned": "Lampadaire au sol extérieur (brûlé)",
+  "block-stolb_fonar-3-x-burned": "Lampadaire au sol extérieur (brûlé)",
+  "block-stolb_fonar-4-i-burned": "Lampadaire au sol extérieur (brûlé)",
+  "block-stolb_fonar-4-r-burned": "Lampadaire au sol extérieur (brûlé)",
+  "block-stolb_fonar-4-t-burned": "Lampadaire au sol extérieur (brûlé)",
+  "block-stolb_fonar-4-x-burned": "Lampadaire au sol extérieur (brûlé)",
+
+
+  "block-elamp-3000-*": "Lampe électrique : Orange-chaud (3000K)",
+  "block-elamp-4000-*": "Lampe électrique : Jaune-chaud (4000K)",
+  "block-elamp-5000-*": "Lampe électrique : Blanc chaud (5000K)",
+  "block-elamp-6000-*": "Lampe électrique : Blanc neutre (6000K)",
+  "block-elamp-7000-*": "Lampe électrique : Blanc bleuté (7000K)",
+  "block-elamp-8000-*": "Lampe électrique : Blanc froid (8000K)",
+  "block-elamp-9000-*": "Lampe électrique : Bleu-froid (9000K)",
+
+  "block-elamp-3000-burned": "Lampe électrique (brûlée)",
+  "block-elamp-4000-burned": "Lampe électrique (brûlée)",
+  "block-elamp-5000-burned": "Lampe électrique (brûlée)",
+  "block-elamp-6000-burned": "Lampe électrique (brûlée)",
+  "block-elamp-7000-burned": "Lampe électrique (brûlée)",
+  "block-elamp-8000-burned": "Lampe électrique (brûlée)",
+  "block-elamp-9000-burned": "Lampe électrique (brûlée)",
+
+  "block-elamp_small-3000-*": "Petite lampe électrique : Orange-chaud (3000K)",
+  "block-elamp_small-4000-*": "Petite lampe électrique : Jaune-chaud (4000K)",
+  "block-elamp_small-5000-*": "Petite lampe électrique : Blanc chaud (5000K)",
+  "block-elamp_small-6000-*": "Petite lampe électrique : Blanc neutre (6000K)",
+  "block-elamp_small-7000-*": "Petite lampe électrique : Blanc bleuté (7000K)",
+  "block-elamp_small-8000-*": "Petite lampe électrique : Blanc froid (8000K)",
+  "block-elamp_small-9000-*": "Petite lampe électrique : Bleu-froid (9000K)",
+
+  "block-elamp_small-3000-burned": "Petite lampe électrique (brûlée)",
+  "block-elamp_small-4000-burned": "Petite lampe électrique (brûlée)",
+  "block-elamp_small-5000-burned": "Petite lampe électrique (brûlée)",
+  "block-elamp_small-6000-burned": "Petite lampe électrique (brûlée)",
+  "block-elamp_small-7000-burned": "Petite lampe électrique (brûlée)",
+  "block-elamp_small-8000-burned": "Petite lampe électrique (brûlée)",
+  "block-elamp_small-9000-burned": "Petite lampe électrique (brûlée)",
+
+
+  "block-handbooktitle-eoven": "Utilisation",
+  "block-handbooktext-eoven": "Le four électrique remplace entièrement le four traditionnel. Il s’éteint automatiquement lorsque le processus de cuisson est terminé. Fini les aliments brûlés !<br>Il prend en charge le chargement et le déchargement automatiques via des goulottes.",
+
+
+  "block-handbooktitle-heater": "Utilisation",
+  "block-handbooktext-heater": "Une petite source de chaleur.",
+
+  "block-handbooktitle-elamp": "Utilisation",
+  "block-handbooktext-elamp": "Une bonne source de lumière consommant de l'énergie électrique.",
+
+  "block-handbooktitle-elamp_small": "Utilisation",
+  "block-handbooktext-elamp_small": "Source de lumière compacte consommant de l'énergie électrique.",
+
+  "block-handbooktitle-nasteniy_fonar": "Utilisation",
+  "block-handbooktext-nasteniy_fonar": "Variante de lampe électrique montée sur mur.",
+
+  "block-handbooktitle-stolb_fonar": "Utilisation",
+  "block-handbooktext-stolb_fonar": "Variante de lampe électrique pour l'éclairage public.",
+
+
+  "block-handbooktitle-ehorn": "Utilisation",
+  "block-handbooktext-ehorn": "La forge électrique remplace entièrement la forge traditionnelle.<br><br>Température de chauffe maximale : 1100 °C.",
+
+  "block-handbooktitle-charger": "Utilisation",
+  "block-handbooktext-charger": "La station de charge permet de recharger les batteries et les appareils avec batterie intégrée.",
+
+  "block-handbooktitle-estove": "Utilisation",
+  "block-handbooktext-estove": "La cuisinière électrique permet de remplacer entièrement un feu de camp classique.<br>Elle prend en charge le chargement et le déchargement automatiques via des goulottes.<br><br>Température maximale de chauffage de la plaque : 1325 °C.",
+
+
+
+
+
+  "game:BlockEStove": "Plaque électrique",
+  "game:freezer-title-gui": "Congélateur",
+  "game:freezer-over-sneak-help": "Ouvrir/fermer la porte.",
+  "game:freezer-over-help": "Ouvrez la porte et placez la nourriture pour la conserver.",
+
+  "game:Put-into-1-items": "Il faut au moins 1 objet pour la cuisson.",
+
+  "game:max-light": "Lumière maximale",
+  "game:height": "Hauteur",
+
+
+  "block-efreezer2-*": "Réfrigérateur électrique",
+  "block-efreezer2-burned-north": "Réfrigérateur électrique (brûlé)",
+  "block-handbooktitle-efreezer2": "En service",
+  "block-handbooktext-efreezer2": "Le réfrigérateur électrique permet de conserver les aliments plus longtemps. <br><br>Emplacements de stockage : 6.<br>Vitesse de détérioration des aliments : 0,05×"
+
+
+}

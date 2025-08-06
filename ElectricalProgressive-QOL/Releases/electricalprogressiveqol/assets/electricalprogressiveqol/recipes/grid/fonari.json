@@ -1,0 +1,328 @@
+﻿[
+  {
+    "ingredientPattern": "GS,MC",
+    "width": 2,
+    "height": 2,
+    "ingredients": {
+      "G": {
+        "type": "block",
+        "code": "game:glass-plain"
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "M": {
+        "type": "item",
+        "code": "game:ingot-iron"
+      },
+      "C": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-128v-copper-single-part",
+        "quantity": 8
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:nasteniy_fonar-disabled",
+      "quantity": 4
+    }
+  },
+
+
+  {
+    "ingredientPattern": "_G_,SM_",
+    "width": 3,
+    "height": 2,
+    "ingredients": {
+      "G": {
+        "type": "block",
+        "code": "electricalprogressiveqol:nasteniy_fonar-disabled",
+        "quantity": 2
+      },
+      "S": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "M": {
+        "type": "item",
+        "code": "game:metalplate-iron"
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveqol:stolb_fonar-2-i-disabled",
+      "quantity": 2
+    },
+  },
+
+    {
+      "ingredientPattern": "_G_,SMC",
+      "width": 3,
+      "height": 2,
+      "ingredients": {
+        "G": {
+          "type": "block",
+          "code": "electricalprogressiveqol:nasteniy_fonar-disabled",
+          "quantity": 2
+        },
+        "S": {
+          "type": "item",
+          "code": "game:hammer-*",
+          "isTool": true,
+          "toolDurabilityCost": 8
+        },
+        "M": {
+          "type": "item",
+          "code": "game:metalplate-iron"
+        },
+        "C": {
+          "type": "item",
+          "code": "game:ingot-iron",
+          "quantity": 1
+        }
+      },
+      "output": {
+        "type": "block",
+        "code": "electricalprogressiveqol:stolb_fonar-3-i-disabled",
+        "quantity": 2
+      }
+    },
+
+    {
+      "ingredientPattern": "_G_,SMC",
+      "width": 3,
+      "height": 2,
+      "ingredients": {
+        "G": {
+          "type": "block",
+          "code": "electricalprogressiveqol:nasteniy_fonar-disabled",
+          "quantity": 2
+        },
+        "S": {
+          "type": "item",
+          "code": "game:hammer-*",
+          "isTool": true,
+          "toolDurabilityCost": 8
+        },
+        "M": {
+          "type": "item",
+          "code": "game:metalplate-iron"
+        },
+        "C": {
+          "type": "item",
+          "code": "game:ingot-iron",
+          "quantity": 2
+        }
+      },
+      "output": {
+        "type": "block",
+        "code": "electricalprogressiveqol:stolb_fonar-4-i-disabled",
+        "quantity": 2
+      }
+    },
+
+    {
+      "ingredientPattern": "__G,SMC",
+      "width": 3,
+      "height": 2,
+      "ingredients": {
+        "G": {
+          "type": "block",
+          "code": "electricalprogressiveqol:nasteniy_fonar-disabled",
+          "quantity": 2
+        },
+        "S": {
+          "type": "item",
+          "code": "game:hammer-*",
+          "isTool": true,
+          "toolDurabilityCost": 8
+        },
+        "M": {
+          "type": "item",
+          "code": "game:metalplate-iron"
+        },
+        "C": {
+          "type": "item",
+          "code": "game:ingot-iron",
+          "quantity": 1
+        }
+      },
+      "output": {
+        "type": "block",
+        "code": "electricalprogressiveqol:stolb_fonar-3-r-disabled",
+        "quantity": 2
+      }
+    },
+
+    {
+      "ingredientPattern": "__G,SMC",
+      "width": 3,
+      "height": 2,
+      "ingredients": {
+        "G": {
+          "type": "block",
+          "code": "electricalprogressiveqol:nasteniy_fonar-disabled",
+          "quantity": 2
+        },
+        "S": {
+          "type": "item",
+          "code": "game:hammer-*",
+          "isTool": true,
+          "toolDurabilityCost": 8
+        },
+        "M": {
+          "type": "item",
+          "code": "game:metalplate-iron"
+        },
+        "C": {
+          "type": "item",
+          "code": "game:ingot-iron",
+          "quantity": 2
+        }
+      },
+      "output": {
+        "type": "block",
+        "code": "electricalprogressiveqol:stolb_fonar-4-r-disabled",
+        "quantity": 2
+      }
+    },
+
+
+    {
+      "ingredientPattern": "G_G,SMC",
+      "width": 3,
+      "height": 2,
+      "ingredients": {
+        "G": {
+          "type": "block",
+          "code": "electricalprogressiveqol:nasteniy_fonar-disabled",
+          "quantity": 2
+        },
+        "S": {
+          "type": "item",
+          "code": "game:hammer-*",
+          "isTool": true,
+          "toolDurabilityCost": 8
+        },
+        "M": {
+          "type": "item",
+          "code": "game:metalplate-iron"
+        },
+        "C": {
+          "type": "item",
+          "code": "game:ingot-iron",
+          "quantity": 1
+        }
+      },
+      "output": {
+        "type": "block",
+        "code": "electricalprogressiveqol:stolb_fonar-3-t-disabled",
+        "quantity": 2
+      }
+    },
+
+    {
+      "ingredientPattern": "G_G,SMC",
+      "width": 3,
+      "height": 2,
+      "ingredients": {
+        "G": {
+          "type": "block",
+          "code": "electricalprogressiveqol:nasteniy_fonar-disabled",
+          "quantity": 2
+        },
+        "S": {
+          "type": "item",
+          "code": "game:hammer-*",
+          "isTool": true,
+          "toolDurabilityCost": 8
+        },
+        "M": {
+          "type": "item",
+          "code": "game:metalplate-iron"
+        },
+        "C": {
+          "type": "item",
+          "code": "game:ingot-iron",
+          "quantity": 2
+        }
+      },
+      "output": {
+        "type": "block",
+        "code": "electricalprogressiveqol:stolb_fonar-4-t-disabled",
+        "quantity": 2
+      }
+    },
+
+
+    {
+      "ingredientPattern": "G_G,SMC,G_G",
+      "width": 3,
+      "height": 3,
+      "ingredients": {
+        "G": {
+          "type": "block",
+          "code": "electricalprogressiveqol:nasteniy_fonar-disabled",
+          "quantity": 2
+        },
+        "S": {
+          "type": "item",
+          "code": "game:hammer-*",
+          "isTool": true,
+          "toolDurabilityCost": 8
+        },
+        "M": {
+          "type": "item",
+          "code": "game:metalplate-iron"
+        },
+        "C": {
+          "type": "item",
+          "code": "game:ingot-iron",
+          "quantity": 1
+        }
+      },
+      "output": {
+        "type": "block",
+        "code": "electricalprogressiveqol:stolb_fonar-3-x-disabled",
+        "quantity": 2
+      }
+    },
+
+    {
+      "ingredientPattern": "G_G,SMC,G_G",
+      "width": 3,
+      "height": 3,
+      "ingredients": {
+        "G": {
+          "type": "block",
+          "code": "electricalprogressiveqol:nasteniy_fonar-disabled",
+          "quantity": 2
+        },
+        "S": {
+          "type": "item",
+          "code": "game:hammer-*",
+          "isTool": true,
+          "toolDurabilityCost": 8
+        },
+        "M": {
+          "type": "item",
+          "code": "game:metalplate-iron"
+        },
+        "C": {
+          "type": "item",
+          "code": "game:ingot-iron",
+          "quantity": 2
+        }
+      },
+      "output": {
+        "type": "block",
+        "code": "electricalprogressiveqol:stolb_fonar-4-x-disabled",
+        "quantity": 2
+      }
+    }
+]

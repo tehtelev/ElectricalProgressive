@@ -1,0 +1,155 @@
+﻿{
+	"code": "static-spear",
+	"class": "ESpear",
+	"damagedby": [ "attacking" ],
+	"tool": "spear",
+	"shape": { "base": "item/static-spear" },
+	"heldTpHitAnimation": "spearhit",
+	"heldTpIdleAnimation": "spearidle",
+	"heldRightReadyAnimation": "spearidle",
+	"attackRange": 4.0,
+  "tooltier": 6,
+	"attackpower": 7,
+	"durability": 1000,
+	"attributes": {
+		"heldItemPitchFollow": 1,
+		"chargable": true,
+		"consume": 20,
+		"lightstrike": 2000,
+		"damage": 12,
+		"handbook": {
+			"groupBy": [ "static-spear-*" ],
+			"extraSections": [
+				{
+					"title": "electricalprogressiveequipment:item-handbooktitle-static-spear",
+					"text": "electricalprogressiveequipment:item-handbooktext-static-spear"
+				}
+			]
+		},
+
+
+
+		"toolrackTransform": {
+			"rotation": {
+				"x": 90,
+				"y": 0,
+				"z": -1
+			},
+			"translation": {
+				"x": -0.5,
+				"y": 0.013,
+				"z": 0.5
+			},
+			"scale": 1
+		},
+		"groundStorageTransform": {
+			"translation": {
+				"x": -0.38,
+				"y": 0.6,
+				"z": 0.15
+			},
+			"rotation": {
+				"x": 10,
+				"y": 0,
+				"z": 90
+			},
+			"scale": 0.8
+		},
+		"scaleX": 0.5,
+		"scaleY": 0.5,
+		"scaleZ": 0.5,
+		"translateX": 0.7,
+		"translateY": 0.025,
+		"translateZ": 0,
+		"rotateX": 0,
+		"rotateY": 0,
+		"rotateZ": 1.56
+	},
+	"creativeinventory": {
+		"general": [ "*" ],
+		"electricity": [ "*" ]
+	},
+	"behaviors": [
+		{
+			"name": "GroundStorable",
+			"properties": {
+				"layout": "WallHalves",
+				"wallOffY": 3,
+				"ctrlKey": true
+			}
+		},
+		{ "name": "AnimationAuthoritative" }
+	],
+	"guiTransform": {
+		"translation": {
+			"x": 0.0,
+			"y": 0.0,
+			"z": 0.0
+		},
+		"rotation": {
+			"x": 0,
+			"y": 0,
+			"z": -45
+		},
+		"origin": {
+			"x": 2.3,
+			"y": 0.0,
+			"z": 0.0
+		},
+		"scale": 1.2
+	},
+	"fpHandTransform": {
+		"translation": {
+			"x": 0.3,
+			"y": 0.5,
+			"z": 0.16
+		},
+		"rotation": {
+			"x": -82,
+			"y": 90,
+			"z": 85
+		},
+		"origin": {
+			"x": 0.5,
+			"y": 0,
+			"z": 0.5
+		},
+		"scale": 2.45
+	},
+	"groundTransform": {
+		"translation": {
+			"x": 0.0,
+			"y": 0.03,
+			"z": 0
+		},
+		"rotation": {
+			"x": 90,
+			"y": 0,
+			"z": 0
+		},
+		"origin": {
+			"x": 1.0,
+			"y": 0,
+			"z": 0.5
+		},
+		"scale": 4.2
+	},
+	"tpHandTransform": {
+		"translation": {
+			"x": -0.33,
+			"y": 0.06,
+			"z": -0.65
+		},
+		"rotation": {
+			"x": -65.0,
+			"y": 0.0,
+			"z": -9.0
+		},
+		"origin": {
+			"x": 0.5,
+			"y": 0,
+			"z": 0.5
+		},
+		"scale": 0.8
+	}
+}

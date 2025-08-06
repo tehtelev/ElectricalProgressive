@@ -1,0 +1,280 @@
+﻿{
+  "code": "stolb_fonar",
+  "class": "BlockESFonar",
+  "entityClass": "BlockEntityESFonar",
+  "entityBehaviors": [
+    {
+      "name": "BEBehaviorESFonar"
+    },
+    {
+      "name": "ElectricalProgressive"
+    }
+  ],
+
+  "attributes": {
+    "voltage": 128,
+    "maxCurrent": 20.0,
+    "isolated": true,
+    "isolatedEnvironment": true,
+    "handbook": {
+      "groupBy": [ "stolb_fonar-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressiveqol:block-handbooktitle-stolb_fonar",
+          "text": "electricalprogressiveqol:block-handbooktext-stolb_fonar"
+        }
+      ]
+    }
+  },
+
+  "attributesByType": {
+    "*-i-*": {
+      "maxConsumption": 16,
+      "HSV":  20 
+    },
+    "*-r-*": {
+      "maxConsumption": 16,
+      "HSV":  20 
+    },
+    "*-t-*": {
+      "maxConsumption": 32,
+      "HSV":  26 
+    },
+    "*-x-*": {
+      "maxConsumption": 64,
+      "HSV":  31 
+    }
+  },
+
+
+
+  "lightHsvByType": {
+    "*-disabled": [ 0, 0, 0 ],
+    "*-burned": [ 0, 0, 0 ],
+    "*-i-enabled": [ 10, 5, 20 ],
+    "*-r-enabled": [ 10, 5, 20 ],
+    "*-t-enabled": [ 10, 5, 26 ],
+    "*-x-enabled": [ 10, 5, 31 ]
+  },
+
+
+
+  "creativeInventory": {
+    "general": [
+      "*-disabled",
+      "*-burned"
+    ],
+    "electricity": [
+      "*-disabled"
+    ]
+  },
+
+  "variantGroups": [
+    {
+      "code": "height",
+      "states": [ "2", "3", "4" ]
+    },
+
+    {
+      "code": "format",
+      "states": [ "i", "r", "t", "x" ]
+    },
+    {
+      "code": "state",
+      "states": [ "disabled", "enabled", "burned" ]
+    }
+  ],
+
+
+  "skipVariants": [
+    "stolb_fonar-2-r-*",
+    "stolb_fonar-2-t-*",
+    "stolb_fonar-2-x-*"
+  ],
+
+
+
+
+  "shape": {
+    "base": "block/fonari/stolb_fonar-{height}-{format}-{state}"
+  },
+
+
+  "resistance": 1,
+  "drawType": "JSON",
+  "lightAbsorption": 0.0,
+  "faceCullMode": "NeverCull",
+  "renderPass": "OpaqueNoCull",
+  "emitSideAo": {
+    "all": false
+  },
+  "sideAo": {
+    "all": false
+  },
+  "sideOpaque": {
+    "all": false
+  },
+  "sideSolid": {
+    "all": false
+  },
+  "sounds": {
+    "place": "game:block/anvil",
+    "walk": "game:walk/stone"
+  },
+
+  "behaviors": [
+    { "name": "HorizontalOrientable" }
+  ],
+
+  "behaviorsByType": {
+    "*-2-*": [
+      {
+        "name": "Multiblock",
+        "properties": {
+          "sizex": 1,
+          "sizey": 2,
+          "sizez": 1,
+          "cposition": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        }
+      }
+    ],
+    "*-3-*": [
+      {
+        "name": "Multiblock",
+        "properties": {
+          "sizex": 1,
+          "sizey": 3,
+          "sizez": 1,
+          "cposition": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        }
+      }
+    ],
+    "*-4-*": [
+      {
+        "name": "Multiblock",
+        "properties": {
+          "sizex": 1,
+          "sizey": 4,
+          "sizez": 1,
+          "cposition": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        }
+      }
+    ]
+  },
+
+
+
+
+  "collisionBox": {
+    "x1": 0.35,
+    "y1": 0.0,
+    "z1": 0.35,
+    "x2": 0.65,
+    "y2": 1.0,
+    "z2": 0.65
+  },
+
+
+
+  "selectionBox": {
+    "x1": 0.35,
+    "y1": 0.0,
+    "z1": 0.35,
+    "x2": 0.65,
+    "y2": 1.0,
+    "z2": 0.65
+  },
+
+
+  "guiTransformByType": {
+    "*-2-*": {
+      "translation": {
+        "x": 0,
+        "y": 28,
+        "z": 0
+      },
+      "rotation": {
+        "x": -21,
+        "y": -53,
+        "z": 0
+      },
+      "scale": 0.96
+    },
+    "*-3-*": {
+      "translation": {
+        "x": 0,
+        "y": 50,
+        "z": 0
+      },
+      "rotation": {
+        "x": -21,
+        "y": -53,
+        "z": 0
+      },
+      "scale": 0.96
+    },
+    "*-4-*": {
+      "translation": {
+        "x": 0,
+        "y": 68,
+        "z": 0
+      },
+      "rotation": {
+        "x": -21,
+        "y": -53,
+        "z": 0
+      },
+      "scale": 0.96
+    }
+  },
+
+  "groundTransform": {
+    "translation": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "rotation": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "origin": {
+      "x": 0.5,
+      "y": 0.0,
+      "z": 0.5
+    },
+    "scale": 2.0
+  },
+
+  "heldTpIdleAnimation": "holdbothhandslarge",
+  "heldRightReadyAnimation": "heldblockready",
+  "heldTpUseAnimation": "twohandplaceblock",
+
+  "tpHandTransform": {
+    "translation": {
+      "x": -1.2,
+      "y": -0.99,
+      "z": -1.2
+    },
+    "rotation": {
+      "x": 5,
+      "y": 99,
+      "z": -78
+    },
+    "scale": 0.51
+  }
+
+}

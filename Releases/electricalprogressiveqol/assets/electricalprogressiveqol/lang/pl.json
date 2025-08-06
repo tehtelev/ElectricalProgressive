@@ -1,0 +1,118 @@
+﻿{
+  "block-charger-*": "Stacja ładowania",
+  "block-charger-burned-south": "Stacja ładowania (spalona)",
+
+  "block-estove-*": "Płyta elektryczna",
+  "block-estove-burned-south": "Płyta elektryczna (spalona)",
+
+
+
+  "block-eoven-*": "Piec elektryczny",
+  "block-eoven-burned-north": "Piec elektryczny (spalony)",
+
+  "block-nasteniy_fonar-*": "Kinkiet uliczny",
+  "block-nasteniy_fonar-burned": "Kinkiet uliczny (spalony)",
+
+  "block-stolb_fonar-*": "Słupek oświetleniowy",
+  "block-stolb_fonar-2-i-burned": "Słupek oświetleniowy (spalony)",
+  "block-stolb_fonar-3-i-burned": "Słupek oświetleniowy (spalony)",
+  "block-stolb_fonar-3-r-burned": "Słupek oświetleniowy (spalony)",
+  "block-stolb_fonar-3-t-burned": "Słupek oświetleniowy (spalony)",
+  "block-stolb_fonar-3-x-burned": "Słupek oświetleniowy (spalony)",
+  "block-stolb_fonar-4-i-burned": "Słupek oświetleniowy (spalony)",
+  "block-stolb_fonar-4-r-burned": "Słupek oświetleniowy (spalony)",
+  "block-stolb_fonar-4-t-burned": "Słupek oświetleniowy (spalony)",
+  "block-stolb_fonar-4-x-burned": "Słupek oświetleniowy (spalony)",
+
+  "block-ehorn-*": "Piec kowalski elektryczny",
+  "block-ehorn-burned-south": "Piec kowalski elektryczny (spalony)",
+
+  "block-heater-*": "Grzejnik elektryczny",
+  "block-heater-burned": "Grzejnik elektryczny (spalony)",
+
+  "block-elamp-3000-*": "Lampa elektryczna: ciepło‑pomarańczowa (3000K)",
+  "block-elamp-4000-*": "Lampa elektryczna: ciepło‑żółta (4000K)",
+  "block-elamp-5000-*": "Lampa elektryczna: ciepły biały (5000K)",
+  "block-elamp-6000-*": "Lampa elektryczna: neutralny biały (6000K)",
+  "block-elamp-7000-*": "Lampa elektryczna: chłodno‑błękitna (7000K)",
+  "block-elamp-8000-*": "Lampa elektryczna: zimny biały (8000K)",
+  "block-elamp-9000-*": "Lampa elektryczna: niebiesko‑zimna (9000K)",
+
+  "block-elamp-3000-burned": "Lampa elektryczna (spalona)",
+  "block-elamp-4000-burned": "Lampa elektryczna (spalona)",
+  "block-elamp-5000-burned": "Lampa elektryczna (spalona)",
+  "block-elamp-6000-burned": "Lampa elektryczna (spalona)",
+  "block-elamp-7000-burned": "Lampa elektryczna (spalona)",
+  "block-elamp-8000-burned": "Lampa elektryczna (spalona)",
+  "block-elamp-9000-burned": "Lampa elektryczna (spalona)",
+
+  "block-elamp_small-3000-*": "Mała lampa: ciepło‑pomarańczowa (3000K)",
+  "block-elamp_small-4000-*": "Mała lampa: ciepło‑żółta (4000K)",
+  "block-elamp_small-5000-*": "Mała lampa: ciepły biały (5000K)",
+  "block-elamp_small-6000-*": "Mała lampa: neutralny biały (6000K)",
+  "block-elamp_small-7000-*": "Mała lampa: chłodno‑błękitna (7000K)",
+  "block-elamp_small-8000-*": "Mała lampa: zimny biały (8000K)",
+  "block-elamp_small-9000-*": "Mała lampa: niebiesko‑zimna (9000K)",
+
+  "block-elamp_small-3000-burned": "Mała lampa (spalona)",
+  "block-elamp_small-4000-burned": "Mała lampa (spalona)",
+  "block-elamp_small-5000-burned": "Mała lampa (spalona)",
+  "block-elamp_small-6000-burned": "Mała lampa (spalona)",
+  "block-elamp_small-7000-burned": "Mała lampa (spalona)",
+  "block-elamp_small-8000-burned": "Mała lampa (spalona)",
+  "block-elamp_small-9000-burned": "Mała lampa (spalona)",
+
+
+
+  "block-handbooktitle-eoven": "Użycie",
+  "block-handbooktext-eoven": "Piekarnik elektryczny pozwala całkowicie zastąpić tradycyjny piec. Wyłącza się automatycznie po zakończeniu procesu pieczenia. Koniec z przypalaniem!<br>Obsługuje automatyczny załadunek i rozładunek za pomocą zsypów.",
+
+
+  "block-handbooktitle-heater": "Użycie",
+  "block-handbooktext-heater": "Niewielkie źródło ciepła.",
+
+  "block-handbooktitle-elamp": "Użycie",
+  "block-handbooktext-elamp": "Dobre źródło światła, zużywa energię elektryczną.",
+
+  "block-handbooktitle-elamp_small": "Użycie",
+  "block-handbooktext-elamp_small": "Źródło światła zużywające energię elektryczną.",
+
+  "block-handbooktitle-nasteniy_fonar": "Użycie",
+  "block-handbooktext-nasteniy_fonar": "Wersja lampy montowanej na ścianie.",
+
+  "block-handbooktitle-stolb_fonar": "Użycie",
+  "block-handbooktext-stolb_fonar": "Wersja słupka oświetleniowego do użytku zewnętrznego.",
+
+  "block-handbooktitle-ehorn": "Użycie",
+  "block-handbooktext-ehorn": "Piec kowalski elektryczny zastępuje tradycyjny piec kowalski.<br><br>Maksymalna temperatura: 1100 °C.",
+
+  "block-handbooktitle-charger": "Użycie",
+  "block-handbooktext-charger": "Stacja ładowania do akumulatorów i urządzeń z wbudowanym akumulatorem.",
+
+  "block-handbooktitle-estove": "Użycie",
+  "block-handbooktext-estove": "Płyta elektryczna pozwala całkowicie zastąpić zwykłe ognisko.<br>Obsługuje automatyczny załadunek i rozładunek za pomocą zsypów.<br><br>Maksymalna temperatura nagrzewania płyty: 1325 °C.",
+
+
+
+
+
+  "game:BlockEStove": "Płyta elektryczna",
+  "game:freezer-title-gui": "Lodówka",
+  "game:freezer-over-sneak-help": "Otwórz/zamknij drzwi.",
+  "game:freezer-over-help": "Otwórz drzwi i włóż jedzenie, aby je przechować.",
+
+  "game:Put-into-1-items": "Do pieczenia potrzebny jest co najmniej 1 przedmiot.",
+
+
+  "game:max-light": "Maksymalne światło",
+  "game:height": "Wysokość",
+
+  "block-efreezer2-*": "Lodówka Elektryczna",
+  "block-efreezer2-burned-north": "Lodówka Elektryczna (spalona)",
+  "block-handbooktitle-efreezer2": "W użyciu",
+  "block-handbooktext-efreezer2": "Elektryczna lodówka pozwala na dłuższe przechowywanie żywności. <br><br>Miejsca do przechowywania: 6.<br>Szybkość psucia się żywności: 0,05×"
+
+
+
+
+}

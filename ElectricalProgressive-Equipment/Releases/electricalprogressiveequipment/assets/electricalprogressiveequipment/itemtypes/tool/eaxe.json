@@ -1,0 +1,140 @@
+﻿{
+  "code": "eaxe",
+  "class": "EAxe",
+  "damagedby": [ "blockbreaking", "attacking" ],
+  "attributes": {
+    "chargable": true,
+    "consume": 20,
+    "handbook": {
+      "groupBy": [ "eaxe-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressiveequipment:item-handbooktitle-eaxe",
+          "text": "electricalprogressiveequipment:item-handbooktext-eaxe"
+        }
+      ]
+    },
+    "toolrackTransform": {
+      "translation": {
+        "x": -0.35,
+        "y": 0.65,
+        "z": 0.2
+      },
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "scale": 1.35
+    },
+    "groundStorageTransform": {
+      "translation": {
+        "x": 0.08,
+        "y": 0.19,
+        "z": -0.1
+      },
+      "rotation": {
+        "x": 30,
+        "y": 90,
+        "z": 270
+      },
+      "scale": 0.8
+    }
+  },
+  "shape": { "base": "item/eaxe" },
+
+  "heldRightReadyAnimation": "axeready",
+  "heldTpHitAnimation": "axechop",
+  "creativeinventory": {
+    "general": [ "*" ],
+    "electricity": [ "*" ]
+  },
+  "tool": "axe",
+  "durability": 1000,
+  "enabled": true,
+  "tooltier": 4,
+  "attackRange": 4,
+  "miningspeed": {
+    "wood": 25.4,
+    "plant": 5,
+    "leaves": 3.2
+  },
+  "behaviors": [
+    {
+      "name": "GroundStorable",
+      "properties": {
+        "layout": "WallHalves",
+        "wallOffY": 1,
+        "ctrlKey": true
+      }
+    }
+  ],
+  "attackpower": 3,
+  "fpHandTransform": {
+    "translation": {
+      "x": -0.3,
+      "y": -0.5,
+      "z": 0.3
+    },
+    "rotation": {
+      "x": -29,
+      "y": 100,
+      "z": 88
+    },
+    "origin": {
+      "x": 0.2,
+      "y": 0.5,
+      "z": 0.5
+    },
+    "scale": 2.5
+  },
+  "guiTransform": {
+    "translation": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "rotation": {
+      "x": -63,
+      "y": -123,
+      "z": -180
+    },
+    "origin": {
+      "x": 0.61,
+      "y": 0,
+      "z": 0.47
+    },
+    "scale": 1.58
+  },
+  "tpHandTransform": {
+    "translation": {
+      "x": -0.43,
+      "y": -0.52,
+      "z": -0.07
+    },
+    "rotation": {
+      "x": 90,
+      "y": 0,
+      "z": 0
+    },
+    "scale": 0.95
+  },
+  "groundTransform": {
+    "translation": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "rotation": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "origin": {
+      "x": 0.5,
+      "y": 0,
+      "z": 0.5
+    },
+    "scale": 3.6
+  }
+}

@@ -1,0 +1,56 @@
+﻿{
+  "code": "termoplastini",
+  "class": "BlockTermoplastini",
+
+  "creativeinventory": {
+    "general": [ "*" ],
+    "electricity": [ "*" ]
+  },
+
+  "attributes": {
+    "handbook": {
+      "groupBy": [ "termoplastini-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivebasics:block-handbooktitle-termoplastini",
+          "text": "electricalprogressivebasics:block-handbooktext-termoplastini"
+        }
+      ]
+    }
+  },
+
+
+
+  "shape": {
+    "base": "block/termoplastini/termoplastini"
+  },
+
+
+  "blockmaterial": "Stone",
+  "sidesolid": {
+    "all": true
+  },
+  "sideopaque": {
+    "all": false
+  },
+  "resistance": 3.5,
+
+  "sounds": {
+    "walk": "game:walk/stone"
+  },
+
+  "heldTpIdleAnimation": "holdbothhandslarge",
+  "heldTpUseAnimation": "twohandplaceblock",
+
+
+  "collisionSelectionBoxes": [
+    {
+      "x1": 0,
+      "y1": 0,
+      "z1": 0,
+      "x2": 1.0,
+      "y2": 1.0,
+      "z2": 1.0
+    }
+  ]
+}

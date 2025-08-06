@@ -1,0 +1,17 @@
+﻿{
+  "type": "code",
+  "modid": "electricalprogressiveequipment",
+  "name": "Electrical Progressive: Equipment",
+  "authors": [
+    "Tehtelev",
+    "Kotl"
+  ],
+  "description": "Brings electricity into the game!",
+  "Version": "2.1.0-rc.2",
+  "dependencies": {
+    "game": "1.21.0-rc.2",
+    "electricalprogressivecore": "2.1.0-rc.2",
+    "electricalprogressivebasics": "2.1.0-rc.2",
+    "electricalprogressiveqol": "2.1.0-rc.2"
+  }
+}

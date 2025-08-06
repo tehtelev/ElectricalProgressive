@@ -1,0 +1,110 @@
+﻿{
+  "code": "transformator",
+  "class": "BlockETransformator",
+  "entityClass": "BlockEntityETransformator",
+  "entityBehaviors": [
+    {
+      "name": "BEBehaviorETransformator"
+    },
+    {
+      "name": "ElectricalProgressive"
+    }
+  ],
+  "creativeInventory": {
+    "general": [
+      "*-normal-south",
+      "*-burned-south"
+    ],
+    "electricity": [
+      "*-normal-south"
+    ]
+  },
+
+  "attributes": {
+    "voltage": 128,
+    "lowVoltage": 32,
+    "maxCurrent": 20.0,
+    "isolated": true,
+    "isolatedEnvironment": false,
+    "handbook": {
+      "groupBy": [ "transformator-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivebasics:block-handbooktitle-transformator",
+          "text": "electricalprogressivebasics:block-handbooktext-transformator"
+        }
+      ]
+    }
+
+  },
+
+  "variantgroups": [
+    {
+      "code": "state",
+      "states": [
+        "normal",
+        "burned"
+      ]
+    },
+    {
+      "code": "side",
+      "loadFromProperties": "abstract/horizontalorientation"
+    }
+  ],
+
+
+
+  "behaviors": [
+    {
+      "name": "HorizontalOrientable",
+      "properties": {
+        "dropBlockFace": "south"
+      }
+    }
+  ],
+
+
+
+  "shapebytype": {
+    "*-north": {
+      "base": "block/transformator/transformator-{state}",
+      "rotateY": 0
+    },
+    "*-east": {
+      "base": "block/transformator/transformator-{state}",
+      "rotateY": 270
+    },
+    "*-south": {
+      "base": "block/transformator/transformator-{state}",
+      "rotateY": 180
+    },
+    "*-west": {
+      "base": "block/transformator/transformator-{state}",
+      "rotateY": 90
+    }
+  },
+
+
+
+  "resistance": 1,
+  "drawType": "JSON",
+  "lightAbsorption": 0.0,
+  "faceCullMode": "NeverCull",
+  "renderPass": "OpaqueNoCull",
+  "emitSideAo": {
+    "all": false
+  },
+  "sideAo": {
+    "all": false
+  },
+  "sideOpaque": {
+    "all": false
+  },
+  "sideSolid": {
+    "all": false
+  },
+  "sounds": {
+    "place": "game:block/anvil",
+    "walk": "game:walk/stone"
+  }
+}

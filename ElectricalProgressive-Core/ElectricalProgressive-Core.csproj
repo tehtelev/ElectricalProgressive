@@ -41,8 +41,11 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
         <Compile Remove="Content\**" />
+        <Compile Remove="Releases\**" />
         <EmbeddedResource Remove="Content\**" />
+        <EmbeddedResource Remove="Releases\**" />
         <None Remove="Content\**" />
+        <None Remove="Releases\**" />
         <Compile Remove="Utils\ParallelHelper.cs" />
         <Content Include="modinfo.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

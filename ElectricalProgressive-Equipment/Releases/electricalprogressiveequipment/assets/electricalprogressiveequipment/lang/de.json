@@ -1,0 +1,54 @@
+﻿{
+  "item-static-saber-*": "Elektrisches Schwert",
+  "item-static-spear": "Elektrischer Speer",
+  "item-static-shield": "Elektrischer Schild",
+  "item-static-helmet": "Elektrischer Helm",
+  "item-static-armor": "Elektrische Brustplatte",
+  "item-static-boots": "Elektrische Beinschienen",
+
+  "item-handbooktitle-static-saber": "Verwendung",
+  "item-handbooktext-static-saber": "Gute Wahl für effektives Zerschneiden von Gegnern. Die Klinge kann rot‑heiß erhitzt werden, um Gegner in Brand zu setzen.<br>Wenn der Akku leer ist, verursacht das Schwert keinen Schaden mehr. Nicht vergessen aufzuladen!",
+
+  "item-handbooktitle-static-spear": "Verwendung",
+  "item-handbooktext-static-spear": "Gute Wahl zum Durchbohren von Gegnern. Verfügt über zwei Wurfmodi: normal und ionisierend. Im ionisierenden Modus wird bei Treffer die Luft stark ionisiert, was einen Blitz auslöst und das Ziel in Brand setzt. Verbraucht 10 % Ladung.<br>Blitzspiele sind gefährlich – Vorsicht!<br>Wenn der Akku leer ist, verursacht der Speer keinen Schaden mehr. Nicht vergessen aufzuladen!",
+
+  "item-handbooktitle-static-shield": "Verwendung",
+  "item-handbooktext-static-shield": "Hervorragender Schutz mit integriertem Licht.<br>Wenn der Akku leer ist, absorbiert der Schild keinen Schaden mehr. Nicht vergessen aufzuladen!",
+
+  "item-handbooktitle-static-helmet": "Verwendung",
+  "item-handbooktext-static-helmet": "Hervorragender Schutz und Funktionalität.<br>Wenn der Akku leer ist, absorbiert der Helm keinen Schaden mehr. Nicht vergessen aufzuladen!",
+
+  "item-handbooktitle-static-armor": "Verwendung",
+  "item-handbooktext-static-armor": "Hervorragender Schutz und Zusatzfunktionen. Ermöglicht Flugmodus per Druck auf R.<br>Wenn der Akku leer ist, erlischt der Schutz und der Flugmodus schaltet sich ab. Nicht vergessen aufzuladen!",
+
+  "item-handbooktitle-static-boots": "Verwendung",
+  "item-handbooktext-static-boots": "Hervorragender Schutz und Funktionalität.<br>Wenn der Akku leer ist, absorbieren die Beinschienen keinen Schaden mehr. Nicht vergessen aufzuladen!",
+
+  "game:spear_common": "Normaler Speer",
+  "game:spear_flash": "Ionisierender Speer",
+
+  "game:saber_right": "Klinge erhitzen/erlöschen",
+
+
+  "item-edrill": "Elektrische Bohrmaschine",
+  "item-echisel": "Elektrischer Bohrhammer",
+  "item-edrilltip": "Bohrerspitze",
+  "item-eaxe": "Elektrische Axt",
+
+  "game:drill1": "Gräbt einen 1×1 Block",
+  "game:drill2": "Gräbt einen 1×3 Blockbereich",
+
+  "item-handbooktitle-edrill": "Verwendung",
+  "item-handbooktext-edrill": "Der Abbau erreicht ein neues Niveau. Ermöglicht zwei Modi: 1×1 und 1×3.<br>Wenn der Akku leer ist, hört es auf zu funktionieren. Nicht vergessen: aufladen!",
+
+  "item-handbooktitle-echisel": "Verwendung",
+  "item-handbooktext-echisel": "Führt die Funktion eines batteriebetriebenen Meißels aus. Hammer in der linken Hand ist nicht nötig. Nicht in Rezepten verwendbar.<br>Wenn der Akku leer ist, hört es auf zu funktionieren. Nicht vergessen: aufladen!",
+
+  "item-handbooktitle-edrilltip": "Verwendung",
+  "item-handbooktext-edrilltip": "Grundkomponente für die elektrische Bohrmaschine.",
+
+  "item-handbooktitle-eaxe": "Verwendung",
+  "item-handbooktext-eaxe": "Perfekt zum Fällen geeignet. Nicht in Rezepten verwendbar.<br>Wenn der Akku leer ist, hört es auf zu funktionieren. Nicht vergessen: aufladen!"
+
+
+}

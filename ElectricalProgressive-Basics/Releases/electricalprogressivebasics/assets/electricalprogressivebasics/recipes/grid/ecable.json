@@ -1,0 +1,397 @@
+﻿[
+  {
+    "ingredientPattern": "PS",
+    "width": 2,
+    "height": 1,
+    "ingredients": {
+      "P": {
+        "type": "item",
+        "code": "game:metalplate-*",
+        "name": "metal",
+        "allowedVariants": [
+          "copper",
+          "silver",
+          "lead",
+          "gold",
+          "steel",
+          "iron",
+          "tinbronze",
+          "brass",
+          "electrum"
+        ]
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 16
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:ecable-32v-{metal}-single-part",
+      "quantity": 16
+    }
+  },
+
+
+  {
+    "ingredientPattern": "HI",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "H": {
+        "type": "item",
+        "code": "game:chisel-*",
+        "isTool": true,
+        "toolDurabilityCost": 2
+      },
+      "I": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-32v-*-single-part",
+        "quantity": 8,
+        "name": "metal",
+        "allowedVariants": [
+          "copper",
+          "silver",
+          "lead",
+          "gold",
+          "steel",
+          "iron",
+          "tinbronze",
+          "brass",
+          "electrum"
+        ]
+      }
+    },
+    "output": {
+      "type": "item",
+      "code": "game:metalbit-{metal}",
+      "quantity": 20
+    }
+  },
+
+
+  {
+    "ingredientPattern": "PS,IW",
+    "width": 2,
+    "height": 2,
+    "ingredients": {
+      "P": {
+        "type": "item",
+        "code": "game:metalplate-*",
+        "name": "metal",
+        "allowedVariants": [
+          "copper",
+          "silver",
+          "lead",
+          "gold",
+          "steel",
+          "iron",
+          "tinbronze",
+          "brass",
+          "electrum"
+        ]
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 16
+      },
+      "I": {
+        "type": "item",
+        "code": "game:paper-parchment",
+        "quantity": 1
+      },
+      "W": {
+        "type": "item",
+        "code": "game:beeswax",
+        "quantity": 1
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:ecable-32v-{metal}-single-isolated",
+      "quantity": 16
+    }
+  },
+
+
+
+  {
+    "ingredientPattern": "P_,IW",
+    "width": 2,
+    "height": 2,
+    "ingredients": {
+      "P": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-32v-*-single-part",
+        "quantity": 16,
+        "name": "metal",
+        "allowedVariants": [
+          "copper",
+          "silver",
+          "lead",
+          "gold",
+          "steel",
+          "iron",
+          "tinbronze",
+          "brass",
+          "electrum"
+        ]
+      },
+      "I": {
+        "type": "item",
+        "code": "game:paper-parchment",
+        "quantity": 1
+      },
+      "W": {
+        "type": "item",
+        "code": "game:beeswax",
+        "quantity": 1
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:ecable-32v-{metal}-single-isolated",
+      "quantity": 16
+    }
+  },
+
+
+
+  {
+    "ingredientPattern": "HI",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "H": {
+        "type": "item",
+        "code": "game:chisel-*",
+        "isTool": true,
+        "toolDurabilityCost": 2
+      },
+      "I": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-32v-*-single-isolated",
+        "quantity": 8,
+        "name": "metal",
+        "allowedVariants": [
+          "copper",
+          "silver",
+          "lead",
+          "gold",
+          "steel",
+          "iron",
+          "tinbronze",
+          "brass",
+          "electrum"
+        ]
+      }
+    },
+    "output": {
+      "type": "item",
+      "code": "game:metalbit-{metal}",
+      "quantity": 20
+    }
+  },
+
+
+  {
+    "ingredientPattern": "PS",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "P": {
+        "type": "item",
+        "code": "game:metalplate-*",
+        "name": "metal",
+        "allowedVariants": [
+          "copper",
+          "silver",
+          "lead",
+          "gold",
+          "steel",
+          "iron",
+          "tinbronze",
+          "brass",
+          "electrum"
+        ]
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 16
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:ecable-128v-{metal}-single-part",
+      "quantity": 8
+    }
+  },
+
+
+  {
+    "ingredientPattern": "HI",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "H": {
+        "type": "item",
+        "code": "game:chisel-*",
+        "isTool": true,
+        "toolDurabilityCost": 2
+      },
+      "I": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-128v-*-single-part",
+        "quantity": 4,
+        "name": "metal",
+        "allowedVariants": [
+          "copper",
+          "silver",
+          "lead",
+          "gold",
+          "steel",
+          "iron",
+          "tinbronze",
+          "brass",
+          "electrum"
+        ]
+      }
+    },
+    "output": {
+      "type": "item",
+      "code": "game:metalbit-{metal}",
+      "quantity": 20
+    }
+  },
+
+
+  {
+    "ingredientPattern": "PI,SW",
+    "width": 2,
+    "height": 2,
+    "ingredients": {
+      "P": {
+        "type": "item",
+        "code": "game:metalplate-*",
+        "name": "metal",
+        "allowedVariants": [
+          "copper",
+          "silver",
+          "lead",
+          "gold",
+          "steel",
+          "iron",
+          "tinbronze",
+          "brass",
+          "electrum"
+        ]
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 16
+      },
+      "I": {
+        "type": "item",
+        "code": "game:paper-parchment",
+        "quantity": 1
+      },
+      "W": {
+        "type": "item",
+        "code": "game:beeswax",
+        "quantity": 1
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:ecable-128v-{metal}-single-isolated",
+      "quantity": 8
+    }
+  },
+
+
+  {
+    "ingredientPattern": "P_,IW",
+    "width": 2,
+    "height": 2,
+    "ingredients": {
+      "P": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-128v-*-single-part",
+        "quantity": 8,
+        "name": "metal",
+        "allowedVariants": [
+          "copper",
+          "silver",
+          "lead",
+          "gold",
+          "steel",
+          "iron",
+          "tinbronze",
+          "brass",
+          "electrum"
+        ]
+      },
+      "I": {
+        "type": "item",
+        "code": "game:paper-parchment",
+        "quantity": 1
+      },
+      "W": {
+        "type": "item",
+        "code": "game:beeswax",
+        "quantity": 1
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:ecable-128v-{metal}-single-isolated",
+      "quantity": 8
+    }
+  },
+
+
+  {
+    "ingredientPattern": "HI",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "H": {
+        "type": "item",
+        "code": "game:chisel-*",
+        "isTool": true,
+        "toolDurabilityCost": 2
+      },
+      "I": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-128v-*-single-isolated",
+        "quantity": 4,
+        "name": "metal",
+        "allowedVariants": [
+          "copper",
+          "silver",
+          "lead",
+          "gold",
+          "steel",
+          "iron",
+          "tinbronze",
+          "brass",
+          "electrum"
+        ]
+      }
+    },
+    "output": {
+      "type": "item",
+      "code": "game:metalbit-{metal}",
+      "quantity": 20
+    }
+  }
+
+]

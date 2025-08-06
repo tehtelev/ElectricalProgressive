@@ -1,0 +1,152 @@
+﻿{
+  "code": "nasteniy_fonar",
+  "class": "BlockEFonar",
+  "entityClass": "BlockEntityEFonar",
+  "entityBehaviors": [
+    {
+      "name": "BEBehaviorEFonar"
+    },
+    {
+      "name": "ElectricalProgressive"
+    }
+  ],
+  "attributes": {
+    "maxConsumption": 16, //максимальное потребление
+    "voltage": 128,
+    "maxCurrent": 20.0,
+    "isolated": true,
+    "isolatedEnvironment": false,
+    "HSV": 20,
+    "handbook": {
+      "groupBy": [ "nasteniy_fonar-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressiveqol:block-handbooktitle-nasteniy_fonar",
+          "text": "electricalprogressiveqol:block-handbooktext-nasteniy_fonar"
+        }
+      ]
+    }
+  },
+
+
+  "lightHsvByType": {
+    "*-disabled": [ 0, 0, 0 ],
+    "*-burned": [ 0, 0, 0 ],
+    "*-enabled": [ 10, 5, 20 ]
+  },
+
+
+
+  "creativeInventory": {
+    "general": [
+      "*-disabled",
+      "*-burned"
+    ],
+    "electricity": [
+      "*-disabled"
+    ]
+  },
+
+  "variantGroups": [
+    {
+      "code": "state",
+      "states": [ "disabled", "enabled", "burned" ]
+    }
+  ],
+
+
+  "shape": {
+    "base": "block/fonari/nasteniy_fonar-{state}"
+  },
+
+  "resistance": 1,
+  "drawType": "JSON",
+  "lightAbsorption": 0.0,
+  "faceCullMode": "NeverCull",
+  "renderPass": "OpaqueNoCull",
+  "emitSideAo": {
+    "all": false
+  },
+  "sideAo": {
+    "all": false
+  },
+  "sideOpaque": {
+    "all": false
+  },
+  "sideSolid": {
+    "all": false
+  },
+  "sounds": {
+    "place": "game:block/anvil",
+    "walk": "game:walk/stone"
+  },
+  "collisionBox": {
+    "x1": 0.33,
+    "y1": 0.0,
+    "z1": 0.0,
+    "x2": 0.66,
+    "y2": 1.0,
+    "z2": 1.0
+  },
+  "selectionBox": {
+    "x1": 0.33,
+    "y1": 0.0,
+    "z1": 0.0,
+    "x2": 0.66,
+    "y2": 1.0,
+    "z2": 1.0
+  },
+  "guiTransform": {
+    "translation": {
+      "x": -14,
+      "y": 0,
+      "z": 0
+    },
+    "rotation": {
+      "x": -95,
+      "y": 1,
+      "z": -38
+    },
+    "origin": {
+      "x": 0.5,
+      "y": 0,
+      "z": 0.5
+    },
+    "scale": 1.65
+  },
+  "tpHandTransform": {
+    "translation": {
+      "x": -1.7,
+      "y": -0.5,
+      "z": -1.6
+    },
+    "rotation": {
+      "x": 93,
+      "y": 1,
+      "z": -180
+    },
+    "origin": {
+      "x": 0.5,
+      "y": 0,
+      "z": 0.5
+    }
+  },
+  "groundTransform": {
+    "translation": {
+      "x": 0,
+      "y": 0.07,
+      "z": 0
+    },
+    "rotation": {
+      "x": 18,
+      "y": -29,
+      "z": -87
+    },
+    "origin": {
+      "x": 0.5,
+      "y": 0,
+      "z": 0.5
+    },
+    "scale": 2.65
+  }
+}

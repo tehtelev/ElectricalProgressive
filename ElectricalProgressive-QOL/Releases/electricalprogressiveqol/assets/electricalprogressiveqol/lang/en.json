@@ -1,0 +1,123 @@
+﻿{
+  "block-charger-*": "Charging Station",
+  "block-charger-burned-south": "Charging Station (Burned)",
+
+  "block-estove-*": "Electric Stove",
+  "block-estove-burned-south": "Electric Stove (Burned)",
+
+
+
+  "block-eoven-*": "Electric Oven",
+  "block-eoven-burned-north": "Electric Oven (Burned)",
+
+  "block-ehorn-*": "Electric Forge",
+  "block-ehorn-burned-south": "Electric Forge (Burned)",
+
+  "block-heater-*": "Electric Heater",
+  "block-heater-burned": "Electric Heater (Burned)",
+
+
+  "block-nasteniy_fonar-*": "Street wall lamp",
+  "block-nasteniy_fonar-burned": "Street wall lamp (Burned)",
+
+  "block-stolb_fonar-*": "Street ground lamp",
+  "block-stolb_fonar-2-i-burned": "Street ground lamp (Burned)",
+  "block-stolb_fonar-3-i-burned": "Street ground lamp (Burned)",
+  "block-stolb_fonar-3-r-burned": "Street ground lamp (Burned)",
+  "block-stolb_fonar-3-t-burned": "Street ground lamp (Burned)",
+  "block-stolb_fonar-3-x-burned": "Street ground lamp (Burned)",
+  "block-stolb_fonar-4-i-burned": "Street ground lamp (Burned)",
+  "block-stolb_fonar-4-r-burned": "Street ground lamp (Burned)",
+  "block-stolb_fonar-4-t-burned": "Street ground lamp (Burned)",
+  "block-stolb_fonar-4-x-burned": "Street ground lamp (Burned)",
+
+
+  "block-elamp-3000-*": "Electric Lamp: Orange-Warm (3000K)",
+  "block-elamp-4000-*": "Electric Lamp: Yellow-Warm (4000K)",
+  "block-elamp-5000-*": "Electric Lamp: Warm White (5000K)",
+  "block-elamp-6000-*": "Electric Lamp: Neutral White (6000K)",
+  "block-elamp-7000-*": "Electric Lamp: Cool White (7000K)",
+  "block-elamp-8000-*": "Electric Lamp: Cold White (8000K)",
+  "block-elamp-9000-*": "Electric Lamp: Blue-Cold (9000K)",
+
+  "block-elamp-3000-burned": "Electric Lamp (Burned)",
+  "block-elamp-4000-burned": "Electric Lamp (Burned)",
+  "block-elamp-5000-burned": "Electric Lamp (Burned)",
+  "block-elamp-6000-burned": "Electric Lamp (Burned)",
+  "block-elamp-7000-burned": "Electric Lamp (Burned)",
+  "block-elamp-8000-burned": "Electric Lamp (Burned)",
+  "block-elamp-9000-burned": "Electric Lamp (Burned)",
+
+  "block-elamp_small-3000-*": "Small Electric Lamp: Orange-Warm (3000K)",
+  "block-elamp_small-4000-*": "Small Electric Lamp: Yellow-Warm (4000K)",
+  "block-elamp_small-5000-*": "Small Electric Lamp: Warm White (5000K)",
+  "block-elamp_small-6000-*": "Small Electric Lamp: Neutral White (6000K)",
+  "block-elamp_small-7000-*": "Small Electric Lamp: Cool White (7000K)",
+  "block-elamp_small-8000-*": "Small Electric Lamp: Cold White (8000K)",
+  "block-elamp_small-9000-*": "Small Electric Lamp: Blue-Cold (9000K)",
+
+  "block-elamp_small-3000-burned": "Small Electric Lamp (Burned)",
+  "block-elamp_small-4000-burned": "Small Electric Lamp (Burned)",
+  "block-elamp_small-5000-burned": "Small Electric Lamp (Burned)",
+  "block-elamp_small-6000-burned": "Small Electric Lamp (Burned)",
+  "block-elamp_small-7000-burned": "Small Electric Lamp (Burned)",
+  "block-elamp_small-8000-burned": "Small Electric Lamp (Burned)",
+  "block-elamp_small-9000-burned": "Small Electric Lamp (Burned)",
+
+
+  "block-handbooktitle-eoven": "Usage",
+  "block-handbooktext-eoven": "The electric oven completely replaces the furnace. It turns off automatically when the baking process is finished. No more burning!<br>Supports automatic loading and unloading via chutes.",
+
+
+  "block-handbooktitle-heater": "Usage",
+  "block-handbooktext-heater": "A small heat source.",
+
+  "block-handbooktitle-elamp": "Usage",
+  "block-handbooktext-elamp": "A reliable light source that consumes electricity.",
+
+  "block-handbooktitle-elamp_small": "Usage",
+  "block-handbooktext-elamp_small": "A compact light source that consumes electricity.",
+
+
+
+  "block-handbooktitle-nasteniy_fonar": "Usage",
+  "block-handbooktext-nasteniy_fonar": "A wall-mounted electric lamp variant.",
+
+  "block-handbooktitle-stolb_fonar": "Usage",
+  "block-handbooktext-stolb_fonar": "An electric lamp variant for street lighting.",
+
+
+
+  "block-handbooktitle-ehorn": "Usage",
+  "block-handbooktext-ehorn": "The electric forge fully replaces the traditional forge.<br><br>Maximum heating temperature: 1100 °C.",
+
+  "block-handbooktitle-charger": "Usage",
+  "block-handbooktext-charger": "The charging station allows recharging batteries and devices with built-in batteries.",
+
+  "block-handbooktitle-estove": "Usage",
+  "block-handbooktext-estove": "The electric stove completely replaces a conventional campfire.<br>Supports automatic loading and unloading via chutes.<br><br>Maximum heating temperature of the stove: 1325 °C.",
+
+
+
+
+
+  "game:BlockEStove": "Electric Stove",
+  "game:freezer-title-gui": "Freezer",
+  "game:freezer-over-sneak-help": "Open/close door.",
+  "game:freezer-over-help": "Open the door and place food to preserve it.",
+
+  "game:Put-into-1-items": "Need at least 1 item for baking.",
+
+
+  "game:max-light": "Max light",
+  "game:height": "Height",
+
+
+  "block-efreezer2-*": "Electric Refrigerator",
+  "block-efreezer2-burned-north": "Electric Refrigerator (Burned)",
+  "block-handbooktitle-efreezer2": "In Use",
+  "block-handbooktext-efreezer2": "The electric refrigerator allows you to keep food fresh for longer. <br><br>Storage slots: 6.<br>Food spoilage rate: 0.05×"
+
+
+
+}

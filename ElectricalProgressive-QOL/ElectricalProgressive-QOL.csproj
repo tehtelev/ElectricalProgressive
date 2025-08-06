@@ -48,6 +48,9 @@
         <Content Include="assets\**">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
+        <Compile Remove="Releases\**" />
+        <EmbeddedResource Remove="Releases\**" />
+        <None Remove="Releases\**" />
         <Content Include="modinfo.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>

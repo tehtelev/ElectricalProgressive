@@ -1,0 +1,175 @@
+﻿{
+  "code": "ehorn",
+  "class": "BlockEHorn",
+  "entityClass": "BlockEntityEHorn",
+  "entityBehaviors": [
+    {
+      "name": "BEBehaviorEHorn"
+    },
+    {
+      "name": "ElectricalProgressive"
+    }
+  ],
+
+  "attributes": {
+    "maxConsumption": 200,
+    "maxTargetTemp": 1100.0,
+    "voltage": 128,
+    "maxCurrent": 20.0,
+    "isolated": true,
+    "isolatedEnvironment": false,
+    "maxHeat": 7.0,
+    "handbook": {
+      "groupBy": [ "ehorn-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressiveqol:block-handbooktitle-ehorn",
+          "text": "electricalprogressiveqol:block-handbooktext-ehorn"
+        }
+      ]
+    }
+  },
+
+  "shape": {
+    "base": "block/ehorn/ehorn-{state}"
+  },
+
+  "creativeInventory": {
+    "general": [
+      "*-disabled-south",
+      "*-burned-south"
+    ],
+    "electricity": [
+      "*-disabled-south"
+    ]
+  },
+
+
+
+  "behaviors": [
+    {
+      "name": "HeatSource"
+    },
+    {
+      "name": "HorizontalOrientable",
+      "properties": {
+        "dropBlockFace": "south"
+      }
+    }
+  ],
+
+
+  "variantgroups": [
+    {
+      "code": "state",
+      "states": [ "disabled", "enabled", "burned" ]
+    },
+    {
+      "code": "side",
+      "loadFromProperties": "abstract/horizontalorientation"
+    }
+  ],
+
+
+
+  "shapebytype": {
+    "*-north": {
+      "base": "block/ehorn/ehorn-{state}",
+      "rotateY": 0
+    },
+    "*-east": {
+      "base": "block/ehorn/ehorn-{state}",
+      "rotateY": 270
+    },
+    "*-south": {
+      "base": "block/ehorn/ehorn-{state}",
+      "rotateY": 180
+    },
+    "*-west": {
+      "base": "block/ehorn/ehorn-{state}",
+      "rotateY": 90
+    }
+  },
+
+  "blockMaterial": "Stone",
+
+  "replaceable": 500,
+  "lightAbsorption": 0,
+
+  "lightHsvByType": {
+    "*-disabled-*": [ 0, 0, 0 ],
+    "*-enabled-*": [ 7, 7, 11 ]
+  },
+
+  "resistance": 3.5,
+  "sounds": {
+    "walk": "game:walk/stone",
+    "byTool": {
+      "Pickaxe": {
+        "hit": "game:block/rock-hit-pickaxe",
+        "break": "game:block/rock-break-pickaxe"
+      }
+    }
+  },
+  "sidesolidByType": {
+    "*-north": {
+      "all": false,
+      "east": true,
+      "west": true,
+      "north": true
+    },
+    "*-east": {
+      "all": false,
+      "east": true,
+      "south": true,
+      "north": true
+    },
+    "*-south": {
+      "all": false,
+      "east": true,
+      "west": true,
+      "south": true
+    },
+    "*-west": {
+      "all": false,
+      "south": true,
+      "west": true,
+      "north": true
+    }
+  },
+  "sideOpaque": {
+    "all": false
+  },
+  "collisionBox": {
+    "x1": 0.0625,
+    "y1": 0,
+    "z1": 0.0625,
+    "x2": 0.9375,
+    "y2": 0.875,
+    "z2": 0.9375
+  },
+  "selectionBox": {
+    "x1": 0.0625,
+    "y1": 0,
+    "z1": 0.0625,
+    "x2": 0.9375,
+    "y2": 0.875,
+    "z2": 0.9375
+  },
+  "heldTpIdleAnimation": "holdbothhandslarge",
+  "heldRightReadyAnimation": "heldblockready",
+  "heldTpUseAnimation": "twohandplaceblock",
+  "tpHandTransform": {
+    "translation": {
+      "x": -1.23,
+      "y": -0.91,
+      "z": -0.8
+    },
+    "rotation": {
+      "x": -2,
+      "y": 25,
+      "z": -78
+    },
+    "scale": 0.4
+  }
+}

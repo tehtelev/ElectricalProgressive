@@ -1,0 +1,230 @@
+﻿{
+  "block-emotor-tier1-*": "Engine",
+  "block-emotor-tier1-burned": "Engine (Burned)",
+
+  "block-emotor-tier2-*": "Upgraded Engine",
+  "block-emotor-tier2-burned": "Upgraded Engine (Burned)",
+
+  "block-emotor-tier3-*": "High-Performance Engine",
+  "block-emotor-tier3-burned": "High-Performance Engine (Burned)",
+
+  "block-egenerator-tier1-*": "Generator",
+  "block-egenerator-tier1-burned": "Generator (Burned)",
+
+  "block-egenerator-tier2-*": "Upgraded Generator",
+  "block-egenerator-tier2-burned": "Upgraded Generator (Burned)",
+
+  "block-egenerator-tier3-*": "High-Performance Generator",
+  "block-egenerator-tier3-burned": "High-Performance Generator (Burned)",
+
+  "block-transformator-*": "Transformer",
+  "block-transformator-burned-south": "Transformer (Burned)",
+
+  "block-accumulator-tier1-*": "Battery (32V)",
+  "block-accumulator-tier1-burned": "Battery (32V) (Burned)",
+
+  "block-accumulator-tier2-*": "Battery (128V)",
+  "block-accumulator-tier2-burned": "Battery (128V) (Burned)",
+
+  // 32V
+  "block-ecable-32v-copper-*-part": "Copper Cable (32V)",
+  "block-ecable-32v-silver-*-part": "Silver Cable (32V)",
+  "block-ecable-32v-lead-*-part": "Lead Cable (32V)",
+  "block-ecable-32v-gold-*-part": "Gold Cable (32V)",
+  "block-ecable-32v-steel-*-part": "Steel Cable (32V)",
+  "block-ecable-32v-iron-*-part": "Iron Cable (32V)",
+  "block-ecable-32v-tinbronze-*-part": "Bronze Cable (32V)",
+  "block-ecable-32v-brass-*-part": "Brass Cable (32V)",
+  "block-ecable-32v-electrum-*-part": "Electrum Cable (32V)",
+
+  // 128V
+  "block-ecable-128v-copper-*-part": "Copper Cable (128V)",
+  "block-ecable-128v-silver-*-part": "Silver Cable (128V)",
+  "block-ecable-128v-lead-*-part": "Lead Cable (128V)",
+  "block-ecable-128v-gold-*-part": "Gold Cable (128V)",
+  "block-ecable-128v-steel-*-part": "Steel Cable (128V)",
+  "block-ecable-128v-iron-*-part": "Iron Cable (128V)",
+  "block-ecable-128v-tinbronze-*-part": "Bronze Cable (128V)",
+  "block-ecable-128v-brass-*-part": "Brass Cable (128V)",
+  "block-ecable-128v-electrum-*-part": "Electrum Cable (128V)",
+
+  // 32V
+  "block-ecable-32v-copper-*-isolated": "Insulated Copper Cable (32V)",
+  "block-ecable-32v-silver-*-isolated": "Insulated Silver Cable (32V)",
+  "block-ecable-32v-lead-*-isolated": "Insulated Lead Cable (32V)",
+  "block-ecable-32v-gold-*-isolated": "Insulated Gold Cable (32V)",
+  "block-ecable-32v-steel-*-isolated": "Insulated Steel Cable (32V)",
+  "block-ecable-32v-iron-*-isolated": "Insulated Iron Cable (32V)",
+  "block-ecable-32v-tinbronze-*-isolated": "Insulated Bronze Cable (32V)",
+  "block-ecable-32v-brass-*-isolated": "Insulated Brass Cable (32V)",
+  "block-ecable-32v-electrum-*-isolated": "Insulated Electrum Cable (32V)",
+
+  // 128V
+  "block-ecable-128v-copper-*-isolated": "Insulated Copper Cable (128V)",
+  "block-ecable-128v-silver-*-isolated": "Insulated Silver Cable (128V)",
+  "block-ecable-128v-lead-*-isolated": "Insulated Lead Cable (128V)",
+  "block-ecable-128v-gold-*-isolated": "Insulated Gold Cable (128V)",
+  "block-ecable-128v-steel-*-isolated": "Insulated Steel Cable (128V)",
+  "block-ecable-128v-iron-*-isolated": "Insulated Iron Cable (128V)",
+  "block-ecable-128v-tinbronze-*-isolated": "Insulated Bronze Cable (128V)",
+  "block-ecable-128v-brass-*-isolated": "Insulated Brass Cable (128V)",
+  "block-ecable-128v-electrum-*-isolated": "Insulated Electrum Cable (128V)",
+
+  // 32V
+  "block-ecable-32v-copper-*-burned": "Burned Copper Cable (32V)",
+  "block-ecable-32v-silver-*-burned": "Burned Silver Cable (32V)",
+  "block-ecable-32v-lead-*-burned": "Burned Lead Cable (32V)",
+  "block-ecable-32v-gold-*-burned": "Burned Gold Cable (32V)",
+  "block-ecable-32v-steel-*-burned": "Burned Steel Cable (32V)",
+  "block-ecable-32v-iron-*-burned": "Burned Iron Cable (32V)",
+  "block-ecable-32v-tinbronze-*-burned": "Burned Bronze Cable (32V)",
+  "block-ecable-32v-brass-*-burned": "Burned Brass Cable (32V)",
+  "block-ecable-32v-electrum-*-burned": "Burned Electrum Cable (32V)",
+
+  // 128V
+  "block-ecable-128v-copper-*-burned": "Burned Copper Cable (128V)",
+  "block-ecable-128v-silver-*-burned": "Burned Silver Cable (128V)",
+  "block-ecable-128v-lead-*-burned": "Burned Lead Cable (128V)",
+  "block-ecable-128v-gold-*-burned": "Burned Gold Cable (128V)",
+  "block-ecable-128v-steel-*-burned": "Burned Steel Cable (128V)",
+  "block-ecable-128v-iron-*-burned": "Burned Iron Cable (128V)",
+  "block-ecable-128v-tinbronze-*-burned": "Burned Bronze Cable (128V)",
+  "block-ecable-128v-brass-*-burned": "Burned Brass Cable (128V)",
+  "block-ecable-128v-electrum-*-burned": "Burned Electrum Cable (128V)",
+
+  "block-switch-*": "Manual Switch",
+
+  "item-coil": "Copper Coil",
+
+  "item-engineshaft": "Rotor",
+
+  "game:tabname-electricity": "Electricity",
+
+  "block-handbooktitle-accumulator-tier1": "Usage",
+  "block-handbooktext-accumulator-tier1": "Allows storing electrical energy.<br>A charged battery can be carried if needed.",
+
+  "block-handbooktitle-accumulator-tier2": "Usage",
+  "block-handbooktext-accumulator-tier2": "Allows storing electrical energy. A higher-capacity version of the standard <a href=\"handbooksearch:\/\/battery\">battery</a>.<br>A charged battery can be carried, but only in the bag slot.",
+
+  "block-handbooktitle-ecable": "Usage",
+  "block-handbooktext-ecable": "Allows transmitting electrical energy over a distance. <br>Read about its operating characteristics in the <a href=\"handbook://gamemechanicinfo-electricalprogressive-princip\">manual</a>.",
+
+
+  "block-handbooktitle-switch": "Usage",
+  "block-handbooktext-switch": "Allows breaking an electrical circuit. Installed on a cable. Click to toggle.",
+
+  "block-handbooktitle-transformator": "Usage",
+  "block-handbooktext-transformator": "Converts electrical energy from one voltage to another. Connect cables/devices to any two sides of the transformer!<br>Transformation ratio: 1:4.",
+
+  "game:gamemechanicinfo-electricalprogressive-title": "Electricity: ElectricalProgressive Mod",
+  "game:gamemechanicinfo-electricalprogressive-text": "<strong>Electricity: ElectricalProgressive Mod</strong><br>This mod introduces electrical energy, electrical appliances, devices, weapons, and armor to the game. These additions aim to simplify (or complicate) survival, reduce repetitive tasks, and diversify gameplay.<br><br><strong>Basics</strong><br>The law of energy conservation states that energy cannot be created or destroyed—it only transforms or transfers between forms. This principle applies in-game as well.<br><br>The primary source of mechanical energy is windmills. Generators convert mechanical energy into electrical energy by transferring torque from a windmill to a generator via shafts and/or gears. Once connected, the generator begins producing electricity.<br><br>Electrical energy is transmitted via cables to consumers. Place cables along blocks in the desired direction. Each block face can hold up to 4 cables, allowing branching and complex circuit layouts. Cables must connect to the iron plate of an electrical device to activate it. Electrical devices and metal blocks can also conduct current.<br><br>Since wind strength fluctuates, generators may not always produce enough energy. To mitigate this, connect your circuit to batteries. They store excess energy and supply it to devices even when wind is absent.<br><br>To conserve energy, disconnect unused devices using a manual switch. Install switches in parts of the circuit where quick power toggling is needed.<br><br>For devices requiring mechanical energy, use engines. Engines convert electrical energy back into mechanical energy. Connect them to devices via shafts. When active, engines attempt to deliver maximum torque, so ensure sufficient energy in the circuit.",
+
+  "game:gamemechanicinfo-electricalprogressive-rotors-title": "Electricity: Motors and Generators",
+  "game:gamemechanicinfo-electricalprogressive-rotors-text": "<strong>Electricity: Motors and Generators</strong><br>Motors and generators in the mod allow conversion between electrical and mechanical energy. This requires connecting cables and attaching a shaft.<br><br><strong>Game Mechanics Features</strong><br>Motors and generators simulate real-world behavior using DC machines as reference. Understanding their operational principles is crucial for effective use.<br>All rotating mechanisms in-game (including shafts and gears) have two core parameters: <i>torque</i> (rotational force) and <i>resistance</i> (friction/loss forces). Shafts and gears have zero torque. The game engine aggregates all forces to calculate shaft <i>speed</i> and acceleration/deceleration. When torque exceeds resistance, speed increases. When resistance dominates, speed decreases. Both parameters follow specific laws, with resistance typically increasing with speed.<br><br><strong>Generators</strong><br>Generators feature:<br><i>I_max</i> – max energy output;<br><i>speed_max</i> – max rated rotation speed;<br><i>resistance_factor</i> – resistance torque multiplier;<br><i>resistance_load</i> – constant resistance component (achieved at I_max).<br><br>Energy output scales linearly with shaft speed up to <i>speed_max</i>, then plateaus at <i>power = I_max</i>. Resistance torque increases linearly below <i>speed_max</i> and quadratically above it. Resistance also scales with electrical load – minimal resistance occurs when no power is consumed.<br><br><strong>Motors</strong><br>Motors feature:<br><i>I_min</i> – minimum activation energy;<br><i>I_max</i> – max energy consumption;<br><i>torque_max</i> – max torque output;<br><i>kpd_max</i> – efficiency;<br><i>speed_max</i> – max rated speed;<br><i>resistance_factor</i> – resistance torque multiplier.<br><br>Motor torque scales linearly with available energy, adjusted by efficiency. Resistance calculation mirrors generators, but with <i>resistance_load</i> = 0.",
+
+  "game:gamemechanicinfo-electricalprogressive-princip-title": "Electricity: Current Behavior and Voltage",
+  "game:gamemechanicinfo-electricalprogressive-princip-text": "<strong>Electricity: current behavior, voltage</strong><br>Electric current now flows through conductors according to the laws of physics. You might have to crack open your physics textbook again!<br><br><strong>New behavior features</strong><br>Electric current travels through conductors in discrete energy packets, except in instant mode. These energy packets follow the shortest path from sources to consumers. Cables and devices now also have their own conductor parameters: resistivity (depends on material), cross-sectional area, maximum current (exceeding it may cause burning), and maximum voltage. The current value is calculated by Ohm’s law for the section of the circuit carrying all packets passing through that face/block. Direction of flow matters: opposing flows subtract algebraically (a consequence of Kirchhoff’s first law). To prevent cables from burning out, you can upgrade them: pick up a cable of the same type and Shift‑click on the placed cable. This increases the current capacity in the circuit. Note that conductor losses follow Joule–Lenz’s law—higher current greatly increases energy losses. For long‑distance transmission, raise the voltage or use batteries as buffer storage.<br><br><strong>Voltages</strong><br>Different devices now require not just varying amounts of energy, but specific voltages. Exceeding a device’s or cable’s voltage limit may burn it out. You can step voltage up or down with a transformer—it works bidirectionally. Be careful when connecting wires of different voltages! Higher voltage allows more power to flow through wires.<br><br><strong>Environmental interaction</strong><br>Uninsulated cables and metal blocks now deal damage to any entity on contact. The higher the voltage in the circuit, the more damage dealt. Burned‑out devices and cables also deal damage. Insulated cables and all operating devices are safe to touch.<br>All cables and devices have a moisture resistance rating. Without moisture resistance, your device or cable risks burning out when exposed to rain, snow, hail, or nearby water! Contact with lava will burn, break, and likely destroy them. Handle with care.",
+
+
+
+  "block-handbooktitle-emotor-tier1": "Usage",
+  "block-handbooktext-emotor-tier1": "Converts electrical to mechanical energy. Low power and speed.<br>Details in <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-rotors\">guide</a>.",
+
+  "block-handbooktitle-emotor-tier2": "Usage",
+  "block-handbooktext-emotor-tier2": "Upgraded engine with higher power and speed than the <a href=\"handbooksearch:\/\/engine\">base engine</a>.<br>Details in <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-rotors\">guide</a>.",
+
+  "block-handbooktitle-emotor-tier3": "Usage",
+  "block-handbooktext-emotor-tier3": "High-performance engine with superior power. Better than <a href=\"handbooksearch:\/\/upgraded engine\">upgraded engines</a>.<br>Details in <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-rotors\">guide</a>.",
+
+  "block-handbooktitle-egenerator-tier1": "Usage",
+  "block-handbooktext-egenerator-tier1": "Converts mechanical to electrical energy. Low power.<br>Details in <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-rotors\">guide</a>.",
+
+  "block-handbooktitle-egenerator-tier2": "Usage",
+  "block-handbooktext-egenerator-tier2": "Upgraded generator with higher output than the <a href=\"handbooksearch:\/\/generator\">base generator</a>.<br>Details in <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-rotors\">guide</a>.",
+
+  "block-handbooktitle-egenerator-tier3": "Usage",
+  "block-handbooktext-egenerator-tier3": "High-performance generator with maximum output. Better than <a href=\"handbooksearch:\/\/upgraded generator\">upgraded generators</a>.<br>Details in <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-rotors\">guide</a>.",
+
+  "item-handbooktitle-coil": "Usage",
+  "item-handbooktext-coil": "What’s electricity without copper coils?",
+
+  "item-handbooktitle-engineshaft": "Usage",
+  "item-handbooktext-engineshaft": "Used in engines/generators and other rotating devices.",
+
+  "game:Electricity": "Power Grid",
+  "game:Storage": "Storage",
+  "game:Temperature": "Temperature",
+  "game:Contents": "Contents",
+  "game:Consumers": "Consumers",
+  "game:Generators": "Generators",
+  "game:Batteries": "Batteries",
+  "game:Transformers": "Transformers",
+  "game:Blocks": "Blocks",
+  "game:Generation": "Generation",
+  "game:W": "W",
+  "game:Consumption": "Consumption",
+  "game:Production": "Produced",
+  "game:Request": "Required",
+
+  "game:Press": "Hold",
+  "game:for details": "for details",
+
+  "game:Block": "Block",
+  "game:Max. current": "Max. current",
+  "game:Current": "Current",
+  "game:Resistivity": "Resistivity",
+  "game:Resistance": "Resistance",
+  "game:Lines": "Lines",
+  "game:Section size": "Cross-section",
+  "game:Max voltage": "Max voltage",
+  "game:V": "V",
+  "game:units": "units",
+  "game:pcs.": "pcs.",
+  "game:A": "A",
+  "game:Om/line": "Ω/line",
+  "game:Om": "Ω",
+  "game:Burned": "!!!BURNED!!!",
+  "game:Power": "Power",
+  "game:J": "J",
+  "game:max": "max",
+  "game:Voltage": "Voltage",
+  "game:High Voltage": "High Voltage",
+  "game:Low Voltage": "Low Voltage",
+
+  "game:max_speed": "Rated speed",
+  "game:rps": "RPS",
+
+  "game:kpd": "Efficiency",
+  "game:max_torque": "Max. torque",
+  "game:WResistance": "Moisture resistance",
+  "game:Yes": "Yes",
+  "game:No": "No",
+
+  "game:res_load": "Nominal resistance at nominal load",
+  "game:res_speed": "Nominal resistance at nominal speed",
+
+  "game:termogen": "Thermo Generator",
+  "game:gui-word-seconds": "sec.",
+
+
+  "game:Capacity": "Capacity",
+
+  "block-etermogenerator-*": "Thermoelectric Generator",
+  "block-handbooktitle-etermogenerator": "Usage",
+  "block-handbooktext-etermogenerator": "Converts heat into electrical energy! Works with any burnable fuel. The higher the fuel’s burn temperature, the greater the output power. Output also varies slightly with ambient temperature: the colder the air around it, the more energy it produces. Must be fitted with <a href=\"handbook://block-electricalprogressivebasics:termoplastini\">thermoelectric plates</a> on top to function.<br><br>Can be fed fuel automatically via hoppers.",
+
+  "block-termoplastini": "Thermoelectric Plates",
+  "block-handbooktitle-termoplastini": "Usage",
+  "block-handbooktext-termoplastini": "Thermoelectric plates are used in thermoelectric generators to convert heat into electricity. They work by generating a thermal electromotive force at the junction of two dissimilar metals. One side is heated by combustion smoke, the other cooled by ambient air.<br><br>Place on top of a <a href=\"handbook://block-electricalprogressivebasics:etermogenerator-south\">thermoelectric generator</a>, up to 10 plates. Each additional plate yields diminishing returns. Ten plates provide 100% generator output. Note: any blocks placed directly against the plates will reduce overall efficiency, as they block airflow and cooling.",
+
+  "game:Speed": "Speed",
+
+  "game:ThickenCables": "Thicken Cables",
+
+  "game:causeCurrent": "Current overload",
+  "game:causeVoltage": "Overvoltage",
+  "game:causeEnvironment": "Liquid exposure"
+
+
+
+}

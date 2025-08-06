@@ -1,0 +1,50 @@
+﻿{
+  "item-static-saber-*": "Espada eléctrica",
+  "item-static-spear": "Lanza eléctrica",
+  "item-static-shield": "Escudo eléctrico",
+  "item-static-helmet": "Casco eléctrico",
+  "item-static-armor": "Peto eléctrico",
+  "item-static-boots": "Botas eléctricas",
+
+  "item-handbooktitle-static-saber": "Uso",
+  "item-handbooktext-static-saber": "Buena opción para cortar eficazmente a los enemigos. Puede calentar la hoja al rojo vivo e incendiar a los adversarios.<br>Cuando se agote la carga, dejará de infligir daño. ¡No olvides recargar!",
+
+  "item-handbooktitle-static-spear": "Uso",
+  "item-handbooktext-static-spear": "Buena opción para crear perforaciones en los enemigos. Tiene dos modos de lanzamiento: lanza normal y lanza ionizante. En este segundo modo, al impactar en cualquier ser vivo, ioniza el aire provocando una descarga eléctrica y prendiendo fuego al objetivo. Consume un 10% de la carga.<br>Los juegos con la electricidad son peligrosos: ten cuidado.<br>Cuando se agote la carga, dejará de infligir daño. ¡No olvides recargar!",
+
+  "item-handbooktitle-static-shield": "Uso",
+  "item-handbooktext-static-shield": "Protección excelente con lámpara incorporada.<br>Cuando se agote la carga, dejará de absorber daño. ¡No olvides recargar!",
+
+  "item-handbooktitle-static-helmet": "Uso",
+  "item-handbooktext-static-helmet": "Protección y capacidades excepcionales.<br>Cuando se agote la carga, dejará de absorber daño. ¡No olvides recargar!",
+
+  "item-handbooktitle-static-armor": "Uso",
+  "item-handbooktext-static-armor": "Protección y capacidades excepcionales. Permite volar al pulsar la tecla R.<br>Cuando se agote la carga, dejará de absorber daño y desactivará el modo de vuelo. ¡No olvides recargar!",
+
+  "item-handbooktitle-static-boots": "Uso",
+  "item-handbooktext-static-boots": "Protección y capacidades excepcionales.<br>Cuando se agote la carga, dejará de absorber daño. ¡No olvides recargar!",
+
+  "game:spear_common": "Lanza normal",
+  "game:spear_flash": "Lanza ionizante",
+  "game:saber_right": "Calentar/Apagar hoja",
+
+  "item-edrill": "Taladro eléctrico",
+  "item-echisel": "Martillo perforador eléctrico",
+  "item-edrilltip": "Punta de broca",
+  "item-eaxe": "Hacha eléctrica",
+
+  "game:drill1": "Excava un bloque 1×1",
+  "game:drill2": "Excava un área de 1×3 bloques",
+
+  "item-handbooktitle-edrill": "Uso",
+  "item-handbooktext-edrill": "La minería alcanza un nuevo nivel. Permite funcionar en dos modos: 1×1 y 1×3.<br>Cuando se agote la carga, dejará de funcionar. ¡No olvides recargar!",
+
+  "item-handbooktitle-echisel": "Uso",
+  "item-handbooktext-echisel": "Funciona como un cincel alimentado por batería. No se necesita martillo en la mano secundaria. No se usa en recetas.<br>Cuando se agote la carga, dejará de funcionar. ¡No olvides recargar!",
+
+  "item-handbooktitle-edrilltip": "Uso",
+  "item-handbooktext-edrilltip": "Componente base para el taladro eléctrico.",
+
+  "item-handbooktitle-eaxe": "Uso",
+  "item-handbooktext-eaxe": "Excelente para cortar. No se usa en recetas.<br>Cuando se agote la carga, dejará de funcionar. ¡No olvides recargar!"
+}

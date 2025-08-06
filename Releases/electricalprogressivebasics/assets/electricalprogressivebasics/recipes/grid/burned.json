@@ -1,0 +1,220 @@
+[
+
+  {
+    "ingredientPattern": "HI",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "I": {
+        "type": "block",
+        "code": "electricalprogressivebasics:emotor-tier1-burned"
+      }
+    },
+    "output": {
+      "type": "item",
+      "code": "game:metalbit-iron",
+      "quantity": 80
+    }
+  },
+
+  {
+    "ingredientPattern": "HI",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "I": {
+        "type": "block",
+        "code": "electricalprogressivebasics:egenerator-tier1-burned"
+      }
+    },
+    "output": {
+      "type": "item",
+      "code": "game:metalbit-iron",
+      "quantity": 80
+    }
+  },
+
+  {
+    "ingredientPattern": "HI",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "I": {
+        "type": "block",
+        "code": "electricalprogressivebasics:emotor-tier2-burned"
+      }
+    },
+    "output": {
+      "type": "item",
+      "code": "game:metalbit-iron",
+      "quantity": 160
+    }
+  },
+
+
+  {
+    "ingredientPattern": "HI",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "I": {
+        "type": "block",
+        "code": "electricalprogressivebasics:egenerator-tier2-burned"
+      }
+    },
+    "output": {
+      "type": "item",
+      "code": "game:metalbit-iron",
+      "quantity": 160
+    }
+  },
+
+  {
+    "ingredientPattern": "HI",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "I": {
+        "type": "block",
+        "code": "electricalprogressivebasics:emotor-tier3-burned"
+      }
+    },
+    "output": {
+      "type": "item",
+      "code": "game:metalbit-iron",
+      "quantity": 160
+    }
+  },
+
+
+  {
+    "ingredientPattern": "HI",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "I": {
+        "type": "block",
+        "code": "electricalprogressivebasics:egenerator-tier3-burned"
+      }
+    },
+    "output": {
+      "type": "item",
+      "code": "game:metalbit-iron",
+      "quantity": 160
+    }
+  },
+
+
+
+
+
+  {
+    "ingredientPattern": "HI",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "I": {
+        "type": "block",
+        "code": "electricalprogressivebasics:transformator-burned-south"
+      }
+    },
+    "output": {
+      "type": "item",
+      "code": "game:metalbit-iron",
+      "quantity": 80
+    }
+  },
+
+ 
+
+  {
+    "ingredientPattern": "HI",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "I": {
+        "type": "block",
+        "code": "electricalprogressivebasics:accumulator-tier1-burned"
+      }
+    },
+    "output": {
+      "type": "item",
+      "code": "game:metalbit-iron",
+      "quantity": 40
+    }
+  },
+
+
+  {
+    "ingredientPattern": "HI",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "I": {
+        "type": "block",
+        "code": "electricalprogressivebasics:accumulator-tier2-burned"
+      }
+    },
+    "output": {
+      "type": "item",
+      "code": "game:metalbit-iron",
+      "quantity": 160
+    }
+  }
+
+
+]

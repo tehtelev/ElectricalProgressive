@@ -1,0 +1,93 @@
+﻿[
+  {
+    "ingredientPattern": "HS,XM,CL",
+    "width": 2,
+    "height": 3,
+    "ingredients": {
+      "L": {
+        "type": "item",
+        "code": "game:metalplate-lead",
+        "quantity": 2
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "X": {
+        "type": "item",
+        "code": "game:chisel-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "M": {
+        "type": "item",
+        "code": "game:metalplate-tin",
+        "quantity": 2
+      },
+      "C": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-32v-copper-single-part",
+        "quantity": 4
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:termoplastini",
+      "quantity": 4
+    }
+  },
+
+  {
+    "ingredientPattern": "HS,XM,CL",
+    "width": 2,
+    "height": 3,
+    "ingredients": {
+      "L": {
+        "type": "item",
+        "code": "game:metalplate-lead",
+        "quantity": 2
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "X": {
+        "type": "item",
+        "code": "game:chisel-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "M": {
+        "type": "item",
+        "code": "game:metalplate-copper",
+        "quantity": 2
+      },
+      "C": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-32v-copper-single-part",
+        "quantity": 4
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:termoplastini",
+      "quantity": 4
+    }
+  }
+]

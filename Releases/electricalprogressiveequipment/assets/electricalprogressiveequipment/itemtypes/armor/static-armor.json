@@ -1,0 +1,142 @@
+﻿{
+	"code": "static-armor",
+	"class": "EArmor",
+	"behaviors": [
+	],
+	"shapeByType": {
+		"*": { "base": "entity/armor/static-armor" }
+	},
+	"heldTpIdleAnimation": "holdunderarm",
+	"storageFlags": 128,
+	"durability": 1000,
+	"attributes": {
+		"chargable": true,
+		"consume": 20,
+		"consumeFly": 40,
+		"speedFly": 2.0,
+		"wearableAttachment": true,
+		"handbook": {
+			"groupBy": [ "static-armor-*" ],
+			"extraSections": [
+				{
+					"title": "electricalprogressiveequipment:item-handbooktitle-static-armor",
+					"text": "electricalprogressiveequipment:item-handbooktext-static-armor"
+				}
+			]
+		},
+		"clothescategoryByType": {
+			"*": "armorbody"
+		},
+		"defaultProtLoss": {
+			"perTierRelativeProtectionLoss": [ 0.0, 0.0 ],
+			"perTierFlatDamageReductionLoss": [ 0.0, 0.0 ]
+		},
+		"protectionModifiersByType": {
+			"*": {
+				"relativeProtection": 0.97,
+				"flatDamageReduction": 1.8,
+				"highDamageTierResistant": true,
+				"protectionTier": 4
+			}
+		},
+		"statModifiersByType": {
+			"*": {
+				"walkSpeed": -0.2,
+				"healingeffectivness": -0.25,
+				"hungerrate": 0.12
+			}
+		},
+		"footStepSoundByType": {
+			"*": "locustmod:armor/brig*"
+		},
+		"scaleX": 0.5,
+		"scaleY": 0.5,
+		"scaleZ": 0.5,
+		"translateX": 0.18,
+		"translateY": 0.4,
+		"translateZ": 0.15,
+		"rotateX": 0,
+		"rotateY": 0,
+		"rotateZ": 0
+	},
+
+	"creativeinventory": {
+		"general": [ "*" ],
+		"electricity": [ "*" ]
+	},
+	"renderAlphaTest": 0.25,
+	"fpHandTransform": {
+		"translation": {
+			"x": 0.4,
+			"y": -1.2,
+			"z": -0.5
+		},
+		"rotation": {
+			"x": 163,
+			"y": -111,
+			"z": -180
+		},
+		"origin": {
+			"x": 0.5,
+			"y": 1.6,
+			"z": 0.5
+		},
+		"scale": 2.15
+	},
+	"tpHandTransformByType": {
+		"*": {
+			"translation": {
+				"x": -1,
+				"y": -1.9,
+				"z": -0.5
+			},
+			"rotation": {
+				"x": 97,
+				"y": -168,
+				"z": 94
+			},
+			"origin": {
+				"x": 0.5,
+				"y": 1.5,
+				"z": 0.5
+			},
+			"scale": 0.67
+		}
+	},
+	"guiTransform": {
+		"translation": {
+			"x": 3,
+			"y": 0,
+			"z": 0
+		},
+		"rotation": {
+			"x": -26,
+			"y": -46,
+			"z": -180
+		},
+		"origin": {
+			"x": 0.5,
+			"y": 1.11,
+			"z": 0.5
+		},
+		"scale": 1.37
+	},
+	"groundTransform": {
+		"translation": {
+			"x": 0,
+			"y": 0,
+			"z": 0
+		},
+		"rotation": {
+			"x": 0,
+			"y": 0,
+			"z": 90
+		},
+		"origin": {
+			"x": 0.34,
+			"y": 1.12,
+			"z": 0.5
+		},
+		"scale": 3.1
+	}
+}

@@ -45,9 +45,12 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
         <Compile Remove="assets\electricalprogressivebasics\textures\block\metal\**" />
+        <Compile Remove="Releases\**" />
         <Content Remove="assets\electricalprogressivebasics\textures\block\metal\**" />
         <EmbeddedResource Remove="assets\electricalprogressivebasics\textures\block\metal\**" />
+        <EmbeddedResource Remove="Releases\**" />
         <None Remove="assets\electricalprogressivebasics\textures\block\metal\**" />
+        <None Remove="Releases\**" />
         <Content Include="modinfo.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
