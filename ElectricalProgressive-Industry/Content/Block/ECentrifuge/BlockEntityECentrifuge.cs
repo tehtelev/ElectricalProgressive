@@ -248,12 +248,11 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
 
         try
         {
-            float speedFactor = (float)(powerSetting / CurrentRecipe.EnergyOperation) * 19.5f;
             animUtil.StartAnimation(new AnimationMetaData()
             {
                 Animation = "craft",
                 Code = "craft",
-                AnimationSpeed = speedFactor,
+                AnimationSpeed = 1f,
                 EaseOutSpeed = 4f,
                 EaseInSpeed = 1f
             });

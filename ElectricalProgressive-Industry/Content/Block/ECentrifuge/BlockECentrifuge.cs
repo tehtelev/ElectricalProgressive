@@ -56,19 +56,6 @@ public class BlockECentrifuge : Vintagestory.API.Common.Block
         return new[] { OnPickBlock(world, pos) };
     }
 
-    public override WorldInteraction[] GetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection selection, IPlayer forPlayer)
-    {
-        return new[]
-        {
-            new WorldInteraction
-            {
-                ActionLangCode = "freezer-over-help",
-                MouseButton = EnumMouseButton.Right,
-            }
-        }.Append(base.GetPlacedBlockInteractionHelp(world, selection, forPlayer));
-    }
-
-
     public override void OnNeighbourBlockChange(IWorldAccessor world, BlockPos pos, BlockPos neibpos)
     {
         base.OnNeighbourBlockChange(world, pos, neibpos);
