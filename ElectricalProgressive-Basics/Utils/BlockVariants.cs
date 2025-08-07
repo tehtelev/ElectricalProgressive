@@ -40,7 +40,8 @@ public class BlockVariants
         var assetLocation = baseBlock.CodeWithVariants(t, v);
         var block = api.World.GetBlock(assetLocation);
 
-        if (block == null) return;
+        if (block == null)
+            return;
 
         this.CollisionBoxes = block.CollisionBoxes;
         this.SelectionBoxes = block.SelectionBoxes;

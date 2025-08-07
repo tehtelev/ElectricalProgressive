@@ -5,6 +5,7 @@ using ElectricalProgressive.Utils;
 using Newtonsoft.Json;
 using System;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -240,7 +241,12 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
 
  
 
-    // Принимает сигнал от клиента, который наводится на блок, что инициирует обновление информации о блоке-энтити
+    /// <summary>
+    /// Принимает сигнал от клиента, который наводится на блок, что инициирует обновление информации о блоке-энтити
+    /// </summary>
+    /// <param name="fromPlayer"></param>
+    /// <param name="packetid"></param>
+    /// <param name="data"></param>
     public override void OnReceivedClientPacket(IPlayer fromPlayer, int packetid, byte[] data)
     {
         if (packetid == MyPacketIdForServer) // проверяем, что пакет именно мой
@@ -257,7 +263,11 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
 
     }
 
-    // Принимает сигнал от сервера, что пришла информация о сети
+    /// <summary>
+    /// Принимает сигнал от сервера, что пришла информация о сети
+    /// </summary>
+    /// <param name="packetid"></param>
+    /// <param name="data"></param>
     public override void OnReceivedServerPacket(int packetid, byte[] data)
     {
         if (packetid == MyPacketIdForClient) // проверяем, что пакет именно мой
@@ -398,7 +408,8 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
         stringBuilder.AppendLine("└ " + Lang.Get("Request") + ": " + networkInformation.Request + " " + Lang.Get("W"));
 
         float capacity = (float)((networkInformation.MaxCapacity == 0f) ? 0f : (networkInformation.Capacity * 100.0F / networkInformation.MaxCapacity));
-        stringBuilder.AppendLine("└ " + Lang.Get("Capacity") + ": " + capacity.ToString("F3") + " %");
+
+        stringBuilder.AppendLine("└ " + Lang.Get("Capacity") + ": " + (int)networkInformation.Capacity + "/" + (int)networkInformation.MaxCapacity+ " " + Lang.Get("J")+ "(" +capacity.ToString("F3") + " %)");
 
         stringBuilder.AppendLine(Lang.Get("Block"));
         stringBuilder.AppendLine("├ " + Lang.Get("Max. current") + ": " + networkInformation.eParamsInNetwork.maxCurrent * networkInformation.eParamsInNetwork.lines + " " + Lang.Get("A"));
