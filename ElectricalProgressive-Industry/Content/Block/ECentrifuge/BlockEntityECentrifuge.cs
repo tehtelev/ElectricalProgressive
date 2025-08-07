@@ -277,18 +277,18 @@ private void ProcessCompletedCraft()
     {
         if (Api?.Side != EnumAppSide.Client || animUtil == null || CurrentRecipe == null) return;
 
-       
+
         if (animUtil?.activeAnimationsByAnimCode.ContainsKey("craft") == false)
+        {
+            animUtil.StartAnimation(new AnimationMetaData()
             {
-                animUtil.StartAnimation(new AnimationMetaData()
-                {
-                    Animation = "craft",
-                    Code = "craft",
-                    AnimationSpeed = 1f,
-                    EaseOutSpeed = 4f,
-                    EaseInSpeed = 1f
-                });
-            }
+                Animation = "craft",
+                Code = "craft",
+                AnimationSpeed = 1f,
+                EaseOutSpeed = 4f,
+                EaseInSpeed = 1f
+            });
+        }
 
     }
 
