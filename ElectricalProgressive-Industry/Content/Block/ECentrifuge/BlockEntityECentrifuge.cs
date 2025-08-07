@@ -209,45 +209,67 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
         _wasCraftingLastTick = isCraftingNow;
     }
 
-    private void ProcessCompletedCraft()
+private void ProcessCompletedCraft()
+{
+    // Проверяем наличие рецепта и API
+    if (CurrentRecipe == null || Api == null || CurrentRecipe.Output?.ResolvedItemstack == null) 
     {
-        if (CurrentRecipe == null || Api == null) return;
+        return;
+    }
 
-        try
+    try
+    {
+        // Создаем копию выходного предмета
+        ItemStack outputItem = CurrentRecipe.Output.ResolvedItemstack.Clone();
+
+        // Проверяем ингредиенты и слоты
+        if (CurrentRecipe.Ingredients == null || CurrentRecipe.Ingredients.Length == 0 || InputSlot == null)
         {
-            ItemStack outputItem = CurrentRecipe.Output.ResolvedItemstack.Clone();
+            Api.Logger.Error("Ошибка в рецепте центрифуги: отсутствуют ингредиенты или входной слот");
+            return;
+        }
 
-            if (OutputSlot.Empty)
-            {
-                OutputSlot.Itemstack = outputItem;
-            }
-            else if (OutputSlot.Itemstack.Collectible == outputItem.Collectible &&
-                     OutputSlot.Itemstack.StackSize < OutputSlot.Itemstack.Collectible.MaxStackSize)
-            {
-                int freeSpace = OutputSlot.Itemstack.Collectible.MaxStackSize - OutputSlot.Itemstack.StackSize;
-                int toAdd = Math.Min(freeSpace, outputItem.StackSize);
+        // Обработка выходного слота
+        if (OutputSlot == null)
+        {
+            Api.Logger.Error("Ошибка: выходной слот не существует");
+            return;
+        }
 
-                OutputSlot.Itemstack.StackSize += toAdd;
-                outputItem.StackSize -= toAdd;
+        if (OutputSlot.Empty)
+        {
+            OutputSlot.Itemstack = outputItem;
+        }
+        else if (OutputSlot.Itemstack != null && 
+                outputItem.Collectible != null &&
+                OutputSlot.Itemstack.Collectible == outputItem.Collectible &&
+                OutputSlot.Itemstack.StackSize < OutputSlot.Itemstack.Collectible.MaxStackSize)
+        {
+            int freeSpace = OutputSlot.Itemstack.Collectible.MaxStackSize - OutputSlot.Itemstack.StackSize;
+            int toAdd = Math.Min(freeSpace, outputItem.StackSize);
 
-                if (outputItem.StackSize > 0)
-                {
-                    Api.World.SpawnItemEntity(outputItem, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
-                }
-            }
-            else
+            OutputSlot.Itemstack.StackSize += toAdd;
+            outputItem.StackSize -= toAdd;
+
+            if (outputItem.StackSize > 0)
             {
                 Api.World.SpawnItemEntity(outputItem, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
             }
-
-            InputSlot.TakeOut(CurrentRecipe.Ingredients[0].Quantity);
-            InputSlot.MarkDirty();
         }
-        catch (Exception ex)
+        else
         {
-            Api?.Logger.Error($"Error in centrifuge craft processing: {ex}");
+            Api.World.SpawnItemEntity(outputItem, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
         }
+
+        // Извлекаем ингредиенты из входного слота
+        InputSlot.TakeOut(CurrentRecipe.Ingredients[0].Quantity);
+        InputSlot.MarkDirty();
     }
+    catch (Exception ex)
+    {
+        Api?.Logger.Error($"Ошибка в обработке крафта центрифуги: {ex}");
+    }
+}
     
 
     private void StartAnimation(float powerSetting)
