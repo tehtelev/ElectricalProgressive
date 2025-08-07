@@ -197,6 +197,7 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
                 else
                 {
                     RecipeProgress = 0f; // Сбрасываем для нового цикла
+                    UpdateState(RecipeProgress);
                 }
             }
         }
