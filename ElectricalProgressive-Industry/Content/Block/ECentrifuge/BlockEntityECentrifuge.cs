@@ -175,7 +175,7 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
         if (isCraftingNow)
         {
             if (!_wasCraftingLastTick)
-            {
+            {                
                 StartAnimation(beh.PowerSetting);
             }
 
@@ -277,21 +277,19 @@ private void ProcessCompletedCraft()
     {
         if (Api?.Side != EnumAppSide.Client || animUtil == null || CurrentRecipe == null) return;
 
-        try
-        {
-            animUtil.StartAnimation(new AnimationMetaData()
+       
+        if (animUtil?.activeAnimationsByAnimCode.ContainsKey("craft") == false)
             {
-                Animation = "craft",
-                Code = "craft",
-                AnimationSpeed = 1f,
-                EaseOutSpeed = 4f,
-                EaseInSpeed = 1f
-            });
-        }
-        catch (Exception ex)
-        {
-            Api.Logger.Error($"Error starting centrifuge animation: {ex}");
-        }
+                animUtil.StartAnimation(new AnimationMetaData()
+                {
+                    Animation = "craft",
+                    Code = "craft",
+                    AnimationSpeed = 1f,
+                    EaseOutSpeed = 4f,
+                    EaseInSpeed = 1f
+                });
+            }
+
     }
 
     private void StopAnimation()

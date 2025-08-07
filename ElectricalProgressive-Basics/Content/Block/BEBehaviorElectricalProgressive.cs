@@ -445,8 +445,11 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
         // Сохраняем флаг формата (например, "binary" или "json")
         tree.SetString("SerializationFormat", "binary");
 
-        // Используем пользовательскую бинарную сериализацию
-        tree.SetBytes(BlockEntityEBase.AllEparamsKey, EParamsSerializer.Serialize(allEparams!));
+        if (allEparams != null)
+        {
+            // Используем пользовательскую бинарную сериализацию
+            tree.SetBytes(BlockEntityEBase.AllEparamsKey, EParamsSerializer.Serialize(allEparams!));
+        }
 
 
     }

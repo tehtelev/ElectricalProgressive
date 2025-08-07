@@ -9,6 +9,7 @@ using ElectricalProgressive.Content.Block.EHeater;
 using ElectricalProgressive.Content.Block.EFonar;
 using ElectricalProgressive.Content.Block.ESFonar;
 using ElectricalProgressive.Content.Block.EFreezer2;
+using ElectricalProgressive.Content.Block.EFence;
 
 
 [assembly: ModDependency("game", "1.21.0-rc.2")]
@@ -84,7 +85,9 @@ public class ElectricalProgressiveQOL : ModSystem
         api.RegisterBlockEntityBehaviorClass("BEBehaviorEOven", typeof(BEBehaviorEOven));
 
 
-
+        api.RegisterBlockClass("BlockEFence", typeof(BlockEFence));
+        api.RegisterBlockEntityClass("BlockEntityEFence", typeof(BlockEntityEFence));
+        api.RegisterBlockEntityBehaviorClass("BEBehaviorEFence", typeof(BEBehaviorEFence));
 
     }
 
