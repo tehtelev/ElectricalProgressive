@@ -101,8 +101,7 @@ public class ElectricalProgressiveBasics : ModSystem
 
         api.RegisterBlockClass("BlockTermoplastini", typeof(BlockTermoplastini));
 
-        api.Network.RegisterChannel("myNetworkChannel")
-            .RegisterMessageType<dynamic>();
+
     }
 
 
