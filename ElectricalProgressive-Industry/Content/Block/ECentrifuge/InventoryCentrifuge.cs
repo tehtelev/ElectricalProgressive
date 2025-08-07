@@ -62,5 +62,10 @@ public class InventoryCentrifuge : InventoryBase, ISlotProvider
     {
         return this.slots[0];
     }
+
+    public override ItemSlot GetAutoPullFromSlot(BlockFacing atBlockFace)
+    {
+        return this.slots[1];
+    }
 }
 
