@@ -116,8 +116,11 @@
   "block-efreezer2-*": "Electric Refrigerator",
   "block-efreezer2-burned-north": "Electric Refrigerator (Burned)",
   "block-handbooktitle-efreezer2": "In Use",
-  "block-handbooktext-efreezer2": "The electric refrigerator allows you to keep food fresh for longer. <br><br>Storage slots: 6.<br>Food spoilage rate: 0.05×"
+  "block-handbooktext-efreezer2": "The electric refrigerator allows you to keep food fresh for longer. <br><br>Storage slots: 6.<br>Food spoilage rate: 0.05×",
 
 
+  "block-efence-*": "Electric Fence",
+  "block-handbooktitle-efence": "Usage",
+  "block-handbooktext-efence": "A good defense against unwanted guests. Deals electric damage on contact. Doesn't consume energy, but must be connected to an electrical circuit to function."
 
 }

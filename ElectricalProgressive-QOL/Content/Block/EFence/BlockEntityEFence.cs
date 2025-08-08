@@ -15,13 +15,18 @@ namespace ElectricalProgressive.Content.Block.EFence
             if (electricity == null)
                 return;
 
+            var voltage = MyMiniLib.GetAttributeInt(this.Block, "voltage", 32);
+            var maxCurrent = MyMiniLib.GetAttributeFloat(this.Block, "maxCurrent", 5.0F);
+            var isolated = MyMiniLib.GetAttributeBool(this.Block, "isolated", false);
+            var isolatedEnvironment = MyMiniLib.GetAttributeBool(this.Block, "isolatedEnvironment", true);
+
             electricity.Connection = Facing.AllAll;
-            electricity.Eparams = (new(128, 128.0F, "", 0, 1, 1, false, false, true), 0);
-            electricity.Eparams = (new(128, 128.0F, "", 0, 1, 1, false, false, true), 1);
-            electricity.Eparams = (new(128, 128.0F, "", 0, 1, 1, false, false, true), 2);
-            electricity.Eparams = (new(128, 128.0F, "", 0, 1, 1, false, false, true), 3);
-            electricity.Eparams = (new(128, 128.0F, "", 0, 1, 1, false, false, true), 4);
-            electricity.Eparams = (new(128, 128.0F, "", 0, 1, 1, false, false, true), 5);
+            electricity.Eparams = (new(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 0);
+            electricity.Eparams = (new(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 1);
+            electricity.Eparams = (new(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 2);
+            electricity.Eparams = (new(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 3);
+            electricity.Eparams = (new(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 4);
+            electricity.Eparams = (new(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 5);
         }
     }
 }

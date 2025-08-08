@@ -1,0 +1,27 @@
+﻿{
+  "ingredientPattern": "GS,GC",
+  "width": 2,
+  "height": 2,
+  "ingredients": {
+    "G": {
+      "type": "item",
+      "code": "game:rod-iron"
+    },
+    "S": {
+      "type": "item",
+      "code": "game:saw-*",
+      "isTool": true,
+      "toolDurabilityCost": 16
+    },
+    "C": {
+      "type": "block",
+      "code": "electricalprogressivebasics:ecable-128v-copper-single-part",
+      "quantity": 16
+    }
+  },
+  "output": {
+    "type": "block",
+    "code": "electricalprogressiveqol:efence-ew-bottom",
+    "quantity": 16
+  }
+}

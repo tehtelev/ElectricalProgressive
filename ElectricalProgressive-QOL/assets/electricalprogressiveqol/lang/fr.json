@@ -111,7 +111,10 @@
   "block-efreezer2-*": "Réfrigérateur électrique",
   "block-efreezer2-burned-north": "Réfrigérateur électrique (brûlé)",
   "block-handbooktitle-efreezer2": "En service",
-  "block-handbooktext-efreezer2": "Le réfrigérateur électrique permet de conserver les aliments plus longtemps. <br><br>Emplacements de stockage : 6.<br>Vitesse de détérioration des aliments : 0,05×"
+  "block-handbooktext-efreezer2": "Le réfrigérateur électrique permet de conserver les aliments plus longtemps. <br><br>Emplacements de stockage : 6.<br>Vitesse de détérioration des aliments : 0,05×",
 
+  "block-efence-*": "Clôture électrique",
+  "block-handbooktitle-efence": "Utilisation",
+  "block-handbooktext-efence": "Une bonne protection contre les invités indésirables. Inflige des dégâts électriques au contact. Ne consomme pas d'énergie, mais doit être connectée à un circuit électrique pour fonctionner."
 
 }

@@ -102,5 +102,10 @@
   "block-efreezer2-*": "Elektrická Chladnička",
   "block-efreezer2-burned-north": "Elektrická Chladnička (Spálená)",
   "block-handbooktitle-efreezer2": "Použití",
-  "block-handbooktext-efreezer2": "Elektrická chladnička vám umožňuje udržet jídlo čerstvé déle. <br><br>Úložných slotů: 6.<br>Rychlost kažení jídla: 0,05×"
+  "block-handbooktext-efreezer2": "Elektrická chladnička vám umožňuje udržet jídlo čerstvé déle. <br><br>Úložných slotů: 6.<br>Rychlost kažení jídla: 0,05×",
+
+  "block-efence-*": "Elektrický plot",
+  "block-handbooktitle-efence": "Použití",
+  "block-handbooktext-efence": "Dobrá ochrana proti nechtěným návštěvníkům. Při dotyku způsobuje elektrické poškození. Nespotřebovává energii, ale musí být připojen k elektrickému obvodu, aby fungoval."
+
 }
