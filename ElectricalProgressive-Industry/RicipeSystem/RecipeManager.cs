@@ -11,6 +11,7 @@ namespace ElectricalProgressive.RicipeSystem;
 public class RecipeManager : ModSystem
 {
     public static List<CentrifugeRecipe> CentrifugeRecipes;
+    public static List<HammerRecipe> HammerRecipes;
     public static List<PressRecipe> PressRecipes;
 
     private ICoreServerAPI api;
@@ -19,6 +20,7 @@ public class RecipeManager : ModSystem
     {
         this.api = api;
         api.Event.SaveGameLoaded += CentrifugeRecipe;
+        api.Event.SaveGameLoaded += HammerRecipe;
         api.Event.SaveGameLoaded += PressRecipe;
     }
 
@@ -27,6 +29,14 @@ public class RecipeManager : ModSystem
         CentrifugeRecipes = new List<CentrifugeRecipe>();
         RecipeLoader recipeLoader = api.ModLoader.GetModSystem<RecipeLoader>();
         recipeLoader.LoadRecipes<CentrifugeRecipe>("Centrifuge Recipe", "recipes/electric/centrifugerecipe", (r) => CentrifugeRecipes.Add(r));
+        api.World.Logger.StoryEvent(Lang.Get("electricalprogressiveindustry:recipeloading"));
+    }
+    
+    public void HammerRecipe()
+    {
+        HammerRecipes = new List<HammerRecipe>();
+        RecipeLoader recipeLoader = api.ModLoader.GetModSystem<RecipeLoader>();
+        recipeLoader.LoadRecipes<HammerRecipe>("Hammer Recipe", "recipes/electric/hammerrecipe", (r) => HammerRecipes.Add(r));
         api.World.Logger.StoryEvent(Lang.Get("electricalprogressiveindustry:recipeloading"));
     }
     

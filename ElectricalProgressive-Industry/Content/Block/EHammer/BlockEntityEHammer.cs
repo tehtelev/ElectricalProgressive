@@ -12,22 +12,25 @@ using Vintagestory.GameContent;
 
 namespace ElectricalProgressive.Content.Block.ECentrifuge;
 
-public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
+public class BlockEntityEHammer : BlockEntityGenericTypedContainer
 {
-
-    internal InventoryCentrifuge inventory;
-    private GuiDialogCentrifuge clientDialog;
-    public override string InventoryClassName => "ecentrifuge";
-    public CentrifugeRecipe CurrentRecipe;
+    
+    internal InventoryHammer inventory;
+    private GuiDialogHammer clientDialog;
+    public override string InventoryClassName => "ehammer";
+    public HammerRecipe CurrentRecipe;
     private readonly int _maxConsumption;
     private ICoreClientAPI _capi;
     private bool _wasCraftingLastTick;
+    public ItemSlot InputSlot => this.inventory[0];
+    public ItemSlot OutputSlot => this.inventory[1];
+    public ItemSlot SecondaryOutputSlot => this.inventory[2]; // Новый слот для дополнительного выхода
 
     public string CurrentRecipeName;
     public float RecipeProgress;
     private ILoadedSound ambientSound;
 
-    public virtual string DialogTitle => Lang.Get("ecentrifuge");
+    public virtual string DialogTitle => Lang.Get("ehammer");
 
     public override InventoryBase Inventory => (InventoryBase)this.inventory;
 
@@ -81,20 +84,20 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
     }
 
 
-    public BlockEntityECentrifuge()
+
+    public BlockEntityEHammer()
     { 
         _maxConsumption = MyMiniLib.GetAttributeInt(this.Block, "maxConsumption", 100);
-        this.inventory = new InventoryCentrifuge((string)null, (ICoreAPI)null);
+        this.inventory = new InventoryHammer((string)null, (ICoreAPI)null);
         this.inventory.SlotModified += new Action<int>(this.OnSlotModifid);
     }
-
 
 
     public override void Initialize(ICoreAPI api)
     {
         base.Initialize(api);
         this.inventory.LateInitialize(
-          "ecentrifuge-" + this.Pos.X.ToString() + "/" + this.Pos.Y.ToString() + "/" + this.Pos.Z.ToString(), api);
+          "ehammer-" + this.Pos.X.ToString() + "/" + this.Pos.Y.ToString() + "/" + this.Pos.Z.ToString(), api);
         this.RegisterGameTickListener(new Action<float>(this.Every500ms), 500);
         
         if (api.Side == EnumAppSide.Client)
@@ -142,7 +145,7 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
         CurrentRecipe = null;
         CurrentRecipeName = string.Empty;
 
-        foreach (CentrifugeRecipe recipe in RecipeManager.CentrifugeRecipes)
+        foreach (HammerRecipe recipe in RecipeManager.HammerRecipes)
         {
             int outsize;
 
@@ -159,10 +162,11 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
 
     private void Every500ms(float dt)
     {
-        var beh = GetBehavior<BEBehaviorECentrifuge>();
+        var beh = GetBehavior<BEBehaviorEHammer>();
         if (beh == null)
         {
             StopAnimation();
+            stopSound();
             return;
         }
 
@@ -211,67 +215,64 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
         _wasCraftingLastTick = isCraftingNow;
     }
 
-private void ProcessCompletedCraft()
-{
-    // Проверяем наличие рецепта и API
-    if (CurrentRecipe == null || Api == null || CurrentRecipe.Output?.ResolvedItemstack == null) 
+    private void ProcessCompletedCraft()
     {
-        return;
+        if (CurrentRecipe == null || Api == null || CurrentRecipe.Output?.ResolvedItemstack == null) 
+        {
+            return;
+        }
+
+        try
+        {
+            // Обработка основного выхода
+            ItemStack outputItem = CurrentRecipe.Output.ResolvedItemstack.Clone();
+            TryMergeOrSpawn(outputItem, OutputSlot);
+
+            // Обработка дополнительного выхода с шансом
+            if (CurrentRecipe.SecondaryOutput != null && 
+                CurrentRecipe.SecondaryOutput.ResolvedItemstack != null &&
+                Api.World.Rand.NextDouble() < CurrentRecipe.SecondaryOutputChance)
+            {
+                ItemStack secondaryOutput = CurrentRecipe.SecondaryOutput.ResolvedItemstack.Clone();
+                TryMergeOrSpawn(secondaryOutput, SecondaryOutputSlot);
+            }
+
+            // Извлекаем ингредиенты
+            InputSlot.TakeOut(CurrentRecipe.Ingredients[0].Quantity);
+            InputSlot.MarkDirty();
+        }
+        catch (Exception ex)
+        {
+            Api?.Logger.Error($"Ошибка в обработке крафта: {ex}");
+        }
     }
 
-    try
+    private void TryMergeOrSpawn(ItemStack stack, ItemSlot targetSlot)
     {
-        // Создаем копию выходного предмета
-        ItemStack outputItem = CurrentRecipe.Output.ResolvedItemstack.Clone();
-
-        // Проверяем ингредиенты и слоты
-        if (CurrentRecipe.Ingredients == null || CurrentRecipe.Ingredients.Length == 0 || InputSlot == null)
+        if (targetSlot.Empty)
         {
-            Api.Logger.Error("Ошибка в рецепте: отсутствуют ингредиенты или входной слот");
-            return;
+            targetSlot.Itemstack = stack;
         }
-
-        // Обработка выходного слота
-        if (OutputSlot == null)
+        else if (targetSlot.Itemstack.Collectible == stack.Collectible &&
+                targetSlot.Itemstack.StackSize < targetSlot.Itemstack.Collectible.MaxStackSize)
         {
-            Api.Logger.Error("Ошибка: выходной слот не существует");
-            return;
-        }
+            int freeSpace = targetSlot.Itemstack.Collectible.MaxStackSize - targetSlot.Itemstack.StackSize;
+            int toAdd = Math.Min(freeSpace, stack.StackSize);
 
-        if (OutputSlot.Empty)
-        {
-            OutputSlot.Itemstack = outputItem;
-        }
-        else if (OutputSlot.Itemstack != null && 
-                outputItem.Collectible != null &&
-                OutputSlot.Itemstack.Collectible == outputItem.Collectible &&
-                OutputSlot.Itemstack.StackSize < OutputSlot.Itemstack.Collectible.MaxStackSize)
-        {
-            int freeSpace = OutputSlot.Itemstack.Collectible.MaxStackSize - OutputSlot.Itemstack.StackSize;
-            int toAdd = Math.Min(freeSpace, outputItem.StackSize);
+            targetSlot.Itemstack.StackSize += toAdd;
+            stack.StackSize -= toAdd;
 
-            OutputSlot.Itemstack.StackSize += toAdd;
-            outputItem.StackSize -= toAdd;
-
-            if (outputItem.StackSize > 0)
+            if (stack.StackSize > 0)
             {
-                Api.World.SpawnItemEntity(outputItem, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
+                Api.World.SpawnItemEntity(stack, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
             }
         }
         else
         {
-            Api.World.SpawnItemEntity(outputItem, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
+            Api.World.SpawnItemEntity(stack, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
         }
-
-        // Извлекаем ингредиенты из входного слота
-        InputSlot.TakeOut(CurrentRecipe.Ingredients[0].Quantity);
-        InputSlot.MarkDirty();
+        targetSlot.MarkDirty();
     }
-    catch (Exception ex)
-    {
-        Api?.Logger.Error($"Ошибка в обработке крафта: {ex}");
-    }
-}
     
 
     private void StartAnimation()
@@ -285,7 +286,7 @@ private void ProcessCompletedCraft()
             {
                 Animation = "craft",
                 Code = "craft",
-                AnimationSpeed = 1f,
+                AnimationSpeed = 5f,
                 EaseOutSpeed = 4f,
                 EaseInSpeed = 1f
             });
@@ -303,23 +304,24 @@ private void ProcessCompletedCraft()
         }
         catch (Exception ex)
         {
-            Api.Logger.Error($"Ошибка в остановке анимации: {ex}");
+            Api.Logger.Error($"Error stopping animation: {ex}");
         }
-    }
+    }    
     
     public void startSound()
     {
         if (this.ambientSound != null)
             return;
-        if ((Api != null ? (Api.Side == EnumAppSide.Client ? 1 : 0) : 0) == 0)
+        ICoreAPI api = this.Api;
+        if ((api != null ? (api.Side == EnumAppSide.Client ? 1 : 0) : 0) == 0)
             return;
         this.ambientSound = (this.Api as ICoreClientAPI).World.LoadSound(new SoundParams()
         {
-            Location = new AssetLocation("electricalprogressiveindustry:sounds/ecentrifuge/centrifuge.ogg"),
+            Location = new AssetLocation("electricalprogressiveindustry:sounds/ehammer/hammer.ogg"),
             ShouldLoop = true,
             Position = this.Pos.ToVec3f().Add(0.5f, 0.25f, 0.5f),
             DisposeOnFinish = false,
-            Volume = 0.75f,
+            Volume = 0.75f
         });
         this.ambientSound.Start();
     }
@@ -332,7 +334,6 @@ private void ProcessCompletedCraft()
         this.ambientSound.Dispose();
         this.ambientSound = (ILoadedSound) null;
     }
-
     protected virtual void UpdateState(float RecipeProgress)
     {
         if (Api != null && Api.Side == EnumAppSide.Client && clientDialog != null && clientDialog.IsOpened())
@@ -348,7 +349,7 @@ private void ProcessCompletedCraft()
             this.toggleInventoryDialogClient(byPlayer, (CreateDialogDelegate)(() =>
             {
                 this.clientDialog =
-                  new GuiDialogCentrifuge(this.DialogTitle, this.Inventory, this.Pos, this.Api as ICoreClientAPI);
+                  new GuiDialogHammer(this.DialogTitle, this.Inventory, this.Pos, this.Api as ICoreClientAPI);
                 this.clientDialog.Update(RecipeProgress);
                 return (GuiDialogBlockEntity)this.clientDialog;
             }));
@@ -448,9 +449,6 @@ private void ProcessCompletedCraft()
         }
     }
     
-    public ItemSlot InputSlot => this.inventory[0];
-    public ItemSlot OutputSlot => this.inventory[1];
-
     public ItemStack InputStack
     {
         get => this.inventory[0].Itemstack;

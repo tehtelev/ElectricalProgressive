@@ -1,0 +1,46 @@
+﻿[
+  {
+    "code": "blistersteel",
+    "EnergyOperation": 10000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:ingot-blistersteel",
+        "quantity": 1
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "game:ingot-steel",
+      "stackSize": 1
+    },
+    "secondaryOutput": {
+      "type": "item",
+      "code": "game:metalbit-blistersteel",
+      "stackSize": 3
+    },
+    "secondaryOutputChance": 0.3
+  },
+  {
+    "code": "ironbloom",
+    "EnergyOperation": 10000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:ironbloom",
+        "quantity": 1
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "game:ingot-iron",
+      "stackSize": 1
+    },
+    "secondaryOutput": {
+      "type": "item",
+      "code": "game:metalbit-iron",
+      "stackSize": 3
+    },
+    "secondaryOutputChance": 0.3
+  }
+]

@@ -5,25 +5,25 @@ using Vintagestory.API.MathTools;
 
 namespace ElectricalProgressive.Content.Block.ECentrifuge;
 
-public class InventoryCentrifuge : InventoryBase, ISlotProvider
+public class InventoryHammer : InventoryBase, ISlotProvider
 {
     private ItemSlot[] slots;
 
     public ItemSlot[] Slots => this.slots;
 
-    public InventoryCentrifuge(string inventoryID, ICoreAPI api)
+    public InventoryHammer(string inventoryID, ICoreAPI api)
         : base(inventoryID, api)
     {
-        this.slots = this.GenEmptySlots(2);
+        this.slots = this.GenEmptySlots(3); // Теперь 3 слота
     }
 
-    public InventoryCentrifuge(string className, string instanceID, ICoreAPI api)
+    public InventoryHammer(string className, string instanceID, ICoreAPI api)
         : base(className, instanceID, api)
     {
-        this.slots = this.GenEmptySlots(2);
+        this.slots = this.GenEmptySlots(3); // Теперь 3 слота
     }
 
-    public override int Count => 2;
+    public override int Count => 3; // Теперь 3 слота
 
     public override ItemSlot this[int slotId]
     {
@@ -53,26 +53,37 @@ public class InventoryCentrifuge : InventoryBase, ISlotProvider
 
     public override float GetSuitability(ItemSlot sourceSlot, ItemSlot targetSlot, bool isMerge)
     {
-        return targetSlot == this.slots[0] && sourceSlot.Itemstack.Collectible.GrindingProps != null
-            ? 4f
-            : base.GetSuitability(sourceSlot, targetSlot, isMerge);
+        // Слот 0 - только для входных предметов
+        if (targetSlot == this.slots[0])
+        {
+            return sourceSlot.Itemstack.Collectible.GrindingProps != null ? 4f : 0f;
+        }
+        
+        // Слоты 1 и 2 - только для выходных предметов (нельзя вручную класть)
+        return 0f;
     }
 
     public override ItemSlot GetAutoPushIntoSlot(BlockFacing atBlockFace, ItemSlot fromSlot)
     {
+        // Автозаполнение только в входной слот
         return this.slots[0];
     }
 
     public override ItemSlot GetAutoPullFromSlot(BlockFacing atBlockFace)
     {
-        for (var i = 1; i < Slots.Length; i++)
+        // Автовывод сначала из основного выхода (слот 1), затем из дополнительного (слот 2)
+        for (var i = 1; i < this.slots.Length; i++)
         {
-            var slot = Slots[i];
+            var slot = this.slots[i];
             if (!slot.Empty)
                 return slot;
         }
 
-        return null!;
+        return null;
     }
-}
 
+    // Методы для удобного доступа к слотам
+    public ItemSlot InputSlot => this.slots[0];
+    public ItemSlot OutputSlot => this.slots[1];
+    public ItemSlot SecondaryOutputSlot => this.slots[2];
+}
