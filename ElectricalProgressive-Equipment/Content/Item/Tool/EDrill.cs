@@ -12,7 +12,7 @@ namespace ElectricalProgressive.Content.Item.Tool;
 
 class EDrill : Vintagestory.API.Common.Item
 {
-    public SkillItem[] toolModes= Array.Empty<SkillItem>();
+    public SkillItem[] toolModes = Array.Empty<SkillItem>();
     int consume;
 
 
@@ -31,18 +31,28 @@ class EDrill : Vintagestory.API.Common.Item
 
 
 
-        toolModes = ObjectCacheUtil.GetOrCreate(api, "drillToolModes", () => new SkillItem[2]
+        toolModes = ObjectCacheUtil.GetOrCreate(api, "drillToolModes", () => new SkillItem[4]
         {
             new SkillItem
             {
-                Code = new AssetLocation("1size"),
-                Name = Lang.Get("drill1")
+                Code = new AssetLocation("11size"),
+                Name = Lang.Get("drill11")
             }.WithIcon(capi, IconStorage.DrawTool1x1),
             new SkillItem
             {
-                Code = new AssetLocation("3size"),
-                Name = Lang.Get("drill2")
-            }.WithIcon(capi, IconStorage.DrawTool1x3)
+                Code = new AssetLocation("13size"),
+                Name = Lang.Get("drill13")
+            }.WithIcon(capi, IconStorage.DrawTool1x3),
+            new SkillItem
+            {
+                Code = new AssetLocation("31size"),
+                Name = Lang.Get("drill31")
+            }.WithIcon(capi, IconStorage.DrawTool3x1),
+            new SkillItem
+            {
+                Code = new AssetLocation("33size"),
+                Name = Lang.Get("drill33")
+            }.WithIcon(capi, IconStorage.DrawTool3x3)
         });
     }
 
@@ -76,7 +86,7 @@ class EDrill : Vintagestory.API.Common.Item
         int toolMode)
     {
         ItemSlot mouseItemSlot = byPlayer.InventoryManager.MouseItemSlot;
-        if (!mouseItemSlot.Empty && mouseItemSlot.Itemstack.Block != null )
+        if (!mouseItemSlot.Empty && mouseItemSlot.Itemstack.Block != null)
         {
             api.Event.PushEvent("keepopentoolmodedlg");
         }
@@ -94,6 +104,10 @@ class EDrill : Vintagestory.API.Common.Item
     public override void DamageItem(IWorldAccessor world, Entity byEntity, ItemSlot itemslot, int amount)
     {
         int durability = itemslot.Itemstack.Attributes.GetInt("durability");
+        var toolMode = GetToolMode(itemslot, byEntity as IPlayer, null!);
+        if (toolMode == 3)
+            amount = 3;
+
         if (durability > amount)
         {
             durability -= amount;
@@ -107,7 +121,7 @@ class EDrill : Vintagestory.API.Common.Item
 
         itemslot.MarkDirty();
     }
-    
+
     /// <summary>
     /// Информация о предмете
     /// </summary>
@@ -162,7 +176,7 @@ class EDrill : Vintagestory.API.Common.Item
         int durability = slot.Itemstack.Attributes.GetInt("durability");
         if (durability > 1)
         {
-            DamageItem(world,byEntity,slot,1);
+            DamageItem(world, byEntity, slot, 1);
             if (base.OnBlockBrokenWith(world, byEntity, slot, blockSel, dropQuantityMultiplier))
             {
                 if (byEntity is EntityPlayer)
@@ -171,68 +185,69 @@ class EDrill : Vintagestory.API.Common.Item
                     {
                         var selection = new Selection(blockSel);
 
-                        if (GetToolMode(slot,player,blockSel) == 1) //второй режим 1х3
+                        var toolMode = GetToolMode(slot, player, blockSel);
+
+                        if (toolMode == 0) //режим 1х1
+                        {
+                            destroyBlocks(world, blockSel.Position,
+                                blockSel.Position, player, blockSel, slot);
+                        }
+
+
+                        if (toolMode == 1) // режим 1х3 (вертикально)
+                        {
+                            destroyBlocks(world, blockSel.Position.AddCopy(0, -1, 0),
+                                blockSel.Position.AddCopy(0, 1, 0), player, blockSel, slot);
+                        }
+
+                        if (toolMode == 2) // режим 3х1 (горизонтально)
                         {
                             switch (blockSel.Face.Axis)
                             {
                                 case EnumAxis.X: //x грань
-                                    
-                                    if (selection.Direction == BlockFacing.DOWN || selection.Direction == BlockFacing.UP) // смотрим в сторону Y
-                                    {
-                                        destroyBlocks(world, blockSel.Position.AddCopy(0, -1, 0),
-                                        blockSel.Position.AddCopy(0, 1, 0), player, blockSel, slot);
-                                    }
-                                    else if (selection.Direction == BlockFacing.SOUTH || selection.Direction == BlockFacing.NORTH) // смотрим в сторону z
-                                    {
-                                        destroyBlocks(world, blockSel.Position.AddCopy(0, 0, -1),
-                                        blockSel.Position.AddCopy(0, 0, 1), player, blockSel, slot);
-                                    }
+                                    destroyBlocks(world, blockSel.Position.AddCopy(0, 0, -1),
+                                    blockSel.Position.AddCopy(0, 0, 1), player, blockSel, slot);
                                     break;
                                 case EnumAxis.Y: //y грань
-                                    
                                     if (selection.Direction == BlockFacing.EAST || selection.Direction == BlockFacing.WEST) // смотрим в сторону x
                                     {
                                         destroyBlocks(world, blockSel.Position.AddCopy(-1, 0, 0),
-                                        blockSel.Position.AddCopy(1, 0, 0), player, blockSel, slot);
+                                            blockSel.Position.AddCopy(1, 0, 0), player, blockSel, slot);
                                     }
                                     else if (selection.Direction == BlockFacing.SOUTH || selection.Direction == BlockFacing.NORTH) // смотрим в сторону z
                                     {
                                         destroyBlocks(world, blockSel.Position.AddCopy(0, 0, -1),
-                                        blockSel.Position.AddCopy(0, 0, 1), player, blockSel, slot);
+                                            blockSel.Position.AddCopy(0, 0, 1), player, blockSel, slot);
                                     }
                                     break;
                                 case EnumAxis.Z: //z грань
-                                    if (selection.Direction == BlockFacing.DOWN || selection.Direction == BlockFacing.UP) // смотрим в сторону Y
-                                    {
-                                        destroyBlocks(world, blockSel.Position.AddCopy(0, -1, 0),
-                                        blockSel.Position.AddCopy(0, 1, 0), player, blockSel, slot);
-                                    }
-                                    else if (selection.Direction == BlockFacing.EAST || selection.Direction == BlockFacing.WEST) // смотрим в сторону x
-                                    {
-                                        destroyBlocks(world, blockSel.Position.AddCopy(-1, 0, 0),
-                                        blockSel.Position.AddCopy(1, 0, 0), player, blockSel, slot);
-                                    }
+
+                                    destroyBlocks(world, blockSel.Position.AddCopy(-1, 0, 0),
+                                    blockSel.Position.AddCopy(1, 0, 0), player, blockSel, slot);
+
                                     break;
                             }
                         }
-                        else
+
+                        if (toolMode == 3) // режим 3х3
                         {
-                            switch (blockSel.Face.Axis) //первый режим
+                            switch (blockSel.Face.Axis)
                             {
-                                case EnumAxis.X:
-                                    destroyBlocks(world, blockSel.Position,
-                                        blockSel.Position, player, blockSel, slot);
+                                case EnumAxis.X: //x грань
+                                    destroyBlocks(world, blockSel.Position.AddCopy(0, -1, -1),
+                                        blockSel.Position.AddCopy(0, 1, 1), player, blockSel, slot);
                                     break;
-                                case EnumAxis.Y:
-                                    destroyBlocks(world, blockSel.Position,
-                                        blockSel.Position, player, blockSel, slot);
+                                case EnumAxis.Y: //y грань
+                                    destroyBlocks(world, blockSel.Position.AddCopy(-1, 0, -1),
+                                        blockSel.Position.AddCopy(1, 0, 1), player, blockSel, slot);
                                     break;
-                                case EnumAxis.Z:
-                                    destroyBlocks(world, blockSel.Position,
-                                        blockSel.Position, player, blockSel, slot);
+                                case EnumAxis.Z: //z грань
+                                    destroyBlocks(world, blockSel.Position.AddCopy(-1, -1, 0),
+                                        blockSel.Position.AddCopy(1, 1, 0), player, blockSel, slot);
                                     break;
-                            } 
+                            }
                         }
+
                     }
 
                 }
@@ -242,6 +257,11 @@ class EDrill : Vintagestory.API.Common.Item
         }
         return false;
     }
+
+
+
+
+
 
     /// <summary>
     /// Ломает блоки в заданном диапазоне
@@ -253,14 +273,14 @@ class EDrill : Vintagestory.API.Common.Item
     /// <param name="block"></param>
     /// <param name="slot"></param>
     //credit to stitch37 for this code
-    public void destroyBlocks(IWorldAccessor world, BlockPos min, BlockPos max, IPlayer player,BlockSelection block, ItemSlot slot)
+    public void destroyBlocks(IWorldAccessor world, BlockPos min, BlockPos max, IPlayer player, BlockSelection block, ItemSlot slot)
     {
-        int durability = slot.Itemstack.Attributes.GetInt("durability"); 
+        int durability = slot.Itemstack.Attributes.GetInt("durability");
         var wBA = world.BlockAccessor;  //тяжелая штука, нужно разочек обьявить
         var centerBlock = wBA.GetBlock(block.Position);
         var itemStack = new ItemStack(this);
         Vintagestory.API.Common.Block tempBlock;
-        var miningTimeMainBlock = GetMiningSpeed(itemStack, block,centerBlock, player);
+        var miningTimeMainBlock = GetMiningSpeed(itemStack, block, centerBlock, player);
         float miningTime;
         var tempPos = new BlockPos(min.dimension);
 
@@ -278,7 +298,7 @@ class EDrill : Vintagestory.API.Common.Item
                     {
                         if (durability > 1)
                         {
-                            miningTime = tempBlock.GetMiningSpeed(itemStack, block,tempBlock, player);
+                            miningTime = tempBlock.GetMiningSpeed(itemStack, block, tempBlock, player);
                             if (ToolTier >= tempBlock.RequiredMiningTier
                                 && miningTimeMainBlock * 1.5f >= miningTime
                                 && MiningSpeed.ContainsKey(tempBlock.BlockMaterial))
@@ -291,5 +311,5 @@ class EDrill : Vintagestory.API.Common.Item
                 }
             }
         }
-    }    
+    }
 }

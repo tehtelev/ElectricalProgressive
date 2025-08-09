@@ -108,9 +108,12 @@
   "block-efreezer2-*": "Nevera eléctrica",
   "block-efreezer2-burned-north": "Nevera eléctrica (quemada)",
   "block-handbooktitle-efreezer2": "En uso",
-  "block-handbooktext-efreezer2": "La nevera eléctrica permite conservar los alimentos durante más tiempo. <br><br>Ranuras de almacenamiento: 6.<br>Tasa de descomposición de los alimentos: 0,05×"
+  "block-handbooktext-efreezer2": "La nevera eléctrica permite conservar los alimentos durante más tiempo. <br><br>Ranuras de almacenamiento: 6.<br>Tasa de descomposición de los alimentos: 0,05×",
 
 
+  "block-efence-*": "Valla eléctrica",
+  "block-handbooktitle-efence": "Uso",
+  "block-handbooktext-efence": "Buena defensa contra invitados no deseados. Causa daño eléctrico al contacto. No consume energía, pero debe estar conectada a un circuito eléctrico para funcionar."
 
 
 }

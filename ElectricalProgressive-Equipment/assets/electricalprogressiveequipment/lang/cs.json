@@ -1,4 +1,4 @@
-{
+﻿{
   "item-static-saber-*": "Elektrická Šavle",
   "item-static-spear": "Elektrické Kopí",
   "item-static-shield": "Elektrický Štít",
@@ -33,11 +33,15 @@
   "item-edrilltip": "Vrták",
   "item-eaxe": "Elektrická Sekera",
 
-  "game:drill1": "Vrtá blok 1×1",
-  "game:drill2": "Vrtá oblast 1×3 bloků",
+  "game:drill11": "Kope 1x1 blok",
+  "game:drill13": "Kope 1x3 bloky",
+  "game:drill31": "Kope 3x1 bloky",
+  "game:drill33": "Kope 3x3 bloky",
+
 
   "item-handbooktitle-edrill": "Použití",
-  "item-handbooktext-edrill": "Těžba dosahuje nové úrovně. Umožňuje provoz ve dvou režimech: 1×1 a 1×3.<br>Po vybití přestane fungovat. Nezapomeňte dobít!",
+  "item-handbooktext-edrill": "Těžba se posouvá na novou úroveň. Umožňuje pracovat v několika režimech: 1x1, 1x3 (vertikálně), 3x1 (horizontálně), 3x3. V režimu 3x3 je spotřeba energie trojnásobná.<br>Když se vybije, přestane fungovat. Nezapomeňte jej nabít!",
+
 
   "item-handbooktitle-echisel": "Použití",
   "item-handbooktext-echisel": "Funguje jako dláto na baterie. Ve druhé ruce nepotřebujete kladivo. Nepoužívá se v receptech.<br>Po vybití přestane fungovat. Nezapomeňte dobít!",

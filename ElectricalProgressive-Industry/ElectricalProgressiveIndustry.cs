@@ -5,7 +5,7 @@ using ElectricalProgressive.Content.Block.EWoodcutter;
 using ElectricalProgressive.Patches;
 
 
-[assembly: ModDependency("game", "1.21.0-rc.2")]
+[assembly: ModDependency("game", "1.21.0-rc.3")]
 [assembly: ModDependency("electricalprogressivecore", "2.1.0-rc.2")]
 [assembly: ModDependency("electricalprogressivebasics", "2.1.0-rc.2")]
 [assembly: ModInfo(
