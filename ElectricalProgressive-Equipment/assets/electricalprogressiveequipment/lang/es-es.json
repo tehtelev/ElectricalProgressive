@@ -33,11 +33,15 @@
   "item-edrilltip": "Punta de broca",
   "item-eaxe": "Hacha eléctrica",
 
-  "game:drill1": "Excava un bloque 1×1",
-  "game:drill2": "Excava un área de 1×3 bloques",
+  "game:drill11": "Excava 1x1 bloque",
+  "game:drill13": "Excava 1x3 bloques",
+  "game:drill31": "Excava 3x1 bloques",
+  "game:drill33": "Excava 3x3 bloques",
+
 
   "item-handbooktitle-edrill": "Uso",
-  "item-handbooktext-edrill": "La minería alcanza un nuevo nivel. Permite funcionar en dos modos: 1×1 y 1×3.<br>Cuando se agote la carga, dejará de funcionar. ¡No olvides recargar!",
+  "item-handbooktext-edrill": "La minería alcanza un nuevo nivel. Permite trabajar en varios modos: 1x1, 1x3 (vertical), 3x1 (horizontal), 3x3. En el modo 3x3, el consumo se triplica.<br>Cuando se descargue, dejará de funcionar. ¡No olvides recargarlo!",
+
 
   "item-handbooktitle-echisel": "Uso",
   "item-handbooktext-echisel": "Funciona como un cincel alimentado por batería. No se necesita martillo en la mano secundaria. No se usa en recetas.<br>Cuando se agote la carga, dejará de funcionar. ¡No olvides recargar!",

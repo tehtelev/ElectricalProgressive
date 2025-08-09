@@ -34,11 +34,14 @@
   "item-edrilltip": "Ponta de broca",
   "item-eaxe": "Machado elétrico",
 
-  "game:drill1": "Escava um bloco 1×1",
-  "game:drill2": "Escava uma área de 1×3 blocos",
+  "game:drill11": "Mina 1x1 bloco",
+  "game:drill13": "Mina 1x3 blocos",
+  "game:drill31": "Mina 3x1 blocos",
+  "game:drill33": "Mina 3x3 blocos",
 
   "item-handbooktitle-edrill": "Uso",
-  "item-handbooktext-edrill": "A mineração atinge um novo nível. Permite operar em dois modos: 1×1 e 1×3.<br>Quando a carga acabar, ele para de funcionar. Não se esqueça de recarregar!",
+  "item-handbooktext-edrill": "A mineração atinge um novo nível. Permite operar em vários modos: 1x1, 1x3 (vertical), 3x1 (horizontal), 3x3. No modo 3x3, o consumo de energia é triplicado.<br>Quando descarregar, deixará de funcionar. Não se esqueça de recarregar!",
+
 
   "item-handbooktitle-echisel": "Uso",
   "item-handbooktext-echisel": "Desempenha funções de cinzel movido a bateria. Martelo na mão secundária não é necessário. Não usado em receitas.<br>Quando a carga acabar, ele para de funcionar. Não se esqueça de recarregar!",

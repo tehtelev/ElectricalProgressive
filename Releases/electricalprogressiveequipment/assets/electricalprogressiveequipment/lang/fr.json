@@ -37,11 +37,15 @@
   "item-edrilltip": "Mèche de forage",
   "item-eaxe": "Hache électrique",
 
-  "game:drill1": "Creuse un bloc 1×1",
-  "game:drill2": "Creuse une zone 1×3 blocs",
+  "game:drill11": "Creuse 1x1 bloc",
+  "game:drill13": "Creuse 1x3 blocs",
+  "game:drill31": "Creuse 3x1 blocs",
+  "game:drill33": "Creuse 3x3 blocs",
+
 
   "item-handbooktitle-edrill": "Utilisation",
-  "item-handbooktext-edrill": "L’exploitation minière passe à un nouveau niveau. Permet deux modes : 1×1 et 1×3.<br>Quand la batterie est vide, il cesse de fonctionner. N’oubliez pas de recharger !",
+  "item-handbooktext-edrill": "L'extraction minière passe à un nouveau niveau. Permet de fonctionner en plusieurs modes : 1x1, 1x3 (vertical), 3x1 (horizontal), 3x3. En mode 3x3, la consommation est triplée.<br>Une fois déchargé, il cesse de fonctionner. N'oubliez pas de le recharger !",
+
 
   "item-handbooktitle-echisel": "Utilisation",
   "item-handbooktext-echisel": "Fonctionne comme un burin alimenté par batterie. Un marteau en main secondaire n’est pas nécessaire. Non utilisé dans les recettes.<br>Quand la batterie est vide, il cesse de fonctionner. N’oubliez pas de recharger !",

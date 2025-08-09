@@ -12,15 +12,15 @@ using ElectricalProgressive.Content.Block.EFreezer2;
 using ElectricalProgressive.Content.Block.EFence;
 
 
-[assembly: ModDependency("game", "1.21.0-rc.2")]
-[assembly: ModDependency("electricalprogressivecore", "2.1.0-rc.2")]
-[assembly: ModDependency("electricalprogressivebasics", "2.1.0-rc.2")]
+[assembly: ModDependency("game", "1.21.0-rc.3")]
+[assembly: ModDependency("electricalprogressivecore", "2.1.0-rc.3")]
+[assembly: ModDependency("electricalprogressivebasics", "2.1.0-rc.3")]
 [assembly: ModInfo(
     "Electrical Progressive: QoL",
     "electricalprogressiveqol",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Additional electrical devices.",
-    Version = "2.1.0-rc.2",
+    Version = "2.1.0-rc.3",
     Authors = new[] {
         "Tehtelev",
         "Kotl"

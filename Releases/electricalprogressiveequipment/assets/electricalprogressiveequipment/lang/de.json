@@ -35,11 +35,15 @@
   "item-edrilltip": "Bohrerspitze",
   "item-eaxe": "Elektrische Axt",
 
-  "game:drill1": "Gräbt einen 1×1 Block",
-  "game:drill2": "Gräbt einen 1×3 Blockbereich",
+  "game:drill11": "Gräbt 1x1 Block",
+  "game:drill13": "Gräbt 1x3 Blöcke",
+  "game:drill31": "Gräbt 3x1 Blöcke",
+  "game:drill33": "Gräbt 3x3 Blöcke",
+
 
   "item-handbooktitle-edrill": "Verwendung",
-  "item-handbooktext-edrill": "Der Abbau erreicht ein neues Niveau. Ermöglicht zwei Modi: 1×1 und 1×3.<br>Wenn der Akku leer ist, hört es auf zu funktionieren. Nicht vergessen: aufladen!",
+  "item-handbooktext-edrill": "Der Bergbau erreicht ein neues Niveau. Ermöglicht den Betrieb in mehreren Modi: 1x1, 1x3 (vertikal), 3x1 (horizontal), 3x3. Im 3x3-Modus ist der Energieverbrauch dreimal so hoch.<br>Wenn der Akku leer ist, funktioniert es nicht mehr. Vergiss nicht, es aufzuladen!",
+
 
   "item-handbooktitle-echisel": "Verwendung",
   "item-handbooktext-echisel": "Führt die Funktion eines batteriebetriebenen Meißels aus. Hammer in der linken Hand ist nicht nötig. Nicht in Rezepten verwendbar.<br>Wenn der Akku leer ist, hört es auf zu funktionieren. Nicht vergessen: aufladen!",

@@ -109,9 +109,12 @@
   "block-efreezer2-*": "Elektrischer Kühlschrank",
   "block-efreezer2-burned-north": "Elektrischer Kühlschrank (verbrannt)",
   "block-handbooktitle-efreezer2": "In Gebrauch",
-  "block-handbooktext-efreezer2": "Der elektrische Kühlschrank ermöglicht es, Lebensmittel länger aufzubewahren. <br><br>Stauraum: 6 Plätze.<br>Verderbensgeschwindigkeit: 0,05×"
+  "block-handbooktext-efreezer2": "Der elektrische Kühlschrank ermöglicht es, Lebensmittel länger aufzubewahren. <br><br>Stauraum: 6 Plätze.<br>Verderbensgeschwindigkeit: 0,05×",
 
 
+  "block-efence-*": "Elektrozaun",
+  "block-handbooktitle-efence": "Verwendung",
+  "block-handbooktext-efence": "Ein guter Schutz vor unerwünschten Gästen. Verursacht Stromschaden bei Berührung. Verbraucht keine Energie, muss aber an einen Stromkreis angeschlossen sein, um zu funktionieren."
 
 
 }

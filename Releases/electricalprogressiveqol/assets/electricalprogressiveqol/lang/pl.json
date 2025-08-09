@@ -110,9 +110,12 @@
   "block-efreezer2-*": "Lodówka Elektryczna",
   "block-efreezer2-burned-north": "Lodówka Elektryczna (spalona)",
   "block-handbooktitle-efreezer2": "W użyciu",
-  "block-handbooktext-efreezer2": "Elektryczna lodówka pozwala na dłuższe przechowywanie żywności. <br><br>Miejsca do przechowywania: 6.<br>Szybkość psucia się żywności: 0,05×"
+  "block-handbooktext-efreezer2": "Elektryczna lodówka pozwala na dłuższe przechowywanie żywności. <br><br>Miejsca do przechowywania: 6.<br>Szybkość psucia się żywności: 0,05×",
 
 
+  "block-efence-*": "Elektryczne ogrodzenie",
+  "block-handbooktitle-efence": "Zastosowanie",
+  "block-handbooktext-efence": "Dobra ochrona przed niechcianymi gośćmi. Zadaje obrażenia elektryczne przy kontakcie. Nie zużywa energii, ale musi być podłączone do obwodu elektrycznego, aby działać."
 
 
 }
