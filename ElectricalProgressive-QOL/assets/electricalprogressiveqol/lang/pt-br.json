@@ -109,9 +109,12 @@
   "block-efreezer2-*": "Geladeira Elétrica",
   "block-efreezer2-burned-north": "Geladeira Elétrica (queimada)",
   "block-handbooktitle-efreezer2": "Em uso",
-  "block-handbooktext-efreezer2": "A geladeira elétrica permite conservar os alimentos por mais tempo. <br><br>Slots de armazenamento: 6.<br>Taxa de deterioração dos alimentos: 0,05×"
+  "block-handbooktext-efreezer2": "A geladeira elétrica permite conservar os alimentos por mais tempo. <br><br>Slots de armazenamento: 6.<br>Taxa de deterioração dos alimentos: 0,05×",
 
 
+  "block-efence-*": "Cerca Elétrica",
+  "block-handbooktitle-efence": "Uso",
+  "block-handbooktext-efence": "Boa defesa contra visitantes indesejados. Causa dano elétrico ao contato. Não consome energia, mas precisa estar conectada a um circuito elétrico para funcionar."
 
 
 

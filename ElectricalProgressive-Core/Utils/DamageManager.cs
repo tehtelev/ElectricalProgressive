@@ -158,7 +158,7 @@ namespace ElectricalProgressive.Utils
         /// <param name="facing"></param>
         /// <param name="AllEparams"></param>
         /// <param name="block"></param>
-        public void DamageEntity(IWorldAccessor world, Entity entity, BlockPos pos, BlockFacing facing, EParams[] AllEparams, Block block)
+        public void DamageEntity(IWorldAccessor world, Entity entity, BlockPos pos, BlockFacing facing, EParams[] AllEparams, Block block, float specifiedDamage=0.0f)
         {
             if (System == null) // Если система ElectricalProgressive не инициализирована, ничего не делаем
                 return;
@@ -218,7 +218,7 @@ namespace ElectricalProgressive.Utils
                     Type = EnumDamageType.Electricity,
                     SourcePos = pos.ToVec3d()
                 };
-                entity.ReceiveDamage(dmg, DAMAGE_AMOUNT[voltage]);
+                entity.ReceiveDamage(dmg, ((specifiedDamage>0.0f)? specifiedDamage: DAMAGE_AMOUNT[voltage]));
 
                 // 2) Вычисляем вектор от блока к сущности и отталкиваем
                 Vec3d center = pos.ToVec3d().Add(0.5, 0.5, 0.5);

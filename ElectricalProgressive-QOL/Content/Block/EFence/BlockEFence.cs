@@ -1,6 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using ElectricalProgressive.Utils;
+using System.Collections.Generic;
+using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Common.Entities;
+using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
@@ -31,6 +35,44 @@ public class BlockEFence : BlockEBase
         CanStep = false;
         bbrt = GetBehavior<BlockBehaviorRopeTieable>();
     }
+
+
+    /// <summary>
+    /// Кто-то или что-то коснулось блока и теперь получит урон
+    /// </summary>
+    /// <param name="world"></param>
+    /// <param name="entity"></param>
+    /// <param name="pos"></param>
+    /// <param name="facing"></param>
+    /// <param name="collideSpeed"></param>
+    /// <param name="isImpact"></param>
+    public override void OnEntityCollide(
+        IWorldAccessor world,
+        Entity entity,
+        BlockPos pos,
+        BlockFacing facing,
+        Vec3d collideSpeed,
+        bool isImpact
+    )
+    {
+        // если это клиент, то не надо 
+        if (world.Side == EnumAppSide.Client)
+            return;
+
+        // энтити не живой и не создание? выходим
+        if (!entity.Alive || !entity.IsCreature)
+            return;
+
+        // если блокэнтити не найден, выходим
+        if (world.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEBase blockEntityEBase)
+            return;
+
+
+        // передаем работу в наш обработчик урона
+        ElectricalProgressive.damageManager?.DamageEntity(world, entity, pos, facing, blockEntityEBase.AllEparams!, this, MyMiniLib.GetAttributeInt(this, "specifiedDamage", 0));
+    }
+
+
 
     public override void OnJsonTesselation(ref MeshData sourceMesh, ref int[] lightRgbsByCorner, BlockPos pos, Vintagestory.API.Common.Block[] chunkExtBlocks, int extIndex3d)
     {
@@ -64,8 +106,30 @@ public class BlockEFence : BlockEBase
 
     public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack, BlockSelection blockSel, ref string failureCode)
     {
-        string orientations = GetOrientations(world, blockSel.Position);
-        var block = world.BlockAccessor.GetBlock(CodeWithVariant("type", orientations));
+        // Проверка, что под этим блоком находится и над ним
+        var blockDown = world.BlockAccessor.GetBlock(blockSel.Position.AddCopy(BlockFacing.DOWN));
+        var blockUp = world.BlockAccessor.GetBlock(blockSel.Position.AddCopy(BlockFacing.UP));
+        string partType = "bottom";
+
+        if (blockDown is BlockEFence)
+        {
+            partType = "top";
+
+            if (blockUp is BlockEFence)
+            {
+                partType = "middle";
+            }
+        }
+
+        // выбираем вариант
+        var variant = new Dictionary<string, string>
+        {
+            { "type", GetOrientations(world, blockSel.Position) },
+            { "part", partType }
+        };
+
+
+        var block = world.BlockAccessor.GetBlock(CodeWithVariants(variant));
         if (block == null)
         {
             block = this;
@@ -82,8 +146,30 @@ public class BlockEFence : BlockEBase
 
     public override void OnNeighbourBlockChange(IWorldAccessor world, BlockPos pos, BlockPos neibpos)
     {
-        string orientations = GetOrientations(world, pos);
-        AssetLocation assetLocation = CodeWithVariant("type", orientations);
+        // Проверка, что под этим блоком находится и над ним
+        var blockDown = world.BlockAccessor.GetBlock(pos.AddCopy(BlockFacing.DOWN));
+        var blockUp = world.BlockAccessor.GetBlock(pos.AddCopy(BlockFacing.UP));
+        string partType = "bottom";
+
+        if (blockDown is BlockEFence)
+        {
+            partType = "top";
+
+            if (blockUp is BlockEFence)
+            {
+                partType = "middle";
+            }
+        }
+
+        // выбираем вариант
+        var variant = new Dictionary<string, string>
+        {
+            { "type", GetOrientations(world, pos) },
+            { "part", partType }
+        };
+
+
+        AssetLocation assetLocation = CodeWithVariants(variant);
         if (!Code.Equals(assetLocation))
         {
             var block = world.BlockAccessor.GetBlock(assetLocation);
@@ -109,7 +195,7 @@ public class BlockEFence : BlockEBase
 
     public override ItemStack[] GetDrops(IWorldAccessor world, BlockPos pos, IPlayer byPlayer, float dropQuantityMultiplier = 1f)
     {
-        var block = world.BlockAccessor.GetBlock(CodeWithVariants(new string[2] { "type", "cover" }, new string[2] { "ew", "free" }));
+        var block = world.BlockAccessor.GetBlock(CodeWithVariants(new string[2] { "type", "part" }, new string[2] { "ew", "bottom" }));
         return new ItemStack[1]
         {
             new ItemStack(block)
@@ -118,7 +204,7 @@ public class BlockEFence : BlockEBase
 
     public override ItemStack OnPickBlock(IWorldAccessor world, BlockPos pos)
     {
-        return new ItemStack(world.BlockAccessor.GetBlock(CodeWithVariants(new string[2] { "type", "cover" }, new string[2] { "ew", "free" })));
+        return new ItemStack(world.BlockAccessor.GetBlock(CodeWithVariants(new string[2] { "type", "part" }, new string[2] { "ew", "bottom" })));
     }
 
 
@@ -189,5 +275,20 @@ public class BlockEFence : BlockEBase
         KeyValuePair<string[], int> keyValuePair = AngleGroups[text];
         string value = keyValuePair.Key[GameMath.Mod(keyValuePair.Value + num, keyValuePair.Key.Length)];
         return CodeWithVariant("type", value);
+    }
+
+
+    /// <summary>
+    /// Получение информации о предмете в инвентаре
+    /// </summary>
+    /// <param name="inSlot"></param>
+    /// <param name="dsc"></param>
+    /// <param name="world"></param>
+    /// <param name="withDebugInfo"></param>
+    public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
+    {
+        base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
+        dsc.AppendLine(Lang.Get("Voltage") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "voltage", 0) + " " + Lang.Get("V"));
+        dsc.AppendLine(Lang.Get("WResistance") + ": " + ((MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false)) ? Lang.Get("Yes") : Lang.Get("No")));
     }
 }

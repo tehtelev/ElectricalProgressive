@@ -17,11 +17,24 @@
 		},
 		{ "name": "RopeTieable" }
 	],
+
+
 	"attributes": {
+		"voltage": 128,
+		"maxCurrent": 128.0,
+		"isolated": false,
+		"isolatedEnvironment": true,
+    "specifiedDamage": 4,
 		"supportsUnstableRock": true,
 		"isFence": true,
 		"handbook": {
-			"groupBy": [ "efence-*" ]
+			"groupBy": [ "efence-*" ],
+			"extraSections": [
+				{
+					"title": "electricalprogressiveqol:block-handbooktitle-efence",
+					"text": "electricalprogressiveqol:block-handbooktext-efence"
+				}
+			]
 		},
 		"attachableToEntity": {
 			"categoryCode": "ropetiepost",
@@ -49,85 +62,85 @@
 			"states": [ "empty", "n", "e", "s", "w", "ne", "ns", "nw", "es", "ew", "sw", "nes", "new", "nsw", "esw", "nesw" ]
 		},
 		{
-			"code": "cover",
-			"states": [ "free" ]
+			"code": "part",
+			"states": [ "bottom", "middle", "top" ]
 		}
 	],
 	"creativeinventory": {
-		"general": [ "efence-ew-free" ],
-		"decorative": [ "efence-ew-free" ],
-		"electricity": [ "efence-ew-free" ]
+		"general": [ "efence-ew-bottom" ],
+		"decorative": [ "efence-ew-bottom" ],
+		"electricity": [ "efence-ew-bottom" ]
 	},
 
 	"shapebytype": {
-		"*-empty-free": { "base": "block/efence/empty" },
-		"*-n-free": {
-			"base": "block/efence/w",
+		"*-empty-*": { "base": "block/efence/{part}/empty" },
+		"*-n-*": {
+			"base": "block/efence/{part}/w",
 			"rotateY": 270
 		},
-		"*-e-free": {
-			"base": "block/efence/w",
+		"*-e-*": {
+			"base": "block/efence/{part}/w",
 			"rotateY": 180
 		},
-		"*-s-free": {
-			"base": "block/efence/w",
+		"*-s-*": {
+			"base": "block/efence/{part}/w",
 			"rotateY": 90
 		},
-		"*-w-free": {
-			"base": "block/efence/w",
+		"*-w-*": {
+			"base": "block/efence/{part}/w",
 			"rotateY": 0
 		},
 
-		"*-ns-free": {
-			"base": "block/efence/ew",
+		"*-ns-*": {
+			"base": "block/efence/{part}/ew",
 			"rotateY": 90
 		},
-		"*-ew-free": {
-			"base": "block/efence/ew",
+		"*-ew-*": {
+			"base": "block/efence/{part}/ew",
 			"rotateY": 0
 		},
 
-		"*-ne-free": {
-			"base": "block/efence/sw",
+		"*-ne-*": {
+			"base": "block/efence/{part}/sw",
 			"rotateY": 180
 		},
-		"*-nw-free": {
-			"base": "block/efence/sw",
+		"*-nw-*": {
+			"base": "block/efence/{part}/sw",
 			"rotateY": 270
 		},
-		"*-es-free": {
-			"base": "block/efence/sw",
+		"*-es-*": {
+			"base": "block/efence/{part}/sw",
 			"rotateY": 90
 		},
-		"*-sw-free": {
-			"base": "block/efence/sw",
+		"*-sw-*": {
+			"base": "block/efence/{part}/sw",
 			"rotateY": 0
 		},
 
-		"*-nes-free": {
-			"base": "block/efence/nsw",
+		"*-nes-*": {
+			"base": "block/efence/{part}/nsw",
 			"rotateY": 180
 		},
-		"*-new-free": {
-			"base": "block/efence/nsw",
+		"*-new-*": {
+			"base": "block/efence/{part}/nsw",
 			"rotateY": 270
 		},
-		"*-nsw-free": {
-			"base": "block/efence/nsw",
+		"*-nsw-*": {
+			"base": "block/efence/{part}/nsw",
 			"rotateY": 0
 		},
-		"*-esw-free": {
-			"base": "block/efence/nsw",
+		"*-esw-*": {
+			"base": "block/efence/{part}/nsw",
 			"rotateY": 90
 		},
 
-		"*-nesw-free": {
-			"base": "block/efence/nesw",
+		"*-nesw-*": {
+			"base": "block/efence/{part}/nesw",
 			"rotateY": 0
 		}
 	},
 	"drawtypeByType": {
-		"*-free": "JSON"
+		"*-bottom": "JSON"
 	},
 	"blockmaterial": "Stone",
 
