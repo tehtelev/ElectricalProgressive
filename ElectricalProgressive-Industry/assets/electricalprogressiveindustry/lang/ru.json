@@ -4,9 +4,8 @@
   "game:ewoodcutter-title-gui": "Электрический лесоруб",
   "block-ewoodcutter-normal": "Электрический лесоруб",
   "block-ewoodcutter-normal-burned": "Электрический лесоруб (сгоревший)",
-  
-  "electricalprogressive:centrifuge-recipes": "Рецепты центрифуги",
-  "electricalprogressive:hammer-recipes": "Рецепты молота",
-  "electricalprogressive:press-recipes": "Рецепты пресса",
-  "electricalprogressive:energy-required": "Требуется энергии: {0} Дж"
+
+  "electricalprogressive:produced-in": "Обрабатывается в:",
+  "electricalprogressive:energy-required": "Требуется энергии: {0} Дж.",
+  "electricalprogressive:recipe-chance": "~{0}%"
 }
