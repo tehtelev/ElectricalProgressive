@@ -16,9 +16,9 @@ namespace ElectricalProgressive.Utils
         public float Stock { get; set; }
 
         /// <summary>
-        /// Массив текущих запросов от клиентов, индекс соответствует Id клиента.
+        /// Словарь текущих запросов от клиентов, ключ - Id клиента.
         /// </summary>
-        public float[] CurrentRequests { get; } // Requests from each customer by customer Id
+        public Dictionary<int, float> CurrentRequests { get; } = new Dictionary<int, float>();
 
         /// <summary>
         /// Флаг, указывающий, что магазин больше не имеет товара.
@@ -35,12 +35,11 @@ namespace ElectricalProgressive.Utils
         /// </summary>
         /// <param name="id"></param>
         /// <param name="stock"></param>
-        /// <param name="numCustomers"></param>
-        public Store(int id, float stock, int numCustomers)
+        public Store(int id, float stock)
         {
             Id = id;
             Stock = stock;
-            CurrentRequests = new float[numCustomers];
+            totalRequest = 0f;
         }
 
         /// <summary>
@@ -48,7 +47,7 @@ namespace ElectricalProgressive.Utils
         /// </summary>
         public void ResetRequests()
         {
-            Array.Clear(CurrentRequests, 0, CurrentRequests.Length);
+            CurrentRequests.Clear();
         }
 
         /// <summary>
@@ -58,9 +57,9 @@ namespace ElectricalProgressive.Utils
         public void ProcessRequests(List<Customer> customers)
         {
             float totalRequested = 0;
-            for (int i = 0; i < CurrentRequests.Length; i++)
+            foreach (var req in CurrentRequests.Values)
             {
-                totalRequested += CurrentRequests[i];
+                totalRequested += req;
             }
 
             totalRequest += totalRequested;
@@ -77,26 +76,24 @@ namespace ElectricalProgressive.Utils
 
             if (Stock >= totalRequested)
             {
-                for (int i = 0; i < CurrentRequests.Length; i++)
+                foreach (var kvp in CurrentRequests)
                 {
-                    if (CurrentRequests[i] > 0)
-                    {
-                        customers[i].Received[Id] += CurrentRequests[i];
-                        Stock -= CurrentRequests[i];
-                    }
+                    int customerId = kvp.Key;
+                    float requested = kvp.Value;
+                    customers[customerId].AddReceived(Id, requested);
+                    Stock -= requested;
                 }
             }
             else
             {
                 float ratio = Stock / totalRequested;
-                for (int i = 0; i < CurrentRequests.Length; i++)
+                foreach (var kvp in CurrentRequests)
                 {
-                    if (CurrentRequests[i] > 0)
-                    {
-                        float allocated = CurrentRequests[i] * ratio;
-                        customers[i].Received[Id] += allocated;
-                        Stock -= allocated;
-                    }
+                    int customerId = kvp.Key;
+                    float requested = kvp.Value;
+                    float allocated = requested * ratio;
+                    customers[customerId].AddReceived(Id, allocated);
+                    Stock -= allocated;
                 }
             }
 

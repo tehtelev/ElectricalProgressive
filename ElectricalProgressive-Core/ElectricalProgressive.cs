@@ -365,7 +365,7 @@ namespace ElectricalProgressive
 
             for (int j = 0; j < pP; j++)
             {
-                stores[j] = new Store(j, producerGive[j], cP);
+                stores[j] = new Store(j, producerGive[j]);
             }
 
 
