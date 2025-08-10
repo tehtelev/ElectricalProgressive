@@ -17,10 +17,6 @@ namespace ElectricalProgressive.Utils
         /// </summary>
         public int voltage;
 
-        /// <summary>
-        /// Версия сети, в которой был создан пакет.
-        /// </summary>
-        public int networkVersion;
 
         /// <summary>
         /// Текущий индекс в пути, где сейчас пакет
@@ -65,8 +61,7 @@ namespace ElectricalProgressive.Utils
             BlockPos[] Path,
             int[] FacingFrom,
             bool[][] NowProcessedFaces,
-            Facing[] UsedConnections,
-            int NetworkVersion
+            Facing[] UsedConnections
         )
         {
             energy = Energy;
@@ -77,7 +72,7 @@ namespace ElectricalProgressive.Utils
             nowProcessedFaces = NowProcessedFaces;
             usedConnections = UsedConnections;
             shouldBeRemoved = false;
-            networkVersion = NetworkVersion;
+        
         }
 
 
