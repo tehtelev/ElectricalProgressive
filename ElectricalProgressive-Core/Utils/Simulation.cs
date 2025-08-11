@@ -14,7 +14,6 @@ namespace ElectricalProgressive.Utils
         /// </summary>
         public List<Store>? Stores { get; set; }
 
-
         /// <summary>
         /// Запускает симуляцию распределения товара между клиентами и магазинами.
         /// </summary>
@@ -42,6 +41,7 @@ namespace ElectricalProgressive.Utils
                 for (int c = 0; c < Customers.Count; c++)
                 {
                     var customer = Customers[c];
+                    customer.ResetStoreIndex();
                     if (customer.Remaining <= 0.001f)
                         continue;
 
@@ -87,8 +87,9 @@ namespace ElectricalProgressive.Utils
         /// <param name="storeIds"></param>
         private void ProcessStoresArray(Customer customer, float remaining, int[] storeIds)
         {
-            for (int s = 0; s < storeIds.Length; s++)
+            while (customer.HasMoreStores() && remaining > 0.001f)
             {
+                int s = customer.GetNextStoreIndex();
                 var store = Stores![storeIds[s]];
                 if (store.Stock <= 0.001f && store.ImNull)
                     continue;
@@ -96,9 +97,6 @@ namespace ElectricalProgressive.Utils
                 float requested = remaining;
                 store.CurrentRequests[customer.Id] = requested;
                 remaining -= requested;
-
-                if (remaining <= 0.001f)
-                    break;
             }
         }
 

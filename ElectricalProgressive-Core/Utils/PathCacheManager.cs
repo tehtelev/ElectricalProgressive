@@ -17,25 +17,27 @@ namespace ElectricalProgressive.Utils
             public bool[][]? NowProcessedFaces;
             public Facing[]? UsedConnections;
             public DateTime LastAccessed;
+            public int version;
         }
 
         // TTL, по истечении которого неиспользуемые записи удаляются
         private static readonly TimeSpan EntryTtl = TimeSpan.FromMinutes(ElectricalProgressive.cacheTimeoutCleanupMinutes);
 
         // Сам кэш, ключом служит только (start, end, version)
-        private static readonly ConcurrentDictionary<(BlockPos, BlockPos, int), Entry> cache = new();
+        private static readonly ConcurrentDictionary<(BlockPos, BlockPos), Entry> cache = new();
 
         /// <summary>
         /// Попытаться получить путь из кэша.
         /// </summary>
         public static bool TryGet(
-            BlockPos start, BlockPos end, int currentVersion,
+            BlockPos start, BlockPos end,
             out BlockPos[] path,
             out int[] facingFrom,
             out bool[][] nowProcessed,
-            out Facing[] usedConnections)
+            out Facing[] usedConnections,
+            out int version)
         {
-            var key = (start, end, currentVersion);
+            var key = (start, end);
             if (cache.TryGetValue(key, out var entry))
             {
                 entry.LastAccessed = DateTime.UtcNow;
@@ -43,6 +45,7 @@ namespace ElectricalProgressive.Utils
                 facingFrom = entry.FacingFrom!;
                 nowProcessed = entry.NowProcessedFaces!;
                 usedConnections = entry.UsedConnections!;
+                version = entry.version;
                 return true;
             }
 
@@ -50,6 +53,7 @@ namespace ElectricalProgressive.Utils
             facingFrom = null!;
             nowProcessed = null!;
             usedConnections = null!;
+            version = 0;
             return false;
         }
 
@@ -65,7 +69,7 @@ namespace ElectricalProgressive.Utils
             bool[][] nowProcessedFaces,
             Facing[] usedConnections)
         {
-            var key = (start, end, currentVersion);
+            var key = (start, end);
             // При обновлении существующей записи не сбрасываем LastAccessed, чтобы не мешать очистке
             cache.AddOrUpdate(key,
                 k => new Entry
@@ -74,7 +78,8 @@ namespace ElectricalProgressive.Utils
                     FacingFrom = facingFrom,
                     NowProcessedFaces = nowProcessedFaces,
                     UsedConnections = usedConnections,
-                    LastAccessed = DateTime.UtcNow
+                    LastAccessed = DateTime.UtcNow,
+                    version = currentVersion
                 },
                 (k, existing) =>
                 {
@@ -82,6 +87,7 @@ namespace ElectricalProgressive.Utils
                     existing.FacingFrom = facingFrom;
                     existing.NowProcessedFaces = nowProcessedFaces;
                     existing.UsedConnections = usedConnections;
+                    existing.version = currentVersion;
                     // сохраняем existing.LastAccessed без изменения
                     return existing;
                 });
@@ -112,9 +118,9 @@ namespace ElectricalProgressive.Utils
         /// Принудительно удаляет из кэша все записи для указанных координат start и end
         /// независимо от version.
         /// </summary>
-        public static void RemoveAll(BlockPos start, BlockPos end, int version)
+        public static void RemoveAll(BlockPos start, BlockPos end)
         {
-            var key = (start, end, version);
+            var key = (start, end);
             cache.TryRemove(key, out _);
         }
     }

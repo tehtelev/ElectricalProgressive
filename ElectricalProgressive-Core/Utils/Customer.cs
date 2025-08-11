@@ -29,6 +29,16 @@ namespace ElectricalProgressive.Utils
         /// </summary>
         private int[] orderedStoreIds;
 
+        /// <summary>
+        /// Сумма полученного товара от всех магазинов.
+        /// </summary>
+        private float _receivedSum;
+
+
+        /// <summary>
+        /// Индекс текущего магазина, от которого клиент получает товар.
+        /// </summary>
+        private int _currentStoreIndex;
 
         /// <summary>
         /// Инициализирует новый экземпляр класса Customer.
@@ -42,25 +52,16 @@ namespace ElectricalProgressive.Utils
             Required = required;
             StoreDistances = storeDistances;
             Received = new float[storeDistances.Length];
-            orderedStoreIds= new int[storeDistances.Length];
+            orderedStoreIds = new int[storeDistances.Length];
+            _receivedSum = 0f;
+            _currentStoreIndex = 0;
             UpdateOrderedStores();
         }
 
         /// <summary>
         /// Возвращает количество товара, которое клиент еще должен получить.
         /// </summary>
-        public float Remaining
-        {
-            get
-            {
-                float receivedSum = 0;
-                for (int i = 0; i < Received.Length; i++)
-                {
-                    receivedSum += Received[i];
-                }
-                return Required - receivedSum;
-            }
-        }
+        public float Remaining => Required - _receivedSum;
 
         /// <summary>
         /// Возвращает общее расстояние, которое клиент должен пройти для получения товара.
@@ -83,7 +84,6 @@ namespace ElectricalProgressive.Utils
         /// </summary>
         private void UpdateOrderedStores()
         {
-            orderedStoreIds = new int[StoreDistances.Length];
             for (int i = 0; i < orderedStoreIds.Length; i++)
             {
                 orderedStoreIds[i] = i;
@@ -96,7 +96,32 @@ namespace ElectricalProgressive.Utils
         /// </summary>
         /// <returns></returns>
         public int[] GetAvailableStoreIds() => orderedStoreIds;
+
+        /// <summary>
+        /// Добавляет полученное количество от магазина.
+        /// </summary>
+        internal void AddReceived(int storeId, float amount)
+        {
+            Received[storeId] += amount;
+            _receivedSum += amount;
+        }
+
+        /// <summary>
+        /// Сбрасывает текущий индекс магазина.
+        /// </summary>
+        internal void ResetStoreIndex()
+        {
+            _currentStoreIndex = 0;
+        }
+
+        /// <summary>
+        /// Возвращает следующий доступный индекс магазина.
+        /// </summary>
+        internal int GetNextStoreIndex() => _currentStoreIndex++;
+
+        /// <summary>
+        /// Проверяет, есть ли еще магазины.
+        /// </summary>
+        internal bool HasMoreStores() => _currentStoreIndex < orderedStoreIds.Length;
     }
 }
-
-

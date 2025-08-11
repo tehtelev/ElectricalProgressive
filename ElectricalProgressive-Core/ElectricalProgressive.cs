@@ -342,9 +342,13 @@ namespace ElectricalProgressive
                 {
                     start = consumerPositions[i];
                     end = producerPositions[j];
-                    if (PathCacheManager.TryGet(start, end, network.version, out var cachedPath, out _, out _, out _))
+                    if (PathCacheManager.TryGet(start, end, out var cachedPath, out _, out _, out _, out var version))
                     {
                         distances[i * pP + j] = cachedPath != null ? cachedPath.Length : int.MaxValue;
+                        if (version != network.version) // Если версия сети не совпадает, то добавляем запрос в очередь
+                        {
+                            asyncPathFinder.EnqueueRequest(start, end, network); // Добавляем запрос в очередь
+                        }
                     }
                     else
                     {
@@ -361,7 +365,7 @@ namespace ElectricalProgressive
 
             for (int j = 0; j < pP; j++)
             {
-                stores[j] = new Store(j, producerGive[j], cP);
+                stores[j] = new Store(j, producerGive[j]);
             }
 
 
@@ -566,8 +570,8 @@ namespace ElectricalProgressive
                             posStore = producerPositions[k];
                             posCustomer = consumerPositions[i];
 
-                            if (PathCacheManager.TryGet(posCustomer, posStore, network.version, out var path,
-                                    out var facing, out var processed, out var usedConn))
+                            if (PathCacheManager.TryGet(posCustomer, posStore, out var path,
+                                    out var facing, out var processed, out var usedConn, out _))
                             {
                                 // Проверяем, что пути и направления не равны null
                                 if (path == null ||
@@ -584,8 +588,7 @@ namespace ElectricalProgressive
                                     path,
                                     facing,
                                     processed,
-                                    usedConn,
-                                    network.version
+                                    usedConn
                                 );
 
 
@@ -673,8 +676,8 @@ namespace ElectricalProgressive
                             posStore = producer2Positions[k];
                             posCustomer = consumer2Positions[i];
 
-                            if (PathCacheManager.TryGet(posCustomer, posStore, network.version, out var path,
-                                    out var facing, out var processed, out var usedConn))
+                            if (PathCacheManager.TryGet(posCustomer, posStore, out var path,
+                                    out var facing, out var processed, out var usedConn, out _))
                             {
                                 // Проверяем, что пути и направления не равны null
                                 if (path == null ||
@@ -691,8 +694,7 @@ namespace ElectricalProgressive
                                     path,
                                     facing,
                                     processed,
-                                    usedConn,
-                                    network.version
+                                    usedConn
                                 );
 
 
@@ -809,7 +811,7 @@ namespace ElectricalProgressive
                 //обновляем каждый блок сети
                 updated = kons % 20 == envUpdater &&
                           part.IsLoaded &&          // блок загружен?
-                          damageManager!.DamageByEnvironment(this.sapi, ref part, ref bAccessor);
+                          (damageManager?.DamageByEnvironment(this.sapi, ref part, ref bAccessor) ?? false);
                 kons++;
 
 
@@ -1010,10 +1012,8 @@ namespace ElectricalProgressive
                     if (parts.TryGetValue(nextPos, out nextPart!) &&
                         parts.TryGetValue(currentPos, out currentPart!))
                     {
-                        if (!nextPart.eparams[packet.facingFrom[curIndex - 1]].burnout   //проверяем не сгорела ли грань в след блоке
-                        //    && currentPart.Networks[currentFacingFrom]!=null  // проверяем, что сеть в текущей части не null
-                        //    && !(currentPart.Networks[currentFacingFrom]?.version > packet.networkVersion)  // проверяем, что версия сети в текущей части не больше, чем в пакете
-                        )
+                        if (!nextPart.eparams[packet.facingFrom[curIndex - 1]].burnout)   //проверяем не сгорела ли грань в след блоке
+                        
                         {
 
                             if ((nextPart.Connection & packet.usedConnections[curIndex - 1]) == packet.usedConnections[curIndex - 1]) // проверяем совпадает ли путь в пакете с путем в части сети
@@ -1075,21 +1075,20 @@ namespace ElectricalProgressive
                             else
                             {
                                 // если все же путь не совпадает с путем в пакете, то чистим кэши
-                                PathCacheManager.RemoveAll(packet.path[0], packet.path.Last(), packet.networkVersion);
+                                PathCacheManager.RemoveAll(packet.path[0], packet.path.Last());
                                 globalEnergyPackets[i].shouldBeRemoved = true;
 
                             }
                         }
                         else
                         {
-                            //PathCacheManager.RemoveAll(packet.path[0], packet.path.Last(), packet.networkVersion);
                             globalEnergyPackets[i].shouldBeRemoved = true;
                         }
                     }
                     else
                     {
                         // если все же части сети не найдены, то тут точно кэш надо утилизировать
-                        PathCacheManager.RemoveAll(packet.path[0], packet.path.Last(), packet.networkVersion);
+                        PathCacheManager.RemoveAll(packet.path[0], packet.path.Last());
                         globalEnergyPackets[i].shouldBeRemoved = true;
                     }
                 }
