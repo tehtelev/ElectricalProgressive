@@ -4,8 +4,12 @@
   "game:ewoodcutter-title-gui": "Электрический лесоруб",
   "block-ewoodcutter-normal": "Электрический лесоруб",
   "block-ewoodcutter-normal-burned": "Электрический лесоруб (сгоревший)",
-
+  "game:ecentrifuge-title-gui": "Центрифуга",
+  "game:ehammer-title-gui": "Автомолот",
+  "game:epress-title-gui": "Автопресс",
+  
   "electricalprogressive:produced-in": "Обрабатывается в:",
-  "electricalprogressive:energy-required": "Требуется энергии: {0} Дж.",
+  "electricalprogressive:energy-required": "Требуется энергии",
+  "electricalprogressive:energy-unit": "Дж",
   "electricalprogressive:recipe-chance": "~{0}%"
 }

@@ -1,8 +1,9 @@
 ﻿using ElectricalProgressive.Content.Block.ECentrifuge;
+using ElectricalProgressive.Content.Block.EPress;
 using Vintagestory.API.Common;
 using Vintagestory.API.Client;
 using ElectricalProgressive.Content.Block.EWoodcutter;
-using ElectricalProgressive.Patches;
+using ElectricalProgressive.Patch;
 
 
 [assembly: ModDependency("game", "1.21.0-rc.3")]
@@ -41,6 +42,10 @@ public class ElectricalProgressiveIndustry : ModSystem
         api.RegisterBlockClass("BlockEHammer", typeof(BlockEHammer));
         api.RegisterBlockEntityClass("BlockEntityEHammer", typeof(BlockEntityEHammer));
         api.RegisterBlockEntityBehaviorClass("BEBehaviorEHammer", typeof(BEBehaviorEHammer));
+        
+        api.RegisterBlockClass("BlockEPress", typeof(BlockEPress));
+        api.RegisterBlockEntityClass("BlockEntityEPress", typeof(BlockEntityEPress));
+        api.RegisterBlockEntityBehaviorClass("BEBehaviorEPress", typeof(BEBehaviorEPress));
 
         api.RegisterBlockClass("BlockEWoodcutter", typeof(BlockEWoodcutter));
         api.RegisterBlockEntityClass("BlockEntityEWoodcutter", typeof(BlockEntityEWoodcutter));
@@ -53,8 +58,6 @@ public class ElectricalProgressiveIndustry : ModSystem
         base.StartClientSide(api);
         this.capi = api;
         HandbookPatch.ApplyPatches(api);
-
-
     }
 
 }

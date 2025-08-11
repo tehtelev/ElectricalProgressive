@@ -30,7 +30,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer
     public float RecipeProgress;
     private ILoadedSound ambientSound;
 
-    public virtual string DialogTitle => Lang.Get("ehammer");
+    public virtual string DialogTitle => Lang.Get("ehammer-title-gui");
 
     public override InventoryBase Inventory => (InventoryBase)this.inventory;
 

@@ -1,0 +1,53 @@
+﻿[
+  {
+    "code": "hammerhead",
+    "energyOperation": 5000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:ingot-*",
+        "quantity": 1,
+        "name": "metal",
+        "allowedVariants": ["copper", "tinbronze", "gold"]
+      },
+      {
+        "type": "item",
+        "code": "game:bushmeat-raw",
+        "quantity": 0
+      },
+      {
+        "type": "item",
+        "code": "game:bushmeat-raw",
+        "quantity": 1
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "game:hammerhead-{metal}",
+      "stacksize": 1
+    }
+  },
+  {
+    "code": "hammer",
+    "energyOperation": 5000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:ingot-*",
+        "quantity": 1,
+        "name": "metal",
+        "allowedVariants": ["copper", "tinbronze", "gold"]
+      },
+      {
+        "type": "block",
+        "code": "game:toolmold-blue-fired-hammer",
+        "quantity": 0
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "game:hammerhead-{metal}",
+      "stacksize": 1
+    }
+  }
+]

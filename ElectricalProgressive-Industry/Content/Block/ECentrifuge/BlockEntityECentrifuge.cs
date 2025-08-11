@@ -27,7 +27,7 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
     public float RecipeProgress;
     private ILoadedSound ambientSound;
 
-    public virtual string DialogTitle => Lang.Get("ecentrifuge");
+    public virtual string DialogTitle => Lang.Get("ecentrifuge-title-gui");
 
     public override InventoryBase Inventory => (InventoryBase)this.inventory;
 

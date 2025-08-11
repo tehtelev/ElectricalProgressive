@@ -1,0 +1,162 @@
+﻿{
+  "code": "epress",
+  "class": "BlockEPress",
+  "entityClass": "BlockEntityEPress",
+  "attributes": {
+    "maxConsumption": 100,
+    "voltage": 32,
+    "maxCurrent": 20.0,
+    "isolated": true,
+    "isolatedEnvironment": true,
+    "handbook": {
+      "groupBy": [ "efreezer2-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressiveqol:block-handbooktitle-efreezer2",
+          "text": "electricalprogressiveqol:block-handbooktext-efreezer2"
+        }
+      ]
+    }
+  },
+
+
+  "entityBehaviors": [
+    {
+      "name": "Animatable"
+    },
+    {
+      "name": "BEBehaviorEPress"
+    },
+    {
+      "name": "ElectricalProgressive"
+    }
+  ],
+
+  "creativeinventory": {
+    "general": [ "*-north", "*-north" ],
+    "electricity": [ "*-north" ]
+  },
+
+  "behaviors": [
+    { "name": "HorizontalOrientable" },
+    {
+      "name": "Multiblock",
+      "properties": {
+        "sizex": 1,
+        "sizey": 2,
+        "sizez": 1,
+        "cposition": {
+          "x": 0,
+          "y": 0,
+          "z": 0
+        }
+
+      }
+    }
+  ],
+
+  "blockmaterial": "Metal",
+
+  "variantgroups": [
+    {
+      "code": "side",
+      "loadFromProperties": "abstract/horizontalorientation"
+    }
+  ],
+
+
+
+
+  "shapebytype": {
+    "*-north": {
+      "base": "block/epress/epress",
+      "rotateY": 0
+    },
+    "*-east": {
+      "base": "block/epress/epress",
+      "rotateY": 270
+    },
+    "*-south": {
+      "base": "block/epress/epress",
+      "rotateY": 180
+    },
+    "*-west": {
+      "base": "block/epress/epress",
+      "rotateY": 90
+    }
+  },
+  "lightAbsorption": 0,
+  "sidesolidByType": {
+    "*-north": {
+      "all": false,
+      "east": true,
+      "west": true,
+      "north": true
+    },
+    "*-east": {
+      "all": false,
+      "east": true,
+      "south": true,
+      "north": true
+    },
+    "*-south": {
+      "all": false,
+      "east": true,
+      "west": true,
+      "south": true
+    },
+    "*-west": {
+      "all": false,
+      "south": true,
+      "west": true,
+      "north": true
+    }
+  },
+
+  "sideopaque": {
+    "all": "false"
+  },
+  "collisionbox": {
+    "x1": 0,
+    "y1": 0,
+    "z1": 0,
+    "x2": 1,
+    "y2": 2,
+    "z2": 1
+  },
+  "resistance": 3.5,
+  "sounds": {
+    "place": "game:block/anvil",
+    "walk": "game:walk/metal"
+  },
+  "guiTransform": {
+    "rotation": {
+      "x": -22.6,
+      "y": -145,
+      "z": 0
+    },
+    "origin": {
+      "x": 0.5,
+      "y": 0.9,
+      "z": 0.5
+    },
+    "scale": 0.72
+  },
+  "heldTpIdleAnimation": "holdbothhandslarge",
+  "heldRightReadyAnimation": "heldblockready",
+  "heldTpUseAnimation": "twohandplaceblock",
+  "tpHandTransform": {
+    "translation": {
+      "x": -0.6,
+      "y": -0.91,
+      "z": -0.8
+    },
+    "rotation": {
+      "x": -2,
+      "y": 25,
+      "z": -78
+    },
+    "scale": 0.4
+  }
+
+}
