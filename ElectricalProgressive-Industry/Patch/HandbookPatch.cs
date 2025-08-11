@@ -50,7 +50,7 @@ public class HandbookPatch
                 var components = new List<RichTextComponentBase>(__result);
                 bool haveText = components.Count > 0;
 
-                CheckAndAddRecipes(components, capi, stack, ref haveText);
+                CheckAndAddRecipes(components, capi, stack, openDetailPageFor, ref haveText);
 
                 __result = components.ToArray();
             }
@@ -60,8 +60,12 @@ public class HandbookPatch
             }
         }
 
-        private static void CheckAndAddRecipes(List<RichTextComponentBase> components, ICoreClientAPI capi,
-            ItemStack stack, ref bool haveText)
+        private static void CheckAndAddRecipes(
+            List<RichTextComponentBase> components, 
+            ICoreClientAPI capi,
+            ItemStack stack, 
+            ActionConsumable<string> openDetailPageFor,
+            ref bool haveText)
         {
             var machines = new Dictionary<string, (string code, IEnumerable<dynamic> recipes)>
             {
@@ -77,8 +81,10 @@ public class HandbookPatch
                 if (machine.Value.recipes != null)
                 {
                     AddMachineInfo(components, capi, machine.Value.code,
-                        GetCachedTranslation("electricalprogressive:produced-in"), ref haveText);
-                    AddRecipes(components, capi, machine.Value.recipes);
+                        GetCachedTranslation("electricalprogressive:produced-in"), 
+                        openDetailPageFor, 
+                        ref haveText);
+                    AddRecipes(components, capi, machine.Value.recipes, openDetailPageFor);
                 }
             }
             else
@@ -94,8 +100,10 @@ public class HandbookPatch
                     if (relevantRecipes.Count > 0)
                     {
                         AddMachineInfo(components, capi, m.Value.code,
-                            GetCachedTranslation("electricalprogressive:produced-in"), ref haveText);
-                        AddRecipes(components, capi, relevantRecipes);
+                            GetCachedTranslation("electricalprogressive:produced-in"),
+                            openDetailPageFor,
+                            ref haveText);
+                        AddRecipes(components, capi, relevantRecipes, openDetailPageFor);
                     }
                 }
             }
@@ -103,12 +111,16 @@ public class HandbookPatch
 
         private static string GetCachedTranslation(string key)
         {
-            // Кешируем переводы, чтобы уменьшить нагрузку на систему локализации
             return Lang.Get(key);
         }
 
-        private static void AddMachineInfo(List<RichTextComponentBase> components, ICoreClientAPI capi,
-            string machineCode, string title, ref bool haveText)
+        private static void AddMachineInfo(
+            List<RichTextComponentBase> components, 
+            ICoreClientAPI capi,
+            string machineCode, 
+            string title,
+            ActionConsumable<string> openDetailPageFor,
+            ref bool haveText)
         {
             if (haveText)
                 components.Add(new ClearFloatTextComponent(capi, LineSpacing));
@@ -125,15 +137,18 @@ public class HandbookPatch
             var machineStack = GetOrCreateStack(machineCode, 1, capi.World);
             if (machineStack != null)
             {
-                var machineIcon = CreateItemStackComponent(capi, machineStack);
+                var machineIcon = CreateItemStackComponent(capi, machineStack, openDetailPageFor);
                 machineIcon.VerticalAlign = EnumVerticalAlign.Middle;
                 machineIcon.Float = EnumFloat.Inline;
                 components.Add(machineIcon);
             }
         }
 
-        private static void AddRecipes(List<RichTextComponentBase> components, ICoreClientAPI capi,
-            IEnumerable<dynamic> recipes)
+        private static void AddRecipes(
+            List<RichTextComponentBase> components, 
+            ICoreClientAPI capi,
+            IEnumerable<dynamic> recipes,
+            ActionConsumable<string> openDetailPageFor)
         {
             components.Add(new ClearFloatTextComponent(capi, SmallPadding));
 
@@ -162,7 +177,7 @@ public class HandbookPatch
                         var resolved = GetOrCreateStack(ing.Code, (int)ing.Quantity, capi.World);
                         if (resolved != null)
                         {
-                            components.Add(CreateItemStackComponent(capi, resolved));
+                            components.Add(CreateItemStackComponent(capi, resolved, openDetailPageFor));
                         }
 
                         firstIngredient = false;
@@ -178,7 +193,7 @@ public class HandbookPatch
                     var outputStack = GetOrCreateStack(recipe.Output.Code, (int)recipe.Output.Quantity, capi.World);
                     if (outputStack != null)
                     {
-                        components.Add(CreateItemStackComponent(capi, outputStack));
+                        components.Add(CreateItemStackComponent(capi, outputStack, openDetailPageFor));
                     }
 
                     try
@@ -197,7 +212,7 @@ public class HandbookPatch
                                 (int)recipe.SecondaryOutput.Quantity, capi.World);
                             if (secondaryOutputStack != null)
                             {
-                                components.Add(CreateItemStackComponent(capi, secondaryOutputStack));
+                                components.Add(CreateItemStackComponent(capi, secondaryOutputStack, openDetailPageFor));
                             }
                         }
                     }
@@ -217,13 +232,18 @@ public class HandbookPatch
             }
         }
 
-        private static ItemstackTextComponent CreateItemStackComponent(ICoreClientAPI capi, ItemStack stack)
+        private static ItemstackTextComponent CreateItemStackComponent(
+            ICoreClientAPI capi, 
+            ItemStack stack,
+            ActionConsumable<string> openDetailPageFor)
         {
-            return new ItemstackTextComponent(capi, stack, ItemSize, 10.0, EnumFloat.Inline, null)
+            var component = new ItemstackTextComponent(capi, stack, ItemSize, 10.0, EnumFloat.Inline, 
+                onStackClicked: (cs) => openDetailPageFor(GuiHandbookItemStackPage.PageCodeForStack(cs)))
             {
-                ShowStacksize = true, 
+                ShowStacksize = true,
                 VerticalAlign = EnumVerticalAlign.Middle
             };
+            return component;
         }
 
         private static ItemStack GetOrCreateStack(AssetLocation code, int quantity, IWorldAccessor world)
