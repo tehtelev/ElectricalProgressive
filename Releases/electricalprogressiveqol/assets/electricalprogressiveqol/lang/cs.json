@@ -106,6 +106,9 @@
 
   "block-efence-*": "Elektrický plot",
   "block-handbooktitle-efence": "Použití",
-  "block-handbooktext-efence": "Dobrá ochrana proti nechtěným návštěvníkům. Při dotyku způsobuje elektrické poškození. Nespotřebovává energii, ale musí být připojen k elektrickému obvodu, aby fungoval."
+  "block-handbooktext-efence": "Dobrá ochrana proti nechtěným návštěvníkům. Při dotyku způsobuje elektrické poškození. Nespotřebovává energii, ale musí být připojen k elektrickému obvodu, aby fungoval.",
+
+  "progress": "Postup: {0:P0}"
+
 
 }

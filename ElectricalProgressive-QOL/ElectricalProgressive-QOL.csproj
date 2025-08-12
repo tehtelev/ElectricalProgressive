@@ -15,6 +15,14 @@
         <HintPath>..\Releases\electricalprogressivebasics\ElectricalProgressive-Basics.dll</HintPath>
         <Private>False</Private>
       </Reference>
+      <Reference Include="Xlib">
+        <HintPath>..\Addons\xlib.dll</HintPath>
+        <Private>False</Private>
+      </Reference>
+      <Reference Include="Xskills">
+        <HintPath>..\Addons\xskills.dll</HintPath>
+        <Private>False</Private>
+      </Reference>
         <Reference Include="protobuf-net">
             <HintPath>$(VINTAGE_STORY)/Lib/protobuf-net.dll</HintPath>
             <Private>False</Private>

@@ -115,7 +115,8 @@
 
   "block-efence-*": "Elektryczne ogrodzenie",
   "block-handbooktitle-efence": "Zastosowanie",
-  "block-handbooktext-efence": "Dobra ochrona przed niechcianymi gośćmi. Zadaje obrażenia elektryczne przy kontakcie. Nie zużywa energii, ale musi być podłączone do obwodu elektrycznego, aby działać."
+  "block-handbooktext-efence": "Dobra ochrona przed niechcianymi gośćmi. Zadaje obrażenia elektryczne przy kontakcie. Nie zużywa energii, ale musi być podłączone do obwodu elektrycznego, aby działać.",
 
+  "progress": "Postęp: {0:P0}"
 
 }

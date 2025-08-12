@@ -114,8 +114,9 @@
 
   "block-efence-*": "Cerca Elétrica",
   "block-handbooktitle-efence": "Uso",
-  "block-handbooktext-efence": "Boa defesa contra visitantes indesejados. Causa dano elétrico ao contato. Não consome energia, mas precisa estar conectada a um circuito elétrico para funcionar."
+  "block-handbooktext-efence": "Boa defesa contra visitantes indesejados. Causa dano elétrico ao contato. Não consome energia, mas precisa estar conectada a um circuito elétrico para funcionar.",
 
 
+  "progress": "Progresso: {0:P0}"
 
 }

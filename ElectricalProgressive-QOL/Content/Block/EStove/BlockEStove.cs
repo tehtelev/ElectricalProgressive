@@ -3,6 +3,7 @@ using System.Text;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
+using Vintagestory.GameContent;
 
 namespace ElectricalProgressive.Content.Block.EStove;
 
@@ -42,10 +43,13 @@ public class BlockEStove : BlockEBase
         var handled = base.OnBlockInteractStart(world, byPlayer, blockSel);
         if (!handled && !byPlayer.WorldData.EntityControls.Sneak && blockSel.Position != null) //зачем тут sneak
         {
+           
+
             _blockEntityEStove?.OnBlockInteract(byPlayer, false, blockSel);
 
             return true;
         }
+        
 
         return true;
     }

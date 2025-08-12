@@ -39,10 +39,35 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
     #region Config
     public virtual float HeatModifier => 1f;
     public virtual int enviromentTemperature() => 20;
+    // Полностью заменяемый maxCookingTime
     public virtual float maxCookingTime()
     {
-        return inputSlot.Itemstack == null ? 30f : inputSlot.Itemstack.Collectible.GetMeltingDuration(Api.World, inventory, inputSlot);
+        if (inputSlot.Itemstack == null) return 30f;
+
+        float baseTime = inputSlot.Itemstack.Collectible.GetMeltingDuration(Api.World, inventory, inputSlot);
+
+        if (!ElectricalProgressiveQOL.xskillsEnabled || !this.ContainsFood())
+            return baseTime;
+
+        // Если xskills включен
+        try
+        {
+            object result = ElectricalProgressiveQOL.methodGetCookingTimeMultiplier?.Invoke(
+                null,
+                new object[] { (BlockEntity)this }
+            );
+
+            if (result is float multiplier)
+                return baseTime * multiplier;
+        }
+        catch (Exception ex)
+        {
+            Api.World.Logger.Warning("Error computing cooking time multiplier (maxCookingTime): {0}", ex);
+        }
+
+        return baseTime;
     }
+
     public override InventoryBase Inventory => inventory;
     public override string InventoryClassName => "blockestove";
     public virtual string DialogTitle => Lang.Get("BlockEStove");
@@ -103,6 +128,22 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
         listenerId2=RegisterGameTickListener(On500msTick, 500);
 
         maxConsumption = MyMiniLib.GetAttributeInt(this.Block, "maxConsumption", 150);
+    }
+
+
+    // Вспомогательный метод (вставьте внутрь класса)
+    private bool ContainsFood()
+    {
+        var collectible = this.inputSlot?.Itemstack?.Collectible;
+        if (collectible == null) return false;
+
+        if (collectible is BlockCookingContainer || collectible is BlockBucket) return true;
+
+        // Если предмет при переплавке даёт объект с NutritionProps -> считаем это "едой"
+        var smelted = collectible.CombustibleProps?.SmeltedStack?.ResolvedItemstack?.Collectible;
+        if (smelted?.NutritionProps != null) return true;
+
+        return false;
     }
 
     public void UpdateMesh(int slotid)
@@ -530,21 +571,51 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
         }
     }
 
+    // Полностью заменяемый SetDialogValues
     void SetDialogValues(ITreeAttribute dialogTree)
     {
         dialogTree.SetFloat("stoveTemperature", stoveTemperature);
         dialogTree.SetFloat("oreCookingTime", inputStackCookingTime);
+
         if (inputSlot.Itemstack != null)
         {
             float meltingDuration = inputSlot.Itemstack.Collectible.GetMeltingDuration(Api.World, inventory, inputSlot);
             dialogTree.SetFloat("oreTemperature", InputStackTemp);
-            dialogTree.SetFloat("maxOreCookingTime", meltingDuration);
+
+            float maxCooking = meltingDuration;
+
+            // Если xskills включен
+            if (ElectricalProgressiveQOL.xskillsEnabled && this.ContainsFood())
+            {
+                try
+                {
+                    object result = ElectricalProgressiveQOL.methodGetCookingTimeMultiplier?.Invoke(
+                        null,
+                        new object[] { (BlockEntity)this }
+                    );
+
+                    if (result is float multiplier)
+                        maxCooking *= multiplier;
+                }
+                catch (Exception ex)
+                {
+                    Api.World.Logger.Warning("Error computing cooking time multiplier (SetDialogValues): {0}", ex);
+                }
+            }
+
+            dialogTree.SetFloat("maxOreCookingTime", maxCooking);
         }
-        else dialogTree.RemoveAttribute("oreTemperature");
+        else
+        {
+            dialogTree.RemoveAttribute("oreTemperature");
+            dialogTree.RemoveAttribute("maxOreCookingTime");
+        }
+
         dialogTree.SetString("outputText", inventory.GetOutputText());
         dialogTree.SetInt("haveCookingContainer", inventory.HaveCookingContainer ? 1 : 0);
         dialogTree.SetInt("quantityCookingSlots", inventory.CookingSlots.Length);
     }
+
 
     public override void ToTreeAttributes(ITreeAttribute tree)
     {

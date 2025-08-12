@@ -121,6 +121,8 @@
 
   "block-efence-*": "Electric Fence",
   "block-handbooktitle-efence": "Usage",
-  "block-handbooktext-efence": "A good defense against unwanted guests. Deals electric damage on contact. Doesn't consume energy, but must be connected to an electrical circuit to function."
+  "block-handbooktext-efence": "A good defense against unwanted guests. Deals electric damage on contact. Doesn't consume energy, but must be connected to an electrical circuit to function.",
+
+  "progress": "Progress: {0:P0}"
 
 }

@@ -114,7 +114,8 @@
 
   "block-efence-*": "Elektrozaun",
   "block-handbooktitle-efence": "Verwendung",
-  "block-handbooktext-efence": "Ein guter Schutz vor unerwünschten Gästen. Verursacht Stromschaden bei Berührung. Verbraucht keine Energie, muss aber an einen Stromkreis angeschlossen sein, um zu funktionieren."
+  "block-handbooktext-efence": "Ein guter Schutz vor unerwünschten Gästen. Verursacht Stromschaden bei Berührung. Verbraucht keine Energie, muss aber an einen Stromkreis angeschlossen sein, um zu funktionieren.",
 
+  "progress": "Fortschritt: {0:P0}"
 
 }

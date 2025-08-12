@@ -113,7 +113,9 @@
 
   "block-efence-*": "Valla eléctrica",
   "block-handbooktitle-efence": "Uso",
-  "block-handbooktext-efence": "Buena defensa contra invitados no deseados. Causa daño eléctrico al contacto. No consume energía, pero debe estar conectada a un circuito eléctrico para funcionar."
+  "block-handbooktext-efence": "Buena defensa contra invitados no deseados. Causa daño eléctrico al contacto. No consume energía, pero debe estar conectada a un circuito eléctrico para funcionar.",
+
+  "progress": "Progreso: {0:P0}"
 
 
 }

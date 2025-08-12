@@ -1,7 +1,8 @@
-﻿using System;
+﻿using ElectricalProgressive.Utils;
+using System;
 using System.Linq;
+using System.Reflection;
 using System.Text;
-using ElectricalProgressive.Utils;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
@@ -134,6 +135,83 @@ public class    BlockEntityEOven : BlockEntityDisplay, IHeatSource
     }
 
 
+
+
+
+// ...
+
+/// <summary>
+/// Возвращает экземпляр поведения указанного типа, безопасно (через MakeGenericMethod или обход списка behaviors).
+/// Возвращает null, если поведение не найдено.
+/// </summary>
+private object GetBehaviorByType(Type behaviorType)
+{
+    if (behaviorType == null) return null;
+
+    try
+    {
+        // 1) Попытка вызвать обобщённый GetBehavior<T>() через рефлексию
+        MethodInfo genericGetBehavior = null;
+        var methods = this.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        foreach (var m in methods)
+        {
+            if (m.Name == "GetBehavior" && m.IsGenericMethodDefinition && m.GetGenericArguments().Length == 1)
+            {
+                genericGetBehavior = m;
+                break;
+            }
+        }
+
+        if (genericGetBehavior != null)
+        {
+            var gen = genericGetBehavior.MakeGenericMethod(behaviorType);
+            return gen.Invoke(this, null);
+        }
+
+        // 2) Fallback: пытаемся найти приватное поле/свойство, которое содержит массив/коллекцию behaviors
+        // Возможные имена полей/свойств (разные версии API)
+        string[] candidateFieldNames = new[] { "blockEntityBehaviors", "behaviors", "BlockEntityBehaviors", "Behaviors" };
+
+        foreach (var name in candidateFieldNames)
+        {
+            var fld = this.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            if (fld != null)
+            {
+                var col = fld.GetValue(this) as System.Collections.IEnumerable;
+                if (col != null)
+                {
+                    foreach (var b in col)
+                    {
+                        if (b != null && behaviorType.IsAssignableFrom(b.GetType())) return b;
+                    }
+                }
+            }
+
+            var prop = this.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+            if (prop != null)
+            {
+                var col = prop.GetValue(this) as System.Collections.IEnumerable;
+                if (col != null)
+                {
+                    foreach (var b in col)
+                    {
+                        if (b != null && behaviorType.IsAssignableFrom(b.GetType())) return b;
+                    }
+                }
+            }
+        }
+    }
+    catch
+    {
+        // ничего не делаем — вернём null внизу
+    }
+
+    return null;
+}
+
+
+
+
     /// <summary>
     /// Обработка взаимодействия с духовкой
     /// </summary>
@@ -143,43 +221,62 @@ public class    BlockEntityEOven : BlockEntityDisplay, IHeatSource
     public virtual bool OnInteract(IPlayer byPlayer, BlockSelection bs)
     {
         ItemSlot activeHotbarSlot = byPlayer.InventoryManager.ActiveHotbarSlot;
-        if (activeHotbarSlot.Empty)                    //если слот пустой - пробуем брать
+        if (activeHotbarSlot.Empty) // если слот пустой - пробуем брать
         {
             if (!this.TryTake(byPlayer))
                 return false;
+
+            // назначаем владельца при успешном взятии (через рефлексию)
+            if (ElectricalProgressiveQOL.xskillsEnabled && ElectricalProgressiveQOL.typeBlockEntityBehaviorOwnable != null)
+            {
+                var ownable = GetBehaviorByType(ElectricalProgressiveQOL.typeBlockEntityBehaviorOwnable);
+                var ownerProp = ownable?.GetType().GetProperty("Owner", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                if (ownerProp != null && ownerProp.CanWrite) ownerProp.SetValue(ownable, byPlayer);
+            }
+
             byPlayer.InventoryManager.BroadcastHotbarSlot();
             return true;
         }
-        CollectibleObject collectible = activeHotbarSlot.Itemstack.Collectible;
 
+        CollectibleObject collectible = activeHotbarSlot.Itemstack.Collectible;
 
         if (activeHotbarSlot.Itemstack.Equals(this.Api.World, this.lastRemoved, GlobalConstants.IgnoredStackAttributes) && !this.ovenInv[0].Empty)
         {
             if (this.TryTake(byPlayer))
             {
+                // назначаем владельца при успешном взятии
+                if (ElectricalProgressiveQOL.xskillsEnabled && ElectricalProgressiveQOL.typeBlockEntityBehaviorOwnable != null)
+                {
+                    var ownableTake2 = GetBehaviorByType(ElectricalProgressiveQOL.typeBlockEntityBehaviorOwnable);
+                    var ownerProp2 = ownableTake2?.GetType().GetProperty("Owner", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                    if (ownerProp2 != null && ownerProp2.CanWrite) ownerProp2.SetValue(ownableTake2, byPlayer);
+                }
+
                 byPlayer.InventoryManager.BroadcastHotbarSlot();
                 return true;
             }
         }
         else
         {
-            
             if (this.TryPut(activeHotbarSlot))
             {
+                // назначаем владельца при успешной установке
+                if (ElectricalProgressiveQOL.xskillsEnabled && ElectricalProgressiveQOL.typeBlockEntityBehaviorOwnable != null)
+                {
+                    var ownablePut = GetBehaviorByType(ElectricalProgressiveQOL.typeBlockEntityBehaviorOwnable);
+                    var ownerProp3 = ownablePut?.GetType().GetProperty("Owner", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                    if (ownerProp3 != null && ownerProp3.CanWrite) ownerProp3.SetValue(ownablePut, byPlayer);
+                }
+
                 AssetLocation place = activeHotbarSlot.Itemstack?.Block?.Sounds?.Place!;
                 this.Api.World.PlaySoundAt(place != null ? place : new AssetLocation("sounds/player/buildhigh"), (Entity)byPlayer.Entity, byPlayer, true, 16f, 1f);
                 byPlayer.InventoryManager.BroadcastHotbarSlot();
-
-                //если предмет успешно положили в духовку - логируем это событие
-                //AssetLocation code = activeHotbarSlot.Itemstack?.Collectible?.Code;
-                //this.Api.World.Logger.Audit("{0} Put 1-4x{1} into Clay oven at {2}.", (object)byPlayer.PlayerName, (object)code, (object)this.Pos);
-
                 return true;
             }
 
-            if (this.Api is ICoreClientAPI api)  //уведомления об ошибках
+            if (this.Api is ICoreClientAPI api) // уведомления об ошибках
             {
-                if (activeHotbarSlot.Empty)     //если слот пустой
+                if (activeHotbarSlot.Empty) // если слот пустой
                 {
                     api.TriggerIngameError((object)this, "notbakeable", Lang.Get("Put-into-1-items"));
                     return true;
@@ -187,32 +284,31 @@ public class    BlockEntityEOven : BlockEntityDisplay, IHeatSource
                 else
                 {
                     BakingProperties bakingProperties1 = BakingProperties.ReadFrom(activeHotbarSlot.Itemstack);
-                    if (bakingProperties1 == null)                                          //если свойства выпекания не найдены
+                    if (bakingProperties1 == null) // если свойства выпекания не найдены
                     {
                         api.TriggerIngameError((object)this, "notbakeable", Lang.Get("This item is not bakeable."));
                         return true;
                     }
 
-                    if (!activeHotbarSlot.Itemstack.Attributes.GetBool("bakeable", true))  //если аттрибут есть выпекания
+                    if (!activeHotbarSlot.Itemstack.Attributes.GetBool("bakeable", true)) // если аттрибут есть выпекания
                     {
                         api.TriggerIngameError((object)this, "notbakeable", Lang.Get("This item is not bakeable."));
                         return true;
                     }
 
-
-                    if (activeHotbarSlot.Itemstack?.StackSize < 1 & !bakingProperties1.LargeItem)   //если айтемы в стаке меньше 1 
+                    if (activeHotbarSlot.Itemstack?.StackSize < 1 & !bakingProperties1.LargeItem) // если айтемы в стаке меньше 1 
                     {
                         api.TriggerIngameError((object)this, "notbakeable", Lang.Get("Put-into-1-items"));
                         return true;
                     }
-
-
                 }
-
             }
         }
         return false;
     }
+
+
+
 
 
     /// <summary>
@@ -465,76 +561,107 @@ public class    BlockEntityEOven : BlockEntityDisplay, IHeatSource
     {
         ItemSlot itemSlot = this.Inventory[slotIndex];
         OvenItemData ovenItemData = this.bakingData[slotIndex];
-        float num1 = ovenItemData.BrowningPoint;
-        if ((double)num1 == 0.0)
-            num1 = 160f;
-        double val = (double)ovenItemData.temp / (double)num1;
-        float num2 = ovenItemData.TimeToBake;
-        if ((double)num2 == 0.0)
-            num2 = 1f;
+        ItemStack prevStack = this.ovenInv[slotIndex].Itemstack?.Clone();
+
+        float num1 = ovenItemData.BrowningPoint == 0 ? 160f : ovenItemData.BrowningPoint;
+        double val = ovenItemData.temp / num1;
+        float num2 = ovenItemData.TimeToBake == 0 ? 1f : ovenItemData.TimeToBake;
         float num3 = (float)GameMath.Clamp((int)val, 1, 30) * dt / num2;
-        float num4 = ovenItemData.BakedLevel;
-        if ((double)ovenItemData.temp > (double)num1)
-        {
-            num4 = ovenItemData.BakedLevel + num3;
-            ovenItemData.BakedLevel = num4;
-        }
+
+        if (ovenItemData.temp > num1)
+            ovenItemData.BakedLevel += num3;
+
         BakingProperties bakingProperties = BakingProperties.ReadFrom(itemSlot.Itemstack);
-        float num5 = bakingProperties != null ? bakingProperties.LevelFrom : 0.0f;
-        float num6 = bakingProperties != null ? bakingProperties.LevelTo : 1f;
-        float num7 = (float)(int)((double)GameMath.Mix(bakingProperties != null ? bakingProperties.StartScaleY : 1f, bakingProperties != null ? bakingProperties.EndScaleY : 1f, GameMath.Clamp((float)(((double)num4 - (double)num5) / ((double)num6 - (double)num5)), 0.0f, 1f)) * (double)BlockEntityOven.BakingStageThreshold) / (float)BlockEntityOven.BakingStageThreshold;
-        bool flag = (double)num7 != (double)ovenItemData.CurHeightMul;
+        float num5 = bakingProperties?.LevelFrom ?? 0f;
+        float num6 = bakingProperties?.LevelTo ?? 1f;
+        float num7 = (float)(int)(GameMath.Mix(bakingProperties?.StartScaleY ?? 1f, bakingProperties?.EndScaleY ?? 1f,
+            GameMath.Clamp((ovenItemData.BakedLevel - num5) / (num6 - num5), 0f, 1f)) * BlockEntityOven.BakingStageThreshold) / BlockEntityOven.BakingStageThreshold;
+
+        bool flag = num7 != ovenItemData.CurHeightMul;
         ovenItemData.CurHeightMul = num7;
-        if ((double)num4 > (double)num6)
+
+        if (ovenItemData.BakedLevel > num6)
         {
             float temp = ovenItemData.temp;
-            string resultCode = bakingProperties?.ResultCode ?? null!;
-            if (resultCode != null)                            //степень готовности изменилась
+            string resultCode = bakingProperties?.ResultCode;
+            if (resultCode != null)
             {
-                ItemStack itemStack = null!;
-                if (itemSlot.Itemstack.Class == EnumItemClass.Block)
-                {
-                    Vintagestory.API.Common.Block block = this.Api.World.GetBlock(new AssetLocation(resultCode));
-                    if (block != null)
-                        itemStack = new ItemStack(block);
-                }
-                else
-                {
-                    Vintagestory.API.Common.Item obj = this.Api.World.GetItem(new AssetLocation(resultCode));
-                    if (obj != null)
-                        itemStack = new ItemStack(obj);
-                }
+                ItemStack itemStack = itemSlot.Itemstack.Class == EnumItemClass.Block
+                    ? new ItemStack(this.Api.World.GetBlock(new AssetLocation(resultCode)))
+                    : new ItemStack(this.Api.World.GetItem(new AssetLocation(resultCode)));
+
                 if (itemStack != null)
                 {
-                    if (this.ovenInv[slotIndex].Itemstack.Collectible is IBakeableCallback collectible)
-                        collectible.OnBaked(this.ovenInv[slotIndex].Itemstack, itemStack);
+                    (this.ovenInv[slotIndex].Itemstack.Collectible as IBakeableCallback)?.OnBaked(this.ovenInv[slotIndex].Itemstack, itemStack);
                     this.ovenInv[slotIndex].Itemstack = itemStack;
-                    this.bakingData[slotIndex] = new OvenItemData(itemStack);
-                    this.bakingData[slotIndex].temp = temp;
+                    this.bakingData[slotIndex] = new OvenItemData(itemStack) { temp = temp };
                     flag = true;
+
+                    // XSkills: через глобальные ссылки
+                    if (ElectricalProgressiveQOL.xskillsEnabled)
+                    {
+                        ApplyCookingAbilities(prevStack, slotIndex);
+                    }
                 }
             }
             else
             {
-                ItemSlot outputSlot = (ItemSlot)new DummySlot(null);
-                if (itemSlot.Itemstack.Collectible.CanSmelt(this.Api.World, (ISlotProvider)this.ovenInv, itemSlot.Itemstack, null!))
+                ItemSlot outputSlot = new DummySlot(null);
+                if (itemSlot.Itemstack.Collectible.CanSmelt(this.Api.World, this.ovenInv, itemSlot.Itemstack, null))
                 {
-                    itemSlot.Itemstack.Collectible.DoSmelt(this.Api.World, (ISlotProvider)this.ovenInv, this.ovenInv[slotIndex], outputSlot);
+                    itemSlot.Itemstack.Collectible.DoSmelt(this.Api.World, this.ovenInv, this.ovenInv[slotIndex], outputSlot);
                     if (!outputSlot.Empty)
                     {
                         this.ovenInv[slotIndex].Itemstack = outputSlot.Itemstack;
-                        this.bakingData[slotIndex] = new OvenItemData(outputSlot.Itemstack);
-                        this.bakingData[slotIndex].temp = temp;
+                        this.bakingData[slotIndex] = new OvenItemData(outputSlot.Itemstack) { temp = temp };
                         flag = true;
+
+                        if (ElectricalProgressiveQOL.xskillsEnabled)
+                        {
+                            ApplyCookingAbilities(prevStack, slotIndex);
+                        }
                     }
                 }
             }
         }
-        if (!flag)
-            return;
-        this.updateMesh(slotIndex);
-        this.MarkDirty(true);
+
+        if (flag)
+        {
+            this.updateMesh(slotIndex);
+            this.MarkDirty(true);
+        }
     }
+
+    private void ApplyCookingAbilities(ItemStack prevStack, int slotIndex)
+    {
+        try
+        {
+            // Получаем собственника через поведение (рефлексией)
+            object ownable = null;
+            if (ElectricalProgressiveQOL.typeBlockEntityBehaviorOwnable != null)
+                ownable = GetBehaviorByType(ElectricalProgressiveQOL.typeBlockEntityBehaviorOwnable);
+
+            IPlayer ownerPlayer = ownable?.GetType().GetProperty("Owner", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.GetValue(ownable) as IPlayer;
+
+            if (ownerPlayer != null && ElectricalProgressiveQOL.methodGetSkill != null && ElectricalProgressiveQOL.typeCooking != null)
+            {
+                var skill = ElectricalProgressiveQOL.methodGetSkill.Invoke(ElectricalProgressiveQOL.xLevelingInstance, new object[] { "cooking", false });
+                if (ElectricalProgressiveQOL.typeCooking.IsInstanceOfType(skill))
+                {
+                    var applyAbilities = ElectricalProgressiveQOL.typeCooking.GetMethod("ApplyAbilities", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                    applyAbilities?.Invoke(skill, new object[] { this.ovenInv[slotIndex], ownerPlayer, 0f, 1f, new ItemStack[] { prevStack }, 1f });
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            this.Api.World.Logger.Warning("Error applying cooking abilities: {0}", ex);
+        }
+    }
+
+
+
+
 
     //получает температуру окружающей среды
     protected virtual int EnvironmentTemperature()
@@ -602,6 +729,51 @@ public class    BlockEntityEOven : BlockEntityDisplay, IHeatSource
     {
         base.GetBlockInfo(forPlayer, stringBuilder);
 
+        if (ElectricalProgressiveQOL.xskillsEnabled && ElectricalProgressiveQOL.methodGetSkill != null && ElectricalProgressiveQOL.typeCooking != null)
+        {
+            try
+            {
+                var skill = ElectricalProgressiveQOL.methodGetSkill.Invoke(ElectricalProgressiveQOL.xLevelingInstance, new object[] { "cooking", false });
+                if (ElectricalProgressiveQOL.typeCooking.IsInstanceOfType(skill))
+                {
+                    var getId = ElectricalProgressiveQOL.typeCooking.BaseType.GetProperty("Id");
+                    var getSpecId = ElectricalProgressiveQOL.typeCooking.BaseType.GetProperty("SpecialisationID");
+                    var id = getId?.GetValue(skill);
+                    var specId = getSpecId?.GetValue(skill);
+
+                    var pssType = ElectricalProgressiveQOL.asmXLib.GetType("XLib.XLeveling.PlayerSkillSet");
+                    var abilityType = ElectricalProgressiveQOL.asmXLib.GetType("XLib.XLeveling.PlayerAbility");
+                    
+                    var playerSkillSet = forPlayer?.Entity?.GetBehavior("SkillSet");
+                    var indexer = pssType?.GetProperty("Item");
+                    var abilitiesForSkill = indexer?.GetValue(playerSkillSet, new object[] { id });
+                    var specIndexer = abilitiesForSkill?.GetType().GetProperty("Item");
+                    var playerAbility = specIndexer?.GetValue(abilitiesForSkill, new object[] { specId });
+
+                    if (playerAbility != null && (int)(abilityType?.GetProperty("Tier")?.GetValue(playerAbility) ?? 0) >= 1)
+                    {
+                        for (int slotId = 0; slotId < this.bakeableCapacity; ++slotId)
+                        {
+                            if (!this.ovenInv[slotId].Empty)
+                            {
+                                OvenItemData ovenItemData = this.bakingData[slotId];
+                                BakingProperties bakingProperties = BakingProperties.ReadFrom(this.ovenInv[slotId].Itemstack);
+                                if (bakingProperties != null && ovenItemData != null)
+                                {
+                                    float num = Math.Min((ovenItemData.BakedLevel - bakingProperties.LevelFrom) /
+                                                          (bakingProperties.LevelTo - bakingProperties.LevelFrom), 1f);
+                                    stringBuilder.AppendLine(Lang.Get("electricalprogressiveqol:progress", num));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                this.Api.World.Logger.Warning("Error showing cooking progress: {0}", ex);
+            }
+        }
 
         stringBuilder.AppendLine();
         for (int slotId = 0; slotId < this.bakeableCapacity; ++slotId)
@@ -610,10 +782,13 @@ public class    BlockEntityEOven : BlockEntityDisplay, IHeatSource
             {
                 ItemStack itemstack = this.ovenInv[slotId].Itemstack;
                 stringBuilder.Append(itemstack.GetName());
-                stringBuilder.AppendLine(" (" + Lang.Get("{0}°C", (object)(int)this.bakingData[slotId].temp) + ")");
+                stringBuilder.AppendLine($" ({Lang.Get("{0}°C", (int)this.bakingData[slotId].temp)})");
             }
         }
     }
+
+
+
 
 
 

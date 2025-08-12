@@ -79,21 +79,74 @@ namespace ElectricalProgressive.Content.Block.EOven;
 
     protected override ItemSlot NewSlot(int i)
     {
-      return (ItemSlot) new ItemSlotSurvival((InventoryBase) this);
+        // Если XSkills включен и есть тип ItemSlotOven
+        if (ElectricalProgressiveQOL.xskillsEnabled && ElectricalProgressiveQOL.asmXSkills != null)
+        {
+            try
+            {
+                var slotType = ElectricalProgressiveQOL.asmXSkills.GetType("XSkills.ItemSlotOven");
+                if (slotType != null)
+                {
+                    return (ItemSlot)Activator.CreateInstance(slotType, new object[] { (InventoryBase)this });
+                }
+            }
+            catch (Exception ex)
+            {
+                this.Api.World.Logger.Warning("Error creating ItemSlotOven via reflection: {0}", ex);
+            }
+        }
+
+        // Если XSkills нет или создать слот не удалось — возвращаем обычный
+        return new ItemSlotSurvival((InventoryBase)this);
     }
 
 
-   
+
 
     public override float GetSuitability(ItemSlot sourceSlot, ItemSlot targetSlot, bool isMerge)
     {
-      CombustibleProperties combustibleProps = sourceSlot.Itemstack.Collectible.CombustibleProps;
-      return targetSlot == this.slots[this.cookingSize] && (combustibleProps == null || combustibleProps.BurnTemperature <= 0) ? 0.0f : base.GetSuitability(sourceSlot, targetSlot, isMerge);
+        // Старая проверка температуры горения
+        CombustibleProperties combustibleProps = sourceSlot?.Itemstack?.Collectible?.CombustibleProps;
+        float result = (targetSlot == this.slots[this.cookingSize] && (combustibleProps == null || combustibleProps.BurnTemperature <= 0))
+            ? 0.0f
+            : base.GetSuitability(sourceSlot, targetSlot, isMerge);
+
+        // Если интеграция XSkills включена и предмет подходит
+        if (ElectricalProgressiveQOL.xskillsEnabled && result != 0.0f)
+        {
+            try
+            {
+                IPlayer player = sourceSlot?.Inventory is InventoryBasePlayer invPlayer ? invPlayer.Player : null;
+                if (player != null && ElectricalProgressiveQOL.typeBlockEntityBehaviorOwnable != null)
+                {
+                    var be = this.Api?.World?.BlockAccessor?.GetBlockEntity(this.Pos);
+                    var getBehaviorMethod = be?.GetType().GetMethod("GetBehavior")?.MakeGenericMethod(ElectricalProgressiveQOL.typeBlockEntityBehaviorOwnable);
+                    var behavior = getBehaviorMethod?.Invoke(be, null);
+
+                    if (behavior != null)
+                    {
+                        var ownerProp = ElectricalProgressiveQOL.typeBlockEntityBehaviorOwnable.GetProperty("Owner");
+                        if (ownerProp != null)
+                        {
+                            ownerProp.SetValue(behavior, player);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                this.Api?.World?.Logger?.Warning("Error while setting owner in InventoryOven.GetSuitability: {0}", ex);
+            }
+        }
+
+        return result;
     }
 
 
 
-    
+
+
+
 
     /// <summary>
     /// Автозагрузка духовки

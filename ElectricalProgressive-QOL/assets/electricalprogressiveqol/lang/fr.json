@@ -115,6 +115,9 @@
 
   "block-efence-*": "Clôture électrique",
   "block-handbooktitle-efence": "Utilisation",
-  "block-handbooktext-efence": "Une bonne protection contre les invités indésirables. Inflige des dégâts électriques au contact. Ne consomme pas d'énergie, mais doit être connectée à un circuit électrique pour fonctionner."
+  "block-handbooktext-efence": "Une bonne protection contre les invités indésirables. Inflige des dégâts électriques au contact. Ne consomme pas d'énergie, mais doit être connectée à un circuit électrique pour fonctionner.",
+
+  "progress": "Progression : {0:P0}"
+
 
 }
