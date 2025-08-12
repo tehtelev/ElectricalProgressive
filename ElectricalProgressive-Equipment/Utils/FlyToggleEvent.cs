@@ -4,6 +4,7 @@ using Vintagestory.API.Client;
 using Vintagestory.API.Server;
 using ElectricalProgressive.Content.Item.Armor;
 using ElectricalProgressive.Net;
+using System.Linq;
 
 
 namespace ElectricalProgressive.Utils;
@@ -26,19 +27,38 @@ public class FlyToggleEvent : ModSystem
     private int consumeFly;
     private float speedFly;
 
+    // Статическое поле для хранения слотов брони
+    private static readonly int[] ArmorSlots = ElectricalProgressiveEquipment.combatoverhaul
+        ? new[] { 34, 35, 36, 26, 27, 28 }
+        : Enumerable.Repeat(13, 6).ToArray();
+
     int consume = 20; // Количество энергии, потребляемое в секунду при полете
 
+    /// <summary>
+    /// Этот метод вызывается при загрузке мода.
+    /// </summary>
+    /// <param name="forSide"></param>
+    /// <returns></returns>
     public override bool ShouldLoad(EnumAppSide forSide)
     {
         return true;
     }
 
+    /// <summary>
+    /// Запускает систему на стороне сервера или клиента.
+    /// </summary>
+    /// <param name="api"></param>
     public override void Start(ICoreAPI api)
     {
         base.Start(api);
         this.api = api;
     }
 
+
+    /// <summary>
+    /// Стартует клиентская сторона мода.
+    /// </summary>
+    /// <param name="api"></param>
     public override void StartClientSide(ICoreClientAPI api)
     {
         base.StartClientSide(api);
@@ -50,62 +70,142 @@ public class FlyToggleEvent : ModSystem
             NetworkServerMessageHandler<FlyResponse>(this.OnClientReceived));
     }
 
+    /// <summary>
+    /// Стартует серверная сторона мода.
+    /// </summary>
+    /// <param name="api"></param>
     public override void StartServerSide(ICoreServerAPI api)
     {
         base.StartServerSide(api);
         this.sapi = api;
         serverChannel = sapi.Network.RegisterChannel("EP").RegisterMessageType(typeof
-            (FlyToggle)).RegisterMessageType(typeof(FlyResponse)).SetMessageHandler<FlyToggle>(new
+            (FlyToggle)). RegisterMessageType(typeof(FlyResponse)).SetMessageHandler<FlyToggle>(new
             NetworkClientMessageHandler<FlyToggle>(this.OnClientSent));
         api.Event.RegisterGameTickListener(new Action<float>(this.onTickItem), 1000);
         api.Event.RegisterGameTickListener(new Action<float>(this.onTickCheckFly), 1000, 200);
     }
+
+    /// <summary>
+    /// Тики для проверки и обновления состояния полета.
+    /// </summary>
+    /// <param name="dt"></param>
     private void onTickItem(float dt)
     {
         double totalHours = this.sapi!.World.Calendar.TotalHours;
         double num = totalHours - this.lastCheckTotalHours;
         if (num <= 0.05)
             return;
-        foreach (IPlayer allOnlinePlayer in this.sapi.World.AllOnlinePlayers)
+        foreach (IPlayer player in this.sapi!.World.AllOnlinePlayers)
         {
-            IInventory ownInventory = allOnlinePlayer.InventoryManager.GetOwnInventory("character");
-            if (ownInventory != null)
+            var inventory = player.InventoryManager.GetOwnInventory("character");
+            if (inventory == null) continue;
+
+            var (armor, itemSlot) = FindEquippedArmor(inventory);
+            if (armor != null)
             {
-                ItemSlot itemSlot = ownInventory[ElectricalProgressiveEquipment.combatoverhaul ? 34 : 13];
-                if (itemSlot.Itemstack?.Collectible is EArmor collectible)
-                {
-                    consumeFly = collectible.consumefly;
-                    speedFly = collectible.flySpeed;
-                    consume = collectible.consume;
+                consumeFly = armor.consumefly;
+                speedFly = armor.flySpeed;
+                consume = armor.consume;
 
-                    int energy = itemSlot.Itemstack.Attributes.GetInt("durability") * consume;
-                    if (energy >= consumeFly / num)
-                    {
-                        if (itemSlot.Itemstack.Attributes.GetBool("flying") &&
-                            itemSlot.Inventory.CanPlayerAccess(allOnlinePlayer, allOnlinePlayer.Entity.Pos) &&
-                            ownInventory[(int)EnumCharacterDressType.Waist]?.Itemstack?.Item.FirstCodePart().Contains("angelbelt") != true)
-                        {
-                            //collectible.receiveEnergy(itemSlot.Itemstack, -(int)(consumeFly / num));
-
-                            int consume = MyMiniLib.GetAttributeInt(itemSlot.Itemstack.Item, "consume", 20);     //размер минимальной порции   
-                            int damage = (int)(consumeFly / num/ consume);                         //рассчитываем удар по проч
-                            itemSlot.Itemstack.Item.DamageItem(sapi.World, null, itemSlot, damage); // уменьшаем прочность на размер порции
-
-
-                            itemSlot.MarkDirty();
-                        }
-                    }
-                    else
-                    {
-                        itemSlot.Itemstack.Attributes.SetBool("flying", false);
-                        itemSlot.MarkDirty();
-                    }
-                }
+                UpdateArmorEnergy(itemSlot, player, num);
             }
         }
         this.lastCheckTotalHours = totalHours;
     }
 
+
+
+    /// <summary>
+    /// Метод для поиска экипированного нагрудника в инвентаре игрока.
+    /// </summary>
+    /// <param name="inventory"></param>
+    /// <returns></returns>
+    private (EArmor?, ItemSlot?) FindEquippedArmor(IInventory inventory)
+    {
+        foreach (int slot in ArmorSlots)
+        {
+            var itemSlot = inventory[slot];
+            if (itemSlot?.Itemstack?.Collectible is EArmor armor)
+            {
+                return (armor, itemSlot);
+            }
+        }
+        return (null!, inventory[13]);
+    }
+
+    /// <summary>
+    /// Обновляет энергию брони и проверяет возможность полета.
+    /// </summary>
+    /// <param name="itemSlot"></param>
+    /// <param name="player"></param>
+    /// <param name="timeDelta"></param>
+    private void UpdateArmorEnergy(ItemSlot itemSlot, IPlayer player, double timeDelta)
+    {
+        if (itemSlot?.Itemstack == null) return;
+
+        int energy = itemSlot.Itemstack.Attributes.GetInt("durability") * consume;
+        
+        if (energy >= consumeFly / timeDelta)
+        {
+            if (IsValidForFlight(itemSlot, player))
+            {
+                ApplyEnergyConsumption(itemSlot, timeDelta);
+            }
+        }
+        else
+        {
+            DisableFlight(itemSlot);
+        }
+    }
+
+    /// <summary>
+    /// Можно ли летать с данным предметом?
+    /// </summary>
+    /// <param name="itemSlot"></param>
+    /// <param name="player"></param>
+    /// <returns></returns>
+    private bool IsValidForFlight(ItemSlot itemSlot, IPlayer player)
+    {
+        return itemSlot.Itemstack.Attributes.GetBool("flying") &&
+               itemSlot.Inventory.CanPlayerAccess(player, player.Entity.Pos) &&
+               !HasAngelBelt(player);
+    }
+
+    /// <summary>
+    /// Применяет потребление энергии для полета.
+    /// </summary>
+    /// <param name="itemSlot"></param>
+    /// <param name="timeDelta"></param>
+    private void ApplyEnergyConsumption(ItemSlot itemSlot, double timeDelta)
+    {
+        int baseConsume = MyMiniLib.GetAttributeInt(itemSlot.Itemstack.Item, "consume", 20);
+        int damage = (int)(consumeFly / timeDelta / baseConsume);
+        
+        itemSlot.Itemstack.Item.DamageItem(sapi.World, null, itemSlot, damage);
+        itemSlot.MarkDirty();
+    }
+
+    /// <summary>
+    /// Отмена полета для предмета.
+    /// </summary>
+    /// <param name="itemSlot"></param>
+    private void DisableFlight(ItemSlot itemSlot)
+    {
+        itemSlot.Itemstack.Attributes.SetBool("flying", false);
+        itemSlot.MarkDirty();
+    }
+
+    /// <summary>
+    /// Проверяет, есть ли у игрока пояс ангела.
+    /// </summary>
+    /// <param name="player"></param>
+    /// <returns></returns>
+    private bool HasAngelBelt(IPlayer player)
+    {
+        var inventory = player.InventoryManager.GetOwnInventory("character");
+        var waistSlot = inventory[(int)EnumCharacterDressType.Waist];
+        return waistSlot?.Itemstack?.Item.FirstCodePart().Contains("angelbelt") == true;
+    }
 
 
     private void onTickCheckFly(float dt)
@@ -115,11 +215,11 @@ public class FlyToggleEvent : ModSystem
             IInventory ownInventory = allOnlinePlayer.InventoryManager.GetOwnInventory("character");
             if (ownInventory != null)
             {
-                ItemSlot itemSlot = ownInventory[ElectricalProgressiveEquipment.combatoverhaul ? 34 : 13];
-                if (itemSlot.Itemstack?.Collectible is EArmor collectible)
+                var itemSlot = FindEquippedArmor(ownInventory).Item2;
+                if (itemSlot != null)
                 {
-                    if (itemSlot.Itemstack.Attributes.GetBool("flying") &&
-                        itemSlot.Inventory.CanPlayerAccess(allOnlinePlayer, allOnlinePlayer.Entity.Pos))
+                    if ((itemSlot.Itemstack?.Attributes.GetBool("flying") ?? false)
+                        && itemSlot.Inventory.CanPlayerAccess(allOnlinePlayer, allOnlinePlayer.Entity.Pos))
                     {
                         if (allOnlinePlayer.WorldData.FreeMove != true)
                         {
@@ -208,8 +308,10 @@ public class FlyToggleEvent : ModSystem
 
     public bool Toggle(IPlayer player, FlyToggle bt)
     {
-        ItemSlot itemSlot = player.InventoryManager.GetOwnInventory("character")[ElectricalProgressiveEquipment.combatoverhaul ? 34 : 13];
-        if (itemSlot == null) return false;
+        var ownInventory = player.InventoryManager.GetOwnInventory("character"); 
+        var itemSlot = FindEquippedArmor(ownInventory).Item2;
+        if (itemSlot == null)
+            return false;
         if (!itemSlot.Itemstack.Attributes.GetBool("flying") &&
             itemSlot.Itemstack.Attributes.GetInt("durability")*consume > consumeFly / 0.05)
         {
@@ -293,7 +395,7 @@ public class FlyToggleEvent : ModSystem
                 return false;
             }
 
-            ItemSlot beltslot = ownInventory[ElectricalProgressiveEquipment.combatoverhaul ? 34 : 13];
+            var beltslot = FindEquippedArmor(ownInventory).Item2;
             if (beltslot == null)
             {
                 return false;
