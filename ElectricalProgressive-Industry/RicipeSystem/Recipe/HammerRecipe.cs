@@ -97,25 +97,79 @@ public class HammerRecipe : IByteSerializable, IRecipeBase<HammerRecipe>
 
         return mappings;
     }
+    
+public bool Resolve(IWorldAccessor world, string sourceForErrorLogging)
+{
+    bool ok = true;
 
-    public bool Resolve(IWorldAccessor world, string sourceForErrorLogging)
+    // 1. Сначала разрешаем ингредиенты
+    for (int i = 0; i < Ingredients.Length; i++)
     {
-        bool ok = true;
-
-        for (int i = 0; i < Ingredients.Length; i++)
-        {
-            ok &= Ingredients[i].Resolve(world, sourceForErrorLogging);
-        }
-
-        ok &= Output.Resolve(world, sourceForErrorLogging);
-        
-        if (SecondaryOutput != null)
-        {
-            ok &= SecondaryOutput.Resolve(world, sourceForErrorLogging);
-        }
-
-        return ok;
+        ok &= Ingredients[i].Resolve(world, sourceForErrorLogging);
     }
+
+    // 2. Собираем словарь для подстановок
+    Dictionary<string, string> substitutions = new Dictionary<string, string>();
+    
+    if (Ingredients.Length > 0 && Ingredients[0].Code != null)
+    {
+        // Автоматически извлекаем значения из кода ингредиента
+        var parts = Ingredients[0].Code.Path.Split('-');
+        if (parts.Length > 1)
+        {
+            substitutions["metal"] = parts[1]; // Для совместимости
+            substitutions["material"] = parts[1]; // Более универсальное имя
+        }
+        
+        // Добавляем имя ингредиента, если указано
+        if (!string.IsNullOrEmpty(Ingredients[0].Name))
+        {
+            substitutions[Ingredients[0].Name] = parts.Length > 1 ? parts[1] : "";
+        }
+    }
+
+    // 3. Обрабатываем основной выход
+    ok &= ResolveWithSubstitutions(Output, world, sourceForErrorLogging, substitutions);
+    
+    // 4. Обрабатываем дополнительный выход
+    if (SecondaryOutput != null)
+    {
+        ok &= ResolveWithSubstitutions(SecondaryOutput, world, sourceForErrorLogging, substitutions);
+    }
+
+    return ok;
+}
+
+private bool ResolveWithSubstitutions(JsonItemStack stack, IWorldAccessor world, 
+    string sourceForErrorLogging, Dictionary<string, string> substitutions)
+{
+    if (stack == null) return true;
+    
+    // Клонируем, чтобы не менять оригинальный объект
+    JsonItemStack tempStack = stack.Clone();
+    
+    // Заменяем все шаблоны {variable}
+    if (tempStack.Code?.Path != null && substitutions.Count > 0)
+    {
+        foreach (var sub in substitutions)
+        {
+            tempStack.Code.Path = tempStack.Code.Path
+                .Replace($"{{{sub.Key}}}", sub.Value);
+        }
+    }
+
+    bool resolved = tempStack.Resolve(world, sourceForErrorLogging);
+    
+    // Если разрешилось успешно, сохраняем изменения
+    if (resolved)
+    {
+        stack.Code = tempStack.Code;
+        stack.StackSize = tempStack.StackSize;
+        // ... другие необходимые поля
+    }
+
+    return resolved;
+}
 
     public void FromBytes(BinaryReader reader, IWorldAccessor resolver)
     {
