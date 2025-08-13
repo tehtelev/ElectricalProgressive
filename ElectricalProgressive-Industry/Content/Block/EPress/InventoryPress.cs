@@ -14,16 +14,16 @@ public class InventoryPress : InventoryBase, ISlotProvider
     public InventoryPress(string inventoryID, ICoreAPI api)
         : base(inventoryID, api)
     {
-        this.slots = this.GenEmptySlots(4);
+        this.slots = this.GenEmptySlots(3);
     }
 
     public InventoryPress(string className, string instanceID, ICoreAPI api)
         : base(className, instanceID, api)
     {
-        this.slots = this.GenEmptySlots(4);
+        this.slots = this.GenEmptySlots(3);
     }
 
-    public override int Count => 4;
+    public override int Count => 3;
 
     public override ItemSlot this[int slotId]
     {
@@ -54,7 +54,7 @@ public class InventoryPress : InventoryBase, ISlotProvider
     public override float GetSuitability(ItemSlot sourceSlot, ItemSlot targetSlot, bool isMerge)
     {
         return targetSlot == this.slots[0] && sourceSlot.Itemstack.Collectible.GrindingProps != null
-            ? 4f
+            ? 3f
             : base.GetSuitability(sourceSlot, targetSlot, isMerge);
     }
 

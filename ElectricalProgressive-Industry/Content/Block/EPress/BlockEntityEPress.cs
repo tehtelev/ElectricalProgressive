@@ -30,16 +30,15 @@ namespace ElectricalProgressive.Content.Block.EPress
         public string CurrentRecipeName;
         public float RecipeProgress;
 
-        // Слоты (3 входа, 1 выход)
+        // Слоты (2 входа, 1 выход)
         public ItemSlot InputSlot1 => inventory[0];
         public ItemSlot InputSlot2 => inventory[1];
-        public ItemSlot InputSlot3 => inventory[2];
-        public ItemSlot OutputSlot => inventory[3];
+        public ItemSlot OutputSlot => inventory[2]; // Теперь слот 2 — выходной
 
         public virtual string DialogTitle => Lang.Get("epress-title-gui");
         public override InventoryBase Inventory => inventory;
 
-        // Электрические параметры
+        // Электрические параметры (без изменений)
         private Facing facing = Facing.None;
         private BEBehaviorElectricalProgressive ElectricalProgressive => GetBehavior<BEBehaviorElectricalProgressive>();
         private BlockEntityAnimationUtil animUtil => GetBehavior<BEBehaviorAnimatable>()?.animUtil;
@@ -87,7 +86,7 @@ namespace ElectricalProgressive.Content.Block.EPress
         public BlockEntityEPress()
         {
             _maxConsumption = MyMiniLib.GetAttributeInt(Block, "maxConsumption", 100);
-            inventory = new InventoryPress(null, null);
+            inventory = new InventoryPress(null, null); // Теперь 2 входа + 1 выход
             inventory.SlotModified += OnSlotModified;
         }
 
@@ -126,7 +125,7 @@ namespace ElectricalProgressive.Content.Block.EPress
             MarkDirty();
         }
 
-        #region Логика рецептов
+        #region Логика рецептов (адаптирована под 2 слота)
         public bool FindMatchingRecipe()
         {
             CurrentRecipe = null;
@@ -145,28 +144,21 @@ namespace ElectricalProgressive.Content.Block.EPress
             RecipeProgress = 0f;
             return false;
         }
-        
-        /// <summary>
-        /// Проверка соответствия рецепту с учетом:
-        /// - Идентичных ингредиентов в разных слотах
-        /// - Нерасходуемых компонентов (quantity=0)
-        /// - Wildcard-совпадений
-        /// </summary>
+
         private bool MatchesRecipe(PressRecipe recipe)
         {
             Dictionary<string, string> wildcardMatches = new Dictionary<string, string>();
             List<int> usedSlots = new List<int>();
 
-            // Проверяем все ингредиенты рецепта
-            for (int ingredIndex = 0; ingredIndex < recipe.Ingredients.Length; ingredIndex++)
+            // Проверяем все ингредиенты рецепта (макс. 2)
+            for (int ingredIndex = 0; ingredIndex < recipe.Ingredients.Length && ingredIndex < 2; ingredIndex++)
             {
                 var ingred = recipe.Ingredients[ingredIndex];
                 bool foundSlot = false;
 
-                // Ищем подходящий слот для этого ингредиента
-                for (int slotIndex = 0; slotIndex < 3; slotIndex++)
+                // Ищем подходящий слот (только 0 или 1)
+                for (int slotIndex = 0; slotIndex < 2; slotIndex++)
                 {
-                    // Пропускаем уже использованные слоты
                     if (usedSlots.Contains(slotIndex)) continue;
 
                     var slot = GetInputSlot(slotIndex);
@@ -194,7 +186,6 @@ namespace ElectricalProgressive.Content.Block.EPress
                     }
                 }
 
-                // Если не нашли подходящий слот для ингредиента
                 if (!foundSlot) return false;
             }
 
@@ -208,10 +199,140 @@ namespace ElectricalProgressive.Content.Block.EPress
 
             return true;
         }
+
+        private bool HasRequiredItems()
+        {
+            if (CurrentRecipe == null) return false;
+
+            // Проверяем только 2 слота
+            for (int i = 0; i < CurrentRecipe.Ingredients.Length && i < 2; i++)
+            {
+                var ingred = CurrentRecipe.Ingredients[i];
+                var slot = GetInputSlot(i);
+
+                if (ingred.Quantity == 0)
+                {
+                    if (slot.Empty || !ingred.SatisfiesAsIngredient(slot.Itemstack))
+                        return false;
+                }
+                else if (ingred.Quantity > 0)
+                {
+                    if (slot.Empty || !ingred.SatisfiesAsIngredient(slot.Itemstack) || 
+                        slot.Itemstack.StackSize < ingred.Quantity)
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
+        private void ProcessCompletedCraft()
+        {
+            if (CurrentRecipe == null || Api == null || CurrentRecipe.Output?.ResolvedItemstack == null)
+                return;
+
+            try
+            {
+                Dictionary<string, string> wildcardMatches = new Dictionary<string, string>();
+                List<int> usedSlots = new List<int>();
+
+                // Первый проход — находим совпадения (только 2 слота)
+                foreach (var ingred in CurrentRecipe.Ingredients)
+                {
+                    for (int slotIndex = 0; slotIndex < 2; slotIndex++)
+                    {
+                        if (usedSlots.Contains(slotIndex)) continue;
+
+                        var slot = GetInputSlot(slotIndex);
+                        if (!slot.Empty && SatisfiesIngredient(slot.Itemstack, ingred, ref wildcardMatches))
+                        {
+                            usedSlots.Add(slotIndex);
+                            break;
+                        }
+                    }
+                }
+
+                // Создаем выходной предмет
+                ItemStack outputStack = CreateOutputStack(wildcardMatches);
+                if (outputStack == null) return;
+
+                // Помещаем результат в слот 2 (выходной)
+                if (OutputSlot.Empty)
+                {
+                    OutputSlot.Itemstack = outputStack;
+                }
+                else if (OutputSlot.Itemstack.Collectible == outputStack.Collectible)
+                {
+                    int space = OutputSlot.Itemstack.Collectible.MaxStackSize - OutputSlot.Itemstack.StackSize;
+                    if (space > 0)
+                    {
+                        int transfer = Math.Min(space, outputStack.StackSize);
+                        OutputSlot.Itemstack.StackSize += transfer;
+                        outputStack.StackSize -= transfer;
+                    }
+                    if (outputStack.StackSize > 0)
+                        Api.World.SpawnItemEntity(outputStack, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
+                }
+                else
+                {
+                    Api.World.SpawnItemEntity(outputStack, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
+                }
+
+                // Второй проход — удаляем расходуемые ингредиенты (только 2 слота)
+                usedSlots.Clear();
+                foreach (var ingred in CurrentRecipe.Ingredients)
+                {
+                    if (ingred.Quantity <= 0) continue;
+
+                    for (int slotIndex = 0; slotIndex < 2; slotIndex++)
+                    {
+                        if (usedSlots.Contains(slotIndex)) continue;
+
+                        var slot = GetInputSlot(slotIndex);
+                        if (!slot.Empty && SatisfiesIngredient(slot.Itemstack, ingred, ref wildcardMatches))
+                        {
+                            slot.TakeOut(ingred.Quantity);
+                            slot.MarkDirty();
+                            usedSlots.Add(slotIndex);
+                            break;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Api.Logger.Error($"Crafting error in EPress at {Pos}: {ex}");
+            }
+        }
+        
+        private ItemStack CreateOutputStack(Dictionary<string, string> wildcardMatches)
+        {
+            if (CurrentRecipe?.Output == null || Api == null) 
+                return null;
+
+            string outputCode = CurrentRecipe.Output.Code.Path;
+
+            // Подставляем wildcard-значения в выходной код
+            foreach (var match in wildcardMatches)
+            {
+                outputCode = outputCode.Replace("{" + match.Key + "}", match.Value);
+            }
+
+            // Создаем новый предмет
+            AssetLocation outputLocation = new AssetLocation(outputCode);
+            Item outputItem = Api.World.GetItem(outputLocation);
+            if (outputItem == null) 
+            {
+                Api.Logger.Error($"EPress: Failed to find output item {outputCode}");
+                return null;
+            }
+
+            return new ItemStack(outputItem, CurrentRecipe.Output.StackSize);
+        }
         
         private bool SatisfiesIngredient(ItemStack stack, CraftingRecipeIngredient ingred, ref Dictionary<string, string> wildcardMatches)
         {
-            // Проверка wildcard-ингредиентов
+            // Проверка wildcard-ингредиентов (например, "gear-*")
             if (ingred.Code.Path.Contains("*"))
             {
                 string wildcardPart = GetWildcardMatch(ingred.Code, stack.Collectible.Code);
@@ -223,7 +344,7 @@ namespace ElectricalProgressive.Content.Block.EPress
                 return true;
             }
 
-            // Обычная проверка ингредиента
+            // Стандартная проверка (совпадение кода и свойств)
             return ingred.SatisfiesAsIngredient(stack);
         }
         
@@ -247,144 +368,11 @@ namespace ElectricalProgressive.Content.Block.EPress
             return itemStr.Substring(before.Length, itemStr.Length - before.Length - after.Length);
         }
 
-        /// <summary>
-        /// Обработка завершенного крафта с учетом:
-        /// - Нерасходуемых компонентов
-        /// - Идентичных ингредиентов в разных слотах
-        /// </summary>
-        
-        private void ProcessCompletedCraft()
-        {
-            if (CurrentRecipe == null || Api == null || CurrentRecipe.Output?.ResolvedItemstack == null)
-                return;
-
-            try
-            {
-                // Собираем wildcard-совпадения
-                Dictionary<string, string> wildcardMatches = new Dictionary<string, string>();
-                List<int> usedSlots = new List<int>();
-
-                // Первый проход - находим совпадения
-                foreach (var ingred in CurrentRecipe.Ingredients)
-                {
-                    for (int slotIndex = 0; slotIndex < 3; slotIndex++)
-                    {
-                        if (usedSlots.Contains(slotIndex)) continue;
-
-                        var slot = GetInputSlot(slotIndex);
-                        if (!slot.Empty && SatisfiesIngredient(slot.Itemstack, ingred, ref wildcardMatches))
-                        {
-                            usedSlots.Add(slotIndex);
-                            break;
-                        }
-                    }
-                }
-
-                // Создаем выходной предмет
-                ItemStack outputStack = CreateOutputStack(wildcardMatches);
-                if (outputStack == null) return;
-
-                // Помещаем результат
-                if (OutputSlot.Empty)
-                {
-                    OutputSlot.Itemstack = outputStack;
-                }
-                else if (OutputSlot.Itemstack.Collectible == outputStack.Collectible)
-                {
-                    int space = OutputSlot.Itemstack.Collectible.MaxStackSize - OutputSlot.Itemstack.StackSize;
-                    if (space > 0)
-                    {
-                        int transfer = Math.Min(space, outputStack.StackSize);
-                        OutputSlot.Itemstack.StackSize += transfer;
-                        outputStack.StackSize -= transfer;
-                    }
-                    if (outputStack.StackSize > 0)
-                        Api.World.SpawnItemEntity(outputStack, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
-                }
-                else
-                {
-                    Api.World.SpawnItemEntity(outputStack, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
-                }
-
-                // Второй проход - удаляем расходуемые ингредиенты
-                usedSlots.Clear();
-                foreach (var ingred in CurrentRecipe.Ingredients)
-                {
-                    if (ingred.Quantity <= 0) continue;
-
-                    for (int slotIndex = 0; slotIndex < 3; slotIndex++)
-                    {
-                        if (usedSlots.Contains(slotIndex)) continue;
-
-                        var slot = GetInputSlot(slotIndex);
-                        if (!slot.Empty && SatisfiesIngredient(slot.Itemstack, ingred, ref wildcardMatches))
-                        {
-                            slot.TakeOut(ingred.Quantity);
-                            slot.MarkDirty();
-                            usedSlots.Add(slotIndex);
-                            break;
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Api.Logger.Error($"Crafting error in EPress at {Pos}: {ex}");
-            }
-        }
-        
-        private ItemStack CreateOutputStack(Dictionary<string, string> wildcardMatches)
-        {
-            string outputCode = CurrentRecipe.Output.Code.Path;
-
-            // Подставляем wildcard-значения в выходной код
-            foreach (var match in wildcardMatches)
-            {
-                outputCode = outputCode.Replace("{" + match.Key + "}", match.Value);
-            }
-
-            // Создаем новый предмет
-            AssetLocation outputLocation = new AssetLocation(outputCode);
-            Item outputItem = Api.World.GetItem(outputLocation);
-            if (outputItem == null) return null;
-
-            return new ItemStack(outputItem, CurrentRecipe.Output.StackSize);
-        }
-
-        private bool HasRequiredItems()
-        {
-            if (CurrentRecipe == null) return false;
-
-            // Проверяем только указанные в рецепте ингредиенты
-            for (int i = 0; i < CurrentRecipe.Ingredients.Length && i < 3; i++)
-            {
-                var ingred = CurrentRecipe.Ingredients[i];
-                var slot = GetInputSlot(i);
-
-                // Для quantity=0 предмет должен быть, но не расходуется
-                if (ingred.Quantity == 0)
-                {
-                    if (slot.Empty || !ingred.SatisfiesAsIngredient(slot.Itemstack))
-                        return false;
-                }
-                // Для quantity>0 проверяем количество
-                else if (ingred.Quantity > 0)
-                {
-                    if (slot.Empty || !ingred.SatisfiesAsIngredient(slot.Itemstack) || 
-                        slot.Itemstack.StackSize < ingred.Quantity)
-                        return false;
-                }
-            }
-
-            return true;
-        }
-
         private ItemSlot GetInputSlot(int index) => index switch
         {
             0 => InputSlot1,
             1 => InputSlot2,
-            2 => InputSlot3,
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new ArgumentOutOfRangeException() // Теперь только 2 слота
         };
         #endregion
 

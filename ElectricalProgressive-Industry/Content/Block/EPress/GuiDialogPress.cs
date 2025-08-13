@@ -39,7 +39,7 @@ public class GuiDialogPress : GuiDialogBlockEntity
     else
       itemSlot = (ItemSlot)null;
     ElementBounds bounds1 = ElementBounds.Fixed(0.0, 0.0, 200.0, 190.0);
-    ElementBounds bounds2 = ElementStdBounds.SlotGrid(EnumDialogArea.None, 0.0, 30.0, 1, 3);
+    ElementBounds bounds2 = ElementStdBounds.SlotGrid(EnumDialogArea.None, 0.0, 55.0, 1, 2);
     ElementBounds bounds3 = ElementStdBounds.SlotGrid(EnumDialogArea.None, 153.0, 80.0, 1, 1);
     ElementBounds bounds4 = ElementBounds.Fill.WithFixedPadding(GuiStyle.ElementToDialogPadding);
     bounds4.BothSizing = ElementSizing.FitToChildren;
@@ -51,10 +51,10 @@ public class GuiDialogPress : GuiDialogBlockEntity
       .CreateCompo("blockentitymillstone" + this.BlockEntityPosition?.ToString(), bounds5).AddShadedDialogBG(bounds4)
       .AddDialogTitleBar(this.DialogTitle, new Action(this.OnTitleBarClose)).BeginChildElements(bounds4)
       .AddDynamicCustomDraw(bounds1, new DrawDelegateWithBounds(this.OnBgDraw), "symbolDrawer")
-      .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 1, new []{0,1,2}, bounds2,
+      .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 1, new []{0,1}, bounds2,
         "inputSlot").AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 1, new []
       {
-        3
+        2
       }, bounds3, "outputslot").EndChildElements().Compose();
     this.lastRedrawMs = this.capi.ElapsedMilliseconds;
     if (itemSlot == null)
@@ -74,22 +74,26 @@ public class GuiDialogPress : GuiDialogBlockEntity
 
   private void OnBgDraw(Context ctx, ImageSurface surface, ElementBounds currentBounds)
   {
-    double num1 = 80.0;
-    ctx.Save();
-    Matrix matrix = ctx.Matrix;
-    matrix.Translate(GuiElement.scaled(63.0), GuiElement.scaled(num1 + 2.0));
-    matrix.Scale(GuiElement.scaled(0.6), GuiElement.scaled(0.6));
-    ctx.Matrix = matrix;
-    this.capi.Gui.Icons.DrawArrowRight(ctx, 2.0);
-    ctx.Rectangle(GuiElement.scaled(5.0), 0.0, GuiElement.scaled(125.0 * _recipeprogress), GuiElement.scaled(100.0));
-    ctx.Clip();
-    LinearGradient source = new LinearGradient(0.0, 0.0, GuiElement.scaled(200.0), 0.0);
-    int num3 = (int)source.AddColorStop(0.0, new Color(0.0, 0.4, 0.0, 1.0));
-    int num4 = (int)source.AddColorStop(1.0, new Color(0.2, 0.6, 0.2, 1.0));
-    ctx.SetSource((Pattern)source);
-    this.capi.Gui.Icons.DrawArrowRight(ctx, 0.0, false, false);
-    source.Dispose();
-    ctx.Restore();
+      double num1 = 80.0;
+      ctx.Save();
+      Matrix matrix = ctx.Matrix;
+      matrix.Translate(GuiElement.scaled(63.0), GuiElement.scaled(num1 + 2.0));
+      matrix.Scale(GuiElement.scaled(0.6), GuiElement.scaled(0.6));
+      ctx.Matrix = matrix;
+      this.capi.Gui.Icons.DrawArrowRight(ctx, 2.0);
+      ctx.Rectangle(GuiElement.scaled(5.0), 0.0, GuiElement.scaled(125.0 * _recipeprogress), GuiElement.scaled(100.0));
+      ctx.Clip();
+    
+      // Изменённый градиент от зелёного к красному
+      LinearGradient source = new LinearGradient(0.0, 0.0, GuiElement.scaled(200.0), 0.0);
+      source.AddColorStop(0.0, new Color(0.0, 0.4, 0.0, 1.0));  // Тёмно-зелёный
+      source.AddColorStop(0.5, new Color(0.8, 0.8, 0.0, 1.0));  // Жёлтый (промежуточный)
+      source.AddColorStop(1.0, new Color(0.6, 0.0, 0.0, 1.0)); // Красный
+    
+      ctx.SetSource((Pattern)source);
+      this.capi.Gui.Icons.DrawArrowRight(ctx, 0.0, false, false);
+      source.Dispose();
+      ctx.Restore();
   }
 
   private void SendInvPacket(object p)
