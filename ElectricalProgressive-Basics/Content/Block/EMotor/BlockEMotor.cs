@@ -14,6 +14,8 @@ public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
     private readonly static Dictionary<(Facing, string), MeshData> MeshData = new();
     private static float[] def_Params = { 10.0F, 100.0F, 0.5F, 0.75F, 0.5F, 0.1F, 0.05F };   //заглушка
 
+   
+
     public override void OnUnloaded(ICoreAPI api)
     {
         base.OnUnloaded(api);
@@ -99,7 +101,7 @@ public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
         }
 
         var selection = new Selection(blockSel);
-        Facing facing = Facing.None;
+        var facing = Facing.None;
 
         try
         {
@@ -132,6 +134,9 @@ public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
             var blockPos = blockSel.Position;
             var blockPos1 = blockPos.AddCopy(blockFacing);
 
+            var beh = entity.GetBehavior<BEBehaviorMPBase>();
+            beh?.CreateJoinAndDiscoverNetwork(blockFacing);
+
             if (
                 world.BlockAccessor.GetBlock(blockPos1) is IMechanicalPowerBlock block &&
                 block.HasMechPowerConnectorAt(world, blockPos1, blockFacing.Opposite)
@@ -139,8 +144,7 @@ public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
             {
                 block.DidConnectAt(world, blockPos1, blockFacing.Opposite);
 
-                world.BlockAccessor.GetBlockEntity(blockPos)?
-                    .GetBehavior<BEBehaviorMPBase>()?.tryConnect(blockFacing);
+                beh?.tryConnect(blockFacing);
             }
 
             return true;
