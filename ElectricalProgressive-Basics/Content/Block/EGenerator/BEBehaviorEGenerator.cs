@@ -1,4 +1,5 @@
-﻿using ElectricalProgressive.Interface;
+﻿using ElectricalProgressive.Content.Block.EMotor;
+using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
 using System;
 using System.Linq;
@@ -95,6 +96,9 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
     private int[] _axisSign=null!;
 
 
+    /// <summary>
+    /// Возвращает направление выхода для обнаружения сети валом
+    /// </summary>
     public override BlockFacing OutFacingForNetworkDiscovery
     {
         get
@@ -102,9 +106,9 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
             if (_outFacingForNetworkDiscovery == null)
             {
                 if (Blockentity is BlockEntityEGenerator entity && entity.Facing != Facing.None)
-                    _outFacingForNetworkDiscovery=FacingHelper.Directions(entity.Facing).First();
+                    _outFacingForNetworkDiscovery = FacingHelper.Directions(entity.Facing).First();
                 else
-                    _outFacingForNetworkDiscovery = BlockFacing.NORTH; // fallback to default direction if not set
+                    return null!; // fallback to default direction if not set
             }
 
             return _outFacingForNetworkDiscovery;
@@ -112,7 +116,7 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
     }
 
 
-    
+
     /// <summary>
     /// Возвращает направление оси, в которой находится генератор
     /// </summary>
@@ -120,10 +124,10 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
     {
         get
         {
-            if (_axisSign == null)
+            if (_axisSign == null && OutFacingForNetworkDiscovery != null)
             {
                 int index = OutFacingForNetworkDiscovery.Index;
-                _axisSign=(index >= 0 && index < _axisSigns.Length)
+                _axisSign = (index >= 0 && index < _axisSigns.Length)
                     ? _axisSigns[index]
                     : _axisSigns[0]; // fallback to default
             }
@@ -131,7 +135,7 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
             return _axisSign;
         }
     }
-    
+
 
 
     /// <inheritdoc />
@@ -205,7 +209,7 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
         return res;
     }
 
-
+    
     /// <inheritdoc />
     public void Update()
     {

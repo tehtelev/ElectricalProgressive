@@ -1,6 +1,7 @@
 ﻿using ElectricalProgressive.Content.Block.EGenerator;
 using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Linq;
 using System.Text;
@@ -93,7 +94,7 @@ public class BEBehaviorEMotor : BEBehaviorMPBase, IElectricConsumer
     private bool IsBurned => Block.Variant["type"] == "burned";
 
 
-
+    
     protected CompositeShape? CompositeShape;  //не трогать уровни доступа
 
 
@@ -101,7 +102,9 @@ public class BEBehaviorEMotor : BEBehaviorMPBase, IElectricConsumer
     private BlockFacing _outFacingForNetworkDiscovery = null!;
     private int[] _axisSign = null!;
 
-
+    /// <summary>
+    /// Возвращает направление выхода для обнаружения сети валом
+    /// </summary>
     public override BlockFacing OutFacingForNetworkDiscovery
     {
         get
@@ -111,7 +114,7 @@ public class BEBehaviorEMotor : BEBehaviorMPBase, IElectricConsumer
                 if (Blockentity is BlockEntityEMotor entity && entity.Facing != Facing.None)
                     _outFacingForNetworkDiscovery = FacingHelper.Directions(entity.Facing).First();
                 else
-                    _outFacingForNetworkDiscovery = BlockFacing.NORTH; // fallback to default direction if not set
+                    return null!; // fallback to default direction if not set
             }
 
             return _outFacingForNetworkDiscovery;
@@ -127,7 +130,7 @@ public class BEBehaviorEMotor : BEBehaviorMPBase, IElectricConsumer
     {
         get
         {
-            if (_axisSign == null)
+            if (_axisSign == null && OutFacingForNetworkDiscovery!=null)
             {
                 int index = OutFacingForNetworkDiscovery.Index;
                 _axisSign = (index >= 0 && index < _axisSigns.Length)
@@ -140,14 +143,13 @@ public class BEBehaviorEMotor : BEBehaviorMPBase, IElectricConsumer
     }
 
 
-
-
-
+ 
     public new BlockPos Pos => Position;
 
     /// <inheritdoc />
     public BEBehaviorEMotor(BlockEntity blockentity) : base(blockentity)
     {
+       
         this.GetParams();
         powerReceive = 0;
         powerRequest = I_max;
@@ -208,6 +210,8 @@ public class BEBehaviorEMotor : BEBehaviorMPBase, IElectricConsumer
             {
                 ParticleManager.SpawnWhiteSlowSmoke(this.Api.World, Pos.ToVec3d().Add(0.1, 0, 0.1));
             }
+
+            
         }
 
         
@@ -316,6 +320,9 @@ public class BEBehaviorEMotor : BEBehaviorMPBase, IElectricConsumer
 
         if (direction == BlockFacing.DOWN)
             shape.rotateX = 270;
+
+
+
 
         return shape;
 

@@ -1,4 +1,5 @@
-﻿using ElectricalProgressive.Utils;
+﻿using ElectricalProgressive.Content.Block.EMotor;
+using ElectricalProgressive.Utils;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -86,8 +87,9 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
 
     //ставим блок
     public override bool DoPlaceBlock(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel,
-        ItemStack byItemStack)
+    ItemStack byItemStack)
     {
+
         // если блок сгорел, то не ставим
         if (byItemStack.Block.Variant["type"] == "burned")
         {
@@ -95,8 +97,7 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
         }
 
         var selection = new Selection(blockSel);
-
-        Facing facing = Facing.None;
+        var facing = Facing.None;
 
         try
         {
@@ -129,6 +130,9 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
             var blockPos = blockSel.Position;
             var blockPos1 = blockPos.AddCopy(blockFacing);
 
+            var beh = entity.GetBehavior<BEBehaviorMPBase>();
+            beh?.CreateJoinAndDiscoverNetwork(blockFacing);
+
             if (
                 world.BlockAccessor.GetBlock(blockPos1) is IMechanicalPowerBlock block &&
                 block.HasMechPowerConnectorAt(world, blockPos1, blockFacing.Opposite)
@@ -136,8 +140,7 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
             {
                 block.DidConnectAt(world, blockPos1, blockFacing.Opposite);
 
-                world.BlockAccessor.GetBlockEntity(blockPos)?
-                    .GetBehavior<BEBehaviorMPBase>()?.tryConnect(blockFacing);
+                beh?.tryConnect(blockFacing);
             }
 
             return true;
@@ -145,6 +148,9 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
 
         return false;
     }
+
+
+
 
     public override void OnNeighbourBlockChange(IWorldAccessor world, BlockPos pos, BlockPos neibpos)
     {
