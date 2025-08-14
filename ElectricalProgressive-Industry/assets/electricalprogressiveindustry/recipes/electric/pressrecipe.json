@@ -100,7 +100,7 @@
         "code": "game:ingot-*",
         "quantity": 1,
         "name": "metal",
-        "allowedVariants": ["copper", "tinbronze", "bismuthbronze", "blackbronze", "silver", "gold", "iron", "meteoriciron", "steel"]
+        "allowedVariants": ["copper", "tinbronze", "bismuthbronze", "blackbronze", "iron", "meteoriciron", "steel"]
       },
       {
         "type": "block",

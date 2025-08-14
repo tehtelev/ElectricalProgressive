@@ -421,6 +421,7 @@ namespace ElectricalProgressive.Content.Block.EPress
                     {
                         StopAnimation();
                         StopSound();
+                        RecipeProgress = 0f; // Сбрасываем прогресс при остановке
                     }
                 }
             }
