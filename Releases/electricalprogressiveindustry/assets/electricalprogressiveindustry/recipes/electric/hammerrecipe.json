@@ -42,5 +42,29 @@
       "stackSize": 3
     },
     "secondaryOutputChance": 0.3
+  },
+  {
+    "code": "metalplate",
+    "EnergyOperation": 4000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:ingot-*",
+        "quantity": 1,
+        "name": "metal",
+        "allowedVariants": ["copper", "tinbronze", "bismuthbronze", "blackbronze", "iron", "meteoriciron", "steel", "gold", "silver"]
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "game:metalplate-{metal}",
+      "stackSize": 1
+    },
+    "secondaryOutput": {
+      "type": "item",
+      "code": "game:metalbit-{metal}",
+      "stackSize": 2
+    },
+    "secondaryOutputChance": 0.4
   }
 ]

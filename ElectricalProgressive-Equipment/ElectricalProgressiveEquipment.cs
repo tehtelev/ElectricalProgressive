@@ -8,16 +8,16 @@ using ElectricalProgressive.Content.Item.Tool;
 
 
 
-[assembly: ModDependency("game", "1.21.0-rc.3")]
-[assembly: ModDependency("electricalprogressivecore", "2.1.0-rc.3")]
-[assembly: ModDependency("electricalprogressivebasics", "2.1.0-rc.3")]
-[assembly: ModDependency("electricalprogressiveqol", "2.1.0-rc.3")]
+[assembly: ModDependency("game", "1.21.0-rc.4")]
+[assembly: ModDependency("electricalprogressivecore", "2.1.0-rc.4")]
+[assembly: ModDependency("electricalprogressivebasics", "2.1.0-rc.4")]
+[assembly: ModDependency("electricalprogressiveqol", "2.1.0-rc.4")]
 [assembly: ModInfo(
     "Electrical Progressive: Equipment",
     "electricalprogressiveequipment",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Brings electricity into the game!",
-    Version = "2.1.0-rc.3",
+    Version = "2.1.0-rc.4",
     Authors = new[] {
         "Tehtelev",
         "Kotl"

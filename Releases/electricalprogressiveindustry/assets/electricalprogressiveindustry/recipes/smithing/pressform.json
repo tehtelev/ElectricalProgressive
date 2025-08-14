@@ -1,0 +1,114 @@
+﻿[
+  {
+    "ingredient": { "type": "item", "code": "game:ingot-steel"},
+    "pattern": [[
+      "#########",
+      "#########",
+      "##____###",
+      "#______##",
+      "#_______#",
+      "#_______#",
+      "###____##",
+      "#####_###",
+      "#########"
+    ]],
+    "name": "axe",
+    "output": { "type": "block", "code": "electricalprogressiveindustry:pressform-axe"  }
+  },
+  {
+    "ingredient": { "type": "item", "code": "game:ingot-steel"},
+    "pattern": [[
+      "#########",
+      "######_##",
+      "#####__##",
+      "####__###",
+      "###__####",
+      "####__###",
+      "#####__##",
+      "######_##",
+      "#########"
+    ]],
+    "name": "pickaxe",
+    "output": { "type": "block", "code": "electricalprogressiveindustry:pressform-pickaxe"  }
+  },
+  {
+    "ingredient": { "type": "item", "code": "game:ingot-steel"},
+    "pattern": [[
+      "#########",
+      "####_####",
+      "###___###",
+      "#_______#",
+      "#_______#",
+      "#_______#",
+      "#_______#",
+      "#__###__#",
+      "#########"
+    ]],
+    "name": "shovel",
+    "output": { "type": "block", "code": "electricalprogressiveindustry:pressform-shovel"  }
+  },
+  {
+    "ingredient": { "type": "item", "code": "game:ingot-steel"},
+    "pattern": [[
+      "#########",
+      "##__#####",
+      "####__###",
+      "#####__##",
+      "######__#",
+      "#####___#",
+      "######__#",
+      "#####___#",
+      "#########"
+    ]],
+    "name": "falx",
+    "output": { "type": "block", "code": "electricalprogressiveindustry:pressform-falx"  }
+  },
+  {
+    "ingredient": { "type": "item", "code": "game:ingot-steel"},
+    "pattern": [[
+      "#########",
+      "#########",
+      "#_______#",
+      "##_____##",
+      "##_____##",
+      "##_____##",
+      "#_______#",
+      "#########",
+      "#########"
+    ]],
+    "name": "hammer",
+    "output": { "type": "block", "code": "electricalprogressiveindustry:pressform-hammer"  }
+  },
+  {
+    "ingredient": { "type": "item", "code": "game:ingot-steel"},
+    "pattern": [[
+      "#########",
+      "####-####",
+      "###___###",
+      "###___###",
+      "###___###",
+      "###___###",
+      "###_#_###",
+      "###___###",
+      "#########"
+    ]],
+    "name": "hoe",
+    "output": { "type": "block", "code": "electricalprogressiveindustry:pressform-hoe"  }
+  },
+  {
+    "ingredient": { "type": "item", "code": "game:ingot-steel"},
+    "pattern": [[
+      "#########",
+      "#######_#",
+      "#####___#",
+      "###____##",
+      "##____###",
+      "#____####",
+      "#___#####",
+      "#__######",
+      "#########"
+    ]],
+    "name": "prospectingpick",
+    "output": { "type": "block", "code": "electricalprogressiveindustry:pressform-prospectingpick"  }
+  }
+]
