@@ -7,6 +7,14 @@
   "game:ecentrifuge-title-gui": "Центрифуга",
   "game:ehammer-title-gui": "Автомолот",
   "game:epress-title-gui": "Автопресс",
+
+  "block-pressform-axe": "Прессформа топора",
+  "block-pressform-pickaxe": "Прессформа кирки",
+  "block-pressform-shovel": "Прессформа лопаты",
+  "block-pressform-falx": "Прессформа фалькса",
+  "block-pressform-hammer": "Прессформа молота",
+  "block-pressform-hoe": "Прессформа мотыги",
+  "block-pressform-prospectingpick": "Прессформа геологического молотка",
   
   "electricalprogressive:produced-in": "Обрабатывается в:",
   "electricalprogressive:energy-required": "Требуется энергии",

@@ -1,24 +1,19 @@
 ﻿[
   {
-    "code": "hammerhead",
-    "energyOperation": 5000,
+    "code": "hammer",
+    "energyOperation": 8000,
     "ingredients": [
       {
         "type": "item",
         "code": "game:ingot-*",
         "quantity": 1,
         "name": "metal",
-        "allowedVariants": ["copper", "tinbronze", "gold"]
+        "allowedVariants": ["copper", "tinbronze", "bismuthbronze", "blackbronze", "silver", "gold", "iron", "meteoriciron", "steel"]
       },
       {
-        "type": "item",
-        "code": "game:bushmeat-raw",
+        "type": "block",
+        "code": "electricalprogressiveindustry:pressform-hammer",
         "quantity": 0
-      },
-      {
-        "type": "item",
-        "code": "game:bushmeat-raw",
-        "quantity": 1
       }
     ],
     "output": {
@@ -28,25 +23,140 @@
     }
   },
   {
-    "code": "hammer",
-    "energyOperation": 5000,
+    "code": "axe",
+    "energyOperation": 8000,
     "ingredients": [
       {
         "type": "item",
         "code": "game:ingot-*",
         "quantity": 1,
         "name": "metal",
-        "allowedVariants": ["copper", "tinbronze", "gold"]
+        "allowedVariants": ["copper", "tinbronze", "bismuthbronze", "blackbronze", "silver", "gold", "iron", "meteoriciron", "steel"]
       },
       {
         "type": "block",
-        "code": "game:toolmold-blue-fired-hammer",
+        "code": "electricalprogressiveindustry:pressform-axe",
         "quantity": 0
       }
     ],
     "output": {
       "type": "item",
-      "code": "game:hammerhead-{metal}",
+      "code": "game:axehead-{metal}",
+      "stacksize": 1
+    }
+  },
+  {
+    "code": "pickaxe",
+    "energyOperation": 8000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:ingot-*",
+        "quantity": 1,
+        "name": "metal",
+        "allowedVariants": ["copper", "tinbronze", "bismuthbronze", "blackbronze", "silver", "gold", "iron", "meteoriciron", "steel"]
+      },
+      {
+        "type": "block",
+        "code": "electricalprogressiveindustry:pressform-pickaxe",
+        "quantity": 0
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "game:pickaxehead-{metal}",
+      "stacksize": 1
+    }
+  },
+  {
+    "code": "shovel",
+    "energyOperation": 8000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:ingot-*",
+        "quantity": 1,
+        "name": "metal",
+        "allowedVariants": ["copper", "tinbronze", "bismuthbronze", "blackbronze", "silver", "gold", "iron", "meteoriciron", "steel"]
+      },
+      {
+        "type": "block",
+        "code": "electricalprogressiveindustry:pressform-shovel",
+        "quantity": 0
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "game:shovelhead-{metal}",
+      "stacksize": 1
+    }
+  },
+  {
+    "code": "falx",
+    "energyOperation": 8000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:ingot-*",
+        "quantity": 1,
+        "name": "metal",
+        "allowedVariants": ["copper", "tinbronze", "bismuthbronze", "blackbronze", "silver", "gold", "iron", "meteoriciron", "steel"]
+      },
+      {
+        "type": "block",
+        "code": "electricalprogressiveindustry:pressform-falx",
+        "quantity": 0
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "game:bladehead-falx-{metal}",
+      "stacksize": 1
+    }
+  },
+  {
+    "code": "hoe",
+    "energyOperation": 8000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:ingot-*",
+        "quantity": 1,
+        "name": "metal",
+        "allowedVariants": ["copper", "tinbronze", "bismuthbronze", "blackbronze", "silver", "gold", "iron", "meteoriciron", "steel"]
+      },
+      {
+        "type": "block",
+        "code": "electricalprogressiveindustry:pressform-hoe",
+        "quantity": 0
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "game:hoehead-{metal}",
+      "stacksize": 1
+    }
+  },
+  {
+    "code": "prospectingpick",
+    "energyOperation": 8000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:ingot-*",
+        "quantity": 1,
+        "name": "metal",
+        "allowedVariants": ["copper", "tinbronze", "bismuthbronze", "blackbronze", "silver", "gold", "iron", "meteoriciron", "steel"]
+      },
+      {
+        "type": "block",
+        "code": "electricalprogressiveindustry:pressform-prospectingpick",
+        "quantity": 0
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "game:prospectingpickhead-{metal}",
       "stacksize": 1
     }
   }
