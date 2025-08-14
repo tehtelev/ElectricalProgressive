@@ -7,10 +7,10 @@
     "Kotl"
   ],
   "description": "Additional electrical devices!",
-  "Version": "2.1.0-rc.4",
+  "Version": "2.0.1",
   "dependencies": {
-    "game": "1.21.0-rc.4",
-    "electricalprogressivecore": "2.1.0-rc.4",
-    "electricalprogressivebasics": "2.1.0-rc.4"
+    "game": "1.20.0",
+    "electricalprogressivecore": "2.0.1",
+    "electricalprogressivebasics": "2.0.1"
   }
 }

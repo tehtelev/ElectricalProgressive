@@ -6,15 +6,15 @@ using ElectricalProgressive.Content.Block.EWoodcutter;
 using ElectricalProgressive.Patch;
 
 
-[assembly: ModDependency("game", "1.21.0-rc.3")]
-[assembly: ModDependency("electricalprogressivecore", "2.1.0-rc.2")]
-[assembly: ModDependency("electricalprogressivebasics", "2.1.0-rc.2")]
+[assembly: ModDependency("game", "1.20.0")]
+[assembly: ModDependency("electricalprogressivecore", "2.0.1")]
+[assembly: ModDependency("electricalprogressivebasics", "2.0.1")]
 [assembly: ModInfo(
     "Electrical Progressive: Industry",
     "electricalprogressiveindustry",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Additional electrical devices.",
-    Version = "2.1.0-rc.2",
+    Version = "2.0.1",
     Authors = new[] {
         "Tehtelev",
         "Kotl"
