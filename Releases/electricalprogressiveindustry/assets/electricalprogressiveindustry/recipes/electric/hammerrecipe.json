@@ -44,25 +44,201 @@
     "secondaryOutputChance": 0.3
   },
   {
-    "code": "metalplate",
+    "code": "metalplatecopper",
     "EnergyOperation": 4000,
     "ingredients": [
       {
         "type": "item",
-        "code": "game:ingot-*",
-        "quantity": 1,
+        "code": "game:ingot-copper",
+        "quantity": 2
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "game:metalplate-copper",
+      "stackSize": 1
+    },
+    "secondaryOutput": {
+      "type": "item",
+      "code": "game:metalbit-copper",
+      "stackSize": 2
+    },
+    "secondaryOutputChance": 0.4
+  },
+  {
+    "code": "metalplatetinbronze",
+    "EnergyOperation": 4000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:ingot-tinbronze",
+        "quantity": 2
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "game:metalplate-tinbronze",
+      "stackSize": 1
+    },
+    "secondaryOutput": {
+      "type": "item",
+      "code": "game:metalbit-tinbronze",
+      "stackSize": 2
+    },
+    "secondaryOutputChance": 0.4
+  },
+  {
+    "code": "metalplatebismuthbronze",
+    "EnergyOperation": 4000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:ingot-bismuthbronze",
+        "quantity": 2
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "game:metalplate-bismuthbronze",
+      "stackSize": 1
+    },
+    "secondaryOutput": {
+      "type": "item",
+      "code": "game:metalbit-bismuthbronze",
+      "stackSize": 2
+    },
+    "secondaryOutputChance": 0.4
+  },
+  {
+    "code": "metalplateblackbronze",
+    "EnergyOperation": 4000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:ingot-blackbronze",
+        "quantity": 2
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "game:metalplate-blackbronze",
+      "stackSize": 1
+    },
+    "secondaryOutput": {
+      "type": "item",
+      "code": "game:metalbit-blackbronze",
+      "stackSize": 2
+    },
+    "secondaryOutputChance": 0.4
+  },
+  {
+    "code": "metalplateiron",
+    "EnergyOperation": 4000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:ingot-iron",
+        "quantity": 2
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "game:metalplate-iron",
+      "stackSize": 1
+    },
+    "secondaryOutput": {
+      "type": "item",
+      "code": "game:metalbit-iron",
+      "stackSize": 2
+    },
+    "secondaryOutputChance": 0.4
+  },
+  {
+    "code": "metalplatemeteoriciron",
+    "EnergyOperation": 4000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:ingot-meteoriciron",
+        "quantity": 2
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "game:metalplate-meteoriciron",
+      "stackSize": 1
+    },
+    "secondaryOutput": {
+      "type": "item",
+      "code": "game:metalbit-meteoriciron",
+      "stackSize": 2
+    },
+    "secondaryOutputChance": 0.4
+  },
+  {
+    "code": "metalplatesteel",
+    "EnergyOperation": 4000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:ingot-steel",
+        "quantity": 2
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "game:metalplate-steel",
+      "stackSize": 1
+    },
+    "secondaryOutput": {
+      "type": "item",
+      "code": "game:metalbit-steel",
+      "stackSize": 2
+    },
+    "secondaryOutputChance": 0.4
+  },
+  {
+    "code": "metalplategold",
+    "EnergyOperation": 4000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:ingot-gold",
+        "quantity": 2
+      }
+    ],
+    "output": {
+      "type": "item",
+      "code": "game:metalplate-gold",
+      "stackSize": 1
+    },
+    "secondaryOutput": {
+      "type": "item",
+      "code": "game:metalbit-gold",
+      "stackSize": 2
+    },
+    "secondaryOutputChance": 0.4
+  },
+  {
+    "code": "metalplatesilver",
+    "EnergyOperation": 4000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:ingot-silver",
+        "quantity": 2,
         "name": "metal",
         "allowedVariants": ["copper", "tinbronze", "bismuthbronze", "blackbronze", "iron", "meteoriciron", "steel", "gold", "silver"]
       }
     ],
     "output": {
       "type": "item",
-      "code": "game:metalplate-{metal}",
+      "code": "game:metalplate-silver",
       "stackSize": 1
     },
     "secondaryOutput": {
       "type": "item",
-      "code": "game:metalbit-{metal}",
+      "code": "game:metalbit-silver",
       "stackSize": 2
     },
     "secondaryOutputChance": 0.4
