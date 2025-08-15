@@ -1,7 +1,7 @@
-# ElectricalProgressive
+# Automaton
 
-Brings electricity into the game!
+Brings automatics into the game!
 
 ## About
 
-ElectricalProgressive is a Mod for the game [VintageStory](https://www.vintagestory.at/).
+Automaton is a Mod for the game [VintageStory](https://www.vintagestory.at/).
