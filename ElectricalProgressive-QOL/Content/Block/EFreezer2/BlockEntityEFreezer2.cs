@@ -357,41 +357,39 @@ class BlockEntityEFreezer2 : ContainerEFreezer2, ITexPositionSource
             return null;
 
         MeshData meshData;
-        try
-        {
-            var meshSource = stack.Collectible as IContainedMeshSource;
 
-            if (meshSource != null)
+        if (meshSource != null)
+        {
+            meshData = meshSource.GenMesh(stack, _capi.BlockTextureAtlas, Pos);
+            meshData.Rotate(new Vec3f(0.5f, 0.5f, 0.5f), 0f, Block.Shape.rotateY * 0.0174532924f, 0f);
+        }
+        else
+        {
+            if (stack.Class == EnumItemClass.Block)
             {
-                meshData = meshSource.GenMesh(stack, _capi.BlockTextureAtlas, Pos);
-                meshData.Rotate(new Vec3f(0.5f, 0.5f, 0.5f), 0f, Block.Shape.rotateY * 0.0174532924f, 0f);
+                meshData = _capi.TesselatorManager.GetDefaultBlockMesh(stack.Block).Clone();
             }
             else
             {
-                if (stack.Class == EnumItemClass.Block)
-                {
-                    meshData = _capi.TesselatorManager.GetDefaultBlockMesh(stack.Block).Clone();
-                }
-                else
-                {
-                    _nowTesselatingObj = stack.Collectible;
-                    _nowTesselatingShape = null;
+                _nowTesselatingObj = stack.Collectible;
+                _nowTesselatingShape = null;
 
-                    if (stack.Item.Shape != null)
-                        _nowTesselatingShape = _capi.TesselatorManager.GetCachedShape(stack.Item.Shape.Base);
+                if (stack.Item.Shape != null)
+                    _nowTesselatingShape = _capi.TesselatorManager.GetCachedShape(stack.Item.Shape.Base);
 
+                try
+                {
                     _capi.Tesselator.TesselateItem(stack.Item, out meshData, this);
                     meshData.RenderPassesAndExtraBits.Fill((short)2);
-
-                    _capi.TesselatorManager.ThreadDispose(); // Проверьте, нужен ли этот вызов
                 }
+                catch (Exception e)
+                {
+                    Api.World.Logger.Error("Не удалось выполнить тесселяцию предмета {0}: {1}", stack.Item.Code, e.Message);
+                    meshData = null;
+                }
+
+                _capi.TesselatorManager.ThreadDispose(); // Проверьте, нужен ли этот вызов
             }
-        }
-        catch (Exception e)
-        {
-            Api.World.Logger.Error("Не удалось выполнить тесселяцию предмета {0}: {1}", stack.Item.Code,
-                e.Message);
-            meshData = null;
         }
 
         return meshData;
