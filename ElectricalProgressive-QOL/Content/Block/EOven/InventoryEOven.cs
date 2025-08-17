@@ -7,45 +7,18 @@ using Vintagestory.API.Util;
 using Vintagestory.GameContent;
 
 namespace ElectricalProgressive.Content.Block.EOven;
-  public class InventoryEOven : InventoryBase, ISlotProvider
+  public class InventoryEOven : InventoryOven
   {
-    private ItemSlot[] slots;
-    private readonly int cookingSize;
 
 
     public InventoryEOven(string inventoryID, int bakeableSlots)
-      : base(inventoryID, (ICoreAPI) null)
+      : base(inventoryID, bakeableSlots)
     {
-      this.slots = this.GenEmptySlots(bakeableSlots + 1);
-      this.cookingSize = bakeableSlots;
-      this.CookingSlots = new ItemSlot[bakeableSlots];
+        
 
-
-      for (int index = 0; index < bakeableSlots; ++index)
-      {
-          this.slots[index].MaxSlotStackSize = 1;
-          this.CookingSlots[index] = this.slots[index];
-      }
     }
 
-    public ItemSlot[] CookingSlots { get; }
 
-    public ItemSlot[] Slots => this.slots;
-
-    public override int Count => this.slots.Length;
-
-    public override ItemSlot this[int slotId]
-    {
-      get => slotId < 0 || slotId >= this.Count ? null! : this.slots[slotId];
-      set
-      {
-        if (slotId < 0 || slotId >= this.Count)
-          throw new ArgumentOutOfRangeException(nameof (slotId));
-        ItemSlot[] slots = this.slots;
-        int index = slotId;
-        slots[index] = value ?? throw new ArgumentNullException(nameof (value));
-      }
-    }
 
     /// <summary>
     /// Если слот изменился, то обновляем данные духовки
@@ -53,7 +26,7 @@ namespace ElectricalProgressive.Content.Block.EOven;
     /// <param name="slot"></param>
     public override void OnItemSlotModified(ItemSlot slot)
     {
-        int num = Array.IndexOf(slots, slot);
+        int num = Array.IndexOf(Slots, slot);
         if (num >= 0 && slot != null && slot.Itemstack!=null) 
         {
             if (Api?.World.BlockAccessor.GetBlockEntity(Pos) is BlockEntityEOven entity && entity != null)
@@ -62,87 +35,6 @@ namespace ElectricalProgressive.Content.Block.EOven;
             }
         }
     }
-
-
-    public override void FromTreeAttributes(ITreeAttribute tree)
-    {
-      List<ItemSlot> modifiedSlots = new List<ItemSlot>();
-      this.slots = this.SlotsFromTreeAttributes(tree, this.slots, modifiedSlots);
-      for (int index = 0; index < modifiedSlots.Count; ++index)
-        this.MarkSlotDirty(this.GetSlotId(modifiedSlots[index]));
-    }
-
-    public override void ToTreeAttributes(ITreeAttribute tree)
-    {
-      this.SlotsToTreeAttributes(this.slots, tree);
-    }
-
-    protected override ItemSlot NewSlot(int i)
-    {
-        // Если XSkills включен и есть тип ItemSlotOven
-        if (ElectricalProgressiveQOL.xskillsEnabled && ElectricalProgressiveQOL.asmXSkills != null)
-        {
-            try
-            {
-                var slotType = ElectricalProgressiveQOL.asmXSkills.GetType("XSkills.ItemSlotOven");
-                if (slotType != null)
-                {
-                    return (ItemSlot)Activator.CreateInstance(slotType, new object[] { (InventoryBase)this });
-                }
-            }
-            catch (Exception ex)
-            {
-                this.Api.World.Logger.Warning("Error creating ItemSlotOven via reflection: {0}", ex);
-            }
-        }
-
-        // Если XSkills нет или создать слот не удалось — возвращаем обычный
-        return new ItemSlotSurvival((InventoryBase)this);
-    }
-
-
-
-
-    public override float GetSuitability(ItemSlot sourceSlot, ItemSlot targetSlot, bool isMerge)
-    {
-        // Старая проверка температуры горения
-        CombustibleProperties combustibleProps = sourceSlot?.Itemstack?.Collectible?.CombustibleProps;
-        float result = (targetSlot == this.slots[this.cookingSize] && (combustibleProps == null || combustibleProps.BurnTemperature <= 0))
-            ? 0.0f
-            : base.GetSuitability(sourceSlot, targetSlot, isMerge);
-
-        // Если интеграция XSkills включена и предмет подходит
-        if (ElectricalProgressiveQOL.xskillsEnabled && result != 0.0f)
-        {
-            try
-            {
-                IPlayer player = sourceSlot?.Inventory is InventoryBasePlayer invPlayer ? invPlayer.Player : null;
-                if (player != null && ElectricalProgressiveQOL.typeBlockEntityBehaviorOwnable != null)
-                {
-                    var be = this.Api?.World?.BlockAccessor?.GetBlockEntity(this.Pos);
-                    var getBehaviorMethod = be?.GetType().GetMethod("GetBehavior")?.MakeGenericMethod(ElectricalProgressiveQOL.typeBlockEntityBehaviorOwnable);
-                    var behavior = getBehaviorMethod?.Invoke(be, null);
-
-                    if (behavior != null)
-                    {
-                        var ownerProp = ElectricalProgressiveQOL.typeBlockEntityBehaviorOwnable.GetProperty("Owner");
-                        if (ownerProp != null)
-                        {
-                            ownerProp.SetValue(behavior, player);
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                this.Api?.World?.Logger?.Warning("Error while setting owner in InventoryOven.GetSuitability: {0}", ex);
-            }
-        }
-
-        return result;
-    }
-
-
 
 
 
@@ -161,7 +53,7 @@ namespace ElectricalProgressive.Content.Block.EOven;
             return null!;
 
         // если в слоты для готовки есть свободные, то выдаем первый из них
-        for (int i = 0; i < this.cookingSize; i++)
+        for (int i = 0; i < this.CookingSlots.Length; i++)
         {
             if (this[i] == null || this[i].Empty)
             {
@@ -189,7 +81,7 @@ namespace ElectricalProgressive.Content.Block.EOven;
     /// <returns></returns>
     public override ItemSlot GetAutoPullFromSlot(BlockFacing atBlockFace)
     {
-        for (int i = 0; i < this.cookingSize; i++)
+        for (int i = 0; i < this.CookingSlots.Length; i++)
         {
             if (this[i] != null && !this[i].Empty)
             {
