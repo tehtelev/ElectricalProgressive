@@ -81,7 +81,7 @@ public class BlockEntityEHorn : BlockEntityEBase, IHeatSource
 
         this.weatherSystem = api.ModLoader.GetModSystem<WeatherSystemBase>();
 
-        listenerId=this.RegisterGameTickListener(this.OnCommonTick, 200);
+        listenerId = this.RegisterGameTickListener(this.OnCommonTick, 200);
 
         this.lastTickTotalHours = this.Api.World.Calendar.TotalHours;
     }
@@ -114,13 +114,17 @@ public class BlockEntityEHorn : BlockEntityEBase, IHeatSource
     /// <param name="dt"></param>
     private void OnCommonTick(float dt)
     {
+        var beh = GetBehavior<BEBehaviorEHorn>();
+        if (beh == null)
+            return;
+
         if (this.burning)
         {
             var num1 = this.Api.World.Calendar.TotalHours - this.lastTickTotalHours;
             if (this.Contents != null)  //внутри есть что-то?
             {
                 var temperature = this.Contents.Collectible.GetTemperature(this.Api.World, this.Contents);
-                var power = GetBehavior<BEBehaviorEHorn>().getPowerReceive();
+                var power = beh.getPowerReceive();
 
                 if (power > 0.0F && this.Block.Variant["state"] == "disabled")
                 {
@@ -184,7 +188,7 @@ public class BlockEntityEHorn : BlockEntityEBase, IHeatSource
             if (temp > 20)
             {
                 playSound = temp > 100;
-                this.Contents?.Collectible.SetTemperature(this.Api.World, this.Contents, Math.Min(GetBehavior<BEBehaviorEHorn>().getPowerReceive() * 11F, temp - 8), false);
+                this.Contents?.Collectible.SetTemperature(this.Api.World, this.Contents, Math.Min(beh.getPowerReceive() * 11F, temp - 8), false);
                 this.MarkDirty();
             }
 
@@ -334,7 +338,7 @@ public class BlockEntityEHorn : BlockEntityEBase, IHeatSource
         if (electricity == null || byItemStack == null)
             return;
 
-        electricity.Connection = Facing.DownAll;
+        electricity.Connection = Facing.AllAll;
 
         //задаем параметры блока/проводника
         var voltage = MyMiniLib.GetAttributeInt(byItemStack!.Block, "voltage", 32);
@@ -342,10 +346,13 @@ public class BlockEntityEHorn : BlockEntityEBase, IHeatSource
         var isolated = MyMiniLib.GetAttributeBool(byItemStack!.Block, "isolated", false);
         var isolatedEnvironment = MyMiniLib.GetAttributeBool(byItemStack!.Block, "isolatedEnvironment", false);
 
-        this.ElectricalProgressive!.Connection = Facing.DownAll;
-        this.ElectricalProgressive.Eparams = (
-            new(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment),
-            FacingHelper.Faces(Facing.DownAll).First().Index);
+        electricity!.Connection = Facing.AllAll;
+        electricity.Eparams = (new(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 0);
+        electricity.Eparams = (new(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 1);
+        electricity.Eparams = (new(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 2);
+        electricity.Eparams = (new(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 3);
+        electricity.Eparams = (new(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 4);
+        electricity.Eparams = (new(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 5);
     }
 
 

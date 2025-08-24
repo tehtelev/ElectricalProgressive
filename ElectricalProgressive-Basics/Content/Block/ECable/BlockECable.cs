@@ -321,7 +321,7 @@ namespace ElectricalProgressive.Content.Block.ECable
                 {
                     entity.Orientation &= ~faceSelect;
                     entity.Switches &= ~faceSelect;
-                    
+
 
                     entity.MarkDirty(true);
 
@@ -485,7 +485,7 @@ namespace ElectricalProgressive.Content.Block.ECable
 
                 entity.Orientation &= ~selectedFacing;
                 entity.Switches &= ~selectedFacing;
-                
+
             }
 
             if (delayReturn)
@@ -637,1316 +637,338 @@ namespace ElectricalProgressive.Content.Block.ECable
         /// <param name="position"></param>
         /// <param name="chunkExtBlocks"></param>
         /// <param name="extIndex3d"></param>
+        // ---- Оптимизированный OnJsonTesselation ----
         public override void OnJsonTesselation(ref MeshData sourceMesh, ref int[] lightRgbsByCorner, BlockPos position, Vintagestory.API.Common.Block[] chunkExtBlocks, int extIndex3d)
         {
-            if (this.api.World.BlockAccessor.GetBlockEntity(position) is BlockEntityECable entity
-                && entity.Connection != Facing.None
-                && entity.AllEparams != null
-                && entity.Block.Code.ToString().Contains("ecable"))
+            if (this.api.World.BlockAccessor.GetBlockEntity(position) is not BlockEntityECable entity
+                || entity.Connection == Facing.None
+                || entity.AllEparams == null
+                || !entity.Block.Code.ToString().Contains("ecable"))
             {
-                var key = CacheDataKey.FromEntity(entity);
-
-                if (!BlockECable.MeshDataCache.TryGetValue(key, out var meshData))
-                {
-                    var origin = new Vec3f(0.5f, 0.5f, 0.5f);
-                    var origin0 = new Vec3f(0f, 0f, 0f);
-
-                    // инициализируем рандомайзер системный
-                    var rnd = new Random();
-
-                    int bufIndex, indexV;
-                    EParams eparam;
-                    string indexM;
-                    byte indexQ;
-                    bool indexB, isol;
-
-                    // рисуем на северной грани
-                    if ((key.Connection & Facing.NorthAll) != 0)
-                    {
-                        bufIndex = FacingHelper.Faces(Facing.NorthAll).First().Index; //индекс грани
-                        eparam = entity.AllEparams[bufIndex];
-                        indexV = eparam.voltage; //индекс напряжения этой грани
-                        indexM = eparam.material; //индекс материала этой грани
-                        indexQ = eparam.lines;  //индекс линий этой грани
-                        indexB = eparam.burnout; //индекс перегорания этой грани
-                        isol = eparam.isolated; //изолировано ли?
-
-
-                        var dotVariant = new BlockVariants(api, entity.Block, indexV, indexM, indexQ, isol ? 7 : 0);   //получаем шейп нужной точки кабеля
-
-                        BlockVariants partVariant;
-                        if (!indexB)
-                        {
-                            partVariant = new(api, entity.Block, indexV, indexM, indexQ, isol ? 6 : 1);  //получаем шейп нужного кабеля изолированного или целого
-                        }
-                        else
-                            partVariant = new(api, entity.Block, indexV, indexM, indexQ, 3);  //получаем шейп нужного кабеля сгоревшего
-
-                        var fixVariant = new BlockVariants(api, entity.Block, indexV, indexM, indexQ, 4);   //получаем шейп крепления кабеля
-
-                        //ставим точку посередине, если провода не перегорел
-                        if (!indexB)
-                            AddMeshData(ref meshData, fixVariant.MeshData?.Clone().Rotate(origin, 90.0f * GameMath.DEG2RAD, 0.0f, 0.0f));
-
-
-                        if ((key.Connection & Facing.NorthEast) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 90.0f * GameMath.DEG2RAD, 270.0f * GameMath.DEG2RAD, 0.0f)); //ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 90.0f * GameMath.DEG2RAD, 0.0f, 0.0f).Translate(0.5F, 0, 0));   //cтавим крепление на ребре
-                        }
-
-                        if ((key.Connection & Facing.NorthWest) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 90.0f * GameMath.DEG2RAD, 90.0f * GameMath.DEG2RAD, 0.0f));//ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 90.0f * GameMath.DEG2RAD, 0.0f, 0.0f).Translate(-0.5F, 0, 0));//cтавим крепление на ребре
-                        }
-
-                        if ((key.Connection & Facing.NorthUp) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 90.0f * GameMath.DEG2RAD, 0.0f * GameMath.DEG2RAD, 0.0f));//ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 90.0f * GameMath.DEG2RAD, 0.0f, 0.0f).Translate(0, 0.5F, 0));//cтавим крепление на ребре
-                        }
-
-                        if ((key.Connection & Facing.NorthDown) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 90.0f * GameMath.DEG2RAD, 180.0f * GameMath.DEG2RAD, 0.0f));//ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 90.0f * GameMath.DEG2RAD, 0.0f, 0.0f).Translate(0, -0.5F, 0));//cтавим крепление на ребре
-                        }
-
-                    }
-
-                    // рисуем на восточной грани
-                    if ((key.Connection & Facing.EastAll) != 0)
-                    {
-                        bufIndex = FacingHelper.Faces(Facing.EastAll).First().Index; //индекс грани
-                        eparam = entity.AllEparams[bufIndex];
-                        indexV = eparam.voltage; //индекс напряжения этой грани
-                        indexM = eparam.material; //индекс материала этой грани
-                        indexQ = eparam.lines;  //индекс линий этой грани
-                        indexB = eparam.burnout; //индекс перегорания этой грани
-                        isol = eparam.isolated; //изолировано ли?
-
-                        var dotVariant = new BlockVariants(api, entity.Block, indexV, indexM, indexQ, isol ? 7 : 0);   //получаем шейп нужной точки кабеля
-
-                        BlockVariants partVariant;
-                        if (!indexB)
-                        {
-                            partVariant = new(api, entity.Block, indexV, indexM, indexQ, isol ? 6 : 1);  //получаем шейп нужного кабеля изолированного или целого
-                        }
-                        else
-                            partVariant = new(api, entity.Block, indexV, indexM, indexQ, 3);  //получаем шейп нужного кабеля сгоревшего
-
-                        var fixVariant = new BlockVariants(api, entity.Block, indexV, indexM, indexQ, 4);   //получаем шейп крепления кабеля
-
-                        //ставим точку посередине, если провода не перегорел
-                        if (!indexB)
-                            AddMeshData(ref meshData, fixVariant.MeshData?.Clone().Rotate(origin, 0.0f, 0.0f, 90.0f * GameMath.DEG2RAD));
-
-                        if ((key.Connection & Facing.EastNorth) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 0.0f * GameMath.DEG2RAD, 0.0f, 90.0f * GameMath.DEG2RAD));//ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 0.0f, 0.0f, 90.0f * GameMath.DEG2RAD).Translate(0, 0, -0.5F));//cтавим крепление на ребре
-                        }
-
-                        if ((key.Connection & Facing.EastSouth) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 180.0f * GameMath.DEG2RAD, 0.0f, 90.0f * GameMath.DEG2RAD));//ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 0.0f, 0.0f, 90.0f * GameMath.DEG2RAD).Translate(0, 0, 0.5F));//cтавим крепление на ребре
-                        }
-
-                        if ((key.Connection & Facing.EastUp) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 90.0f * GameMath.DEG2RAD, 0.0f, 90.0f * GameMath.DEG2RAD));//ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 0.0f, 0.0f, 90.0f * GameMath.DEG2RAD).Translate(0, 0.5F, 0));//cтавим крепление на ребре
-                        }
-
-                        if ((key.Connection & Facing.EastDown) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 270.0f * GameMath.DEG2RAD, 0.0f, 90.0f * GameMath.DEG2RAD));//ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 0.0f, 0.0f, 90.0f * GameMath.DEG2RAD).Translate(0, -0.5F, 0));//cтавим крепление на ребре
-                        }
-                    }
-
-                    // рисуем на южной грани
-                    if ((key.Connection & Facing.SouthAll) != 0)
-                    {
-                        bufIndex = FacingHelper.Faces(Facing.SouthAll).First().Index; //индекс грани
-                        eparam = entity.AllEparams[bufIndex];
-                        indexV = eparam.voltage; //индекс напряжения этой грани
-                        indexM = eparam.material; //индекс материала этой грани
-                        indexQ = eparam.lines;  //индекс линий этой грани
-                        indexB = eparam.burnout; //индекс перегорания этой грани
-                        isol = eparam.isolated; //изолировано ли?
-
-                        var dotVariant = new BlockVariants(api, entity.Block, indexV, indexM, indexQ, isol ? 7 : 0);   //получаем шейп нужной точки кабеля
-
-                        BlockVariants partVariant;
-                        if (!indexB)
-                        {
-                            partVariant = new(api, entity.Block, indexV, indexM, indexQ, isol ? 6 : 1);  //получаем шейп нужного кабеля изолированного или целого
-                        }
-                        else
-                            partVariant = new(api, entity.Block, indexV, indexM, indexQ, 3);  //получаем шейп нужного кабеля сгоревшего
-
-                        var fixVariant = new BlockVariants(api, entity.Block, indexV, indexM, indexQ, 4);   //получаем шейп крепления кабеля
-
-                        //ставим точку посередине, если провода не перегорел
-                        if (!indexB)
-                            AddMeshData(ref meshData, fixVariant.MeshData?.Clone().Rotate(origin, 270.0f * GameMath.DEG2RAD, 0.0f, 0.0f));
-
-                        if ((key.Connection & Facing.SouthEast) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 270.0f * GameMath.DEG2RAD, 270.0f * GameMath.DEG2RAD, 0.0f));//ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 270.0f * GameMath.DEG2RAD, 0.0f, 0.0f).Translate(0.5F, 0, 0));//cтавим крепление на ребре
-                        }
-
-                        if ((key.Connection & Facing.SouthWest) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 270.0f * GameMath.DEG2RAD, 90.0f * GameMath.DEG2RAD, 0.0f));//ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 270.0f * GameMath.DEG2RAD, 0.0f, 0.0f).Translate(-0.5F, 0, 0));//cтавим крепление на ребре
-                        }
-
-                        if ((key.Connection & Facing.SouthUp) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 270.0f * GameMath.DEG2RAD, 180.0f * GameMath.DEG2RAD, 0.0f));//ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 270.0f * GameMath.DEG2RAD, 0.0f, 0.0f).Translate(0, 0.5F, 0));//cтавим крепление на ребре
-                        }
-
-                        if ((key.Connection & Facing.SouthDown) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 270.0f * GameMath.DEG2RAD, 0.0f * GameMath.DEG2RAD, 0.0f));//ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 270.0f * GameMath.DEG2RAD, 0.0f, 0.0f).Translate(0, -0.5F, 0));//cтавим крепление на ребре
-                        }
-                    }
-
-                    // рисуем на западной грани
-                    if ((key.Connection & Facing.WestAll) != 0)
-                    {
-                        bufIndex = FacingHelper.Faces(Facing.WestAll).First().Index; //индекс грани
-                        eparam = entity.AllEparams[bufIndex];
-                        indexV = eparam.voltage; //индекс напряжения этой грани
-                        indexM = eparam.material; //индекс материала этой грани
-                        indexQ = eparam.lines;  //индекс линий этой грани
-                        indexB = eparam.burnout; //индекс перегорания этой грани
-                        isol = eparam.isolated; //изолировано ли?
-
-                        var dotVariant = new BlockVariants(api, entity.Block, indexV, indexM, indexQ, isol ? 7 : 0);   //получаем шейп нужной точки кабеля
-
-                        BlockVariants partVariant;
-                        if (!indexB)
-                        {
-                            partVariant = new(api, entity.Block, indexV, indexM, indexQ, isol ? 6 : 1);  //получаем шейп нужного кабеля изолированного или целого
-                        }
-                        else
-                            partVariant = new(api, entity.Block, indexV, indexM, indexQ, 3);  //получаем шейп нужного кабеля сгоревшего
-
-                        var fixVariant = new BlockVariants(api, entity.Block, indexV, indexM, indexQ, 4);   //получаем шейп крепления кабеля
-
-                        //ставим точку посередине, если провода не перегорел
-                        if (!indexB)
-                            AddMeshData(ref meshData, fixVariant.MeshData?.Clone().Rotate(origin, 0.0f, 0.0f, 270.0f * GameMath.DEG2RAD));
-
-                        if ((key.Connection & Facing.WestNorth) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 0.0f * GameMath.DEG2RAD, 0.0f, 270.0f * GameMath.DEG2RAD));//ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 0.0f, 0.0f, 270.0f * GameMath.DEG2RAD).Translate(0, 0, -0.5F));//cтавим крепление на ребре
-                        }
-
-                        if ((key.Connection & Facing.WestSouth) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 180.0f * GameMath.DEG2RAD, 0.0f, 270.0f * GameMath.DEG2RAD));//ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 0.0f, 0.0f, 270.0f * GameMath.DEG2RAD).Translate(0, 0, 0.5F));//cтавим крепление на ребре
-                        }
-
-                        if ((key.Connection & Facing.WestUp) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 90.0f * GameMath.DEG2RAD, 0.0f, 270.0f * GameMath.DEG2RAD));//ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 0.0f, 0.0f, 270.0f * GameMath.DEG2RAD).Translate(0, 0.5F, 0));//cтавим крепление на ребре
-                        }
-
-                        if ((key.Connection & Facing.WestDown) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 270.0f * GameMath.DEG2RAD, 0.0f, 270.0f * GameMath.DEG2RAD));//ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 0.0f, 0.0f, 270.0f * GameMath.DEG2RAD).Translate(0, -0.5F, 0));//cтавим крепление на ребре
-                        }
-                    }
-
-                    // рисуем на верхней грани
-                    if ((key.Connection & Facing.UpAll) != 0)
-                    {
-                        bufIndex = FacingHelper.Faces(Facing.UpAll).First().Index; //индекс грани
-                        eparam = entity.AllEparams[bufIndex];
-                        indexV = eparam.voltage; //индекс напряжения этой грани
-                        indexM = eparam.material; //индекс материала этой грани
-                        indexQ = eparam.lines;  //индекс линий этой грани
-                        indexB = eparam.burnout; //индекс перегорания этой грани
-                        isol = eparam.isolated; //изолировано ли?
-
-                        var dotVariant = new BlockVariants(api, entity.Block, indexV, indexM, indexQ, isol ? 7 : 0);   //получаем шейп нужной точки кабеля
-
-                        BlockVariants partVariant;
-                        if (!indexB)
-                        {
-                            partVariant = new(api, entity.Block, indexV, indexM, indexQ, isol ? 6 : 1);  //получаем шейп нужного кабеля изолированного или целого
-                        }
-                        else
-                            partVariant = new(api, entity.Block, indexV, indexM, indexQ, 3);  //получаем шейп нужного кабеля сгоревшего
-
-                        var fixVariant = new BlockVariants(api, entity.Block, indexV, indexM, indexQ, 4);   //получаем шейп крепления кабеля
-
-                        //ставим точку посередине, если провода не перегорел
-                        if (!indexB)
-                            AddMeshData(ref meshData, fixVariant.MeshData?.Clone().Rotate(origin, 0.0f, 0.0f, 180.0f * GameMath.DEG2RAD));
-
-                        if ((key.Connection & Facing.UpNorth) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 0.0f, 0.0f * GameMath.DEG2RAD, 180.0f * GameMath.DEG2RAD));//ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 0.0f, 0.0f, 180.0f * GameMath.DEG2RAD).Translate(0, 0, -0.5F));//cтавим крепление на ребре
-                        }
-
-                        if ((key.Connection & Facing.UpSouth) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 0.0f, 180.0f * GameMath.DEG2RAD, 180.0f * GameMath.DEG2RAD));//ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 0.0f, 0.0f, 180.0f * GameMath.DEG2RAD).Translate(0, 0, 0.5F));//cтавим крепление на ребре
-                        }
-
-                        if ((key.Connection & Facing.UpEast) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 0.0f, 270.0f * GameMath.DEG2RAD, 180.0f * GameMath.DEG2RAD));//ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 0.0f, 0.0f, 180.0f * GameMath.DEG2RAD).Translate(0.5F, 0, 0));//cтавим крепление на ребре
-                        }
-
-                        if ((key.Connection & Facing.UpWest) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 0.0f, 90.0f * GameMath.DEG2RAD, 180.0f * GameMath.DEG2RAD));//ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 0.0f, 0.0f, 180.0f * GameMath.DEG2RAD).Translate(-0.5F, 0, 0));//cтавим крепление на ребре
-                        }
-                    }
-
-                    // рисуем на нижней грани
-                    if ((key.Connection & Facing.DownAll) != 0)
-                    {
-                        bufIndex = FacingHelper.Faces(Facing.DownAll).First().Index; //индекс грани
-                        eparam = entity.AllEparams[bufIndex];
-                        indexV = eparam.voltage; //индекс напряжения этой грани
-                        indexM = eparam.material; //индекс материала этой грани
-                        indexQ = eparam.lines;  //индекс линий этой грани
-                        indexB = eparam.burnout; //индекс перегорания этой грани
-                        isol = eparam.isolated; //изолировано ли?
-
-                        var dotVariant = new BlockVariants(api, entity.Block, indexV, indexM, indexQ, isol ? 7 : 0);   //получаем шейп нужной точки кабеля
-
-                        BlockVariants partVariant;
-                        if (!indexB)
-                        {
-                            partVariant = new(api, entity.Block, indexV, indexM, indexQ, isol ? 6 : 1);  //получаем шейп нужного кабеля изолированного или целого
-                        }
-                        else
-                            partVariant = new(api, entity.Block, indexV, indexM, indexQ, 3);  //получаем шейп нужного кабеля сгоревшего
-
-                        var fixVariant = new BlockVariants(api, entity.Block, indexV, indexM, indexQ, 4);   //получаем шейп крепления кабеля
-
-                        //ставим точку посередине, если провода не перегорел
-                        if (!indexB)
-                            AddMeshData(ref meshData, fixVariant.MeshData?.Clone().Rotate(origin, 0.0f, 0.0f, 0.0f));
-
-                        if ((key.Connection & Facing.DownNorth) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 0.0f, 0.0f * GameMath.DEG2RAD, 0.0f));//ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 0.0f, 0.0f, 0.0f).Translate(0, 0, -0.5F));//cтавим крепление на ребре
-                        }
-
-                        if ((key.Connection & Facing.DownSouth) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 0.0f, 180.0f * GameMath.DEG2RAD, 0.0f));//ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 0.0f, 0.0f, 0.0f).Translate(0, 0, 0.5F));//cтавим крепление на ребре
-                        }
-
-                        if ((key.Connection & Facing.DownEast) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 0.0f, 270.0f * GameMath.DEG2RAD, 0.0f));//ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 0.0f, 0.0f, 0.0f).Translate(0.5F, 0, 0));//cтавим крепление на ребре
-                        }
-
-                        if ((key.Connection & Facing.DownWest) != 0)
-                        {
-                            AddMeshData(ref meshData, partVariant.MeshData?.Clone().Rotate(origin, 0.0f, 90.0f * GameMath.DEG2RAD, 0.0f));//ставим кусок
-                            AddMeshData(ref meshData, dotVariant.MeshData?.Clone().Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd)).Rotate(origin, 0.0f, 0.0f, 0.0f).Translate(-0.5F, 0, 0));//cтавим крепление на ребре
-                        }
-                    }
-
-                    // Переключатели
-                    if ((key.Orientation & Facing.NorthEast) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.NorthAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone().Rotate(
-                                origin,
-                                90.0f * GameMath.DEG2RAD,
-                                90.0f * GameMath.DEG2RAD,
-                                0.0f
-                            )
-                        );
-                    }
-
-                    if ((key.Orientation & Facing.NorthWest) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.NorthAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone().Rotate(
-                                origin,
-                                90.0f * GameMath.DEG2RAD,
-                                270.0f * GameMath.DEG2RAD,
-                                0.0f
-                            )
-                        );
-                    }
-
-                    if ((key.Orientation & Facing.NorthUp) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.NorthAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone().Rotate(
-                                origin,
-                                90.0f * GameMath.DEG2RAD,
-                                180.0f * GameMath.DEG2RAD,
-                                0.0f
-                            )
-                        );
-                    }
-
-                    if ((key.Orientation & Facing.NorthDown) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.NorthAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone().Rotate(
-                                origin,
-                                90.0f * GameMath.DEG2RAD,
-                                0.0f * GameMath.DEG2RAD,
-                                0.0f
-                            )
-                        );
-                    }
-
-                    if ((key.Orientation & Facing.EastNorth) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.EastAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone().Rotate(
-                                origin,
-                                180.0f * GameMath.DEG2RAD,
-                                0.0f,
-                                90.0f * GameMath.DEG2RAD
-                            )
-                        );
-                    }
-
-                    if ((key.Orientation & Facing.EastSouth) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.EastAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone().Rotate(
-                                origin,
-                                0.0f * GameMath.DEG2RAD,
-                                0.0f,
-                                90.0f * GameMath.DEG2RAD
-                            )
-                        );
-                    }
-
-                    if ((key.Orientation & Facing.EastUp) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.EastAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone().Rotate(
-                                origin,
-                                270.0f * GameMath.DEG2RAD,
-                                0.0f,
-                                90.0f * GameMath.DEG2RAD
-                            )
-                        );
-                    }
-
-                    if ((key.Orientation & Facing.EastDown) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.EastAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone().Rotate(
-                                origin,
-                                90.0f * GameMath.DEG2RAD,
-                                0.0f,
-                                90.0f * GameMath.DEG2RAD
-                            )
-                        );
-                    }
-
-                    if ((key.Orientation & Facing.SouthEast) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.SouthAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone().Rotate(
-                                origin,
-                                90.0f * GameMath.DEG2RAD,
-                                90.0f * GameMath.DEG2RAD,
-                                180.0f * GameMath.DEG2RAD
-                            )
-                        );
-                    }
-
-                    if ((key.Orientation & Facing.SouthWest) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.SouthAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone().Rotate(
-                                origin,
-                                90.0f * GameMath.DEG2RAD,
-                                270.0f * GameMath.DEG2RAD,
-                                180.0f * GameMath.DEG2RAD
-                            )
-                        );
-                    }
-
-                    if ((key.Orientation & Facing.SouthUp) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.SouthAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone().Rotate(
-                                origin,
-                                90.0f * GameMath.DEG2RAD,
-                                180.0f * GameMath.DEG2RAD,
-                                180.0f * GameMath.DEG2RAD
-                            )
-                        );
-                    }
-
-                    if ((key.Orientation & Facing.SouthDown) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.SouthAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone().Rotate(
-                                origin,
-                                90.0f * GameMath.DEG2RAD,
-                                0.0f * GameMath.DEG2RAD,
-                                180.0f * GameMath.DEG2RAD
-                            )
-                        );
-                    }
-
-                    if ((key.Orientation & Facing.WestNorth) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.WestAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone().Rotate(
-                                origin,
-                                180.0f * GameMath.DEG2RAD,
-                                0.0f,
-                                270.0f * GameMath.DEG2RAD
-                            )
-                        );
-                    }
-
-                    if ((key.Orientation & Facing.WestSouth) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.WestAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone().Rotate(
-                                origin,
-                                0.0f * GameMath.DEG2RAD,
-                                0.0f,
-                                270.0f * GameMath.DEG2RAD
-                            )
-                        );
-                    }
-
-                    if ((key.Orientation & Facing.WestUp) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.WestAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone().Rotate(
-                                origin,
-                                270.0f * GameMath.DEG2RAD,
-                                0.0f,
-                                270.0f * GameMath.DEG2RAD
-                            )
-                        );
-                    }
-
-                    if ((key.Orientation & Facing.WestDown) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.WestAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone().Rotate(
-                                origin,
-                                90.0f * GameMath.DEG2RAD,
-                                0.0f,
-                                270.0f * GameMath.DEG2RAD
-                            )
-                        );
-                    }
-
-                    if ((key.Orientation & Facing.UpNorth) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.UpAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone().Rotate(
-                                origin,
-                                0.0f,
-                                180.0f * GameMath.DEG2RAD,
-                                180.0f * GameMath.DEG2RAD
-                            )
-                        );
-                    }
-
-                    if ((key.Orientation & Facing.UpEast) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.UpAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone().Rotate(
-                                origin,
-                                0.0f,
-                                90.0f * GameMath.DEG2RAD,
-                                180.0f * GameMath.DEG2RAD
-                            )
-                        );
-                    }
-
-                    if ((key.Orientation & Facing.UpSouth) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.UpAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone().Rotate(
-                                origin,
-                                0.0f,
-                                0.0f * GameMath.DEG2RAD,
-                                180.0f * GameMath.DEG2RAD
-                            )
-                        );
-                    }
-
-                    if ((key.Orientation & Facing.UpWest) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.UpAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone().Rotate(
-                                origin,
-                                0.0f,
-                                270.0f * GameMath.DEG2RAD,
-                                180.0f * GameMath.DEG2RAD
-                            )
-                        );
-                    }
-
-                    if ((key.Orientation & Facing.DownNorth) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.DownAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone()
-                            .Rotate(origin, 0.0f, 180.0f * GameMath.DEG2RAD, 0.0f)
-                        );
-                    }
-
-                    if ((key.Orientation & Facing.DownEast) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.DownAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone()
-                            .Rotate(origin, 0.0f, 90.0f * GameMath.DEG2RAD, 0.0f)
-                        );
-                    }
-
-                    if ((key.Orientation & Facing.DownSouth) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.DownAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone()
-                            .Rotate(origin, 0.0f, 0.0f * GameMath.DEG2RAD, 0.0f)
-                        );
-                    }
-
-                    if ((key.Orientation & Facing.DownWest) != 0)
-                    {
-                        AddMeshData(
-                            ref meshData,
-                            ((key.Orientation & key.SwitchesState & Facing.DownAll) != 0
-                                ? enabledSwitchVariant
-                                : disabledSwitchVariant)?.MeshData?.Clone()
-                            .Rotate(origin, 0.0f, 270.0f * GameMath.DEG2RAD, 0.0f)
-                        );
-                    }
-
-                    BlockECable.MeshDataCache[key] = meshData!;
-                }
-
-                sourceMesh = meshData ?? sourceMesh;
+                base.OnJsonTesselation(ref sourceMesh, ref lightRgbsByCorner, position, chunkExtBlocks, extIndex3d);
+                return;
             }
 
+            var key = CacheDataKey.FromEntity(entity);
+
+            if (!BlockECable.MeshDataCache.TryGetValue(key, out var meshData))
+            {
+                MeshData? built = null;
+                var origin = new Vec3f(0.5f, 0.5f, 0.5f);
+                var origin0 = new Vec3f(0f, 0f, 0f);
+                var rnd = new Random();
+                var deg2rad = GameMath.DEG2RAD;
+
+                // helper to add rotated+translated dot
+                void AddDot(MeshData? md, MeshData? dot, float rx, float ry, float rz, Vec3f trans)
+                {
+                    if (dot == null) return;
+                    var m = dot.Clone()
+                               .Scale(origin0, RndHelp(ref rnd), RndHelp(ref rnd), RndHelp(ref rnd))
+                               .Rotate(origin, rx * deg2rad, ry * deg2rad, rz * deg2rad)
+                               .Translate(trans.X, trans.Y, trans.Z);
+                    AddMeshData(ref built, m);
+                }
+
+                // helper to add rotated part
+                void AddPart(MeshData? md, MeshData? part, float rx, float ry, float rz)
+                {
+                    if (part == null) return;
+                    AddMeshData(ref built, part.Clone().Rotate(origin, rx * deg2rad, ry * deg2rad, rz * deg2rad));
+                }
+
+                // Generic face processor: takes face mask, function that returns rotations/translations for subfaces
+                void ProcessFace(Facing faceAll, (Facing sub, float rx, float ry, float rz, Vec3f trans)[] subs, float fixRx, float fixRy, float fixRz)
+                {
+                    if ((key.Connection & faceAll) == 0) return;
+
+                    int bufIndex = FacingHelper.Faces(faceAll).First().Index;
+                    var eparam = entity.AllEparams[bufIndex];
+                    var indexV = eparam.voltage;
+                    var indexM = eparam.material;
+                    var indexQ = eparam.lines;
+                    var indexB = eparam.burnout;
+                    var isol = eparam.isolated;
+
+                    var dotVariant = new BlockVariants(api, entity.Block, indexV, indexM, indexQ, isol ? 7 : 0);
+                    BlockVariants partVariant = !indexB
+                        ? new BlockVariants(api, entity.Block, indexV, indexM, indexQ, isol ? 6 : 1)
+                        : new BlockVariants(api, entity.Block, indexV, indexM, indexQ, 3);
+                    var fixVariant = new BlockVariants(api, entity.Block, indexV, indexM, indexQ, 4);
+
+                    if (!indexB)
+                    {
+                        AddMeshData(ref built, fixVariant.MeshData?.Clone().Rotate(origin, fixRx * deg2rad, fixRy * deg2rad, fixRz * deg2rad));
+                    }
+
+                    foreach (var (sub, rx, ry, rz, trans) in subs)
+                    {
+                        if ((key.Connection & sub) != 0)
+                        {
+                            AddPart(built, partVariant.MeshData, rx, ry, rz);
+                            AddDot(built, dotVariant.MeshData, rx, ry, rz, trans);
+                        }
+                    }
+                }
+
+                // Define subfaces for each face (rotations in degrees, translations)
+                ProcessFace(Facing.NorthAll, new (Facing, float, float, float, Vec3f)[]
+                {
+            (Facing.NorthEast, 90f, 270f, 0f, new Vec3f(0.5f, 0f, 0f)),
+            (Facing.NorthWest, 90f, 90f, 0f, new Vec3f(-0.5f, 0f, 0f)),
+            (Facing.NorthUp, 90f, 0f, 0f, new Vec3f(0f, 0.5f, 0f)),
+            (Facing.NorthDown, 90f, 180f, 0f, new Vec3f(0f, -0.5f, 0f))
+                }, 90f, 0f, 0f);
+
+                ProcessFace(Facing.EastAll, new (Facing, float, float, float, Vec3f)[]
+                {
+            (Facing.EastNorth, 0f, 0f, 90f, new Vec3f(0f, 0f, -0.5f)),
+            (Facing.EastSouth, 180f, 0f, 90f, new Vec3f(0f, 0f, 0.5f)),
+            (Facing.EastUp, 90f, 0f, 90f, new Vec3f(0f, 0.5f, 0f)),
+            (Facing.EastDown, 270f, 0f, 90f, new Vec3f(0f, -0.5f, 0f))
+                }, 0f, 0f, 90f);
+
+                ProcessFace(Facing.SouthAll, new (Facing, float, float, float, Vec3f)[]
+                {
+            (Facing.SouthEast, 270f, 270f, 0f, new Vec3f(0.5f, 0f, 0f)),
+            (Facing.SouthWest, 270f, 90f, 0f, new Vec3f(-0.5f, 0f, 0f)),
+            (Facing.SouthUp, 270f, 180f, 0f, new Vec3f(0f, 0.5f, 0f)),
+            (Facing.SouthDown, 270f, 0f, 0f, new Vec3f(0f, -0.5f, 0f))
+                }, 270f, 0f, 0f);
+
+                ProcessFace(Facing.WestAll, new (Facing, float, float, float, Vec3f)[]
+                {
+            (Facing.WestNorth, 0f, 0f, 270f, new Vec3f(0f, 0f, -0.5f)),
+            (Facing.WestSouth, 180f, 0f, 270f, new Vec3f(0f, 0f, 0.5f)),
+            (Facing.WestUp, 90f, 0f, 270f, new Vec3f(0f, 0.5f, 0f)),
+            (Facing.WestDown, 270f, 0f, 270f, new Vec3f(0f, -0.5f, 0f))
+                }, 0f, 0f, 270f);
+
+                ProcessFace(Facing.UpAll, new (Facing, float, float, float, Vec3f)[]
+                {
+            (Facing.UpNorth, 0f, 0f, 180f, new Vec3f(0f, 0f, -0.5f)),
+            (Facing.UpEast, 0f, 270f, 180f, new Vec3f(0.5f, 0f, 0f)),
+            (Facing.UpSouth, 0f, 180f, 180f, new Vec3f(0f, 0f, 0.5f)),
+            (Facing.UpWest, 0f, 90f, 180f, new Vec3f(-0.5f, 0f, 0f))
+                }, 0f, 0f, 180f);
+
+                ProcessFace(Facing.DownAll, new (Facing, float, float, float, Vec3f)[]
+                {
+            (Facing.DownNorth, 0f, 0f, 0f, new Vec3f(0f, 0f, -0.5f)),
+            (Facing.DownSouth, 0f, 180f, 0f, new Vec3f(0f, 0f, 0.5f)),
+            (Facing.DownEast, 0f, 270f, 0f, new Vec3f(0.5f, 0f, 0f)),
+            (Facing.DownWest, 0f, 90f, 0f, new Vec3f(-0.5f, 0f, 0f))
+                }, 0f, 0f, 0f);
+
+                // Switches (orientation): reuse enabled/disabled variants with precomputed rotations
+                void AddSwitchIf(Facing mask, Facing allMask, float rx, float ry, float rz)
+                {
+                    if ((key.Orientation & mask) != 0)
+                    {
+                        var variant = ((key.Orientation & key.SwitchesState & allMask) != 0 ? enabledSwitchVariant : disabledSwitchVariant);
+                        AddMeshData(ref built, variant?.MeshData?.Clone().Rotate(origin, rx * deg2rad, ry * deg2rad, rz * deg2rad));
+                    }
+                }
+
+                // All switch placements (kept same rotations as original)
+                AddSwitchIf(Facing.NorthEast, Facing.NorthAll, 90f, 90f, 0f);
+                AddSwitchIf(Facing.NorthWest, Facing.NorthAll, 90f, 270f, 0f);
+                AddSwitchIf(Facing.NorthUp, Facing.NorthAll, 90f, 180f, 0f);
+                AddSwitchIf(Facing.NorthDown, Facing.NorthAll, 90f, 0f, 0f);
+
+                AddSwitchIf(Facing.EastNorth, Facing.EastAll, 180f, 0f, 90f);
+                AddSwitchIf(Facing.EastSouth, Facing.EastAll, 0f, 0f, 90f);
+                AddSwitchIf(Facing.EastUp, Facing.EastAll, 270f, 0f, 90f);
+                AddSwitchIf(Facing.EastDown, Facing.EastAll, 90f, 0f, 90f);
+
+                AddSwitchIf(Facing.SouthEast, Facing.SouthAll, 90f, 90f, 180f);
+                AddSwitchIf(Facing.SouthWest, Facing.SouthAll, 90f, 270f, 180f);
+                AddSwitchIf(Facing.SouthUp, Facing.SouthAll, 90f, 180f, 180f);
+                AddSwitchIf(Facing.SouthDown, Facing.SouthAll, 90f, 0f, 180f);
+
+                AddSwitchIf(Facing.WestNorth, Facing.WestAll, 180f, 0f, 270f);
+                AddSwitchIf(Facing.WestSouth, Facing.WestAll, 0f, 0f, 270f);
+                AddSwitchIf(Facing.WestUp, Facing.WestAll, 270f, 0f, 270f);
+                AddSwitchIf(Facing.WestDown, Facing.WestAll, 90f, 0f, 270f);
+
+                AddSwitchIf(Facing.UpNorth, Facing.UpAll, 0f, 180f, 180f);
+                AddSwitchIf(Facing.UpEast, Facing.UpAll, 0f, 90f, 180f);
+                AddSwitchIf(Facing.UpSouth, Facing.UpAll, 0f, 0f, 180f);
+                AddSwitchIf(Facing.UpWest, Facing.UpAll, 0f, 270f, 180f);
+
+                AddSwitchIf(Facing.DownNorth, Facing.DownAll, 0f, 180f, 0f);
+                AddSwitchIf(Facing.DownEast, Facing.DownAll, 0f, 90f, 0f);
+                AddSwitchIf(Facing.DownSouth, Facing.DownAll, 0f, 0f, 0f);
+                AddSwitchIf(Facing.DownWest, Facing.DownAll, 0f, 270f, 0f);
+
+                // store to cache
+                BlockECable.MeshDataCache[key] = built ?? new MeshData();
+                meshData = BlockECable.MeshDataCache[key];
+            }
+
+            sourceMesh = meshData ?? sourceMesh;
             base.OnJsonTesselation(ref sourceMesh, ref lightRgbsByCorner, position, chunkExtBlocks, extIndex3d);
         }
 
-        /// <summary>
-        /// Просчет коллайдеров (коллизии проводов должны совпадать с коллизиями выделения)
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="boxesCache"></param>
-        /// <param name="entity"></param>
-        /// <returns></returns>
+
+        // ---- Оптимизированный CalculateBoxes ----
         public static Dictionary<Facing, Cuboidf[]> CalculateBoxes(CacheDataKey key, IDictionary<CacheDataKey, Dictionary<Facing, Cuboidf[]>> boxesCache, BlockEntityECable entity)
         {
-            if (!boxesCache.TryGetValue(key, out var boxes)
-                && entity.Connection != Facing.None
-                && entity.Block.Code.ToString().Contains("ecable"))
+            // Если уже в кэше — сразу вернуть
+            if (boxesCache.TryGetValue(key, out var cached))
+                return cached;
+
+            // Если нет соединений или не ecable — вернуть дефолтные коллайдеры для блока
+            if (entity.Connection == Facing.None || !entity.Block.Code.ToString().Contains("ecable"))
             {
-                var origin = new Vec3d(0.5, 0.5, 0.5);
+                var simple = new Dictionary<Facing, Cuboidf[]>();
+                simple.Add(Facing.NorthAll, entity.Block.CollisionBoxes);
+                boxesCache[key] = simple;
+                return simple;
+            }
 
-                boxesCache[key] = boxes = new();
+            var origin = new Vec3d(0.5, 0.5, 0.5);
+            var boxes = new Dictionary<Facing, Cuboidf[]>();
 
-                int bufIndex, indexV;
-                EParams eparam;
-                string indexM;
-                byte indexQ;
-                bool indexB, isol;
+            // helper для добавления набора RotatedCopy'ов
+            void AddRotated(Facing addKey, Cuboidf[] baseBoxes, double rx, double ry, double rz)
+            {
+                AddBoxes(ref boxes, addKey, baseBoxes.Select(b => b.RotatedCopy((float)rx, (float)ry, (float)rz, origin)).ToArray());
+            }
 
+            // Обрабатываем каждую грань: один раз вычисляем partBoxes и fixBoxes, потом добавляем нужные повороты
+            void ProcessFaceBoxes(Facing faceAll,
+                (Facing sub, double rx, double ry, double rz)[] subs,
+                double fixRx, double fixRy, double fixRz)
+            {
+                if ((key.Connection & faceAll) == 0) return;
 
-                // Connections
-                if ((key.Connection & Facing.NorthAll) != 0)
+                int bufIndex = FacingHelper.Faces(faceAll).First().Index;
+                var eparam = entity.AllEparams![bufIndex];
+                var indexV = eparam.voltage;
+                var indexM = eparam.material;
+                var indexQ = eparam.lines;
+                var indexB = eparam.burnout;
+                var isol = eparam.isolated;
+
+                Cuboidf[] partBoxes = !indexB
+                    ? new BlockVariants(entity.Api, entity.Block, indexV, indexM, indexQ, isol ? 6 : 1).CollisionBoxes
+                    : new BlockVariants(entity.Api, entity.Block, indexV, indexM, indexQ, 3).CollisionBoxes;
+
+                var fixBoxes = new BlockVariants(entity.Api, entity.Block, indexV, indexM, indexQ, 4).CollisionBoxes;
+
+                if (!indexB)
                 {
-                    bufIndex = FacingHelper.Faces(Facing.NorthAll).First().Index; //индекс грани
-                    eparam = entity.AllEparams![bufIndex];
-                    indexV = eparam.voltage; //индекс напряжения этой грани
-                    indexM = eparam.material; //индекс материала этой грани
-                    indexQ = eparam.lines;  //индекс линий этой грани
-                    indexB = eparam.burnout; //индекс перегорания этой грани
-                    isol = eparam.isolated; //изолировано ли?
-
-
-                    Cuboidf[] partBoxes;
-                    if (!indexB)
-                    {
-                        partBoxes = new BlockVariants(entity.Api, entity.Block, indexV, indexM, indexQ, isol ? 6 : 1).CollisionBoxes;  //получаем шейп нужного кабеля изолированного или целого
-                    }
-                    else
-                        partBoxes = new BlockVariants(entity.Api, entity.Block, indexV, indexM, indexQ, 3).CollisionBoxes;  //получаем шейп нужного кабеля сгоревшего
-
-                    var fixBoxes = new BlockVariants(entity.Api, entity.Block, indexV, indexM, indexQ, 4).CollisionBoxes;   //получаем шейп крепления кабеля
-
-                    //ставим точку посередине, если провода не перегорел
-                    if (!indexB)
-                        boxes.Add(Facing.NorthAll, fixBoxes.Select(selectionBox => selectionBox.RotatedCopy(90.0f, 0.0f, 0.0f, origin)).ToArray());
-
-
-                    if ((key.Connection & Facing.NorthEast) != 0)
-                    {
-                        boxes.Add(Facing.NorthEast, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(90.0f, 270.0f, 0.0f, origin)).ToArray());
-                    }
-
-                    if ((key.Connection & Facing.NorthWest) != 0)
-                    {
-                        boxes.Add(Facing.NorthWest, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(90.0f, 90.0f, 0.0f, origin)).ToArray());
-                    }
-
-                    if ((key.Connection & Facing.NorthUp) != 0)
-                    {
-                        boxes.Add(Facing.NorthUp, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(90.0f, 0.0f, 0.0f, origin)).ToArray());
-                    }
-
-                    if ((key.Connection & Facing.NorthDown) != 0)
-                    {
-                        boxes.Add(Facing.NorthDown, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(90.0f, 180.0f, 0.0f, origin)).ToArray());
-                    }
-
+                    AddRotated(faceAll, fixBoxes, fixRx, fixRy, fixRz);
                 }
 
-
-                if ((key.Connection & Facing.EastAll) != 0)
+                foreach (var (sub, rx, ry, rz) in subs)
                 {
-                    bufIndex = FacingHelper.Faces(Facing.EastAll).First().Index; //индекс грани
-                    eparam = entity.AllEparams![bufIndex];
-                    indexV = eparam.voltage; //индекс напряжения этой грани
-                    indexM = eparam.material; //индекс материала этой грани
-                    indexQ = eparam.lines;  //индекс линий этой грани
-                    indexB = eparam.burnout; //индекс перегорания этой грани
-                    isol = eparam.isolated; //изолировано ли?
-
-
-                    Cuboidf[] partBoxes;
-                    if (!indexB)
+                    if ((key.Connection & sub) != 0)
                     {
-                        partBoxes = new BlockVariants(entity.Api, entity.Block, indexV, indexM, indexQ, isol ? 6 : 1).CollisionBoxes;  //получаем шейп нужного кабеля изолированного или целого
+                        AddRotated(sub, partBoxes, rx, ry, rz);
                     }
-                    else
-                        partBoxes = new BlockVariants(entity.Api, entity.Block, indexV, indexM, indexQ, 3).CollisionBoxes;  //получаем шейп нужного кабеля сгоревшего
-
-                    var fixBoxes = new BlockVariants(entity.Api, entity.Block, indexV, indexM, indexQ, 4).CollisionBoxes;   //получаем шейп крепления кабеля
-
-                    //ставим точку посередине, если провода не перегорел
-                    if (!indexB)
-                        boxes.Add(Facing.EastAll, fixBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 0.0f, 90.0f, origin)).ToArray());
-
-                    if ((key.Connection & Facing.EastNorth) != 0)
-                    {
-                        boxes.Add(Facing.EastNorth, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 0.0f, 90.0f, origin)).ToArray());
-                    }
-
-                    if ((key.Connection & Facing.EastSouth) != 0)
-                    {
-                        boxes.Add(Facing.EastSouth, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(180.0f, 0.0f, 90.0f, origin)).ToArray());
-                    }
-
-                    if ((key.Connection & Facing.EastUp) != 0)
-                    {
-                        boxes.Add(Facing.EastUp, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(90.0f, 0.0f, 90.0f, origin)).ToArray());
-                    }
-
-                    if ((key.Connection & Facing.EastDown) != 0)
-                    {
-                        boxes.Add(Facing.EastDown, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(270.0f, 0.0f, 90.0f, origin)).ToArray());
-                    }
-                }
-
-                if ((key.Connection & Facing.SouthAll) != 0)
-                {
-                    bufIndex = FacingHelper.Faces(Facing.SouthAll).First().Index; //индекс грани
-                    eparam = entity.AllEparams![bufIndex];
-                    indexV = eparam.voltage; //индекс напряжения этой грани
-                    indexM = eparam.material; //индекс материала этой грани
-                    indexQ = eparam.lines;  //индекс линий этой грани
-                    indexB = eparam.burnout; //индекс перегорания этой грани
-                    isol = eparam.isolated; //изолировано ли?
-
-
-                    Cuboidf[] partBoxes;
-                    if (!indexB)
-                    {
-                        partBoxes = new BlockVariants(entity.Api, entity.Block, indexV, indexM, indexQ, isol ? 6 : 1).CollisionBoxes;  //получаем шейп нужного кабеля изолированного или целого
-                    }
-                    else
-                        partBoxes = new BlockVariants(entity.Api, entity.Block, indexV, indexM, indexQ, 3).CollisionBoxes;  //получаем шейп нужного кабеля сгоревшего
-
-                    var fixBoxes = new BlockVariants(entity.Api, entity.Block, indexV, indexM, indexQ, 4).CollisionBoxes;   //получаем шейп крепления кабеля
-
-                    //ставим точку посередине, если провода не перегорел
-                    if (!indexB)
-                        boxes.Add(Facing.SouthAll, fixBoxes.Select(selectionBox => selectionBox.RotatedCopy(270.0f, 0.0f, 0.0f, origin)).ToArray());
-
-                    if ((key.Connection & Facing.SouthEast) != 0)
-                    {
-                        boxes.Add(Facing.SouthEast, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(270.0f, 270.0f, 0.0f, origin)).ToArray());
-                    }
-
-                    if ((key.Connection & Facing.SouthWest) != 0)
-                    {
-                        boxes.Add(Facing.SouthWest, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(270.0f, 90.0f, 0.0f, origin)).ToArray());
-                    }
-
-                    if ((key.Connection & Facing.SouthUp) != 0)
-                    {
-                        boxes.Add(Facing.SouthUp, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(270.0f, 180.0f, 0.0f, origin)).ToArray());
-                    }
-
-                    if ((key.Connection & Facing.SouthDown) != 0)
-                    {
-                        boxes.Add(Facing.SouthDown, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(270.0f, 0.0f, 0.0f, origin)).ToArray());
-                    }
-                }
-
-
-
-                if ((key.Connection & Facing.WestAll) != 0)
-                {
-                    bufIndex = FacingHelper.Faces(Facing.WestAll).First().Index; //индекс грани
-                    eparam = entity.AllEparams![bufIndex];
-                    indexV = eparam.voltage; //индекс напряжения этой грани
-                    indexM = eparam.material; //индекс материала этой грани
-                    indexQ = eparam.lines;  //индекс линий этой грани
-                    indexB = eparam.burnout; //индекс перегорания этой грани
-                    isol = eparam.isolated; //изолировано ли?
-
-
-                    Cuboidf[] partBoxes;
-                    if (!indexB)
-                    {
-                        partBoxes = new BlockVariants(entity.Api, entity.Block, indexV, indexM, indexQ, isol ? 6 : 1).CollisionBoxes;  //получаем шейп нужного кабеля изолированного или целого
-                    }
-                    else
-                        partBoxes = new BlockVariants(entity.Api, entity.Block, indexV, indexM, indexQ, 3).CollisionBoxes;  //получаем шейп нужного кабеля сгоревшего
-
-                    var fixBoxes = new BlockVariants(entity.Api, entity.Block, indexV, indexM, indexQ, 4).CollisionBoxes;   //получаем шейп крепления кабеля
-
-                    //ставим точку посередине, если провода не перегорел
-                    if (!indexB)
-                        boxes.Add(Facing.WestAll, fixBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 0.0f, 270.0f, origin)).ToArray());
-
-                    if ((key.Connection & Facing.WestNorth) != 0)
-                    {
-                        boxes.Add(Facing.WestNorth, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 0.0f, 270.0f, origin)).ToArray());
-                    }
-
-                    if ((key.Connection & Facing.WestSouth) != 0)
-                    {
-                        boxes.Add(Facing.WestSouth, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(180.0f, 0.0f, 270.0f, origin)).ToArray());
-                    }
-
-                    if ((key.Connection & Facing.WestUp) != 0)
-                    {
-                        boxes.Add(Facing.WestUp, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(90.0f, 0.0f, 270.0f, origin)).ToArray());
-                    }
-
-                    if ((key.Connection & Facing.WestDown) != 0)
-                    {
-                        boxes.Add(Facing.WestDown, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(270.0f, 0.0f, 270.0f, origin)).ToArray());
-                    }
-                }
-
-
-
-                if ((key.Connection & Facing.UpAll) != 0)
-                {
-                    bufIndex = FacingHelper.Faces(Facing.UpAll).First().Index; //индекс грани
-                    eparam = entity.AllEparams![bufIndex];
-                    indexV = eparam.voltage; //индекс напряжения этой грани
-                    indexM = eparam.material; //индекс материала этой грани
-                    indexQ = eparam.lines;  //индекс линий этой грани
-                    indexB = eparam.burnout; //индекс перегорания этой грани
-                    isol = eparam.isolated; //изолировано ли?
-
-
-
-                    Cuboidf[] partBoxes;
-                    if (!indexB)
-                    {
-                        partBoxes = new BlockVariants(entity.Api, entity.Block, indexV, indexM, indexQ, isol ? 6 : 1).CollisionBoxes;  //получаем шейп нужного кабеля изолированного или целого
-                    }
-                    else
-                        partBoxes = new BlockVariants(entity.Api, entity.Block, indexV, indexM, indexQ, 3).CollisionBoxes;  //получаем шейп нужного кабеля сгоревшего
-
-                    var fixBoxes = new BlockVariants(entity.Api, entity.Block, indexV, indexM, indexQ, 4).CollisionBoxes;   //получаем шейп крепления кабеля
-
-                    //ставим точку посередине, если провода не перегорел
-                    if (!indexB)
-                        boxes.Add(Facing.UpAll, fixBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 0.0f, 180.0f, origin)).ToArray());
-
-                    if ((key.Connection & Facing.UpNorth) != 0)
-                    {
-                        boxes.Add(Facing.UpNorth, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 0.0f, 180.0f, origin)).ToArray());
-                    }
-
-                    if ((key.Connection & Facing.UpEast) != 0)
-                    {
-                        boxes.Add(Facing.UpEast, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 270.0f, 180.0f, origin)).ToArray());
-                    }
-
-                    if ((key.Connection & Facing.UpSouth) != 0)
-                    {
-                        boxes.Add(Facing.UpSouth, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 180.0f, 180.0f, origin)).ToArray());
-                    }
-
-                    if ((key.Connection & Facing.UpWest) != 0)
-                    {
-                        boxes.Add(Facing.UpWest, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 90.0f, 180.0f, origin)).ToArray());
-                    }
-                }
-
-
-
-                if ((key.Connection & Facing.DownAll) != 0)
-                {
-                    bufIndex = FacingHelper.Faces(Facing.DownAll).First().Index; //индекс грани
-                    eparam = entity.AllEparams![bufIndex];
-                    indexV = eparam.voltage; //индекс напряжения этой грани
-                    indexM = eparam.material; //индекс материала этой грани
-                    indexQ = eparam.lines;  //индекс линий этой грани
-                    indexB = eparam.burnout; //индекс перегорания этой грани
-                    isol = eparam.isolated; //изолировано ли?
-
-
-
-                    Cuboidf[] partBoxes;
-                    if (!indexB)
-                    {
-                        partBoxes = new BlockVariants(entity.Api, entity.Block, indexV, indexM, indexQ, isol ? 6 : 1).CollisionBoxes;  //получаем шейп нужного кабеля изолированного или целого
-                    }
-                    else
-                        partBoxes = new BlockVariants(entity.Api, entity.Block, indexV, indexM, indexQ, 3).CollisionBoxes;  //получаем шейп нужного кабеля сгоревшего
-
-                    var fixBoxes = new BlockVariants(entity.Api, entity.Block, indexV, indexM, indexQ, 4).CollisionBoxes;   //получаем шейп крепления кабеля
-
-                    //ставим точку посередине, если провода не перегорел
-                    if (!indexB)
-                        boxes.Add(Facing.DownAll, fixBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 0.0f, 0.0f, origin)).ToArray());
-
-                    if ((key.Connection & Facing.DownNorth) != 0)
-                    {
-                        boxes.Add(Facing.DownNorth, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 0.0f, 0.0f, origin)).ToArray());
-                    }
-
-                    if ((key.Connection & Facing.DownEast) != 0)
-                    {
-                        boxes.Add(Facing.DownEast, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 270.0f, 0.0f, origin)).ToArray());
-                    }
-
-                    if ((key.Connection & Facing.DownSouth) != 0)
-                    {
-                        boxes.Add(Facing.DownSouth, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 180.0f, 0.0f, origin)).ToArray());
-                    }
-
-                    if ((key.Connection & Facing.DownWest) != 0)
-                    {
-                        boxes.Add(Facing.DownWest, partBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 90.0f, 0.0f, origin)).ToArray());
-                    }
-                }
-
-                Cuboidf[] enabledSwitchBoxes = enabledSwitchVariant?.CollisionBoxes ?? Array.Empty<Cuboidf>();
-                Cuboidf[] disabledSwitchBoxes = disabledSwitchVariant?.CollisionBoxes ?? Array.Empty<Cuboidf>();
-
-                // переключатели
-                if ((key.Orientation & Facing.NorthEast) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.NorthAll,
-                        ((key.Orientation & key.SwitchesState & Facing.NorthAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes)
-                        .Select(selectionBox => selectionBox.RotatedCopy(90.0f, 90.0f, 0.0f, origin)).ToArray()
-                    );
-                }
-
-                if ((key.Orientation & Facing.NorthWest) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.NorthAll,
-                        ((key.Orientation & key.SwitchesState & Facing.NorthAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes)
-                        .Select(selectionBox => selectionBox.RotatedCopy(90.0f, 270.0f, 0.0f, origin)).ToArray()
-                    );
-                }
-
-                if ((key.Orientation & Facing.NorthUp) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.NorthAll,
-                        ((key.Orientation & key.SwitchesState & Facing.NorthAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes)
-                        .Select(selectionBox => selectionBox.RotatedCopy(90.0f, 180.0f, 0.0f, origin)).ToArray()
-                    );
-                }
-
-                if ((key.Orientation & Facing.NorthDown) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.NorthAll,
-                        ((key.Orientation & key.SwitchesState & Facing.NorthAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes)
-                        .Select(selectionBox => selectionBox.RotatedCopy(90.0f, 0.0f, 0.0f, origin)).ToArray()
-                    );
-                }
-
-                if ((key.Orientation & Facing.EastNorth) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.EastAll,
-                        ((key.Orientation & key.SwitchesState & Facing.EastAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes)
-                        .Select(selectionBox => selectionBox.RotatedCopy(180.0f, 0.0f, 90.0f, origin)).ToArray()
-                    );
-                }
-
-                if ((key.Orientation & Facing.EastSouth) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.EastAll,
-                        ((key.Orientation & key.SwitchesState & Facing.EastAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes)
-                        .Select(selectionBox => selectionBox.RotatedCopy(0.0f, 0.0f, 90.0f, origin)).ToArray()
-                    );
-                }
-
-                if ((key.Orientation & Facing.EastUp) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.EastAll,
-                        ((key.Orientation & key.SwitchesState & Facing.EastAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes)
-                        .Select(selectionBox => selectionBox.RotatedCopy(270.0f, 0.0f, 90.0f, origin)).ToArray()
-                    );
-                }
-
-                if ((key.Orientation & Facing.EastDown) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.EastAll,
-                        ((key.Orientation & key.SwitchesState & Facing.EastAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes)
-                        .Select(selectionBox => selectionBox.RotatedCopy(90.0f, 0.0f, 90.0f, origin)).ToArray()
-                    );
-                }
-
-                if ((key.Orientation & Facing.SouthEast) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.SouthAll,
-                        ((key.Orientation & key.SwitchesState & Facing.SouthAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes)
-                        .Select(selectionBox => selectionBox.RotatedCopy(90.0f, 90.0f, 180.0f, origin)).ToArray()
-                    );
-                }
-
-                if ((key.Orientation & Facing.SouthWest) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.SouthAll,
-                        ((key.Orientation & key.SwitchesState & Facing.SouthAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes).Select(
-                            selectionBox =>
-                                selectionBox.RotatedCopy(90.0f, 270.0f, 180.0f, origin)
-                        ).ToArray()
-                    );
-                }
-
-                if ((key.Orientation & Facing.SouthUp) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.SouthAll,
-                        ((key.Orientation & key.SwitchesState & Facing.SouthAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes).Select(
-                            selectionBox =>
-                                selectionBox.RotatedCopy(90.0f, 180.0f, 180.0f, origin)
-                        ).ToArray()
-                    );
-                }
-
-                if ((key.Orientation & Facing.SouthDown) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.SouthAll,
-                        ((key.Orientation & key.SwitchesState & Facing.SouthAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes)
-                        .Select(selectionBox => selectionBox.RotatedCopy(90.0f, 0.0f, 180.0f, origin)).ToArray()
-                    );
-                }
-
-                if ((key.Orientation & Facing.WestNorth) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.WestAll,
-                        ((key.Orientation & key.SwitchesState & Facing.WestAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes)
-                        .Select(selectionBox => selectionBox.RotatedCopy(180.0f, 0.0f, 270.0f, origin)).ToArray()
-                    );
-                }
-
-                if ((key.Orientation & Facing.WestSouth) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.WestAll,
-                        ((key.Orientation & key.SwitchesState & Facing.WestAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes)
-                        .Select(selectionBox => selectionBox.RotatedCopy(0.0f, 0.0f, 270.0f, origin)).ToArray()
-                    );
-                }
-
-                if ((key.Orientation & Facing.WestUp) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.WestAll,
-                        ((key.Orientation & key.SwitchesState & Facing.WestAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes)
-                        .Select(selectionBox => selectionBox.RotatedCopy(270.0f, 0.0f, 270.0f, origin)).ToArray()
-                    );
-                }
-
-                if ((key.Orientation & Facing.WestDown) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.WestAll,
-                        ((key.Orientation & key.SwitchesState & Facing.WestAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes)
-                        .Select(selectionBox => selectionBox.RotatedCopy(90.0f, 0.0f, 270.0f, origin)).ToArray()
-                    );
-                }
-
-                if ((key.Orientation & Facing.UpNorth) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.UpAll,
-                        ((key.Orientation & key.SwitchesState & Facing.UpAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes)
-                        .Select(selectionBox => selectionBox.RotatedCopy(0.0f, 180.0f, 180.0f, origin)).ToArray()
-                    );
-                }
-
-                if ((key.Orientation & Facing.UpEast) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.UpAll,
-                        ((key.Orientation & key.SwitchesState & Facing.UpAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes)
-                        .Select(selectionBox => selectionBox.RotatedCopy(0.0f, 90.0f, 180.0f, origin)).ToArray()
-                    );
-                }
-
-                if ((key.Orientation & Facing.UpSouth) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.UpAll,
-                        ((key.Orientation & key.SwitchesState & Facing.UpAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes)
-                        .Select(selectionBox => selectionBox.RotatedCopy(0.0f, 0.0f, 180.0f, origin)).ToArray()
-                    );
-                }
-
-                if ((key.Orientation & Facing.UpWest) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.UpAll,
-                        ((key.Orientation & key.SwitchesState & Facing.UpAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes)
-                        .Select(selectionBox => selectionBox.RotatedCopy(0.0f, 270.0f, 180.0f, origin)).ToArray()
-                    );
-                }
-
-                if ((key.Orientation & Facing.DownNorth) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.DownAll,
-                        ((key.Orientation & key.SwitchesState & Facing.DownAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes)
-                        .Select(selectionBox => selectionBox.RotatedCopy(0.0f, 180.0f, 0.0f, origin)).ToArray()
-                    );
-                }
-
-                if ((key.Orientation & Facing.DownEast) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.DownAll,
-                        ((key.Orientation & key.SwitchesState & Facing.DownAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes)
-                        .Select(selectionBox => selectionBox.RotatedCopy(0.0f, 90.0f, 0.0f, origin)).ToArray()
-                    );
-                }
-
-                if ((key.Orientation & Facing.DownSouth) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.DownAll,
-                        ((key.Orientation & key.SwitchesState & Facing.DownAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes)
-                        .Select(selectionBox => selectionBox.RotatedCopy(0.0f, 0.0f, 0.0f, origin)).ToArray()
-                    );
-                }
-
-                if ((key.Orientation & Facing.DownWest) != 0)
-                {
-                    AddBoxes(
-                        ref boxes,
-                        Facing.DownAll,
-                        ((key.Orientation & key.SwitchesState & Facing.DownAll) != 0
-                            ? enabledSwitchBoxes
-                            : disabledSwitchBoxes)
-                        .Select(selectionBox => selectionBox.RotatedCopy(0.0f, 270.0f, 0.0f, origin)).ToArray()
-                    );
                 }
             }
 
-            //если это не кабель, то просто возвращаем коллайдеры
-            if (!entity.Block.Code.ToString().Contains("ecable"))
+            ProcessFaceBoxes(Facing.NorthAll, new (Facing, double, double, double)[]
             {
-                boxes = new Dictionary<Facing, Cuboidf[]>();
-                boxes.Add(Facing.NorthAll, entity.Block.CollisionBoxes);
+        (Facing.NorthEast, 90, 270, 0),
+        (Facing.NorthWest, 90, 90, 0),
+        (Facing.NorthUp, 90, 0, 0),
+        (Facing.NorthDown, 90, 180, 0)
+            }, 90, 0, 0);
+
+            ProcessFaceBoxes(Facing.EastAll, new (Facing, double, double, double)[]
+            {
+        (Facing.EastNorth, 0, 0, 90),
+        (Facing.EastSouth, 180, 0, 90),
+        (Facing.EastUp, 90, 0, 90),
+        (Facing.EastDown, 270, 0, 90)
+            }, 0, 0, 90);
+
+            ProcessFaceBoxes(Facing.SouthAll, new (Facing, double, double, double)[]
+            {
+        (Facing.SouthEast, 270, 270, 0),
+        (Facing.SouthWest, 270, 90, 0),
+        (Facing.SouthUp, 270, 180, 0),
+        (Facing.SouthDown, 270, 0, 0)
+            }, 270, 0, 0);
+
+            ProcessFaceBoxes(Facing.WestAll, new (Facing, double, double, double)[]
+            {
+        (Facing.WestNorth, 0, 0, 270),
+        (Facing.WestSouth, 180, 0, 270),
+        (Facing.WestUp, 90, 0, 270),
+        (Facing.WestDown, 270, 0, 270)
+            }, 0, 0, 270);
+
+            ProcessFaceBoxes(Facing.UpAll, new (Facing, double, double, double)[]
+            {
+        (Facing.UpNorth, 0, 0, 180),
+        (Facing.UpEast, 0, 270, 180),
+        (Facing.UpSouth, 0, 180, 180),
+        (Facing.UpWest, 0, 90, 180)
+            }, 0, 0, 180);
+
+            ProcessFaceBoxes(Facing.DownAll, new (Facing, double, double, double)[]
+            {
+        (Facing.DownNorth, 0, 0, 0),
+        (Facing.DownSouth, 0, 180, 0),
+        (Facing.DownEast, 0, 270, 0),
+        (Facing.DownWest, 0, 90, 0)
+            }, 0, 0, 0);
+
+            // Switch colliders (use block variants for switches if present)
+            // Precompute switch boxes once
+            var enabledSwitchBoxes = enabledSwitchVariant?.CollisionBoxes;
+            var disabledSwitchBoxes = disabledSwitchVariant?.CollisionBoxes;
+            if (enabledSwitchBoxes != null || disabledSwitchBoxes != null)
+            {
+                void AddSwitchBoxesIf(Facing mask, Facing allMask, double rx, double ry, double rz)
+                {
+                    if ((key.Orientation & mask) != 0)
+                    {
+                        var boxesToUse = ((key.Orientation & key.SwitchesState & allMask) != 0 ? enabledSwitchBoxes : disabledSwitchBoxes) ?? enabledSwitchBoxes ?? disabledSwitchBoxes;
+                        AddBoxes(ref boxes, allMask, boxesToUse.Select(b => b.RotatedCopy((float)rx, (float)ry, (float)rz, origin)).ToArray());
+                    }
+                }
+
+                AddSwitchBoxesIf(Facing.NorthEast, Facing.NorthAll, 90, 90, 0);
+                AddSwitchBoxesIf(Facing.NorthWest, Facing.NorthAll, 90, 270, 0);
+                AddSwitchBoxesIf(Facing.NorthUp, Facing.NorthAll, 90, 180, 0);
+                AddSwitchBoxesIf(Facing.NorthDown, Facing.NorthAll, 90, 0, 0);
+
+                AddSwitchBoxesIf(Facing.EastNorth, Facing.EastAll, 180, 0, 90);
+                AddSwitchBoxesIf(Facing.EastSouth, Facing.EastAll, 0, 0, 90);
+                AddSwitchBoxesIf(Facing.EastUp, Facing.EastAll, 270, 0, 90);
+                AddSwitchBoxesIf(Facing.EastDown, Facing.EastAll, 90, 0, 90);
+
+                AddSwitchBoxesIf(Facing.SouthEast, Facing.SouthAll, 90, 90, 180);
+                AddSwitchBoxesIf(Facing.SouthWest, Facing.SouthAll, 90, 270, 180);
+                AddSwitchBoxesIf(Facing.SouthUp, Facing.SouthAll, 90, 180, 180);
+                AddSwitchBoxesIf(Facing.SouthDown, Facing.SouthAll, 90, 0, 180);
+
+                AddSwitchBoxesIf(Facing.WestNorth, Facing.WestAll, 180, 0, 270);
+                AddSwitchBoxesIf(Facing.WestSouth, Facing.WestAll, 0, 0, 270);
+                AddSwitchBoxesIf(Facing.WestUp, Facing.WestAll, 270, 0, 270);
+                AddSwitchBoxesIf(Facing.WestDown, Facing.WestAll, 90, 0, 270);
+
+                AddSwitchBoxesIf(Facing.UpNorth, Facing.UpAll, 0, 180, 180);
+                AddSwitchBoxesIf(Facing.UpEast, Facing.UpAll, 0, 90, 180);
+                AddSwitchBoxesIf(Facing.UpSouth, Facing.UpAll, 0, 0, 180);
+                AddSwitchBoxesIf(Facing.UpWest, Facing.UpAll, 0, 270, 180);
+
+                AddSwitchBoxesIf(Facing.DownNorth, Facing.DownAll, 0, 180, 0);
+                AddSwitchBoxesIf(Facing.DownEast, Facing.DownAll, 0, 90, 0);
+                AddSwitchBoxesIf(Facing.DownSouth, Facing.DownAll, 0, 0, 0);
+                AddSwitchBoxesIf(Facing.DownWest, Facing.DownAll, 0, 270, 0);
             }
 
-            return boxes!;
+            boxesCache[key] = boxes;
+            return boxes;
         }
+
 
         private static void AddBoxes(ref Dictionary<Facing, Cuboidf[]> cache, Facing key, Cuboidf[] boxes)
         {
@@ -2008,7 +1030,7 @@ namespace ElectricalProgressive.Content.Block.ECable
                 {
                     ActionLangCode = "ThickenCables",
                     HotKeyCode = "shift",
-                    MouseButton = EnumMouseButton.Right                    
+                    MouseButton = EnumMouseButton.Right
                 }
             }.Append(base.GetPlacedBlockInteractionHelp(world, selection, forPlayer));
         }

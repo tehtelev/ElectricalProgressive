@@ -29,7 +29,7 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
     private BEBehaviorElectricalProgressive? ElectricalProgressive => GetBehavior<BEBehaviorElectricalProgressive>();
 
     public float prevStoveTemperature = 20;
-    
+
     public int maxConsumption;
     public float stoveTemperature = 20;
     public float inputStackCookingTime;
@@ -84,7 +84,7 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
     {
         inventory = new InventoryEStove(null!, null!);
         inventory.SlotModified += OnSlotModifid;
-        
+
         meshes = new MeshData[6];
     }
 
@@ -124,8 +124,8 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
         UpdateMeshes();
         MarkDirty(true);
 
-        listenerId=RegisterGameTickListener(OnBurnTick, 250);
-        listenerId2=RegisterGameTickListener(On500msTick, 500);
+        listenerId = RegisterGameTickListener(OnBurnTick, 250);
+        listenerId2 = RegisterGameTickListener(On500msTick, 500);
 
         maxConsumption = MyMiniLib.GetAttributeInt(this.Block, "maxConsumption", 150);
     }
@@ -278,7 +278,7 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
 
     public MeshData GenMesh(ItemStack stack)
     {
-        
+
         IContainedMeshSource? meshsource = stack.Collectible as IContainedMeshSource;
         MeshData meshData;
         if (meshsource != null)
@@ -358,10 +358,17 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
 
     private void OnBurnTick(float dt)
     {
-        if (Api is ICoreClientAPI) return;
+        if (Api is ICoreClientAPI)
+            return;
+
+        var beh = GetBehavior<BEBehaviorEStove>();
+
+        if (beh == null) // если нет поведения то все плохо
+            return;
+
         if (IsBurning)
         {
-            stoveTemperature = changeTemperature(stoveTemperature, GetBehavior<BEBehaviorEStove>().PowerSetting * 1.0F / maxConsumption * maxTemperature, dt);
+            stoveTemperature = changeTemperature(stoveTemperature, beh.PowerSetting * 1.0F / maxConsumption * maxTemperature, dt);
         }
         if (canHeatInput())
             heatInput(dt);
@@ -372,7 +379,7 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
         if (canSmeltInput() && inputStackCookingTime > maxCookingTime())
             smeltItems();
 
-        if (GetBehavior<BEBehaviorEStove>()?.PowerSetting > 0)
+        if (beh.PowerSetting > 0)
         {
             if (!IsBurning)
             {
@@ -633,15 +640,18 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
         var electricity = ElectricalProgressive;
         if (electricity == null || byItemStack == null)
             return;
-        electricity.Connection = Facing.DownAll;
+        electricity.Connection = Facing.AllAll;
         var voltage = MyMiniLib.GetAttributeInt(byItemStack!.Block, "voltage", 32);
         var maxCurrent = MyMiniLib.GetAttributeFloat(byItemStack!.Block, "maxCurrent", 5.0F);
         var isolated = MyMiniLib.GetAttributeBool(byItemStack!.Block, "isolated", false);
         var isolatedEnvironment = MyMiniLib.GetAttributeBool(byItemStack!.Block, "isolatedEnvironment", false);
 
-        this.ElectricalProgressive!.Eparams =
-            (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment),
-            FacingHelper.Faces(Facing.DownAll).First().Index);
+        electricity!.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 0);
+        electricity!.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 1);
+        electricity!.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 2);
+        electricity!.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 3);
+        electricity!.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 4);
+        electricity!.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 5);
     }
 
     /// <summary>

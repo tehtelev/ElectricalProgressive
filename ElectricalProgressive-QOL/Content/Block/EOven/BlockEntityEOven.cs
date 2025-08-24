@@ -12,7 +12,7 @@ using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
 
 namespace ElectricalProgressive.Content.Block.EOven;
-public class    BlockEntityEOven : BlockEntityDisplay, IHeatSource
+public class BlockEntityEOven : BlockEntityDisplay, IHeatSource
 {
     public static readonly int BakingStageThreshold = 100;
     public static readonly int maxBakingTemperatureAccepted = 260;
@@ -111,10 +111,10 @@ public class    BlockEntityEOven : BlockEntityDisplay, IHeatSource
         this.capi = api as ICoreClientAPI;
         base.Initialize(api);
         this.ovenInv.LateInitialize(this.InventoryClassName + "-" + this.Pos?.ToString(), api);
-        listenerId=this.RegisterGameTickListener(new Action<float>(this.OnBurnTick), 100);
+        listenerId = this.RegisterGameTickListener(new Action<float>(this.OnBurnTick), 100);
 
         this.SetRotation();
-        
+
         _maxConsumption = MyMiniLib.GetAttributeInt(this.Block, "maxConsumption", 100);
     }
 
@@ -138,76 +138,76 @@ public class    BlockEntityEOven : BlockEntityDisplay, IHeatSource
 
 
 
-// ...
+    // ...
 
-/// <summary>
-/// Возвращает экземпляр поведения указанного типа, безопасно (через MakeGenericMethod или обход списка behaviors).
-/// Возвращает null, если поведение не найдено.
-/// </summary>
-private object GetBehaviorByType(Type behaviorType)
-{
-    if (behaviorType == null) return null;
-
-    try
+    /// <summary>
+    /// Возвращает экземпляр поведения указанного типа, безопасно (через MakeGenericMethod или обход списка behaviors).
+    /// Возвращает null, если поведение не найдено.
+    /// </summary>
+    private object GetBehaviorByType(Type behaviorType)
     {
-        // 1) Попытка вызвать обобщённый GetBehavior<T>() через рефлексию
-        MethodInfo genericGetBehavior = null;
-        var methods = this.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-        foreach (var m in methods)
+        if (behaviorType == null) return null;
+
+        try
         {
-            if (m.Name == "GetBehavior" && m.IsGenericMethodDefinition && m.GetGenericArguments().Length == 1)
+            // 1) Попытка вызвать обобщённый GetBehavior<T>() через рефлексию
+            MethodInfo genericGetBehavior = null;
+            var methods = this.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            foreach (var m in methods)
             {
-                genericGetBehavior = m;
-                break;
-            }
-        }
-
-        if (genericGetBehavior != null)
-        {
-            var gen = genericGetBehavior.MakeGenericMethod(behaviorType);
-            return gen.Invoke(this, null);
-        }
-
-        // 2) Fallback: пытаемся найти приватное поле/свойство, которое содержит массив/коллекцию behaviors
-        // Возможные имена полей/свойств (разные версии API)
-        string[] candidateFieldNames = new[] { "blockEntityBehaviors", "behaviors", "BlockEntityBehaviors", "Behaviors" };
-
-        foreach (var name in candidateFieldNames)
-        {
-            var fld = this.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-            if (fld != null)
-            {
-                var col = fld.GetValue(this) as System.Collections.IEnumerable;
-                if (col != null)
+                if (m.Name == "GetBehavior" && m.IsGenericMethodDefinition && m.GetGenericArguments().Length == 1)
                 {
-                    foreach (var b in col)
-                    {
-                        if (b != null && behaviorType.IsAssignableFrom(b.GetType())) return b;
-                    }
+                    genericGetBehavior = m;
+                    break;
                 }
             }
 
-            var prop = this.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-            if (prop != null)
+            if (genericGetBehavior != null)
             {
-                var col = prop.GetValue(this) as System.Collections.IEnumerable;
-                if (col != null)
+                var gen = genericGetBehavior.MakeGenericMethod(behaviorType);
+                return gen.Invoke(this, null);
+            }
+
+            // 2) Fallback: пытаемся найти приватное поле/свойство, которое содержит массив/коллекцию behaviors
+            // Возможные имена полей/свойств (разные версии API)
+            string[] candidateFieldNames = new[] { "blockEntityBehaviors", "behaviors", "BlockEntityBehaviors", "Behaviors" };
+
+            foreach (var name in candidateFieldNames)
+            {
+                var fld = this.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                if (fld != null)
                 {
-                    foreach (var b in col)
+                    var col = fld.GetValue(this) as System.Collections.IEnumerable;
+                    if (col != null)
                     {
-                        if (b != null && behaviorType.IsAssignableFrom(b.GetType())) return b;
+                        foreach (var b in col)
+                        {
+                            if (b != null && behaviorType.IsAssignableFrom(b.GetType())) return b;
+                        }
+                    }
+                }
+
+                var prop = this.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                if (prop != null)
+                {
+                    var col = prop.GetValue(this) as System.Collections.IEnumerable;
+                    if (col != null)
+                    {
+                        foreach (var b in col)
+                        {
+                            if (b != null && behaviorType.IsAssignableFrom(b.GetType())) return b;
+                        }
                     }
                 }
             }
         }
-    }
-    catch
-    {
-        // ничего не делаем — вернём null внизу
-    }
+        catch
+        {
+            // ничего не делаем — вернём null внизу
+        }
 
-    return null;
-}
+        return null;
+    }
 
 
 
@@ -326,7 +326,7 @@ private object GetBehaviorByType(Type behaviorType)
         if (!inv[0].Empty) //если в духовке уже что-то лежит в первом слоте
         {
             BakingProperties bakingProperties2 = BakingProperties.ReadFrom(slot.Itemstack);
-            if (bakingProperties2!=null && bakingProperties2.LargeItem)  //если уже лежит большое - выход
+            if (bakingProperties2 != null && bakingProperties2.LargeItem)  //если уже лежит большое - выход
                 return false;
 
             if (bakingProperties1.LargeItem) //если пытаемся положить большое в духовку, где уже что-то лежит
@@ -431,6 +431,9 @@ private object GetBehaviorByType(Type behaviorType)
             return;
 
         var ovenBehavior = GetBehavior<BEBehaviorEOven>();
+
+        if (ovenBehavior == null) // если поведение не найдено - выходим, хотя этого быть не должно
+            return;
 
         if (!ovenBehavior.IsBurned && ovenBehavior.PowerSetting > 0)
         {
@@ -743,7 +746,7 @@ private object GetBehaviorByType(Type behaviorType)
 
                     var pssType = ElectricalProgressiveQOL.asmXLib.GetType("XLib.XLeveling.PlayerSkillSet");
                     var abilityType = ElectricalProgressiveQOL.asmXLib.GetType("XLib.XLeveling.PlayerAbility");
-                    
+
                     var playerSkillSet = forPlayer?.Entity?.GetBehavior("SkillSet");
                     var indexer = pssType?.GetProperty("Item");
                     var abilitiesForSkill = indexer?.GetValue(playerSkillSet, new object[] { id });
@@ -808,7 +811,7 @@ private object GetBehaviorByType(Type behaviorType)
 
         if (electricity != null)
         {
-            electricity.Connection = Facing.DownAll;
+            electricity.Connection = Facing.AllAll;
 
             //задаем параметры блока/проводника
             var voltage = MyMiniLib.GetAttributeInt(byItemStack!.Block, "voltage", 32);
@@ -816,9 +819,12 @@ private object GetBehaviorByType(Type behaviorType)
             var isolated = MyMiniLib.GetAttributeBool(byItemStack!.Block, "isolated", false);
             var isolatedEnvironment = MyMiniLib.GetAttributeBool(byItemStack!.Block, "isolatedEnvironment", false);
 
-            this.ElectricalProgressive!.Eparams = (
-                new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment),
-                FacingHelper.Faces(Facing.DownAll).First().Index);
+            electricity!.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 0);
+            electricity!.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 1);
+            electricity!.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 2);
+            electricity!.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 3);
+            electricity!.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 4);
+            electricity!.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 5);
         }
     }
 

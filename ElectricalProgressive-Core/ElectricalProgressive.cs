@@ -19,7 +19,7 @@ using Vintagestory.API.Util;
     "electricalprogressivecore",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Electrical logic library.",
-    Version = "2.0.1",
+    Version = "2.0.3",
     Authors = new[] { "Tehtelev", "Kotl" }
 )]
 

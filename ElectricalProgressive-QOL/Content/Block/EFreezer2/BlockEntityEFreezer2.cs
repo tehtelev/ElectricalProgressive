@@ -1,7 +1,8 @@
-﻿using System;
+﻿using ElectricalProgressive.Content.Block.EFreezer2;
+using ElectricalProgressive.Utils;
+using System;
 using System.IO;
 using System.Linq;
-using ElectricalProgressive.Utils;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -98,14 +99,14 @@ class BlockEntityEFreezer2 : ContainerEFreezer2, ITexPositionSource
                 Code = "open",
                 AnimationSpeed = 1.8f,
                 EaseOutSpeed = 6,
-                EaseInSpeed = 6                
+                EaseInSpeed = 6
             });
 
             //применяем цвет и яркость
             Block.LightHsv = new byte[] { 7, 7, 11 };
 
             //добавляем звук
-            _capi.World.PlaySoundAt(new ("electricalprogressiveqol:sounds/freezer_open.ogg"), Pos.X, Pos.Y, Pos.Z, null, false, 8.0F, 0.4F);
+            _capi.World.PlaySoundAt(new("electricalprogressiveqol:sounds/freezer_open.ogg"), Pos.X, Pos.Y, Pos.Z, null, false, 8.0F, 0.4F);
 
         }
 
@@ -125,7 +126,7 @@ class BlockEntityEFreezer2 : ContainerEFreezer2, ITexPositionSource
             Block.LightHsv = new byte[] { 7, 7, 0 };
 
             //добавляем звук
-            _capi.World.PlaySoundAt(new ("electricalprogressiveqol:sounds/freezer_close.ogg"), Pos.X, Pos.Y, Pos.Z, null, false, 8.0F, 0.4F);
+            _capi.World.PlaySoundAt(new("electricalprogressiveqol:sounds/freezer_close.ogg"), Pos.X, Pos.Y, Pos.Z, null, false, 8.0F, 0.4F);
         }
     }
 
@@ -163,7 +164,7 @@ class BlockEntityEFreezer2 : ContainerEFreezer2, ITexPositionSource
             if (animUtil != null)
             {
                 animUtil.InitializeAnimator(InventoryClassName, null, null, new Vec3f(0, GetRotation(), 0f));
-                
+
             }
         }
 
@@ -180,7 +181,7 @@ class BlockEntityEFreezer2 : ContainerEFreezer2, ITexPositionSource
         MarkDirty(true);
 
         // Слушатель для обновления содержимого 
-        listenerId=RegisterGameTickListener(FreezerTick, 500);
+        listenerId = RegisterGameTickListener(FreezerTick, 500);
     }
 
 
@@ -190,7 +191,7 @@ class BlockEntityEFreezer2 : ContainerEFreezer2, ITexPositionSource
     /// <param name="slotid"></param>
     public void UpdateMesh(int slotid)
     {
-        if (Api == null || Api.Side == EnumAppSide.Server || _capi==null)
+        if (Api == null || Api.Side == EnumAppSide.Server || _capi == null)
             return;
 
         if (slotid >= _inventory.Count)
@@ -360,7 +361,7 @@ class BlockEntityEFreezer2 : ContainerEFreezer2, ITexPositionSource
         try
         {
             var meshSource = stack.Collectible as IContainedMeshSource;
-            
+
             if (meshSource != null)
             {
                 meshData = meshSource.GenMesh(stack, _capi.BlockTextureAtlas, Pos);
@@ -379,20 +380,23 @@ class BlockEntityEFreezer2 : ContainerEFreezer2, ITexPositionSource
 
                     if (stack.Item.Shape != null)
                         _nowTesselatingShape = _capi.TesselatorManager.GetCachedShape(stack.Item.Shape.Base);
-                    
+
                     _capi.Tesselator.TesselateItem(stack.Item, out meshData, this);
                     meshData.RenderPassesAndExtraBits.Fill((short)2);
-                    
+
                     _capi.TesselatorManager.ThreadDispose(); // Проверьте, нужен ли этот вызов
                 }
             }
         }
         catch (Exception e)
         {
-            Api.World.Logger.Error("Не удалось выполнить тесселяцию предмета {0}: {1}", stack.Item.Code,
-                e.Message);
+            Api.World.Logger.Error("Не удалось выполнить тесселяцию предмета {0}: {1}", stack.Item.Code, e.Message);
             meshData = null;
         }
+
+        _capi.TesselatorManager.ThreadDispose(); // Проверьте, нужен ли этот вызов
+    
+
 
         return meshData;
     }
@@ -404,247 +408,188 @@ class BlockEntityEFreezer2 : ContainerEFreezer2, ITexPositionSource
     /// <param name="tessThreadTesselator"></param>
     /// <returns></returns>
     public override bool OnTesselation(ITerrainMeshPool mesher, ITesselatorAPI tessThreadTesselator)
-    {
-        base.OnTesselation(mesher, tessThreadTesselator); // вызываем базовую логику тесселяции
+{
+    base.OnTesselation(mesher, tessThreadTesselator); // вызываем базовую логику тесселяции
 
-        if (_meshes != null)
+    if (_meshes != null)
+    {
+        for (var i = 0; i < _meshes.Length; i++)
         {
-            for (var i = 0; i < _meshes.Length; i++)
+            if (_meshes[i] != null)
+                mesher.AddMeshData(_meshes[i]);
+        }
+    }
+
+    // если анимации нет, то рисуем блок базовый
+    if (animUtil?.activeAnimationsByAnimCode.ContainsKey("open") == false)
+    {
+        return false;
+    }
+
+    return true;  // не рисует базовый блок, если есть анимация
+}
+
+
+/// <summary>
+/// Обновляет все meshы в инвентаре
+/// </summary>
+public void UpdateMeshes()
+{
+    for (var i = 0; i < _inventory.Count; i++)
+        UpdateMesh(i);
+
+    MarkDirty(true);
+}
+
+/// <summary>
+/// Тики холодильника
+/// </summary>
+/// <param name="dt"></param>
+private void FreezerTick(float dt)
+{
+    if (Api.Side != EnumAppSide.Server || this.Block.Variant["state"] == "burned") // если сгорел, то не тикаем
+        return;
+
+    TryRefuel();
+
+}
+
+
+/// <summary>
+/// Проверяет, нужно ли размораживать или замораживать блок
+/// </summary>
+private void TryRefuel()
+{
+    var beh = GetBehavior<BEBehaviorEFreezer2>();
+
+    if (beh is null)
+        return;
+
+    // Энергии хватает?
+    if (beh.PowerSetting >= _maxConsumption * 0.1F && this.Block.Variant["state"] == "melted")
+    {
+        var originalBlock = Api.World.BlockAccessor.GetBlock(Pos);
+        var newBlockAL = originalBlock.CodeWithVariant("state", "frozen");
+        var newBlock = Api.World.GetBlock(newBlockAL);
+        Api.World.BlockAccessor.ExchangeBlock(newBlock.Id, Pos);
+        MarkDirty();
+    }
+
+    if (beh.PowerSetting < _maxConsumption * 0.1F && this.Block.Variant["state"] == "frozen")
+    {
+        var originalBlock = Api.World.BlockAccessor.GetBlock(Pos);
+        var newBlockAL = originalBlock.CodeWithVariant("state", "melted");
+        var newBlock = Api.World.GetBlock(newBlockAL);
+        Api.World.BlockAccessor.ExchangeBlock(newBlock.Id, Pos);
+        MarkDirty();
+    }
+}
+
+
+
+/// <summary>
+/// Вызывается при взаимодействии с блоком игроком
+/// </summary>
+/// <param name="byPlayer"></param>
+/// <param name="isOwner"></param>
+/// <param name="blockSel"></param>
+public void OnBlockInteract(IPlayer byPlayer, bool isOwner, BlockSelection blockSel)
+{
+    if (Api.Side == EnumAppSide.Server)
+    {
+        byte[] data;
+        using (var ms = new MemoryStream())
+        {
+            var writer = new BinaryWriter(ms);
+            var tree = new TreeAttribute();
+            _inventory.ToTreeAttributes(tree);
+            tree.ToBytes(writer);
+            data = ms.ToArray();
+        }
+
+        ((ICoreServerAPI)Api).Network.SendBlockEntityPacket(
+            (IServerPlayer)byPlayer,
+            blockSel.Position,
+            (int)EnumBlockStovePacket.OpenGUI,
+            data
+        );
+
+        byPlayer.InventoryManager.OpenInventory(_inventory);
+    }
+    else
+    {
+        // Логика клиента
+    }
+}
+
+public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldForResolving)
+{
+    base.FromTreeAttributes(tree, worldForResolving);
+
+    _closedDelay = tree.GetInt("closedDelay");
+    IsOpened = tree.GetBool("isOpened");
+
+    if (Api == null)
+        return;
+
+    _inventory.AfterBlocksLoaded(Api.World);
+    if (Api.Side == EnumAppSide.Client)
+        UpdateMeshes();
+}
+
+public override void ToTreeAttributes(ITreeAttribute tree)
+{
+    base.ToTreeAttributes(tree);
+
+    tree.SetInt("closedDelay", _closedDelay);
+    tree.SetBool("isOpened", IsOpened);
+}
+
+public override void OnReceivedClientPacket(IPlayer fromPlayer, int packetid, byte[] data)
+{
+    base.OnReceivedClientPacket(fromPlayer, packetid, data);
+
+    if (packetid <= (int)EnumBlockEntityPacketId.Open)
+        _inventory.InvNetworkUtil.HandleClientPacket(fromPlayer, packetid, data);
+
+    if (packetid == (int)EnumBlockEntityPacketId.Close)
+        fromPlayer.InventoryManager?.CloseInventory(Inventory);
+}
+
+
+public override void OnReceivedServerPacket(int packetid, byte[] data)
+{
+    base.OnReceivedServerPacket(packetid, data);
+
+    var clientWorld = (IClientWorldAccessor)Api.World;
+
+    if (packetid == (int)EnumBlockStovePacket.OpenGUI)
+    {
+        using (var ms = new MemoryStream(data))
+        {
+            var reader = new BinaryReader(ms);
+            var tree = new TreeAttribute();
+            tree.FromBytes(reader);
+            Inventory.FromTreeAttributes(tree);
+            Inventory.ResolveBlocksOrItems();
+
+
+            if (_freezerDialog == null)
             {
-                if (_meshes[i] != null)
-                    mesher.AddMeshData(_meshes[i]);
-            }
-        }
-
-        // если анимации нет, то рисуем блок базовый
-        if (animUtil?.activeAnimationsByAnimCode.ContainsKey("open") == false)
-        {
-            return false;
-        }
-
-        return true;  // не рисует базовый блок, если есть анимация
-    }
-
-
-    /// <summary>
-    /// Обновляет все meshы в инвентаре
-    /// </summary>
-    public void UpdateMeshes()
-    {
-        for (var i = 0; i < _inventory.Count; i++)
-            UpdateMesh(i);
-
-        MarkDirty(true);
-    }
-
-    /// <summary>
-    /// Тики холодильника
-    /// </summary>
-    /// <param name="dt"></param>
-    private void FreezerTick(float dt)
-    {
-        if (Api.Side != EnumAppSide.Server || this.Block.Variant["state"] == "burned") // если сгорел, то не тикаем
-            return; 
-
-        TryRefuel();
-
-    }
-
-
-    /// <summary>
-    /// Проверяет, нужно ли размораживать или замораживать блок
-    /// </summary>
-    private void TryRefuel()
-    {
-        var beh=GetBehavior<BEBehaviorEFreezer2>();
-
-        if (beh is null)
-            return;
-
-        // Энергии хватает?
-        if (beh.PowerSetting >= _maxConsumption * 0.1F && this.Block.Variant["state"] == "melted")
-        {
-            var originalBlock = Api.World.BlockAccessor.GetBlock(Pos);
-            var newBlockAL = originalBlock.CodeWithVariant("state", "frozen");
-            var newBlock = Api.World.GetBlock(newBlockAL);
-            Api.World.BlockAccessor.ExchangeBlock(newBlock.Id, Pos);
-            MarkDirty();
-        }
-
-        if (beh.PowerSetting < _maxConsumption * 0.1F && this.Block.Variant["state"] == "frozen")
-        {
-            var originalBlock = Api.World.BlockAccessor.GetBlock(Pos);
-            var newBlockAL = originalBlock.CodeWithVariant("state", "melted");
-            var newBlock = Api.World.GetBlock(newBlockAL);
-            Api.World.BlockAccessor.ExchangeBlock(newBlock.Id, Pos);
-            MarkDirty();
-        }
-    }
-
-
-
-    /// <summary>
-    /// Вызывается при взаимодействии с блоком игроком
-    /// </summary>
-    /// <param name="byPlayer"></param>
-    /// <param name="isOwner"></param>
-    /// <param name="blockSel"></param>
-    public void OnBlockInteract(IPlayer byPlayer, bool isOwner, BlockSelection blockSel)
-    {
-        if (Api.Side == EnumAppSide.Server)
-        {
-            byte[] data;
-            using (var ms = new MemoryStream())
-            {
-                var writer = new BinaryWriter(ms);
-                var tree = new TreeAttribute();
-                _inventory.ToTreeAttributes(tree);
-                tree.ToBytes(writer);
-                data = ms.ToArray();
-            }
-
-            ((ICoreServerAPI)Api).Network.SendBlockEntityPacket(
-                (IServerPlayer)byPlayer,
-                blockSel.Position,
-                (int)EnumBlockStovePacket.OpenGUI,
-                data
-            );
-
-            byPlayer.InventoryManager.OpenInventory(_inventory);
-        }
-        else
-        {
-            // Логика клиента
-        }
-    }
-
-    public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldForResolving)
-    {
-        base.FromTreeAttributes(tree, worldForResolving);
-
-        _closedDelay = tree.GetInt("closedDelay");
-        IsOpened = tree.GetBool("isOpened");
-
-        if (Api == null)
-            return;
-
-        _inventory.AfterBlocksLoaded(Api.World);
-        if (Api.Side == EnumAppSide.Client)
-            UpdateMeshes();
-    }
-
-    public override void ToTreeAttributes(ITreeAttribute tree)
-    {
-        base.ToTreeAttributes(tree);
-
-        tree.SetInt("closedDelay", _closedDelay);
-        tree.SetBool("isOpened", IsOpened);
-    }
-
-    public override void OnReceivedClientPacket (IPlayer fromPlayer, int packetid, byte[] data)
-    {
-        base.OnReceivedClientPacket(fromPlayer, packetid, data);
-
-        if (packetid <= (int)EnumBlockEntityPacketId.Open)
-            _inventory.InvNetworkUtil.HandleClientPacket(fromPlayer, packetid, data);
-
-        if (packetid == (int)EnumBlockEntityPacketId.Close)
-            fromPlayer.InventoryManager?.CloseInventory(Inventory);
-    }
-
-
-    public override void OnReceivedServerPacket(int packetid, byte[] data)
-    {
-        base.OnReceivedServerPacket(packetid, data);
-
-        var clientWorld = (IClientWorldAccessor)Api.World;
-
-        if (packetid == (int)EnumBlockStovePacket.OpenGUI)
-        {
-            using (var ms = new MemoryStream(data))
-            {
-                var reader = new BinaryReader(ms);
-                var tree = new TreeAttribute();
-                tree.FromBytes(reader);
-                Inventory.FromTreeAttributes(tree);
-                Inventory.ResolveBlocksOrItems();
-
-
-                if (_freezerDialog == null)
+                _freezerDialog = new(Lang.Get("freezer-title-gui"), Inventory, Pos, Api as ICoreClientAPI, this);
+                _freezerDialog.OnClosed += () =>
                 {
-                    _freezerDialog = new(Lang.Get("freezer-title-gui"), Inventory, Pos, Api as ICoreClientAPI, this);
-                    _freezerDialog.OnClosed += () =>
-                    {
-                        _freezerDialog = null;
-                    };
-                }
-
-                _freezerDialog.TryOpen();
+                    _freezerDialog = null;
+                };
             }
-        }
 
-        if (packetid == (int)EnumBlockEntityPacketId.Close)
-        {
-            clientWorld.Player.InventoryManager.CloseInventory(Inventory);
-
-            if (_freezerDialog != null)
-            {
-                _freezerDialog?.TryClose();
-                _freezerDialog?.Dispose();
-                _freezerDialog = null;
-            }
+            _freezerDialog.TryOpen();
         }
     }
 
-
-    /// <summary>
-    /// Возвращает скорость порчи предметов в холодильнике
-    /// </summary>
-    /// <returns></returns>
-    public override float GetPerishRate()
+    if (packetid == (int)EnumBlockEntityPacketId.Close)
     {
-        var initial = base.GetPerishRate();
-        var side = Api.Side;
-        if (GetBehavior<BEBehaviorEFreezer2>().PowerSetting < _maxConsumption * 0.1F)
-            return initial;
-
-        return 0.05F;
-    }
-
-
-
-    /// <summary>
-    /// Вызывается при установке блока в мир
-    /// </summary>
-    /// <param name="byItemStack"></param>
-    public override void OnBlockPlaced(ItemStack? byItemStack = null)
-    {
-        base.OnBlockPlaced(byItemStack);
-
-        if (ElectricalProgressive == null || byItemStack == null)
-            return;
-
-        ElectricalProgressive.Connection = Facing.DownAll;
-
-        // Задаем параметры блока/проводника
-        var voltage = MyMiniLib.GetAttributeInt(byItemStack.Block, "voltage", 32);
-        var maxCurrent = MyMiniLib.GetAttributeFloat(byItemStack.Block, "maxCurrent", 5.0F);
-        var isolated = MyMiniLib.GetAttributeBool(byItemStack.Block, "isolated", false);
-        var isolatedEnvironment = MyMiniLib.GetAttributeBool(byItemStack!.Block, "isolatedEnvironment", false);
-
-        this.ElectricalProgressive.Eparams = (
-            new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment),
-            FacingHelper.Faces(Facing.DownAll).First().Index);
-    }
-
-
-
-    /// <summary>
-    /// Вызывается при удалении блока
-    /// </summary>
-    public override void OnBlockRemoved()
-    {
-        base.OnBlockRemoved();
+        clientWorld.Player.InventoryManager.CloseInventory(Inventory);
 
         if (_freezerDialog != null)
         {
@@ -653,6 +598,68 @@ class BlockEntityEFreezer2 : ContainerEFreezer2, ITexPositionSource
             _freezerDialog = null;
         }
     }
+}
+
+
+/// <summary>
+/// Возвращает скорость порчи предметов в холодильнике
+/// </summary>
+/// <returns></returns>
+public override float GetPerishRate()
+{
+    var initial = base.GetPerishRate();
+    var side = Api.Side;
+    if (GetBehavior<BEBehaviorEFreezer2>().PowerSetting < _maxConsumption * 0.1F)
+        return initial;
+
+    return 0.05F;
+}
+
+
+
+/// <summary>
+/// Вызывается при установке блока в мир
+/// </summary>
+/// <param name="byItemStack"></param>
+public override void OnBlockPlaced(ItemStack? byItemStack = null)
+{
+    base.OnBlockPlaced(byItemStack);
+
+    if (ElectricalProgressive == null || byItemStack == null)
+        return;
+
+    ElectricalProgressive.Connection = Facing.AllAll;
+
+    // Задаем параметры блока/проводника
+    var voltage = MyMiniLib.GetAttributeInt(byItemStack.Block, "voltage", 32);
+    var maxCurrent = MyMiniLib.GetAttributeFloat(byItemStack.Block, "maxCurrent", 5.0F);
+    var isolated = MyMiniLib.GetAttributeBool(byItemStack.Block, "isolated", false);
+    var isolatedEnvironment = MyMiniLib.GetAttributeBool(byItemStack!.Block, "isolatedEnvironment", false);
+
+    ElectricalProgressive.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 0);
+    ElectricalProgressive.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 1);
+    ElectricalProgressive.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 2);
+    ElectricalProgressive.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 3);
+    ElectricalProgressive.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 4);
+    ElectricalProgressive.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 5);
+}
+
+
+
+/// <summary>
+/// Вызывается при удалении блока
+/// </summary>
+public override void OnBlockRemoved()
+{
+    base.OnBlockRemoved();
+
+    if (_freezerDialog != null)
+    {
+        _freezerDialog?.TryClose();
+        _freezerDialog?.Dispose();
+        _freezerDialog = null;
+    }
+}
 
 
 
