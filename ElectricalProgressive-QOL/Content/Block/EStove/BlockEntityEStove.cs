@@ -358,10 +358,17 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
 
     private void OnBurnTick(float dt)
     {
-        if (Api is ICoreClientAPI) return;
+        if (Api is ICoreClientAPI)
+            return;
+
+        var beh = GetBehavior<BEBehaviorEStove>();
+
+        if (beh == null) // если нет поведения то все плохо
+            return;
+
         if (IsBurning)
         {
-            stoveTemperature = changeTemperature(stoveTemperature, GetBehavior<BEBehaviorEStove>().PowerSetting * 1.0F / maxConsumption * maxTemperature, dt);
+            stoveTemperature = changeTemperature(stoveTemperature, beh.PowerSetting * 1.0F / maxConsumption * maxTemperature, dt);
         }
         if (canHeatInput())
             heatInput(dt);
@@ -372,7 +379,7 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
         if (canSmeltInput() && inputStackCookingTime > maxCookingTime())
             smeltItems();
 
-        if (GetBehavior<BEBehaviorEStove>()?.PowerSetting > 0)
+        if (beh.PowerSetting > 0)
         {
             if (!IsBurning)
             {

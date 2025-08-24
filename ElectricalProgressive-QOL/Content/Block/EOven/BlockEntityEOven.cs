@@ -432,6 +432,9 @@ private object GetBehaviorByType(Type behaviorType)
 
         var ovenBehavior = GetBehavior<BEBehaviorEOven>();
 
+        if (ovenBehavior == null) // если поведение не найдено - выходим, хотя этого быть не должно
+            return;
+
         if (!ovenBehavior.IsBurned && ovenBehavior.PowerSetting > 0)
         {
 

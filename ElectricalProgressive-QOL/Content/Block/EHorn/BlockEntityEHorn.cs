@@ -114,13 +114,17 @@ public class BlockEntityEHorn : BlockEntityEBase, IHeatSource
     /// <param name="dt"></param>
     private void OnCommonTick(float dt)
     {
+        var beh = GetBehavior<BEBehaviorEHorn>();
+        if (beh == null)
+            return;
+
         if (this.burning)
         {
             var num1 = this.Api.World.Calendar.TotalHours - this.lastTickTotalHours;
             if (this.Contents != null)  //внутри есть что-то?
             {
                 var temperature = this.Contents.Collectible.GetTemperature(this.Api.World, this.Contents);
-                var power = GetBehavior<BEBehaviorEHorn>().getPowerReceive();
+                var power = beh.getPowerReceive();
 
                 if (power > 0.0F && this.Block.Variant["state"] == "disabled")
                 {
@@ -184,7 +188,7 @@ public class BlockEntityEHorn : BlockEntityEBase, IHeatSource
             if (temp > 20)
             {
                 playSound = temp > 100;
-                this.Contents?.Collectible.SetTemperature(this.Api.World, this.Contents, Math.Min(GetBehavior<BEBehaviorEHorn>().getPowerReceive() * 11F, temp - 8), false);
+                this.Contents?.Collectible.SetTemperature(this.Api.World, this.Contents, Math.Min(beh.getPowerReceive() * 11F, temp - 8), false);
                 this.MarkDirty();
             }
 
