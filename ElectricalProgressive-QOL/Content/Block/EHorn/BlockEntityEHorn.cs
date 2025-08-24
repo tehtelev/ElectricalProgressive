@@ -334,7 +334,7 @@ public class BlockEntityEHorn : BlockEntityEBase, IHeatSource
         if (electricity == null || byItemStack == null)
             return;
 
-        electricity.Connection = Facing.DownAll;
+        electricity.Connection = Facing.AllAll;
 
         //задаем параметры блока/проводника
         var voltage = MyMiniLib.GetAttributeInt(byItemStack!.Block, "voltage", 32);
@@ -342,10 +342,13 @@ public class BlockEntityEHorn : BlockEntityEBase, IHeatSource
         var isolated = MyMiniLib.GetAttributeBool(byItemStack!.Block, "isolated", false);
         var isolatedEnvironment = MyMiniLib.GetAttributeBool(byItemStack!.Block, "isolatedEnvironment", false);
 
-        this.ElectricalProgressive!.Connection = Facing.DownAll;
-        this.ElectricalProgressive.Eparams = (
-            new(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment),
-            FacingHelper.Faces(Facing.DownAll).First().Index);
+        electricity!.Connection = Facing.AllAll;
+        electricity.Eparams = (new(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 0);
+        electricity.Eparams = (new(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 1);
+        electricity.Eparams = (new(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 2);
+        electricity.Eparams = (new(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 3);
+        electricity.Eparams = (new(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 4);
+        electricity.Eparams = (new(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 5);
     }
 
 

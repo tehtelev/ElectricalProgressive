@@ -808,7 +808,7 @@ private object GetBehaviorByType(Type behaviorType)
 
         if (electricity != null)
         {
-            electricity.Connection = Facing.DownAll;
+            electricity.Connection = Facing.AllAll;
 
             //задаем параметры блока/проводника
             var voltage = MyMiniLib.GetAttributeInt(byItemStack!.Block, "voltage", 32);
@@ -816,9 +816,12 @@ private object GetBehaviorByType(Type behaviorType)
             var isolated = MyMiniLib.GetAttributeBool(byItemStack!.Block, "isolated", false);
             var isolatedEnvironment = MyMiniLib.GetAttributeBool(byItemStack!.Block, "isolatedEnvironment", false);
 
-            this.ElectricalProgressive!.Eparams = (
-                new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment),
-                FacingHelper.Faces(Facing.DownAll).First().Index);
+            electricity!.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 0);
+            electricity!.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 1);
+            electricity!.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 2);
+            electricity!.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 3);
+            electricity!.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 4);
+            electricity!.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), 5);
         }
     }
 
