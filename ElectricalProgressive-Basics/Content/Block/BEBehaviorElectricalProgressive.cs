@@ -599,20 +599,20 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
             {
                 var faceIndex = face.Index;
 
-                if (part.eparams[faceIndex].burnout || part.eparams[faceIndex].ticksBeforeBurnout > 0) // показываем причину сгорания, когда горит и когда уже сгорело
+                if (part.eparams[faceIndex].burnout || part.eparams[faceIndex].ticksBeforeBurnout > 0)
                 {
                     var cause = part.eparams[faceIndex].causeBurnout switch
                     {
-                        1 => ElectricalProgressiveBasics.causeBurn[1],
-                        2 => ElectricalProgressiveBasics.causeBurn[2],
-                        3 => ElectricalProgressiveBasics.causeBurn[3],
+                        1 => Lang.Get("electricalprogressivebasics:CauseCurrent"),
+                        2 => Lang.Get("electricalprogressivebasics:CauseVoltage"),
+                        3 => Lang.Get("electricalprogressivebasics:CauseEnvironment"),
                         _ => null!
                     };
 
                     if (cause is not null)
                     {
                         if (part.eparams[faceIndex].burnout)
-                            stringBuilder.AppendLine(Lang.Get("Burned"));
+                            stringBuilder.AppendLine(Lang.Get("electricalprogressivebasics:Burned"));
 
                         stringBuilder.AppendLine(cause);
                         break;
@@ -621,18 +621,12 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
             }
         }
 
-
-
-
-
-
-
         // получаем информацию о сети раз в секунду!
         if ((DateTime.Now - lastExecution).TotalMilliseconds >= intervalMSeconds)
         {
             ((ICoreClientAPI)Api).Network.SendBlockEntityPacket<(BlockPos, Facing, string)>(this.Blockentity.Pos, MyPacketIdForServer,
                 (this.Blockentity.Pos, selectedFacing, methodForInformation));
-            
+
             lastExecution = DateTime.Now;
         }
 
@@ -649,40 +643,39 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
 
         if (!altPressed)
         {
-            stringBuilder.AppendLine(Lang.Get("Press") + " " + nameAltPressed + " " + Lang.Get("for details"));
+            stringBuilder.AppendLine(Lang.Get("electricalprogressivebasics:PressForDetails", nameAltPressed));
             return;
         }
 
-
-        stringBuilder.AppendLine(Lang.Get("Electricity"));
-        stringBuilder.AppendLine("├ " + Lang.Get("Consumers") + ": " + networkInformation.NumberOfConsumers);
-        stringBuilder.AppendLine("├ " + Lang.Get("Generators") + ": " + networkInformation.NumberOfProducers);
-        stringBuilder.AppendLine("├ " + Lang.Get("Batteries") + ": " + networkInformation.NumberOfAccumulators);
-        stringBuilder.AppendLine("├ " + Lang.Get("Transformers") + ": " + networkInformation.NumberOfTransformators);
-        stringBuilder.AppendLine("├ " + Lang.Get("Blocks") + ": " + networkInformation.NumberOfBlocks);
-        stringBuilder.AppendLine("├ " + Lang.Get("Generation") + ": " + networkInformation.Production + " " + Lang.Get("W"));
-        stringBuilder.AppendLine("├ " + Lang.Get("Consumption") + ": " + networkInformation.Consumption + " " + Lang.Get("W"));
-        stringBuilder.AppendLine("└ " + Lang.Get("Request") + ": " + networkInformation.Request + " " + Lang.Get("W"));
+        stringBuilder.AppendLine(Lang.Get("electricalprogressivebasics:Electricity"));
+        stringBuilder.AppendLine("├ " + Lang.Get("electricalprogressivebasics:Consumers") + ": " + networkInformation.NumberOfConsumers);
+        stringBuilder.AppendLine("├ " + Lang.Get("electricalprogressivebasics:Generators") + ": " + networkInformation.NumberOfProducers);
+        stringBuilder.AppendLine("├ " + Lang.Get("electricalprogressivebasics:Batteries") + ": " + networkInformation.NumberOfAccumulators);
+        stringBuilder.AppendLine("├ " + Lang.Get("electricalprogressivebasics:Transformers") + ": " + networkInformation.NumberOfTransformators);
+        stringBuilder.AppendLine("├ " + Lang.Get("electricalprogressivebasics:Blocks") + ": " + networkInformation.NumberOfBlocks);
+        stringBuilder.AppendLine("├ " + Lang.Get("electricalprogressivebasics:Generation") + ": " + networkInformation.Production + " " + Lang.Get("electricalprogressivebasics:W"));
+        stringBuilder.AppendLine("├ " + Lang.Get("electricalprogressivebasics:Consumption") + ": " + networkInformation.Consumption + " " + Lang.Get("electricalprogressivebasics:W"));
+        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Request") + ": " + networkInformation.Request + " " + Lang.Get("electricalprogressivebasics:W"));
 
         var capacity = (float)((networkInformation.MaxCapacity == 0f) ? 0f : (networkInformation.Capacity * 100.0F / networkInformation.MaxCapacity));
 
-        stringBuilder.AppendLine("└ " + Lang.Get("Capacity") + ": " + (int)networkInformation.Capacity + "/" + (int)networkInformation.MaxCapacity+ " " + Lang.Get("J")+ "(" +capacity.ToString("F3") + " %)");
+        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Capacity") + ": " + (int)networkInformation.Capacity + "/" + (int)networkInformation.MaxCapacity + " " + Lang.Get("electricalprogressivebasics:J") + " (" + capacity.ToString("F3") + " %)");
 
-        stringBuilder.AppendLine(Lang.Get("Block"));
-        stringBuilder.AppendLine("├ " + Lang.Get("Max. current") + ": " + networkInformation.eParamsInNetwork.maxCurrent * networkInformation.eParamsInNetwork.lines + " " + Lang.Get("A"));
-        stringBuilder.AppendLine("├ " + Lang.Get("Current") + ": " + Math.Abs(networkInformation.current).ToString("F3") + " " + Lang.Get("A"));
+        stringBuilder.AppendLine(Lang.Get("electricalprogressivebasics:Block"));
+        stringBuilder.AppendLine("├ " + Lang.Get("electricalprogressivebasics:MaxCurrent") + ": " + networkInformation.eParamsInNetwork.maxCurrent * networkInformation.eParamsInNetwork.lines + " " + Lang.Get("electricalprogressivebasics:A"));
+        stringBuilder.AppendLine("├ " + Lang.Get("electricalprogressivebasics:Current") + ": " + Math.Abs(networkInformation.current).ToString("F3") + " " + Lang.Get("electricalprogressivebasics:A"));
 
         if (this.Api.World.BlockAccessor.GetBlockEntity(this.Blockentity.Pos) is BlockEntityECable) //если кабель!
         {
-            stringBuilder.AppendLine("├ " + Lang.Get("Resistivity") + ": " + networkInformation.eParamsInNetwork.resistivity / (networkInformation.eParamsInNetwork.isolated ? 2.0F : 1.0F)
-                + " " + Lang.Get("Om/line"));
-            stringBuilder.AppendLine("├ " + Lang.Get("Resistance") + ": " + networkInformation.eParamsInNetwork.resistivity / (networkInformation.eParamsInNetwork.lines
-                * networkInformation.eParamsInNetwork.crossArea) / (networkInformation.eParamsInNetwork.isolated ? 2.0F : 1.0F) + " " + Lang.Get("Om"));
-            stringBuilder.AppendLine("├ " + Lang.Get("Lines") + ": " + networkInformation.eParamsInNetwork.lines + " " + Lang.Get("pcs."));
-            stringBuilder.AppendLine("├ " + Lang.Get("Section size") + ": " + networkInformation.eParamsInNetwork.crossArea * networkInformation.eParamsInNetwork.lines + " " + Lang.Get("units"));
+            stringBuilder.AppendLine("├ " + Lang.Get("electricalprogressivebasics:Resistivity") + ": " + networkInformation.eParamsInNetwork.resistivity / (networkInformation.eParamsInNetwork.isolated ? 2.0F : 1.0F)
+                + " " + Lang.Get("electricalprogressivebasics:OmLine"));
+            stringBuilder.AppendLine("├ " + Lang.Get("electricalprogressivebasics:Resistance") + ": " + networkInformation.eParamsInNetwork.resistivity / (networkInformation.eParamsInNetwork.lines
+                * networkInformation.eParamsInNetwork.crossArea) / (networkInformation.eParamsInNetwork.isolated ? 2.0F : 1.0F) + " " + Lang.Get("electricalprogressivebasics:Om"));
+            stringBuilder.AppendLine("├ " + Lang.Get("electricalprogressivebasics:Lines") + ": " + networkInformation.eParamsInNetwork.lines + " " + Lang.Get("electricalprogressivebasics:Pcs"));
+            stringBuilder.AppendLine("├ " + Lang.Get("electricalprogressivebasics:SectionSize") + ": " + networkInformation.eParamsInNetwork.crossArea * networkInformation.eParamsInNetwork.lines + " " + Lang.Get("electricalprogressivebasics:Units"));
         }
 
-        stringBuilder.AppendLine("└ " + Lang.Get("Max voltage") + ": " + networkInformation?.eParamsInNetwork.voltage + " " + Lang.Get("V"));
+        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:MaxVoltage") + ": " + networkInformation?.eParamsInNetwork.voltage + " " + Lang.Get("electricalprogressivebasics:V"));
     }
 
 

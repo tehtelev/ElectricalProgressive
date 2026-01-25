@@ -12,15 +12,16 @@ namespace ElectricalProgressive.Content.Block.EGenerator;
 
 public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
 {
-    private readonly static Dictionary<(Facing, string), MeshData> MeshData = new();
+    private static readonly Dictionary<(Facing, string), MeshData> MeshData = new();
     private static float[] def_Params = [100.0F, 0.5F, 0.1F, 0.25F, 0.05F, 1F];          //заглушка
 
     public override void OnUnloaded(ICoreAPI api)
     {
         base.OnUnloaded(api);
         MeshData.Clear();
-
     }
+
+
 
     public MechanicalNetwork? GetNetwork(IWorldAccessor world, BlockPos pos)
     {

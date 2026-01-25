@@ -5,10 +5,15 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
+using Vintagestory.API.Server;
+using Vintagestory.API.Util;
 using Vintagestory.GameContent;
 
 namespace EPImmersive.Content.Block;
@@ -59,8 +64,15 @@ public class BEBehaviorEPImmersive : BlockEntityBehavior
     }
 
 
-    public const int MyPacketIdForServer = 1122334457;
-    public const int MyPacketIdForClient = 1122334458;
+    // Константы для пакетов
+    public const int PacketIdRequestNetworkInfo = 1122334457;
+    public const int PacketIdResponseNetworkInfo = 1122334458;
+
+    // Добавляем поле для хранения информации о сети
+    private ImmersiveNetworkInformation networkInformation = new();
+    private DateTime lastRequestTime = DateTime.MinValue;
+
+
 
     public const string InterruptionKey = "electricalprogressive:interruption";
     public const string ConnectionKey = "electricalprogressive:connection";
@@ -653,6 +665,142 @@ public class BEBehaviorEPImmersive : BlockEntityBehavior
         if (Api.Side == EnumAppSide.Client && Block is ImmersiveWireBlock wireBlock)
         {
             ImmersiveWireBlock.InvalidateBlockMeshCache(Pos);
+        }
+    }
+
+    /// <summary>
+    /// Информация о блоке
+    /// </summary>
+    /// <param name="forPlayer"></param>
+    /// <param name="stringBuilder"></param>
+    public override void GetBlockInfo(IPlayer forPlayer, StringBuilder stringBuilder)
+    {
+        base.GetBlockInfo(forPlayer, stringBuilder);
+
+        if (Api is not ICoreClientAPI capi)
+            return;
+
+        // Отправляем запрос на сервер раз в секунду
+        if ((DateTime.Now - lastRequestTime).TotalSeconds >= 1.0)
+        {
+            capi.Network.SendBlockEntityPacket(Pos, PacketIdRequestNetworkInfo, null);
+            lastRequestTime = DateTime.Now;
+        }
+
+        // Если нет информации, показываем сообщение
+        if (networkInformation == null)
+        {
+            stringBuilder.AppendLine(Lang.Get("electricalprogressivebasics:WaitingNetworkInfo"));
+            return;
+        }
+
+        // Проверяем нажатие Alt для подробной информации
+        var altPressed = capi.Input.IsHotKeyPressed("AltPressForNetwork");
+        var nameAltPressed = capi.Input.GetHotKeyByCode("AltPressForNetwork")?.CurrentMapping.ToString() ?? "Alt";
+
+        if (!altPressed)
+        {
+            stringBuilder.AppendLine(Lang.Get("electricalprogressivebasics:PressForDetails", nameAltPressed));
+            stringBuilder.AppendLine("├ " + Lang.Get("electricalprogressivebasics:ConnectedWires", networkInformation.NumberOfConnections));
+            return;
+        }
+
+        // Подробная информация
+        stringBuilder.AppendLine(Lang.Get("electricalprogressivebasics:NetworkInfo"));
+        stringBuilder.AppendLine("├ " + Lang.Get("electricalprogressivebasics:ConnectedWires", networkInformation.NumberOfConnections));
+
+        // Информация о блоке
+        stringBuilder.AppendLine(Lang.Get("electricalprogressivebasics:BlockParameters"));
+        stringBuilder.AppendLine("  ├ " + Lang.Get("electricalprogressivebasics:MaxCurrent") + ": " +
+            (networkInformation.eParamsInNetwork.maxCurrent * networkInformation.eParamsInNetwork.lines) +
+            " " + Lang.Get("electricalprogressivebasics:A"));
+        stringBuilder.AppendLine("  ├ " + Lang.Get("electricalprogressivebasics:Current") + ": " +
+            Math.Abs(networkInformation.current).ToString("F3") +
+            " " + Lang.Get("electricalprogressivebasics:A"));
+        stringBuilder.AppendLine("  ├ " + Lang.Get("electricalprogressivebasics:MaxVoltage") + ": " +
+            networkInformation.eParamsInNetwork.voltage +
+            " " + Lang.Get("electricalprogressivebasics:V"));
+        stringBuilder.AppendLine("  ├ " + Lang.Get("electricalprogressivebasics:Resistivity") + ": " +
+            networkInformation.eParamsInNetwork.resistivity.ToString("F3") +
+            " " + Lang.Get("electricalprogressivebasics:OmLine"));
+
+        if (networkInformation.IsConductorOpen)
+            stringBuilder.AppendLine("  ├ " + Lang.Get("electricalprogressivebasics:ConductorOpen"));
+        else
+        {
+            stringBuilder.AppendLine("  ├ " + Lang.Get("electricalprogressivebasics:ConductorClosed"));
+        }
+
+        // Информация по каждой сети
+        for (int i = 0; i < networkInformation.Networks.Count; i++)
+        {
+                var network = networkInformation.Networks[i];
+                stringBuilder.AppendLine(Lang.Get("electricalprogressivebasics:NetworkStatus"));
+                stringBuilder.AppendLine("  ├ " + Lang.Get("electricalprogressivebasics:GeneratorsShort") + ": " + network.NumberOfProducers);
+                stringBuilder.AppendLine("  ├ " + Lang.Get("electricalprogressivebasics:ConsumersShort") + ": " + network.NumberOfConsumers);
+                stringBuilder.AppendLine("  ├ " + Lang.Get("electricalprogressivebasics:BatteriesShort") + ": " + network.NumberOfAccumulators);
+                stringBuilder.AppendLine("  ├ " + Lang.Get("electricalprogressivebasics:TransformersShort") + ": " + network.NumberOfTransformators);
+                stringBuilder.AppendLine("  ├ " + Lang.Get("electricalprogressivebasics:ConductorsShort") + ": " + network.NumberOfConductors);
+                stringBuilder.AppendLine("  ├ " + Lang.Get("electricalprogressivebasics:Generation") + ": " + network.Production.ToString("F1") + " " + Lang.Get("electricalprogressivebasics:W"));
+                stringBuilder.AppendLine("  ├ " + Lang.Get("electricalprogressivebasics:Consumption") + ": " + network.Consumption.ToString("F1") + " " + Lang.Get("electricalprogressivebasics:W"));
+                stringBuilder.AppendLine("  ├ " + Lang.Get("electricalprogressivebasics:Request") + ": " + network.Request.ToString("F1") + " " + Lang.Get("electricalprogressivebasics:W"));
+
+                if (network.MaxCapacity > 0)
+                {
+                    float capacityPercent = (network.Capacity / network.MaxCapacity) * 100f;
+                    stringBuilder.AppendLine("  └ " + Lang.Get("electricalprogressivebasics:Capacity") + ": " +
+                        network.Capacity.ToString("F0") + "/" + network.MaxCapacity.ToString("F0") + " " +
+                        Lang.Get("electricalprogressivebasics:J") + " (" + capacityPercent.ToString("F1") + "%)");
+                }
+                else
+                {
+                    stringBuilder.AppendLine("  └ " + Lang.Get("electricalprogressivebasics:Capacity") + ": 0/0 " +
+                        Lang.Get("electricalprogressivebasics:J") + " (0.0%)");
+                }
+            }
+
+        // Общая сводка (только если больше одной сети)
+        if (networkInformation.Networks.Count > 1)
+        {
+            stringBuilder.AppendLine(Lang.Get("electricalprogressivebasics:Summary"));
+            stringBuilder.AppendLine("  ├ " + Lang.Get("electricalprogressivebasics:TotalBlocks") + ": " + networkInformation.NumberOfBlocks);
+            stringBuilder.AppendLine("  ├ " + Lang.Get("electricalprogressivebasics:TotalGenerators") + ": " + networkInformation.NumberOfProducers);
+            stringBuilder.AppendLine("  ├ " + Lang.Get("electricalprogressivebasics:TotalConsumers") + ": " + networkInformation.NumberOfConsumers);
+            stringBuilder.AppendLine("  ├ " + Lang.Get("electricalprogressivebasics:TotalBatteries") + ": " + networkInformation.NumberOfAccumulators);
+            stringBuilder.AppendLine("  ├ " + Lang.Get("electricalprogressivebasics:TotalProduction") + ": " + networkInformation.Production.ToString("F1") + " " + Lang.Get("electricalprogressivebasics:W"));
+            stringBuilder.AppendLine("  └ " + Lang.Get("electricalprogressivebasics:TotalConsumption") + ": " + networkInformation.Consumption.ToString("F1") + " " + Lang.Get("electricalprogressivebasics:W"));
+        }
+    }
+
+
+    public override void OnReceivedClientPacket(IPlayer fromPlayer, int packetid, byte[] data)
+    {
+        base.OnReceivedClientPacket(fromPlayer, packetid, data);
+
+        if (packetid == PacketIdRequestNetworkInfo)
+        {
+            // Получаем информацию о сети
+            var info = System?.GetNetworkForImmersiveWire(Pos);
+            if (info != null)
+            {
+                // Используем кастомный сериализатор
+                var serializedData = ImmersiveNetworkInformationSerializer.Serialize(info);
+                (Api as ICoreServerAPI)?.Network.SendBlockEntityPacket(fromPlayer as IServerPlayer,
+                    Pos, PacketIdResponseNetworkInfo, serializedData);
+            }
+        }
+    }
+
+    public override void OnReceivedServerPacket(int packetid, byte[] data)
+    {
+        base.OnReceivedServerPacket(packetid, data);
+
+        if (packetid == PacketIdResponseNetworkInfo)
+        {
+            // Используем кастомный десериализатор
+            networkInformation = ImmersiveNetworkInformationSerializer.Deserialize(data);
+            // Обновляем отображение
+            Blockentity.MarkDirty();
         }
     }
 

@@ -720,6 +720,10 @@ namespace ElectricalProgressive.Content.Block.ECable
                     var indexB = eparam.burnout;
                     var isol = eparam.isolated;
 
+                    // если eparams еще не инициализировался
+                    if (indexM == "")
+                        return;
+
                     var dotVariant = new BlockVariants(api, entity.Block, indexV, indexM, indexQ, isol ? 7 : 0);
                     var partVariant = !indexB
                         ? new BlockVariants(api, entity.Block, indexV, indexM, indexQ, isol ? 6 : 1)
@@ -750,45 +754,40 @@ namespace ElectricalProgressive.Content.Block.ECable
                     (Facing.NorthDown, 90f, 180f, 0f, new Vec3f(0f, -0.5f, 0f))
                 ], 90f, 0f, 0f);
 
-                ProcessFace(Facing.EastAll, new (Facing, float, float, float, Vec3f)[]
-                {
+                ProcessFace(Facing.EastAll, [
                     (Facing.EastNorth, 0f, 0f, 90f, new Vec3f(0f, 0f, -0.5f)),
                     (Facing.EastSouth, 180f, 0f, 90f, new Vec3f(0f, 0f, 0.5f)),
                     (Facing.EastUp, 90f, 0f, 90f, new Vec3f(0f, 0.5f, 0f)),
                     (Facing.EastDown, 270f, 0f, 90f, new Vec3f(0f, -0.5f, 0f))
-                }, 0f, 0f, 90f);
+                ], 0f, 0f, 90f);
 
-                ProcessFace(Facing.SouthAll, new (Facing, float, float, float, Vec3f)[]
-                {
+                ProcessFace(Facing.SouthAll, [
                     (Facing.SouthEast, 270f, 270f, 0f, new Vec3f(0.5f, 0f, 0f)),
                     (Facing.SouthWest, 270f, 90f, 0f, new Vec3f(-0.5f, 0f, 0f)),
                     (Facing.SouthUp, 270f, 180f, 0f, new Vec3f(0f, 0.5f, 0f)),
                     (Facing.SouthDown, 270f, 0f, 0f, new Vec3f(0f, -0.5f, 0f))
-                }, 270f, 0f, 0f);
+                ], 270f, 0f, 0f);
 
-                ProcessFace(Facing.WestAll, new (Facing, float, float, float, Vec3f)[]
-                {
+                ProcessFace(Facing.WestAll, [
                     (Facing.WestNorth, 0f, 0f, 270f, new Vec3f(0f, 0f, -0.5f)),
                     (Facing.WestSouth, 180f, 0f, 270f, new Vec3f(0f, 0f, 0.5f)),
                     (Facing.WestUp, 90f, 0f, 270f, new Vec3f(0f, 0.5f, 0f)),
                     (Facing.WestDown, 270f, 0f, 270f, new Vec3f(0f, -0.5f, 0f))
-                }, 0f, 0f, 270f);
+                ], 0f, 0f, 270f);
 
-                ProcessFace(Facing.UpAll, new (Facing, float, float, float, Vec3f)[]
-                {
+                ProcessFace(Facing.UpAll, [
                     (Facing.UpNorth, 0f, 0f, 180f, new Vec3f(0f, 0f, -0.5f)),
                     (Facing.UpEast, 0f, 270f, 180f, new Vec3f(0.5f, 0f, 0f)),
                     (Facing.UpSouth, 0f, 180f, 180f, new Vec3f(0f, 0f, 0.5f)),
                     (Facing.UpWest, 0f, 90f, 180f, new Vec3f(-0.5f, 0f, 0f))
-                }, 0f, 0f, 180f);
+                ], 0f, 0f, 180f);
 
-                ProcessFace(Facing.DownAll, new (Facing, float, float, float, Vec3f)[]
-                {
+                ProcessFace(Facing.DownAll, [
                     (Facing.DownNorth, 0f, 0f, 0f, new Vec3f(0f, 0f, -0.5f)),
                     (Facing.DownSouth, 0f, 180f, 0f, new Vec3f(0f, 0f, 0.5f)),
                     (Facing.DownEast, 0f, 270f, 0f, new Vec3f(0.5f, 0f, 0f)),
                     (Facing.DownWest, 0f, 90f, 0f, new Vec3f(-0.5f, 0f, 0f))
-                }, 0f, 0f, 0f);
+                ], 0f, 0f, 0f);
 
                 // Switches (orientation): reuse enabled/disabled variants with precomputed rotations
                 void AddSwitchIf(Facing mask, Facing allMask, float rx, float ry, float rz)

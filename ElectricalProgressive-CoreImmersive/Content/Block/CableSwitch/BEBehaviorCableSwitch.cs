@@ -11,11 +11,25 @@ namespace EPImmersive.Content.Block.CableSwitch
 
         private bool hasBurnout;
         private bool prepareBurnout;
-
-        public bool IsOpen { get; set; }
-
-
+        private bool _isOpen;
+        
         public const string IsOpenKey = "electricalprogressive:isopen";
+
+        public bool IsOpen
+        {
+            get
+            {
+                return _isOpen;
+            }
+            set
+            {
+                if (_isOpen != value)
+                {
+                    _isOpen = value;
+                }
+            }
+        }
+
 
         public BEBehaviorCableSwitch(BlockEntity blockEntity) : base(blockEntity)
         {
@@ -26,7 +40,7 @@ namespace EPImmersive.Content.Block.CableSwitch
         {
             base.OnBlockPlaced(byItemStack);
 
-            IsOpen = MyMiniLib.GetAttributeBool(this.Block, "IsOpen", true);
+            _isOpen = MyMiniLib.GetAttributeBool(this.Block, "IsOpen", true);
         }
 
 
@@ -86,13 +100,13 @@ namespace EPImmersive.Content.Block.CableSwitch
         public override void ToTreeAttributes(ITreeAttribute tree)
         {
             base.ToTreeAttributes(tree);
-            tree.SetBool(IsOpenKey, IsOpen);
+            tree.SetBool(IsOpenKey, _isOpen);
         }
 
         public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
         {
             base.FromTreeAttributes(tree, worldAccessForResolve);
-            IsOpen = tree.GetBool(IsOpenKey);
+            _isOpen = tree.GetBool(IsOpenKey);
         }
     }
 }

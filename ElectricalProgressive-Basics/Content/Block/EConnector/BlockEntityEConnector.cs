@@ -4,7 +4,7 @@ using Vintagestory.API.Common;
 
 namespace ElectricalProgressive.Content.Block.EConnector;
 
-public class BlockEntityEConnector : BlockEntityECable
+public class BlockEntityEConnector : BlockEntityEFacingBase
 {
     public override void OnBlockPlaced(ItemStack? byItemStack = null)
     {

@@ -8,5 +8,5 @@ public interface IEImmersiveConductor : IElectricConductor
     /// <summary>
     /// Замкнут ли ключ
     /// </summary>
-    public bool IsOpen { get; set; }
+    bool IsOpen { get; set; }
 }

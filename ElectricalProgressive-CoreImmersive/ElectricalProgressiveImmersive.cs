@@ -2052,52 +2052,129 @@ namespace EPImmersive
 
 
         /// <summary>
-        /// Cобирает информацию по цепи для иммерсивных проводов
+        /// Собирает информацию по цепи для иммерсивных проводов с учетом подключений
         /// </summary>
         /// <param name="position">Позиция блока</param>
-        /// <param name="nodeIndex">Индекс точки подключения</param>
+        /// <param name="nodeIndex">Индекс точки подключения (если -1 - общая информация)</param>
         /// <returns>Информация о сети</returns>
-        public ImmersiveNetworkInformation GetNetworkForImmersiveWire(BlockPos position, byte nodeIndex)
+        public ImmersiveNetworkInformation GetNetworkForImmersiveWire(BlockPos position, int nodeIndex = -1)
         {
             _result.Reset(); // сбрасываем значения
 
             if (this.Parts.TryGetValue(position, out var part))
             {
-                // Ищем сеть для этой части
-                var immersiveNetwork = Networks.FirstOrDefault(n => n.PartPositions.Contains(position));
-                if (immersiveNetwork != null)
+                // Количество подключенных проводов к блоку
+                _result.NumberOfConnections = part.Connections.Count;
+
+                // Основные параметры блока
+                _result.eParamsInNetwork = part.MainEparams;
+                _result.current = part.MainEparams.current;
+
+                // Проверяем, замкнуты ли узлы
+                if (part.Conductor!=null && part.Conductor.IsOpen)
                 {
-                    _localNetwork = immersiveNetwork;
+                    _result.IsConductorOpen = true;
+                }
+                else
+                {
+                    _result.IsConductorOpen = false;
+                }
 
-                    // Находим соединение для этой точки подключения
-                    var connection = part.Connections.FirstOrDefault(c => c.LocalNodeIndex == nodeIndex);
-                    if (connection != null)
-                    {
-                        _result.eParamsInNetwork = connection.Parameters;
-                        _result.current = connection.Parameters.current;
-                    }
-                    else
-                    {
-                        _result.eParamsInNetwork = part.MainEparams;
-                        _result.current = part.MainEparams.current;
-                    }
+                // Собираем информацию о всех сетях, к которым подключен блок
+                var networks = new HashSet<ImmersiveNetwork>();
 
-                    // Заполняем информацию о сети
-                    _result.NumberOfBlocks = _localNetwork.PartPositions.Count;
-                    _result.NumberOfConsumers = _localNetwork.Consumers.Count;
-                    _result.NumberOfProducers = _localNetwork.Producers.Count;
-                    _result.NumberOfAccumulators = _localNetwork.Accumulators.Count;
-                    _result.NumberOfTransformators = _localNetwork.Transformators.Count;
-                    _result.Production = _localNetwork.Production;
-                    _result.Consumption = _localNetwork.Consumption;
-                    _result.Capacity = _localNetwork.Capacity;
-                    _result.MaxCapacity = _localNetwork.MaxCapacity;
-                    _result.Request = _localNetwork.Request;
+                if (nodeIndex == -1)
+                {
+                    // Для всех соединений блока
+                    foreach (var connection in part.Connections)
+                    {
+                        // Ищем сеть для каждого соединения
+                        var network = Networks.FirstOrDefault(n =>
+                            n.PartPositions.Contains(position) &&
+                            n.ImmersiveConnections.Any(c =>
+                                (c.LocalPos.Equals(position) && c.LocalNodeIndex == connection.LocalNodeIndex) ||
+                                (c.NeighborPos.Equals(position) && c.NeighborNodeIndex == connection.LocalNodeIndex)));
+
+                        if (network != null)
+                        {
+                            networks.Add(network);
+                        }
+                    }
+                }
+                else
+                {
+                    // Для конкретного узла
+                    var network = Networks.FirstOrDefault(n =>
+                        n.PartPositions.Contains(position) &&
+                        n.ImmersiveConnections.Any(c =>
+                            (c.LocalPos.Equals(position) && c.LocalNodeIndex == nodeIndex) ||
+                            (c.NeighborPos.Equals(position) && c.NeighborNodeIndex == nodeIndex)));
+
+                    if (network != null)
+                    {
+                        networks.Add(network);
+                    }
+                }
+
+                // Если не нашли сети по соединениям, ищем сеть, к которой принадлежит блок
+                if (networks.Count == 0)
+                {
+                    var network = Networks.FirstOrDefault(n => n.PartPositions.Contains(position));
+                    if (network != null)
+                    {
+                        networks.Add(network);
+                    }
+                }
+
+                _result.NumberOfNetworks = networks.Count;
+
+                // Собираем информацию по каждой сети
+                foreach (var network in networks)
+                {
+                    var networkData = new NetworkData
+                    {
+                        NumberOfAccumulators = network.Accumulators.Count,
+                        NumberOfConsumers = network.Consumers.Count,
+                        NumberOfProducers = network.Producers.Count,
+                        NumberOfTransformators = network.Transformators.Count,
+                        NumberOfConductors = network.Conductors.Count,
+                        Consumption = network.Consumption,
+                        Capacity = network.Capacity,
+                        MaxCapacity = network.MaxCapacity,
+                        Production = network.Production,
+                        Request = network.Request
+                    };
+
+
+
+                    _result.Networks.Add(networkData);
+
+                    // Суммируем общую информацию (для обратной совместимости)
+                    _result.NumberOfBlocks += network.PartPositions.Count;
+                    _result.NumberOfConsumers += networkData.NumberOfConsumers;
+                    _result.NumberOfProducers += networkData.NumberOfProducers;
+                    _result.NumberOfAccumulators += networkData.NumberOfAccumulators;
+                    _result.NumberOfTransformators += networkData.NumberOfTransformators;
+                    _result.Production += networkData.Production;
+                    _result.Consumption += networkData.Consumption;
+                    _result.Capacity += networkData.Capacity;
+                    _result.MaxCapacity += networkData.MaxCapacity;
+                    _result.Request += networkData.Request;
+                }
+
+                // Если нет сетей, но есть часть
+                if (networks.Count == 0)
+                {
+                    _result.NumberOfBlocks = 1; // Только этот блок
+                    _result.NumberOfNetworks = 0;
                 }
             }
 
             return _result;
         }
+
+
+
 
         /// <summary>
         /// Вычисление экспоненциального скользящего среднего (EMA) на лету

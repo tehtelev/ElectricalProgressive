@@ -8,8 +8,8 @@ namespace ElectricalProgressive.Content.Block.ECable
 {
     public class BlockEntityECable : BlockEntityEBase
     {
-        private Facing switches = Facing.None;
-        private Facing orientation = Facing.None;
+        private Facing _switches = Facing.None;
+        private Facing _orientation = Facing.None;
 
         public Facing Connection  //соединение этого провода
         {
@@ -26,14 +26,14 @@ namespace ElectricalProgressive.Content.Block.ECable
 
         public Facing Orientation
         {
-            get => this.orientation;
-            set => this.orientation = value;
+            get => this._orientation;
+            set => this._orientation = value;
         }
 
         public Facing Switches
         {
-            get => this.switches;
-            set => this.ElectricalProgressive!.Interruption &= this.switches = value;
+            get => this._switches;
+            set => this.ElectricalProgressive!.Interruption &= this._switches = value;
         }
 
         public const string SwitchesKey = "electricalprogressive:switches";
@@ -43,15 +43,15 @@ namespace ElectricalProgressive.Content.Block.ECable
         public Facing SwitchesState
         {
             get => ~this.ElectricalProgressive!.Interruption;
-            set => this.ElectricalProgressive!.Interruption = this.switches & ~value;
+            set => this.ElectricalProgressive!.Interruption = this._switches & ~value;
         }
 
         public override void ToTreeAttributes(ITreeAttribute tree)
         {
             base.ToTreeAttributes(tree);
 
-            tree.SetBytes(SwitchesKey, SerializerUtil.Serialize(this.switches));
-            tree.SetBytes(OrientationKey, SerializerUtil.Serialize(this.orientation));
+            tree.SetBytes(SwitchesKey, SerializerUtil.Serialize(this._switches));
+            tree.SetBytes(OrientationKey, SerializerUtil.Serialize(this._orientation));
         }
 
         public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
@@ -60,8 +60,8 @@ namespace ElectricalProgressive.Content.Block.ECable
 
             try
             {
-                this.switches = SerializerUtil.Deserialize<Facing>(tree.GetBytes(SwitchesKey));
-                this.orientation = SerializerUtil.Deserialize<Facing>(tree.GetBytes(OrientationKey));
+                this._switches = SerializerUtil.Deserialize<Facing>(tree.GetBytes(SwitchesKey));
+                this._orientation = SerializerUtil.Deserialize<Facing>(tree.GetBytes(OrientationKey));
             }
             catch (Exception exception)
             {

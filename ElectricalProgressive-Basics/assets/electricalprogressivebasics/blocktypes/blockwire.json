@@ -1,0 +1,96 @@
+﻿{
+  "code": "blockwire",
+  "class": "BlockConnector",
+  "entityClass": "BlockEntityEConnector",
+
+
+  "entityBehaviors": [
+    {
+      "name": "BEBehaviorEConnector"
+    },
+    {
+      "name": "ElectricalProgressive"
+    }
+  ],
+
+
+
+  "attributes": {
+    "voltage": 128,
+    "maxCurrent": 1024.0,
+    "isolated": false,
+    "isolatedEnvironment": true,
+    "particlesOffsetPos": [ [ 0.1, 0.5, 0.1 ] ],
+    "blockEProperties": "main",
+    "facesEProperties": [ "north", "east", "south", "west", "up", "down" ],
+    "handbook": {
+      "groupBy": [ "blockwire-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivebasics:block-handbooktitle-blockwire",
+          "text": "electricalprogressivebasics:block-handbooktext-blockwire"
+        }
+      ]
+    }
+  },
+
+
+
+  "creativeInventory": {
+    "general": [
+      "*",
+      "*"
+    ],
+    "electricity": [
+      "*"
+    ]
+  },
+
+
+
+
+  "shape": {
+    "base": "block/blockwire/blockwire"
+  },
+
+
+
+  "resistance": 1,
+  "drawType": "JSON",
+  "lightAbsorption": 0.0,
+  "faceCullMode": "NeverCull",
+  "renderPass": "OpaqueNoCull",
+  "emitSideAo": {
+    "all": false
+  },
+  "sideAo": {
+    "all": false
+  },
+  "sideOpaque": {
+    "all": true
+  },
+  "sideSolid": {
+    "all": true
+  },
+  "sounds": {
+    "place": "game:block/anvil",
+    "walk": "game:walk/stone"
+  },
+
+  "heldTpIdleAnimation": "holdbothhandslarge",
+  "heldRightReadyAnimation": "heldblockready",
+  "heldTpUseAnimation": "twohandplaceblock",
+  "tpHandTransform": {
+    "translation": {
+      "x": -1.23,
+      "y": -0.91,
+      "z": -0.8
+    },
+    "rotation": {
+      "x": -2,
+      "y": 25,
+      "z": -78
+    },
+    "scale": 0.4
+  }
+}
