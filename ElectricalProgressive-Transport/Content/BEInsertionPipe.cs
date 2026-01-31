@@ -435,256 +435,203 @@ namespace ElectricalProgressiveTransport
             // Ищем и переносим предметы
             FindAndTransferItems(targetContainer, containerPos);
         }
-        
-private void FindAndTransferItems(BlockEntityContainer targetContainer, BlockPos targetPos)
-{
-    IInventory targetInventory = targetContainer?.Inventory;
-    
-    if (targetInventory == null) 
-    {
-        if (debugCounter % 20 == 0)
-            Api.Logger.Error($"=== Не удалось получить инвентарь из контейнера на {targetPos} ===");
-        return;
-    }
-    
-    if (debugCounter % 10 == 0)
-        Api.Logger.Notification($"=== Получен инвентарь цели. Количество слотов: {targetInventory.Count} ===");
-    
-    // Используем сеть для поиска источников
-    var network = networkManager.GetNetwork(Pos);
-    if (network == null) 
-    {
-        if (debugCounter % 20 == 0)
-            Api.Logger.Notification($"=== Нет сети для трубы на {Pos} ===");
-        return;
-    }
 
-    if (debugCounter % 20 == 0)
-        Api.Logger.Notification($"=== Размер сети: {network.Pipes.Count} труб, {network.Inserters.Count} инсертеров ===");
-    
-    // Собираем все позиции для исключения
-    var excludePositions = new HashSet<BlockPos>();
-    excludePositions.Add(Pos);
-    excludePositions.Add(targetPos);
-
-    // Исключаем другие фильтрующие трубы и их цели
-    foreach (var inserterPos in network.Inserters)
-    {
-        if (!inserterPos.Equals(Pos))
+        private void FindAndTransferItems(BlockEntityContainer targetContainer, BlockPos targetPos)
         {
-            excludePositions.Add(inserterPos);
-            BEInsertionPipe otherPipe = Api.World.BlockAccessor.GetBlockEntity(inserterPos) as BEInsertionPipe;
-            if (otherPipe != null && otherPipe.outputFacing != null)
+            IInventory targetInventory = targetContainer?.Inventory;
+
+            if (targetInventory == null)
             {
-                excludePositions.Add(inserterPos.AddCopy(otherPipe.outputFacing));
+                if (debugCounter % 20 == 0)
+                    Api.Logger.Error($"=== Не удалось получить инвентарь из контейнера на {targetPos} ===");
+                return;
             }
-        }
-    }
 
-    // Ищем источник предметов в сети
-    bool foundSource = false;
-    foreach (var pipePos in network.Pipes)
-    {
-        if (excludePositions.Contains(pipePos)) continue;
-
-        // Проверяем все стороны трубы
-        for (int i = 0; i < 6; i++)
-        {
-            BlockFacing facing = BlockFacing.ALLFACES[i];
-            BlockPos checkPos = pipePos.AddCopy(facing);
-
-            if (excludePositions.Contains(checkPos)) continue;
-
-            // Проверяем, можно ли взять предмет из этого источника
-            if (TryTransferFromSource(checkPos, targetInventory, targetContainer, targetPos))
-            {
-                if (debugCounter % 5 == 0)
-                    Api.Logger.Notification($"=== Успешно нашли и перенесли предмет из {checkPos} ===");
-                return; // Успешно перенесли предмет
-            }
-            else
-            {
-                foundSource = true; // Нашли источник, но не смогли взять предмет
-            }
-        }
-    }
-    
-    if (!foundSource && debugCounter % 10 == 0)
-        Api.Logger.Notification($"=== Не найдено подходящих источников в сети ===");
-}
-
-private bool TryTransferFromSource(BlockPos sourcePos, IInventory targetInventory,
-    BlockEntityContainer targetContainer, BlockPos targetPos)
-{
-    // Проверяем тайминг
-    if (!CanTransferFrom(sourcePos))
-    {
-        if (debugCounter % 30 == 0)
-            Api.Logger.Notification($"=== Слишком рано для переноса из {sourcePos} ===");
-        return false;
-    }
-
-    // ПОЛУЧАЕМ КОНТЕЙНЕР ИСТОЧНИКА ТАК ЖЕ, КАК И ДЛЯ ЦЕЛИ!
-    Block sourceBlock = Api.World.BlockAccessor.GetBlock(sourcePos);
-    BlockEntityContainer sourceContainer = sourceBlock.GetBlockEntity<BlockEntityContainer>(sourcePos);
-
-    if (sourceContainer == null)
-    {
-        if (debugCounter % 30 == 0)
-            Api.Logger.Notification($"=== Источник не найден на {sourcePos} ===");
-        return false;
-    }
-
-    if (debugCounter % 20 == 0)
-        Api.Logger.Notification($"=== Проверяем источник: {sourceContainer.GetType().Name} на {sourcePos} ===");
-
-    // Получаем инвентарь источника ЧЕРЕЗ CONTAINER
-    IInventory sourceInventory = sourceContainer.Inventory;
-    if (sourceInventory == null)
-    {
-        if (debugCounter % 20 == 0)
-            Api.Logger.Notification(
-                $"=== Не удалось получить инвентарь из источника {sourceContainer.GetType().Name} ===");
-        return false;
-    }
-
-    if (debugCounter % 20 == 0)
-        Api.Logger.Notification($"=== Инвентарь источника получен. Слотов: {sourceInventory.Count} ===");
-
-    // Определяем направление от источника к трубе
-    BlockFacing directionFromSource = GetFacingFromTo(sourcePos, Pos);
-    if (directionFromSource == null)
-    {
-        if (debugCounter % 20 == 0)
-            Api.Logger.Notification($"=== Не удалось определить направление от источника ===");
-        return false;
-    }
-
-    // Ищем подходящий слот
-    ItemSlot sourceSlot = FindFirstSuitableSlot(sourceInventory, directionFromSource.Opposite);
-
-    if (sourceSlot == null || sourceSlot.Empty)
-    {
-        if (debugCounter % 30 == 0)
-            Api.Logger.Notification($"=== В источнике нет подходящих предметов ===");
-        return false;
-    }
-
-    if (IsLiquidItem(sourceSlot.Itemstack))
-    {
-        if (debugCounter % 10 == 0)
-            Api.Logger.Notification($"=== Пропускаем жидкость: {sourceSlot.Itemstack.Collectible.Code} ===");
-        return false;
-    }
-
-    // Определяем направление к цели
-    BlockFacing directionToTarget = GetFacingFromTo(Pos, targetPos);
-    if (directionToTarget == null)
-    {
-        if (debugCounter % 20 == 0)
-            Api.Logger.Notification($"=== Не удалось определить направление к цели ===");
-        return false;
-    }
-
-    // Запрашиваем у цели разрешение на вставку
-    ItemSlot targetSlot = null;
-    if (targetInventory is InventoryBase targetInventoryBase)
-    {
-        if (debugCounter % 20 == 0)
-            Api.Logger.Notification($"=== Запрашиваем GetAutoPushIntoSlot у цели ===");
-
-        targetSlot = targetInventoryBase.GetAutoPushIntoSlot(directionToTarget.Opposite, sourceSlot);
-
-        if (targetSlot != null)
-        {
             if (debugCounter % 10 == 0)
-                Api.Logger.Notification($"=== GetAutoPushIntoSlot вернул целевой слот ===");
-        }
-    }
+                Api.Logger.Notification($"=== Получен инвентарь цели. Количество слотов: {targetInventory.Count} ===");
 
-    // Если не получили целевой слот через GetAutoPushIntoSlot, ищем подходящий
-    if (targetSlot == null)
-    {
-        if (debugCounter % 20 == 0)
-            Api.Logger.Notification($"=== Ищем подходящий слот в цели вручную ===");
-
-        targetSlot = FindSuitableTargetSlot(targetInventory, sourceSlot);
-
-        if (targetSlot == null)
-        {
-            if (debugCounter % 10 == 0)
-                Api.Logger.Notification($"=== Не найден подходящий слот в цели ===");
-            return false;
-        }
-    }
-
-    // Проверяем, может ли целевой слот принять предмет
-    if (!targetSlot.CanHold(sourceSlot))
-    {
-        if (debugCounter % 10 == 0)
-            Api.Logger.Notification($"=== Целевой слот не может принять предмет ===");
-        return false;
-    }
-
-    // Выполняем перенос
-    return ExecuteTransfer(sourceSlot, targetSlot, sourceContainer, targetContainer, sourcePos);
-}
-
-// Добавляем метод проверки на жидкость (аналогичный в BELiquidInsertionPipe)
-        private bool IsLiquidItem(ItemStack itemstack)
-        {
-            if (itemstack == null || itemstack.Collectible == null)
-                return false;
-
-            // 1. Проверяем через IsLiquid()
-            if (itemstack.Collectible.IsLiquid())
-                return true;
-
-            // 2. Проверяем, является ли это BlockLiquidContainerBase (ведра)
-            if (itemstack.Block is BlockLiquidContainerBase)
-                return true;
-
-            // 3. Проверяем атрибуты контейнера с жидкостью
-            if (itemstack.ItemAttributes != null)
+            // Используем сеть для поиска источников
+            var network = networkManager.GetNetwork(Pos);
+            if (network == null)
             {
-                // Контейнеры с жидкостью имеют contentItemCode
-                if (itemstack.ItemAttributes["contentItemCode"].Exists)
-                    return true;
+                if (debugCounter % 20 == 0)
+                    Api.Logger.Notification($"=== Нет сети для трубы на {Pos} ===");
+                return;
+            }
 
-                // Или contentItem2BlockCodes (для бутылок)
-                if (itemstack.ItemAttributes["contentItem2BlockCodes"].Exists)
-                    return true;
+            if (debugCounter % 20 == 0)
+                Api.Logger.Notification(
+                    $"=== Размер сети: {network.Pipes.Count} труб, {network.Inserters.Count} инсертеров ===");
 
-                // Проверяем атрибут containerType
-                if (itemstack.ItemAttributes["containerType"].Exists)
+            // Собираем все позиции для исключения
+            var excludePositions = new HashSet<BlockPos>();
+            excludePositions.Add(Pos);
+            excludePositions.Add(targetPos);
+
+            // Исключаем другие фильтрующие трубы и их цели
+            foreach (var inserterPos in network.Inserters)
+            {
+                if (!inserterPos.Equals(Pos))
                 {
-                    string containerType = itemstack.ItemAttributes["containerType"].AsString();
-                    if (containerType?.ToLower() == "liquid" || containerType?.ToLower() == "portion")
-                        return true;
+                    excludePositions.Add(inserterPos);
+                    BEInsertionPipe otherPipe = Api.World.BlockAccessor.GetBlockEntity(inserterPos) as BEInsertionPipe;
+                    if (otherPipe != null && otherPipe.outputFacing != null)
+                    {
+                        excludePositions.Add(inserterPos.AddCopy(otherPipe.outputFacing));
+                    }
                 }
-
-                // Проверяем атрибут liquidProps
-                if (itemstack.ItemAttributes["liquidProps"].Exists)
-                    return true;
             }
 
-            // 4. Проверяем через ItemLadle (черпаки)
-            if (itemstack.Collectible.Code?.Path?.Contains("ladle") == true)
-                return true;
+            // Ищем источник предметов в сети
+            bool foundSource = false;
+            foreach (var pipePos in network.Pipes)
+            {
+                if (excludePositions.Contains(pipePos)) continue;
 
-            // 5. Для предметов с атрибутом "content" - предполагаем жидкость
-            if (itemstack.Attributes?.HasAttribute("content") == true)
-                return true;
+                // Проверяем все стороны трубы
+                for (int i = 0; i < 6; i++)
+                {
+                    BlockFacing facing = BlockFacing.ALLFACES[i];
+                    BlockPos checkPos = pipePos.AddCopy(facing);
 
-            // 6. Проверяем по коду (waterportion, milkportion и т.д.)
-            string itemCode = itemstack.Collectible.Code?.ToString() ?? "";
-            if (itemCode.ToLower().Contains("portion"))
-                return true;
+                    if (excludePositions.Contains(checkPos)) continue;
 
-            return false;
+                    // Проверяем, можно ли взять предмет из этого источника
+                    if (TryTransferFromSource(checkPos, targetInventory, targetContainer, targetPos))
+                    {
+                        if (debugCounter % 5 == 0)
+                            Api.Logger.Notification($"=== Успешно нашли и перенесли предмет из {checkPos} ===");
+                        return; // Успешно перенесли предмет
+                    }
+                    else
+                    {
+                        foundSource = true; // Нашли источник, но не смогли взять предмет
+                    }
+                }
+            }
+
+            if (!foundSource && debugCounter % 10 == 0)
+                Api.Logger.Notification($"=== Не найдено подходящих источников в сети ===");
         }
 
-// НОВЫЙ МЕТОД: Ищет первый подходящий слот в источнике
+        private bool TryTransferFromSource(BlockPos sourcePos, IInventory targetInventory,
+            BlockEntityContainer targetContainer, BlockPos targetPos)
+        {
+            // Проверяем тайминг
+            if (!CanTransferFrom(sourcePos))
+            {
+                if (debugCounter % 30 == 0)
+                    Api.Logger.Notification($"=== Слишком рано для переноса из {sourcePos} ===");
+                return false;
+            }
+
+            // ПОЛУЧАЕМ КОНТЕЙНЕР ИСТОЧНИКА ТАК ЖЕ, КАК И ДЛЯ ЦЕЛИ!
+            Block sourceBlock = Api.World.BlockAccessor.GetBlock(sourcePos);
+            BlockEntityContainer sourceContainer = sourceBlock.GetBlockEntity<BlockEntityContainer>(sourcePos);
+
+            if (sourceContainer == null)
+            {
+                if (debugCounter % 30 == 0)
+                    Api.Logger.Notification($"=== Источник не найден на {sourcePos} ===");
+                return false;
+            }
+
+            if (debugCounter % 20 == 0)
+                Api.Logger.Notification($"=== Проверяем источник: {sourceContainer.GetType().Name} на {sourcePos} ===");
+
+            // Получаем инвентарь источника ЧЕРЕЗ CONTAINER
+            IInventory sourceInventory = sourceContainer.Inventory;
+            if (sourceInventory == null)
+            {
+                if (debugCounter % 20 == 0)
+                    Api.Logger.Notification(
+                        $"=== Не удалось получить инвентарь из источника {sourceContainer.GetType().Name} ===");
+                return false;
+            }
+
+            if (debugCounter % 20 == 0)
+                Api.Logger.Notification($"=== Инвентарь источника получен. Слотов: {sourceInventory.Count} ===");
+
+            // Определяем направление от источника к трубе
+            BlockFacing directionFromSource = GetFacingFromTo(sourcePos, Pos);
+            if (directionFromSource == null)
+            {
+                if (debugCounter % 20 == 0)
+                    Api.Logger.Notification($"=== Не удалось определить направление от источника ===");
+                return false;
+            }
+
+            // Ищем подходящий слот
+            ItemSlot sourceSlot = FindFirstSuitableSlot(sourceInventory, directionFromSource.Opposite);
+
+            if (sourceSlot == null || sourceSlot.Empty)
+            {
+                if (debugCounter % 30 == 0)
+                    Api.Logger.Notification($"=== В источнике нет подходящих предметов ===");
+                return false;
+            }
+
+            if (sourceSlot.Itemstack.Collectible.IsLiquid())
+            {
+                if (debugCounter % 10 == 0)
+                    Api.Logger.Notification($"=== Это жидкость не переносим: {sourceSlot.Itemstack.Collectible.Code} ===");
+                return false;
+            }
+
+            // Определяем направление к цели
+            BlockFacing directionToTarget = GetFacingFromTo(Pos, targetPos);
+            if (directionToTarget == null)
+            {
+                if (debugCounter % 20 == 0)
+                    Api.Logger.Notification($"=== Не удалось определить направление к цели ===");
+                return false;
+            }
+
+            // Запрашиваем у цели разрешение на вставку
+            ItemSlot targetSlot = null;
+            if (targetInventory is InventoryBase targetInventoryBase)
+            {
+                if (debugCounter % 20 == 0)
+                    Api.Logger.Notification($"=== Запрашиваем GetAutoPushIntoSlot у цели ===");
+
+                targetSlot = targetInventoryBase.GetAutoPushIntoSlot(directionToTarget.Opposite, sourceSlot);
+
+                if (targetSlot != null)
+                {
+                    if (debugCounter % 10 == 0)
+                        Api.Logger.Notification($"=== GetAutoPushIntoSlot вернул целевой слот ===");
+                }
+            }
+
+            // Если не получили целевой слот через GetAutoPushIntoSlot, ищем подходящий
+            if (targetSlot == null)
+            {
+                if (debugCounter % 20 == 0)
+                    Api.Logger.Notification($"=== Ищем подходящий слот в цели вручную ===");
+
+                targetSlot = FindSuitableTargetSlot(targetInventory, sourceSlot);
+
+                if (targetSlot == null)
+                {
+                    if (debugCounter % 10 == 0)
+                        Api.Logger.Notification($"=== Не найден подходящий слот в цели ===");
+                    return false;
+                }
+            }
+
+            // Проверяем, может ли целевой слот принять предмет
+            if (!targetSlot.CanHold(sourceSlot))
+            {
+                if (debugCounter % 10 == 0)
+                    Api.Logger.Notification($"=== Целевой слот не может принять предмет ===");
+                return false;
+            }
+
+            // Выполняем перенос
+            return ExecuteTransfer(sourceSlot, targetSlot, sourceContainer, targetContainer, sourcePos);
+        }
+
+        // НОВЫЙ МЕТОД: Ищет первый подходящий слот в источнике
         private ItemSlot FindFirstSuitableSlot(IInventory inventory, BlockFacing pullDirection)
         {
             // ищем по всем слотам вручную
