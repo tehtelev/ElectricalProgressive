@@ -34,7 +34,15 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
         }
     }
 
-    
+
+    private static readonly Dictionary<float, BlockFacing> varRotate = new()
+    {
+        { 180, BlockFacing.SOUTH },
+        { 270, BlockFacing.EAST},
+        { 0, BlockFacing.NORTH},
+        { 90, BlockFacing.WEST}
+    };
+
 
     ICoreClientAPI? _capi;
     ICoreServerAPI? _sapi;
@@ -48,13 +56,13 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
     /// <summary>
     /// Rэш для мэша топлива, где int - размер топлива в генераторе (от 0 до 8)
     /// </summary>
-    private static readonly Dictionary<int, MeshData> MeshData = new();
+    private static readonly Dictionary<(int, float), MeshData> MeshData = new();
 
 
     /// <summary>
     /// Коэффициенты КПД в зависимости от высоты пластин
     /// </summary>
-    public static readonly float[] KpdPerHeight =
+    public static readonly float[] KpdPerDistance =
     [
         0.15F, // 1-й 
         0.14F, // 2-й 
@@ -162,6 +170,8 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
     /// </summary>
     public new void OpenLid()
     {
+        StopWorkingAnim();
+
         if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("open") == false)
         {
             AnimUtil?.StartAnimation(new AnimationMetaData()
@@ -199,7 +209,47 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
             //добавляем звук
             _capi?.World.PlaySoundAt(new AssetLocation("game:sounds/block/cokeovendoor-close"), Pos.X, Pos.Y, Pos.Z, null, false, 8.0F, 0.4F);
         }
+
+        StartWorkingAnim();
     }
+
+
+    /// <summary>
+    /// Запускает анимацию работы
+    /// </summary>
+    public new void StartWorkingAnim()
+    {
+        if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("open") == false && AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false && _genTemp>20)
+        {
+            AnimUtil?.StartAnimation(new AnimationMetaData()
+            {
+                Animation = "work-on",
+                Code = "work-on",
+                AnimationSpeed = 1f,
+                EaseOutSpeed = 6,
+                EaseInSpeed = 15
+            });
+
+            
+        }
+
+    }
+
+
+    /// <summary>
+    /// Останавливает анимацию работы
+    /// </summary>
+    public new void StopWorkingAnim()
+    {
+        if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == true)
+        {
+            AnimUtil?.StopAnimation("open");
+          
+        }
+    }
+
+
+
 
 
     private long _listenerId;
@@ -387,6 +437,16 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
         chunkatPos.MarkModified();
     }
 
+
+    private static readonly Dictionary<float, Vec3f?> fuelMeshOffset = new()
+    {
+        { 180, new Vec3f(0.98f,0.2f,-1.6f) },
+        { 270, new Vec3f(-1.6f,0.2f,-0.98f) },
+        { 0, new Vec3f(-0.98f,0.2f,1.6f) },
+        { 90, new Vec3f(1.6f,0.2f,0.98f) }
+    };
+
+
     /// <summary>
     /// Обработчик тесселяции блока, добавляет мэш блока и мэш топлива, если он есть
     /// </summary>
@@ -408,8 +468,9 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
             sizeFuel = Math.Clamp(sizeFuel, 1, 8); // ограничиваем размер топлива от 1 до 8
         }
 
+        
 
-        if (!MeshData.TryGetValue(sizeFuel, out var fuelMesh))
+        if (!MeshData.TryGetValue((sizeFuel, Block.Shape.rotateY), out var fuelMesh))
         {
             // если есть топливо, то добавляем его в мэш
             
@@ -417,7 +478,11 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
 
             _capi?.TesselatorManager.ThreadDispose(); //обязательно
 
-            MeshData.TryAdd(sizeFuel, fuelMesh!);
+            var offset = fuelMeshOffset[Block.Shape.rotateY];
+
+            fuelMesh =fuelMesh.Clone().Translate(offset.X, offset.Y, offset.Z);
+
+            MeshData.TryAdd((sizeFuel, Block.Shape.rotateY), fuelMesh!);
             
         }
 
@@ -428,7 +493,7 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
 
 
         // если анимации нет, то рисуем блок базовый
-        if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("open") == false)
+        if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("open") == false && AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false)
         {
             return false;
         }
@@ -480,6 +545,13 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
             if (this._clientDialog != null)
                 _clientDialog.Update(_genTemp, _fuelBurnTime);
 
+            if(_genTemp>20)
+                StartWorkingAnim();
+            else
+            {
+                StopWorkingAnim();
+            }
+
         }
 
     }
@@ -494,32 +566,37 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
         // Получаем доступ к блочным данным один раз
         var accessor = this.Api.World.BlockAccessor;
         Kpd = 0f;
-
+        
         // Перебираем потенциальные термопластины по высоте
         for (var level = 1; level <= 11; level++)
         {
             // Получаем позицию и блок термопластины
-            var platePos = Pos.UpCopy(level);
-            if (accessor.GetBlock(platePos) is not BlockTermoplastini)
+            BlockFacing facing = varRotate[Block.Shape.rotateY];
+            BlockPos platePos = Pos.AddCopy(BlockTermoplastini.varRotateOffset[facing]);
+
+            if (facing == BlockFacing.NORTH)
+                platePos = platePos.NorthCopy(level);
+            else if (facing == BlockFacing.SOUTH)
+                platePos = platePos.SouthCopy(level);
+            else if (facing == BlockFacing.EAST)
+                platePos = platePos.EastCopy(level);
+            else if (facing == BlockFacing.WEST)
+                platePos = platePos.WestCopy(level);
+            else
             {
-                HeightTermoplastin = level-1; //сохраняем высоту термопластин
+                HeightTermoplastin = level - 1; //сохраняем высоту термопластин
                 break;
             }
 
-            // Проверяем соседние блоки и считаем количество воздухом незаполненных сторон
-            var airSides = 0f;
-            foreach (var face in OffsetsHorizontal)
+            if (accessor.GetBlock(platePos) is not BlockTermoplastini)
             {
-                var neighBlock = accessor.GetBlock(platePos.AddCopy(face));
-                if (neighBlock != null && neighBlock.BlockId == 0)
-                {
-                    airSides += 1f;
-                }
+                HeightTermoplastin = level - 1; //сохраняем высоту термопластин
+                break;
             }
+            
 
             // Учитываем множитель КПД на данном уровне
-            // 0.25f — вклад одной стороны в КПД
-            Kpd += airSides * 0.25f * KpdPerHeight[level - 1];
+            Kpd +=  KpdPerDistance[level - 1];
         }
     }
 

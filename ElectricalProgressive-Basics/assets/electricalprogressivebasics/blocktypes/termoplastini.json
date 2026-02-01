@@ -2,10 +2,95 @@
   "code": "termoplastini",
   "class": "BlockTermoplastini",
 
+  "behaviors": [
+    {
+      "name": "HorizontalOrientable",
+      "properties": {
+        "dropBlockFace": "south"
+      }
+    },
+    {
+      "name": "Multiblock",
+      "propertiesByType": {
+        "*-north": {
+          "sizex": 3,
+          "sizey": 2,
+          "sizez": 1,
+          "cposition": {
+            "x": 1,
+            "y": 0,
+            "z": 0
+          }
+        },
+        "*-east": {
+          "sizex": 1,
+          "sizey": 2,
+          "sizez": 3,
+          "cposition": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          }
+        },
+        "*-south": {
+          "sizex": 3,
+          "sizey": 2,
+          "sizez": 1,
+          "cposition": {
+            "x": 1,
+            "y": 0,
+            "z": 0
+          }
+        },
+        "*-west": {
+          "sizex": 1,
+          "sizey": 2,
+          "sizez": 3,
+          "cposition": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          }
+        }
+      }
+    }
+  ],
+
+
   "creativeinventory": {
-    "general": [ "*" ],
-    "electricity": [ "*" ]
+    "general": [ "*-south" ],
+    "electricity": [ "*-south" ]
   },
+
+  "variantgroups": [
+    {
+      "code": "side",
+      "loadFromProperties": "abstract/horizontalorientation"
+    }
+  ],
+
+
+
+
+  "shapebytype": {
+    "*-north": {
+      "base": "block/termoplastini/termoplastini",
+      "rotateY": 0
+    },
+    "*-east": {
+      "base": "block/termoplastini/termoplastini",
+      "rotateY": 270
+    },
+    "*-south": {
+      "base": "block/termoplastini/termoplastini",
+      "rotateY": 180
+    },
+    "*-west": {
+      "base": "block/termoplastini/termoplastini",
+      "rotateY": 90
+    }
+  },
+
 
   "attributes": {
     "handbook": {
@@ -19,11 +104,6 @@
     }
   },
 
-
-
-  "shape": {
-    "base": "block/termoplastini/termoplastini"
-  },
 
 
   "blockmaterial": "Stone",
@@ -42,6 +122,27 @@
   "heldTpIdleAnimation": "holdbothhandslarge",
   "heldTpUseAnimation": "twohandplaceblock",
 
+  "guiTransform": {
+    "translation": {
+      "x": 0,
+      "y": 5,
+      "z": 0
+    },
+    "scale": 0.67
+  },
+
+  "tpHandTransform": {
+    "translation": {
+      "x": -2.1,
+      "y": -1.8,
+      "z": -1
+    },
+    "rotation": {
+      "x": -70,
+      "y": -161,
+      "z": 96
+    }
+  },
 
   "collisionSelectionBoxes": [
     {

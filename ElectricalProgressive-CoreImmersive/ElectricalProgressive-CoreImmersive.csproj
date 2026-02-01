@@ -68,5 +68,9 @@
         <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       </EmbeddedResource>
     </ItemGroup>
+    <ItemGroup>
+      <Folder Include="assets\electricalprogressivecoreimmersive\lang\" />
+      <Folder Include="assets\electricalprogressivecoreimmersive\recipes\grid\" />
+    </ItemGroup>
     <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 </Project>

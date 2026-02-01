@@ -174,5 +174,19 @@
   },
 
   "heldTpIdleAnimation": "holdbothhandslarge",
-  "heldTpUseAnimation": "twohandplaceblock"
+  "heldTpUseAnimation": "twohandplaceblock",
+
+  "guiTransform": {
+    "translation": {
+      "x": 0,
+      "y": -11,
+      "z": 0
+    },
+    "origin": {
+      "x": 0.5,
+      "y": 1.5,
+      "z": 1.5
+    },
+    "scale": 0.5
+  }
 }

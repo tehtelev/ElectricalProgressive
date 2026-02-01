@@ -1,6 +1,7 @@
 ﻿using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
 using System;
+using System.Collections.Generic;
 using System.Text;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -87,21 +88,15 @@ public class BEBehaviorTermoEGenerator : BlockEntityBehavior, IElectricProducer
             if (entity.GenTemp > 20)
             {
                 entity.ElectricalProgressive.ParticlesType = 2;
-                entity.ElectricalProgressive.ParticlesOffsetPos.Clear();
-                entity.ElectricalProgressive.ParticlesOffsetPos.Add(new Vec3d(0.4, entity.HeightTermoplastin + 0.9, 0.4));
             }
             else
             {
                 entity.ElectricalProgressive.ParticlesType = 0;
-                entity.ElectricalProgressive.ParticlesOffsetPos.Clear();
-                entity.ElectricalProgressive.ParticlesOffsetPos.Add(new Vec3d(0.1, 0.5, 0.1));
             }
         }
         else
         {
             entity.ElectricalProgressive.ParticlesType = 0;
-            entity.ElectricalProgressive.ParticlesOffsetPos.Clear();
-            entity.ElectricalProgressive.ParticlesOffsetPos.Add(new Vec3d(0.1, 0.5, 0.1));
         }
     }
 
