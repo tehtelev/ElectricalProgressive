@@ -1,7 +1,7 @@
 ﻿{
-  "code": "efreezer2",
-  "class": "BlockEFreezer2",
-  "entityClass": "BlockEntityEFreezer2",
+  "code": "efreezer",
+  "class": "BlockEFreezer",
+  "entityClass": "BlockEntityEFreezer",
   "attributes": {
     "blockEProperties": "all",
     "facesEProperties": [ "north", "east", "south", "west", "up", "down" ],
@@ -12,11 +12,11 @@
     "isolated": true,
     "isolatedEnvironment": true,
     "handbook": {
-      "groupBy": [ "efreezer2-*" ],
+      "groupBy": [ "efreezer-*" ],
       "extraSections": [
         {
-          "title": "electricalprogressiveqol:block-handbooktitle-efreezer2",
-          "text": "electricalprogressiveqol:block-handbooktext-efreezer2"
+          "title": "electricalprogressiveqol:block-handbooktitle-efreezer",
+          "text": "electricalprogressiveqol:block-handbooktext-efreezer"
         }
       ]
     }
@@ -28,7 +28,7 @@
       "name": "Animatable"
     },
     {
-      "name": "BEBehaviorEFreezer2"
+      "name": "BEBehaviorEFreezer"
     },
     {
       "name": "ElectricalProgressive"
@@ -36,7 +36,7 @@
   ],
 
   "creativeinventory": {
-    "general": [ "*-melted-north", "*-burned-north" ],
+    "general": [ "*-melted-north" ],
     "electricity": [ "*-melted-north" ]
   },
 
@@ -63,7 +63,7 @@
   "variantgroups": [
     {
       "code": "state",
-      "states": [ "frozen", "melted", "burned" ]
+      "states": [ "frozen", "melted" ]
     },
     {
       "code": "side",
@@ -76,19 +76,19 @@
 
   "shapebytype": {
     "*-north": {
-      "base": "block/efreezer2/efreezer2-{state}",
+      "base": "block/efreezer/efreezer-{state}",
       "rotateY": 0
     },
     "*-east": {
-      "base": "block/efreezer2/efreezer2-{state}",
+      "base": "block/efreezer/efreezer-{state}",
       "rotateY": 270
     },
     "*-south": {
-      "base": "block/efreezer2/efreezer2-{state}",
+      "base": "block/efreezer/efreezer-{state}",
       "rotateY": 180
     },
     "*-west": {
-      "base": "block/efreezer2/efreezer2-{state}",
+      "base": "block/efreezer/efreezer-{state}",
       "rotateY": 90
     }
   },

@@ -2,12 +2,12 @@
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 
-namespace ElectricalProgressive.Content.Block.EFreezer2;
+namespace ElectricalProgressive.Content.Block.EFreezer;
 
-class GuiEFreezer2 : GuiDialogBlockEntity
+class GuiEFreezer : GuiDialogBlockEntity
 {
-    BlockEntityEFreezer2? _freezer;
-    public GuiEFreezer2(string dialogTitle, InventoryBase inventory, BlockPos blockEntityPos, ICoreClientAPI capi, BlockEntityEFreezer2 freezer) : base(
+    BlockEntityEFreezer? _freezer;
+    public GuiEFreezer(string dialogTitle, InventoryBase inventory, BlockPos blockEntityPos, ICoreClientAPI capi, BlockEntityEFreezer freezer) : base(
         dialogTitle, inventory, blockEntityPos, capi)
     {
         if (IsDuplicate)

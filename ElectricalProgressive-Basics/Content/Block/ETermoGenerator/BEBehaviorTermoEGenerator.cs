@@ -87,7 +87,7 @@ public class BEBehaviorTermoEGenerator : BlockEntityBehavior, IElectricProducer
         {
             if (entity.GenTemp > 20)
             {
-                entity.ElectricalProgressive.ParticlesType = 2;
+                entity.ElectricalProgressive.ParticlesType = 3;
             }
             else
             {
@@ -151,9 +151,9 @@ public class BEBehaviorTermoEGenerator : BlockEntityBehavior, IElectricProducer
             return;
 
         stringBuilder.AppendLine(StringHelper.Progressbar(Math.Min(_powerGive, _powerOrder) / entity.Power * 100));
-        stringBuilder.AppendLine("└ " + Lang.Get("Production") + ": " + ((int)Math.Min(_powerGive, _powerOrder)).ToString() + "/" + ((int)entity.Power).ToString() + " " + Lang.Get("W"));
-        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:block-termoplastini") + ": " + entity.HeightTermoplastin);
-        stringBuilder.AppendLine("└ " + Lang.Get("kpd") + ": " + (entity.Kpd * 100).ToString("F1") + " %");
+        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Production") + ": " + ((int)Math.Min(_powerGive, _powerOrder)).ToString() + "/" + ((int)entity.Power).ToString() + " " + Lang.Get("electricalprogressivebasics:W"));
+        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:termoplastini") + ": " + entity.HeightTermoplastin);
+        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:kpd") + ": " + (entity.Kpd * 100).ToString("F1") + " %");
     }
 
 

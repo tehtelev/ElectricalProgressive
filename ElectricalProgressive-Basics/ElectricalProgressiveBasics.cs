@@ -50,9 +50,9 @@ public class ElectricalProgressiveBasics : ModSystem
     /// </summary>
     public static Dictionary<int, string> causeBurn = new()
     {
-        { 1, Lang.Get("causeCurrent") },
-        { 2, Lang.Get("causeVoltage") },
-        { 3, Lang.Get("causeEnvironment") }
+        { 1, Lang.Get("electricalprogressivebasics:causeCurrent") },
+        { 2, Lang.Get("electricalprogressivebasics:causeVoltage") },
+        { 3, Lang.Get("electricalprogressivebasics:causeEnvironment") }
     };
 
 

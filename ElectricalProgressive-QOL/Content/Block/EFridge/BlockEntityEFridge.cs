@@ -12,15 +12,15 @@ using Vintagestory.API.Util;
 using Vintagestory.GameContent;
 using static System.Reflection.Metadata.BlobBuilder;
 
-namespace ElectricalProgressive.Content.Block.EFreezer2;
+namespace ElectricalProgressive.Content.Block.EFridge;
 
-class BlockEntityEFreezer2 : ContainerEFreezer2, ITexPositionSource
+class BlockEntityEFridge : ContainerEFridge, ITexPositionSource
 {
     public bool IsOpened { get; set; }
     private int _closedDelay;
 
     private InventoryBase _inventory;
-    private GuiEFreezer2? _freezerDialog;
+    private GuiEFridge? _freezerDialog;
     private ICoreClientAPI _capi;
 
     private MeshData?[] _meshes;
@@ -37,7 +37,7 @@ class BlockEntityEFreezer2 : ContainerEFreezer2, ITexPositionSource
     private const double _maxColdHours = 6.0; // максимальное количество часов холода
 
 
-    public BlockEntityEFreezer2()
+    public BlockEntityEFridge()
     {
         _maxConsumption = MyMiniLib.GetAttributeInt(this.Block, "maxConsumption", 100);
         IsOpened = false;
@@ -49,7 +49,7 @@ class BlockEntityEFreezer2 : ContainerEFreezer2, ITexPositionSource
 
     public override InventoryBase Inventory => _inventory;
 
-    public override string InventoryClassName => "efreezer";
+    public override string InventoryClassName => "efridge";
 
 
     /// <summary>
@@ -92,7 +92,7 @@ class BlockEntityEFreezer2 : ContainerEFreezer2, ITexPositionSource
     public override void OnBlockUnloaded()
     {
         base.OnBlockUnloaded();
-        _wasPowered = GetBehavior<BEBehaviorEFreezer2>().PowerSetting >= _maxConsumption * 0.1F;
+        _wasPowered = GetBehavior<BEBehaviorEFridge>()?.PowerSetting >= _maxConsumption * 0.1F;
         MarkDirty(true);
 
         this.ElectricalProgressive?.OnBlockUnloaded(); // вызываем метод OnBlockUnloaded у BEBehaviorElectricalProgressive
@@ -118,9 +118,6 @@ class BlockEntityEFreezer2 : ContainerEFreezer2, ITexPositionSource
     /// </summary>
     public void OpenLid()
     {
-        //animUtil.Dispose();
-        animUtil.InitializeAnimator(InventoryClassName, null, null, new Vec3f(0, GetRotation(), 0f));
-
         if (animUtil?.activeAnimationsByAnimCode.ContainsKey("open") == false)
         {
             animUtil?.StartAnimation(new AnimationMetaData()
@@ -135,6 +132,7 @@ class BlockEntityEFreezer2 : ContainerEFreezer2, ITexPositionSource
             //применяем цвет и яркость
             Block.LightHsv = new byte[] { 7, 7, 11 };
 
+           
             //добавляем звук
             _capi.World.PlaySoundAt(new ("electricalprogressiveqol:sounds/freezer_open.ogg"), Pos.X, Pos.Y, Pos.Z, null, false, 8.0F, 0.4F);
 
@@ -155,12 +153,46 @@ class BlockEntityEFreezer2 : ContainerEFreezer2, ITexPositionSource
             //применяем цвет и яркость
             Block.LightHsv = new byte[] { 7, 7, 0 };
 
+           
             //добавляем звук
             _capi.World.PlaySoundAt(new ("electricalprogressiveqol:sounds/freezer_close.ogg"), Pos.X, Pos.Y, Pos.Z, null, false, 8.0F, 0.4F);
         }
+
+    }
+
+    /// <summary>
+    /// Запускает анимацию работы
+    /// </summary>
+    public void StartWorkingAnim()
+    {
+        if (animUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false && _wasPowered)
+        {
+            animUtil?.StartAnimation(new AnimationMetaData()
+            {
+                Animation = "work-on",
+                Code = "work-on",
+                AnimationSpeed = 1f,
+                EaseOutSpeed = 6,
+                EaseInSpeed = 15
+            });
+
+
+        }
+
     }
 
 
+    /// <summary>
+    /// Останавливает анимацию работы
+    /// </summary>
+    public void StopWorkingAnim()
+    {
+        if (animUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == true)
+        {
+            animUtil?.StopAnimation("work-on");
+
+        }
+    }
 
     /// <summary>
     /// Получает угол поворота блока в градусах
@@ -298,7 +330,7 @@ class BlockEntityEFreezer2 : ContainerEFreezer2, ITexPositionSource
             }
         }
 
-        meshData.Translate(x, y, 0.025f);
+        meshData.Translate(x+0.1f, y, 0.025f);
 
         var orientationRotate = Block.Shape.rotateY;
 
@@ -457,7 +489,7 @@ class BlockEntityEFreezer2 : ContainerEFreezer2, ITexPositionSource
         }
 
         // если анимации нет, то рисуем блок базовый
-        if (animUtil?.activeAnimationsByAnimCode.ContainsKey("open") == false)
+        if (animUtil?.activeAnimationsByAnimCode.ContainsKey("open") == false && animUtil?.activeAnimationsByAnimCode.ContainsKey("work-on")==false)
         {
             return false;
         }
@@ -483,46 +515,39 @@ class BlockEntityEFreezer2 : ContainerEFreezer2, ITexPositionSource
     /// <param name="dt"></param>
     private void FreezerTick(float dt)
     {
-        if (Api.Side != EnumAppSide.Server || this.Block.Variant["state"] == "burned") return;
+        if (Api.Side == EnumAppSide.Server)
+        {
+            double now = Api.World.Calendar.TotalHours;
+            double delta = now - _lastUpdateTime;
+            _lastUpdateTime = now;
 
-        double now = Api.World.Calendar.TotalHours;
-        double delta = now - _lastUpdateTime;
-        _lastUpdateTime = now;
+            bool currentlyPowered = GetBehavior<BEBehaviorEFridge>().PowerSetting >= _maxConsumption * 0.1F;
+            UpdateColdState(delta, currentlyPowered);
+            _wasPowered = currentlyPowered;
 
-        bool currentlyPowered = GetBehavior<BEBehaviorEFreezer2>().PowerSetting >= _maxConsumption * 0.1F;
-        UpdateColdState(delta, currentlyPowered);
-        _wasPowered = currentlyPowered;
+        }
+        else
+        {
+            TryRefuel();
+        }
 
-        TryRefuel();
 
     }
 
 
     /// <summary>
-    /// Проверяет, нужно ли размораживать или замораживать блок
+    /// Проверяет, нужно ли запускать анимацию
     /// </summary>
     private void TryRefuel()
     {
-        var beh = GetBehavior<BEBehaviorEFreezer2>();
-        if (beh is null) return;
-
-        bool effectivePowered = beh.PowerSetting >= _maxConsumption * 0.1F || _accumulatedColdHours > 0;
-
-        if (effectivePowered && this.Block.Variant["state"] == "melted")
+        
+        if (_wasPowered)
         {
-            var originalBlock = Api.World.BlockAccessor.GetBlock(Pos);
-            var newBlockAL = originalBlock.CodeWithVariant("state", "frozen");
-            var newBlock = Api.World.GetBlock(newBlockAL);
-            Api.World.BlockAccessor.ExchangeBlock(newBlock.Id, Pos);
-            MarkDirty();
+            StartWorkingAnim();
         }
-        if (!effectivePowered && this.Block.Variant["state"] == "frozen")
+        else
         {
-            var originalBlock = Api.World.BlockAccessor.GetBlock(Pos);
-            var newBlockAL = originalBlock.CodeWithVariant("state", "melted");
-            var newBlock = Api.World.GetBlock(newBlockAL);
-            Api.World.BlockAccessor.ExchangeBlock(newBlock.Id, Pos);
-            MarkDirty();
+            StopWorkingAnim();
         }
     }
 
@@ -661,7 +686,7 @@ class BlockEntityEFreezer2 : ContainerEFreezer2, ITexPositionSource
     public override float GetPerishRate()
     {
         var initial = base.GetPerishRate();
-        bool currentPowered = GetBehavior<BEBehaviorEFreezer2>().PowerSetting >= _maxConsumption * 0.1F;
+        bool currentPowered = GetBehavior<BEBehaviorEFridge>().PowerSetting >= _maxConsumption * 0.1F;
         if (currentPowered || _accumulatedColdHours > 0)
         {
             return 0.05F;

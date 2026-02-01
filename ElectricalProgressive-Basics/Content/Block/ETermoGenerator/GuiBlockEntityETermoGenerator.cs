@@ -69,7 +69,7 @@ public class GuiBlockEntityETermoGenerator : GuiDialogBlockEntity
 
         this.SingleComposer = capi.Gui.CreateCompo("termogen" + (blockPos?.ToString()), window)
             .AddShadedDialogBG(dialog, true, 5)
-            .AddDialogTitleBar(Lang.Get("termogen"), new Action(OnTitleBarClose), null, null)
+            .AddDialogTitleBar(Lang.Get("electricalprogressivebasics:termogen"), new Action(OnTitleBarClose), null, null)
             .BeginChildElements(dialog)
 
             .AddDynamicCustomDraw(stoveBounds, OnBgDraw, "symbolDrawer")
@@ -131,7 +131,7 @@ public class GuiBlockEntityETermoGenerator : GuiDialogBlockEntity
             return;
 
         _gentemp = gentemp;
-        var newText = (int)gentemp+" °C"+System.Environment.NewLine+(int)burntime+" "+Lang.Get("gui-word-seconds")+System.Environment.NewLine;
+        var newText = (int)gentemp+" °C"+System.Environment.NewLine+(int)burntime+" "+Lang.Get("electricalprogressivebasics:gui-word-seconds") +System.Environment.NewLine;
         if (this.SingleComposer != null)
         {
             base.SingleComposer.GetDynamicText("outputText").SetNewText(newText);
@@ -152,6 +152,8 @@ public class GuiBlockEntityETermoGenerator : GuiDialogBlockEntity
         base.Inventory.SlotModified += this.OnSlotModified;
 
         betestgen.OpenLid(); //открываем крышку генератора при открытии диалога
+
+        
     }
 
     public override void OnGuiClosed()
@@ -161,5 +163,6 @@ public class GuiBlockEntityETermoGenerator : GuiDialogBlockEntity
         base.OnGuiClosed();
 
         betestgen.CloseLid(); //закрываем крышку генератора при закрытии диалога
+
     }
 }

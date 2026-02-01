@@ -80,7 +80,7 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
         // Создание композитора GUI
         SingleComposer = capi.Gui.CreateCompo("termogen" + BlockEntityPosition, window)
             .AddShadedDialogBG(dialog, true, 5)
-            .AddDialogTitleBar(Lang.Get("termogen"), OnTitleBarClose)
+            .AddDialogTitleBar(Lang.Get("electricalprogressivebasics:termogen"), OnTitleBarClose)
             .BeginChildElements(dialog)
             .AddDynamicCustomDraw(stoveBounds, OnBgDraw, "symbolDrawer")
             .AddInset(waterBounds.ForkBoundingParent(2, 2, 2, 2), 2)
@@ -210,7 +210,7 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
         
         // Формирование текста информации
         var newText = (int)gentemp + " °C\n" + 
-                     (int)burntime + " " + Lang.Get("gui-word-seconds") + "\n" +
+                     (int)burntime + " " + Lang.Get("electricalprogressivebasics:gui-word-seconds") + "\n" +
                      "Liquid: " + waterAmount.ToString("0.0") + "/" + capacity.ToString("0.0") + " L\n" +
                      liquidName;
         

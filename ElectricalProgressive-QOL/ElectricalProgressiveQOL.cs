@@ -1,16 +1,17 @@
 ﻿using ElectricalProgressive.Content.Block.ECharger;
 using ElectricalProgressive.Content.Block.EFence;
 using ElectricalProgressive.Content.Block.EFonar;
-using ElectricalProgressive.Content.Block.EFreezer2;
+using ElectricalProgressive.Content.Block.EFreezer;
+using ElectricalProgressive.Content.Block.EFridge;
 using ElectricalProgressive.Content.Block.EHeatCannon;
 using ElectricalProgressive.Content.Block.EHeater;
+using ElectricalProgressive.Content.Block.EHeatExchanger;
 using ElectricalProgressive.Content.Block.EHorn;
+using ElectricalProgressive.Content.Block.EHotSpringsGenerator;
 using ElectricalProgressive.Content.Block.ELamp;
 using ElectricalProgressive.Content.Block.EOven;
 using ElectricalProgressive.Content.Block.ESFonar;
 using ElectricalProgressive.Content.Block.EStove;
-using ElectricalProgressive.Content.Block.EHotSpringsGenerator;
-using ElectricalProgressive.Content.Block.EHeatExchanger;
 using ElectricalProgressive.Patch;
 using HarmonyLib;
 using Newtonsoft.Json.Linq;
@@ -110,9 +111,13 @@ public class ElectricalProgressiveQOL : ModSystem
         api.RegisterBlockEntityBehaviorClass("BEBehaviorEStove", typeof(BEBehaviorEStove));
 
         //холодильник с анимацией
-        api.RegisterBlockClass("BlockEFreezer2", typeof(BlockEFreezer2));
-        api.RegisterBlockEntityClass("BlockEntityEFreezer2", typeof(BlockEntityEFreezer2));
-        api.RegisterBlockEntityBehaviorClass("BEBehaviorEFreezer2", typeof(BEBehaviorEFreezer2));
+        api.RegisterBlockClass("BlockEFreezer", typeof(BlockEFreezer));
+        api.RegisterBlockEntityClass("BlockEntityEFreezer", typeof(BlockEntityEFreezer));
+        api.RegisterBlockEntityBehaviorClass("BEBehaviorEFreezer", typeof(BEBehaviorEFreezer));
+
+        api.RegisterBlockClass("BlockEFridge", typeof(BlockEFridge));
+        api.RegisterBlockEntityClass("BlockEntityEFridge", typeof(BlockEntityEFridge));
+        api.RegisterBlockEntityBehaviorClass("BEBehaviorEFridge", typeof(BEBehaviorEFridge));
 
 
         api.RegisterBlockClass("BlockEOven", typeof(BlockEOven));

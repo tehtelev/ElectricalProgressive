@@ -328,15 +328,15 @@ public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
     public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
     {
         base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
-        dsc.AppendLine(Lang.Get("Voltage") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "voltage", 0) + " " + Lang.Get("V"));
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
 
         var Params = MyMiniLib.GetAttributeArrayFloat(inSlot.Itemstack.Block, "params", def_Params);
 
-        dsc.AppendLine(Lang.Get("Consumption") + ": " + Params[1] + " " + Lang.Get("W"));
-        dsc.AppendLine(Lang.Get("max_speed") + ": " + Params[4] + " " + Lang.Get("rps"));
-        dsc.AppendLine(Lang.Get("res_speed") + ": " + Params[5]);
-        dsc.AppendLine(Lang.Get("max_torque") + ": " + Params[2]);
-        dsc.AppendLine(Lang.Get("kpd") + ": " + Params[3] * 100 + " %");
-        dsc.AppendLine(Lang.Get("WResistance") + ": " + ((MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false)) ? Lang.Get("Yes") : Lang.Get("No")));
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Consumption") + ": " + Params[1] + " " + Lang.Get("electricalprogressivebasics:W"));
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:max_speed") + ": " + Params[4] + " " + Lang.Get("electricalprogressivebasics:rps"));
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:res_speed") + ": " + Params[5]);
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:max_torque") + ": " + Params[2]);
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:kpd") + ": " + Params[3] * 100 + " %");
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + ((MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false)) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
     }
 }
