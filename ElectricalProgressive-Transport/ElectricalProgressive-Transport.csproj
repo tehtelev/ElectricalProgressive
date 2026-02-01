@@ -69,5 +69,8 @@
         <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       </EmbeddedResource>
     </ItemGroup>
-    <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
+    <ItemGroup>
+      <Folder Include="assets\electricalprogressivetransport\textures\" />
+    </ItemGroup>
+    <ProjectExtensions><VisualStudio><UserProperties assets_4electricalprogressivetransport_4blocktypes_4pipe-normal_1json__JsonSchema="https://acp-protocol.dev/schemas/v1/attempts.schema.json" /></VisualStudio></ProjectExtensions>
 </Project>

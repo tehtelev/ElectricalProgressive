@@ -66,6 +66,7 @@
       ]
     }
   ],
+  "creativeinventory": { "electricalprogressivetransport": [ "*-normal-cross" ] },
   "lightAbsorption": 0.0,
   "drawType": "JSON",
   "emitSideAo": {
