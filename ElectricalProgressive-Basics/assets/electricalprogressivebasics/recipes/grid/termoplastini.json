@@ -40,8 +40,8 @@
     },
     "output": {
       "type": "block",
-      "code": "electricalprogressivebasics:termoplastini",
-      "quantity": 4
+      "code": "electricalprogressivebasics:termoplastini-south",
+      "quantity": 2
     }
   },
 
@@ -86,8 +86,8 @@
     },
     "output": {
       "type": "block",
-      "code": "electricalprogressivebasics:termoplastini",
-      "quantity": 4
+      "code": "electricalprogressivebasics:termoplastini-south",
+      "quantity": 2
     }
   }
 ]

@@ -23,9 +23,8 @@
       },
       "H": {
         "type": "item",
-        "code": "game:hammer-*",
-        "isTool": true,
-        "toolDurabilityCost": 8
+        "code": "game:burnedbrick-*",
+        "quantity": 24
       },
       "M": {
         "type": "item",

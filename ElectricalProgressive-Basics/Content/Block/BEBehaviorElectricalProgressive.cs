@@ -713,7 +713,7 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
 
         // Сохраняем массив фреймов для синхронизации
         tree.SetInt("ParticlesFramesAnimCount", ParticlesFramesAnim.Count);
-        for (int i = 0; i < ParticlesOffsetPos.Count; i++)
+        for (int i = 0; i < ParticlesFramesAnim.Count; i++)
         {
             tree.SetInt($"ParticlesFramesAnimMin_{i}", ParticlesFramesAnim[i][0]);
             tree.SetInt($"ParticlesFramesAnimMax_{i}", ParticlesFramesAnim[i][1]);
