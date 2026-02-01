@@ -156,7 +156,7 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
     /// <summary>
     /// Заголовок диалога
     /// </summary>
-    public override string DialogTitle => Lang.Get("fuelgen");
+    public override string DialogTitle => Lang.Get("electricalprogressivebasics:fuelgen");
     
     /// <summary>
     /// Имя класса инвентаря

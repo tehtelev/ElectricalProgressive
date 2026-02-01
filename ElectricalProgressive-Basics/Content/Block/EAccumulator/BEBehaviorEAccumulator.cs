@@ -209,7 +209,7 @@ public class BEBehaviorEAccumulator : BlockEntityBehavior, IElectricAccumulator
             return;
 
         stringBuilder.AppendLine(StringHelper.Progressbar(GetCapacity() * 100.0f / GetMaxCapacity()));
-        stringBuilder.AppendLine("└ " + Lang.Get("Storage") + ": " + ((int)GetCapacity()).ToString() + "/" + ((int)GetMaxCapacity()).ToString() + " " + Lang.Get("J"));
+        stringBuilder.AppendLine("└ " + Lang.Get("Storage") + ": " + ((int)GetCapacity()).ToString() + "/" + ((int)GetMaxCapacity()).ToString() + " " + Lang.Get("electricalprogressivebasics:J"));
 
         stringBuilder.AppendLine();
     }

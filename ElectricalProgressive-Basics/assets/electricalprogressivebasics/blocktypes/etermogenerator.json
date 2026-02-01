@@ -73,7 +73,7 @@
   ],
 
   "attributes": {
-    "particlesType": 2,
+    "particlesType": 3,
     "blockEProperties": "main",
     "facesEProperties": [ "down" ],
     "voltage": 32,

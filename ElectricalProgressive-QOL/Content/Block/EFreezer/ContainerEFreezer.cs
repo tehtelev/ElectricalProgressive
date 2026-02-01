@@ -8,9 +8,9 @@ using Vintagestory.API.MathTools;
 using Vintagestory.API.Server;
 using Vintagestory.GameContent;
 
-namespace ElectricalProgressive.Content.Block.EFreezer2;
+namespace ElectricalProgressive.Content.Block.EFreezer;
 
-public abstract class ContainerEFreezer2 : BlockEntityEBase, IBlockEntityContainer
+public abstract class ContainerEFreezer : BlockEntityEBase, IBlockEntityContainer
 {
     public abstract InventoryBase Inventory { get; }
     public abstract string InventoryClassName { get; }
@@ -24,7 +24,7 @@ public abstract class ContainerEFreezer2 : BlockEntityEBase, IBlockEntityContain
 
 
 
-    protected ContainerEFreezer2()
+    protected ContainerEFreezer()
     {
 
     }

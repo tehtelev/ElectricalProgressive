@@ -1,4 +1,4 @@
-{
+п»ї{
 	"editor": {
 		"collapsedPaths": "Root/DoorInternal,Root/Top21,Root/Side9,Root/Side7,Root/Side5,Root/Side3,Root/DoorBase,Root/Top18,Root/Bottom/Side3/Hinge2,Root/Side13,Root/Side11,Root/Bottom/Side3/Hinge/DoorBase,Root/Cube2,Root/TermalGenBase/FrameMain2/Cube153/InvAxisFrame,Root/Bottom",
 		"allAngles": true,
@@ -9,29 +9,29 @@
 	"textureSizes": {
 	},
 	"textures": {
-		"copper-hot": "C:/Users/YobaMegaDrive/Desktop/Сервер винтажа/electr/electricalprogressivebasics_2.6.0/assets/electricalprogressivebasics/textures/block/copper-hot",
-		"emeral": "C:/Users/YobaMegaDrive/Desktop/Сервер винтажа/electr/electricalprogressivebasics_2.6.0/assets/electricalprogressivebasics/textures/block/emeral",
-		"iron96x96": "C:/Users/YobaMegaDrive/Desktop/Сервер винтажа/electr/electricalprogressivebasics_2.6.0/assets/electricalprogressivebasics/textures/block/iron96x96",
-		"steel4-96x96": "C:/Users/YobaMegaDrive/Desktop/Сервер винтажа/electr/electricalprogressivebasics_2.6.0/assets/electricalprogressivebasics/textures/block/plate/steel4-96x96",
-		"red1": "block/clay/brick/irregular/red1",
-		"blue": "block/cloth/basic/blue",
-		"charcoal": "block/coal/charcoal",
-		"quartzglass": "block/glass/quartzglass",
-		"bismuthbronze": "block/metal/plate/bismuthbronze",
-		"brass": "block/metal/plate/brass",
-		"copper": "block/metal/plate/copper",
-		"iron": "block/metal/plate/iron",
-		"nickel": "block/metal/plate/nickel",
-		"stainlesssteel": "block/metal/plate/stainlesssteel",
-		"steel": "block/metal/plate/steel",
-		"uranium": "block/metal/plate/uranium",
-		"zinc": "block/metal/plate/zinc",
-		"iron1": "block/metal/sheet/iron1",
-		"nickel1": "block/metal/sheet/nickel1",
-		"steel1": "block/metal/sheet/steel1",
-		"steel12": "block/metal/sheet/steel1",
-		"aquamarine": "block/stone/gem/aquamarine",
-		"sapphire": "block/stone/gem/sapphire"
+		"copper-hot": "electricalprogressivebasics:block/copper-hot",
+		"emeral": "electricalprogressivebasics:block/emeral",
+		"iron96x96": "electricalprogressivebasics:block/iron96x96",
+		"steel4-96x96": "block/plate/steel4-96x96",
+		"red1": "game:block/clay/brick/irregular/red1",
+		"blue": "game:block/cloth/basic/blue",
+		"charcoal": "game:block/coal/charcoal",
+		"quartzglass": "game:block/glass/quartzglass",
+		"bismuthbronze": "game:block/metal/plate/bismuthbronze",
+		"brass": "game:block/metal/plate/brass",
+		"copper": "game:block/metal/plate/copper",
+		"iron": "game:block/metal/plate/iron",
+		"nickel": "game:block/metal/plate/nickel",
+		"stainlesssteel": "game:block/metal/plate/stainlesssteel",
+		"steel": "game:block/metal/plate/steel",
+		"uranium": "game:block/metal/plate/uranium",
+		"zinc": "game:block/metal/plate/zinc",
+		"iron1": "game:block/metal/sheet/iron1",
+		"nickel1": "game:block/metal/sheet/nickel1",
+		"steel1": "game:block/metal/sheet/steel1",
+		"steel12": "game:block/metal/sheet/steel1",
+		"aquamarine": "game:block/stone/gem/aquamarine",
+		"sapphire": "game:block/stone/gem/sapphire"
 	},
 	"elements": [
 		{

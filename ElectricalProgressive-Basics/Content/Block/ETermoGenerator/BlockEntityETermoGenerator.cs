@@ -170,8 +170,6 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
     /// </summary>
     public new void OpenLid()
     {
-        StopWorkingAnim();
-
         if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("open") == false)
         {
             AnimUtil?.StartAnimation(new AnimationMetaData()
@@ -185,6 +183,8 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
 
             //применяем цвет и яркость
             Block.LightHsv = new byte[] { 7, 7, 11 };
+
+       
 
             //добавляем звук
             _capi?.World.PlaySoundAt(new AssetLocation("game:sounds/block/cokeovendoor-open"), Pos.X, Pos.Y, Pos.Z, null, false, 8.0F, 0.4F);
@@ -206,11 +206,12 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
             //применяем цвет и яркость
             Block.LightHsv = new byte[] { 7, 7, 0 };
 
+        
+
             //добавляем звук
             _capi?.World.PlaySoundAt(new AssetLocation("game:sounds/block/cokeovendoor-close"), Pos.X, Pos.Y, Pos.Z, null, false, 8.0F, 0.4F);
         }
 
-        StartWorkingAnim();
     }
 
 
@@ -219,7 +220,7 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
     /// </summary>
     public new void StartWorkingAnim()
     {
-        if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("open") == false && AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false && _genTemp>20)
+        if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false && _genTemp>20)
         {
             AnimUtil?.StartAnimation(new AnimationMetaData()
             {
@@ -243,7 +244,7 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
     {
         if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == true)
         {
-            AnimUtil?.StopAnimation("open");
+            AnimUtil?.StopAnimation("work-on");
           
         }
     }
@@ -256,7 +257,7 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
 
     public override InventoryBase Inventory => _inventory;
 
-    public override string DialogTitle => Lang.Get("termogen");
+    public override string DialogTitle => Lang.Get("electricalprogressivebasics:termogen");
 
     public override string InventoryClassName => "termogen";
 

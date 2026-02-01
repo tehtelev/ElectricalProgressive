@@ -6,9 +6,9 @@ using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 
-namespace ElectricalProgressive.Content.Block.EFreezer2;
+namespace ElectricalProgressive.Content.Block.EFridge;
 
-public class BEBehaviorEFreezer2 : BlockEntityBehavior, IElectricConsumer
+public class BEBehaviorEFridge : BlockEntityBehavior, IElectricConsumer
 {
     public int PowerSetting { get; set; }
 
@@ -26,7 +26,7 @@ public class BEBehaviorEFreezer2 : BlockEntityBehavior, IElectricConsumer
 
     public float AvgConsumeCoeff { get; set; }
 
-    public BEBehaviorEFreezer2(BlockEntity blockEntity) : base(blockEntity)
+    public BEBehaviorEFridge(BlockEntity blockEntity) : base(blockEntity)
     {
         _maxConsumption = MyMiniLib.GetAttributeInt(this.Block, "maxConsumption", 100);
 
@@ -50,7 +50,7 @@ public class BEBehaviorEFreezer2 : BlockEntityBehavior, IElectricConsumer
         base.GetBlockInfo(forPlayer, stringBuilder);
 
         //проверяем не сгорел ли прибор
-        if (Blockentity is not BlockEntityEFreezer2)
+        if (Blockentity is not BlockEntityEFridge)
             return;
 
         if (IsBurned)
@@ -76,7 +76,7 @@ public class BEBehaviorEFreezer2 : BlockEntityBehavior, IElectricConsumer
 
     public void Update()
     {
-        if (Blockentity is not BlockEntityEFreezer2 entity ||
+        if (Blockentity is not BlockEntityEFridge entity ||
             entity.ElectricalProgressive == null ||
             entity.ElectricalProgressive.AllEparams is null)
         {
@@ -119,16 +119,10 @@ public class BEBehaviorEFreezer2 : BlockEntityBehavior, IElectricConsumer
             entity.MarkDirty(true);
         }
 
-        if (!hasBurnout || entity.Block.Variant["state"] == "burned")
+        if (!hasBurnout)
             return;
 
-        // Используем константы вместо создания новых строк
-        const string type = "state";
-        const string variant = "burned";
 
-        // Кэшируем блок для обмена
-        var burnedBlock = Api.World.GetBlock(Block.CodeWithVariant(type, variant));
-        Api.World.BlockAccessor.ExchangeBlock(burnedBlock.BlockId, Pos);
     }
 
 

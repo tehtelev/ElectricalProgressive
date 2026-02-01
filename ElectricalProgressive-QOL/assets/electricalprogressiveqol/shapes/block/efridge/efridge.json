@@ -12,7 +12,7 @@
 		"copper-hot": "electricalprogressivebasics:block/copper-hot",
 		"emeral": "electricalprogressivebasics:block/emeral",
 		"iron96x96": "electricalprogressivebasics:block/iron96x96",
-		"steel4-96x96": "block/plate/steel4-96x96",
+		"steel4-96x96": "electricalprogressivebasics:block/plate/steel4-96x96",
 		"red1": "game:block/clay/brick/irregular/red1",
 		"blue": "game:block/cloth/basic/blue",
 		"charcoal": "game:block/coal/charcoal",
@@ -5661,94 +5661,85 @@
 		},
 
 		{
-			"name": "open-on",
-			"code": "open-on",
+			"name": "open",
+			"code": "open",
 			"quantityframes": 41,
-			"onActivityStopped": "PlayTillEnd",
+			"onActivityStopped": "Rewind",
 			"onAnimationEnd": "Hold",
 			"keyframes": [
 				{
 					"frame": 0,
 					"elements": {
-						"Cube139": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
-						"DoorBase": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
-						"Cube240p": { "offsetX": 0.0, "offsetY": 4.0, "offsetZ": 0.0 }
+						"Cube139": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": 0.0
+						},
+						"DoorBase": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": 0.0
+						}
 					}
 				},
 				{
 					"frame": 15,
 					"elements": {
-						"Cube139": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": -93.5 },
-						"Cube240p": { "offsetX": 0.0, "offsetY": 4.2, "offsetZ": 0.0 }
+						"Cube139": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": -93.5
+						}
 					}
 				},
 				{
 					"frame": 18,
 					"elements": {
-						"Cube139": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": -93.5 },
-						"DoorBase": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
-						"Cube240p": { "offsetX": 0.0, "offsetY": 4.0, "offsetZ": 0.0 }
+						"Cube139": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": -93.5
+						},
+						"DoorBase": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": 0.0
+						}
 					}
 				},
 				{
 					"frame": 38,
 					"elements": {
-						"Cube139": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": -93.5 },
-						"DoorBase": { "rotationX": 0.0, "rotationY": -144.0, "rotationZ": 0.0 },
-						"Cube240p": { "offsetX": 0.0, "offsetY": -1.0, "offsetZ": 0.0 }
+						"Cube139": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": -93.5
+						},
+						"DoorBase": {
+							"rotationX": 0.0,
+							"rotationY": -144.0,
+							"rotationZ": 0.0
+						}
 					}
 				},
 				{
 					"frame": 40,
 					"elements": {
-						"Cube139": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": -93.5 },
-						"DoorBase": { "rotationX": 0.0, "rotationY": -136.0, "rotationZ": 0.0 },
-						"Cube240p": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 }
-					}
-				}
-			]
-		},
-
-		{
-			"name": "close",
-			"code": "close",
-			"quantityframes": 41,
-			"onActivityStopped": "PlayTillEnd",
-			"onAnimationEnd": "Hold",
-			"keyframes": [
-				{
-					"frame": 0,
-					"elements": {
-						"Cube139": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": -93.5 },
-						"DoorBase": { "rotationX": 0.0, "rotationY": -136.0, "rotationZ": 0.0 },
-						"Cube240p": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 }
-					}
-				},
-				{
-					"frame": 20,
-					"elements": {
-						"Cube139": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": -93.5 },
-						"DoorBase": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
-						"Cube240p": { "offsetX": 0.0, "offsetY": 0.3, "offsetZ": 0.0 }
-					}
-				},
-				{
-					"frame": 23,
-					"elements": {
-						"Cube139": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": -93.5 },
-						"Cube240p": { "offsetX": 0.0, "offsetY": 0.9, "offsetZ": 0.0 },
-						"DoorBase": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 }
-					}
-				},
-				{
-					"frame": 40,
-					"elements": {
-						"Cube139": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
-						"Cube240p": { "offsetX": 0.0, "offsetY": 4.0, "offsetZ": 0.0 },
-						"DoorBase": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 }
+						"Cube139": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": -93.5
+						},
+						"DoorBase": {
+							"rotationX": 0.0,
+							"rotationY": -136.0,
+							"rotationZ": 0.0
+						}
 					}
 				}
 			]
 		}
+
+		
 	]
 }

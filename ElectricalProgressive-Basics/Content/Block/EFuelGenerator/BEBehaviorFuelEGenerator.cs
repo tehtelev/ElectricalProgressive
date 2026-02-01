@@ -150,13 +150,13 @@ public class BEBehaviorFuelEGenerator : BlockEntityBehavior, IElectricProducer
 
         // Отображение прогресс-бара производства
         stringBuilder.AppendLine(StringHelper.Progressbar(Math.Min(_powerGive, _powerOrder) / Math.Max(1f, _powerGive) * 100));
-        stringBuilder.AppendLine("└ " + Lang.Get("Production") + ": " + ((int)Math.Min(_powerGive, _powerOrder)) + "/" + Math.Max(1f, _powerGive) + " " + Lang.Get("W"));
+        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Production") + ": " + ((int)Math.Min(_powerGive, _powerOrder)) + "/" + Math.Max(1f, _powerGive) + " " + Lang.Get("electricalprogressivebasics:W"));
         
         // Отображение информации о воде
         if (!entity.WaterSlot.Empty)
-            stringBuilder.AppendLine("└ " + Lang.Get("Water") + ": " + entity.WaterAmount.ToString("0.0") + "/" + entity.WaterCapacity + " L");
+            stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Water") + ": " + entity.WaterAmount.ToString("0.0") + "/" + entity.WaterCapacity + " L");
         else
-            stringBuilder.AppendLine("└ " + Lang.Get("No water") + " - " + Lang.Get("Reduced power"));
+            stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:No water") + " - " + Lang.Get("electricalprogressivebasics:Reduced power"));
     }
 
     /// <summary>

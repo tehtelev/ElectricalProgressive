@@ -1049,10 +1049,10 @@ namespace ElectricalProgressive.Content.Block.ECable
         {
             base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
             var text = inSlot.Itemstack.Block.Variant["voltage"];
-            dsc.AppendLine(Lang.Get("Voltage") + ": " + text.Substring(0, text.Length - 1) + " " + Lang.Get("V"));
-            dsc.AppendLine(Lang.Get("Max. current") + ": " + MyMiniLib.GetAttributeFloat(inSlot.Itemstack.Block, "maxCurrent", 0) + " " + Lang.Get("A"));
-            dsc.AppendLine(Lang.Get("Resistivity") + ": " + MyMiniLib.GetAttributeFloat(inSlot.Itemstack.Block, "res", 0) + " " + Lang.Get("units"));
-            dsc.AppendLine(Lang.Get("WResistance") + ": " + (inSlot.Itemstack.Block.Code.Path.Contains("isolated") ? Lang.Get("Yes") : Lang.Get("No")));
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + text.Substring(0, text.Length - 1) + " " + Lang.Get("electricalprogressivebasics:V"));
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:MaxCurrent") + ": " + MyMiniLib.GetAttributeFloat(inSlot.Itemstack.Block, "maxCurrent", 0) + " " + Lang.Get("electricalprogressivebasics:A"));
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:Resistivity") + ": " + MyMiniLib.GetAttributeFloat(inSlot.Itemstack.Block, "res", 0) + " " + Lang.Get("electricalprogressivebasics:Units"));
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + (inSlot.Itemstack.Block.Code.Path.Contains("isolated") ? Lang.Get("Yes") : Lang.Get("electricalprogressivebasics:No")));
         }
 
 

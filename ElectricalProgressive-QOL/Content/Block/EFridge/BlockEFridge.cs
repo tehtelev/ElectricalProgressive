@@ -6,16 +6,16 @@ using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
 
-namespace ElectricalProgressive.Content.Block.EFreezer2;
+namespace ElectricalProgressive.Content.Block.EFridge;
 
-class BlockEFreezer2 : BlockEBase
+class BlockEFridge : BlockEBase
 {
-    private BlockEntityEFreezer2? _blockEntityEFreezer;
+    private BlockEntityEFridge? _blockEntityEFreezer;
 
     public override bool OnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel)
     {
         _blockEntityEFreezer = null!;
-        if (blockSel.Position != null && world.BlockAccessor.GetBlockEntity(blockSel.Position) is BlockEntityEFreezer2 blockEntityEFreezer)
+        if (blockSel.Position != null && world.BlockAccessor.GetBlockEntity(blockSel.Position) is BlockEntityEFridge blockEntityEFreezer)
             _blockEntityEFreezer = blockEntityEFreezer;
 
         var handled = base.OnBlockInteractStart(world, byPlayer, blockSel);
@@ -40,15 +40,9 @@ class BlockEFreezer2 : BlockEBase
 
     public override ItemStack OnPickBlock(IWorldAccessor world, BlockPos pos)
     {
-        var newState = this.Variant["state"] switch
-        {
-            "frozen" => "melted",
-            "melted" => "melted",
-            _ => "burned"
-        };
+
         var blockCode = CodeWithVariants(new()
         {
-            { "state", newState },
             { "side", "north" }
         });
 
@@ -86,9 +80,9 @@ class BlockEFreezer2 : BlockEBase
     public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
     {
         base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
-        dsc.AppendLine(Lang.Get("Voltage") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "voltage", 0) + " " + Lang.Get("V"));
-        dsc.AppendLine(Lang.Get("Consumption") + ": " + MyMiniLib.GetAttributeFloat(inSlot.Itemstack.Block, "maxConsumption", 0) + " " + Lang.Get("W"));
-        dsc.AppendLine(Lang.Get("WResistance") + ": " + ((MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false)) ? Lang.Get("Yes") : Lang.Get("No")));
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Consumption") + ": " + MyMiniLib.GetAttributeFloat(inSlot.Itemstack.Block, "maxConsumption", 0) + " " + Lang.Get("electricalprogressivebasics:W"));
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + ((MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false)) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
     }
 
 

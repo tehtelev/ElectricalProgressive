@@ -48,7 +48,7 @@ public class BEBehaviorETransformator : BlockEntityBehavior, IElectricTransforma
 
         //stringBuilder.AppendLine(StringHelper.Progressbar(getPower() / (lowVoltage * maxCurrent) * 100));
         //stringBuilder.AppendLine("└ " + Lang.Get("Power") + ": " + getPower() + " / " + lowVoltage * maxCurrent + " " + Lang.Get("W"));
-        stringBuilder.AppendLine("└ " + Lang.Get("Power") + ": " + ((int)getPower()).ToString() + " " + Lang.Get("W"));
+        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Power") + ": " + ((int)getPower()).ToString() + " " + Lang.Get("electricalprogressivebasics:W"));
         stringBuilder.AppendLine();
 
 

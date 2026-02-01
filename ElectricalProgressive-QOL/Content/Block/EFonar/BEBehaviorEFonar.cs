@@ -1,5 +1,4 @@
-﻿using ElectricalProgressive.Content.Block.EFreezer2;
-using ElectricalProgressive.Interface;
+﻿using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
 using System;
 using System.Text;
