@@ -15,6 +15,7 @@
   "electricalprogressivetransport:active-filters": "Фильтров: {0}/{1}",
   
   "electricalprogressivetransport:filter-pipe-title": "Фильтрующая труба",
+  "electricalprogressivetransport:filter-pipe-comment": "Положите предметы в слоты для фильтрации",
   "electricalprogressivetransport:filter-pipe-settings": "Настройки фильтра:",
   "electricalprogressivetransport:filter-pipe": "Фильтрующая труба",
   "electricalprogressivetransport:filter-mode-allow": "Белый список",
@@ -27,6 +28,7 @@
   "electricalprogressivetransport:filter-speet-down": "Убавить",
 
   "electricalprogressivetransport:block-pipe-liquid-insertion": "Жидкостная помещающая труба",
+  "electricalprogressivetransport:filter-liquidpipe-comment": "Положите жидкости в слоты для фильтрации",
   "electricalprogressivetransport:pipe-liquid-insertion-info": "Труба для фильтрации и помещения жидкостей",
   "electricalprogressivetransport:blockhelp-liquid-filter-settings": "Открыть настройки жидкостного фильтра",
   "electricalprogressivetransport:liquid-filter-pipe-title": "Жидкостная фильтрующая труба",

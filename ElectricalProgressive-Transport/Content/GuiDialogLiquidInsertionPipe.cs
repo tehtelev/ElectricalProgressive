@@ -50,7 +50,7 @@ namespace ElectricalProgressiveTransport
                 .BeginChildElements(dialogBounds)
                 
                 // Заголовок фильтров
-                .AddStaticText("Положите жидкости в слоты для фильтрации", CairoFont.WhiteDetailText(), 
+                .AddStaticText(Lang.Get("electricalprogressivetransport:filter-liquidpipe-comment"), CairoFont.WhiteDetailText(), 
                     ElementBounds.Fixed(10, 40, 320, 25))
                 
                 // Сетка фильтров для жидкостей (2x3)
@@ -67,9 +67,9 @@ namespace ElectricalProgressiveTransport
                     CairoFont.WhiteDetailText().WithWeight(Cairo.FontWeight.Bold), 
                     ElementBounds.Fixed(10, 160, 260, 25))
                 
-                .AddStaticText("═══════════════════════════", 
+                .AddStaticText("═════════════════════════════", 
                     CairoFont.WhiteDetailText(), 
-                    ElementBounds.Fixed(10, 170, 260, 25))
+                    ElementBounds.Fixed(10, 170, 300, 25))
                 
                 // Кнопки режима фильтра
                 .AddSmallButton(Lang.Get("electricalprogressivetransport:filter-mode-allow"), OnAllowListClicked, 
@@ -77,9 +77,9 @@ namespace ElectricalProgressiveTransport
                 .AddSmallButton(Lang.Get("electricalprogressivetransport:filter-mode-deny"), OnDenyListClicked, 
                     ElementBounds.Fixed(170, 185, 130, 30), EnumButtonStyle.Normal, EnumTextOrientation.Center, "btnDenyList")
                 
-                .AddStaticText("═══════════════════════════", 
+                .AddStaticText("═════════════════════════════", 
                     CairoFont.WhiteDetailText(), 
-                    ElementBounds.Fixed(10, 225, 260, 25))
+                    ElementBounds.Fixed(10, 225, 300, 25))
                 
                 // Скорость передачи жидкостей
                 .AddStaticText(Lang.Get("electricalprogressivetransport:liquid-transfer-speed"), 

@@ -59,7 +59,7 @@ namespace ElectricalProgressiveTransport
                 .BeginChildElements(dialogBounds)
                 
                 // Заголовок фильтров (12 слотов: 4x3)
-                .AddStaticText("Положите предметы в слоты для фильтрации", CairoFont.WhiteDetailText(), 
+                .AddStaticText(Lang.Get("electricalprogressivetransport:filter-pipe-comment"), CairoFont.WhiteDetailText(), 
                     ElementBounds.Fixed(10, 40, 320, 25))
                 
                 // Сетка фильтров 4x3 (12 слотов)
@@ -75,7 +75,7 @@ namespace ElectricalProgressiveTransport
                 .AddStaticText(Lang.Get("electricalprogressivetransport:filter-pipe-settings"), CairoFont.WhiteDetailText().WithWeight(Cairo.FontWeight.Bold), 
                     ElementBounds.Fixed(10, 165, 300, 25))
                 // Разделительная линия
-                .AddStaticText("═══════════════════════════════", 
+                .AddStaticText("══════════════════════════════", 
                     CairoFont.WhiteDetailText(), 
                     ElementBounds.Fixed(10, 175, 300, 25))
                 
@@ -101,7 +101,7 @@ namespace ElectricalProgressiveTransport
                     ElementBounds.Fixed(55, 305, 150, 25))
                 
                 // Еще одна разделительная линия
-                .AddStaticText("═══════════════════════════════", 
+                .AddStaticText("══════════════════════════════", 
                     CairoFont.WhiteDetailText(), 
                     ElementBounds.Fixed(10, 345, 300, 25))
                 

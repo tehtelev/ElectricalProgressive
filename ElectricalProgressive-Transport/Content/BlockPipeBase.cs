@@ -14,7 +14,6 @@ namespace ElectricalProgressiveTransport
 {
     public class BlockPipeBase : Block
     {
-        
         private WorldInteraction[] _interactions;
 
         public override WorldInteraction[] GetPlacedBlockInteractionHelp(
@@ -52,6 +51,7 @@ namespace ElectricalProgressiveTransport
 
             return _interactions;
         }
+        
         public override bool OnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel)
         {
             if (byPlayer == null || blockSel == null) return false;
@@ -65,26 +65,21 @@ namespace ElectricalProgressiveTransport
             string toolCode = activeSlot.Itemstack?.Collectible?.FirstCodePart();
     
             // Логика для контейнера с проверкой на Shift
-
-                // Для контейнеров - открываем только при зажатом Shift
-                if (byPlayer.Entity.Controls.Sneak)
+            if (byPlayer.Entity.Controls.Sneak)
+            {
+                var blockEntity = world.BlockAccessor.GetBlockEntity(blockSel.Position);
+                if (blockEntity is BlockEntityOpenableContainer openableContainer)
                 {
-                    var blockEntity = world.BlockAccessor.GetBlockEntity(blockSel.Position);
-                    if (blockEntity is BlockEntityOpenableContainer openableContainer)
-                    {
-                        openableContainer.OnPlayerRightClick(byPlayer, blockSel);
-                        return true;
-                    }
+                    openableContainer.OnPlayerRightClick(byPlayer, blockSel);
+                    return true;
                 }
-
+            }
     
             // Логика для трубы с проверкой на ключ
-
-                // Проверяем, что в руке ключ (проверяем по FirstCodePart)
-                if (toolCode == "wrench")
-                {
-                    return TransformPipeType(world, blockSel.Position, byPlayer);
-                }
+            if (toolCode == "wrench")
+            {
+                return TransformPipeType(world, blockSel.Position, byPlayer);
+            }
 
             return base.OnBlockInteractStart(world, byPlayer, blockSel);
         }
@@ -125,7 +120,7 @@ namespace ElectricalProgressiveTransport
     
             // Обновляем и проигрываем звук
             world.BlockAccessor.MarkBlockDirty(pos);
-            world.PlaySoundAt(new AssetLocation("sounds/effect/tooluse"), pos.X, pos.Y, pos.Z, player);
+            world.PlaySoundAt(new AssetLocation("game:sounds/effect/tooluse"), pos.X, pos.Y, pos.Z, player);
     
             return true;
         }
@@ -134,23 +129,61 @@ namespace ElectricalProgressiveTransport
         {
             base.OnNeighbourBlockChange(world, pos, neibpos);
             
-            BEPipe pipe = world.BlockAccessor.GetBlockEntity(pos) as BEPipe;
-            pipe?.UpdateConnections();
+            // Обновляем все трубы в радиусе 1 блока
+            UpdateNearbyPipes(world, pos);
+            
+            // Также обновляем трубу на позиции neibpos, если это труба
+            if (world.BlockAccessor.GetBlock(neibpos) is BlockPipeBase)
+            {
+                UpdateNearbyPipes(world, neibpos);
+            }
+        }
+        
+        private void UpdateNearbyPipes(IWorldAccessor world, BlockPos centerPos)
+        {
+            // Обновляем все трубы в радиусе 1 блока от центра
+            for (int i = 0; i < 6; i++)
+            {
+                BlockFacing facing = BlockFacing.ALLFACES[i];
+                BlockPos checkPos = centerPos.AddCopy(facing);
+                
+                // Обновляем трубы
+                if (world.BlockAccessor.GetBlockEntity(checkPos) is BEPipe pipe)
+                {
+                    pipe.UpdateConnections();
+                }
+                else if (world.BlockAccessor.GetBlockEntity(checkPos) is BEInsertionPipe inserter)
+                {
+                    inserter.UpdateConnections();
+                }
+                else if (world.BlockAccessor.GetBlockEntity(checkPos) is BELiquidInsertionPipe liquidInserter)
+                {
+                    liquidInserter.UpdateConnections();
+                }
+            }
         }
         
         public override void OnBlockPlaced(IWorldAccessor world, BlockPos blockPos, ItemStack byItemStack = null)
         {
             base.OnBlockPlaced(world, blockPos, byItemStack);
             
-            BEPipe pipe = world.BlockAccessor.GetBlockEntity(blockPos) as BEPipe;
-            if (pipe != null)
+            // Отложенное обновление соединений (после того как блок будет полностью размещен)
+            world.RegisterCallback((dt) => 
             {
-                world.RegisterCallback((dt) => 
+                if (world.BlockAccessor.GetBlockEntity(blockPos) is BEPipe pipe)
                 {
                     pipe.UpdateConnections();
-                }, 50);
-            }
+                    UpdateNearbyPipes(world, blockPos);
+                }
+            }, 50);
         }
         
+        public override void OnBlockRemoved(IWorldAccessor world, BlockPos pos)
+        {
+            base.OnBlockRemoved(world, pos);
+            
+            // Обновляем соседние трубы после удаления
+            UpdateNearbyPipes(world, pos);
+        }
     }
 }
