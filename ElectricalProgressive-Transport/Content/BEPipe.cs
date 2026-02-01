@@ -6,6 +6,7 @@ using Vintagestory.API.MathTools;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using Vintagestory.GameContent;
 
 namespace ElectricalProgressiveTransport
 {
@@ -13,9 +14,11 @@ namespace ElectricalProgressiveTransport
     {
         protected bool[] connectedSides = new bool[6];
         protected BlockPos?[] connectedPipes = new BlockPos?[6];
+        protected bool[] connectedToInventory = new bool[6];
         protected PipeNetworkManager networkManager;
 
         public bool[] ConnectedSides => connectedSides;
+        public bool[] ConnectedToInventory => connectedToInventory;
 
         public override void Initialize(ICoreAPI api)
         {
@@ -40,11 +43,13 @@ namespace ElectricalProgressiveTransport
             {
                 connectedSides[i] = false;
                 connectedPipes[i] = null;
+                connectedToInventory[i] = false;
             }
 
             int connectionsFound = 0;
+            int inventoryConnectionsFound = 0;
 
-            // Проверяем все 6 сторон на наличие труб
+            // Проверяем все 6 сторон на наличие труб и блоков с инвентарем
             for (int i = 0; i < 6; i++)
             {
                 BlockFacing facing = BlockFacing.ALLFACES[i];
@@ -58,26 +63,56 @@ namespace ElectricalProgressiveTransport
                     Api.Logger.Notification($"Проверяем сторону {facing.Code}: блок {neighborBlock?.Code}");
                 }
 
-                // ПРОВЕРЯЕМ: является ли соседний блок любой трубой
+                bool isConnected = false;
+                bool isInventoryConnection = false;
+                BlockPos? connectedPos = null;
+
+                // 1. Проверка на трубу
                 if (IsPipeBlock(neighborBlock))
+                {
+                    isConnected = true;
+                    connectedPos = checkPos.Copy();
+                    isInventoryConnection = false;
+                }
+                // 2. Проверка на блок с инвентарем (как в BEInsertionPipe!)
+                else if (HasValidInventoryBlock(checkPos))
+                {
+                    isConnected = true;
+                    connectedPos = checkPos.Copy();
+                    isInventoryConnection = true;
+                    inventoryConnectionsFound++;
+                }
+
+                if (isConnected)
                 {
                     connectionsFound++;
                     connectedSides[i] = true;
-                    connectedPipes[i] = checkPos.Copy();
+                    connectedPipes[i] = connectedPos;
+                    connectedToInventory[i] = isInventoryConnection;
 
                     if (Api?.Side == EnumAppSide.Server)
                     {
-                        Api.Logger.Notification($"Найдено соединение с {checkPos}");
+                        if (isInventoryConnection)
+                        {
+                            Api.Logger.Notification($"Найдено соединение с инвентарем на {checkPos}");
+                        }
+                        else
+                        {
+                            Api.Logger.Notification($"Найдено соединение с трубой на {checkPos}");
+                        }
                     }
 
-                    // Обновляем соединение у соседа
-                    UpdateNeighborConnection(checkPos, facing.Opposite);
+                    // Обновляем соединение у соседа (только если это труба)
+                    if (!isInventoryConnection)
+                    {
+                        UpdateNeighborConnection(checkPos, facing.Opposite);
+                    }
                 }
             }
 
             if (Api?.Side == EnumAppSide.Server)
             {
-                Api.Logger.Notification($"Всего соединений: {connectionsFound}");
+                Api.Logger.Notification($"Всего соединений: {connectionsFound}, из них с инвентарями: {inventoryConnectionsFound}");
             }
 
             // Обновляем модель после изменения соединений
@@ -95,11 +130,156 @@ namespace ElectricalProgressiveTransport
             return code.Contains("pipe"); // Все блоки с "pipe" в названии
         }
 
+        private bool HasValidInventoryBlock(BlockPos pos)
+        {
+            if (Api == null) return false;
+
+            try
+            {
+                // Получаем блок
+                Block block = Api.World.BlockAccessor.GetBlock(pos);
+                if (block == null) return false;
+
+                // ПЕРВЫЙ СПОСОБ: как в BEInsertionPipe - проверка на BlockEntityContainer
+                BlockEntityContainer container = block.GetBlockEntity<BlockEntityContainer>(pos);
+                if (container != null)
+                {
+                    // Проверяем, что у контейнера есть инвентарь
+                    if (container.Inventory != null && container.Inventory.Count > 0)
+                    {
+                        return true;
+                    }
+                }
+
+                // ВТОРОЙ СПОСОБ: Получаем BlockEntity и проверяем несколько интерфейсов
+                var blockEntity = Api.World.BlockAccessor.GetBlockEntity(pos);
+
+                if (blockEntity != null)
+                {
+                    // Как в BEInsertionPipe.GetInventoryFromBlockEntity()
+                    // 1. Проверка на BlockEntityContainer
+                    if (blockEntity is BlockEntityContainer bec)
+                    {
+                        return bec.Inventory != null && bec.Inventory.Count > 0;
+                    }
+
+                    // 2. Проверка на IBlockEntityContainer
+                    if (blockEntity is IBlockEntityContainer ibec)
+                    {
+                        return ibec.Inventory != null && ibec.Inventory.Count > 0;
+                    }
+
+                    // 3. Проверка на IInventory
+                    if (blockEntity is IInventory inventory)
+                    {
+                        return inventory.Count > 0;
+                    }
+
+                    // 4. Рефлексия для поиска Inventory свойства
+                    try
+                    {
+                        var prop = blockEntity.GetType().GetProperty("Inventory");
+                        if (prop != null)
+                        {
+                            var invValue = prop.GetValue(blockEntity) as IInventory;
+                            return invValue != null && invValue.Count > 0;
+                        }
+                    }
+                    catch { }
+                }
+
+                // ТРЕТИЙ СПОСОБ: Проверка по коду блока (для блоков, которые могут не иметь BlockEntity)
+                string code = block.Code?.ToString() ?? "";
+
+                // Список блоков с инвентарем, которые точно должны соединяться
+                string[] inventoryKeywords = new string[]
+                {
+                    "chest", "crate", "box", "barrel", "shelf",
+                    "hopper", "funnel", "container", "storage",
+                    "cabinet", "drawer", "bin", "basket", "bag",
+                    "vessel", "pot", "jar", "tub", "tank", "tub",
+                    "mill", "quern", "press", "forge", "crucible",
+                    "machine", "machinebase", "generator", "machinerack"
+                };
+
+                foreach (var keyword in inventoryKeywords)
+                {
+                    if (code.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Api?.Logger?.Error($"Ошибка при проверке инвентаря в позиции {pos}: {ex.Message}");
+                return false;
+            }
+        }
+
+        // Упрощенная версия GetInventoryFromBlockEntity из BEInsertionPipe
+        public static IInventory GetInventoryFromBlockEntity(BlockEntity be)
+        {
+            if (be == null) return null;
+
+            // 1. BlockEntityContainer
+            if (be is BlockEntityContainer container)
+            {
+                return container.Inventory;
+            }
+
+            // 2. IBlockEntityContainer
+            if (be is IBlockEntityContainer icon)
+            {
+                return icon.Inventory;
+            }
+
+            // 3. IInventory
+            if (be is IInventory inventory)
+            {
+                return inventory;
+            }
+
+            // 4. Рефлексия
+            try
+            {
+                var prop = be.GetType().GetProperty("Inventory");
+                if (prop != null)
+                {
+                    return prop.GetValue(be) as IInventory;
+                }
+            }
+            catch { }
+
+            return null;
+        }
+
+        // Получение инвентаря из позиции (комбинированный метод)
+        public IInventory GetInventoryAtPosition(BlockPos pos)
+        {
+            if (Api == null) return null;
+
+            // Сначала пытаемся получить BlockEntityContainer
+            Block block = Api.World.BlockAccessor.GetBlock(pos);
+            BlockEntityContainer container = block?.GetBlockEntity<BlockEntityContainer>(pos);
+
+            if (container != null)
+            {
+                return container.Inventory;
+            }
+
+            // Затем общий подход через GetInventoryFromBlockEntity
+            var blockEntity = Api.World.BlockAccessor.GetBlockEntity(pos);
+            return GetInventoryFromBlockEntity(blockEntity);
+        }
+
         private void UpdateNeighborConnection(BlockPos neighborPos, BlockFacing fromDirection)
         {
             if (Api.World.BlockAccessor.GetBlockEntity(neighborPos) is BEPipe neighborPipe)
             {
-                neighborPipe.UpdateSingleConnection(fromDirection, Pos);
+                neighborPipe.UpdateSingleConnection(fromDirection, Pos, false);
             }
             else if (Api.World.BlockAccessor.GetBlockEntity(neighborPos) is BEInsertionPipe neighborInserter)
             {
@@ -111,11 +291,12 @@ namespace ElectricalProgressiveTransport
             }
         }
 
-        public void UpdateSingleConnection(BlockFacing side, BlockPos fromPos)
+        public void UpdateSingleConnection(BlockFacing side, BlockPos fromPos, bool fromInventory = false)
         {
             int index = side.Index;
             connectedSides[index] = true;
             connectedPipes[index] = fromPos.Copy();
+            connectedToInventory[index] = fromInventory;
 
             // Обновляем модель
             UpdateBlockModel();
@@ -418,7 +599,7 @@ namespace ElectricalProgressiveTransport
             string side2 = sortedCodes[1];
             string side3 = sortedCodes[2];
             string key = $"{side1}-{side2}-{side3}";
-
+            Api.Logger.Notification($"  Отсортированные коды: {side1}, {side2}, {side3}");
             // Все возможные комбинации 3 сторон
             switch (key)
             {
@@ -433,6 +614,12 @@ namespace ElectricalProgressiveTransport
                 case "down-north-south": return "tee-dn";     // ножка: вниз (линия север-юг)
                 case "east-up-west": return "tee-uw";     // ножка: вверх (линия восток-запад)
                 case "down-east-west": return "tee-dw";     // ножка: вниз (линия восток-запад)
+
+                // 3. ГОРИЗОНТАЛЬНЫЕ Т с вертикальной линией (4 типа) - ножка горизонтальная, линия вертикальная
+                case "down-east-up": return "tee-eh";     // ножка: восток (линия верх-низ)
+                case "down-north-up": return "tee-nh";     // ножка: север (линия верх-низ)
+                case "down-south-up": return "tee-sh";     // ножка: юг (линия верх-низ)
+                case "down-up-west": return "tee-wh";     // ножка: запад (линия верх-низ)
                 default: return "cross";
             }
         }
@@ -697,12 +884,23 @@ namespace ElectricalProgressiveTransport
         public void GetBlockInfo(StringBuilder sb)
         {
             int connections = 0;
+            int inventoryConnections = 0;
+
             for (int i = 0; i < 6; i++)
             {
-                if (connectedSides[i]) connections++;
+                if (connectedSides[i])
+                {
+                    connections++;
+                    if (connectedToInventory[i]) inventoryConnections++;
+                }
             }
 
             sb.AppendLine(Lang.Get("electricalprogressivetransport:connections", connections));
+
+            if (inventoryConnections > 0)
+            {
+                sb.AppendLine(Lang.Get("electricalprogressivetransport:inventory-connections", inventoryConnections));
+            }
 
             if (networkManager != null)
             {
@@ -713,9 +911,7 @@ namespace ElectricalProgressiveTransport
                     sb.AppendLine(Lang.Get("electricalprogressivetransport:inserters", network.Inserters.Count));
                 }
             }
-
         }
-
 
         public override void OnBlockPlaced(ItemStack byItemStack = null)
         {
@@ -728,7 +924,7 @@ namespace ElectricalProgressiveTransport
             // Разрываем соединения с соседями
             for (int i = 0; i < 6; i++)
             {
-                if (connectedSides[i] && connectedPipes[i] != null)
+                if (connectedSides[i] && connectedPipes[i] != null && !connectedToInventory[i])
                 {
                     BreakNeighborConnection(connectedPipes[i]!, BlockFacing.ALLFACES[i]);
                 }
@@ -761,17 +957,44 @@ namespace ElectricalProgressiveTransport
             int index = side.Index;
             connectedSides[index] = false;
             connectedPipes[index] = null;
+            connectedToInventory[index] = false;
 
             // Обновляем модель после разрыва соединения
             UpdateBlockModel();
 
             MarkDirty();
         }
+        /// <summary>
+        /// Получает список всех блоков с инвентарем, соединенных с этой трубой
+        /// </summary>
+        public List<BlockPos> GetConnectedInventories()
+        {
+            List<BlockPos> inventories = new List<BlockPos>();
+
+            for (int i = 0; i < 6; i++)
+            {
+                if (connectedSides[i] && connectedToInventory[i] && connectedPipes[i] != null)
+                {
+                    inventories.Add((BlockPos)connectedPipes[i]);
+                }
+            }
+
+            return inventories;
+        }
+
+        /// <summary>
+        /// Получает инвентарь из подключенной позиции
+        /// </summary>
+        public IInventory GetConnectedInventory(BlockPos inventoryPos)
+        {
+            return GetInventoryAtPosition(inventoryPos);
+        }
 
         public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
         {
             base.FromTreeAttributes(tree, worldAccessForResolve);
 
+            // Загружаем соединения
             byte[] connBytes = tree.GetBytes("connections", null);
             if (connBytes != null && connBytes.Length == 6)
             {
@@ -780,18 +1003,37 @@ namespace ElectricalProgressiveTransport
                     connectedSides[i] = connBytes[i] == 1;
                 }
             }
+
+            // Загружаем информацию о соединениях с инвентарем
+            byte[] invConnBytes = tree.GetBytes("inventoryConnections", null);
+            if (invConnBytes != null && invConnBytes.Length == 6)
+            {
+                for (int i = 0; i < 6; i++)
+                {
+                    connectedToInventory[i] = invConnBytes[i] == 1;
+                }
+            }
         }
 
         public override void ToTreeAttributes(ITreeAttribute tree)
         {
             base.ToTreeAttributes(tree);
 
+            // Сохраняем соединения
             byte[] connBytes = new byte[6];
             for (int i = 0; i < 6; i++)
             {
                 connBytes[i] = (byte)(connectedSides[i] ? 1 : 0);
             }
             tree.SetBytes("connections", connBytes);
+
+            // Сохраняем информацию о соединениях с инвентарем
+            byte[] invConnBytes = new byte[6];
+            for (int i = 0; i < 6; i++)
+            {
+                invConnBytes[i] = (byte)(connectedToInventory[i] ? 1 : 0);
+            }
+            tree.SetBytes("inventoryConnections", invConnBytes);
         }
     }
 }

@@ -29,6 +29,10 @@
         "tee-uw",
         "tee-dn",
         "tee-dw",
+        "tee-eh",
+        "tee-nh",
+        "tee-sh",
+        "tee-wh",
         "triple-neu",
         "triple-seu",
         "triple-swu",
@@ -179,30 +183,51 @@
       "base": "block/pipe/tee",
       "rotateY": 270
     },
-    // === Т-ОБРАЗНЫЕ СОЕДИНЕНИЯ (вертикальные с горизонтальной ориентацией) ===
+    // ВЕРТИКАЛЬНЫЕ Т с горизонтальной линией (4 типа) - ножка вертикальная, линия горизонтальная
     "*-tee-un": {
       "base": "block/pipe/tee",
       "rotateX": 90,
       "rotateY": 0,
       "rotateZ": 90
-    }, // Вертикаль вверх, горизонталь север-юг
+    },
     "*-tee-uw": {
       "base": "block/pipe/tee",
       "rotateY": 0,
       "rotateX": 90,
       "rotateZ": 0
-    }, // Вертикаль вверх, горизонталь восток-запад
+    },
     "*-tee-dn": {
       "base": "block/pipe/tee",
       "rotateY": 0,
       "rotateX": 270,
       "rotateZ": 90
-    }, // Вертикаль вниз, горизонталь север-юг
+    },
     "*-tee-dw": {
       "base": "block/pipe/tee",
+      "rotateY": 0,
+      "rotateX": 270
+    },
+    //ГОРИЗОНТАЛЬНЫЕ Т с вертикальной линией (4 типа) - ножка горизонтальная, линия вертикальная
+    "*-tee-nh": {
+      "base": "block/pipe/tee",
+      "rotateY": 0,
+      "rotateZ": 90
+    },
+    "*-tee-eh": {
+      "base": "block/pipe/tee",
       "rotateY": 270,
-      "rotateZ": 0
-    }, // Вертикаль вниз, горизонталь восток-запад
+      "rotateZ": 90
+    },
+    "*-tee-sh": {
+      "base": "block/pipe/tee",
+      "rotateX": 180,
+      "rotateZ": 90
+    },
+    "*-tee-wh": {
+      "base": "block/pipe/tee",
+      "rotateY": 90,
+      "rotateZ": 90
+    },
 
     // === ТРОЙНЫЕ УГЛЫ ===
     "*-triple-neu": {
