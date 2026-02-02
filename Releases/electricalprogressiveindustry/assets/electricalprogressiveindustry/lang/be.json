@@ -1,0 +1,45 @@
+{
+  "electricalprogressiveindustry:recipeloading": "Рэцэпт паспяхова загружаны",
+  "electricalprogressiveindustry:blockhelp-pickup": "Падняць",
+
+  "block-ecentrifuge-*": "Перапрацоўшчык",
+  "block-handbooktitle-ecentrifuge": "Выкарыстанне",
+  "block-handbooktext-ecentrifuge": "Дазваляе здрабняць і перапрацоўваць усю ежу і прадукты, што псуюцца, наўпрост у кампост. Колькасць атрыманага кампосту ў два разы меншая за ванільны спосаб. Таксама падтрымлівае карыстальніцкія рэцэпты перапрацоўкі, якія будуць адлюстроўвацца ў апісанні прылады і самога прадмета.<br>Падтрымлівае аўтаматычную загрузку і выгрузку праз жалабы.",
+
+  "block-ehammer-*": "Аўтамалат",
+  "block-handbooktitle-ehammer": "Выкарыстанне",
+  "block-handbooktext-ehammer": "Спрашчае і аўтаматызуе працу на кавадле. Пры перапрацоўцы ёсць шанец атрымаць дадатковыя матэрыялы.<br>Падтрымлівае аўтаматычную загрузку і выгрузку праз жалабы.",
+
+  "block-epress-*": "Аўтапрэс",
+  "block-handbooktitle-epress": "Выкарыстанне",
+  "block-handbooktext-epress": "Дазваляе ствараць пэўныя прадметы метадам экструзіі з выкарыстаннем формы.<br>Падтрымлівае аўтаматычную загрузку і выгрузку праз жалабы.",
+
+  "block-edrawing-*": "Валачыльны стан",
+  "block-handbooktitle-edrawing": "Выкарыстанне",
+  "block-handbooktext-edrawing": "Дазваляе ствараць пэўныя прадметы шляхам працягвання металу праз валакі, надаючы яму патрэбную форму.<br>Падтрымлівае аўтаматычную загрузку і выгрузку праз жалабы.",
+
+  "game:ewoodcutter-title-gui": "Электрычны дрэвасек",
+  "block-ewoodcutter-normal": "Электрычны дрэвасек",
+  "block-ewoodcutter-normal-burned": "Электрычны дрэвасек (згарэлы)",
+  "game:ecentrifuge-title-gui": "Перапрацоўшчык",
+  "game:ehammer-title-gui": "Аўтамалат",
+  "game:epress-title-gui": "Аўтапрэс",
+  "game:edrawing-title-gui": "Валачыльны стан",
+
+  "block-pressform-axe": "Форма для прэсавання сякеры",
+  "block-pressform-pickaxe": "Форма для прэсавання кірхі",
+  "block-pressform-shovel": "Форма для прэсавання рыдлёўкі",
+  "block-pressform-falx": "Форма для прэсавання фалкса",
+  "block-pressform-hammer": "Форма для прэсавання молата",
+  "block-pressform-hoe": "Форма для прэсавання матыкі",
+  "block-pressform-prospectingpick": "Форма для прэсавання геалагічнай кірхі",
+
+  "block-gauge-32v": "Валака для кабеля 32В",
+  "block-gauge-128v": "Валака для кабеля 128В",
+
+  "electricalprogressive:produced-in": "Перапрацоўваецца ў:",
+  "electricalprogressive:energy-required": "Патрабуецца энергіі",
+  "electricalprogressive:energy-unit": "Дж",
+  "electricalprogressive:recipe-chance": "~{0}%",
+  "electricalprogressive:chance": "шанец"
+}
