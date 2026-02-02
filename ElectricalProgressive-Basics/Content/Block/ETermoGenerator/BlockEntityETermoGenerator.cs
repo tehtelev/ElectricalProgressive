@@ -182,8 +182,8 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
                 Animation = "open",
                 Code = "open",
                 AnimationSpeed = 1.4f,
-                EaseOutSpeed = 6,
-                EaseInSpeed = 15
+                EaseOutSpeed = 10,
+                EaseInSpeed = 10
             });
 
             //применяем цвет и яркость
@@ -204,7 +204,6 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
     /// </summary>
     public new void CloseLid()
     {
-
         if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("open") == true)
         {
             AnimUtil?.StopAnimation("open");
@@ -214,8 +213,8 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
                 Animation = "close",
                 Code = "close",
                 AnimationSpeed = 1.4f,
-                EaseOutSpeed = 6,
-                EaseInSpeed = 15
+                EaseOutSpeed = 10,
+                EaseInSpeed = 10
             });
 
             //применяем цвет и яркость
@@ -242,7 +241,7 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
                 Animation = "work-on",
                 Code = "work-on",
                 AnimationSpeed = 1f,
-                EaseOutSpeed = 6,
+                EaseOutSpeed = 15,
                 EaseInSpeed = 15
             });
 

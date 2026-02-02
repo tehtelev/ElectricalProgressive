@@ -5738,6 +5738,85 @@
 					}
 				}
 			]
+		},
+		{
+			"name": "close",
+			"code": "close",
+			"quantityframes": 41,
+			"onActivityStopped": "Rewind",
+			"onAnimationEnd": "Hold",
+			"keyframes": [
+				{
+					"frame": 0,
+					"elements": {
+						"Cube139": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": -93.5
+						},
+						"DoorBase": {
+							"rotationX": 0.0,
+							"rotationY": -136.0,
+							"rotationZ": 0.0
+						}
+					}
+				},
+				{
+					"frame": 2,
+					"elements": {
+						"Cube139": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": -93.5
+						},
+						"DoorBase": {
+							"rotationX": 0.0,
+							"rotationY": -144.0,
+							"rotationZ": 0.0
+						}
+					}
+				},
+				{
+					"frame": 22,
+					"elements": {
+						"Cube139": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": -93.5
+						},
+						"DoorBase": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": 0.0
+						}
+					}
+				},
+				{
+					"frame": 25,
+					"elements": {
+						"Cube139": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": -93.5
+						}
+					}
+				},
+				{
+					"frame": 40,
+					"elements": {
+						"Cube139": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": 0.0
+						},
+						"DoorBase": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": 0.0
+						}
+					}
+				}
+			]
 		}
 
 		

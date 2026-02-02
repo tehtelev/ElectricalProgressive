@@ -118,15 +118,20 @@ class BlockEntityEFridge : ContainerEFridge, ITexPositionSource
     /// </summary>
     public void OpenLid()
     {
+        if (animUtil?.activeAnimationsByAnimCode.ContainsKey("close") == true)
+        {
+            animUtil?.StopAnimation("close");
+        }
+
         if (animUtil?.activeAnimationsByAnimCode.ContainsKey("open") == false)
         {
             animUtil?.StartAnimation(new AnimationMetaData()
             {
                 Animation = "open",
                 Code = "open",
-                AnimationSpeed = 1.8f,
-                EaseOutSpeed = 6,
-                EaseInSpeed = 6                
+                AnimationSpeed = 1.4f,
+                EaseOutSpeed = 10,
+                EaseInSpeed = 10
             });
 
             //применяем цвет и яркость
@@ -150,6 +155,15 @@ class BlockEntityEFridge : ContainerEFridge, ITexPositionSource
         {
             animUtil?.StopAnimation("open");
 
+            animUtil?.StartAnimation(new AnimationMetaData()
+            {
+                Animation = "close",
+                Code = "close",
+                AnimationSpeed = 1.4f,
+                EaseOutSpeed = 10,
+                EaseInSpeed = 10
+            });
+
             //применяем цвет и яркость
             Block.LightHsv = new byte[] { 7, 7, 0 };
 
@@ -172,8 +186,8 @@ class BlockEntityEFridge : ContainerEFridge, ITexPositionSource
                 Animation = "work-on",
                 Code = "work-on",
                 AnimationSpeed = 1f,
-                EaseOutSpeed = 6,
-                EaseInSpeed = 15
+                EaseOutSpeed = 15,
+                EaseInSpeed = 15,
             });
 
 
@@ -489,7 +503,7 @@ class BlockEntityEFridge : ContainerEFridge, ITexPositionSource
         }
 
         // если анимации нет, то рисуем блок базовый
-        if (animUtil?.activeAnimationsByAnimCode.ContainsKey("open") == false && animUtil?.activeAnimationsByAnimCode.ContainsKey("work-on")==false)
+        if (animUtil?.animator.ActiveAnimationCount == 0)
         {
             return false;
         }
@@ -689,7 +703,7 @@ class BlockEntityEFridge : ContainerEFridge, ITexPositionSource
         bool currentPowered = GetBehavior<BEBehaviorEFridge>().PowerSetting >= _maxConsumption * 0.1F;
         if (currentPowered || _accumulatedColdHours > 0)
         {
-            return 0.05F;
+            return 0.1F;
         }
         return initial;
     }
