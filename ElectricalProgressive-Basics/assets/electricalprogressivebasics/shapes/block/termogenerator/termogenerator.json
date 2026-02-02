@@ -383,24 +383,24 @@
 						{
 							"name": "Cube141",
 							"from": [ 12.0, -1.99, -8.0 ],
-							"to": [ 28.0, 17.01, 2.0 ],
+							"to": [ 28.0, 14.01, 2.0 ],
 							"rotationOrigin": [ 12.0, -2.0, -8.0 ],
 							"faces": {
 								"north": {
 									"texture": "#copper",
-									"uv": [ 0.0, 0.0, 16.0, 19.0 ]
+									"uv": [ 0.0, 0.0, 16.0, 16.0 ]
 								},
 								"east": {
 									"texture": "#copper",
-									"uv": [ 0.0, 0.0, 10.0, 19.0 ]
+									"uv": [ 0.0, 0.0, 10.0, 16.0 ]
 								},
 								"south": {
 									"texture": "#copper",
-									"uv": [ 0.0, 0.0, 16.0, 19.0 ]
+									"uv": [ 0.0, 0.0, 16.0, 16.0 ]
 								},
 								"west": {
 									"texture": "#copper",
-									"uv": [ 0.0, 0.0, 10.0, 19.0 ]
+									"uv": [ 0.0, 0.0, 10.0, 16.0 ]
 								},
 								"up": {
 									"texture": "#copper",
@@ -11081,7 +11081,75 @@
 				}
 			]
 		},
-
+		{
+			"name": "close",
+			"code": "close",
+			"quantityframes": 31,
+			"onActivityStopped": "Rewind",
+			"onAnimationEnd": "Hold",
+			"keyframes": [
+				{
+					"frame": 0,
+					"elements": {
+						"hatchBase": {
+							"rotationX": 0.0,
+							"rotationY": -135.0,
+							"rotationZ": 0.0
+						},
+						"hatchLeverOrg": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": 0.0
+						}
+					}
+				},
+				{
+					"frame": 18,
+					"elements": {
+						"hatchBase": {
+							"rotationX": 0.0,
+							"rotationY": -3.0,
+							"rotationZ": 0.0
+						},
+						"hatchLeverOrg": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": 0.0
+						}
+					}
+				},
+				{
+					"frame": 22,
+					"elements": {
+						"hatchBase": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": 0.0
+						},
+						"hatchLeverOrg": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": 22.5
+						}
+					}
+				},
+				{
+					"frame": 30,
+					"elements": {
+						"hatchBase": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": 0.0
+						},
+						"hatchLeverOrg": {
+							"rotationX": 0.0,
+							"rotationY": 0.0,
+							"rotationZ": 0.0
+						}
+					}
+				}
+			]
+		},
 		{
 			"name": "work-on",
 			"code": "work-on",

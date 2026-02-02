@@ -170,13 +170,18 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
     /// </summary>
     public new void OpenLid()
     {
+        if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("close") == true)
+        {
+            AnimUtil?.StopAnimation("close");
+        }
+
         if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("open") == false)
         {
             AnimUtil?.StartAnimation(new AnimationMetaData()
             {
                 Animation = "open",
                 Code = "open",
-                AnimationSpeed = 1.8f,
+                AnimationSpeed = 1.4f,
                 EaseOutSpeed = 6,
                 EaseInSpeed = 15
             });
@@ -199,9 +204,19 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
     /// </summary>
     public new void CloseLid()
     {
+
         if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("open") == true)
         {
             AnimUtil?.StopAnimation("open");
+
+            AnimUtil?.StartAnimation(new AnimationMetaData()
+            {
+                Animation = "close",
+                Code = "close",
+                AnimationSpeed = 1.4f,
+                EaseOutSpeed = 6,
+                EaseInSpeed = 15
+            });
 
             //применяем цвет и яркость
             Block.LightHsv = new byte[] { 7, 7, 0 };
@@ -441,10 +456,10 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
 
     private static readonly Dictionary<float, Vec3f?> fuelMeshOffset = new()
     {
-        { 180, new Vec3f(0.98f,0.2f,-1.6f) },
-        { 270, new Vec3f(-1.6f,0.2f,-0.98f) },
-        { 0, new Vec3f(-0.98f,0.2f,1.6f) },
-        { 90, new Vec3f(1.6f,0.2f,0.98f) }
+        { 180, new Vec3f(0.98f,0.2f,-1.37f) },
+        { 270, new Vec3f(-1.37f,0.2f,-0.98f) },
+        { 0, new Vec3f(-0.98f,0.2f,1.37f) },
+        { 90, new Vec3f(1.37f,0.2f,0.98f) }
     };
 
 
@@ -494,7 +509,7 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
 
 
         // если анимации нет, то рисуем блок базовый
-        if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("open") == false && AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false)
+        if (AnimUtil?.animator.ActiveAnimationCount==0)
         {
             return false;
         }
