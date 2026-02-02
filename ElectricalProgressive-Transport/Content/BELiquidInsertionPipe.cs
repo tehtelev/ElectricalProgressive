@@ -35,6 +35,15 @@ namespace ElectricalProgressiveTransport
         
         private FilterMode currentFilterMode = FilterMode.AllowList;
         
+        // НАСТРОЙКИ ОСТАНОВКИ ПОРЧИ (ДОБАВЛЕНО)
+        private bool stopPerishEnabled = true; // Останавливать порчу
+        private float perishRateMultiplier = 0f; // Множитель скорости порчи (0 = полная остановка)
+        private bool stopAllTransitions = false; // Останавливать все типы переходов
+        
+        // Кэширование температуры для оптимизации (ДОБАВЛЕНО)
+        private float temperatureCached = -1000f;
+        private long lastTemperatureUpdate = 0;
+        
         // Тайминги
         private Dictionary<BlockPos, long> lastTransferTime = new Dictionary<BlockPos, long>();
         private const long MinTransferInterval = 100;
@@ -45,6 +54,11 @@ namespace ElectricalProgressiveTransport
         public int TransferRate => transferRate;
         public bool[] ConnectedSides => connectedSides;
         public FilterMode CurrentFilterMode => currentFilterMode;
+        
+        // Свойства для остановки порчи (ДОБАВЛЕНО)
+        public bool StopPerishEnabled => stopPerishEnabled;
+        public float PerishRateMultiplier => perishRateMultiplier;
+        public bool StopAllTransitions => stopAllTransitions;
         
         public BELiquidInsertionPipe()
         {
@@ -67,8 +81,121 @@ namespace ElectricalProgressiveTransport
             if (api.Side == EnumAppSide.Server)
             {
                 transferTimer = api.World.RegisterGameTickListener(OnTransferTick, 200);
+                
+                // Также регистрируем тик для обработки порчи (ДОБАВЛЕНО)
+                api.World.RegisterGameTickListener(OnPerishTick, 2000); // Каждые 2 секунды
+            }
+            
+            // Подписываемся на события инвентаря для контроля скорости порчи (ДОБАВЛЕНО)
+            _inventory.OnAcquireTransitionSpeed += OnAcquireTransitionSpeed;
+        }
+
+        #region Методы для остановки порчи (ДОБАВЛЕНО)
+
+        // Обработчик скорости переходных состояний
+        private float OnAcquireTransitionSpeed(EnumTransitionType transType, ItemStack stack, float baseMul)
+        {
+            // Если отключена остановка порчи или предмет не портится
+            if (!stopPerishEnabled || transType != EnumTransitionType.Perish)
+            {
+                // Проверяем, нужно ли останавливать все переходы
+                if (stopAllTransitions && ShouldStopTransition(transType))
+                {
+                    return 0f;
+                }
+                return baseMul;
+            }
+
+            // Применяем множитель скорости порчи
+            return baseMul * perishRateMultiplier;
+        }
+
+        // Проверяет, нужно ли останавливать этот тип перехода
+        private bool ShouldStopTransition(EnumTransitionType transType)
+        {
+            switch (transType)
+            {
+                case EnumTransitionType.Perish:    // Порча
+                case EnumTransitionType.Harden:
+                case EnumTransitionType.Melt:
+                case EnumTransitionType.None:
+                case EnumTransitionType.Burn:
+                case EnumTransitionType.Ripen:     // Созревание
+                case EnumTransitionType.Convert:   // Превращение
+                case EnumTransitionType.Dry:       // Сушка
+                case EnumTransitionType.Cure:      // Выдержка
+                    return true;
+                default:
+                    return false;
             }
         }
+
+        // Тик для обработки порчи
+        private void OnPerishTick(float dt)
+        {
+            if (Api?.Side != EnumAppSide.Server || !stopPerishEnabled)
+                return;
+
+            // Обновляем состояние всех предметов в инвентаре
+            foreach (var slot in _inventory)
+            {
+                if (slot.Itemstack != null)
+                {
+                    var before = slot.Itemstack.Clone();
+                    slot.Itemstack.Collectible.UpdateAndGetTransitionStates(Api.World, slot);
+
+                    // Если предмет изменился, помечаем как грязный
+                    if (!slot.Itemstack.Equals(Api.World, before))
+                    {
+                        MarkDirty();
+                    }
+                }
+            }
+        }
+
+        // Методы для управления настройками порчи
+        public void SetPerishSettings(bool enabled, float multiplier = 0f, bool stopAll = false)
+        {
+            stopPerishEnabled = enabled;
+            perishRateMultiplier = GameMath.Clamp(multiplier, 0f, 10f);
+            stopAllTransitions = stopAll;
+            MarkDirty(true);
+
+            Api?.Logger?.Notification($"=== Настройки порчи обновлены: enabled={enabled}, multiplier={multiplier}, stopAll={stopAll} ===");
+        }
+
+        // Расчет скорости порчи (аналогично ContainerEFreezer)
+        public float GetPerishRate()
+        {
+            if (!stopPerishEnabled || Api == null)
+                return 1f;
+
+            // Если множитель установлен в 0 - полная остановка порчи
+            if (perishRateMultiplier <= 0.001f)
+                return 0f;
+
+            // Используем кэширование температуры для оптимизации
+            long currentTime = Api.World.ElapsedMilliseconds;
+            if (currentTime - lastTemperatureUpdate > 10000 || temperatureCached < -999f)
+            {
+                var sealevelpos = Pos.Copy();
+                sealevelpos.Y = Api.World.SeaLevel;
+
+                temperatureCached = Api.World.BlockAccessor.GetClimateAt(
+                    sealevelpos,
+                    EnumGetClimateMode.ForSuppliedDate_TemperatureOnly,
+                    Api.World.Calendar.TotalDays
+                ).Temperature;
+
+                lastTemperatureUpdate = currentTime;
+            }
+
+            // Применяем наш множитель к базовой скорости
+            float baseRate = Math.Max(0.1f, Math.Min(2.4f, (float)Math.Pow(3, temperatureCached / 19 - 1.2) - 0.1f));
+            return baseRate * perishRateMultiplier;
+        }
+
+        #endregion
         
         public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
         {
@@ -735,6 +862,31 @@ namespace ElectricalProgressiveTransport
             {
                 sb.AppendLine(Lang.Get("electricalprogressivetransport:no-output-facing"));
             }
+            
+            // ДОБАВЛЕНО: Информация о настройках порчи
+            sb.AppendLine("══════════════════════════════════════════");
+            sb.AppendLine(Lang.Get("Настройки сохранения продуктов:"));
+            
+            if (stopPerishEnabled)
+            {
+                if (perishRateMultiplier <= 0.001f)
+                {
+                    sb.AppendLine(Lang.Get("• Порча: полностью остановлена"));
+                }
+                else
+                {
+                    sb.AppendLine(Lang.Get("• Порча: замедлена в {0} раз", Math.Round(1f / perishRateMultiplier, 1)));
+                }
+                
+                if (stopAllTransitions)
+                {
+                    sb.AppendLine(Lang.Get("• Все переходы: остановлены"));
+                }
+            }
+            else
+            {
+                sb.AppendLine(Lang.Get("• Сохранение продуктов: отключено"));
+            }
         }
         
         public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
@@ -753,6 +905,11 @@ namespace ElectricalProgressiveTransport
             transferRate = tree.GetInt("transferRate", 100);
             currentFilterMode = (FilterMode)tree.GetInt("filterMode", 0);
             transferRate = Math.Max(10, Math.Min(transferRate, 1000));
+            
+            // Загружаем настройки порчи (ДОБАВЛЕНО)
+            stopPerishEnabled = tree.GetBool("stopPerishEnabled", true);
+            perishRateMultiplier = tree.GetFloat("perishRateMultiplier", 0f);
+            stopAllTransitions = tree.GetBool("stopAllTransitions", false);
         }
 
         public override void ToTreeAttributes(ITreeAttribute tree)
@@ -768,6 +925,11 @@ namespace ElectricalProgressiveTransport
     
             tree.SetInt("transferRate", transferRate);
             tree.SetInt("filterMode", (int)currentFilterMode);
+            
+            // Сохраняем настройки порчи (ДОБАВЛЕНО)
+            tree.SetBool("stopPerishEnabled", stopPerishEnabled);
+            tree.SetFloat("perishRateMultiplier", perishRateMultiplier);
+            tree.SetBool("stopAllTransitions", stopAllTransitions);
         }
         
         public override void OnReceivedClientPacket(IPlayer player, int packetid, byte[] data)
@@ -802,6 +964,28 @@ namespace ElectricalProgressiveTransport
                     transferRate = newRate;
                     MarkDirty();
                     Api.World.BlockAccessor.MarkBlockDirty(Pos);
+                }
+            }
+            else if (packetid == 2004) // Обновление настроек порчи (НОВЫЙ ПАКЕТ)
+            {
+                try
+                {
+                    var tree = new TreeAttribute();
+                    tree.FromBytes(data);
+                    
+                    bool enabled = tree.GetBool("stopPerishEnabled", true);
+                    float multiplier = tree.GetFloat("perishRateMultiplier", 0f);
+                    bool stopAll = tree.GetBool("stopAllTransitions", false);
+                    
+                    SetPerishSettings(enabled, multiplier, stopAll);
+                    
+                    // Отправляем обновление другим клиентам
+                    MarkDirty();
+                    Api.World.BlockAccessor.MarkBlockDirty(Pos);
+                }
+                catch (Exception ex)
+                {
+                    Api?.Logger?.Error($"Ошибка при обновлении настроек порчи: {ex.Message}");
                 }
             }
         }
@@ -970,7 +1154,7 @@ namespace ElectricalProgressiveTransport
             }
             
             // Сначала проверяем, можно ли вообще положить этот предмет
-            if (!CanHold(sourceSlot))
+            if (!CanHold(sourceSlot)|| op.ShiftDown || op.Modifiers!= null)
             {
                 // Не жидкость - ничего не делаем
                 op.MovedQuantity = 0;

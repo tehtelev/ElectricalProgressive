@@ -6,8 +6,8 @@
     "Tehtelev",
     "Kotl"
   ],
-  "description": "Electrical logic library.",
-  "Version": "2.6.2",
+  "description": "Electrical Progressive addon transport aand logic",
+  "Version": "1.0.0",
   "dependencies": {
     "game": "1.21.0"
   }
