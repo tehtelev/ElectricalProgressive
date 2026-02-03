@@ -1,7 +1,7 @@
 ﻿{
-  "code": "pipe-normal",
-  "class": "BlockPipe",
-  "entityClass": "BEPipe",
+  "code": "pipe-liquid-insertion",
+  "class": "BlockLiquidInsertionPipe",
+  "entityClass": "BELiquidInsertionPipe",
   "variantgroups": [
     {
       "code": "type",
@@ -70,9 +70,9 @@
       ]
     }
   ],
-  "creativeinventory": { "electricalprogressivetransport": [ "*-normal-cross" ] },
+  "creativeinventory": { "electricalprogressivetransport": [ "*-cross" ] },
   "texturesByType": {
-    "*-normal-*": {
+    "*-liquid-*": {
       "bismuthbronze": {
         "base": "game:block/metal/plate/bismuthbronze"
       },
@@ -98,7 +98,7 @@
         "base": "roundblack"
       },
       "itempipe": {
-        "base": "game:block/metal/plate/steel"
+        "base": "liquidpipe"
       }
     }
   },
@@ -119,16 +119,16 @@
   "shapeByType": {
     // === ПРЯМЫЕ ТРУБЫ ===
     "*-straight-ns": {
-      "base": "block/pipe/straight",
+      "base": "block/pipe/straightinserter",
       "rotateY": 90
     },
     "*-straight-ew": {
-      "base": "block/pipe/straight",
+      "base": "block/pipe/straightinserter",
       "rotateY": 0
     },
     "*-straight-ud": {
-      "base": "block/pipe/vertical",
-      "rotateY": 0
+      "base": "block/pipe/straightinserter",
+      "rotateX": 90
     },
 
     // === ГОРИЗОНТАЛЬНЫЕ УГЛЫ ===
@@ -214,7 +214,7 @@
       "base": "block/pipe/tee",
       "rotateY": 270
     },
-    // ВЕРТИКАЛЬНЫЕ Т с горизонтальной линией (4 типа) - ножка вертикальная, линия горизонтальная
+    // ВЕРТИКАЛЬНЫЕ Т с горизонтальной линией
     "*-tee-un": {
       "base": "block/pipe/tee",
       "rotateX": 90,
@@ -238,7 +238,7 @@
       "rotateY": 0,
       "rotateX": 270
     },
-    //ГОРИЗОНТАЛЬНЫЕ Т с вертикальной линией (4 типа) - ножка горизонтальная, линия вертикальная
+    //ГОРИЗОНТАЛЬНЫЕ Т с вертикальной линией
     "*-tee-nh": {
       "base": "block/pipe/tee",
       "rotateY": 0,
@@ -298,131 +298,121 @@
       "rotateY": 90
     },
 
-    // === 4 СОЕДИНЕНИЯ (ОТСУТСТВУЕТ 1 СТОРОНА) ===
-    // Отсутствует одна горизонтальная сторона
+    // === 4 СОЕДИНЕНИЯ ===
     "*-four-n": {
       "base": "block/pipe/four",
       "rotateY": 0
-    }, // Отсутствует север
+    },
     "*-four-e": {
       "base": "block/pipe/four",
       "rotateY": 90
-    }, // Отсутствует восток
+    },
     "*-four-s": {
       "base": "block/pipe/four",
       "rotateY": 180
-    }, // Отсутствует юг
+    },
     "*-four-w": {
       "base": "block/pipe/four",
       "rotateY": 270
-    }, // Отсутствует запад
-
-    // Отсутствует вертикальная сторона (все 4 горизонтальных)
+    },
     "*-four-u": {
       "base": "block/pipe/four",
       "rotateZ": 90
-    }, // Отсутствует верх
+    },
     "*-four-v": {
       "base": "block/pipe/four",
       "rotateX": 90
-    }, // Отсутствует верх
+    },
     "*-four-d": {
       "base": "block/pipe/four",
       "rotateY": 0
-    }, // Отсутствует низ
-
-    // === 4 СОЕДИНЕНИЯ (ОТСУТСТВУЮТ 2 СМЕЖНЫЕ СТОРОНЫ) ===
-    // Отсутствуют две смежные горизонтальные стороны
+    },
     "*-four-nw": {
       "base": "block/pipe/diagonal",
       "rotateY": 270
-    }, // Отсутствуют север и запад
+    },
     "*-four-ne": {
       "base": "block/pipe/diagonal",
       "rotateY": 180
-    }, // Отсутствуют север и восток
+    },
     "*-four-sw": {
       "base": "block/pipe/diagonal",
       "rotateY": 0
-    }, // Отсутствуют юг и запад
+    },
     "*-four-se": {
       "base": "block/pipe/diagonal",
       "rotateY": 90
-    }, // Отсутствуют юг и восток
-
-    // Отсутствует горизонтальная + вертикальная сверху
+    },
     "*-four-nu": {
       "base": "block/pipe/diagonal",
       "rotateY": 180,
       "rotateZ": -90
-    }, // Отсутствуют север и верх
+    },
     "*-four-su": {
       "base": "block/pipe/diagonal",
       "rotateY": 0,
       "rotateZ": -90
-    }, // Отсутствуют юг и верх
+    },
     "*-four-eu": {
       "base": "block/pipe/diagonal",
       "rotateY": 90,
       "rotateX": -90,
       "rotateZ": 0
-    }, // Отсутствуют восток и верх
+    },
     "*-four-wu": {
       "base": "block/pipe/diagonal",
       "rotateY": 0,
       "rotateX": -90
-    }, // Отсутствуют запад и верх
-
-    // Отсутствует горизонтальная + вертикальная снизу
+    },
     "*-four-nd": {
       "base": "block/pipe/diagonal",
       "rotateY": 0,
       "rotateX": 90,
       "rotateZ": 90
-    }, // Отсутствуют север и низ
+    },
     "*-four-sd": {
       "base": "block/pipe/diagonal",
       "rotateY": 0,
       "rotateZ": 90
-    }, // Отсутствуют юг и низ
+    },
     "*-four-ed": {
       "base": "block/pipe/diagonal",
       "rotateY": -180,
       "rotateX": -90
-    }, // Отсутствуют восток и низ
+    },
     "*-four-wd": {
       "base": "block/pipe/diagonal",
       "rotateY": 270,
       "rotateX": -90
-    }, // Отсутствуют запад и низ
+    },
 
     // === 5 СОЕДИНЕНИЙ ===
     "*-five-n": {
       "base": "block/pipe/five",
       "rotateY": 270
-    }, // Отсутствует север
+    },
     "*-five-e": {
       "base": "block/pipe/five",
       "rotateY": 180
-    }, // Отсутствует восток
+    },
     "*-five-s": {
       "base": "block/pipe/five",
       "rotateY": 90
-    }, // Отсутствует юг
+    },
     "*-five-w": {
       "base": "block/pipe/five",
       "rotateY": 0
-    }, // Отсутствует запад
+    },
     "*-five-u": {
       "base": "block/pipe/five",
       "rotateZ": -90,
       "rotateY": 0
-    }, // Отсутствует верх
+    },
     "*-five-d": {
       "base": "block/pipe/five",
       "rotateZ": 90,
       "rotateY": 0
-    }, // Отсутствует низ
+    },
 
     // === КРЕСТОВИНА ===
     "*-cross": {
@@ -430,16 +420,4 @@
       "rotateY": 0
     }
   }
-
-  // Пояснения:
-  // 1. four-n/e/s/w/u/d: отсутствует ОДНА сторона (5 соединений фактически)
-  // 2. four-nw/ne/sw/se: отсутствуют ДВЕ смежные горизонтальные стороны (угловые)
-  // 3. four-nu/su/eu/wu: отсутствует горизонтальная сторона + верх
-  // 4. four-nd/sd/ed/wd: отсутствует горизонтальная сторона + низ
-  //
-  // Для работы с этими моделями нужно создать соответствующие .json модели в assets:
-  // - block/pipe/four-horizontal.json (все 4 горизонтальных соединения)
-  // - block/pipe/four-diagonal.json (2 противоположных горизонтальных + 2 вертикальных)
-  // - block/pipe/four-corner-up.json (3 соединения в форме угла смотрящего вверх)
-  // - block/pipe/four-corner-down.json (3 соединения в форме угла смотрящего вниз)
 }

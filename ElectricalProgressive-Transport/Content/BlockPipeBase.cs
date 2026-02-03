@@ -1,10 +1,10 @@
-﻿using System;
+﻿using ElectricalProgressiveTransport.ItemInsertionPipe;
+using ElectricalProgressiveTransport.LiquidInsertionPipe;
+using ElectricalProgressiveTransport.NormalPipe;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
-using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
@@ -89,7 +89,7 @@ namespace ElectricalProgressiveTransport
             string currentType = this.Code.Path;
             string typeName = currentType.Split('/').Last().Split(':').Last();
     
-            string newType = typeName == "pipe-normal" ? "pipe-insertion" : "pipe-normal";
+            string newType = typeName == "pipe-normal" ? "pipe-item-insertion" : "pipe-normal";
     
             Block newBlock = world.GetBlock(new AssetLocation($"electricalprogressivetransport:{newType}"));
             if (newBlock == null) return false;

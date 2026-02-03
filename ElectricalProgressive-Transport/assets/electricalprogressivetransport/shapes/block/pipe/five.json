@@ -1,6 +1,6 @@
 {
 	"editor": {
-		"collapsedPaths": "Root/TubeBaseDown/TubeAxis7/InvAxT289,Root/TubeBaseSouth/TubeAxis9,Root/InvAxis/GearAxis2/GearAxis4,Root/InvAxis/GearAxis2/GearAxis3,Root/TubeBaseEast/TubeAxis3,Root/TubeBaseDown/TubeAxis7,Root/InvAxis/TubeAxis2/InvAxT/tPart1,Root/TubeBaseTop/TubeAxis5,Root/TubeBaseWest,Root/GearAxis2,Root/TubeBaseNorth,Root/Base,Root/TubeBaseSouth,Root/InvAxis/TubeGAxis,Root/TubeBaseEast,Root/InvAxis/TubeGAxis2,Root/TubeBaseWest/TubeAxis,Root/TubeBaseDown/TubeAxis7/InvAxT291,Root/TubeBaseDown/TubeAxis7/InvAxT290,Root/TubeBaseWest/TubeAxis2,Root/InvAxis/TubeAxis,Root/TubeBaseNorth/TubeAxis11,Root/InvAxis,Root/TubeBaseDown,Root/InvAxis/GearAxis3,Root/InvAxis/GearAxis5,Root/TubeBaseTop",
+		"collapsedPaths": "Root/TubeBaseEast/TubeAxis3,Root/InvAxis/TubeAxis2/InvAxT/tPart1,Root/GearAxis2,Root/TubeBaseNorth,Root/TubeBaseSouth,Root/InvAxis/TubeGAxis,Root/InvAxis/TubeGAxis2,Root/TubeBaseWest/TubeAxis2,Root/InvAxis,Root/TubeBaseDown,Root/TubeBaseDown/TubeAxis7/InvAxT289,Root/TubeBaseSouth/TubeAxis9,Root/InvAxis/GearAxis2/GearAxis4,Root/InvAxis/GearAxis2/GearAxis3,Root/TubeBaseDown/TubeAxis7,Root/TubeBaseTop/TubeAxis5,Root/TubeBaseWest,Root/Base,Root/TubeBaseEast,Root/TubeBaseWest/TubeAxis,Root/TubeBaseDown/TubeAxis7/InvAxT291,Root/TubeBaseDown/TubeAxis7/InvAxT290,Root/InvAxis/TubeAxis,Root/TubeBaseNorth/TubeAxis11,Root/InvAxis/GearAxis3,Root/InvAxis/GearAxis5,Root/TubeBaseTop",
 		"allAngles": true,
 		"entityTextureMode": false
 	},
@@ -16,7 +16,8 @@
 		"iron": "game:block/metal/plate/iron",
 		"steel": "game:block/metal/plate/steel",
 		"steel1": "game:block/metal/sheet/steel1",
-		"RoundBlack": "roundblack"
+		"RoundBlack": "roundblack",
+		"itempipe": "itempipe"
 	},
 	"elements": [
 		{
@@ -25,12 +26,12 @@
 			"to": [ 12.7, 12.7, 12.7 ],
 			"rotationOrigin": [ 8.0, 8.0, 8.0 ],
 			"faces": {
-				"north": { "texture": "#steel", "uv": [ 0.0, 0.0, 9.0, 9.0 ] },
-				"east": { "texture": "#steel", "uv": [ 0.0, 0.0, 9.0, 9.0 ] },
-				"south": { "texture": "#steel", "uv": [ 0.0, 0.0, 9.0, 9.0 ] },
-				"west": { "texture": "#steel", "uv": [ 0.0, 0.0, 9.0, 9.0 ] },
-				"up": { "texture": "#steel", "uv": [ 0.0, 0.0, 9.0, 9.0 ] },
-				"down": { "texture": "#steel", "uv": [ 0.0, 0.0, 9.0, 9.0 ] }
+				"north": { "texture": "#itempipe", "uv": [ 1.0, 1.0, 15.0, 15.0 ], "autoUv": false },
+				"east": { "texture": "#itempipe", "uv": [ 1.0, 1.0, 15.0, 15.0 ], "autoUv": false },
+				"south": { "texture": "#itempipe", "uv": [ 1.0, 1.0, 15.0, 15.0 ], "autoUv": false },
+				"west": { "texture": "#itempipe", "uv": [ 1.0, 1.0, 15.0, 15.0 ], "autoUv": false },
+				"up": { "texture": "#itempipe", "uv": [ 1.0, 1.0, 15.0, 15.0 ], "autoUv": false },
+				"down": { "texture": "#itempipe", "uv": [ 1.0, 1.0, 15.0, 15.0 ], "autoUv": false }
 			},
 			"children": [
 				{

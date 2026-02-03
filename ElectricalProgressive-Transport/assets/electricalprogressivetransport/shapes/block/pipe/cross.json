@@ -16,7 +16,8 @@
 		"iron": "game:block/metal/plate/iron",
 		"steel": "game:block/metal/plate/steel",
 		"steel1": "game:block/metal/sheet/steel1",
-		"RoundBlack": "roundblack"
+		"RoundBlack": "roundblack",
+		"itempipe": "itempipe"
 	},
 	"elements": [
 		{
@@ -25,12 +26,12 @@
 			"to": [ 12.7, 12.7, 12.7 ],
 			"rotationOrigin": [ 8.0, 8.0, 8.0 ],
 			"faces": {
-				"north": { "texture": "#steel", "uv": [ 0.0, 0.0, 9.0, 9.0 ] },
-				"east": { "texture": "#steel", "uv": [ 0.0, 0.0, 9.0, 9.0 ] },
-				"south": { "texture": "#steel", "uv": [ 0.0, 0.0, 9.0, 9.0 ] },
-				"west": { "texture": "#steel", "uv": [ 0.0, 0.0, 9.0, 9.0 ] },
-				"up": { "texture": "#steel", "uv": [ 0.0, 0.0, 9.0, 9.0 ] },
-				"down": { "texture": "#steel", "uv": [ 0.0, 0.0, 9.0, 9.0 ] }
+				"north": { "texture": "#itempipe", "uv": [ 1.0, 1.0, 15.0, 15.0 ], "autoUv": false },
+				"east": { "texture": "#itempipe", "uv": [ 1.0, 1.0, 15.0, 15.0 ], "autoUv": false },
+				"south": { "texture": "#itempipe", "uv": [ 1.0, 1.0, 15.0, 15.0 ], "autoUv": false },
+				"west": { "texture": "#itempipe", "uv": [ 1.0, 1.0, 15.0, 15.0 ], "autoUv": false },
+				"up": { "texture": "#itempipe", "uv": [ 1.0, 1.0, 15.0, 15.0 ], "autoUv": false },
+				"down": { "texture": "#itempipe", "uv": [ 1.0, 1.0, 15.0, 15.0 ], "autoUv": false }
 			},
 			"children": [
 				{

@@ -1,41 +1,65 @@
-﻿using System.Text;
+﻿using ElectricalProgressiveTransport.NetworkPipe;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
-using System.Collections.Generic;
-using System.Linq;
-using System;
 using Vintagestory.GameContent;
 
 namespace ElectricalProgressiveTransport
 {
-    public class BEPipe : BlockEntity
+    /// <summary>
+    /// Базовый класс для всех типов труб (наследуется от контейнера)
+    /// </summary>
+    public class BlockEntityPipeBase : BlockEntityGenericTypedContainer
     {
+        // Основные данные о соединениях
         protected bool[] connectedSides = new bool[6];
         protected BlockPos?[] connectedPipes = new BlockPos?[6];
         protected bool[] connectedToInventory = new bool[6];
-        protected PipeNetworkManager networkManager;
 
+        // Публичные свойства для доступа
         public bool[] ConnectedSides => connectedSides;
         public bool[] ConnectedToInventory => connectedToInventory;
+        public BlockPos?[] ConnectedPipes => connectedPipes;
 
+        // Менеджер сети
+        protected PipeNetworkManager networkManager;
+
+        // Для моделей труб
+        private string currentPipeType = "cross"; // По умолчанию
+
+        // Событие для обновления модели
+        public event Action<string> OnPipeTypeChanged;
+
+        /// <summary>
+        /// Базовый метод инициализации
+        /// </summary>
         public override void Initialize(ICoreAPI api)
         {
+            // Сначала вызываем базовую инициализацию контейнера
             base.Initialize(api);
 
             // Регистрируем трубу в сети
             networkManager = ElectricalProgressiveTransport.Instance?.GetNetworkManager();
             networkManager?.AddPipe(Pos, this);
 
+            // Обновляем соединения
             UpdateConnections();
         }
 
+        /// <summary>
+        /// Основной метод обновления соединений
+        /// </summary>
         public virtual void UpdateConnections()
         {
             if (Api?.Side == EnumAppSide.Server)
             {
-                Api.Logger.Notification($"=== UpdateConnections для трубы на {Pos} ===");
+                Api.Logger.Notification($"=== UpdateConnections для {GetType().Name} на {Pos} ===");
             }
 
             // Сбрасываем все соединения
@@ -74,7 +98,7 @@ namespace ElectricalProgressiveTransport
                     connectedPos = checkPos.Copy();
                     isInventoryConnection = false;
                 }
-                // 2. Проверка на блок с инвентарем (как в BEInsertionPipe!)
+                // 2. Проверка на блок с инвентарем
                 else if (HasValidInventoryBlock(checkPos))
                 {
                     isConnected = true;
@@ -121,16 +145,22 @@ namespace ElectricalProgressiveTransport
             MarkDirty();
         }
 
-        private bool IsPipeBlock(Block block)
+        /// <summary>
+        /// Проверяет, является ли блок трубой
+        /// </summary>
+        protected virtual bool IsPipeBlock(Block block)
         {
             if (block == null) return false;
 
             // Простая проверка по коду блока
             string code = block.Code?.ToString() ?? "";
-            return code.Contains("pipe"); // Все блоки с "pipe" в названии
+            return code.Contains("pipe") || block is BlockPipeBase;
         }
 
-        private bool HasValidInventoryBlock(BlockPos pos)
+        /// <summary>
+        /// Проверяет, есть ли в позиции блок с инвентарем
+        /// </summary>
+        protected virtual bool HasValidInventoryBlock(BlockPos pos)
         {
             if (Api == null) return false;
 
@@ -140,7 +170,7 @@ namespace ElectricalProgressiveTransport
                 Block block = Api.World.BlockAccessor.GetBlock(pos);
                 if (block == null) return false;
 
-                // ПЕРВЫЙ СПОСОБ: как в BEInsertionPipe - проверка на BlockEntityContainer
+                // ПЕРВЫЙ СПОСОБ: проверка на BlockEntityContainer
                 BlockEntityContainer container = block.GetBlockEntity<BlockEntityContainer>(pos);
                 if (container != null)
                 {
@@ -156,7 +186,6 @@ namespace ElectricalProgressiveTransport
 
                 if (blockEntity != null)
                 {
-                    // Как в BEInsertionPipe.GetInventoryFromBlockEntity()
                     // 1. Проверка на BlockEntityContainer
                     if (blockEntity is BlockEntityContainer bec)
                     {
@@ -188,16 +217,16 @@ namespace ElectricalProgressiveTransport
                     catch { }
                 }
 
-                // ТРЕТИЙ СПОСОБ: Проверка по коду блока (для блоков, которые могут не иметь BlockEntity)
+                // ТРЕТИЙ СПОСОБ: Проверка по коду блока
                 string code = block.Code?.ToString() ?? "";
 
-                // Список блоков с инвентарем, которые точно должны соединяться
+                // Список блоков с инвентарем
                 string[] inventoryKeywords = new string[]
                 {
                     "chest", "crate", "box", "barrel", "shelf",
                     "hopper", "funnel", "container", "storage",
                     "cabinet", "drawer", "bin", "basket", "bag",
-                    "vessel", "pot", "jar", "tub", "tank", "tub",
+                    "vessel", "pot", "jar", "tub", "tank",
                     "mill", "quern", "press", "forge", "crucible",
                     "machine", "machinebase", "generator", "machinerack"
                 };
@@ -219,7 +248,9 @@ namespace ElectricalProgressiveTransport
             }
         }
 
-        // Упрощенная версия GetInventoryFromBlockEntity из BEInsertionPipe
+        /// <summary>
+        /// Универсальный метод для получения инвентаря из BlockEntity
+        /// </summary>
         public static IInventory GetInventoryFromBlockEntity(BlockEntity be)
         {
             if (be == null) return null;
@@ -256,7 +287,9 @@ namespace ElectricalProgressiveTransport
             return null;
         }
 
-        // Получение инвентаря из позиции (комбинированный метод)
+        /// <summary>
+        /// Получение инвентаря из позиции
+        /// </summary>
         public IInventory GetInventoryAtPosition(BlockPos pos)
         {
             if (Api == null) return null;
@@ -277,17 +310,9 @@ namespace ElectricalProgressiveTransport
 
         private void UpdateNeighborConnection(BlockPos neighborPos, BlockFacing fromDirection)
         {
-            if (Api.World.BlockAccessor.GetBlockEntity(neighborPos) is BEPipe neighborPipe)
+            if (Api.World.BlockAccessor.GetBlockEntity(neighborPos) is BlockEntityPipeBase neighborPipe)
             {
                 neighborPipe.UpdateSingleConnection(fromDirection, Pos, false);
-            }
-            else if (Api.World.BlockAccessor.GetBlockEntity(neighborPos) is BEInsertionPipe neighborInserter)
-            {
-                neighborInserter.UpdateSingleConnection(fromDirection, Pos);
-            }
-            else if (Api.World.BlockAccessor.GetBlockEntity(neighborPos) is BELiquidInsertionPipe neighborLiquidInserter)
-            {
-                neighborLiquidInserter.UpdateSingleConnection(fromDirection, Pos);
             }
         }
 
@@ -307,7 +332,7 @@ namespace ElectricalProgressiveTransport
         /// <summary>
         /// Автоматически выбирает и устанавливает правильную модель трубы
         /// </summary>
-        public void UpdateBlockModel()
+        public virtual void UpdateBlockModel()
         {
             if (Api == null || Api.Side != EnumAppSide.Server) return;
 
@@ -322,35 +347,45 @@ namespace ElectricalProgressiveTransport
             }
 
             // Определяем тип модели
-            string pipeType = DeterminePipeType(connectedFacings);
+            string newPipeType = DeterminePipeType(connectedFacings);
+
+            // Если тип изменился
+            if (newPipeType != currentPipeType)
+            {
+                currentPipeType = newPipeType;
+
+                // Вызываем событие изменения типа
+                OnPipeTypeChanged?.Invoke(newPipeType);
+
+                // Обновляем визуальное представление
+                UpdateVisualBlockType(newPipeType);
+            }
+        }
+
+        /// <summary>
+        /// Обновляет визуальный тип блока
+        /// </summary>
+        protected virtual void UpdateVisualBlockType(string pipeType)
+        {
+            if (Api == null || Api.Side != EnumAppSide.Server) return;
 
             // Получаем текущий блок
             Block currentBlock = Api.World.BlockAccessor.GetBlock(Pos);
             if (currentBlock == null) return;
 
-            // Создаем правильный код блока
-            string newBlockCodeString = $"electricalprogressivetransport:pipe-normal-{pipeType}";
-            AssetLocation newBlockCode = new AssetLocation(newBlockCodeString);
+            // Определяем базовый код блока (без типа)
+            string baseBlockCode = GetBaseBlockCode();
+            if (string.IsNullOrEmpty(baseBlockCode)) return;
 
-            Api.Logger.Notification($"Пытаемся получить блок: {newBlockCode}");
+            // Создаем правильный код блока
+            string newBlockCodeString = $"{baseBlockCode}-{pipeType}";
+            AssetLocation newBlockCode = new AssetLocation(newBlockCodeString);
 
             Block newBlock = Api.World.GetBlock(newBlockCode);
 
             if (newBlock == null)
             {
-                // Пробуем найти среди всех блоков
                 Api.Logger.Error($"Блок не найден: {newBlockCode}");
-                Api.Logger.Error($"Ищем альтернативы...");
-
-                // Выводим все доступные блоки труб
-                foreach (var block in Api.World.Blocks)
-                {
-                    if (block?.Code?.ToString()?.Contains("pipe-normal") == true)
-                    {
-                        Api.Logger.Notification($"Доступен: {block.Code}");
-                    }
-                }
-
                 return;
             }
 
@@ -365,7 +400,7 @@ namespace ElectricalProgressiveTransport
 
                 // Восстанавливаем данные
                 BlockEntity newEntity = Api.World.BlockAccessor.GetBlockEntity(Pos);
-                if (newEntity is BEPipe newPipe)
+                if (newEntity is BlockEntityPipeBase newPipe)
                 {
                     newPipe.FromTreeAttributes(tree, Api.World);
                     newPipe.MarkDirty();
@@ -374,6 +409,26 @@ namespace ElectricalProgressiveTransport
                 Api.World.BlockAccessor.MarkBlockDirty(Pos);
                 Api.Logger.Notification($"Блок изменен: {currentBlock.Code} -> {newBlock.Code}");
             }
+        }
+
+        /// <summary>
+        /// Получает базовый код блока (без суффикса типа)
+        /// </summary>
+        protected virtual string GetBaseBlockCode()
+        {
+            var currentBlock = Api?.World.BlockAccessor?.GetBlock(Pos);
+            if (currentBlock == null) return null;
+
+            string code = currentBlock.Code.ToString();
+
+            // Убираем суффикс типа (последнюю часть после последнего дефиса)
+            int lastDash = code.LastIndexOf('-');
+            if (lastDash > 0)
+            {
+                return code.Substring(0, lastDash);
+            }
+
+            return code;
         }
 
         /// <summary>
@@ -599,7 +654,7 @@ namespace ElectricalProgressiveTransport
             string side2 = sortedCodes[1];
             string side3 = sortedCodes[2];
             string key = $"{side1}-{side2}-{side3}";
-            Api.Logger.Notification($"  Отсортированные коды: {side1}, {side2}, {side3}");
+
             // Все возможные комбинации 3 сторон
             switch (key)
             {
@@ -881,7 +936,80 @@ namespace ElectricalProgressiveTransport
             };
         }
 
-        public void GetBlockInfo(StringBuilder sb)
+        public void BreakConnection(BlockFacing side)
+        {
+            int index = side.Index;
+            connectedSides[index] = false;
+            connectedPipes[index] = null;
+            connectedToInventory[index] = false;
+
+            // Обновляем модель после разрыва соединения
+            UpdateBlockModel();
+
+            MarkDirty();
+        }
+
+        /// <summary>
+        /// Получает список всех блоков с инвентарем, соединенных с этой трубой
+        /// </summary>
+        public List<BlockPos> GetConnectedInventories()
+        {
+            List<BlockPos> inventories = new List<BlockPos>();
+
+            for (int i = 0; i < 6; i++)
+            {
+                if (connectedSides[i] && connectedToInventory[i] && connectedPipes[i] != null)
+                {
+                    inventories.Add((BlockPos)connectedPipes[i]);
+                }
+            }
+
+            return inventories;
+        }
+
+        /// <summary>
+        /// Получает инвентарь из подключенной позиции
+        /// </summary>
+        public IInventory GetConnectedInventory(BlockPos inventoryPos)
+        {
+            return GetInventoryAtPosition(inventoryPos);
+        }
+
+        public override void OnBlockPlaced(ItemStack byItemStack = null)
+        {
+            base.OnBlockPlaced(byItemStack);
+            UpdateConnections();
+        }
+
+        public override void OnBlockRemoved()
+        {
+            // Разрываем соединения с соседями
+            for (int i = 0; i < 6; i++)
+            {
+                if (connectedSides[i] && connectedPipes[i] != null && !connectedToInventory[i])
+                {
+                    BreakNeighborConnection(connectedPipes[i]!, BlockFacing.ALLFACES[i]);
+                }
+            }
+
+            // Удаляем трубу из сети
+            networkManager?.RemovePipe(Pos);
+
+            base.OnBlockRemoved();
+        }
+
+        private void BreakNeighborConnection(BlockPos neighborPos, BlockFacing direction)
+        {
+            if (Api.World.BlockAccessor.GetBlockEntity(neighborPos) is BlockEntityPipeBase neighborPipe)
+            {
+                neighborPipe.BreakConnection(direction.Opposite);
+            }
+        }
+
+        /// <summary>
+        /// Отображает информацию о соединениях
+        /// </summary>
+        public virtual void GetPipeBlockInfo(StringBuilder sb)
         {
             int connections = 0;
             int inventoryConnections = 0;
@@ -913,83 +1041,6 @@ namespace ElectricalProgressiveTransport
             }
         }
 
-        public override void OnBlockPlaced(ItemStack byItemStack = null)
-        {
-            base.OnBlockPlaced(byItemStack);
-            UpdateConnections();
-        }
-
-        public override void OnBlockRemoved()
-        {
-            // Разрываем соединения с соседями
-            for (int i = 0; i < 6; i++)
-            {
-                if (connectedSides[i] && connectedPipes[i] != null && !connectedToInventory[i])
-                {
-                    BreakNeighborConnection(connectedPipes[i]!, BlockFacing.ALLFACES[i]);
-                }
-            }
-
-            // Удаляем трубу из сети
-            networkManager?.RemovePipe(Pos);
-
-            base.OnBlockRemoved();
-        }
-
-        private void BreakNeighborConnection(BlockPos neighborPos, BlockFacing direction)
-        {
-            if (Api.World.BlockAccessor.GetBlockEntity(neighborPos) is BEPipe neighborPipe)
-            {
-                neighborPipe.BreakConnection(direction.Opposite);
-            }
-            else if (Api.World.BlockAccessor.GetBlockEntity(neighborPos) is BEInsertionPipe neighborInserter)
-            {
-                neighborInserter.BreakConnection(direction.Opposite);
-            }
-            else if (Api.World.BlockAccessor.GetBlockEntity(neighborPos) is BELiquidInsertionPipe neighborLiquidInserter)
-            {
-                neighborLiquidInserter.BreakConnection(direction.Opposite);
-            }
-        }
-
-        public void BreakConnection(BlockFacing side)
-        {
-            int index = side.Index;
-            connectedSides[index] = false;
-            connectedPipes[index] = null;
-            connectedToInventory[index] = false;
-
-            // Обновляем модель после разрыва соединения
-            UpdateBlockModel();
-
-            MarkDirty();
-        }
-        /// <summary>
-        /// Получает список всех блоков с инвентарем, соединенных с этой трубой
-        /// </summary>
-        public List<BlockPos> GetConnectedInventories()
-        {
-            List<BlockPos> inventories = new List<BlockPos>();
-
-            for (int i = 0; i < 6; i++)
-            {
-                if (connectedSides[i] && connectedToInventory[i] && connectedPipes[i] != null)
-                {
-                    inventories.Add((BlockPos)connectedPipes[i]);
-                }
-            }
-
-            return inventories;
-        }
-
-        /// <summary>
-        /// Получает инвентарь из подключенной позиции
-        /// </summary>
-        public IInventory GetConnectedInventory(BlockPos inventoryPos)
-        {
-            return GetInventoryAtPosition(inventoryPos);
-        }
-
         public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
         {
             base.FromTreeAttributes(tree, worldAccessForResolve);
@@ -1013,6 +1064,9 @@ namespace ElectricalProgressiveTransport
                     connectedToInventory[i] = invConnBytes[i] == 1;
                 }
             }
+
+            // Загружаем текущий тип трубы
+            currentPipeType = tree.GetString("currentPipeType", "cross");
         }
 
         public override void ToTreeAttributes(ITreeAttribute tree)
@@ -1034,6 +1088,18 @@ namespace ElectricalProgressiveTransport
                 invConnBytes[i] = (byte)(connectedToInventory[i] ? 1 : 0);
             }
             tree.SetBytes("inventoryConnections", invConnBytes);
+
+            // Сохраняем текущий тип трубы
+            tree.SetString("currentPipeType", currentPipeType);
+        }
+
+        /// <summary>
+        /// Метод для получения информации о блоке
+        /// </summary>
+        public override void GetBlockInfo(IPlayer forPlayer, StringBuilder sb)
+        {
+            base.GetBlockInfo(forPlayer, sb);
+            GetPipeBlockInfo(sb);
         }
     }
 }
