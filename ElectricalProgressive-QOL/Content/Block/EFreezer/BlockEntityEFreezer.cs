@@ -583,8 +583,8 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
             return;
 
         _inventory.AfterBlocksLoaded(Api.World);
-        if (Api.Side == EnumAppSide.Client)
-            UpdateMeshes();
+        //if (Api.Side == EnumAppSide.Client)
+        //    UpdateMeshes();
     }
 
     public override void ToTreeAttributes(ITreeAttribute tree)

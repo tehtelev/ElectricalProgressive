@@ -61,7 +61,7 @@ public abstract class ContainerEFreezer : BlockEntityEBase, IBlockEntityContaine
 
     private void Inventory_OnInventoryOpenedClient(IPlayer player)
     {
-        OnTick(1);
+        OnTick(1000);
     }
 
 

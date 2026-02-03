@@ -282,7 +282,7 @@ namespace ElectricalProgressive.Content.Block.EHeater
 
         public override WorldInteraction[] GetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection selection, IPlayer forPlayer)
         {
-            return _interactions.Append(base.GetPlacedBlockInteractionHelp(world, selection, forPlayer));
+            return _interactions; // такой вариант самый производительный
         }
 
 

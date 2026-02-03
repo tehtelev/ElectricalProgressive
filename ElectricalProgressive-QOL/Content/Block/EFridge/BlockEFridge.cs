@@ -1,4 +1,5 @@
 ﻿using ElectricalProgressive.Utils;
+using System.Collections.Generic;
 using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -11,6 +12,23 @@ namespace ElectricalProgressive.Content.Block.EFridge;
 class BlockEFridge : BlockEBase
 {
     private BlockEntityEFridge? _blockEntityEFreezer;
+
+
+    private WorldInteraction[]? _interactions;
+
+    public override void OnLoaded(ICoreAPI api)
+    {
+        base.OnLoaded(api);
+
+        _interactions = ObjectCacheUtil.GetOrCreate(api, "freezerBlockInteractions", () =>
+        {
+            return new[]
+            {
+                new WorldInteraction { ActionLangCode = "freezer-over-help", MouseButton = EnumMouseButton.Right, }
+            };
+        });
+    }
+
 
     public override bool OnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel)
     {
@@ -57,14 +75,7 @@ class BlockEFridge : BlockEBase
 
     public override WorldInteraction[] GetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection selection, IPlayer forPlayer)
     {
-        return new[]
-        {
-            new WorldInteraction
-            {
-                ActionLangCode = "freezer-over-help",
-                MouseButton = EnumMouseButton.Right,
-            }
-        }.Append(base.GetPlacedBlockInteractionHelp(world, selection, forPlayer));
+        return _interactions; // такой вариант самый производительный
     }
 
 
