@@ -1,4 +1,5 @@
 ﻿using ElectricalProgressive.Utils;
+using System;
 using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -12,13 +13,13 @@ class BlockEFreezer : BlockEBase
 {
     private BlockEntityEFreezer? _blockEntityEFreezer;
 
-    private WorldInteraction[]? _interactions;
+    private WorldInteraction[] _interactions= Array.Empty<WorldInteraction>();
 
     public override void OnLoaded(ICoreAPI api)
     {
         base.OnLoaded(api);
 
-        _interactions = ObjectCacheUtil.GetOrCreate(api, "fridgeBlockInteractions", () =>
+        _interactions = ObjectCacheUtil.GetOrCreate(api, "freezerBlockInteractions", () =>
         {
             return new[]
             {

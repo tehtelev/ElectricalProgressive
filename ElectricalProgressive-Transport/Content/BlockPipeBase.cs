@@ -1,6 +1,7 @@
 ﻿using ElectricalProgressiveTransport.ItemInsertionPipe;
 using ElectricalProgressiveTransport.LiquidInsertionPipe;
 using ElectricalProgressiveTransport.NormalPipe;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Vintagestory.API.Client;
@@ -14,7 +15,7 @@ namespace ElectricalProgressiveTransport
 {
     public class BlockPipeBase : Block
     {
-        private WorldInteraction[] _interactions;
+        private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
 
         public override WorldInteraction[] GetPlacedBlockInteractionHelp(
             IWorldAccessor world,

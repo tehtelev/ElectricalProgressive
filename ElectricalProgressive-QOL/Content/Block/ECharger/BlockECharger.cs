@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 using ElectricalProgressive.Utils;
+using System;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -11,7 +12,7 @@ namespace ElectricalProgressive.Content.Block.ECharger;
 
 public class BlockECharger : BlockEBase
 {
-    private WorldInteraction[]? _interactions;
+    private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
     private int _output;
 
     public override void OnLoaded(ICoreAPI api)

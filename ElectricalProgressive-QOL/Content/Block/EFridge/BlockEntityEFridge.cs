@@ -503,7 +503,7 @@ class BlockEntityEFridge : ContainerEFridge, ITexPositionSource
         }
 
         // если анимации нет, то рисуем блок базовый
-        if (animUtil?.animator.ActiveAnimationCount == 0)
+        if (animUtil?.activeAnimationsByAnimCode.Count==0)
         {
             return false;
         }

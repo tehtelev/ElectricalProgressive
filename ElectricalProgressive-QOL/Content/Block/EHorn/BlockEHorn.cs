@@ -1,4 +1,5 @@
 ﻿using ElectricalProgressive.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +13,7 @@ namespace ElectricalProgressive.Content.Block.EHorn;
 
 public class BlockEHorn : BlockEBase
 {
-    private WorldInteraction[]? _interactions;
+    private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
 
     public override void OnLoaded(ICoreAPI api)
     {

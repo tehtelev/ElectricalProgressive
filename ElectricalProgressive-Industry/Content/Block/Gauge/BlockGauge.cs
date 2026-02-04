@@ -1,4 +1,5 @@
-﻿using Vintagestory.API.Client;
+﻿using System;
+using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Util;
 
@@ -6,20 +7,32 @@ using Vintagestory.API.Util;
 namespace ElectricalProgressive.Content.Block.Gauge;
 public class BlockGauge : Vintagestory.API.Common.Block
 {
-   
+
+    private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
+
+    public override void OnLoaded(ICoreAPI api)
+    {
+        base.OnLoaded(api);
+
+        _interactions = ObjectCacheUtil.GetOrCreate(api, "BlockGaugeInteractions", () =>
+        {
+            return new WorldInteraction[]
+            {
+                new()
+                {
+                    ActionLangCode = "electricalprogressiveindustry:blockhelp-pickup",
+                    MouseButton = EnumMouseButton.Right
+                }
+            };
+        });
+
+    }
+    
+
 
     public override WorldInteraction[] GetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection selection, IPlayer forPlayer)
     {
-        return new WorldInteraction[]
-        {
-            new()
-            {
-                ActionLangCode = "electricalprogressiveindustry:blockhelp-pickup",
-                MouseButton = EnumMouseButton.Right
-            }
-        }.Append(base.GetPlacedBlockInteractionHelp(world, selection, forPlayer)); ;
-
-
+        return _interactions;
     }
 
     public override bool OnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel)

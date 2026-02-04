@@ -26,6 +26,29 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
     public int ContainerSlotId => 1;
     public float TransferSizeLitres => 1f;
 
+    private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
+
+    public override void OnLoaded(ICoreAPI api)
+    {
+        base.OnLoaded(api);
+
+        _interactions = ObjectCacheUtil.GetOrCreate(api, "BlockEFuelGeneratorInteractions", () =>
+        {
+            return new WorldInteraction[]
+            {
+                new()
+                {
+                    ActionLangCode = "blockhelp-firepit-refuel",
+                    MouseButton = EnumMouseButton.Right,
+                    HotKeyCode = "ctrl"
+                },
+                new() { ActionLangCode = "blockhelp-watergen-fillliquid", MouseButton = EnumMouseButton.Right }
+            };
+        });
+
+    }
+
+
     #region Реализация интерфейса ILiquidSource/ILiquidSink для BlockPos
 
     /// <summary>
@@ -473,20 +496,7 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
     /// </summary>
     public override WorldInteraction[] GetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection selection, IPlayer forPlayer)
     {
-        return new WorldInteraction[]
-        {
-            new()
-            {
-                ActionLangCode = "blockhelp-firepit-refuel",
-                MouseButton = EnumMouseButton.Right,
-                HotKeyCode = "ctrl"
-            },
-            new()
-            {
-                ActionLangCode = "blockhelp-watergen-fillliquid",
-                MouseButton = EnumMouseButton.Right
-            }
-        }.Append(base.GetPlacedBlockInteractionHelp(world, selection, forPlayer));
+        return _interactions;
     }
 
     /// <summary>

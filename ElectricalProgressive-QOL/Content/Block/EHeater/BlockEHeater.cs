@@ -17,7 +17,7 @@ namespace ElectricalProgressive.Content.Block.EHeater
 {
     public class BlockEHeater : BlockEBase
     {
-        private WorldInteraction[]? _interactions;
+        private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
 
         private static readonly Dictionary<CacheDataKey, MeshData> MeshDataCache = new();
         private static readonly Dictionary<CacheDataKey, Cuboidf[]> SelectionBoxesCache = new();

@@ -6,8 +6,8 @@
     "blockEProperties": "all",
     "facesEProperties": [ "north", "east", "south", "west", "up", "down" ],
     "particlesOffsetPos": [ [ 0.1, 1.0, 0.1 ] ],
-    "maxConsumption": 100,
-    "voltage": 32,
+    "maxConsumption": 128,
+    "voltage": 128,
     "maxCurrent": 20.0,
     "isolated": true,
     "isolatedEnvironment": true,
@@ -36,24 +36,55 @@
   ],
 
   "creativeinventory": {
-    "general": [ "*-melted-north" ],
-    "electricity": [ "*-melted-north" ]
+    "general": [ "*-north" ],
+    "electricity": [ "*-north" ]
   },
 
   "behaviors": [
     { "name": "HorizontalOrientable" },
     {
       "name": "Multiblock",
-      "properties": {
-        "sizex": 1,
-        "sizey": 2,
-        "sizez": 1,
-        "cposition": {
-          "x": 0,
-          "y": 0,
-          "z": 0
+      "propertiesByType": {
+        "*-north": {
+          "sizex": 2,
+          "sizey": 1,
+          "sizez": 1,
+          "cposition": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        },
+        "*-east": {
+          "sizex": 1,
+          "sizey": 1,
+          "sizez": 2,
+          "cposition": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        },
+        "*-south": {
+          "sizex": 2,
+          "sizey": 1,
+          "sizez": 1,
+          "cposition": {
+            "x": 1,
+            "y": 0,
+            "z": 0
+          }
+        },
+        "*-west": {
+          "sizex": 1,
+          "sizey": 1,
+          "sizez": 2,
+          "cposition": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          }
         }
-
       }
     }
   ],
@@ -61,10 +92,6 @@
   "blockmaterial": "Metal",
 
   "variantgroups": [
-    {
-      "code": "state",
-      "states": [ "frozen", "melted" ]
-    },
     {
       "code": "side",
       "loadFromProperties": "abstract/horizontalorientation"
@@ -76,19 +103,19 @@
 
   "shapebytype": {
     "*-north": {
-      "base": "block/efreezer/efreezer-{state}",
+      "base": "block/efreezer/efreezer",
       "rotateY": 0
     },
     "*-east": {
-      "base": "block/efreezer/efreezer-{state}",
+      "base": "block/efreezer/efreezer",
       "rotateY": 270
     },
     "*-south": {
-      "base": "block/efreezer/efreezer-{state}",
+      "base": "block/efreezer/efreezer",
       "rotateY": 180
     },
     "*-west": {
-      "base": "block/efreezer/efreezer-{state}",
+      "base": "block/efreezer/efreezer",
       "rotateY": 90
     }
   },
@@ -100,25 +127,29 @@
       "all": false,
       "east": true,
       "west": true,
-      "north": true
+      "north": true,
+      "south": true
     },
     "*-east": {
       "all": false,
       "east": true,
-      "south": true,
-      "north": true
+      "west": true,
+      "north": true,
+      "south": true
     },
     "*-south": {
       "all": false,
       "east": true,
       "west": true,
+      "north": true,
       "south": true
     },
     "*-west": {
       "all": false,
-      "south": true,
+      "east": true,
       "west": true,
-      "north": true
+      "north": true,
+      "south": true
     }
   },
 
@@ -130,7 +161,7 @@
     "y1": 0,
     "z1": 0,
     "x2": 1,
-    "y2": 2,
+    "y2": 1,
     "z2": 1
   },
   "resistance": 3.5,

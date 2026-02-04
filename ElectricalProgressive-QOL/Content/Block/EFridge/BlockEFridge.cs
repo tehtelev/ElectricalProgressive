@@ -1,4 +1,5 @@
 ﻿using ElectricalProgressive.Utils;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Vintagestory.API.Client;
@@ -11,16 +12,16 @@ namespace ElectricalProgressive.Content.Block.EFridge;
 
 class BlockEFridge : BlockEBase
 {
-    private BlockEntityEFridge? _blockEntityEFreezer;
+    private BlockEntityEFridge? _blockEntityEFridge;
 
 
-    private WorldInteraction[]? _interactions;
+    private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
 
     public override void OnLoaded(ICoreAPI api)
     {
         base.OnLoaded(api);
 
-        _interactions = ObjectCacheUtil.GetOrCreate(api, "freezerBlockInteractions", () =>
+        _interactions = ObjectCacheUtil.GetOrCreate(api, "fridgeBlockInteractions", () =>
         {
             return new[]
             {
@@ -32,24 +33,24 @@ class BlockEFridge : BlockEBase
 
     public override bool OnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel)
     {
-        _blockEntityEFreezer = null!;
+        _blockEntityEFridge = null!;
         if (blockSel.Position != null && world.BlockAccessor.GetBlockEntity(blockSel.Position) is BlockEntityEFridge blockEntityEFreezer)
-            _blockEntityEFreezer = blockEntityEFreezer;
+            _blockEntityEFridge = blockEntityEFreezer;
 
         var handled = base.OnBlockInteractStart(world, byPlayer, blockSel);
         if (!handled && blockSel.Position != null)
         {
-            if (_blockEntityEFreezer != null)
+            if (_blockEntityEFridge != null)
             {
                 
-               _blockEntityEFreezer.OnBlockInteract(byPlayer, false, blockSel);
+               _blockEntityEFridge.OnBlockInteract(byPlayer, false, blockSel);
              
             }
 
             return true;
         }
 
-        if (_blockEntityEFreezer is null)
+        if (_blockEntityEFridge is null)
             return true;
 
 

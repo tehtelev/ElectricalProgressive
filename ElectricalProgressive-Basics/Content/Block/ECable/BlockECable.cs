@@ -22,6 +22,8 @@ namespace ElectricalProgressive.Content.Block.ECable
 
         public static readonly Dictionary<CacheDataKey, MeshData> MeshDataCache = new();
 
+
+
         public static BlockVariant? enabledSwitchVariant;
         public static BlockVariant? disabledSwitchVariant;
 
@@ -74,6 +76,8 @@ namespace ElectricalProgressive.Content.Block.ECable
 
             enabledSwitchVariant = new(api, block, "enabled");
             disabledSwitchVariant = new(api, block, "disabled");
+
+            
         }
 
         public override void OnUnloaded(ICoreAPI api)

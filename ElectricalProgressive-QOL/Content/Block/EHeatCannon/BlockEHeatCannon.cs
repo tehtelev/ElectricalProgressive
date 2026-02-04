@@ -1,5 +1,6 @@
 ﻿using ElectricalProgressive.Patch;
 using ElectricalProgressive.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,8 +15,8 @@ namespace ElectricalProgressive.Content.Block.EHeatCannon
 {
     public class BlockEHeatCannon : BlockEBase
     {
-        private WorldInteraction[]? _interactions;
 
+        private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
 
 
         public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack, BlockSelection blockSel, ref string failureCode)

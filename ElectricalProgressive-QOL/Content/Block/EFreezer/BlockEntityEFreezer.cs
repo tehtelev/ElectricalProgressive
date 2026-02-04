@@ -1,6 +1,7 @@
-﻿using System;
-using System.IO;
+﻿using ElectricalProgressive.Content.Block.EFreezer;
 using ElectricalProgressive.Utils;
+using System;
+using System.IO;
 using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -92,7 +93,7 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
     public override void OnBlockUnloaded()
     {
         base.OnBlockUnloaded();
-        _wasPowered = GetBehavior<BEBehaviorEFreezer>().PowerSetting >= _maxConsumption * 0.1F;
+        _wasPowered = GetBehavior<BEBehaviorEFreezer>()?.PowerSetting >= _maxConsumption * 0.1F;
         MarkDirty(true);
 
         this.ElectricalProgressive?.OnBlockUnloaded(); // вызываем метод OnBlockUnloaded у BEBehaviorElectricalProgressive
@@ -118,8 +119,10 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
     /// </summary>
     public void OpenLid()
     {
-        //animUtil.Dispose();
-        animUtil.InitializeAnimator(InventoryClassName, null, null, new Vec3f(0, GetRotation(), 0f));
+        if (animUtil?.activeAnimationsByAnimCode.ContainsKey("close") == true)
+        {
+            animUtil?.StopAnimation("close");
+        }
 
         if (animUtil?.activeAnimationsByAnimCode.ContainsKey("open") == false)
         {
@@ -127,16 +130,17 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
             {
                 Animation = "open",
                 Code = "open",
-                AnimationSpeed = 1.8f,
-                EaseOutSpeed = 6,
-                EaseInSpeed = 6                
+                AnimationSpeed = 1.4f,
+                EaseOutSpeed = 10,
+                EaseInSpeed = 10
             });
 
             //применяем цвет и яркость
             Block.LightHsv = new byte[] { 7, 7, 11 };
 
+
             //добавляем звук
-            _capi.World.PlaySoundAt(new ("electricalprogressiveqol:sounds/freezer_open.ogg"), Pos.X, Pos.Y, Pos.Z, null, false, 8.0F, 0.4F);
+            _capi.World.PlaySoundAt(new("electricalprogressiveqol:sounds/freezer_open.ogg"), Pos.X, Pos.Y, Pos.Z, null, false, 8.0F, 0.4F);
 
         }
 
@@ -152,15 +156,58 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
         {
             animUtil?.StopAnimation("open");
 
+            animUtil?.StartAnimation(new AnimationMetaData()
+            {
+                Animation = "close",
+                Code = "close",
+                AnimationSpeed = 1.4f,
+                EaseOutSpeed = 10,
+                EaseInSpeed = 10
+            });
+
             //применяем цвет и яркость
             Block.LightHsv = new byte[] { 7, 7, 0 };
 
+
             //добавляем звук
-            _capi.World.PlaySoundAt(new ("electricalprogressiveqol:sounds/freezer_close.ogg"), Pos.X, Pos.Y, Pos.Z, null, false, 8.0F, 0.4F);
+            _capi.World.PlaySoundAt(new("electricalprogressiveqol:sounds/freezer_close.ogg"), Pos.X, Pos.Y, Pos.Z, null, false, 8.0F, 0.4F);
         }
+
+    }
+
+    /// <summary>
+    /// Запускает анимацию работы
+    /// </summary>
+    public void StartWorkingAnim()
+    {
+        if (animUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false && _wasPowered)
+        {
+            animUtil?.StartAnimation(new AnimationMetaData()
+            {
+                Animation = "work-on",
+                Code = "work-on",
+                AnimationSpeed = 1f,
+                EaseOutSpeed = 15,
+                EaseInSpeed = 15,
+            });
+
+
+        }
+
     }
 
 
+    /// <summary>
+    /// Останавливает анимацию работы
+    /// </summary>
+    public void StopWorkingAnim()
+    {
+        if (animUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == true)
+        {
+            animUtil?.StopAnimation("work-on");
+
+        }
+    }
 
     /// <summary>
     /// Получает угол поворота блока в градусах
@@ -194,7 +241,7 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
             if (animUtil != null)
             {
                 animUtil.InitializeAnimator(InventoryClassName, null, null, new Vec3f(0, GetRotation(), 0f));
-                
+
             }
         }
 
@@ -226,7 +273,7 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
         MarkDirty(true);
 
         // Слушатель для обновления содержимого 
-        _listenerId=RegisterGameTickListener(FreezerTick, 500);
+        _listenerId = RegisterGameTickListener(FreezerTick, 500);
     }
 
 
@@ -236,7 +283,7 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
     /// <param name="slotid"></param>
     public void UpdateMesh(int slotid)
     {
-        if (Api == null || Api.Side == EnumAppSide.Server || _capi==null)
+        if (Api == null || Api.Side == EnumAppSide.Server || _capi == null)
             return;
 
         if (slotid >= _inventory.Count)
@@ -261,49 +308,54 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
     }
 
 
-    /// <summary>
-    /// Перемещаем mesh в нужную позицию в зависимости от слота
-    /// </summary>
-    /// <param name="meshData"></param>
-    /// <param name="slotId"></param>
-    public void TranslateMesh(MeshData? meshData, int slotId)
+/// <summary>
+/// Перемещаем mesh в нужную позицию в зависимости от слота
+/// </summary>
+/// <param name="meshData"></param>
+/// <param name="slotId"></param>
+public void TranslateMesh(MeshData? meshData, int slotId)
+{
+    if (meshData == null)
+        return;
+
+    const float stdoffset = 0.2f;
+    
+    // Координаты для горизонтальных полок:
+    // x - влево/вправо, z - вглубь/назад, y - высота полки
+    var (x, y, z) = slotId switch
     {
-        if (meshData == null)
-            return;
+        0 => (-stdoffset, 0.15f, 0f),     // Верхняя полка, лево
+        1 => (+stdoffset, 0.15f, 0f),     // Верхняя полка, право
+        2 => (-stdoffset, 0.15f, 0.62f),     // Средняя полка, лево
+        3 => (+stdoffset, 0.15f, 0.62f),     // Средняя полка, право
+        4 => (-stdoffset, 0.15f, 1.245f),    // Нижняя полка, лево
+        5 => (+stdoffset, 0.15f, 1.245f),    // Нижняя полка, право
+        _ => (0, 0.2f, 0)
+    };
 
-        const float stdoffset = 0.2f;
-
-        var (x, y) = slotId switch
+    if (!Inventory[slotId].Empty)
+    {
+        if (Inventory[slotId].Itemstack.Class == EnumItemClass.Block)
         {
-            0 => (-stdoffset, 1.435f),
-            1 => (+stdoffset, 1.435f),
-            2 => (-stdoffset, 0.81f),
-            3 => (+stdoffset, 0.81f),
-            4 => (-stdoffset, 0.19f),
-            5 => (+stdoffset, 0.19f),
-            _ => (0, 0)
-        };
-
-        if (!Inventory[slotId].Empty)
-        {
-            if (Inventory[slotId].Itemstack.Class == EnumItemClass.Block)
-            {
-                meshData.Scale(new(0.5f, 0, 0.5f), 0.53f, 0.53f, 0.53f);
-                meshData.Rotate(new(0.5f, 0, 0.5f), 0, 8 * GameMath.DEG2RAD, 0);
-            }
-            else
-            {
-                meshData.Scale(new(0.5f, 0, 0.5f), 0.8f, 0.8f, 0.8f);
-                meshData.Rotate(new(0.5f, 0, 0.5f), 0, 15 * GameMath.DEG2RAD, 0);
-            }
+            // Блоки - лежат на боку
+            meshData.Scale(new(0.5f, 0.5f, 0.5f), 0.53f, 0.53f, 0.53f);
+            meshData.Translate(0, -0.14f, 0);
+            //meshData.Rotate(new(0.5f, 0.5f, 0.5f), 90 * GameMath.DEG2RAD, 0, 8 * GameMath.DEG2RAD);
         }
-
-        meshData.Translate(x, y, 0.025f);
-
-        var orientationRotate = Block.Shape.rotateY;
-
-        meshData.Rotate(new Vec3f(0.5f, 0, 0.5f), 0, orientationRotate * GameMath.DEG2RAD, 0);
+        else
+        {
+            // Обычные предметы - лежат на полке
+            meshData.Scale(new(0.5f, 0.5f, 0.5f), 0.8f, 0.8f, 0.8f);
+            //meshData.Rotate(new(0.5f, 0.5f, 0.5f), 90 * GameMath.DEG2RAD, 0, 15 * GameMath.DEG2RAD);
+        }
     }
+
+    // Смещение: x - влево/вправо, y - высота (фиксированная для полок), z - глубина
+    meshData.Translate(x, y, z);
+
+    var orientationRotate = Block.Shape.rotateY+90f;
+    meshData.Rotate(new Vec3f(0.5f, 0.5f, 0.5f), 0, orientationRotate * GameMath.DEG2RAD, 0);
+}
 
     public Size2i AtlasSize => _capi.BlockTextureAtlas.Size;
 
@@ -457,7 +509,7 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
         }
 
         // если анимации нет, то рисуем блок базовый
-        if (animUtil?.activeAnimationsByAnimCode.ContainsKey("open") == false)
+        if (animUtil?.activeAnimationsByAnimCode.Count == 0)
         {
             return false;
         }
@@ -483,46 +535,39 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
     /// <param name="dt"></param>
     private void FreezerTick(float dt)
     {
-        if (Api.Side != EnumAppSide.Server || this.Block.Variant["state"] == "burned") return;
+        if (Api.Side == EnumAppSide.Server)
+        {
+            double now = Api.World.Calendar.TotalHours;
+            double delta = now - _lastUpdateTime;
+            _lastUpdateTime = now;
 
-        double now = Api.World.Calendar.TotalHours;
-        double delta = now - _lastUpdateTime;
-        _lastUpdateTime = now;
+            bool currentlyPowered = GetBehavior<BEBehaviorEFreezer>().PowerSetting >= _maxConsumption * 0.1F;
+            UpdateColdState(delta, currentlyPowered);
+            _wasPowered = currentlyPowered;
 
-        bool currentlyPowered = GetBehavior<BEBehaviorEFreezer>().PowerSetting >= _maxConsumption * 0.1F;
-        UpdateColdState(delta, currentlyPowered);
-        _wasPowered = currentlyPowered;
+        }
+        else
+        {
+            TryRefuel();
+        }
 
-        TryRefuel();
 
     }
 
 
     /// <summary>
-    /// Проверяет, нужно ли размораживать или замораживать блок
+    /// Проверяет, нужно ли запускать анимацию
     /// </summary>
     private void TryRefuel()
     {
-        var beh = GetBehavior<BEBehaviorEFreezer>();
-        if (beh is null) return;
 
-        bool effectivePowered = beh.PowerSetting >= _maxConsumption * 0.1F || _accumulatedColdHours > 0;
-
-        if (effectivePowered && this.Block.Variant["state"] == "melted")
+        if (_wasPowered)
         {
-            var originalBlock = Api.World.BlockAccessor.GetBlock(Pos);
-            var newBlockAL = originalBlock.CodeWithVariant("state", "frozen");
-            var newBlock = Api.World.GetBlock(newBlockAL);
-            Api.World.BlockAccessor.ExchangeBlock(newBlock.Id, Pos);
-            MarkDirty();
+            StartWorkingAnim();
         }
-        if (!effectivePowered && this.Block.Variant["state"] == "frozen")
+        else
         {
-            var originalBlock = Api.World.BlockAccessor.GetBlock(Pos);
-            var newBlockAL = originalBlock.CodeWithVariant("state", "melted");
-            var newBlock = Api.World.GetBlock(newBlockAL);
-            Api.World.BlockAccessor.ExchangeBlock(newBlock.Id, Pos);
-            MarkDirty();
+            StopWorkingAnim();
         }
     }
 
@@ -584,7 +629,7 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
 
         _inventory.AfterBlocksLoaded(Api.World);
         //if (Api.Side == EnumAppSide.Client)
-        //    UpdateMeshes();
+        //   UpdateMeshes();
     }
 
     public override void ToTreeAttributes(ITreeAttribute tree)
@@ -598,7 +643,7 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
         tree.SetBool("isOpened", IsOpened);
     }
 
-    public override void OnReceivedClientPacket (IPlayer fromPlayer, int packetid, byte[] data)
+    public override void OnReceivedClientPacket(IPlayer fromPlayer, int packetid, byte[] data)
     {
         base.OnReceivedClientPacket(fromPlayer, packetid, data);
 

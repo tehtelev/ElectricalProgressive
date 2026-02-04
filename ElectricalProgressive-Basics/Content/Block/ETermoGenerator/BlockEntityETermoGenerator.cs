@@ -508,7 +508,7 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
 
 
         // если анимации нет, то рисуем блок базовый
-        if (AnimUtil?.animator.ActiveAnimationCount==0)
+        if (AnimUtil?.activeAnimationsByAnimCode.Count == 0)
         {
             return false;
         }

@@ -1,4 +1,5 @@
 ﻿using ElectricalProgressive.Utils;
+using System;
 using System.Linq;
 using System.Text;
 using Vintagestory.API.Client;
@@ -12,6 +13,30 @@ namespace ElectricalProgressive.Content.Block.ETermoGenerator;
 
 public class BlockETermoGenerator : BlockEBase
 {
+    private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
+
+    public override void OnLoaded(ICoreAPI api)
+    {
+        base.OnLoaded(api);
+
+        _interactions = ObjectCacheUtil.GetOrCreate(api, "BlockETermoGeneratorInteractions", () =>
+        {
+            return new WorldInteraction[]
+            {
+                new() { ActionLangCode = "blockhelp-door-openclose", MouseButton = EnumMouseButton.Right },
+                new()
+                {
+                    ActionLangCode = "blockhelp-firepit-refuel",
+                    MouseButton = EnumMouseButton.Right,
+                    HotKeyCode = "ctrl"
+                }
+            };
+        });
+
+    }
+
+
+
     /// <summary>
     /// Проверка возможности установки блока
     /// </summary>
@@ -208,20 +233,7 @@ public class BlockETermoGenerator : BlockEBase
     /// <returns></returns>
     public override WorldInteraction[] GetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection selection, IPlayer forPlayer)
     {
-        return new WorldInteraction[]
-        {
-                new()
-                {
-                    ActionLangCode = "blockhelp-door-openclose",
-                    MouseButton = EnumMouseButton.Right
-                },
-                new()
-                {
-                    ActionLangCode = "blockhelp-firepit-refuel",
-                    MouseButton = EnumMouseButton.Right,
-                    HotKeyCode = "ctrl"
-                }
-        }.Append(base.GetPlacedBlockInteractionHelp(world, selection, forPlayer));
+        return _interactions;
     }
 
 

@@ -1,7 +1,7 @@
 ﻿using ElectricalProgressive.Content.Block;
 using ElectricalProgressive.Utils;
 using EPImmersive.Utils;
-using Microsoft.VisualBasic;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,7 +19,26 @@ namespace EPImmersive.Content.Block.CableSwitch
         private static readonly Dictionary<CacheDataKey, Cuboidf[]> SelectionBoxesCache = [];
         private static readonly Dictionary<CacheDataKey, Cuboidf[]> CollisionBoxesCache = [];
 
-        
+        private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
+
+        public override void OnLoaded(ICoreAPI api)
+        {
+            base.OnLoaded(api);
+
+            _interactions = ObjectCacheUtil.GetOrCreate(api, "BlockCableSwitchWallInteractions", () =>
+            {
+                return new[]
+                {
+                    new WorldInteraction
+                    {
+                        ActionLangCode = "electricalprogressivebasics:switch",
+                        HotKeyCode = null,
+                        MouseButton = EnumMouseButton.Right,
+                    }
+                };
+            });
+
+        }
 
         public override void OnUnloaded(ICoreAPI api)
         {
@@ -188,14 +207,7 @@ namespace EPImmersive.Content.Block.CableSwitch
 
         public override WorldInteraction[] GetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection selection, IPlayer forPlayer)
         {
-            return new[] {
-                new WorldInteraction
-                {
-                    ActionLangCode = "electricalprogressivebasics:switch",
-                    HotKeyCode = null,
-                    MouseButton = EnumMouseButton.Right,
-                }
-            }.Append(base.GetPlacedBlockInteractionHelp(world, selection, forPlayer));
+            return _interactions;
         }
 
 
