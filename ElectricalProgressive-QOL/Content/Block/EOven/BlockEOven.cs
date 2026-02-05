@@ -63,13 +63,9 @@ public class BlockEOven : BlockEBase
             : base.OnBlockInteractStart(world, byPlayer, bs);
     }
 
-    public override WorldInteraction[] GetPlacedBlockInteractionHelp(
-        IWorldAccessor world,
-        BlockSelection selection,
-        IPlayer forPlayer)
+    public override WorldInteraction[] GetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection selection, IPlayer forPlayer)
     {
-        return this._interactions.Append<WorldInteraction>(
-            base.GetPlacedBlockInteractionHelp(world, selection, forPlayer));
+        return _interactions; // такой вариант самый производительный
     }
 
 

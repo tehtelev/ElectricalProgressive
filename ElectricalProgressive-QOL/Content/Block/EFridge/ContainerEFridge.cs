@@ -61,7 +61,7 @@ public abstract class ContainerEFridge : BlockEntityEBase, IBlockEntityContainer
 
     private void Inventory_OnInventoryOpenedClient(IPlayer player)
     {
-        OnTick(1);
+        OnTick(1000);
     }
 
 

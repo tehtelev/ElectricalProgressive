@@ -12,6 +12,22 @@ class BlockEFreezer : BlockEBase
 {
     private BlockEntityEFreezer? _blockEntityEFreezer;
 
+    private WorldInteraction[]? _interactions;
+
+    public override void OnLoaded(ICoreAPI api)
+    {
+        base.OnLoaded(api);
+
+        _interactions = ObjectCacheUtil.GetOrCreate(api, "fridgeBlockInteractions", () =>
+        {
+            return new[]
+            {
+                new WorldInteraction { ActionLangCode = "freezer-over-help", MouseButton = EnumMouseButton.Right, }
+            };
+        });
+    }
+
+
     public override bool OnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel)
     {
         _blockEntityEFreezer = null!;
@@ -63,14 +79,7 @@ class BlockEFreezer : BlockEBase
 
     public override WorldInteraction[] GetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection selection, IPlayer forPlayer)
     {
-        return new[]
-        {
-            new WorldInteraction
-            {
-                ActionLangCode = "freezer-over-help",
-                MouseButton = EnumMouseButton.Right,
-            }
-        }.Append(base.GetPlacedBlockInteractionHelp(world, selection, forPlayer));
+        return _interactions; // такой вариант самый производительный
     }
 
 

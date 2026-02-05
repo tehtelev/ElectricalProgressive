@@ -68,7 +68,7 @@ public class BlockECharger : BlockEBase
 
     public override WorldInteraction[] GetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection selection, IPlayer forPlayer)
     {
-        return _interactions.Append(base.GetPlacedBlockInteractionHelp(world, selection, forPlayer));
+        return _interactions; // такой вариант самый производительный
     }
 
     public override bool CanAttachBlockAt(IBlockAccessor blockAccessor, Vintagestory.API.Common.Block block, BlockPos pos, BlockFacing blockFace, Cuboidi attachmentArea = null!)
