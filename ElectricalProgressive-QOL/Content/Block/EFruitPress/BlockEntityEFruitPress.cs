@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Utils;
+﻿﻿using ElectricalProgressive.Utils;
 using System;
 using System.Text;
 using Vintagestory.API.Client;
@@ -47,7 +47,7 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
     
     private Facing _facing = Facing.None;
     
-    // === СВОЙСТВА ЖИДКОСТИ ===
+    // === СВОЙСТВА ЖИДКОСТИ (ДОБАВЛЕНО) ===
     
     public float LiquidAmount 
     { 
@@ -80,6 +80,14 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
             _inventory.LiquidSlot.MarkDirty();
         }
     }
+    
+    // === ДОПОЛНИТЕЛЬНЫЕ СВОЙСТВА ДЛЯ ИНТЕРФЕЙСА ===
+    
+    public float WaterAmount => LiquidAmount; // Для совместимости с кодом генератора
+    
+    public ItemSlot WaterSlot => LiquidSlot; // Для совместимости с кодом генератора
+    
+    public ItemStack WaterStack => LiquidStack; // Для совместимости с кодом генератора
     
     public BlockEntityEFruitPress()
     {
@@ -580,7 +588,7 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         MarkDirty(true);
     }
     
-    // === МЕТОДЫ РАБОТЫ С ЖИДКОСТЬЮ ===
+    // === МЕТОДЫ РАБОТЫ С ЖИДКОСТЬЮ (ИСПРАВЛЕННЫЕ) ===
     
     public int TryPutLiquidFromStack(ItemStack liquidStack, float desiredLitres)
     {
@@ -601,29 +609,36 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
                 int placeableItems = (int)GameMath.Min(desiredItems, maxItems, availItems);
                 int movedItems = Math.Min(desiredItems, placeableItems);
                 
-                ItemStack placedstack = liquidStack.Clone();
-                placedstack.StackSize = movedItems;
-                LiquidStack = placedstack;
-                
-                MarkDirty();
-                UpdateState();
-                
-                return movedItems;
+                if (movedItems > 0)
+                {
+                    ItemStack placedstack = liquidStack.Clone();
+                    placedstack.StackSize = movedItems;
+                    LiquidStack = placedstack;
+                    
+                    MarkDirty();
+                    UpdateState();
+                    
+                    return movedItems;
+                }
             }
             else
             {
+                // ВАЖНО: Проверяем совместимость жидкостей
                 if (!currentStack.Equals(Api.World, liquidStack, GlobalConstants.IgnoredStackAttributes)) 
                     return 0;
                 
                 int placeableItems = (int)Math.Min(availItems, maxItems - (float)currentStack.StackSize);
                 int movedItems = Math.Min(placeableItems, desiredItems);
                 
-                currentStack.StackSize += movedItems;
-                LiquidSlot.MarkDirty();
-                MarkDirty(true);
-                UpdateState();
-                
-                return movedItems;
+                if (movedItems > 0)
+                {
+                    currentStack.StackSize += movedItems;
+                    LiquidSlot.MarkDirty();
+                    MarkDirty(true);
+                    UpdateState();
+                    
+                    return movedItems;
+                }
             }
         }
         

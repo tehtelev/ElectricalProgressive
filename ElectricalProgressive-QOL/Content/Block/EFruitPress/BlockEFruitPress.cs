@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Utils;
+﻿﻿using ElectricalProgressive.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +15,7 @@ using Vintagestory.GameContent;
 namespace ElectricalProgressive.Content.Block.EFruitPress;
 
 /// <summary>
-/// Блок электрического генератора на топливе.
+/// Блок электрического пресса для фруктов.
 /// Реализует интерфейсы для работы с жидкостями (ILiquidSink, ILiquidSource).
 /// </summary>
 public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource
@@ -93,22 +93,22 @@ public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource
     #region Реализация интерфейса ILiquidSource/ILiquidSink для ItemStack (упрощенная)
 
     /// <summary>
-    /// Получить текущее количество жидкости (для генератора в руке всегда 0)
+    /// Получить текущее количество жидкости (для пресса в руке всегда 0)
     /// </summary>
     public float GetCurrentLitres(ItemStack containerStack) => 0;
     
     /// <summary>
-    /// Получить содержимое (для генератора в руке всегда null)
+    /// Получить содержимое (для пресса в руке всегда null)
     /// </summary>
     public ItemStack GetContent(ItemStack containerStack) => null;
     
     /// <summary>
-    /// Положить жидкость (для генератора в руке нельзя)
+    /// Положить жидкость (для пресса в руке нельзя)
     /// </summary>
     public int TryPutLiquid(ItemStack containerStack, ItemStack liquidStack, float desiredLitres) => 0;
     
     /// <summary>
-    /// Взять жидкость (для генератора в руке нельзя)
+    /// Взять жидкость (для пресса в руке нельзя)
     /// </summary>
     public ItemStack TryTakeContent(ItemStack containerStack, int quantityItems) => null;
 
@@ -126,7 +126,7 @@ public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource
     #region Вспомогательные методы
 
     /// <summary>
-    /// Получить BlockEntity генератора по позиции
+    /// Получить BlockEntity пресса по позиции
     /// </summary>
     private BlockEntityEFruitPress GetBlockEntity(BlockPos pos)
     {
@@ -393,26 +393,98 @@ public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource
         }
     }
 
-    public override bool OnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection? blockSel)
+    /// <summary>
+    /// Обработка взаимодействия с блоком (ЖИДКОСТИ И ИНВЕНТАРЬ)
+    /// </summary>
+    public override bool OnBlockInteractStart(
+        IWorldAccessor world,
+        IPlayer byPlayer,
+        BlockSelection blockSel)
     {
-        if (blockSel is null)
-            return false;
+        ItemSlot activeHotbarSlot = byPlayer.InventoryManager.ActiveHotbarSlot;
 
-        if (!world.Claims.TryAccess(byPlayer, blockSel.Position, EnumBlockAccessFlags.Use))
-            return false;
+        // ПЕРВОЕ: Проверяем, есть ли в руке контейнер с жидкостью
+        if (!activeHotbarSlot.Empty)
+        {
+            JsonObject attributes = activeHotbarSlot.Itemstack.Collectible.Attributes;
+            if ((attributes != null ? (attributes.IsTrue("handleLiquidContainerInteract") ? 1 : 0) : 0) != 0)
+            {
+                EnumHandHandling handling = EnumHandHandling.NotHandled;
+                activeHotbarSlot.Itemstack.Collectible.OnHeldInteractStart(activeHotbarSlot,
+                    (EntityAgent)byPlayer.Entity, blockSel, (EntitySelection)null, true, ref handling);
+                if (handling == EnumHandHandling.PreventDefault || handling == EnumHandHandling.PreventDefaultAction)
+                    return true;
+            }
+        }
 
-        blockSel.Block = this;
+        // ВТОРОЕ: Проверяем, есть ли в руке предмет с интерфейсом жидкости
+        if (!activeHotbarSlot.Empty && activeHotbarSlot.Itemstack.Collectible is ILiquidInterface)
+        {
+            CollectibleObject collectible = activeHotbarSlot.Itemstack.Collectible;
+            bool shiftKey = byPlayer.WorldData.EntityControls.ShiftKey;
+            bool ctrlKey = byPlayer.WorldData.EntityControls.CtrlKey;
+            ILiquidSource objLso = collectible as ILiquidSource;
 
+            // Наливание жидкости из контейнера в руке в блок
+            if (objLso != null && !shiftKey)
+            {
+                if (!objLso.AllowHeldLiquidTransfer)
+                    return false;
+                ItemStack content = objLso.GetContent(activeHotbarSlot.Itemstack);
+                float desiredLitres = ctrlKey ? objLso.TransferSizeLitres : objLso.CapacityLitres;
+                int moved = this.TryPutLiquid(blockSel.Position, content, desiredLitres);
+                if (moved > 0)
+                {
+                    this.SplitStackAndPerformAction((Entity)byPlayer.Entity, activeHotbarSlot,
+                        (System.Func<ItemStack, int>)(stack =>
+                        {
+                            objLso.TryTakeContent(stack, moved);
+                            return moved;
+                        }));
+                    this.DoLiquidMovedEffects(byPlayer, content, moved,
+                        BlockLiquidContainerBase.EnumLiquidDirection.Pour);
+                    return true;
+                }
+            }
+
+            // Сливание жидкости из блока в контейнер в руке
+            ILiquidSink objLsi = collectible as ILiquidSink;
+            if (objLsi != null && !ctrlKey)
+            {
+                if (!objLsi.AllowHeldLiquidTransfer)
+                    return false;
+                ItemStack owncontentStack = this.GetContent(blockSel.Position);
+                if (owncontentStack == null)
+                    return base.OnBlockInteractStart(world, byPlayer, blockSel);
+                ItemStack contentStack = owncontentStack.Clone();
+                float litres = shiftKey ? objLsi.TransferSizeLitres : objLsi.CapacityLitres;
+                int num = this.SplitStackAndPerformAction((Entity)byPlayer.Entity, activeHotbarSlot,
+                    (System.Func<ItemStack, int>)(stack => objLsi.TryPutLiquid(stack, owncontentStack, litres)));
+                if (num > 0)
+                {
+                    this.TryTakeContent(blockSel.Position, num);
+                    this.DoLiquidMovedEffects(byPlayer, contentStack, num,
+                        BlockLiquidContainerBase.EnumLiquidDirection.Fill);
+                    return true;
+                }
+            }
+        }
+
+        // ТРЕТЬЕ: Если не работали с жидкостями, открываем инвентарь
         var blockEntity = world.BlockAccessor.GetBlockEntity(blockSel.Position);
-        if (blockEntity is null)
-            return true;
+        if (blockEntity != null && blockEntity is BlockEntityOpenableContainer openableContainer)
+        {
+            // Проверяем права доступа
+            if (!world.Claims.TryAccess(byPlayer, blockSel.Position, EnumBlockAccessFlags.Use))
+                return false;
 
-        if (blockEntity is BlockEntityOpenableContainer openableContainer)
             openableContainer.OnPlayerRightClick(byPlayer, blockSel);
+            return true;
+        }
 
-        return true;
+        // Если ничего не сработало, вызываем базовый метод
+        return base.OnBlockInteractStart(world, byPlayer, blockSel);
     }
-    
 
     /// <summary>
     /// Получить дроп при разрушении блока
