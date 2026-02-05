@@ -95,8 +95,9 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
     {
         base.Initialize(api);
         
-        // Инициализируем инвентарь
+        // Правильная инициализация инвентаря
         this._inventory.LateInitialize("efruitpress-" + Pos, api);
+        (_inventory as InventoryEFruitPress)?.SetBlockPos(Pos); // Устанавливаем позицию
         
         this.RegisterGameTickListener(UpdatePress, 50); // 20 раз в секунду
         
@@ -149,7 +150,7 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
             _currentJuiceStack = null;
             _pressingProgress = 0;
             SqueezeProgress = 0;
-            StopAnimation();
+            StopAnimation(); // Останавливаем анимацию при удалении фруктов
             return;
         }
         
@@ -184,9 +185,8 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
             _currentJuiceStack = null;
             _pressingProgress = 0;
             SqueezeProgress = 0;
+            StopAnimation(); // Останавливаем анимацию если нет свойств для отжима
         }
-        
-        UpdateAnimationState();
     }
 
     // Класс JuiceableProperties для совместимости с ванильным прессом
@@ -242,7 +242,7 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
             if (!_wasPressingLastTick)
             {
                 StartSound();
-                StartAnimation();
+                StartAnimation(); // Запускаем анимацию только при начале отжима
             }
             
             // ПРОСТАЯ ЛОГИКА ОТЖИМА:
@@ -282,6 +282,7 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         }
         else if (_wasPressingLastTick)
         {
+            // Отжим прекратился - останавливаем анимацию
             StopAnimation();
             StopSound();
             
@@ -314,6 +315,7 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
             _pressingProgress = 0;
             SqueezeProgress = 0;
             
+            // Останавливаем анимацию и звук при завершении цикла
             StopAnimation();
             StopSound();
             
@@ -400,12 +402,13 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
             return;
         
-        if (!AnimUtil.activeAnimationsByAnimCode.ContainsKey("press"))
+        // Проверяем, не запущена ли уже анимация (как в центрифуге)
+        if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("craft") == false)
         {
             AnimUtil.StartAnimation(new AnimationMetaData()
             {
-                Animation = "press",
-                Code = "press",
+                Animation = "craft",
+                Code = "craft",
                 AnimationSpeed = 1f,
                 EaseOutSpeed = 4f,
                 EaseInSpeed = 1f
@@ -418,9 +421,10 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
             return;
         
-        if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("press"))
+        // Проверяем, запущена ли анимация (как в центрифуге)
+        if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("craft") == true)
         {
-            AnimUtil.StopAnimation("press");
+            AnimUtil.StopAnimation("craft");
         }
     }
     
@@ -458,23 +462,6 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
             _clientDialog.Update(SqueezeProgress, LiquidAmount, LiquidCapacity);
         }
         MarkDirty(true);
-    }
-    
-    private void UpdateAnimationState()
-    {
-        bool shouldAnimate = PowerBehavior?.PowerSetting >= _maxConsumption * 0.1f && 
-                           !FruitSlot.Empty && 
-                           _totalJuiceAvailable > 0 && 
-                           !IsFull();
-        
-        if (shouldAnimate)
-        {
-            StartAnimation();
-        }
-        else
-        {
-            StopAnimation();
-        }
     }
     
     // === МЕТОДЫ РАБОТЫ С ЖИДКОСТЬЮ ===
