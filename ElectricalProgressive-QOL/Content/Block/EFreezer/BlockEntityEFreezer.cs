@@ -1,7 +1,9 @@
 ﻿using ElectricalProgressive.Content.Block.EFreezer;
+using ElectricalProgressive.Content.Block.EStove;
 using ElectricalProgressive.Utils;
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -46,6 +48,7 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
 
         // Инициализируем инвентарь раньше всего
         _inventory = new InventoryGeneric(6, null, null);
+        _inventory.Foreach(slot => slot.StorageType = slot.StorageType | EnumItemStorageFlags.Backpack);
     }
 
     public override InventoryBase Inventory => _inventory;
@@ -227,7 +230,8 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
     /// <param name="api"></param>
     public override void Initialize(ICoreAPI api)
     {
-        // Инициализируем инвентарь
+
+
         _inventory.Pos = Pos;
         _inventory.LateInitialize(InventoryClassName + "-" + Pos.X + "/" + Pos.Y + "/" + Pos.Z, api);
 
@@ -265,6 +269,7 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
         // Как только инвентарь изменится — подписываемся на событие изменения любого слота и перерисовываем их все
         Inventory.SlotModified += slotId =>
         {
+
             UpdateMeshes();
         };
 
@@ -308,54 +313,76 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
     }
 
 
-/// <summary>
-/// Перемещаем mesh в нужную позицию в зависимости от слота
-/// </summary>
-/// <param name="meshData"></param>
-/// <param name="slotId"></param>
-public void TranslateMesh(MeshData? meshData, int slotId)
-{
-    if (meshData == null)
-        return;
-
-    const float stdoffset = 0.2f;
-    
-    // Координаты для горизонтальных полок:
-    // x - влево/вправо, z - вглубь/назад, y - высота полки
-    var (x, y, z) = slotId switch
+    /// <summary>
+    /// Перемещаем mesh в нужную позицию в зависимости от слота
+    /// </summary>
+    /// <param name="meshData"></param>
+    /// <param name="slotId"></param>
+    public void TranslateMesh(MeshData? meshData, int slotId)
     {
-        0 => (-stdoffset, 0.15f, 0f),     // Верхняя полка, лево
-        1 => (+stdoffset, 0.15f, 0f),     // Верхняя полка, право
-        2 => (-stdoffset, 0.15f, 0.62f),     // Средняя полка, лево
-        3 => (+stdoffset, 0.15f, 0.62f),     // Средняя полка, право
-        4 => (-stdoffset, 0.15f, 1.245f),    // Нижняя полка, лево
-        5 => (+stdoffset, 0.15f, 1.245f),    // Нижняя полка, право
-        _ => (0, 0.2f, 0)
-    };
+        if (meshData == null)
+            return;
 
-    if (!Inventory[slotId].Empty)
-    {
-        if (Inventory[slotId].Itemstack.Class == EnumItemClass.Block)
+        const float stdoffset = 0.2f;
+
+
+
+            // Координаты для горизонтальных полок:
+            // x - влево/вправо, z - вглубь/назад, y - высота полки
+            var (x, y, z) = slotId switch
         {
-            // Блоки - лежат на боку
-            meshData.Scale(new(0.5f, 0.5f, 0.5f), 0.53f, 0.53f, 0.53f);
-            meshData.Translate(0, -0.14f, 0);
-            //meshData.Rotate(new(0.5f, 0.5f, 0.5f), 90 * GameMath.DEG2RAD, 0, 8 * GameMath.DEG2RAD);
+            0 => (-stdoffset, 0.15f, 0f),     // Верхняя полка, лево
+            1 => (+stdoffset, 0.15f, 0f),     // Верхняя полка, право
+            2 => (-stdoffset, 0.15f, 0.62f),     // Средняя полка, лево
+            3 => (+stdoffset, 0.15f, 0.62f),     // Средняя полка, право
+            4 => (-stdoffset, 0.15f, 1.245f),    // Нижняя полка, лево
+            5 => (+stdoffset, 0.15f, 1.245f),    // Нижняя полка, право
+            _ => (0, 0.2f, 0)
+        };
+
+        if (!Inventory[slotId].Empty)
+        {
+            if (Inventory[slotId].Itemstack.Class == EnumItemClass.Block)
+            {
+                // Блоки - лежат на боку
+                meshData.Scale(new(0.5f, 0.5f, 0.5f), 0.53f, 0.53f, 0.53f);
+                meshData.Translate(0, -0.14f, 0);
+                //meshData.Rotate(new(0.5f, 0.5f, 0.5f), 90 * GameMath.DEG2RAD, 0, 8 * GameMath.DEG2RAD);
+            }
+            else
+            {
+                // Обычные предметы - лежат на полке
+                if (Inventory[slotId].Itemstack.Collectible.Code.Domain.Contains("butchering") && // для мода butchering
+                    Inventory[slotId].Itemstack.Collectible.Code.Path.Contains("dead"))
+                {
+                    meshData.Scale(new(0.5f, 0.5f, 0.5f), 0.4f, 0.4f, 0.4f);
+                    meshData.Translate(0.65f, -0.14f, -0.24f);
+                    meshData.Rotate(new Vec3f(0.5f, 0.5f, 0.5f), 0, -90f * GameMath.DEG2RAD, 0);
+                }
+                else
+                {
+                    meshData.Scale(new(0.5f, 0.5f, 0.5f), 0.8f, 0.8f, 0.8f);
+                }
+
+            }
+        }
+
+        // Смещение: x - влево/вправо, y - высота (фиксированная для полок), z - глубина
+
+        if (Inventory[slotId].Itemstack.Collectible.Code.Domain.Contains("butchering") && // для мода butchering
+            Inventory[slotId].Itemstack.Collectible.Code.Path.Contains("dead"))
+        {
+            meshData.Translate(-stdoffset, 0.15f, 0f);
         }
         else
         {
-            // Обычные предметы - лежат на полке
-            meshData.Scale(new(0.5f, 0.5f, 0.5f), 0.8f, 0.8f, 0.8f);
-            //meshData.Rotate(new(0.5f, 0.5f, 0.5f), 90 * GameMath.DEG2RAD, 0, 15 * GameMath.DEG2RAD);
+            meshData.Translate(x, y, z);
         }
+        
+        var orientationRotate = Block.Shape.rotateY + 90f;
+
+        meshData.Rotate(new Vec3f(0.5f, 0.5f, 0.5f), 0, orientationRotate * GameMath.DEG2RAD, 0);
     }
-
-    // Смещение: x - влево/вправо, y - высота (фиксированная для полок), z - глубина
-    meshData.Translate(x, y, z);
-
-    var orientationRotate = Block.Shape.rotateY+90f;
-    meshData.Rotate(new Vec3f(0.5f, 0.5f, 0.5f), 0, orientationRotate * GameMath.DEG2RAD, 0);
-}
 
     public Size2i AtlasSize => _capi.BlockTextureAtlas.Size;
 
@@ -709,7 +736,7 @@ public void TranslateMesh(MeshData? meshData, int slotId)
         bool currentPowered = GetBehavior<BEBehaviorEFreezer>().PowerSetting >= _maxConsumption * 0.1F;
         if (currentPowered || _accumulatedColdHours > 0)
         {
-            return 0.05F;
+            return 0.025F;
         }
         return initial;
     }

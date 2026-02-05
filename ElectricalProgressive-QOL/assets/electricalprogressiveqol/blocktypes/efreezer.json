@@ -6,7 +6,7 @@
     "blockEProperties": "all",
     "facesEProperties": [ "north", "east", "south", "west", "up", "down" ],
     "particlesOffsetPos": [ [ 0.1, 1.0, 0.1 ] ],
-    "maxConsumption": 128,
+    "maxConsumption": 150,
     "voltage": 128,
     "maxCurrent": 20.0,
     "isolated": true,
