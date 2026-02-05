@@ -10,7 +10,7 @@
   "Version": "2.6.6",
   "dependencies": {
     "game": "1.21.6",
-    "electricalprogressivecore": "2.6.2",
-    "electricalprogressivebasics": "2.6.0"
+    "electricalprogressivecore": "2.6.4",
+    "electricalprogressivebasics": "2.6.4"
   }
 }

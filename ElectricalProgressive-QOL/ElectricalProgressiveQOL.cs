@@ -3,6 +3,7 @@ using ElectricalProgressive.Content.Block.EFence;
 using ElectricalProgressive.Content.Block.EFonar;
 using ElectricalProgressive.Content.Block.EFreezer;
 using ElectricalProgressive.Content.Block.EFridge;
+using ElectricalProgressive.Content.Block.EFruitPress;
 using ElectricalProgressive.Content.Block.EHeatCannon;
 using ElectricalProgressive.Content.Block.EHeater;
 using ElectricalProgressive.Content.Block.EHeatExchanger;
@@ -25,8 +26,8 @@ using Vintagestory.API.Server;
 
 
 [assembly: ModDependency("game", "1.21.6")]
-[assembly: ModDependency("electricalprogressivecore", "2.6.2")]
-[assembly: ModDependency("electricalprogressivebasics", "2.6.0")]
+[assembly: ModDependency("electricalprogressivecore", "2.6.4")]
+[assembly: ModDependency("electricalprogressivebasics", "2.6.4")]
 [assembly: ModInfo(
     "Electrical Progressive: QoL",
     "electricalprogressiveqol",
@@ -132,6 +133,10 @@ public class ElectricalProgressiveQOL : ModSystem
         api.RegisterBlockClass("BlockEHotSpringsGenerator", typeof(BlockEHotSpringsGenerator));
         api.RegisterBlockEntityClass("BlockEntityEHotSpringsGenerator", typeof(BlockEntityEHotSpringsGenerator));
         api.RegisterBlockEntityBehaviorClass("BEBehaviorHotSpringsEGenerator", typeof(BEBehaviorHotSpringsEGenerator));
+        
+        api.RegisterBlockClass("BlockEFruitPress", typeof(BlockEFruitPress));
+        api.RegisterBlockEntityBehaviorClass("BEBehaviorEFruitPress", typeof(BEBehaviorEFruitPress));
+        api.RegisterBlockEntityClass("BlockEntityEFruitPress", typeof(BlockEntityEFruitPress));
 
         api.RegisterBlockClass("BlockEHeatExchanger", typeof(BlockEHeatExchanger));
 
