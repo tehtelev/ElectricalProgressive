@@ -221,7 +221,7 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
         }
 
         // генерируем статичный мэш тут
-        var meshData = GenMesh(inventory[slotid].Itemstack);
+        var meshData = GenMesh(inventory[slotid]);
         if (meshData != null)
         {
             TranslateMesh(meshData, slotid);
@@ -261,7 +261,7 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
             
 
             IInFirepitRenderer childrenderer = (contentStack?.Collectible as IInFirepitRendererSupplier).GetRendererWhenInFirepit(contentStack, be, outt);
-            be.Dispose();
+            (be as IDisposable)?.Dispose();
             if (childrenderer != null)
             {
                 renderer.SetChildRenderer(contentStack, childrenderer);
@@ -271,20 +271,7 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
             
         }
 
-        /*
-        // Для остальных предметов используем оригинальную логику
-        if (contentStack?.Collectible is IInFirepitRendererSupplier supplier)
-        {
-            IInFirepitRenderer childRenderer = supplier.GetRendererWhenInFirepit(contentStack, null, false);
-            if (childRenderer != null)
-            {
-                renderer.SetChildRenderer(contentStack, childRenderer);
-                return;
-            }
-        }
 
-        renderer.SetChildRenderer(null, null);
-        */
     }
 
 
@@ -395,14 +382,15 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
         return textureAtlasPosition!;
     }
 
-    public MeshData GenMesh(ItemStack stack)
+    public MeshData? GenMesh(ItemSlot slot)
     {
+        var stack = slot.Itemstack;
         
         var meshsource = stack.Collectible as IContainedMeshSource;
         MeshData meshData;
         if (meshsource != null)
         {
-            meshData = meshsource.GenMesh(stack, _capi!.BlockTextureAtlas, Pos);
+            meshData = meshsource.GenMesh(slot, _capi!.BlockTextureAtlas, Pos);
             meshData.Rotate(new Vec3f(0.5f, 0.5f, 0.5f), 0f, Block.Shape.rotateY * 0.0174532924f, 0f);
         }
         else

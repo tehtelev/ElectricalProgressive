@@ -240,8 +240,8 @@ public class BlockEntityEOven : BlockEntityDisplay, IHeatSource
                     if (ownerProp3 != null && ownerProp3.CanWrite) ownerProp3.SetValue(ownablePut, byPlayer);
                 }
 
-                var place = activeHotbarSlot.Itemstack?.Block?.Sounds?.Place!;
-                this.Api.World.PlaySoundAt(place != null ? place : new AssetLocation("sounds/player/buildhigh"), (Entity)byPlayer.Entity, byPlayer, true, 16f, 1f);
+                var place = activeHotbarSlot.Itemstack?.Block?.Sounds?.Place.Location;
+                this.Api.World.PlaySoundAt(place != null ? place : new AssetLocation("sounds/player/buildhigh"), byPlayer.Entity, byPlayer, true, 16f, 1f);
                 byPlayer.InventoryManager.BroadcastHotbarSlot();
                 return true;
             }
@@ -361,7 +361,7 @@ public class BlockEntityEOven : BlockEntityDisplay, IHeatSource
                 this._lastRemoved = itemstack == null ? null! : itemstack.Clone();
                 if (byPlayer.InventoryManager.TryGiveItemstack(itemstack))
                 {
-                    var place = itemstack?.Block?.Sounds?.Place!;
+                    var place = itemstack?.Block?.Sounds?.Place.Location;
                     this.Api.World.PlaySoundAt(place != null ? place : new AssetLocation("sounds/player/throw"), (Entity)byPlayer.Entity, byPlayer, true, 16f, 1f);
                 }
                 if (itemstack?.StackSize > 0)
@@ -831,18 +831,18 @@ public class BlockEntityEOven : BlockEntityDisplay, IHeatSource
         return numArray;
     }
 
-    protected override string getMeshCacheKey(ItemStack stack)
+    protected override string getMeshCacheKey(ItemSlot slot)
     {
         var str = "";
         for (var slotId = 0; slotId < this.BakingData.Length; ++slotId)
         {
-            if (this.Inventory[slotId].Itemstack == stack)
+            if (this.Inventory[slotId].Itemstack == slot.Itemstack)
             {
                 str = "-" + this.BakingData[slotId].CurHeightMul.ToString();
                 break;
             }
         }
-        return base.getMeshCacheKey(stack) + str;
+        return base.getMeshCacheKey(slot) + str;
     }
 
     /// <summary>
@@ -864,9 +864,9 @@ public class BlockEntityEOven : BlockEntityDisplay, IHeatSource
     /// <param name="stack"></param>
     /// <param name="index"></param>
     /// <returns></returns>
-    protected override MeshData getOrCreateMesh(ItemStack stack, int index)
+    protected override MeshData getOrCreateMesh(ItemSlot slot, int index)
     {
-        return base.getOrCreateMesh(stack, index);
+        return base.getOrCreateMesh(slot, index);
     }
 
     /// <summary>

@@ -29,7 +29,7 @@ public class PressRecipe : IByteSerializable, IRecipeMulty<PressRecipe>
         var outputs = new RecipeOutput[Outputs.Length];
         for (var i = 0; i < Outputs.Length; i++)
         {
-            outputs[i] = Outputs[i].Clone();
+            outputs[i] = (RecipeOutput)Outputs[i].Clone();
         }
 
         return new PressRecipe()
@@ -136,7 +136,7 @@ public class PressRecipe : IByteSerializable, IRecipeMulty<PressRecipe>
         for (var i = 0; i < Outputs.Length; i++)
         {
             Outputs[i] = new RecipeOutput();
-            Outputs[i].FromBytes(reader, resolver.ClassRegistry);
+            Outputs[i].FromBytes(reader, resolver);
             Outputs[i].Resolve(resolver, "Press Recipe Output (FromBytes)");
         }
 

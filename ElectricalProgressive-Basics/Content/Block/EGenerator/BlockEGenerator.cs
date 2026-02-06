@@ -15,6 +15,8 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
     private static readonly Dictionary<(Facing, string), MeshData> MeshData = new();
     private static float[] def_Params = [100.0F, 0.5F, 0.1F, 0.25F, 0.05F, 1F];          //заглушка
 
+
+
     public override void OnUnloaded(ICoreAPI api)
     {
         base.OnUnloaded(api);
@@ -52,6 +54,8 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
     public override void OnLoaded(ICoreAPI coreApi)
     {
         base.OnLoaded(coreApi);
+
+       
     }
 
     public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack,
@@ -124,10 +128,10 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
             var blockPos1 = blockPos.AddCopy(blockFacing);
 
             var beh = entity.GetBehavior<BEBehaviorMPBase>();
-
+        
             if (
-                world.BlockAccessor.GetBlock(blockPos1) is IMechanicalPowerBlock block &&
-                block.HasMechPowerConnectorAt(world, blockPos1, blockFacing.Opposite)
+                world.BlockAccessor.GetBlock(blockPos1) is BlockMPBase block &&
+                this.HasMechPowerConnectorAt(world, blockPos, blockFacing.Opposite, block)
             )
             {
                 block.DidConnectAt(world, blockPos1, blockFacing.Opposite);
@@ -337,5 +341,12 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:res_load") + ": " + Params[3]);
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:kpd") + ": " + Params[5] * 100 + " %");
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + ((MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false)) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
+    }
+
+    public bool HasMechPowerConnectorAt(IWorldAccessor world, BlockPos pos, BlockFacing face, BlockMPBase forBlock)
+    {
+        var entity = world.BlockAccessor.GetBlockEntity(pos) as BlockEntityEGenerator;
+        var powerOutFacing = FacingHelper.Faces(entity.Facing).First();
+        return face == powerOutFacing;
     }
 }

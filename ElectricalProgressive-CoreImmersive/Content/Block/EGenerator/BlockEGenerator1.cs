@@ -126,8 +126,8 @@ public class BlockEGenerator1 : ImmersiveWireBlock, IMechanicalPowerBlock
             var beh = entity.GetBehavior<BEBehaviorMPBase>();
 
             if (
-                world.BlockAccessor.GetBlock(blockPos1) is IMechanicalPowerBlock block &&
-                block.HasMechPowerConnectorAt(world, blockPos1, blockFacing.Opposite)
+                world.BlockAccessor.GetBlock(blockPos1) is BlockMPBase block &&
+                this.HasMechPowerConnectorAt(world, blockPos, blockFacing.Opposite, block)
             )
             {
                 block.DidConnectAt(world, blockPos1, blockFacing.Opposite);
@@ -337,5 +337,12 @@ public class BlockEGenerator1 : ImmersiveWireBlock, IMechanicalPowerBlock
         dsc.AppendLine(Lang.Get("res_load") + ": " + Params[3]);
         dsc.AppendLine(Lang.Get("kpd") + ": " + Params[5] * 100 + " %");
         dsc.AppendLine(Lang.Get("WResistance") + ": " + ((MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false)) ? Lang.Get("Yes") : Lang.Get("No")));
+    }
+
+    public bool HasMechPowerConnectorAt(IWorldAccessor world, BlockPos pos, BlockFacing face, BlockMPBase forBlock)
+    {
+        var entity = world.BlockAccessor.GetBlockEntity(pos) as BlockEntityEGenerator1;
+        var powerOutFacing = FacingHelper.Faces(entity.Facing).First();
+        return face == powerOutFacing;
     }
 }

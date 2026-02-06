@@ -249,7 +249,7 @@ public class BlockEntityECharger : BlockEntityContainer, ITexPositionSource
         if (Api == null || Api.Side == EnumAppSide.Server || _capi == null)
             return;
 
-        if (slotid >= this._inventory.Count)
+        if (slotid >= _inventory.Count)
             return;
 
         // В заряднике отображаем только слот 0
@@ -259,13 +259,13 @@ public class BlockEntityECharger : BlockEntityContainer, ITexPositionSource
             return;
         }
 
-        if (this._inventory[slotid].Empty)
+        if (_inventory[slotid].Empty)
         {
             _meshes[slotid] = null;
             return;
         }
 
-        var meshData = GenMesh(this._inventory[slotid].Itemstack);
+        var meshData = GenMesh(_inventory[slotid]);
         if (meshData != null)
         {
             TranslateMesh(meshData, slotid);
@@ -315,8 +315,10 @@ public class BlockEntityECharger : BlockEntityContainer, ITexPositionSource
     /// <summary>
     /// Генерация меша для предмета (как в холодильнике)
     /// </summary>
-    public MeshData? GenMesh(ItemStack stack)
+    public MeshData? GenMesh(ItemSlot slot)
     {
+        var stack = slot.Itemstack;
+
         if (stack == null)
             return null;
 
@@ -327,7 +329,7 @@ public class BlockEntityECharger : BlockEntityContainer, ITexPositionSource
 
             if (meshSource != null)
             {
-                meshData = meshSource.GenMesh(stack, _capi.BlockTextureAtlas, Pos);
+                meshData = meshSource.GenMesh(slot, _capi.BlockTextureAtlas, Pos);
                 meshData.Rotate(new Vec3f(0.5f, 0.5f, 0.5f), 0f, Block.Shape.rotateY * 0.0174532924f, 0f);
             }
             else

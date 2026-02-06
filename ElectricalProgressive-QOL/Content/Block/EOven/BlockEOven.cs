@@ -52,7 +52,7 @@ public class BlockEOven : BlockEBase
         });
     }
 
-    public override bool DoParticalSelection(IWorldAccessor world, BlockPos pos) => true;
+    public override bool DoPartialSelection(IWorldAccessor world, BlockPos pos) => true;
 
     public override bool OnBlockInteractStart(
         IWorldAccessor world,

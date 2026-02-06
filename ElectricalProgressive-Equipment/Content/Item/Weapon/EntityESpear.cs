@@ -68,14 +68,13 @@ namespace ElectricalProgressive.Content.Item.Weapon
         /// Попадание в энтити
         /// </summary>
         /// <param name="entity"></param>
-        protected override void impactOnEntity(Entity entity)
+        protected override void ImpactOnEntity(Entity entity)
         {
-            base.impactOnEntity(entity);
+            base.ImpactOnEntity(entity);
 
             // без погоды не будет ничего
             if  (ElectricalProgressiveEquipment.WeatherSystemServer == null)
                 return;
-
 
             // живой и можно сразить молнией?
             if (entity.Alive && canStrike)
@@ -98,7 +97,6 @@ namespace ElectricalProgressive.Content.Item.Weapon
                 {
                     energy -= lightstrike;
                     ProjectileStack.Attributes.SetInt("durability", Math.Max(1, energy / consume));
-                    
                 }
                 else
                 {

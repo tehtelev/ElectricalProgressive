@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using Vintagestory.API.Common;
 using Newtonsoft.Json;
+using System;
 
 namespace ElectricalProgressive.RecipeSystem.Recipe
 {
@@ -23,7 +24,17 @@ namespace ElectricalProgressive.RecipeSystem.Recipe
         [JsonIgnore]
         public ItemStack ResolvedItemstack { get; set; }
 
-        public RecipeOutput Clone()
+        // Реализация IRecipeOutput.ResolvedItemStack
+        ItemStack IRecipeOutput.ResolvedItemStack => ResolvedItemstack;
+
+        // Реализация ICloneable.Clone()
+        public object Clone()
+        {
+            return Cloone();
+        }
+
+        // Оставляем типизированный Clone для удобства
+        public RecipeOutput Cloone()
         {
             return new RecipeOutput()
             {
@@ -92,7 +103,7 @@ namespace ElectricalProgressive.RecipeSystem.Recipe
             }
         }
 
-        public void FromBytes(BinaryReader reader, IClassRegistryAPI registry)
+        public void FromBytes(BinaryReader reader, IWorldAccessor resolver)
         {
             Type = reader.ReadString();
             var codeStr = reader.ReadString();

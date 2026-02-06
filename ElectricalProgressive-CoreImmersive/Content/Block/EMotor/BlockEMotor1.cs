@@ -134,8 +134,8 @@ public class BlockEMotor1 : ImmersiveWireBlock, IMechanicalPowerBlock
 
 
             if (
-                world.BlockAccessor.GetBlock(blockPos1) is IMechanicalPowerBlock block &&
-                block.HasMechPowerConnectorAt(world, blockPos1, blockFacing.Opposite)
+                world.BlockAccessor.GetBlock(blockPos1) is BlockMPBase block &&
+                this.HasMechPowerConnectorAt(world, blockPos, blockFacing.Opposite, block)
             )
             {
                 block.DidConnectAt(world, blockPos1, blockFacing.Opposite);
@@ -343,5 +343,12 @@ public class BlockEMotor1 : ImmersiveWireBlock, IMechanicalPowerBlock
         dsc.AppendLine(Lang.Get("max_torque") + ": " + Params[2]);
         dsc.AppendLine(Lang.Get("kpd") + ": " + Params[3] * 100 + " %");
         dsc.AppendLine(Lang.Get("WResistance") + ": " + ((MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false)) ? Lang.Get("Yes") : Lang.Get("No")));
+    }
+
+    public bool HasMechPowerConnectorAt(IWorldAccessor world, BlockPos pos, BlockFacing face, BlockMPBase forBlock)
+    {
+        var entity = world.BlockAccessor.GetBlockEntity(pos) as BlockEntityEMotor1;
+        var powerOutFacing = FacingHelper.Faces(entity.Facing).First();
+        return face == powerOutFacing;
     }
 }

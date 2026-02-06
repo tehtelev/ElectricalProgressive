@@ -260,7 +260,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         if (Api == null || Api.Side == EnumAppSide.Server || _capi == null)
             return;
 
-        if (slotid >= this.inventory.Count)
+        if (slotid >= inventory.Count)
             return;
 
         // В молоте отображаем только слот 0 (инструмент)
@@ -270,13 +270,13 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             return;
         }
 
-        if (this.inventory[slotid].Empty)
+        if (inventory[slotid].Empty)
         {
             _meshes[slotid] = null;
             return;
         }
 
-        var meshData = GenMesh(this.inventory[slotid].Itemstack);
+        var meshData = GenMesh(inventory[slotid]);
         if (meshData != null)
         {
             TranslateMesh(meshData, slotid);
@@ -325,8 +325,10 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
     /// <summary>
     /// Генерация меша для предмета (как в холодильнике)
     /// </summary>
-    public MeshData? GenMesh(ItemStack stack)
+    public MeshData? GenMesh(ItemSlot slot)
     {
+        var stack = slot.Itemstack;
+
         if (stack == null)
             return null;
 
@@ -337,7 +339,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
 
             if (meshSource != null)
             {
-                meshData = meshSource.GenMesh(stack, _capi.BlockTextureAtlas, Pos);
+                meshData = meshSource.GenMesh(slot, _capi.BlockTextureAtlas, Pos);
                 meshData.Rotate(new Vec3f(0.5f, 0.5f, 0.5f), 0f, Block.Shape.rotateY * 0.0174532924f, 0f);
             }
             else

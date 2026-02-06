@@ -218,7 +218,7 @@ public class ESpear : Vintagestory.API.Common.Item
         entityProjectile.ServerPos.Motion.Set(pos);
         entityProjectile.Pos.SetFrom(entityProjectile.ServerPos);
         entityProjectile.World = byEntity.World;
-        entityProjectile.SetRotation();
+        entityProjectile.SetInitialRotation();
 
         byEntity.World.SpawnEntity(entityProjectile);
         byEntity.StartAnimation("throw");

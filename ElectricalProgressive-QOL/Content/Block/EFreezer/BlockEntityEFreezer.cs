@@ -300,7 +300,7 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
             return;
         }
 
-        var meshData = GenMesh(_inventory[slotid].Itemstack);
+        var meshData = GenMesh(_inventory[slotid]);
         if (meshData != null)
         {
             TranslateMesh(meshData, slotid);
@@ -464,8 +464,10 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
     /// </summary>
     /// <param name="stack"></param>
     /// <returns></returns>
-    public MeshData? GenMesh(ItemStack stack)
+    public MeshData? GenMesh(ItemSlot slot)
     {
+        var stack = slot.Itemstack;
+        
         if (stack == null) // если стек пустой, то ничего не рисуем
             return null;
 
@@ -476,7 +478,7 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
 
             if (meshSource != null)
             {
-                meshData = meshSource.GenMesh(stack, _capi.BlockTextureAtlas, Pos);
+                meshData = meshSource.GenMesh(slot, _capi.BlockTextureAtlas, Pos);
                 //meshData.Rotate(new Vec3f(0.5f, 0.5f, 0.5f), 0f, Block.Shape.rotateY, 0f);
             }
             else

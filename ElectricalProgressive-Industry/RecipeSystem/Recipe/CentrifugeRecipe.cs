@@ -29,7 +29,7 @@ public class CentrifugeRecipe : IByteSerializable, IRecipeMulty<CentrifugeRecipe
         var outputs = new RecipeOutput[Outputs.Length];
         for (var i = 0; i < Outputs.Length; i++)
         {
-            outputs[i] = Outputs[i].Clone();
+            outputs[i] = (RecipeOutput)Outputs[i].Clone();
         }
 
         return new CentrifugeRecipe()
@@ -136,7 +136,7 @@ public class CentrifugeRecipe : IByteSerializable, IRecipeMulty<CentrifugeRecipe
         for (var i = 0; i < Outputs.Length; i++)
         {
             Outputs[i] = new RecipeOutput();
-            Outputs[i].FromBytes(reader, resolver.ClassRegistry);
+            Outputs[i].FromBytes(reader, resolver);
             Outputs[i].Resolve(resolver, "Centrifuge Recipe Output (FromBytes)");
         }
 

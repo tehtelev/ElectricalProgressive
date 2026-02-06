@@ -299,7 +299,7 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
             pos,
             _inventory[0].Itemstack
         );
-        Api.World.PlaySoundAt(saplingBlock.Sounds.Place, pos.X, pos.Y, pos.Z);
+        Api.World.PlaySoundAt(saplingBlock.Sounds.Place.Location, pos.X, pos.Y, pos.Z);
 
         _inventory[0].TakeOut(1);
         _inventory[0].MarkDirty();
@@ -438,7 +438,7 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
 
         block.SpawnBlockBrokenParticles(pos);
         Api.World.BlockAccessor.SetBlock(0, pos);
-        Api.World.PlaySoundAt(block.Sounds.Break, pos, 0, null, false, 16);
+        Api.World.PlaySoundAt(block.Sounds.Break.Location, pos, 0, null, false, 16);
     }
 
     /// <summary>

@@ -244,7 +244,7 @@ namespace ElectricalProgressive.Content.Block.EPress
                 return;
             }
 
-            var meshData = GenMesh(stack);
+            var meshData = GenMesh(inventory[slotid]);
             if (meshData != null)
             {
                 TranslateMesh(meshData, slotid);
@@ -293,8 +293,9 @@ namespace ElectricalProgressive.Content.Block.EPress
         /// <summary>
         /// Генерация меша для предмета (как в холодильнике)
         /// </summary>
-        public MeshData? GenMesh(ItemStack stack)
+        public MeshData? GenMesh(ItemSlot slot)
         {
+            var stack = slot.Itemstack;
             if (stack == null)
                 return null;
 
@@ -305,7 +306,7 @@ namespace ElectricalProgressive.Content.Block.EPress
 
                 if (meshSource != null)
                 {
-                    meshData = meshSource.GenMesh(stack, _capi.BlockTextureAtlas, Pos);
+                    meshData = meshSource.GenMesh(slot, _capi.BlockTextureAtlas, Pos);
                     meshData.Rotate(new Vec3f(0.5f, 0.5f, 0.5f), 0f, Block.Shape.rotateY * 0.0174532924f, 0f);
                 }
                 else
