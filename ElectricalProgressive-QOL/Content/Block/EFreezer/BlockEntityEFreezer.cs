@@ -47,8 +47,8 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
         _closedDelay = 0;
 
         // Инициализируем инвентарь раньше всего
-        _inventory = new InventoryGeneric(6, null, null);
-        _inventory.Foreach(slot => slot.StorageType = slot.StorageType | EnumItemStorageFlags.Backpack);
+        _inventory = new InventoryEFreezer(6, null, null);
+        
     }
 
     public override InventoryBase Inventory => _inventory;
@@ -323,65 +323,59 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
         if (meshData == null)
             return;
 
-        const float stdoffset = 0.2f;
+        ItemStack itemstack = Inventory[slotId].Itemstack;
+        if (itemstack == null)
+            return;// Though typically meshData null if empty
 
+        bool isBlock = itemstack.Class == EnumItemClass.Block;
+        bool isCarcass = itemstack.Collectible.Code.Domain.Contains("butchering") &&
+                         itemstack.Collectible.Code.Path.Contains("dead");
 
+        var origin = new Vec3f(0.5f, 0.5f, 0.5f);
 
-            // Координаты для горизонтальных полок:
-            // x - влево/вправо, z - вглубь/назад, y - высота полки
-            var (x, y, z) = slotId switch
+        if (isBlock)
         {
-            0 => (-stdoffset, 0.15f, 0f),     // Верхняя полка, лево
-            1 => (+stdoffset, 0.15f, 0f),     // Верхняя полка, право
-            2 => (-stdoffset, 0.15f, 0.62f),     // Средняя полка, лево
-            3 => (+stdoffset, 0.15f, 0.62f),     // Средняя полка, право
-            4 => (-stdoffset, 0.15f, 1.245f),    // Нижняя полка, лево
-            5 => (+stdoffset, 0.15f, 1.245f),    // Нижняя полка, право
-            _ => (0, 0.2f, 0)
-        };
-
-        if (!Inventory[slotId].Empty)
-        {
-            if (Inventory[slotId].Itemstack.Class == EnumItemClass.Block)
-            {
-                // Блоки - лежат на боку
-                meshData.Scale(new(0.5f, 0.5f, 0.5f), 0.53f, 0.53f, 0.53f);
-                meshData.Translate(0, -0.14f, 0);
-                //meshData.Rotate(new(0.5f, 0.5f, 0.5f), 90 * GameMath.DEG2RAD, 0, 8 * GameMath.DEG2RAD);
-            }
-            else
-            {
-                // Обычные предметы - лежат на полке
-                if (Inventory[slotId].Itemstack.Collectible.Code.Domain.Contains("butchering") && // для мода butchering
-                    Inventory[slotId].Itemstack.Collectible.Code.Path.Contains("dead"))
-                {
-                    meshData.Scale(new(0.5f, 0.5f, 0.5f), 0.4f, 0.4f, 0.4f);
-                    meshData.Translate(0.65f, -0.14f, -0.24f);
-                    meshData.Rotate(new Vec3f(0.5f, 0.5f, 0.5f), 0, -90f * GameMath.DEG2RAD, 0);
-                }
-                else
-                {
-                    meshData.Scale(new(0.5f, 0.5f, 0.5f), 0.8f, 0.8f, 0.8f);
-                }
-
-            }
+            meshData.Scale(origin, 0.53f, 0.53f, 0.53f);
+            meshData.Translate(0, -0.14f, 0);
+            // meshData.Rotate(origin, 90 * GameMath.DEG2RAD, 0, 8 * GameMath.DEG2RAD);  // Uncomment if needed
         }
-
-        // Смещение: x - влево/вправо, y - высота (фиксированная для полок), z - глубина
-
-        if (Inventory[slotId].Itemstack.Collectible.Code.Domain.Contains("butchering") && // для мода butchering
-            Inventory[slotId].Itemstack.Collectible.Code.Path.Contains("dead"))
+        else if (isCarcass)
         {
-            meshData.Translate(-stdoffset, 0.15f, 0f);
+            meshData.Scale(origin, 0.4f, 0.4f, 0.4f);
+            meshData.Translate(0.65f, -0.14f, -0.24f);
+            meshData.Rotate(origin, 0, -90f * GameMath.DEG2RAD, 0);
         }
         else
         {
-            meshData.Translate(x, y, z);
+            meshData.Scale(origin, 0.8f, 0.8f, 0.8f);
         }
-        
-        var orientationRotate = Block.Shape.rotateY + 90f;
 
-        meshData.Rotate(new Vec3f(0.5f, 0.5f, 0.5f), 0, orientationRotate * GameMath.DEG2RAD, 0);
+        const float stdoffset = 0.2f;
+        float px, py, pz;
+        if (isCarcass)
+        {
+            px = -stdoffset;
+            py = 0.15f;
+            pz = 0f;
+        }
+        else
+        {
+            (px, py, pz) = slotId switch
+            {
+                0 => (-stdoffset, 0.15f, 0f),     // Верхняя полка, лево
+                1 => (+stdoffset, 0.15f, 0f),     // Верхняя полка, право
+                2 => (-stdoffset, 0.15f, 0.62f),  // Средняя полка, лево
+                3 => (+stdoffset, 0.15f, 0.62f),  // Средняя полка, право
+                4 => (-stdoffset, 0.15f, 1.245f), // Нижняя полка, лево
+                5 => (+stdoffset, 0.15f, 1.245f), // Нижняя полка, право
+                _ => (0, 0.2f, 0)
+            };
+        }
+
+        meshData.Translate(px, py, pz);
+
+        var orientationRotate = Block.Shape.rotateY + 90f;
+        meshData.Rotate(origin, 0, orientationRotate * GameMath.DEG2RAD, 0);
     }
 
     public Size2i AtlasSize => _capi.BlockTextureAtlas.Size;

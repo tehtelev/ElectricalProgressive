@@ -170,17 +170,26 @@
     "walk": "game:walk/metal"
   },
   "guiTransform": {
+    "translation": {
+      "x": -3,
+      "y": -4,
+      "z": 0
+    },
     "rotation": {
       "x": -22.6,
-      "y": -145,
+      "y": -143,
       "z": 0
     },
     "origin": {
-      "x": 0.5,
+      "x": 0.9,
       "y": 0.9,
       "z": 0.5
     },
-    "scale": 0.72
+    "scaleXyz": {
+      "x": -0.72,
+      "y": 0.72,
+      "z": 0.72
+    }
   },
   "heldTpIdleAnimation": "holdbothhandslarge",
   "heldRightReadyAnimation": "heldblockready",

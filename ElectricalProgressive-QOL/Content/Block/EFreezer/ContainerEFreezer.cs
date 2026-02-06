@@ -22,11 +22,11 @@ public abstract class ContainerEFreezer : BlockEntityEBase, IBlockEntityContaine
 
 
 
-
+     
 
     protected ContainerEFreezer()
     {
-
+        
     }
 
 
