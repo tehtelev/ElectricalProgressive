@@ -16,7 +16,7 @@ namespace ElectricalProgressive.Content.Block.EHeatCannon
     public class BlockEHeatCannon : BlockEBase
     {
 
-        private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
+        private WorldInteraction[] _interactions = [];
 
 
         public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack, BlockSelection blockSel, ref string failureCode)
@@ -74,7 +74,7 @@ namespace ElectricalProgressive.Content.Block.EHeatCannon
 
         public override ItemStack[] GetDrops(IWorldAccessor world, BlockPos pos, IPlayer byPlayer, float dropQuantityMultiplier = 1)
         {
-            return new[] { OnPickBlock(world, pos) };
+            return [OnPickBlock(world, pos)];
         }
         
 

@@ -12,7 +12,7 @@ namespace ElectricalProgressive.Content.Block.ESFonar
 {
     internal class BlockESFonar : BlockEBase
     {
-        private readonly static Dictionary<CacheDataKey, MeshData> MeshDataCache = new();
+        private static readonly Dictionary<CacheDataKey, MeshData> MeshDataCache = new();
 
 
         public override void OnLoaded(ICoreAPI coreApi)

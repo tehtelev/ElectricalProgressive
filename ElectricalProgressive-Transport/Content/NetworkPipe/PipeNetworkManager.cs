@@ -2,6 +2,7 @@
 using ElectricalProgressiveTransport.NormalPipe;
 using System.Collections.Generic;
 using Vintagestory.API.Common;
+using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 
 namespace ElectricalProgressiveTransport.NetworkPipe;
@@ -9,8 +10,8 @@ namespace ElectricalProgressiveTransport.NetworkPipe;
 public class PipeNetworkManager
 {
     private ICoreAPI api;
-    private Dictionary<long, PipeNetwork> networks = new Dictionary<long, PipeNetwork>();
-    private Dictionary<BlockPos, long> pipeToNetwork = new Dictionary<BlockPos, long>();
+    private Dictionary<long, PipeNetwork> networks = new ();
+    private Dictionary<BlockPos, long> pipeToNetwork = new ();
     private long nextNetworkId = 1;
 
     public void Initialize(ICoreAPI api)
@@ -22,7 +23,7 @@ public class PipeNetworkManager
     public void AddPipe(BlockPos pos, BlockEntity pipe)
     {
         // Ищем соседние сети
-        List<long> adjacentNetworks = new List<long>();
+        List<long> adjacentNetworks = [];
 
         for (int i = 0; i < 6; i++)
         {
@@ -98,7 +99,7 @@ public class PipeNetworkManager
                 {
                     // Ищем разъединенные компоненты
                     var allPipes = new List<BlockPos>(network.Pipes);
-                    HashSet<BlockPos> processed = new HashSet<BlockPos>();
+                    HashSet<BlockPos> processed = [];
 
                     foreach (var pipePos in allPipes)
                     {
@@ -146,9 +147,9 @@ public class PipeNetworkManager
 
     private List<BlockPos> FindConnectedComponent(BlockPos startPos)
     {
-        List<BlockPos> component = new List<BlockPos>();
+        List<BlockPos> component = [];
         Queue<BlockPos> queue = new Queue<BlockPos>();
-        HashSet<BlockPos> visited = new HashSet<BlockPos>();
+        HashSet<BlockPos> visited = [];
 
         queue.Enqueue(startPos);
         visited.Add(startPos);
@@ -201,7 +202,7 @@ public class PipeNetworkManager
         var allPipes = new List<BlockPos>();
 
         // Используем IMapChunk для доступа к чанкам
-        int chunkSize = api.World.BlockAccessor.ChunkSize;
+        int chunkSize = GlobalConstants.ChunkSize;
         int worldSize = api.World.BlockAccessor.MapSizeY / chunkSize;
 
         // Получаем все загруженные чанки
@@ -301,7 +302,7 @@ public class PipeNetworkManager
         */
 
         // Строим сети
-        HashSet<BlockPos> processed = new HashSet<BlockPos>();
+        HashSet<BlockPos> processed = [];
 
         foreach (var pipePos in allPipes)
         {
@@ -349,7 +350,7 @@ public class PipeNetworkManager
     public List<BlockPos> GetInsertersInNetwork(BlockPos pipePos)
     {
         var network = GetNetwork(pipePos);
-        return network?.Inserters ?? new List<BlockPos>();
+        return network?.Inserters ?? [];
     }
 
     public int GetNetworkCount()

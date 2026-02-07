@@ -56,7 +56,7 @@ namespace ElectricalProgressive.RecipeSystem.Recipe
 
             foreach (var ingred in Ingredients)
             {
-                if (!ingred.Code.Path.Contains("*"))
+                if (!ingred.Code.Path.Contains('*'))
                     continue;
 
                 var wildcardStartLen = ingred.Code.Path.IndexOf("*");

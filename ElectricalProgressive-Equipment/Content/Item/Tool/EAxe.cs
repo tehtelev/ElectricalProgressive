@@ -71,7 +71,7 @@ class EAxe : ItemAxe
     /// <param name="byEntity"></param>
     /// <param name="itemslot"></param>
     /// <param name="amount"></param>
-    public override void DamageItem(IWorldAccessor world, Entity byEntity, ItemSlot itemslot, int amount = 1)
+    public override void DamageItem(IWorldAccessor world, Entity byEntity, ItemSlot itemslot, int amount = 1, bool destroyOnZeroDurability=false)
     {
         var durability = itemslot.Itemstack.Attributes.GetInt("durability");
         if (durability > amount)
@@ -172,9 +172,7 @@ class EAxe : ItemAxe
             }
 
 
-            int resistance;
-            int woodTier;
-            var stack = FindTree(world, blockSel.Position, out resistance, out woodTier);
+            var stack = FindTree(world, blockSel.Position, out var resistance, out var woodTier);
             if (stack.Count == 0)
             {
                 return base.OnBlockBrokenWith(world, byEntity, itemslot, blockSel, dropQuantityMultiplier);
@@ -185,7 +183,7 @@ class EAxe : ItemAxe
             var num3 = 0.8f;
             var num4 = 0;
             var flag2 = true;
-            var num = api.ModLoader.GetModSystem<WeatherSystemBase>()?.WeatherDataSlowAccess.GetWindSpeed(byEntity.SidedPos.XYZ) ?? 0.0;
+            var num = api.ModLoader.GetModSystem<WeatherSystemBase>()?.WeatherDataSlowAccess.GetWindSpeed(byEntity.Pos.XYZ) ?? 0.0;
             while (stack.Count > 0)
             {
                 var blockPos = stack.Pop();
@@ -225,7 +223,7 @@ class EAxe : ItemAxe
 
                 if (flag && flag3)
                 {
-                    DamageItem(world, byEntity, itemslot);
+                    DamageItem(world, byEntity, itemslot,1, false);
                     if (itemslot.Itemstack == null)
                     {
                         flag2 = false;

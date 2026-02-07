@@ -371,8 +371,7 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
             var asset = _capi.Assets.TryGet(texturePath.Clone().WithPathPrefixOnce("textures/").WithPathAppendixOnce(".png"));
             if (asset != null)
             {
-                int num;
-                _capi.BlockTextureAtlas.GetOrInsertTexture(texturePath, out num, out textureAtlasPosition, null, 0.005f);
+                _capi.BlockTextureAtlas.GetOrInsertTexture(texturePath, out var num, out textureAtlasPosition, null, 0.005f);
             }
             else
             {
@@ -880,29 +879,27 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
 
         if (packetid == (int)EnumBlockStovePacket.OpenGUI)
         {
-            using (var ms = new MemoryStream(data))
+            using var ms = new MemoryStream(data);
+            var reader = new BinaryReader(ms);
+            var dialogClassName = reader.ReadString();
+            var dialogTitle = reader.ReadString();
+            var tree = new TreeAttribute();
+            tree.FromBytes(reader);
+            Inventory.FromTreeAttributes(tree);
+            Inventory.ResolveBlocksOrItems();
+            var clientWorld = (IClientWorldAccessor)Api.World;
+            var dtree = new SyncedTreeAttribute();
+            SetDialogValues(dtree);
+            if (_clientDialog != null)
             {
-                var reader = new BinaryReader(ms);
-                var dialogClassName = reader.ReadString();
-                var dialogTitle = reader.ReadString();
-                var tree = new TreeAttribute();
-                tree.FromBytes(reader);
-                Inventory.FromTreeAttributes(tree);
-                Inventory.ResolveBlocksOrItems();
-                var clientWorld = (IClientWorldAccessor)Api.World;
-                var dtree = new SyncedTreeAttribute();
-                SetDialogValues(dtree);
-                if (_clientDialog != null)
-                {
-                    _clientDialog.TryClose();
-                    _clientDialog = null!;
-                }
-                else
-                {
-                    _clientDialog = new GuiDialogBlockEntityEStove(dialogTitle, Inventory, Pos, dtree, _capi!);
-                    _clientDialog.OnClosed += () => { _clientDialog.Dispose(); _clientDialog = null!; };
-                    _clientDialog.TryOpen();
-                }
+                _clientDialog.TryClose();
+                _clientDialog = null!;
+            }
+            else
+            {
+                _clientDialog = new GuiDialogBlockEntityEStove(dialogTitle, Inventory, Pos, dtree, _capi!);
+                _clientDialog.OnClosed += () => { _clientDialog.Dispose(); _clientDialog = null!; };
+                _clientDialog.TryOpen();
             }
         }
         if (packetid == (int)EnumBlockEntityPacketId.Close)

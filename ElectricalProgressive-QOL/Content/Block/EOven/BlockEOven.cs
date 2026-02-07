@@ -12,7 +12,7 @@ namespace ElectricalProgressive.Content.Block.EOven;
 
 public class BlockEOven : BlockEBase
 {
-    private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
+    private WorldInteraction[] _interactions = [];
 
     public override void OnLoaded(ICoreAPI api)
     {

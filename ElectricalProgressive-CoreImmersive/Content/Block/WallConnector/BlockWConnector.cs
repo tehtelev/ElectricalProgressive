@@ -5,7 +5,7 @@ using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 
 
-namespace EPImmersive.Content.Block.WallConnector
+namespace ElectricalProgressive.Content.Block.WallConnector
 {
     internal class BlockWConnector : ImmersiveWireBlock
     {
@@ -54,7 +54,7 @@ namespace EPImmersive.Content.Block.WallConnector
         {
             base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
             dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
-            dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + ((MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false)) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + (MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
         }
 
       

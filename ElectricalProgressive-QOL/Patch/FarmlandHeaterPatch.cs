@@ -42,7 +42,7 @@ public class FarmlandHeaterPatch
         var farmlandMethod = typeof(BlockEntityFarmland).GetMethod("Update",
             BindingFlags.NonPublic | BindingFlags.Instance,
             null,
-            new Type[] { typeof(float) },
+            [typeof(float)],
             null);
 
         if (farmlandMethod == null)
@@ -57,7 +57,7 @@ public class FarmlandHeaterPatch
         var berryBushMethod = typeof(BlockEntityBerryBush).GetMethod("CheckGrow",
             BindingFlags.NonPublic | BindingFlags.Instance,
             null,
-            new Type[] { typeof(float) },
+            [typeof(float)],
             null);
 
         if (berryBushMethod == null)
@@ -72,7 +72,7 @@ public class FarmlandHeaterPatch
         var beehiveMethod = typeof(BlockEntityBeehive).GetMethod("TestHarvestable",
             BindingFlags.NonPublic | BindingFlags.Instance,
             null,
-            new Type[] { typeof(float) },
+            [typeof(float)],
             null);
 
         if (beehiveMethod == null)
@@ -87,7 +87,7 @@ public class FarmlandHeaterPatch
         var fruitTreeMethod = typeof(FruitTreeRootBH).GetMethod("getGreenhouseTempBonus",
             BindingFlags.NonPublic | BindingFlags.Instance,
             null,
-            new Type[0],
+            [],
             null);
 
         if (fruitTreeMethod == null)
@@ -103,7 +103,7 @@ public class FarmlandHeaterPatch
         var fruitTreeGrowingMethod = typeof(FruitTreeGrowingBranchBH).GetMethod("OnTick",
             BindingFlags.NonPublic | BindingFlags.Instance,
             null,
-            new Type[] { typeof(float) },
+            [typeof(float)],
             null);
 
         if (fruitTreeGrowingMethod == null)
@@ -119,7 +119,7 @@ public class FarmlandHeaterPatch
         var saplingMethod = typeof(BlockEntitySapling).GetMethod("CheckGrow",
             BindingFlags.NonPublic | BindingFlags.Instance,
             null,
-            new Type[] { typeof(float) },
+            [typeof(float)],
             null);
 
         if (saplingMethod == null)
@@ -142,7 +142,7 @@ public class FarmlandHeaterPatch
         var farmlandMethod = typeof(BlockEntityFarmland).GetMethod("Update",
             BindingFlags.NonPublic | BindingFlags.Instance,
             null,
-            new Type[] { typeof(float) },
+            [typeof(float)],
             null);
 
         if (farmlandMethod != null)
@@ -153,7 +153,7 @@ public class FarmlandHeaterPatch
         var berryBushMethod = typeof(BlockEntityBerryBush).GetMethod("CheckGrow",
             BindingFlags.NonPublic | BindingFlags.Instance,
             null,
-            new Type[] { typeof(float) },
+            [typeof(float)],
             null);
 
         if (berryBushMethod != null)
@@ -164,7 +164,7 @@ public class FarmlandHeaterPatch
         var beehiveMethod = typeof(BlockEntityBeehive).GetMethod("TestHarvestable",
             BindingFlags.NonPublic | BindingFlags.Instance,
             null,
-            new Type[] { typeof(float) },
+            [typeof(float)],
             null);
 
         if (beehiveMethod != null)
@@ -175,7 +175,7 @@ public class FarmlandHeaterPatch
         var fruitTreeMethod = typeof(FruitTreeRootBH).GetMethod("getGreenhouseTempBonus",
             BindingFlags.NonPublic | BindingFlags.Instance,
             null,
-            new Type[0],
+            [],
             null);
 
         if (fruitTreeMethod != null)
@@ -186,7 +186,7 @@ public class FarmlandHeaterPatch
         var fruitTreeGrowingMethod = typeof(FruitTreeGrowingBranchBH).GetMethod("OnTick",
             BindingFlags.NonPublic | BindingFlags.Instance,
             null,
-            new Type[] { typeof(float) },
+            [typeof(float)],
             null);
 
         if (fruitTreeGrowingMethod != null)
@@ -198,7 +198,7 @@ public class FarmlandHeaterPatch
         var saplingMethod = typeof(BlockEntitySapling).GetMethod("CheckGrow",
             BindingFlags.NonPublic | BindingFlags.Instance,
             null,
-            new Type[] { typeof(float) },
+            [typeof(float)],
             null);
 
         if (saplingMethod != null)
@@ -210,7 +210,7 @@ public class FarmlandHeaterPatch
     /// <summary>
     /// Транспайлер для BlockEntityFarmland.Update
     /// </summary>
-    static IEnumerable<CodeInstruction> TranspilerFarmland(IEnumerable<CodeInstruction> instructions)
+    static List<CodeInstruction> TranspilerFarmland(IEnumerable<CodeInstruction> instructions)
     {
         var codes = new List<CodeInstruction>(instructions);
         var found = false;
@@ -287,7 +287,7 @@ public class FarmlandHeaterPatch
     /// <summary>
     /// Транспайлер для BlockEntityBerryBush.CheckGrow
     /// </summary>
-    static IEnumerable<CodeInstruction> TranspilerBerryBush(IEnumerable<CodeInstruction> instructions)
+    static List<CodeInstruction> TranspilerBerryBush(IEnumerable<CodeInstruction> instructions)
     {
         var codes = new List<CodeInstruction>(instructions);
         var found = false;
@@ -350,7 +350,7 @@ public class FarmlandHeaterPatch
 
 
 
-    static IEnumerable<CodeInstruction> TranspilerBeehive(IEnumerable<CodeInstruction> instructions)
+    static List<CodeInstruction> TranspilerBeehive(IEnumerable<CodeInstruction> instructions)
     {
         var codes = new List<CodeInstruction>(instructions);
         var found = false;
@@ -413,7 +413,7 @@ public class FarmlandHeaterPatch
     }
 
     // Добавить новый транспайлер для FruitTreeRootBH с проверкой roomness
-    static IEnumerable<CodeInstruction> TranspilerFruitTree(IEnumerable<CodeInstruction> instructions)
+    static List<CodeInstruction> TranspilerFruitTree(IEnumerable<CodeInstruction> instructions)
     {
         var codes = new List<CodeInstruction>(instructions);
         var found = false;
@@ -466,7 +466,7 @@ public class FarmlandHeaterPatch
 
 
     // Добавить новый транспайлер для FruitTreeGrowingBranchBH.OnTick
-    static IEnumerable<CodeInstruction> TranspilerFruitTreeGrowing(IEnumerable<CodeInstruction> instructions)
+    static List<CodeInstruction> TranspilerFruitTreeGrowing(IEnumerable<CodeInstruction> instructions)
     {
         var codes = new List<CodeInstruction>(instructions);
         var found = false;
@@ -509,7 +509,7 @@ public class FarmlandHeaterPatch
     }
 
 
-    static IEnumerable<CodeInstruction> TranspilerSapling(IEnumerable<CodeInstruction> instructions)
+    static List<CodeInstruction> TranspilerSapling(IEnumerable<CodeInstruction> instructions)
     {
         var codes = new List<CodeInstruction>(instructions);
         var found = false;

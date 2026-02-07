@@ -36,21 +36,6 @@ public class BlockEntityEMotor1 : BlockEntityEIBase
     }
 
 
-    private Facing _facing = Facing.None;
-
-    public Facing Facing
-    {
-        get => _facing;
-        set
-        {
-            if (value == _facing)
-                return;
-
-            _facing = value;
-        }
-    }
-
-    public const string FacingKey = "electricalprogressive:facing";
 
 
 }

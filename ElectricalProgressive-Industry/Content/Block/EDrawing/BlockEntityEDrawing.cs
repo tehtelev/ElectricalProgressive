@@ -32,7 +32,7 @@ namespace ElectricalProgressive.Content.Block.EDrawing
         public ItemSlot InputSlot1 => inventory[0];
         public ItemSlot InputSlot2 => inventory[1];
         public ItemSlot OutputSlot1 => inventory[2];
-        public virtual string DialogTitle => Lang.Get("edrawing-title-gui");
+        public override string DialogTitle => Lang.Get("edrawing-title-gui");
         public override InventoryBase Inventory => inventory;
 
         private BlockEntityAnimationUtil AnimUtil => GetBehavior<BEBehaviorAnimatable>()?.animUtil;
@@ -266,7 +266,7 @@ namespace ElectricalProgressive.Content.Block.EDrawing
             }
         }
 
-        private bool TryMergeToOutputSlot(ItemStack stack, ItemSlot targetSlot)
+        private static bool TryMergeToOutputSlot(ItemStack stack, ItemSlot targetSlot)
         {
             if (targetSlot.Empty)
             {
@@ -524,7 +524,7 @@ namespace ElectricalProgressive.Content.Block.EDrawing
                 {
                     Inventory.AfterBlocksLoaded(Api.World);
                 }
-                catch (Exception e)
+                catch
                 {
 
                 }

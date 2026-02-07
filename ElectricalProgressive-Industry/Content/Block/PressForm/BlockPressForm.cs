@@ -10,7 +10,7 @@ using Vintagestory.API.Util;
 namespace ElectricalProgressive.Content.Block.PressForm;
 public class BlockPressForm : Vintagestory.API.Common.Block
 {
-    private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
+    private WorldInteraction[] _interactions = [];
 
     public override void OnLoaded(ICoreAPI api)
     {

@@ -2,7 +2,7 @@
 using Vintagestory.API.MathTools;
 using EPImmersive.Interface;
 
-namespace EPImmersive.Utils
+namespace ElectricalProgressive.Utils
 {
     /// <summary>
     /// Сеть
@@ -24,7 +24,7 @@ namespace EPImmersive.Utils
         public int version;       //Версия сети, для отслеживания изменений
 
         // все соединения сети
-        public List<NetworkImmersiveConnection> ImmersiveConnections = new List<NetworkImmersiveConnection>(); 
+        public List<NetworkImmersiveConnection> ImmersiveConnections = []; 
 
     }
 }

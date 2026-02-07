@@ -221,15 +221,15 @@ namespace ElectricalProgressiveTransport
                 string code = block.Code?.ToString() ?? "";
 
                 // Список блоков с инвентарем
-                string[] inventoryKeywords = new string[]
-                {
+                string[] inventoryKeywords =
+                [
                     "chest", "crate", "box", "barrel", "shelf",
                     "hopper", "funnel", "container", "storage",
                     "cabinet", "drawer", "bin", "basket", "bag",
                     "vessel", "pot", "jar", "tub", "tank",
                     "mill", "quern", "press", "forge", "crucible",
                     "machine", "machinebase", "generator", "machinerack"
-                };
+                ];
 
                 foreach (var keyword in inventoryKeywords)
                 {
@@ -337,7 +337,7 @@ namespace ElectricalProgressiveTransport
             if (Api == null || Api.Side != EnumAppSide.Server) return;
 
             // Получаем список подключенных сторон
-            List<BlockFacing> connectedFacings = new List<BlockFacing>();
+            List<BlockFacing> connectedFacings = [];
             for (int i = 0; i < 6; i++)
             {
                 if (connectedSides[i])
@@ -434,45 +434,26 @@ namespace ElectricalProgressiveTransport
         /// <summary>
         /// Определяет тип трубы на основе соединений
         /// </summary>
-        private string DeterminePipeType(List<BlockFacing> facings)
+        private static string DeterminePipeType(List<BlockFacing> facings)
         {
             int count = facings.Count;
 
-            if (count == 0)
+            return count switch
             {
-                return "straight-ns"; // Изолированная труба
-            }
-            else if (count == 1)
-            {
-                // Одно соединение - прямая труба (конец трубы)
-                return DetermineSingleConnectionType(facings[0]);
-            }
-            else if (count == 2)
-            {
-                return DetermineTwoConnectionType(facings[0], facings[1]);
-            }
-            else if (count == 3)
-            {
-                // Проверяем все возможные типы для 3 соединений
-                return DetermineThreeConnectionType(facings);
-            }
-            else if (count == 4)
-            {
-                return DetermineFourConnectionType(facings);
-            }
-            else if (count == 5)
-            {
-                return DetermineFiveConnectionType(facings);
-            }
-
-            // 6 соединений → крестовина
-            return "cross";
+                0 => "straight-ns",
+                1 => DetermineSingleConnectionType(facings[0]),
+                2 => DetermineTwoConnectionType(facings[0], facings[1]),
+                3 => DetermineThreeConnectionType(facings),
+                4 => DetermineFourConnectionType(facings),
+                5 => DetermineFiveConnectionType(facings),
+                _ => "cross"
+            };
         }
 
         /// <summary>
         /// Определяет тип для одного соединения (конец трубы)
         /// </summary>
-        private string DetermineSingleConnectionType(BlockFacing facing)
+        private static string DetermineSingleConnectionType(BlockFacing facing)
         {
             // Для одного соединения используем прямую трубу
             // Определяем ориентацию на основе направления соединения
@@ -488,10 +469,10 @@ namespace ElectricalProgressiveTransport
         /// <summary>
         /// Определяет тип для двух соединений
         /// </summary>
-        private string DetermineTwoConnectionType(BlockFacing f1, BlockFacing f2)
+        private static string DetermineTwoConnectionType(BlockFacing f1, BlockFacing f2)
         {
             // Сортируем для единообразия
-            List<BlockFacing> sorted = new List<BlockFacing> { f1, f2 };
+            List<BlockFacing> sorted = [f1, f2];
             sorted.Sort((a, b) => a.Index.CompareTo(b.Index));
             f1 = sorted[0];
             f2 = sorted[1];
@@ -529,7 +510,7 @@ namespace ElectricalProgressiveTransport
         /// <summary>
         /// Определяет тип для трех соединений
         /// </summary>
-        private string DetermineThreeConnectionType(List<BlockFacing> facings)
+        private static string DetermineThreeConnectionType(List<BlockFacing> facings)
         {
             // Сначала проверяем, является ли это тройным углом (3 стороны не в одной плоскости)
             if (IsTripleCorner(facings))
@@ -551,11 +532,12 @@ namespace ElectricalProgressiveTransport
         /// <summary>
         /// Проверяет, является ли соединение тройным углом (все три стороны не в одной плоскости)
         /// </summary>
-        private bool IsTripleCorner(List<BlockFacing> facings)
+        private static bool IsTripleCorner(List<BlockFacing> facings)
         {
             // Для тройного угла каждая сторона должна быть перпендикулярна к двум другим
             // и ни одна не должна быть противоположной другой
-            if (facings.Count != 3) return false;
+            if (facings.Count != 3)
+                return false;
 
             // Проверяем наличие противоположных сторон
             foreach (BlockFacing facing in facings)
@@ -574,7 +556,7 @@ namespace ElectricalProgressiveTransport
         /// <summary>
         /// Определяет тип тройного угла
         /// </summary>
-        private string DetermineTripleCornerType(List<BlockFacing> facings)
+        private static string DetermineTripleCornerType(List<BlockFacing> facings)
         {
             facings.Sort((a, b) => a.Index.CompareTo(b.Index));
 
@@ -620,7 +602,7 @@ namespace ElectricalProgressiveTransport
         /// <summary>
         /// Проверяет, является ли соединение Т-образным (все три стороны в одной плоскости)
         /// </summary>
-        private bool IsTeeConnection(List<BlockFacing> facings)
+        private static bool IsTeeConnection(List<BlockFacing> facings)
         {
             if (facings.Count != 3) return false;
 
@@ -640,7 +622,7 @@ namespace ElectricalProgressiveTransport
         /// <summary>
         /// Определяет тип Т-образного соединения (8 типов)
         /// </summary>
-        private string DetermineTeeType(List<BlockFacing> facings)
+        private static string DetermineTeeType(List<BlockFacing> facings)
         {
             if (facings.Count != 3) return "cross";
 
@@ -682,11 +664,11 @@ namespace ElectricalProgressiveTransport
         /// <summary>
         /// Определяет тип для случая "3 горизонтальных + 1 вертикальное" соединение
         /// </summary>
-        private string DetermineThreePlusVerticalType(List<BlockFacing> facings)
+        private static string DetermineThreePlusVerticalType(List<BlockFacing> facings)
         {
             // Разделяем горизонтальные и вертикальные стороны
-            List<BlockFacing> horizontalSides = new List<BlockFacing>();
-            List<BlockFacing> verticalSides = new List<BlockFacing>();
+            List<BlockFacing> horizontalSides = [];
+            List<BlockFacing> verticalSides = [];
 
             foreach (var facing in facings)
             {
@@ -700,7 +682,7 @@ namespace ElectricalProgressiveTransport
             if (horizontalSides.Count == 3 && verticalSides.Count == 1)
             {
                 // Определяем недостающую горизонтальную сторону
-                List<string> allHorizontalCodes = new List<string> { "north", "east", "south", "west" };
+                List<string> allHorizontalCodes = ["north", "east", "south", "west"];
                 List<string> presentHorizontalCodes = horizontalSides.Select(f => f.Code).ToList();
 
                 string missingHorizontal = allHorizontalCodes.FirstOrDefault(code => !presentHorizontalCodes.Contains(code));
@@ -708,22 +690,17 @@ namespace ElectricalProgressiveTransport
                 // Определяем вертикальную сторону
                 string verticalCode = verticalSides[0].Code;
 
-                // Определяем тип на основе комбинации
-                if (missingHorizontal == "north")
+                switch (missingHorizontal)
                 {
-                    return verticalCode == "up" ? "four-d" : "four-u"; // Отсутствует север
-                }
-                else if (missingHorizontal == "east")
-                {
-                    return verticalCode == "up" ? "four-d" : "four-u"; // Отсутствует восток
-                }
-                else if (missingHorizontal == "south")
-                {
-                    return verticalCode == "up" ? "four-d" : "four-u"; // Отсутствует юг
-                }
-                else if (missingHorizontal == "west")
-                {
-                    return verticalCode == "up" ? "four-d" : "four-u"; // Отсутствует запад
+                    // Определяем тип на основе комбинации
+                    case "north":
+                        return verticalCode == "up" ? "four-d" : "four-u"; // Отсутствует север
+                    case "east":
+                        return verticalCode == "up" ? "four-d" : "four-u"; // Отсутствует восток
+                    case "south":
+                        return verticalCode == "up" ? "four-d" : "four-u"; // Отсутствует юг
+                    case "west":
+                        return verticalCode == "up" ? "four-d" : "four-u"; // Отсутствует запад
                 }
             }
 
@@ -734,12 +711,13 @@ namespace ElectricalProgressiveTransport
         /// <summary>
         /// Определяет тип для четырех соединений
         /// </summary>
-        private string DetermineFourConnectionType(List<BlockFacing> facings)
+        private static string DetermineFourConnectionType(List<BlockFacing> facings)
         {
-            if (facings.Count != 4) return "four-n";
+            if (facings.Count != 4)
+                return "four-n";
 
             // Находим отсутствующие стороны
-            List<BlockFacing> missingSides = new List<BlockFacing>();
+            List<BlockFacing> missingSides = [];
             for (int i = 0; i < 6; i++)
             {
                 BlockFacing facing = BlockFacing.ALLFACES[i];
@@ -749,7 +727,8 @@ namespace ElectricalProgressiveTransport
                 }
             }
 
-            if (missingSides.Count != 2) return "four-n";
+            if (missingSides.Count != 2)
+                return "four-n";
 
             BlockFacing missing1 = missingSides[0];
             BlockFacing missing2 = missingSides[1];
@@ -860,7 +839,7 @@ namespace ElectricalProgressiveTransport
                 {
                     // 3 горизонтальные стороны
                     // Определяем недостающую горизонтальную сторону
-                    List<string> allHorizontalCodes = new List<string> { "north", "east", "south", "west" };
+                    List<string> allHorizontalCodes = ["north", "east", "south", "west"];
                     List<string> presentHorizontalCodes = facings
                         .Where(f => f.Axis != EnumAxis.Y)
                         .Select(f => f.Code)
@@ -887,17 +866,17 @@ namespace ElectricalProgressiveTransport
         /// <summary>
         /// Проверяет, являются ли две горизонтальные стороны смежными
         /// </summary>
-        private bool AreAdjacentHorizontal(BlockFacing f1, BlockFacing f2)
+        private static bool AreAdjacentHorizontal(BlockFacing f1, BlockFacing f2)
         {
             if (f1.Axis == EnumAxis.Y || f2.Axis == EnumAxis.Y) return false;
 
             // Определяем порядок сторон по часовой стрелке
-            Dictionary<string, string[]> adjacencyMap = new Dictionary<string, string[]>
+            var adjacencyMap = new Dictionary<string, string[]>
             {
-                { "north", new[] { "west", "east" } },
-                { "east", new[] { "north", "south" } },
-                { "south", new[] { "east", "west" } },
-                { "west", new[] { "south", "north" } }
+                { "north", ["west", "east"] },
+                { "east", ["north", "south"] },
+                { "south", ["east", "west"] },
+                { "west", ["south", "north"] }
             };
 
             return adjacencyMap.ContainsKey(f1.Code) &&
@@ -907,7 +886,7 @@ namespace ElectricalProgressiveTransport
         /// <summary>
         /// Определяет тип для пяти соединений
         /// </summary>
-        private string DetermineFiveConnectionType(List<BlockFacing> facings)
+        private static string DetermineFiveConnectionType(List<BlockFacing> facings)
         {
             // Находим отсутствующую сторону
             BlockFacing missingSide = null;
@@ -921,7 +900,8 @@ namespace ElectricalProgressiveTransport
                 }
             }
 
-            if (missingSide == null) return "five-n";
+            if (missingSide == null)
+                return "five-n";
 
             // Возвращаем тип на основе отсутствующей стороны
             return missingSide.Code switch
@@ -954,7 +934,7 @@ namespace ElectricalProgressiveTransport
         /// </summary>
         public List<BlockPos> GetConnectedInventories()
         {
-            List<BlockPos> inventories = new List<BlockPos>();
+            List<BlockPos> inventories = [];
 
             for (int i = 0; i < 6; i++)
             {

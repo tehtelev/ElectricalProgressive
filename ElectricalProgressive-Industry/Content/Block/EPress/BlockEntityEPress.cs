@@ -33,7 +33,7 @@ namespace ElectricalProgressive.Content.Block.EPress
         public ItemSlot InputSlot2 => inventory[1];
         public ItemSlot OutputSlot1 => inventory[2];
         public ItemSlot OutputSlot2 => inventory[3];
-        public virtual string DialogTitle => Lang.Get("epress-title-gui");
+        public override string DialogTitle => Lang.Get("epress-title-gui");
         public override InventoryBase Inventory => inventory;
 
         private BlockEntityAnimationUtil AnimUtil => GetBehavior<BEBehaviorAnimatable>()?.animUtil;

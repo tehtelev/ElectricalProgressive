@@ -1,4 +1,12 @@
 ﻿using ElectricalProgressive;
+using ElectricalProgressive.Content.Block;
+using ElectricalProgressive.Content.Block.CableDot;
+using ElectricalProgressive.Content.Block.EMotor;
+using ElectricalProgressive.Content.Block.HVSFonar;
+using ElectricalProgressive.Content.Block.HVTower;
+using ElectricalProgressive.Content.Block.HVTransformator;
+using ElectricalProgressive.Content.Block.WallConnector;
+using ElectricalProgressive.Content.Block.Wire;
 using ElectricalProgressive.Utils;
 using EPImmersive.Content.Block;
 using EPImmersive.Content.Block.CableDot;
@@ -10,7 +18,6 @@ using EPImmersive.Content.Block.HVSFonar;
 using EPImmersive.Content.Block.HVTower;
 using EPImmersive.Content.Block.HVTransformator;
 using EPImmersive.Content.Block.WallConnector;
-using EPImmersive.Content.Block.Wire;
 using EPImmersive.Interface;
 using EPImmersive.Utils;
 using System;
@@ -23,7 +30,7 @@ using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Server;
-using static EPImmersive.Content.Block.ImmersiveWireBlock;
+using static ElectricalProgressive.Content.Block.ImmersiveWireBlock;
 using static EPImmersive.ElectricalProgressiveImmersive;
 
 
@@ -65,10 +72,10 @@ namespace EPImmersive
 
 
         private readonly BlockingCollection<ImmersiveNetwork> _networkProcessingQueue = new(); // коллекция для сетей
-        private readonly List<Thread> _networkProcessingThreads = new();                //список потоков работников
+        private readonly List<Thread> _networkProcessingThreads = [];                //список потоков работников
         private volatile bool _networkProcessingRunning = true;                         //сети работают?
         private readonly CountdownEvent _networkProcessingCompleted = new(0); // ивент для окончания ожидания потоков
-        private readonly ConcurrentBag<List<ImmersiveEnergyPacket>> _networkResults = new();      // список для пакетов в потоках
+        private readonly ConcurrentBag<List<ImmersiveEnergyPacket>> _networkResults = [];      // список для пакетов в потоках
 
 
 
@@ -226,7 +233,7 @@ namespace EPImmersive
             RegisterAltKeys();
 
             // регистрируем канал для синхронизации данных о закрепляемых проводах
-            clientWireChannel = api.Network.RegisterChannel("EPWireChannel").RegisterMessageType(typeof(WireConnectionData));
+            clientWireChannel = api.Network.RegisterChannel("EPWireChannel").RegisterMessageType<WireConnectionData>();
         }
 
 
@@ -266,8 +273,7 @@ namespace EPImmersive
             }
 
             // регистрируем канал для синхронизации данных о закрепляемых проводах
-            serverWireChannel = _sapi.Network.RegisterChannel("EPWireChannel").RegisterMessageType(typeof
-                (WireConnectionData)).SetMessageHandler<WireConnectionData>(new
+            serverWireChannel = _sapi.Network.RegisterChannel("EPWireChannel").RegisterMessageType<WireConnectionData>().SetMessageHandler<WireConnectionData>(new
                 NetworkClientMessageHandler<WireConnectionData>(ImmersiveWireBlock.OnClientSent));
         }
 
@@ -302,7 +308,7 @@ namespace EPImmersive
                         }
                     }
                 }
-                catch (Exception ex)
+                catch
                 {
                     // Логирование ошибки
                 }
@@ -408,7 +414,7 @@ namespace EPImmersive
         }
 
 
-        private bool AreWireNodesEqual(List<WireNode> list1, List<WireNode> list2)
+        private static bool AreWireNodesEqual(List<WireNode> list1, List<WireNode> list2)
         {
             if (list1.Count != list2.Count)
                 return false;
@@ -430,7 +436,7 @@ namespace EPImmersive
             return true;
         }
 
-        private bool AreConnectionsEqual(List<ConnectionData> list1, List<ConnectionData> list2)
+        private static bool AreConnectionsEqual(List<ConnectionData> list1, List<ConnectionData> list2)
         {
             if (list1.Count != list2.Count) return false;
 
@@ -489,7 +495,7 @@ namespace EPImmersive
             }
         }
 
-        private void AddOrUpdateImmersiveConnection(ImmersiveNetwork network, BlockPos localPos, byte localIndex, BlockPos neighborPos, byte neighborIndex, EParams parameters)
+        private static void AddOrUpdateImmersiveConnection(ImmersiveNetwork network, BlockPos localPos, byte localIndex, BlockPos neighborPos, byte neighborIndex, EParams parameters)
         {
             // Canonicalize order: ensure LocalPos < NeighborPos
             bool swapped = localPos.Equals(neighborPos);
@@ -1068,8 +1074,8 @@ namespace EPImmersive
 
 
             ImmersiveEnergyPacket packet;   // Временная переменная для пакета энергии
-            BlockPos posStore; // Позиция магазина в мире
-            BlockPos posCustomer; // Позиция потребителя в мире
+            //BlockPos posStore; // Позиция магазина в мире
+            //BlockPos posCustomer; // Позиция потребителя в мире
             var customCount = context.ConsumerPositions.Count; // Количество клиентов в симуляции
             var storeCount = context.ProducerPositions.Count; // Количество магазинов в симуляции
             var k = 0;
@@ -1503,9 +1509,9 @@ namespace EPImmersive
         {
             BlockPos pos;                   // Временная переменная для позиции
             float resistance, current, lossEnergy;  // Переменные для расчета сопротивления, тока и потерь энергии                    
-            int curIndex, currentFacingFrom;        // текущий индекс и направление в пакете
-            BlockPos currentPos;           // текущая и следующая позиции в пути пакета
-            ImmersiveNetworkPart currentPart;      // Временные переменные для частей сети
+            int curIndex;        // текущий индекс и направление в пакете
+            //BlockPos currentPos;           // текущая и следующая позиции в пути пакета
+            //ImmersiveNetworkPart currentPart;      // Временные переменные для частей сети
 
 
 
@@ -1648,13 +1654,9 @@ namespace EPImmersive
                             // если все ок, то продолжаем
                             if (isValid)
                             {
-                                if (_sumEnergy.ContainsKey(pos))
+                                if (!_sumEnergy.TryAdd(pos, packet.energy))
                                 {
                                     _sumEnergy[pos] += packet.energy;
-                                }
-                                else
-                                {
-                                    _sumEnergy.Add(pos, packet.energy);
                                 }
                             }
                         }
@@ -1876,7 +1878,7 @@ namespace EPImmersive
             }
         }
 
-        private void ClearNetworkComponents(ImmersiveNetwork network)
+        private static void ClearNetworkComponents(ImmersiveNetwork network)
         {
             network.Consumers.Clear();
             network.Producers.Clear();

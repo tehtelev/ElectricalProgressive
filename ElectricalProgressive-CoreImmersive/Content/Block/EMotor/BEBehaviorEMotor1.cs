@@ -1,6 +1,7 @@
 ﻿using ElectricalProgressive.Content.Block.EAccumulator;
 using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
+using EPImmersive.Content.Block.EMotor;
 using EPImmersive.Interface;
 using System;
 using System.Linq;
@@ -13,7 +14,7 @@ using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.GameContent.Mechanics;
 
-namespace EPImmersive.Content.Block.EMotor;
+namespace ElectricalProgressive.Content.Block.EMotor;
 
 public class BEBehaviorEMotor1 : BEBehaviorMPBase, IEImmersiveConsumer
 {
@@ -134,7 +135,7 @@ public class BEBehaviorEMotor1 : BEBehaviorMPBase, IEImmersiveConsumer
             if (_axisSign == null && OutFacingForNetworkDiscovery != null)
             {
                 var index = OutFacingForNetworkDiscovery.Index;
-                _axisSign = (index >= 0 && index < _axisSigns.Length)
+                _axisSign = index >= 0 && index < _axisSigns.Length
                     ? _axisSigns[index]
                     : _axisSigns[0]; // fallback to default
             }
@@ -153,7 +154,7 @@ public class BEBehaviorEMotor1 : BEBehaviorMPBase, IEImmersiveConsumer
     public BEBehaviorEMotor1(BlockEntity blockentity) : base(blockentity)
     {
 
-        this.GetParams();
+        GetParams();
         powerReceive = 0;
         powerRequest = I_max;
     }
@@ -209,8 +210,8 @@ public class BEBehaviorEMotor1 : BEBehaviorMPBase, IEImmersiveConsumer
 
         //entity.MarkDirty();
 
-        bool anyBurnout = false;
-        bool anyPrepareBurnout = false;
+        var anyBurnout = false;
+        var anyPrepareBurnout = false;
 
         var eParam = entity.EPImmersive.MainEparams();
         {
@@ -282,8 +283,8 @@ public class BEBehaviorEMotor1 : BEBehaviorMPBase, IEImmersiveConsumer
 
 
         return base_resistance +
-               ((Math.Abs(spd) > speed_max)
-                   ? resistance_factor * (float)Math.Pow((spd / speed_max), 2f)
+               (Math.Abs(spd) > speed_max
+                   ? resistance_factor * (float)Math.Pow(spd / speed_max, 2f)
                    : resistance_factor * spd / speed_max);
 
 

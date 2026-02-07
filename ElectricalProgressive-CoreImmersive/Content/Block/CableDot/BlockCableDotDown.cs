@@ -1,5 +1,4 @@
-﻿using ElectricalProgressive.Content.Block;
-using ElectricalProgressive.Utils;
+﻿using ElectricalProgressive.Utils;
 using EPImmersive.Utils;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,8 +7,9 @@ using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Config;
+using EPImmersive.Content.Block.CableDot;
 
-namespace EPImmersive.Content.Block.CableDot
+namespace ElectricalProgressive.Content.Block.CableDot
 {
     internal class BlockCableDotDown : ImmersiveWireBlock
     {

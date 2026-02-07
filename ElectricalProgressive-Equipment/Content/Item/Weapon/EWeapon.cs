@@ -19,7 +19,7 @@ public class EWeapon : Vintagestory.API.Common.Item
     private double lastUpdateTime = 0;
     private const double interval = 5000; //интервал обновления меча
 
-    private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
+    private WorldInteraction[] _interactions = [];
 
     public override void OnLoaded(ICoreAPI api)
     {
@@ -72,7 +72,7 @@ public class EWeapon : Vintagestory.API.Common.Item
         if (slot.Itemstack.Item.Variant["type"] == "hot" && currentTime - lastUpdateTime >= interval)
         {
             
-            DamageItem(api.World, byEntity, slot);
+            DamageItem(api.World, byEntity, slot,1,false);
             lastUpdateTime = currentTime;
 
             if (slot.Itemstack.Attributes.GetInt("durability")<=1) //тушим
@@ -125,7 +125,7 @@ public class EWeapon : Vintagestory.API.Common.Item
                         
             var slot = new DummySlot();
             slot.Itemstack = entityItem.Itemstack; //связываем их
-            DamageItem(api.World, null!, slot);
+            DamageItem(api.World, null!, slot,1,false);
             slot.MarkDirty();
             entityItem.Itemstack = slot.Itemstack;            
 
@@ -237,7 +237,7 @@ public class EWeapon : Vintagestory.API.Common.Item
     /// <param name="byEntity"></param>
     /// <param name="itemslot"></param>
     /// <param name="amount"></param>
-    public override void DamageItem(IWorldAccessor world, Entity byEntity, ItemSlot itemslot, int amount = 1)
+    public override void DamageItem(IWorldAccessor world, Entity byEntity, ItemSlot itemslot, int amount = 1, bool destroyOnZeroDurability = false)
     {
         var durability = itemslot.Itemstack.Attributes.GetInt("durability");
         if (durability > amount)

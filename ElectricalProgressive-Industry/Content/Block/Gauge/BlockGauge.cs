@@ -8,7 +8,7 @@ namespace ElectricalProgressive.Content.Block.Gauge;
 public class BlockGauge : Vintagestory.API.Common.Block
 {
 
-    private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
+    private WorldInteraction[] _interactions = [];
 
     public override void OnLoaded(ICoreAPI api)
     {

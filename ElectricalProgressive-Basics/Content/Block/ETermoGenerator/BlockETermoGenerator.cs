@@ -13,7 +13,7 @@ namespace ElectricalProgressive.Content.Block.ETermoGenerator;
 
 public class BlockETermoGenerator : BlockEBase
 {
-    private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
+    private WorldInteraction[] _interactions = [];
 
     public override void OnLoaded(ICoreAPI api)
     {

@@ -90,7 +90,7 @@ public class InventoryEFruitPress : InventoryBase, ISlotProvider
         InitializeSlots();
     }
     
-    public void LateInitialize(string inventoryID, ICoreAPI api)
+    public override void LateInitialize(string inventoryID, ICoreAPI api)
     {
         base.LateInitialize(inventoryID, api);
         _api = api;

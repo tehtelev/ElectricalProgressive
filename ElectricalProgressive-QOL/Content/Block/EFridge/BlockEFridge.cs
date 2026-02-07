@@ -15,7 +15,7 @@ class BlockEFridge : BlockEBase
     private BlockEntityEFridge? _blockEntityEFridge;
 
 
-    private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
+    private WorldInteraction[] _interactions = [];
 
     public override void OnLoaded(ICoreAPI api)
     {

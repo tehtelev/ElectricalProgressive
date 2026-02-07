@@ -146,7 +146,7 @@ public class BlockEntityECharger : BlockEntityContainer, ITexPositionSource
         }
         else
         {
-            _listenerId = RegisterGameTickListener(OnTick, 1000);
+            _listenerId = RegisterGameTickListener(OnServerTick, 1000);
         }
 
         MarkDirty(true);
@@ -169,7 +169,7 @@ public class BlockEntityECharger : BlockEntityContainer, ITexPositionSource
     }
 
     //проверка, нужно ли заряжать
-    private void OnTick(float dt)
+    private void OnServerTick(float dt)
     {
         if (this.Block.Variant["state"] == "burned") //если прибор сгорел, то нечего тут делать
             return;

@@ -3,7 +3,7 @@ using System.Text;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 
-namespace EPImmersive.Content.Block.Wire
+namespace ElectricalProgressive.Content.Block.Wire
 {
     public class BlockWire : Vintagestory.API.Common.Block
     {

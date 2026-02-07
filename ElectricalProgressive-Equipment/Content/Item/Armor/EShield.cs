@@ -29,7 +29,7 @@ class EShield : Vintagestory.API.Common.Item
     /// <param name="byEntity"></param>
     /// <param name="itemslot"></param>
     /// <param name="amount"></param>
-    public override void DamageItem(IWorldAccessor world, Entity byEntity, ItemSlot itemslot, int amount = 1)
+    public override void DamageItem(IWorldAccessor world, Entity byEntity, ItemSlot itemslot, int amount = 1, bool destroyOnZeroDurability = false)
     {
         var durability = itemslot.Itemstack.Attributes.GetInt("durability");
         if (durability > amount)

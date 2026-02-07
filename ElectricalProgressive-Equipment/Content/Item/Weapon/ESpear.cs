@@ -20,7 +20,7 @@ public class ESpear : Vintagestory.API.Common.Item
     int lightstrike;
     public SkillItem[] toolModes = [];
 
-    private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
+    private WorldInteraction[] _interactions = [];
 
     public override void OnLoaded(ICoreAPI api)
     {
@@ -227,12 +227,12 @@ public class ESpear : Vintagestory.API.Common.Item
         var num = 1f - byEntity.Attributes.GetFloat("aimingAccuracy");
         var num2 = byEntity.WatchedAttributes.GetDouble("aimingRandPitch", 1.0) * (double)num * 0.75;
         var num3 = byEntity.WatchedAttributes.GetDouble("aimingRandYaw", 1.0) * (double)num * 0.75;
-        var vec3d = byEntity.ServerPos.XYZ.Add(0.0, byEntity.LocalEyePos.Y - 0.2, 0.0);
-        var pos = (vec3d.AheadCopy(1.0, (double)byEntity.ServerPos.Pitch + num2, (double)byEntity.ServerPos.Yaw + num3) - vec3d) * 0.65 * byEntity.Stats.GetBlended("bowDrawingStrength");
-        var posWithDimension = byEntity.ServerPos.BehindCopy(0.15).XYZ.Add(byEntity.LocalEyePos.X, byEntity.LocalEyePos.Y - 0.2, byEntity.LocalEyePos.Z);
-        entityProjectile.ServerPos.SetPosWithDimension(posWithDimension);
-        entityProjectile.ServerPos.Motion.Set(pos);
-        entityProjectile.Pos.SetFrom(entityProjectile.ServerPos);
+        var vec3d = byEntity.Pos.XYZ.Add(0.0, byEntity.LocalEyePos.Y - 0.2, 0.0);
+        var pos = (vec3d.AheadCopy(1.0, (double)byEntity.Pos.Pitch + num2, (double)byEntity.Pos.Yaw + num3) - vec3d) * 0.65 * byEntity.Stats.GetBlended("bowDrawingStrength");
+        var posWithDimension = byEntity.Pos.BehindCopy(0.15).XYZ.Add(byEntity.LocalEyePos.X, byEntity.LocalEyePos.Y - 0.2, byEntity.LocalEyePos.Z);
+        entityProjectile.Pos.SetPosWithDimension(posWithDimension);
+        entityProjectile.Pos.Motion.Set(pos);
+        entityProjectile.Pos.SetFrom(entityProjectile.Pos);
         entityProjectile.World = byEntity.World;
         entityProjectile.SetInitialRotation();
 
@@ -322,7 +322,7 @@ public class ESpear : Vintagestory.API.Common.Item
     /// <param name="byEntity"></param>
     /// <param name="itemslot"></param>
     /// <param name="amount"></param>
-    public override void DamageItem(IWorldAccessor world, Entity byEntity, ItemSlot itemslot, int amount = 1)
+    public override void DamageItem(IWorldAccessor world, Entity byEntity, ItemSlot itemslot, int amount = 1, bool destroyOnZeroDurability=false)
     {
         var durability = itemslot.Itemstack.Attributes.GetInt("durability");
         if (durability > amount)

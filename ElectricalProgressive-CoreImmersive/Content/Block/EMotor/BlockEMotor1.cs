@@ -1,6 +1,5 @@
-﻿
-using ElectricalProgressive.Content.Block;
-using ElectricalProgressive.Utils;
+﻿using ElectricalProgressive.Utils;
+using EPImmersive.Content.Block.EMotor;
 using EPImmersive.Utils;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,18 +10,18 @@ using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 using Vintagestory.GameContent.Mechanics;
 
-namespace EPImmersive.Content.Block.EMotor;
+namespace ElectricalProgressive.Content.Block.EMotor;
 public class BlockEMotor1 : ImmersiveWireBlock, IMechanicalPowerBlock
 {
-    private readonly static Dictionary<(Facing, string), MeshData> MeshData = new();
-    private static float[] def_Params = [10.0F, 100.0F, 0.5F, 0.75F, 0.5F, 0.1F, 0.05F];   //заглушка
+    private static readonly Dictionary<(Facing, string), MeshData> MeshData = new();
+    private static readonly float[] DefParams = [10.0F, 100.0F, 0.5F, 0.75F, 0.5F, 0.1F, 0.05F];   //заглушка
 
 
 
     public override void OnUnloaded(ICoreAPI api)
     {
         base.OnUnloaded(api);
-        BlockEMotor1.MeshData.Clear();
+        MeshData.Clear();
     }
 
     public MechanicalNetwork? GetNetwork(IWorldAccessor world, BlockPos pos)
@@ -35,19 +34,7 @@ public class BlockEMotor1 : ImmersiveWireBlock, IMechanicalPowerBlock
         return null;
     }
 
-    public bool HasMechPowerConnectorAt(IWorldAccessor world, BlockPos pos, BlockFacing face)
-    {
-        if (world.BlockAccessor.GetBlockEntity(pos) is BlockEntityEMotor1 entity && entity.Facing != Facing.None)
-        {
-            var directions = FacingHelper.Directions(entity.Facing).ToList();
-            if (directions.Count > 0)
-            {
-                return directions.First() == face;
-            }
-        }
 
-        return false;
-    }
 
     public void DidConnectAt(IWorldAccessor world, BlockPos pos, BlockFacing face)
     {
@@ -135,7 +122,7 @@ public class BlockEMotor1 : ImmersiveWireBlock, IMechanicalPowerBlock
 
             if (
                 world.BlockAccessor.GetBlock(blockPos1) is BlockMPBase block &&
-                this.HasMechPowerConnectorAt(world, blockPos, blockFacing.Opposite, block)
+                HasMechPowerConnectorAt(world, blockPos, blockFacing.Opposite, block)
             )
             {
                 block.DidConnectAt(world, blockPos1, blockFacing.Opposite);
@@ -158,7 +145,7 @@ public class BlockEMotor1 : ImmersiveWireBlock, IMechanicalPowerBlock
             var faces = FacingHelper.Faces(entity.Facing).ToList();
             if (
             faces != null &&
-            faces.Any() &&
+            faces.Count != 0 &&
             faces.First() is { } blockFacing &&
             !world.BlockAccessor.GetBlock(pos.AddCopy(blockFacing)).SideSolid[blockFacing.Opposite.Index])
             {
@@ -172,8 +159,8 @@ public class BlockEMotor1 : ImmersiveWireBlock, IMechanicalPowerBlock
     {
         
 
-        if (this.api is ICoreClientAPI clientApi &&
-            this.api.World.BlockAccessor.GetBlockEntity(pos) is BlockEntityEMotor1 entity &&
+        if (api is ICoreClientAPI clientApi &&
+            api.World.BlockAccessor.GetBlockEntity(pos) is BlockEntityEMotor1 entity &&
             entity.Facing != Facing.None
            )
         {
@@ -181,7 +168,7 @@ public class BlockEMotor1 : ImmersiveWireBlock, IMechanicalPowerBlock
             var facing = entity.Facing;   //куда смотрит генератор
             string code = entity.Block.Code; //код блока
 
-            if (!BlockEMotor1.MeshData.TryGetValue((facing, code), out var meshData))
+            if (!MeshData.TryGetValue((facing, code), out var meshData))
             {
                 var origin = new Vec3f(0.5f, 0.5f, 0.5f);
                 var block = clientApi.World.BlockAccessor.GetBlockEntity(pos).Block;
@@ -313,7 +300,7 @@ public class BlockEMotor1 : ImmersiveWireBlock, IMechanicalPowerBlock
                     meshData.Rotate(origin, 0.0f, 90.0f * GameMath.DEG2RAD, 0.0f);
                 }
 
-                BlockEMotor1.MeshData.TryAdd((facing, code), meshData);
+                MeshData.TryAdd((facing, code), meshData);
             }
 
             _CustomMeshData = meshData;
@@ -335,19 +322,23 @@ public class BlockEMotor1 : ImmersiveWireBlock, IMechanicalPowerBlock
         base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
 
-        var Params = MyMiniLib.GetAttributeArrayFloat(inSlot.Itemstack.Block, "params", def_Params);
+        var @params = MyMiniLib.GetAttributeArrayFloat(inSlot.Itemstack.Block, "params", DefParams);
 
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Consumption") + ": " + Params[1] + " " + Lang.Get("electricalprogressivebasics:W"));
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:max_speed") + ": " + Params[4] + " " + Lang.Get("electricalprogressivebasics:rps"));
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:res_speed") + ": " + Params[5]);
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:max_torque") + ": " + Params[2]);
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:kpd") + ": " + Params[3] * 100 + " %");
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + ((MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false)) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Consumption") + ": " + @params[1] + " " + Lang.Get("electricalprogressivebasics:W"));
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:max_speed") + ": " + @params[4] + " " + Lang.Get("electricalprogressivebasics:rps"));
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:res_speed") + ": " + @params[5]);
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:max_torque") + ": " + @params[2]);
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:kpd") + ": " + @params[3] * 100 + " %");
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + (MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
     }
 
     public bool HasMechPowerConnectorAt(IWorldAccessor world, BlockPos pos, BlockFacing face, BlockMPBase forBlock)
     {
         var entity = world.BlockAccessor.GetBlockEntity(pos) as BlockEntityEMotor1;
+        if (entity.Facing == Facing.None)
+        {
+            return false;
+        }
         var powerOutFacing = FacingHelper.Directions(entity.Facing).First();
         return face == powerOutFacing;
     }

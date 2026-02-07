@@ -232,7 +232,7 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
     /// <summary>
     /// Запускает анимацию работы
     /// </summary>
-    public new void StartWorkingAnim()
+    public void StartWorkingAnim()
     {
         if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false && _genTemp>20)
         {
@@ -254,7 +254,7 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
     /// <summary>
     /// Останавливает анимацию работы
     /// </summary>
-    public new void StopWorkingAnim()
+    public void StopWorkingAnim()
     {
         if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == true)
         {

@@ -1,4 +1,4 @@
-using ElectricalProgressive.Utils;
+﻿using ElectricalProgressive.Utils;
 using System;
 using System.Collections.Generic;
 using Vintagestory.API.Client;
@@ -15,7 +15,7 @@ public class BlockEntityEHotSpringsGenerator : BlockEntityEFacingBase
 {
     private Facing _facing = Facing.None;
 
-    public BEBehaviorElectricalProgressive? ElectricalProgressive => GetBehavior<BEBehaviorElectricalProgressive>();
+
 
     /// <summary>
     /// Maximum power output for hot springs generator
@@ -220,8 +220,8 @@ public class BlockEntityEHotSpringsGenerator : BlockEntityEFacingBase
         int count = 0;
 
         // Check all 8 horizontal directions (N, S, E, W, NE, NW, SE, SW)
-        BlockPos[] adjacentPositions = new[]
-        {
+        BlockPos[] adjacentPositions =
+        [
             Pos.NorthCopy(),
             Pos.SouthCopy(),
             Pos.EastCopy(),
@@ -230,7 +230,7 @@ public class BlockEntityEHotSpringsGenerator : BlockEntityEFacingBase
             Pos.NorthCopy().WestCopy(),  // NW
             Pos.SouthCopy().EastCopy(),  // SE
             Pos.SouthCopy().WestCopy()   // SW
-        };
+        ];
 
         foreach (var adjPos in adjacentPositions)
         {

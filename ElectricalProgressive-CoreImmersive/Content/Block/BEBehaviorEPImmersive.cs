@@ -1,4 +1,5 @@
-﻿using ElectricalProgressive.Utils;
+﻿using ElectricalProgressive.Content.Block;
+using ElectricalProgressive.Utils;
 using EPImmersive.Interface;
 using EPImmersive.Utils;
 using Newtonsoft.Json.Linq;
@@ -56,10 +57,10 @@ public class ConnectionData
 public class BEBehaviorEPImmersive : BlockEntityBehavior
 {
     // Единый список всех соединений
-    private List<ConnectionData> _connections = new List<ConnectionData>();
+    private List<ConnectionData> _connections = [];
 
     // Список точек подключения из JSON атрибутов
-    private List<WireNode> _wireNodes = new List<WireNode>();
+    private List<WireNode> _wireNodes = [];
 
     public BEBehaviorEPImmersive(BlockEntity blockEntity)
         : base(blockEntity)
@@ -88,8 +89,8 @@ public class BEBehaviorEPImmersive : BlockEntityBehavior
     private IEImmersiveProducer? _producer;
     private IEImmersiveTransformator? _transformator;
 
-    public List<Vec3d> ParticlesOffsetPos = new List<Vec3d>(1);
-    public List<int[]> ParticlesFramesAnim = new List<int[]>(1);
+    public List<Vec3d> ParticlesOffsetPos = new (1);
+    public List<int[]> ParticlesFramesAnim = new (1);
     public int ParticlesType = 0;
     private BlockEntityAnimationUtil AnimUtil;
     private BlockPos? mainPartPos;
@@ -104,7 +105,7 @@ public class BEBehaviorEPImmersive : BlockEntityBehavior
     private (EParams param, byte index) _eparams;
     private bool _isLoaded;
 
-    private EParams _mainEpar = new EParams();
+    private EParams _mainEpar = new();
 
 
 
@@ -413,7 +414,7 @@ public class BEBehaviorEPImmersive : BlockEntityBehavior
 
                 _wireNodes.Add(wireNode);
             }
-            catch (Exception ex)
+            catch
             {
                 //this.Api?.Logger.Warning($"Failed to load wire node for block {Block?.Code} at {Blockentity.Pos}: {ex.Message}");
             }

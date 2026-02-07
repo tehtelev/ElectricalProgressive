@@ -12,9 +12,9 @@ namespace ElectricalProgressive.Content.Block.ELamp
 {
     internal class BlockELamp : BlockEBase
     {
-        private static readonly Dictionary<CacheDataKey, MeshData> MeshDataCache = new();
-        private static readonly Dictionary<CacheDataKey, Cuboidf[]> SelectionBoxesCache = new();
-        private static readonly Dictionary<CacheDataKey, Cuboidf[]> CollisionBoxesCache = new();
+        private static readonly Dictionary<CacheDataKey, MeshData> MeshDataCache = [];
+        private static readonly Dictionary<CacheDataKey, Cuboidf[]> SelectionBoxesCache = [];
+        private static readonly Dictionary<CacheDataKey, Cuboidf[]> CollisionBoxesCache = [];
 
         // Кэш преобразований поворотов
         private static readonly Dictionary<Facing, RotationData> RotationCache = CreateRotationCache();
@@ -87,7 +87,7 @@ namespace ElectricalProgressive.Content.Block.ELamp
 
         public override ItemStack[] GetDrops(IWorldAccessor world, BlockPos pos, IPlayer byPlayer, float dropQuantityMultiplier = 1)
         {
-            return new[] { OnPickBlock(world, pos) };
+            return [OnPickBlock(world, pos)];
         }
 
         public override void OnNeighbourBlockChange(IWorldAccessor world, BlockPos pos, BlockPos neibpos)
@@ -119,7 +119,7 @@ namespace ElectricalProgressive.Content.Block.ELamp
             if (api?.World?.BlockAccessor.GetBlockEntity(pos) is not BlockEntityELamp entity ||
                 entity.Facing == Facing.None)
             {
-                return Array.Empty<Cuboidf>();
+                return [];
             }
 
             var key = CacheDataKey.FromEntity(entity);
@@ -134,7 +134,7 @@ namespace ElectricalProgressive.Content.Block.ELamp
                 }
             }
 
-            return boxes ?? Array.Empty<Cuboidf>();
+            return boxes ?? [];
         }
 
         public override void OnJsonTesselation(ref MeshData sourceMesh, ref int[] lightRgbsByCorner, BlockPos pos, Vintagestory.API.Common.Block[] chunkExtBlocks, int extIndex3d)

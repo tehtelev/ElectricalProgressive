@@ -203,7 +203,7 @@
   "causeVoltage": "Превышено напряжение",
   "causeEnvironment": "Воздействие жидкости",
 
-
+  "game:tabname-electricity": "Электричество",
 
 
   "Electricity": "Электросеть (обычная)",

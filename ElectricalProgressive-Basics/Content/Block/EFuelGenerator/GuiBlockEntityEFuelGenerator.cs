@@ -85,7 +85,7 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
             .AddDynamicCustomDraw(stoveBounds, OnBgDraw, "symbolDrawer")
             .AddInset(waterBounds.ForkBoundingParent(2, 2, 2, 2), 2)
             .AddDynamicCustomDraw(waterBounds, OnWaterDraw, "waterDrawer")
-            .AddItemSlotGrid(Inventory, SendInvPacket, 1, new int[] { 0 }, fuelGrid, "fuelSlot")
+            .AddItemSlotGrid(Inventory, SendInvPacket, 1, [0], fuelGrid, "fuelSlot")
             .AddDynamicText("", outputText, textBounds, "outputText")
             .EndChildElements()
             .Compose();

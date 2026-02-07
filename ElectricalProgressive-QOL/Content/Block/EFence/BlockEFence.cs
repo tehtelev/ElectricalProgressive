@@ -217,13 +217,13 @@ public class BlockEFence : BlockEBase
             return block.Attributes["fenceConnect"][side.Code].AsBool(defaultValue: true);
         }
 
-        var attachmentArea = (new Cuboidi[4]
-        {
+        var attachmentArea = ((Cuboidi[])
+        [
             new RotatableCube(6f, 0f, 15f, 10f, 14f, 15f).ToHitboxCuboidi(180f),
             new RotatableCube(6f, 0f, 15f, 10f, 14f, 15f).ToHitboxCuboidi(270f),
             new RotatableCube(6f, 0f, 15f, 10f, 14f, 15f).ToHitboxCuboidi(0f),
             new RotatableCube(6f, 0f, 15f, 10f, 14f, 15f).ToHitboxCuboidi(90f)
-        })[side.Index];
+        ])[side.Index];
         if (!(block is BlockEFence)
             && (!(block is BlockFenceGate blockFenceGate) || blockFenceGate.GetDirection() == side || blockFenceGate.GetDirection() == side.Opposite)
             && (!(block is BlockFenceGateRoughHewn blockFenceGateRoughHewn) || blockFenceGateRoughHewn.GetDirection() == side || blockFenceGateRoughHewn.GetDirection() == side.Opposite))

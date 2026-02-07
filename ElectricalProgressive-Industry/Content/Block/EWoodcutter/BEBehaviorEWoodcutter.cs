@@ -118,8 +118,8 @@ public class BEBehaviorEWoodcutter : BlockEntityBehavior, IElectricConsumer
 
         var side = entity.Block.Variant["side"];
 
-        var types = new string[2] { "state", "side" };
-        var variants = new string[2] { "burned", side };
+        string[] types = ["state", "side"];
+        string[] variants = ["burned", side];
 
         Api.World.BlockAccessor.ExchangeBlock(Api.World.GetBlock(Block.CodeWithVariants(types, variants)).BlockId, Pos);
     }

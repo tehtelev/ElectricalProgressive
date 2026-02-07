@@ -65,8 +65,7 @@ public class FlyToggleEvent : ModSystem
         this.capi = api;
         RegisterFlyKeys();
 
-        clientChannel = api.Network.RegisterChannel("EP").RegisterMessageType(typeof
-            (FlyToggle)).RegisterMessageType(typeof(FlyResponse)).SetMessageHandler<FlyResponse>(new
+        clientChannel = api.Network.RegisterChannel("EP").RegisterMessageType<FlyToggle>().RegisterMessageType<FlyResponse>().SetMessageHandler<FlyResponse>(new
             NetworkServerMessageHandler<FlyResponse>(this.OnClientReceived));
     }
 
@@ -78,8 +77,7 @@ public class FlyToggleEvent : ModSystem
     {
         base.StartServerSide(api);
         this.sapi = api;
-        serverChannel = sapi.Network.RegisterChannel("EP").RegisterMessageType(typeof
-            (FlyToggle)). RegisterMessageType(typeof(FlyResponse)).SetMessageHandler<FlyToggle>(new
+        serverChannel = sapi.Network.RegisterChannel("EP").RegisterMessageType<FlyToggle>().RegisterMessageType<FlyResponse>().SetMessageHandler<FlyToggle>(new
             NetworkClientMessageHandler<FlyToggle>(this.OnClientSent));
         api.Event.RegisterGameTickListener(new Action<float>(this.onTickItem), 1000);
         api.Event.RegisterGameTickListener(new Action<float>(this.onTickCheckFly), 1000, 200);
@@ -181,7 +179,7 @@ public class FlyToggleEvent : ModSystem
         var baseConsume = MyMiniLib.GetAttributeInt(itemSlot.Itemstack.Item, "consume", 20);
         var damage = (int)(consumeFly / timeDelta / baseConsume);
         
-        itemSlot.Itemstack.Item.DamageItem(sapi.World, null, itemSlot, damage);
+        itemSlot.Itemstack.Item.DamageItem(sapi.World, null, itemSlot, 1, false);
         itemSlot.MarkDirty();
     }
 

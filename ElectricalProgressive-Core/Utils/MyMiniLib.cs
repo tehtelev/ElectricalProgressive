@@ -139,7 +139,7 @@ public static class MyMiniLib
 
                 return result ?? def;
             }
-            catch (Exception ex)
+            catch
             {
                 // Логируем ошибку если нужно
                 //Console.WriteLine($"Error parsing array {attrname}: {ex.Message}");
@@ -168,7 +168,7 @@ public static class MyMiniLib
 
                 return result ?? def;
             }
-            catch (Exception ex)
+            catch
             {
                 // Логируем ошибку если нужно
                 //Console.WriteLine($"Error parsing array {attrname}: {ex.Message}");

@@ -15,7 +15,7 @@ namespace ElectricalProgressiveTransport
 {
     public class BlockPipeBase : Block
     {
-        private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
+        private WorldInteraction[] _interactions = [];
 
         public override WorldInteraction[] GetPlacedBlockInteractionHelp(
             IWorldAccessor world,
@@ -140,24 +140,27 @@ namespace ElectricalProgressiveTransport
             }
         }
         
-        private void UpdateNearbyPipes(IWorldAccessor world, BlockPos centerPos)
+        private static void UpdateNearbyPipes(IWorldAccessor world, BlockPos centerPos)
         {
             // Обновляем все трубы в радиусе 1 блока от центра
             for (int i = 0; i < 6; i++)
             {
-                BlockFacing facing = BlockFacing.ALLFACES[i];
-                BlockPos checkPos = centerPos.AddCopy(facing);
+                var facing = BlockFacing.ALLFACES[i];
+                var checkPos = centerPos.AddCopy(facing);
                 
                 // Обновляем трубы
-                if (world.BlockAccessor.GetBlockEntity(checkPos) is BEPipe pipe)
+
+                var entity = world.BlockAccessor.GetBlockEntity(checkPos);
+
+                if (entity is BEPipe pipe)
                 {
                     pipe.UpdateConnections();
                 }
-                else if (world.BlockAccessor.GetBlockEntity(checkPos) is BEInsertionPipe inserter)
+                else if (entity is BEInsertionPipe inserter)
                 {
                     inserter.UpdateConnections();
                 }
-                else if (world.BlockAccessor.GetBlockEntity(checkPos) is BELiquidInsertionPipe liquidInserter)
+                else if (entity is BELiquidInsertionPipe liquidInserter)
                 {
                     liquidInserter.UpdateConnections();
                 }

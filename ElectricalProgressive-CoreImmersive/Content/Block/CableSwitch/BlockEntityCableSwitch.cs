@@ -1,5 +1,5 @@
-﻿using ElectricalProgressive.Utils;
-using EPImmersive.Content.Block;
+﻿using ElectricalProgressive.Content.Block;
+using ElectricalProgressive.Utils;
 using System;
 using System.Collections.Generic;
 using Vintagestory.API.Client;

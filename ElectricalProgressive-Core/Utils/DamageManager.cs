@@ -29,7 +29,7 @@ namespace ElectricalProgressive.Utils
 
         public static global::ElectricalProgressive.ElectricalProgressive? SystemEP;
 
-        private ICoreServerAPI _sapi;
+        private readonly ICoreServerAPI _sapi;
 
 
         /// <summary>
@@ -48,9 +48,9 @@ namespace ElectricalProgressive.Utils
 
 
         // Время жизни кэша в миллисекундах (например, 1 с)
-        private static long _cacheTtlMs = 1000;
+        private static readonly long _cacheTtlMs = 1000;
         // Интервал между автосбросами кэша в миллисекундах (например, 1 минута)
-        private static long _cleanupIntervalMs = 60 * 1000;
+        private static readonly long _cleanupIntervalMs = 60 * 1000;
 
         // Структура для хранения данных + время записи
         private class CacheEntry
@@ -221,7 +221,7 @@ namespace ElectricalProgressive.Utils
 
                 // 2) Вычисляем вектор от блока к сущности и отталкиваем
                 var center = pos.ToVec3d().Add(0.5, 0.5, 0.5);
-                var diff = entity.ServerPos.XYZ - center;
+                var diff = entity.Pos.XYZ - center;
                 diff.Y = 0.2; // небольшой подъём
                 diff.Normalize();
 

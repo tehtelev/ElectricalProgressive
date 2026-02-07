@@ -19,7 +19,7 @@ namespace EPImmersive.Content.Block.CableSwitch
         private static readonly Dictionary<CacheDataKey, Cuboidf[]> SelectionBoxesCache = [];
         private static readonly Dictionary<CacheDataKey, Cuboidf[]> CollisionBoxesCache = [];
 
-        private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
+        private WorldInteraction[] _interactions = [];
 
         public override void OnLoaded(ICoreAPI api)
         {

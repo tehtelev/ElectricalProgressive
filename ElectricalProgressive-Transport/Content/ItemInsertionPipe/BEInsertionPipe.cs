@@ -44,7 +44,7 @@ public class BEInsertionPipe : BlockEntityPipeBase
     private long lastTemperatureUpdate = 0;
 
     // Тайминги для предотвращения спама
-    private Dictionary<BlockPos, long> lastTransferTime = new Dictionary<BlockPos, long>();
+    private Dictionary<BlockPos, long> lastTransferTime = new();
     private const long MinTransferInterval = 500; // 500 мс между переносами
 
     // Переопределяем свойство Inventory для фильтрующей трубы
@@ -112,7 +112,7 @@ public class BEInsertionPipe : BlockEntityPipeBase
     }
 
     // Проверяет, нужно ли останавливать этот тип перехода
-    private bool ShouldStopTransition(EnumTransitionType transType)
+    private static bool ShouldStopTransition(EnumTransitionType transType)
     {
         switch (transType)
         {
@@ -167,6 +167,7 @@ public class BEInsertionPipe : BlockEntityPipeBase
     }
 
     // Расчет скорости порчи
+    /*
     public float GetPerishRate()
     {
         if (!stopPerishEnabled || Api == null)
@@ -196,7 +197,7 @@ public class BEInsertionPipe : BlockEntityPipeBase
         float baseRate = Math.Max(0.1f, Math.Min(2.4f, (float)Math.Pow(3, temperatureCached / 19 - 1.2) - 0.1f));
         return baseRate * perishRateMultiplier;
     }
-
+    */
     #endregion
 
     public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
@@ -776,10 +777,10 @@ public class BEInsertionPipe : BlockEntityPipeBase
 
     private bool CanTransferFrom(BlockPos sourcePos)
     {
-        if (!lastTransferTime.ContainsKey(sourcePos))
+        if (!lastTransferTime.TryGetValue(sourcePos, out var value))
             return true;
 
-        long elapsed = Api.World.ElapsedMilliseconds - lastTransferTime[sourcePos];
+        long elapsed = Api.World.ElapsedMilliseconds - value;
         return elapsed > MinTransferInterval;
     }
 
@@ -837,7 +838,7 @@ public class BEInsertionPipe : BlockEntityPipeBase
         sb.AppendLine(Lang.Get("electricalprogressivetransport:filter-mode", modeText));
 
         // Информация о настройках сравнения
-        List<string> filters = new List<string>();
+        List<string> filters = [];
         if (matchMod) filters.Add(Lang.Get("electricalprogressivetransport:filter-match-mod"));
         if (matchType) filters.Add(Lang.Get("electricalprogressivetransport:filter-match-type"));
         if (matchAttributes) filters.Add(Lang.Get("electricalprogressivetransport:filter-match-attrs"));
@@ -953,16 +954,14 @@ public class BEInsertionPipe : BlockEntityPipeBase
         }
         else if (packetid == 1002) // Обновление настроек фильтра
         {
-            using (var ms = new System.IO.MemoryStream(data))
-            using (var br = new System.IO.BinaryReader(ms))
-            {
-                FilterMode mode = (FilterMode)br.ReadInt32();
-                bool modMatch = br.ReadBoolean();
-                bool typeMatch = br.ReadBoolean();
-                bool attrMatch = br.ReadBoolean();
+            using var ms = new System.IO.MemoryStream(data);
+            using var br = new System.IO.BinaryReader(ms);
+            FilterMode mode = (FilterMode)br.ReadInt32();
+            bool modMatch = br.ReadBoolean();
+            bool typeMatch = br.ReadBoolean();
+            bool attrMatch = br.ReadBoolean();
 
-                UpdateFilterSettings(mode, modMatch, typeMatch, attrMatch);
-            }
+            UpdateFilterSettings(mode, modMatch, typeMatch, attrMatch);
         }
         else if (packetid == 1003) // Обновление скорости передачи
         {

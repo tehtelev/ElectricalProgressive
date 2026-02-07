@@ -134,7 +134,8 @@ public class BlockEHotSpringsGenerator : BlockEBase
         var newState = Variant["state"] switch
         {
             "on" => "off",
-            "off" => "off"
+            "off" => "off",
+            _ => "off" // Обработка всех остальных случаев (например, пустая строка)
         };
 
         var blockCode = CodeWithVariants(new Dictionary<string, string>

@@ -23,7 +23,7 @@ public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource
     // === Параметры контейнера для жидкости ===
     public float CapacityLitres => 100f;
     public bool AllowHeldLiquidTransfer => true;
-    public int ContainerSlotId => 1;
+    public static int ContainerSlotId => 1;
     public float TransferSizeLitres => 1f;
 
     #region Реализация интерфейса ILiquidSource/ILiquidSink для BlockPos
@@ -31,12 +31,12 @@ public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource
     /// <summary>
     /// Получить ID слота для контейнера по позиции блока
     /// </summary>
-    public int GetContainerSlotId(BlockPos pos) => ContainerSlotId;
+    public static int GetContainerSlotId(BlockPos pos) => ContainerSlotId;
     
     /// <summary>
     /// Получить ID слота для контейнера по ItemStack
     /// </summary>
-    public int GetContainerSlotId(ItemStack containerStack) => ContainerSlotId;
+    public static int GetContainerSlotId(ItemStack containerStack) => ContainerSlotId;
     
     /// <summary>
     /// Получить текущее количество жидкости в блоке
@@ -105,12 +105,12 @@ public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource
     /// <summary>
     /// Положить жидкость (для пресса в руке нельзя)
     /// </summary>
-    public int TryPutLiquid(ItemStack containerStack, ItemStack liquidStack, float desiredLitres) => 0;
+    public static int TryPutLiquid(ItemStack containerStack, ItemStack liquidStack, float desiredLitres) => 0;
     
     /// <summary>
     /// Взять жидкость (для пресса в руке нельзя)
     /// </summary>
-    public ItemStack TryTakeContent(ItemStack containerStack, int quantityItems) => null;
+    public static ItemStack TryTakeContent(ItemStack containerStack, int quantityItems) => null;
 
     #endregion
 
@@ -160,7 +160,7 @@ public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource
             SetContents(containerStack, null);
             return;
         }
-        SetContents(containerStack, new ItemStack[] { content });
+        SetContents(containerStack, [content]);
     }
     
     /// <summary>
@@ -255,7 +255,7 @@ public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource
                 slot.TakeOut(1);
                 if ((byEntity as EntityPlayer)?.Player.InventoryManager.TryGiveItemstack(containerStack, true) != true)
                 {
-                    api.World.SpawnItemEntity(containerStack, byEntity.SidedPos.XYZ);
+                    api.World.SpawnItemEntity(containerStack, byEntity.Pos.XYZ);
                 }
 
                 slot.MarkDirty();

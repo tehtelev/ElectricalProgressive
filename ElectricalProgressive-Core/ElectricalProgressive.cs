@@ -58,10 +58,10 @@ namespace ElectricalProgressive
         private Network _localNetwork = new();
 
         private readonly BlockingCollection<Network> _networkProcessingQueue = new(); // коллекция для сетей
-        private readonly List<Thread> _networkProcessingThreads = new();                //список потоков работников
+        private readonly List<Thread> _networkProcessingThreads = [];                //список потоков работников
         private volatile bool _networkProcessingRunning = true;                         //сети работают?
         private readonly CountdownEvent _networkProcessingCompleted = new(0); // ивент для окончания ожидания потоков
-        private readonly ConcurrentBag<List<EnergyPacket>> _networkResults = new();      // список для пакетов в потоках
+        private readonly ConcurrentBag<List<EnergyPacket>> _networkResults = [];      // список для пакетов в потоках
 
         public static int speedOfElectricity; // Скорость электричества в проводах (блоков в тик)
         public static int timeBeforeBurnout; // Время до сгорания проводника в секундах
@@ -267,7 +267,7 @@ namespace ElectricalProgressive
                         }
                     }
                 }
-                catch (Exception ex)
+                catch
                 {
                     // Логирование ошибки
                 }
@@ -736,8 +736,8 @@ namespace ElectricalProgressive
 
 
             EnergyPacket packet;   // Временная переменная для пакета энергии
-            BlockPos posStore; // Позиция магазина в мире
-            BlockPos posCustomer; // Позиция потребителя в мире
+            //BlockPos posStore; // Позиция магазина в мире
+            //BlockPos posCustomer; // Позиция потребителя в мире
             var customCount = context.ConsumerPositions.Count; // Количество клиентов в симуляции
             var storeCount = context.ProducerPositions.Count; // Количество магазинов в симуляции
             var k = 0;
@@ -1108,7 +1108,7 @@ namespace ElectricalProgressive
             float resistance, current, lossEnergy;  // Переменные для расчета сопротивления, тока и потерь энергии                    
             int curIndex, currentFacingFrom;        // текущий индекс и направление в пакете
             BlockPos currentPos;           // текущая и следующая позиции в пути пакета
-            NetworkPart currentPart;      // Временные переменные для частей сети
+            //NetworkPart currentPart;      // Временные переменные для частей сети
 
 
 
@@ -1166,13 +1166,9 @@ namespace ElectricalProgressive
 
                             if (isValid)
                             {
-                                if (_sumEnergy.ContainsKey(pos))
+                                if (!_sumEnergy.TryAdd(pos, packet.energy))
                                 {
                                     _sumEnergy[pos] += packet.energy;
-                                }
-                                else
-                                {
-                                    _sumEnergy.Add(pos, packet.energy);
                                 }
                             }
                         }
@@ -1480,11 +1476,11 @@ namespace ElectricalProgressive
         /// <exception cref="Exception"></exception>
         private void AddConnections(ref NetworkPart part, Facing addedConnections, (EParams, int) setEparams)
         {
-            var networksByFace = new[]
-            {
+            HashSet<Network>[] networksByFace =
+            [
                 [], [], [], [], [],
-            new HashSet<Network>()
-            };
+                []
+            ];
 
             foreach (var face in FacingHelper.Faces(part.Connection))           //ищет к каким сетям эти провода могут относиться
             {

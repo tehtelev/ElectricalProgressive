@@ -5,7 +5,7 @@ using System.Text;
 using EPImmersive.Content.Block;
 using Vintagestory.API.MathTools;
 
-namespace EPImmersive.Utils
+namespace ElectricalProgressive.Utils
 {
     public static class WireNodeSerializer
     {
@@ -49,7 +49,7 @@ namespace EPImmersive.Utils
         public static List<WireNode> DeserializeWireNodes(byte[] data)
         {
             if (data == null || data.Length == 0)
-                return new List<WireNode>();
+                return [];
 
             using var ms = new MemoryStream(data);
             using var reader = new BinaryReader(ms, Encoding.UTF8);
@@ -63,12 +63,12 @@ namespace EPImmersive.Utils
             catch
             {
                 // Если не удалось прочитать версию, значит формат старый
-                return new List<WireNode>();
+                return [];
             }
 
             // Пока поддерживаем только версию 1
             if (version != 1)
-                return new List<WireNode>();
+                return [];
 
             // Читаем количество узлов
             var count = reader.ReadInt32();
@@ -92,7 +92,7 @@ namespace EPImmersive.Utils
 
                     wireNodes.Add(node);
                 }
-                catch (Exception ex)
+                catch
                 {
                     // Пропускаем поврежденные узлы
                     // Можно добавить логгирование: Api.Logger?.Warning($"Failed to deserialize wire node: {ex.Message}");

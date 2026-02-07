@@ -26,7 +26,7 @@ public class BlockEntityEHorn : BlockEntityContainer, IHeatSource
     private ForgeContentsRenderer? _renderer;
     private WeatherSystemBase? _weatherSystem;
     private long _listenerId;
-    private Vec3f _blockRotRad = new Vec3f();
+    private Vec3f _blockRotRad = new ();
     public ItemStack? Contents => _inventory[0]?.Itemstack;
     public bool IsBurning
     {
@@ -200,8 +200,10 @@ public class BlockEntityEHorn : BlockEntityContainer, IHeatSource
         });
         this._ambientSound.Start();
     }
+
+
     /// <summary>
-    /// Вызывается при взаимодействии игрока с блоком (ОРИГИНАЛЬНАЯ ЛОГИКА сохранена)
+    /// Вызывается при взаимодействии игрока с блоком 
     /// </summary>
     internal bool OnPlayerInteract(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel)
     {

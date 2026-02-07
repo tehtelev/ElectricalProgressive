@@ -14,8 +14,8 @@ namespace EPImmersive.Content.Block.EGenerator;
 
 public class BlockEGenerator1 : ImmersiveWireBlock, IMechanicalPowerBlock
 {
-    private readonly static Dictionary<(Facing, string), MeshData> MeshData = new();
-    private static float[] def_Params = [100.0F, 0.5F, 0.1F, 0.25F, 0.05F, 1F];          //заглушка
+    private static readonly Dictionary<(Facing, string), MeshData> MeshData = new();
+    private static readonly float[] DefParams = [100.0F, 0.5F, 0.1F, 0.25F, 0.05F, 1F];          //заглушка
 
     public override void OnUnloaded(ICoreAPI api)
     {
@@ -34,16 +34,7 @@ public class BlockEGenerator1 : ImmersiveWireBlock, IMechanicalPowerBlock
         return null;
     }
 
-    public bool HasMechPowerConnectorAt(IWorldAccessor world, BlockPos pos, BlockFacing face)
-    {
-        if (world.BlockAccessor.GetBlockEntity(pos) is BlockEntityEGenerator1 entity &&
-            entity.Facing != Facing.None)
-        {
-            return FacingHelper.Directions(entity.Facing).First() == face;
-        }
 
-        return false;
-    }
 
     public void DidConnectAt(IWorldAccessor world, BlockPos pos, BlockFacing face)
     {
@@ -153,7 +144,7 @@ public class BlockEGenerator1 : ImmersiveWireBlock, IMechanicalPowerBlock
             var faces = FacingHelper.Faces(entity.Facing).ToList();
             if (
             faces != null &&
-            faces.Any() &&
+            faces.Count != 0 &&
             faces.First() is { } blockFacing &&
             !world.BlockAccessor.GetBlock(pos.AddCopy(blockFacing)).SideSolid[blockFacing.Opposite.Index])
             {
@@ -329,7 +320,7 @@ public class BlockEGenerator1 : ImmersiveWireBlock, IMechanicalPowerBlock
         base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
 
-        var Params = MyMiniLib.GetAttributeArrayFloat(inSlot.Itemstack.Block, "params", def_Params);
+        var Params = MyMiniLib.GetAttributeArrayFloat(inSlot.Itemstack.Block, "params", DefParams);
 
         dsc.AppendLine(Lang.Get("Generation") + ": " + Params[0] + " " + Lang.Get("electricalprogressivebasics:W"));
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:max_speed") + ": " + Params[1] + " " + Lang.Get("electricalprogressivebasics:rps"));
@@ -342,6 +333,10 @@ public class BlockEGenerator1 : ImmersiveWireBlock, IMechanicalPowerBlock
     public bool HasMechPowerConnectorAt(IWorldAccessor world, BlockPos pos, BlockFacing face, BlockMPBase forBlock)
     {
         var entity = world.BlockAccessor.GetBlockEntity(pos) as BlockEntityEGenerator1;
+        if (entity.Facing == Facing.None)
+        {
+            return false;
+        }
         var powerOutFacing = FacingHelper.Directions(entity.Facing).First();
         return face == powerOutFacing;
     }

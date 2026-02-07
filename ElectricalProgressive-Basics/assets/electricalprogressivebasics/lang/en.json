@@ -247,6 +247,8 @@
   "switch": "Toggle",
   "buffer": "Buffer",
 
+  "game:tabname-electricity": "Electricity",
+
   "block-esolargenerator-*": "Solar Generator",
   "block-handbooktitle-esolargenerator": "Usage",
   "block-handbooktext-esolargenerator": "Converts light into electrical energy! The more sunlight hits the solar panel, the more energy it can produce. Blocks placed above the solar panel will reduce its efficiency. In late autumn and winter, sunlight decreases, leading to reduced efficiency.",

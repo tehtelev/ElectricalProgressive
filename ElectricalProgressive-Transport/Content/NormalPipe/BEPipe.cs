@@ -125,7 +125,7 @@ public class BEPipe : BlockEntity
         MarkDirty();
     }
 
-    private bool IsPipeBlock(Block block)
+    private static bool IsPipeBlock(Block block)
     {
         if (block == null) return false;
 
@@ -196,12 +196,12 @@ public class BEPipe : BlockEntity
             string code = block.Code?.ToString() ?? "";
 
             // Список блоков с инвентарем, которые точно должны соединяться
-            string[] inventoryKeywords = new string[]
-            {
+            string[] inventoryKeywords =
+            [
                 "chest", "crate", "box", "barrel", "shelf", "hopper", "funnel", "container", "storage", "cabinet",
                 "drawer", "bin", "basket", "bag", "vessel", "pot", "jar", "tub", "tank", "tub", "mill", "quern",
                 "press", "forge", "crucible", "machine", "machinebase", "generator", "machinerack"
-            };
+            ];
 
             foreach (var keyword in inventoryKeywords)
             {
@@ -313,7 +313,7 @@ public class BEPipe : BlockEntity
         if (Api == null || Api.Side != EnumAppSide.Server) return;
 
         // Получаем список подключенных сторон
-        List<BlockFacing> connectedFacings = new List<BlockFacing>();
+        List<BlockFacing> connectedFacings = [];
         for (int i = 0; i < 6; i++)
         {
             if (connectedSides[i])
@@ -418,7 +418,7 @@ public class BEPipe : BlockEntity
     /// <summary>
     /// Определяет тип для одного соединения (конец трубы)
     /// </summary>
-    private string DetermineSingleConnectionType(BlockFacing facing)
+    private static string DetermineSingleConnectionType(BlockFacing facing)
     {
         // Для одного соединения используем прямую трубу
         // Определяем ориентацию на основе направления соединения
@@ -434,10 +434,10 @@ public class BEPipe : BlockEntity
     /// <summary>
     /// Определяет тип для двух соединений
     /// </summary>
-    private string DetermineTwoConnectionType(BlockFacing f1, BlockFacing f2)
+    private static string DetermineTwoConnectionType(BlockFacing f1, BlockFacing f2)
     {
         // Сортируем для единообразия
-        List<BlockFacing> sorted = new List<BlockFacing> { f1, f2 };
+        List<BlockFacing> sorted = [f1, f2];
         sorted.Sort((a, b) => a.Index.CompareTo(b.Index));
         f1 = sorted[0];
         f2 = sorted[1];
@@ -497,7 +497,7 @@ public class BEPipe : BlockEntity
     /// <summary>
     /// Проверяет, является ли соединение тройным углом (все три стороны не в одной плоскости)
     /// </summary>
-    private bool IsTripleCorner(List<BlockFacing> facings)
+    private static bool IsTripleCorner(List<BlockFacing> facings)
     {
         // Для тройного угла каждая сторона должна быть перпендикулярна к двум другим
         // и ни одна не должна быть противоположной другой
@@ -520,7 +520,7 @@ public class BEPipe : BlockEntity
     /// <summary>
     /// Определяет тип тройного угла
     /// </summary>
-    private string DetermineTripleCornerType(List<BlockFacing> facings)
+    private static string DetermineTripleCornerType(List<BlockFacing> facings)
     {
         facings.Sort((a, b) => a.Index.CompareTo(b.Index));
 
@@ -566,7 +566,7 @@ public class BEPipe : BlockEntity
     /// <summary>
     /// Проверяет, является ли соединение Т-образным (все три стороны в одной плоскости)
     /// </summary>
-    private bool IsTeeConnection(List<BlockFacing> facings)
+    private static bool IsTeeConnection(List<BlockFacing> facings)
     {
         if (facings.Count != 3) return false;
 
@@ -628,11 +628,11 @@ public class BEPipe : BlockEntity
     /// <summary>
     /// Определяет тип для случая "3 горизонтальных + 1 вертикальное" соединение
     /// </summary>
-    private string DetermineThreePlusVerticalType(List<BlockFacing> facings)
+    private static string DetermineThreePlusVerticalType(List<BlockFacing> facings)
     {
         // Разделяем горизонтальные и вертикальные стороны
-        List<BlockFacing> horizontalSides = new List<BlockFacing>();
-        List<BlockFacing> verticalSides = new List<BlockFacing>();
+        List<BlockFacing> horizontalSides = [];
+        List<BlockFacing> verticalSides = [];
 
         foreach (var facing in facings)
         {
@@ -646,7 +646,7 @@ public class BEPipe : BlockEntity
         if (horizontalSides.Count == 3 && verticalSides.Count == 1)
         {
             // Определяем недостающую горизонтальную сторону
-            List<string> allHorizontalCodes = new List<string> { "north", "east", "south", "west" };
+            List<string> allHorizontalCodes = ["north", "east", "south", "west"];
             List<string> presentHorizontalCodes = horizontalSides.Select(f => f.Code).ToList();
 
             string missingHorizontal =
@@ -681,12 +681,12 @@ public class BEPipe : BlockEntity
     /// <summary>
     /// Определяет тип для четырех соединений
     /// </summary>
-    private string DetermineFourConnectionType(List<BlockFacing> facings)
+    private static string DetermineFourConnectionType(List<BlockFacing> facings)
     {
         if (facings.Count != 4) return "four-n";
 
         // Находим отсутствующие стороны
-        List<BlockFacing> missingSides = new List<BlockFacing>();
+        List<BlockFacing> missingSides = [];
         for (int i = 0; i < 6; i++)
         {
             BlockFacing facing = BlockFacing.ALLFACES[i];
@@ -807,7 +807,7 @@ public class BEPipe : BlockEntity
             {
                 // 3 горизонтальные стороны
                 // Определяем недостающую горизонтальную сторону
-                List<string> allHorizontalCodes = new List<string> { "north", "east", "south", "west" };
+                List<string> allHorizontalCodes = ["north", "east", "south", "west"];
                 List<string> presentHorizontalCodes = facings
                     .Where(f => f.Axis != EnumAxis.Y)
                     .Select(f => f.Code)
@@ -834,17 +834,17 @@ public class BEPipe : BlockEntity
     /// <summary>
     /// Проверяет, являются ли две горизонтальные стороны смежными
     /// </summary>
-    private bool AreAdjacentHorizontal(BlockFacing f1, BlockFacing f2)
+    private static bool AreAdjacentHorizontal(BlockFacing f1, BlockFacing f2)
     {
         if (f1.Axis == EnumAxis.Y || f2.Axis == EnumAxis.Y) return false;
 
         // Определяем порядок сторон по часовой стрелке
         Dictionary<string, string[]> adjacencyMap = new Dictionary<string, string[]>
         {
-            { "north", new[] { "west", "east" } },
-            { "east", new[] { "north", "south" } },
-            { "south", new[] { "east", "west" } },
-            { "west", new[] { "south", "north" } }
+            { "north", ["west", "east"] },
+            { "east", ["north", "south"] },
+            { "south", ["east", "west"] },
+            { "west", ["south", "north"] }
         };
 
         return adjacencyMap.ContainsKey(f1.Code) &&
@@ -854,7 +854,7 @@ public class BEPipe : BlockEntity
     /// <summary>
     /// Определяет тип для пяти соединений
     /// </summary>
-    private string DetermineFiveConnectionType(List<BlockFacing> facings)
+    private static string DetermineFiveConnectionType(List<BlockFacing> facings)
     {
         // Находим отсутствующую сторону
         BlockFacing missingSide = null;
@@ -972,7 +972,7 @@ public class BEPipe : BlockEntity
     /// </summary>
     public List<BlockPos> GetConnectedInventories()
     {
-        List<BlockPos> inventories = new List<BlockPos>();
+        List<BlockPos> inventories = [];
 
         for (int i = 0; i < 6; i++)
         {

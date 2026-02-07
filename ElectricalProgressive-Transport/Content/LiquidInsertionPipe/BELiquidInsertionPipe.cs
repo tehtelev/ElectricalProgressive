@@ -111,7 +111,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     }
 
     // Проверяет, нужно ли останавливать этот тип перехода
-    private bool ShouldStopTransition(EnumTransitionType transType)
+    private static bool ShouldStopTransition(EnumTransitionType transType)
     {
         switch (transType)
         {
@@ -166,6 +166,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     }
 
     // Расчет скорости порчи
+    /*
     public float GetPerishRate()
     {
         if (!stopPerishEnabled || Api == null)
@@ -195,7 +196,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         float baseRate = Math.Max(0.1f, Math.Min(2.4f, (float)Math.Pow(3, temperatureCached / 19 - 1.2) - 0.1f));
         return baseRate * perishRateMultiplier;
     }
-
+    */
     #endregion
 
     public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
@@ -683,7 +684,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         return currentFilterMode == FilterMode.AllowList ? hasMatchingFilter : !hasMatchingFilter;
     }
 
-    private BlockFacing GetFacingFromTo(BlockPos from, BlockPos to)
+    private static BlockFacing GetFacingFromTo(BlockPos from, BlockPos to)
     {
         int dx = to.X - from.X;
         int dy = to.Y - from.Y;

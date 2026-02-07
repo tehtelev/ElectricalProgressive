@@ -7,8 +7,8 @@ namespace ElectricalProgressive.Utils
     /// </summary>
     public class EParams : IEquatable<EParams>
     {
-        private static int maxSecBeforeBurnout = ElectricalProgressive.timeBeforeBurnout; //максимальное время в секундах до сгорания проводника
-        private static int maxTicksBeforeBurnout = maxSecBeforeBurnout*ElectricalProgressive.speedOfElectricity; //максимальное количество тиков до сгорания проводника 
+        private static readonly int maxSecBeforeBurnout = ElectricalProgressive.timeBeforeBurnout; //максимальное время в секундах до сгорания проводника
+        private static readonly int maxTicksBeforeBurnout = maxSecBeforeBurnout*ElectricalProgressive.speedOfElectricity; //максимальное количество тиков до сгорания проводника 
 
         public int voltage;         //напряжение
         public float maxCurrent;    //максимальный ток

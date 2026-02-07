@@ -9,7 +9,7 @@ using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
 
 
-namespace EPImmersive.Content.Block.HVSFonar
+namespace ElectricalProgressive.Content.Block.HVSFonar
 {
     internal class BlockHVSFonar : ImmersiveWireBlock
     {
@@ -30,7 +30,7 @@ namespace EPImmersive.Content.Block.HVSFonar
         
         public override ItemStack OnPickBlock(IWorldAccessor world, BlockPos pos)
         {
-            var newState = this.Variant["state"] switch
+            var newState = Variant["state"] switch
             {
                 "enabled" => "disabled",
                 _ => "disabled"
@@ -80,8 +80,8 @@ namespace EPImmersive.Content.Block.HVSFonar
             dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
             dsc.AppendLine(Lang.Get("electricalprogressivebasics:Consumption") + ": " + MyMiniLib.GetAttributeFloat(inSlot.Itemstack.Block, "maxConsumption", 0) + " " + Lang.Get("electricalprogressivebasics:W"));
             dsc.AppendLine(Lang.Get("electricalprogressiveqol:max-light") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "HSV", 0));
-            dsc.AppendLine(Lang.Get("electricalprogressiveqol:height") + ": " + this.Variant["height"]);
-            dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + ((MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false)) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
+            dsc.AppendLine(Lang.Get("electricalprogressiveqol:height") + ": " + Variant["height"]);
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + (MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
         }
 
       

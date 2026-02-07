@@ -13,7 +13,7 @@ namespace ElectricalProgressive.Content.Block.EHorn;
 
 public class BlockEHorn : BlockEBase
 {
-    private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
+    private WorldInteraction[] _interactions = [];
 
     public override void OnLoaded(ICoreAPI api)
     {

@@ -1,5 +1,7 @@
 ﻿using ElectricalProgressive.Content.Block.ECable;
 using ElectricalProgressive.Utils;
+using EPImmersive;
+using EPImmersive.Content.Block;
 using ProtoBuf;
 using System;
 using System.Collections.Concurrent;
@@ -14,7 +16,7 @@ using Vintagestory.API.Server;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
 
-namespace EPImmersive.Content.Block
+namespace ElectricalProgressive.Content.Block
 {
     public class ImmersiveWireBlock : Vintagestory.API.Common.Block, IMultiBlockColSelBoxes
     {
@@ -57,14 +59,14 @@ namespace EPImmersive.Content.Block
 
                 (api as ICoreClientAPI).Event.RegisterCallback((dt) =>
                 {
-                    EPImmersive.ElectricalProgressiveImmersive.clientWireChannel?.SendPacket<WireConnectionData>(data);
+                    ElectricalProgressiveImmersive.clientWireChannel?.SendPacket(data);
                 }, 100);
 
                 
             }
             else
             {
-                data = data;
+                //data = data;
             }
         }
 
@@ -308,7 +310,7 @@ namespace EPImmersive.Content.Block
                 }
             }
 
-            for (int i = 0; i < wireNodes.Count; i++)
+            for (var i = 0; i < wireNodes.Count; i++)
             {
                 var x = wireNodes[i].Position.X;
                 var y = wireNodes[i].Position.Y;
@@ -338,23 +340,23 @@ namespace EPImmersive.Content.Block
         {
             // Конвертируем угол поворота в радианы
             double angleRad = (360 - rotateY) * GameMath.DEG2RAD;
-            double cosAngle = Math.Cos(angleRad);
-            double sinAngle = Math.Sin(angleRad);
+            var cosAngle = Math.Cos(angleRad);
+            var sinAngle = Math.Sin(angleRad);
 
             // Центр блока для поворота (0.5, 0.5, 0.5 в локальных координатах)
-            double centerX = 0.5;
-            double centerZ = 0.5;
+            var centerX = 0.5;
+            var centerZ = 0.5;
 
             // Применяем поворот вокруг центра блока
             if (rotateY != 0)
             {
                 // Смещаем координаты относительно центра
-                double xRel = x - centerX;
-                double zRel = z - centerZ;
+                var xRel = x - centerX;
+                var zRel = z - centerZ;
 
                 // Поворачиваем координаты
-                double xRotated = xRel * cosAngle - zRel * sinAngle;
-                double zRotated = xRel * sinAngle + zRel * cosAngle;
+                var xRotated = xRel * cosAngle - zRel * sinAngle;
+                var zRotated = xRel * sinAngle + zRel * cosAngle;
 
                 // Возвращаем обратно в систему координат блока
                 x = xRotated + centerX;
@@ -526,9 +528,9 @@ namespace EPImmersive.Content.Block
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public bool IsHoldingWireTool(IPlayer player)
+        public static bool IsHoldingWireTool(IPlayer player)
         {
-            ItemSlot activeSlot = player.InventoryManager.ActiveHotbarSlot;
+            var activeSlot = player.InventoryManager.ActiveHotbarSlot;
             return activeSlot?.Itemstack?.Block?.Code.ToString().Contains("wire-")==true;
         }
 
@@ -538,9 +540,9 @@ namespace EPImmersive.Content.Block
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public bool IsHoldingWrench(IPlayer player)
+        public static bool IsHoldingWrench(IPlayer player)
         {
-            ItemSlot activeSlot = player.InventoryManager.ActiveHotbarSlot;
+            var activeSlot = player.InventoryManager.ActiveHotbarSlot;
             return activeSlot?.Itemstack?.Item?.Tool == EnumTool.Wrench;
         }
 
@@ -555,7 +557,7 @@ namespace EPImmersive.Content.Block
         /// <param name="behavior"></param>
         private void HandleWireConnection(ICoreClientAPI capi, IPlayer byPlayer, BlockSelection blockSel, BEBehaviorEPImmersive behavior)
         {
-            byte nodeIndex = (byte)blockSel.SelectionBoxIndex;
+            var nodeIndex = (byte)blockSel.SelectionBoxIndex;
 
             if (behavior.FindConnection(nodeIndex).Count >= 8)
             {
@@ -666,8 +668,8 @@ namespace EPImmersive.Content.Block
 
             // Рассчитываем длину провода
 
-            WireNode startNode = startBehavior.GetWireNode(connectionData.StartNodeIndex);
-            WireNode endNode = endBehavior.GetWireNode((byte)blockSel.SelectionBoxIndex);
+            var startNode = startBehavior.GetWireNode(connectionData.StartNodeIndex);
+            var endNode = endBehavior.GetWireNode((byte)blockSel.SelectionBoxIndex);
 
             var startWorldPos = new Vec3d(
                 connectionData.StartPos.X + startNode.Position.X,
@@ -684,7 +686,7 @@ namespace EPImmersive.Content.Block
             double distance = startWorldPos.DistanceTo(endWorldPos);
 
             // округляем длину в большую сторону до целого
-            int cableLength = (int)Math.Ceiling(distance);
+            var cableLength = (int)Math.Ceiling(distance);
 
 
             // ограничиваем максимальную длину провода
@@ -697,7 +699,7 @@ namespace EPImmersive.Content.Block
             }
 
             // Проверяем достаточно ли кабеля у игрока
-            ItemSlot activeSlot = byPlayer.InventoryManager.ActiveHotbarSlot;
+            var activeSlot = byPlayer.InventoryManager.ActiveHotbarSlot;
             if (byPlayer.WorldData.CurrentGameMode != EnumGameMode.Creative && activeSlot.StackSize < cableLength)
             {
                 if (capi != null)
@@ -716,7 +718,7 @@ namespace EPImmersive.Content.Block
 
 
             // Создаем электрические параметры кабеля
-            EParams cableParams = CreateCableParams(api.World.GetBlock(connectionData.Asset));
+            var cableParams = CreateCableParams(api.World.GetBlock(connectionData.Asset));
 
             if (api.Side == EnumAppSide.Server)
             {
@@ -744,8 +746,8 @@ namespace EPImmersive.Content.Block
             // После создания соединения обновляем меши
             if (api.Side == EnumAppSide.Client)
             {
-                ImmersiveWireBlock.InvalidateBlockMeshCache(connectionData.StartPos);
-                ImmersiveWireBlock.InvalidateBlockMeshCache(blockSel.Position);
+                InvalidateBlockMeshCache(connectionData.StartPos);
+                InvalidateBlockMeshCache(blockSel.Position);
             }
 
 
@@ -769,7 +771,7 @@ namespace EPImmersive.Content.Block
         /// </summary>
         /// <param name="cableBlock"></param>
         /// <returns></returns>
-        private EParams CreateCableParams(Vintagestory.API.Common.Block cableBlock)
+        private static EParams CreateCableParams(Vintagestory.API.Common.Block cableBlock)
         {
             // Загружаем параметры кабеля из JSON атрибутов
             var voltage = BlockECable.VoltagesInvert[cableBlock.Variant["voltage"]];
@@ -798,20 +800,20 @@ namespace EPImmersive.Content.Block
             var wireNodes = behavior.GetWireNodes();
             if (connections.Count > 0 && wireNodes != null && blockSel.SelectionBoxIndex < wireNodes.Count)
             {
-                byte nodeIndex = (byte)blockSel.SelectionBoxIndex;
+                var nodeIndex = (byte)blockSel.SelectionBoxIndex;
                 var connectionToRemove = connections.FirstOrDefault(c => c.LocalNodeIndex == nodeIndex);
 
                 if (connectionToRemove != null)
                 {
                     // Рассчитываем длину провода для возврата
-                    WireNode startNode = behavior.GetWireNode(connectionToRemove.LocalNodeIndex);
-                    WireNode endNode = null;
+                    var startNode = behavior.GetWireNode(connectionToRemove.LocalNodeIndex);
+                    //WireNode endNode = null;
 
                     var neighborEntity = api.World.BlockAccessor.GetBlockEntity(connectionToRemove.NeighborPos);
                     var neighborBehavior = neighborEntity?.GetBehavior<BEBehaviorEPImmersive>();
 
 
-                    int cableLength = (int)Math.Ceiling(connectionToRemove.WireLength);
+                    var cableLength = (int)Math.Ceiling(connectionToRemove.WireLength);
 
 
                     // только на сервере
@@ -872,8 +874,8 @@ namespace EPImmersive.Content.Block
                         // вывод сообщения о количестве выданных кабелей
                         ((ICoreClientAPI)api).ShowChatMessage(Lang.Get("electricalprogressivebasics:wire_disconnected", cableLength));
 
-                        ImmersiveWireBlock.InvalidateBlockMeshCache(blockSel.Position);
-                        ImmersiveWireBlock.InvalidateBlockMeshCache(connectionToRemove.NeighborPos);
+                        InvalidateBlockMeshCache(blockSel.Position);
+                        InvalidateBlockMeshCache(connectionToRemove.NeighborPos);
                     }
 
 
@@ -919,10 +921,10 @@ namespace EPImmersive.Content.Block
                 baseMeshData = null;
 
 
-            MeshData finalMesh = baseMeshData?.Clone() ?? new MeshData(4,6);
+            var finalMesh = baseMeshData?.Clone() ?? new MeshData(4,6);
 
             // Пытаемся получить меши проводов из кэша
-            if (WireMeshesCache.TryGetValue(cacheKey, out MeshData cachedWiresMesh))
+            if (WireMeshesCache.TryGetValue(cacheKey, out var cachedWiresMesh))
             {
                 // Если нашли в кэше - просто добавляем провода к базовому мешу
                 if (cachedWiresMesh != null)
@@ -1004,7 +1006,7 @@ namespace EPImmersive.Content.Block
                     WireMeshesCache.Remove(key);
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 // Для отладки можно добавить логирование
                 // api?.Logger.Debug($"Failed to clear mesh cache for {position}: {ex.Message}");
@@ -1060,7 +1062,7 @@ namespace EPImmersive.Content.Block
         /// </summary>
         private MeshData? CreateWireSegmentMesh(Vec3f startPos, Vec3f endPos, float thickness, AssetLocation asset, float sagFactor, bool isReverse = false)
         {
-            float dist = startPos.DistanceTo(endPos);
+            var dist = startPos.DistanceTo(endPos);
             if (dist < 0.001f)
                 return null;
 
@@ -1069,10 +1071,10 @@ namespace EPImmersive.Content.Block
             endPos = endPos.AddCopy(-0.5f, -0.5f, -0.5f);
 
             // Количество сегментов - зависит от длины провода
-            int segments = Math.Max(4, (int)(dist * 4f));
-            int segmentCount = (segments / 2) + 1;
+            var segments = Math.Max(4, (int)(dist * 4f));
+            var segmentCount = segments / 2 + 1;
 
-            var wireVariant = GetWireVariant(asset, thickness);
+            var wireVariant = GetWireVariant(asset);
             if (wireVariant?.MeshData == null)
                 return null;
 
@@ -1080,11 +1082,11 @@ namespace EPImmersive.Content.Block
             var templateMesh = wireVariant.MeshData;
 
             // Вычисляем общее количество вершин и индексов
-            int totalVertices = segmentCount * templateMesh.VerticesCount;
-            int totalIndices = segmentCount * templateMesh.IndicesCount;
+            var totalVertices = segmentCount * templateMesh.VerticesCount;
+            var totalIndices = segmentCount * templateMesh.IndicesCount;
 
             // Создаем меш с заранее рассчитанным размером
-            MeshData mesh = new MeshData(
+            var mesh = new MeshData(
                 totalVertices,
                 totalIndices,
                 withNormals: templateMesh.Normals != null,
@@ -1094,24 +1096,24 @@ namespace EPImmersive.Content.Block
             );
 
             var center = new Vec3f(0.5f, 0.5f, 0.5f);
-            float segmentLength = dist * 1.2f / segments;
-            float scaleZ = segmentLength * 2f; // базовый меш имеет длину 0.5
+            var segmentLength = dist * 1.2f / segments;
+            var scaleZ = segmentLength * 2f; // базовый меш имеет длину 0.5
 
-            Random rnd = new Random();
+            var rnd = new Random();
 
-            for (int i = 0; i < segmentCount; i++)
+            for (var i = 0; i < segmentCount; i++)
             {
-                float progress = (float)i / segments;
-                float nextProgress = (float)(i + 1) / segments;
+                var progress = (float)i / segments;
+                var nextProgress = (float)(i + 1) / segments;
 
                 // Позиция начала сегмента
-                Vec3f segmentStartPos = CalculateSagPosition(startPos, endPos, progress, sagFactor);
+                var segmentStartPos = CalculateSagPosition(startPos, endPos, progress, sagFactor);
                 // Позиция конца сегмента  
-                Vec3f segmentEndPos = CalculateSagPosition(startPos, endPos, nextProgress, sagFactor);
+                var segmentEndPos = CalculateSagPosition(startPos, endPos, nextProgress, sagFactor);
 
                 // Направление сегмента
-                Vec3f segmentDir = segmentEndPos - segmentStartPos;
-                float segmentDist = segmentDir.Length();
+                var segmentDir = segmentEndPos - segmentStartPos;
+                var segmentDist = segmentDir.Length();
 
                 if (segmentDist < 0.001f)
                     continue;
@@ -1121,26 +1123,26 @@ namespace EPImmersive.Content.Block
                 var segmentMesh = templateMesh.Clone();
 
                 // Масштабируем по длине
-                if (isReverse && i >= (segments / 2) - 2)
+                if (isReverse && i >= segments / 2 - 2)
                     segmentMesh.Scale(center, 0.99f, 0.99f, scaleZ); // стык посередине чуть меньше
                 else
                 {
-                    float buf = (float)(rnd.NextDouble() / 1000d);
+                    var buf = (float)(rnd.NextDouble() / 1000d);
                     segmentMesh.Scale(center, 1f + buf, 1f + buf, scaleZ);
                 }
 
                 // Используем общее направление провода для единообразного поворота
-                Vec3f rotationDirection = isReverse ? -1 * segmentDir : segmentDir;
+                var rotationDirection = isReverse ? -1 * segmentDir : segmentDir;
 
                 // Используем кватернион для правильного поворота
-                float[] quat = CalculateSegmentRotation(rotationDirection);
-                float[] rotationMatrix = QuaternionToMatrix4x4(quat);
+                var quat = CalculateSegmentRotation(rotationDirection);
+                var rotationMatrix = QuaternionToMatrix4x4(quat);
 
                 // Применяем поворот через матрицу
                 segmentMesh.MatrixTransform(rotationMatrix, new float[4], center);
 
                 // Позиционируем в центр сегмента
-                Vec3f segmentCenter = segmentStartPos + segmentDir * (segmentDist / 2f);
+                var segmentCenter = segmentStartPos + segmentDir * (segmentDist / 2f);
                 segmentMesh.Translate(segmentCenter.X, segmentCenter.Y, segmentCenter.Z);
 
                 // Добавляем к основному мешу
@@ -1158,11 +1160,11 @@ namespace EPImmersive.Content.Block
         /// <summary>
         /// Вычисляет кватернион поворота для ориентации сегмента вдоль направления
         /// </summary>
-        private float[] CalculateSegmentRotation(Vec3f direction)
+        private static float[] CalculateSegmentRotation(Vec3f direction)
         {
             // Базовое направление (вдоль оси Z)
-            var baseDirection = new float[] { 0, 0, 1 };
-            var targetDirection = new float[] { direction.X, direction.Y, direction.Z };
+            float[] baseDirection = [0, 0, 1];
+            float[] targetDirection = [direction.X, direction.Y, direction.Z];
 
             // Вычисляем кватернион поворота от базового направления к целевому
             return Quaternionf.RotationTo(Quaternionf.Create(), baseDirection, targetDirection);
@@ -1174,22 +1176,22 @@ namespace EPImmersive.Content.Block
         /// <summary>
         /// Преобразует кватернион в матрицу 4x4
         /// </summary>
-        private float[] QuaternionToMatrix4x4(float[] quat)
+        private static float[] QuaternionToMatrix4x4(float[] quat)
         {
             float x = quat[0], y = quat[1], z = quat[2], w = quat[3];
 
-            float[] matrix = new float[16];
+            var matrix = new float[16];
 
             // Вычисляем элементы матрицы из кватерниона
-            float xx = x * x;
-            float yy = y * y;
-            float zz = z * z;
-            float xy = x * y;
-            float xz = x * z;
-            float yz = y * z;
-            float wx = w * x;
-            float wy = w * y;
-            float wz = w * z;
+            var xx = x * x;
+            var yy = y * y;
+            var zz = z * z;
+            var xy = x * y;
+            var xz = x * z;
+            var yz = y * z;
+            var wx = w * x;
+            var wy = w * y;
+            var wz = w * z;
 
             // Column-major order
             matrix[0] = 1.0f - 2.0f * (yy + zz);
@@ -1220,7 +1222,7 @@ namespace EPImmersive.Content.Block
         /// <summary>
         /// Вычисляет позицию с учетом провисания
         /// </summary>
-        private Vec3f CalculateSagPosition(Vec3f start, Vec3f end, float progress, float sagFactor)
+        private static Vec3f CalculateSagPosition(Vec3f start, Vec3f end, float progress, float sagFactor)
         {
             var linear = start + (end - start) * progress;
 
@@ -1228,16 +1230,16 @@ namespace EPImmersive.Content.Block
                 return linear;
 
             // Горизонтальное расстояние
-            float hDist = (float)Math.Sqrt((end.X - start.X) * (end.X - start.X) +
+            var hDist = (float)Math.Sqrt((end.X - start.X) * (end.X - start.X) +
                                           (end.Z - start.Z) * (end.Z - start.Z));
 
             if (hDist < 0.001f)
                 return linear;
 
             // Провисание по катеноиде (вниз)
-            float a = hDist / (8f * sagFactor);
-            float hProgress = progress * hDist;
-            float sagY = a * ((float)Math.Cosh((hProgress - hDist / 2f) / a) -
+            var a = hDist / (8f * sagFactor);
+            var hProgress = progress * hDist;
+            var sagY = a * ((float)Math.Cosh((hProgress - hDist / 2f) / a) -
                              (float)Math.Cosh(hDist / 2f / a));
 
             return new Vec3f(linear.X, linear.Y + sagY, linear.Z);
@@ -1271,7 +1273,7 @@ namespace EPImmersive.Content.Block
         /// <summary>
         /// Получает вариант провода из системы BlockECable
         /// </summary>
-        private BlockVariants GetWireVariant(AssetLocation asset, float thickness)
+        private BlockVariants GetWireVariant(AssetLocation asset)
         {
             try
             {
@@ -1319,9 +1321,9 @@ namespace EPImmersive.Content.Block
         /// <returns></returns>
         public static AssetLocation CreateCableAsset(ICoreAPI api, EParams cableParams)
         {
-            string voltage = BlockECable.Voltages[cableParams.voltage];
-            string material = cableParams.material;
-            string type = cableParams.isolated ? "isolated" : "part";
+            var voltage = BlockECable.Voltages[cableParams.voltage];
+            var material = cableParams.material;
+            var type = cableParams.isolated ? "isolated" : "part";
 
             // если кабель сгорел
             if (cableParams.burnout)
@@ -1412,9 +1414,9 @@ namespace EPImmersive.Content.Block
                 
 
                 var startPos = new Vec3f(
-                    (float)(x),
-                    (float)(y),
-                    (float)(z)
+                    (float)x,
+                    (float)y,
+                    (float)z
                 );
 
                 rotateY = 0;
@@ -1444,7 +1446,7 @@ namespace EPImmersive.Content.Block
                 );
 
                 // Используем хеш позиции для детерминированного выбора направления
-                bool isSource = pos.GetHashCode() < connection.NeighborPos.GetHashCode();
+                var isSource = pos.GetHashCode() < connection.NeighborPos.GetHashCode();
 
                 conn.Add(new WireConnection
                 {
@@ -1483,7 +1485,7 @@ namespace EPImmersive.Content.Block
                 if (connections == null || connections.Count == 0)
                     return 0;
 
-                int hash = 17;
+                var hash = 17;
                 foreach (var conn in connections.OrderBy(c => c.LocalNodeIndex).ThenBy(c => c.NeighborPos.GetHashCode()))
                 {
                     hash = hash * 31 + conn.LocalNodeIndex;
@@ -1515,7 +1517,7 @@ namespace EPImmersive.Content.Block
             {
                 unchecked
                 {
-                    int hash = 17;
+                    var hash = 17;
                     hash = hash * 31 + Position.GetHashCode();
                     hash = hash * 31 + ConnectionsHash;
                     return hash;
@@ -1553,23 +1555,23 @@ namespace EPImmersive.Content.Block
         /// <summary>
         /// Структура для ключа кэша мешей
         /// </summary>
-        public struct CacheDataKey : IEquatable<CacheDataKey>
+        public struct CacheDataKeyWB : IEquatable<CacheDataKeyWB>
         {
             public BlockPos Position;
             public List<ConnectionData> Connections;
 
-            public CacheDataKey(BlockPos position, List<ConnectionData> connections)
+            public CacheDataKeyWB(BlockPos position, List<ConnectionData> connections)
             {
                 Position = position;
                 Connections = connections;
             }
 
-            public bool Equals(CacheDataKey other)
+            public bool Equals(CacheDataKeyWB other)
             {
                 if (!Position.Equals(other.Position) || Connections.Count != other.Connections.Count)
                     return false;
 
-                for (int i = 0; i < Connections.Count; i++)
+                for (var i = 0; i < Connections.Count; i++)
                 {
                     if (!Connections[i].Equals(other.Connections[i]))
                         return false;
@@ -1580,16 +1582,16 @@ namespace EPImmersive.Content.Block
 
             public override bool Equals(object obj)
             {
-                return obj is CacheDataKey other && Equals(other);
+                return obj is CacheDataKeyWB other && Equals(other);
             }
 
             public override int GetHashCode()
             {
                 unchecked
                 {
-                    int hash = 17;
+                    var hash = 17;
                     hash = hash * 31 + Position.GetHashCode();
-                    foreach (ConnectionData conn in Connections)
+                    foreach (var conn in Connections)
                     {
                         hash = hash * 31 + conn.GetHashCode();
                     }

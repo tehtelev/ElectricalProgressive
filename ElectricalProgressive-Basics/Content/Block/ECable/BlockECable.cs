@@ -20,7 +20,7 @@ namespace ElectricalProgressive.Content.Block.ECable
 
         public static readonly ConcurrentDictionary<CacheDataKey, Dictionary<Facing, Cuboidf[]>> SelectionBoxesCache = new();
 
-        public static readonly Dictionary<CacheDataKey, MeshData> MeshDataCache = new();
+        public static readonly Dictionary<CacheDataKey, MeshData> MeshDataCache = [];
 
 
 
@@ -916,53 +916,47 @@ namespace ElectricalProgressive.Content.Block.ECable
                 }
             }
 
-            ProcessFaceBoxes(Facing.NorthAll, new (Facing, double, double, double)[]
-            {
+            ProcessFaceBoxes(Facing.NorthAll, [
                 (Facing.NorthEast, 90, 270, 0),
                 (Facing.NorthWest, 90, 90, 0),
                 (Facing.NorthUp, 90, 0, 0),
                 (Facing.NorthDown, 90, 180, 0)
-            }, 90, 0, 0);
+            ], 90, 0, 0);
 
-            ProcessFaceBoxes(Facing.EastAll, new (Facing, double, double, double)[]
-            {
+            ProcessFaceBoxes(Facing.EastAll, [
                 (Facing.EastNorth, 0, 0, 90),
                 (Facing.EastSouth, 180, 0, 90),
                 (Facing.EastUp, 90, 0, 90),
                 (Facing.EastDown, 270, 0, 90)
-            }, 0, 0, 90);
+            ], 0, 0, 90);
 
-            ProcessFaceBoxes(Facing.SouthAll, new (Facing, double, double, double)[]
-            {
+            ProcessFaceBoxes(Facing.SouthAll, [
                 (Facing.SouthEast, 270, 270, 0),
                 (Facing.SouthWest, 270, 90, 0),
                 (Facing.SouthUp, 270, 180, 0),
                 (Facing.SouthDown, 270, 0, 0)
-            }, 270, 0, 0);
+            ], 270, 0, 0);
 
-            ProcessFaceBoxes(Facing.WestAll, new (Facing, double, double, double)[]
-            {
+            ProcessFaceBoxes(Facing.WestAll, [
                 (Facing.WestNorth, 0, 0, 270),
                 (Facing.WestSouth, 180, 0, 270),
                 (Facing.WestUp, 90, 0, 270),
                 (Facing.WestDown, 270, 0, 270)
-            }, 0, 0, 270);
+            ], 0, 0, 270);
 
-            ProcessFaceBoxes(Facing.UpAll, new (Facing, double, double, double)[]
-            {
+            ProcessFaceBoxes(Facing.UpAll, [
                 (Facing.UpNorth, 0, 0, 180),
                 (Facing.UpEast, 0, 270, 180),
                 (Facing.UpSouth, 0, 180, 180),
                 (Facing.UpWest, 0, 90, 180)
-            }, 0, 0, 180);
+            ], 0, 0, 180);
 
-            ProcessFaceBoxes(Facing.DownAll, new (Facing, double, double, double)[]
-            {
+            ProcessFaceBoxes(Facing.DownAll, [
                 (Facing.DownNorth, 0, 0, 0),
                 (Facing.DownSouth, 0, 180, 0),
                 (Facing.DownEast, 0, 270, 0),
                 (Facing.DownWest, 0, 90, 0)
-            }, 0, 0, 0);
+            ], 0, 0, 0);
 
             // Switch colliders (use block variants for switches if present)
             // Precompute switch boxes once
@@ -1017,9 +1011,9 @@ namespace ElectricalProgressive.Content.Block.ECable
 
         private static void AddBoxes(ref Dictionary<Facing, Cuboidf[]> cache, Facing key, Cuboidf[] boxes)
         {
-            if (cache.ContainsKey(key))
+            if (cache.TryGetValue(key, out var value))
             {
-                cache[key] = cache[key].Concat(boxes).ToArray();
+                cache[key] = value.Concat(boxes).ToArray();
             }
             else
             {

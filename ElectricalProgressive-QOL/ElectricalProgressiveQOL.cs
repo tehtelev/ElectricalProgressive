@@ -6,9 +6,9 @@ using ElectricalProgressive.Content.Block.EFridge;
 using ElectricalProgressive.Content.Block.EFruitPress;
 using ElectricalProgressive.Content.Block.EHeatCannon;
 using ElectricalProgressive.Content.Block.EHeater;
-using ElectricalProgressive.Content.Block.EHeatExchanger;
 using ElectricalProgressive.Content.Block.EHorn;
 using ElectricalProgressive.Content.Block.EHotSpringsGenerator;
+using ElectricalProgressive.Content.Block.EHotSpringsGenerator.EHeatExchanger;
 using ElectricalProgressive.Content.Block.ELamp;
 using ElectricalProgressive.Content.Block.EOven;
 using ElectricalProgressive.Content.Block.ESFonar;
@@ -253,7 +253,7 @@ public class ElectricalProgressiveQOL : ModSystem
         }
     }
 
-    private bool ResolveBakeables(ICoreAPI api, CollectibleObject obj)
+    private static bool ResolveBakeables(ICoreAPI api, CollectibleObject obj)
     {
         BakingProperties props = obj?.Attributes?["bakingProperties"]?.AsObject<BakingProperties>();
         if (props == null || props.ResultCode != null)
@@ -271,12 +271,12 @@ public class ElectricalProgressiveQOL : ModSystem
         return true;
     }
 
-    public CollectibleObject GetCollectible(ICoreAPI api, AssetLocation code)
+    public static CollectibleObject GetCollectible(ICoreAPI api, AssetLocation code)
     {
         return api.World.GetItem(code) ?? api.World.GetBlock(code) as CollectibleObject;
     }
 
-    public void AddTag(CollectibleObject obj, string tag)
+    public static void AddTag(CollectibleObject obj, string tag)
     {
         obj.Attributes.Token["foodtag"] = JToken.FromObject(tag);
     }

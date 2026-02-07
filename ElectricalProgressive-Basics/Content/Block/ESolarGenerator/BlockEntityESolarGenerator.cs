@@ -194,7 +194,7 @@ public class BlockEntityESolarGenerator : BlockEntityEFacingBase
         var penalty = 1f; // Start with full sunlight
 
         // Multipliers for the 5 blocks above
-        float[] penalties = { 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f };
+        float[] penalties = [0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f];
 
         for (var i = 0; i < penalties.Length; i++)
         {

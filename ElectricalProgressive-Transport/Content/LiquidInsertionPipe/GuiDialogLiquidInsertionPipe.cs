@@ -59,7 +59,7 @@ public class GuiDialogLiquidInsertionPipe : GuiDialogBlockEntity
                 (IInventory)Inventory,
                 SendInvPacket,
                 6, // 6 колонок
-                new[] { 0, 1, 2, 3, 4, 5 }, // 6 слотов
+                [0, 1, 2, 3, 4, 5], // 6 слотов
                 ElementStdBounds.SlotGrid(EnumDialogArea.None, 10, 60, 6, 1),
                 "liquidFilterSlots")
 
@@ -74,10 +74,10 @@ public class GuiDialogLiquidInsertionPipe : GuiDialogBlockEntity
 
             // Кнопки режима фильтра
             .AddSmallButton(Lang.Get("electricalprogressivetransport:filter-mode-allow"), OnAllowListClicked,
-                ElementBounds.Fixed(10, 185, 130, 30), EnumButtonStyle.Normal, EnumTextOrientation.Center,
+                ElementBounds.Fixed(10, 185, 130, 30), EnumButtonStyle.Normal,
                 "btnAllowList")
             .AddSmallButton(Lang.Get("electricalprogressivetransport:filter-mode-deny"), OnDenyListClicked,
-                ElementBounds.Fixed(170, 185, 130, 30), EnumButtonStyle.Normal, EnumTextOrientation.Center,
+                ElementBounds.Fixed(170, 185, 130, 30), EnumButtonStyle.Normal,
                 "btnDenyList")
 
             .AddStaticText("═════════════════════════════",
@@ -90,7 +90,7 @@ public class GuiDialogLiquidInsertionPipe : GuiDialogBlockEntity
                 ElementBounds.Fixed(10, 215, 150, 25))
 
             .AddSmallButton("-10", OnDecreaseRateClicked,
-                ElementBounds.Fixed(12, 240, 100, 30), EnumButtonStyle.Normal, EnumTextOrientation.Center,
+                ElementBounds.Fixed(12, 240, 100, 30), EnumButtonStyle.Normal,
                 "btnDecrease")
 
             .AddDynamicText(transferRate.ToString(),
@@ -98,7 +98,7 @@ public class GuiDialogLiquidInsertionPipe : GuiDialogBlockEntity
                 ElementBounds.Fixed(150, 240, 40, 30), "txtTransferRate")
 
             .AddSmallButton("+10", OnIncreaseRateClicked,
-                ElementBounds.Fixed(200, 240, 100, 30), EnumButtonStyle.Normal, EnumTextOrientation.Center,
+                ElementBounds.Fixed(200, 240, 100, 30), EnumButtonStyle.Normal,
                 "btnIncrease")
 
             .EndChildElements()
@@ -150,9 +150,7 @@ public class GuiDialogLiquidInsertionPipe : GuiDialogBlockEntity
     {
         TryClose();
         capi.Network.SendBlockEntityPacket(
-            BlockEntityPosition.X,
-            BlockEntityPosition.Y,
-            BlockEntityPosition.Z,
+            BlockEntityPosition,
             2001);
     }
 
@@ -221,16 +219,12 @@ public class GuiDialogLiquidInsertionPipe : GuiDialogBlockEntity
 
     private void SendFilterSettings()
     {
-        using (var ms = new System.IO.MemoryStream())
-        using (var bw = new System.IO.BinaryWriter(ms))
-        {
-            bw.Write((int)filterMode);
-            capi.Network.SendBlockEntityPacket(
-                BlockEntityPosition.X,
-                BlockEntityPosition.Y,
-                BlockEntityPosition.Z,
-                2002,
-                ms.ToArray());
-        }
+        using var ms = new System.IO.MemoryStream();
+        using var bw = new System.IO.BinaryWriter(ms);
+        bw.Write((int)filterMode);
+        capi.Network.SendBlockEntityPacket(
+            BlockEntityPosition,
+            2002,
+            ms.ToArray());
     }
 }

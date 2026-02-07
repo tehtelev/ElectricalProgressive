@@ -13,7 +13,7 @@ namespace ElectricalProgressive.Content.Block.EGenerator;
 public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
 {
     private static readonly Dictionary<(Facing, string), MeshData> MeshData = new();
-    private static float[] def_Params = [100.0F, 0.5F, 0.1F, 0.25F, 0.05F, 1F];          //заглушка
+    private static readonly float[] def_Params = [100.0F, 0.5F, 0.1F, 0.25F, 0.05F, 1F];          //заглушка
 
 
 
@@ -35,16 +35,7 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
         return null;
     }
 
-    public bool HasMechPowerConnectorAt(IWorldAccessor world, BlockPos pos, BlockFacing face)
-    {
-        if (world.BlockAccessor.GetBlockEntity(pos) is BlockEntityEGenerator entity &&
-            entity.Facing != Facing.None)
-        {
-            return FacingHelper.Directions(entity.Facing).First() == face;
-        }
 
-        return false;
-    }
 
     public void DidConnectAt(IWorldAccessor world, BlockPos pos, BlockFacing face)
     {
@@ -157,7 +148,7 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
             var faces = FacingHelper.Faces(entity.Facing).ToList();
             if (
             faces != null &&
-            faces.Any() &&
+            faces.Count != 0 &&
             faces.First() is { } blockFacing &&
             !world.BlockAccessor.GetBlock(pos.AddCopy(blockFacing)).SideSolid[blockFacing.Opposite.Index])
             {
@@ -346,6 +337,10 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
     public bool HasMechPowerConnectorAt(IWorldAccessor world, BlockPos pos, BlockFacing face, BlockMPBase forBlock)
     {
         var entity = world.BlockAccessor.GetBlockEntity(pos) as BlockEntityEGenerator;
+        if (entity.Facing == Facing.None)
+        {
+            return false;
+        }
         var powerOutFacing = FacingHelper.Directions(entity.Facing).First();
         return face == powerOutFacing;
     }

@@ -66,7 +66,7 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
                 (IInventory)Inventory,
                 SendInvPacket,
                 6, // 4 колонки
-                new[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 }, // 12 слотов
+                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], // 12 слотов
                 ElementStdBounds.SlotGrid(EnumDialogArea.None, 10, 60, 6, 2), // 4x3
                 "filterSlots")
 
@@ -83,10 +83,10 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
 
             // Кнопки режима фильтра (шире и с большими отступами)
             .AddSmallButton(Lang.Get("electricalprogressivetransport:filter-mode-allow"), OnAllowListClicked,
-                ElementBounds.Fixed(10, 190, 130, 30), EnumButtonStyle.Normal, EnumTextOrientation.Center,
+                ElementBounds.Fixed(10, 190, 130, 30), EnumButtonStyle.Normal,
                 "btnAllowList")
             .AddSmallButton(Lang.Get("electricalprogressivetransport:filter-mode-deny"), OnDenyListClicked,
-                ElementBounds.Fixed(170, 190, 130, 30), EnumButtonStyle.Normal, EnumTextOrientation.Center,
+                ElementBounds.Fixed(170, 190, 130, 30), EnumButtonStyle.Normal,
                 "btnDenyList")
 
             // Чекбоксы сравнения с выравниванием
@@ -114,7 +114,7 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
 
             // Кнопка "-"
             .AddSmallButton(Lang.Get("electricalprogressivetransport:filter-speet-down"), OnDecreaseRateClicked,
-                ElementBounds.Fixed(12, 360, 100, 30), EnumButtonStyle.Normal, EnumTextOrientation.Center,
+                ElementBounds.Fixed(12, 360, 100, 30), EnumButtonStyle.Normal,
                 "btnDecrease")
 
             // Отображение текущей скорости
@@ -124,7 +124,7 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
 
             // Кнопка "+"
             .AddSmallButton(Lang.Get("electricalprogressivetransport:filter-speet-up"), OnIncreaseRateClicked,
-                ElementBounds.Fixed(200, 360, 100, 30), EnumButtonStyle.Normal, EnumTextOrientation.Center,
+                ElementBounds.Fixed(200, 360, 100, 30), EnumButtonStyle.Normal,
                 "btnIncrease")
 
             .EndChildElements()
@@ -191,9 +191,7 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
         TryClose();
         // Отправляем пакет серверу о закрытии GUI
         capi.Network.SendBlockEntityPacket(
-            BlockEntityPosition.X,
-            BlockEntityPosition.Y,
-            BlockEntityPosition.Z,
+            BlockEntityPosition,
             1001); // Пакет закрытия GUI
     }
 
@@ -281,21 +279,17 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
 
     private void SendFilterSettings()
     {
-        using (var ms = new System.IO.MemoryStream())
-        using (var bw = new System.IO.BinaryWriter(ms))
-        {
-            bw.Write((int)filterMode);
-            bw.Write(matchMod);
-            bw.Write(matchType);
-            bw.Write(matchAttributes);
+        using var ms = new System.IO.MemoryStream();
+        using var bw = new System.IO.BinaryWriter(ms);
+        bw.Write((int)filterMode);
+        bw.Write(matchMod);
+        bw.Write(matchType);
+        bw.Write(matchAttributes);
 
-            capi.Network.SendBlockEntityPacket(
-                BlockEntityPosition.X,
-                BlockEntityPosition.Y,
-                BlockEntityPosition.Z,
-                1002, // Пакет настроек фильтра
-                ms.ToArray());
-        }
+        capi.Network.SendBlockEntityPacket(
+            BlockEntityPosition,
+            1002, // Пакет настроек фильтра
+            ms.ToArray());
     }
 
     public override void OnGuiClosed()

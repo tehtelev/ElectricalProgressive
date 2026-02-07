@@ -659,26 +659,24 @@ class BlockEntityEFridge : ContainerEFridge, ITexPositionSource
 
         if (packetid == (int)EnumBlockStovePacket.OpenGUI)
         {
-            using (var ms = new MemoryStream(data))
+            using var ms = new MemoryStream(data);
+            var reader = new BinaryReader(ms);
+            var tree = new TreeAttribute();
+            tree.FromBytes(reader);
+            Inventory.FromTreeAttributes(tree);
+            Inventory.ResolveBlocksOrItems();
+
+
+            if (_freezerDialog == null)
             {
-                var reader = new BinaryReader(ms);
-                var tree = new TreeAttribute();
-                tree.FromBytes(reader);
-                Inventory.FromTreeAttributes(tree);
-                Inventory.ResolveBlocksOrItems();
-
-
-                if (_freezerDialog == null)
+                _freezerDialog = new(Lang.Get("electricalprogressiveqol:freezer-title-gui"), Inventory, Pos, Api as ICoreClientAPI, this);
+                _freezerDialog.OnClosed += () =>
                 {
-                    _freezerDialog = new(Lang.Get("electricalprogressiveqol:freezer-title-gui"), Inventory, Pos, Api as ICoreClientAPI, this);
-                    _freezerDialog.OnClosed += () =>
-                    {
-                        _freezerDialog = null;
-                    };
-                }
-
-                _freezerDialog.TryOpen();
+                    _freezerDialog = null;
+                };
             }
+
+            _freezerDialog.TryOpen();
         }
 
         if (packetid == (int)EnumBlockEntityPacketId.Close)

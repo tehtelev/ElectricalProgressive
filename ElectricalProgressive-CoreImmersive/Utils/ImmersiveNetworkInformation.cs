@@ -1,8 +1,7 @@
-﻿using ElectricalProgressive.Utils;
-using ProtoBuf;
+﻿using ProtoBuf;
 using System.Collections.Generic;
 
-namespace EPImmersive.Utils
+namespace ElectricalProgressive.Utils
 {
     /// <summary>
     /// Сборщик информации о сети иммерсивных проводов
@@ -21,7 +20,7 @@ namespace EPImmersive.Utils
         public int NumberOfTransformators;
         public int NumberOfConnections; // Количество подключенных проводов
         public int NumberOfNetworks; // Количество независимых сетей
-        public List<NetworkData> Networks = new(); // Информация о каждой сети
+        public List<NetworkData> Networks = []; // Информация о каждой сети
         public EParams eParamsInNetwork = new();
         public float current;
         public bool IsConductorOpen; // Проводник разомкнут

@@ -17,7 +17,7 @@ namespace ElectricalProgressive.Content.Block.EHeater
 {
     public class BlockEHeater : BlockEBase
     {
-        private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
+        private WorldInteraction[] _interactions = [];
 
         private static readonly Dictionary<CacheDataKey, MeshData> MeshDataCache = new();
         private static readonly Dictionary<CacheDataKey, Cuboidf[]> SelectionBoxesCache = new();
@@ -93,7 +93,7 @@ namespace ElectricalProgressive.Content.Block.EHeater
 
         public override ItemStack[] GetDrops(IWorldAccessor world, BlockPos pos, IPlayer byPlayer, float dropQuantityMultiplier = 1)
         {
-            return new[] { OnPickBlock(world, pos) };
+            return [OnPickBlock(world, pos)];
         }
 
         public override void OnNeighbourBlockChange(IWorldAccessor world, BlockPos pos, BlockPos neibpos)
@@ -125,7 +125,7 @@ namespace ElectricalProgressive.Content.Block.EHeater
             if (api?.World?.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEHeater entity ||
                 entity.Facing == Facing.None)
             {
-                return Array.Empty<Cuboidf>();
+                return [];
             }
 
             var key = CacheDataKey.FromEntity(entity);
@@ -140,7 +140,7 @@ namespace ElectricalProgressive.Content.Block.EHeater
                 }
             }
 
-            return boxes ?? Array.Empty<Cuboidf>();
+            return boxes ?? [];
         }
 
         public override void OnJsonTesselation(ref MeshData sourceMesh, ref int[] lightRgbsByCorner, BlockPos pos, Vintagestory.API.Common.Block[] chunkExtBlocks, int extIndex3d)

@@ -15,8 +15,8 @@ public class PipeNetwork
     public PipeNetwork(long id)
     {
         NetworkId = id;
-        Pipes = new List<BlockPos>();
-        Inserters = new List<BlockPos>();
+        Pipes = [];
+        Inserters = [];
     }
 
     public void AddPipe(BlockPos pos, BlockEntity pipe)
@@ -57,11 +57,11 @@ public class PipeNetwork
         }
     }
 
-    public List<BlockPos> FindConnectedPipes(IWorldAccessor world, BlockPos startPos, BlockPos skipPos = null)
+    public static List<BlockPos> FindConnectedPipes(IWorldAccessor world, BlockPos startPos, BlockPos skipPos = null)
     {
-        List<BlockPos> connected = new List<BlockPos>();
+        List<BlockPos> connected = [];
         Queue<BlockPos> toCheck = new Queue<BlockPos>();
-        HashSet<BlockPos> visited = new HashSet<BlockPos>();
+        HashSet<BlockPos> visited = [];
 
         toCheck.Enqueue(startPos.Copy());
         visited.Add(startPos.Copy());

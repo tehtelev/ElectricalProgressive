@@ -10,7 +10,7 @@ using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
 
 
-namespace EPImmersive.Content.Block.HVTransformator
+namespace ElectricalProgressive.Content.Block.HVTransformator
 {
     internal class BlockHVTransformator : ImmersiveWireBlock
     {
@@ -84,7 +84,7 @@ namespace EPImmersive.Content.Block.HVTransformator
 
             dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage_immersive") + ": " + imvoltage + " " + Lang.Get("electricalprogressivebasics:V"));
             dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + voltage + " " + Lang.Get("electricalprogressivebasics:V"));
-            dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + ((MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false)) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + (MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
         }
 
       

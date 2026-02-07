@@ -12,8 +12,8 @@ using Vintagestory.GameContent.Mechanics;
 namespace ElectricalProgressive.Content.Block.EMotor;
 public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
 {
-    private readonly static Dictionary<(Facing, string), MeshData> MeshData = new();
-    private static float[] def_Params = [10.0F, 100.0F, 0.5F, 0.75F, 0.5F, 0.1F, 0.05F];   //заглушка
+    private static readonly Dictionary<(Facing, string), MeshData> MeshData = new();
+    private static readonly float[] DefParams = [10.0F, 100.0F, 0.5F, 0.75F, 0.5F, 0.1F, 0.05F];   //заглушка
 
 
 
@@ -33,19 +33,6 @@ public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
         return null;
     }
 
-    public bool HasMechPowerConnectorAt(IWorldAccessor world, BlockPos pos, BlockFacing face)
-    {
-        if (world.BlockAccessor.GetBlockEntity(pos) is BlockEntityEMotor entity && entity.Facing != Facing.None)
-        {
-            var directions = FacingHelper.Directions(entity.Facing).ToList();
-            if (directions.Count > 0)
-            {
-                return directions.First() == face;
-            }
-        }
-
-        return false;
-    }
 
     public void DidConnectAt(IWorldAccessor world, BlockPos pos, BlockFacing face)
     {
@@ -155,7 +142,7 @@ public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
             var faces = FacingHelper.Faces(entity.Facing).ToList();
             if (
             faces != null &&
-            faces.Any() &&
+            faces.Count != 0 &&
             faces.First() is { } blockFacing &&
             !world.BlockAccessor.GetBlock(pos.AddCopy(blockFacing)).SideSolid[blockFacing.Opposite.Index])
             {
@@ -330,13 +317,13 @@ public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
         base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
 
-        var Params = MyMiniLib.GetAttributeArrayFloat(inSlot.Itemstack.Block, "params", def_Params);
+        var @params = MyMiniLib.GetAttributeArrayFloat(inSlot.Itemstack.Block, "params", DefParams);
 
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Consumption") + ": " + Params[1] + " " + Lang.Get("electricalprogressivebasics:W"));
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:max_speed") + ": " + Params[4] + " " + Lang.Get("electricalprogressivebasics:rps"));
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:res_speed") + ": " + Params[5]);
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:max_torque") + ": " + Params[2]);
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:kpd") + ": " + Params[3] * 100 + " %");
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Consumption") + ": " + @params[1] + " " + Lang.Get("electricalprogressivebasics:W"));
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:max_speed") + ": " + @params[4] + " " + Lang.Get("electricalprogressivebasics:rps"));
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:res_speed") + ": " + @params[5]);
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:max_torque") + ": " + @params[2]);
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:kpd") + ": " + @params[3] * 100 + " %");
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + ((MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false)) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
     }
 
@@ -344,6 +331,10 @@ public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
     public bool HasMechPowerConnectorAt(IWorldAccessor world, BlockPos pos, BlockFacing face, BlockMPBase forBlock)
     {
         var entity = world.BlockAccessor.GetBlockEntity(pos) as BlockEntityEMotor;
+        if (entity.Facing == Facing.None)
+        {
+            return false;
+        }
         var powerOutFacing = FacingHelper.Directions(entity.Facing).First();
         return face == powerOutFacing;
     }

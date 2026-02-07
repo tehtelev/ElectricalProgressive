@@ -1,10 +1,9 @@
-using System.Text;
+﻿using System.Text;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
-using ElectricalProgressive.Content.Block.EHotSpringsGenerator;
 
-namespace ElectricalProgressive.Content.Block.EHeatExchanger;
+namespace ElectricalProgressive.Content.Block.EHotSpringsGenerator.EHeatExchanger;
 
 public class BlockEHeatExchanger : Vintagestory.API.Common.Block
 {
@@ -28,13 +27,13 @@ public class BlockEHeatExchanger : Vintagestory.API.Common.Block
     /// <summary>
     /// Checks if the position is horizontally adjacent to a hot springs generator (including diagonals)
     /// </summary>
-    private bool IsAdjacentToHotSpringsGenerator(IWorldAccessor world, BlockPos pos)
+    private static bool IsAdjacentToHotSpringsGenerator(IWorldAccessor world, BlockPos pos)
     {
         var accessor = world.BlockAccessor;
 
         // Check all 8 horizontal directions (N, S, E, W, NE, NW, SE, SW)
-        BlockPos[] adjacentPositions = new[]
-        {
+        BlockPos[] adjacentPositions =
+        [
             pos.NorthCopy(),
             pos.SouthCopy(),
             pos.EastCopy(),
@@ -43,7 +42,7 @@ public class BlockEHeatExchanger : Vintagestory.API.Common.Block
             pos.NorthCopy().WestCopy(),  // NW
             pos.SouthCopy().EastCopy(),  // SE
             pos.SouthCopy().WestCopy()   // SW
-        };
+        ];
 
         foreach (var adjPos in adjacentPositions)
         {

@@ -12,7 +12,7 @@ namespace ElectricalProgressive.Content.Block.ECharger;
 
 public class BlockECharger : BlockEBase
 {
-    private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
+    private WorldInteraction[] _interactions = [];
     private int _output;
 
     public override void OnLoaded(ICoreAPI api)

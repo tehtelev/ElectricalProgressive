@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Vintagestory.API.MathTools;
 
-namespace EPImmersive.Utils
+namespace ElectricalProgressive.Utils
 {
     /// <summary>
     /// Быстрый ключ для позиции блока с кэшированием хэш-кода
@@ -31,9 +31,9 @@ namespace EPImmersive.Utils
             unchecked
             {
                 var hash = X;
-                hash = (hash << 9) ^ (hash >> 23) ^ Y;
-                hash = (hash << 9) ^ (hash >> 23) ^ Z;
-                return hash ^ (Dim * 269023);
+                hash = hash << 9 ^ hash >> 23 ^ Y;
+                hash = hash << 9 ^ hash >> 23 ^ Z;
+                return hash ^ Dim * 269023;
             }
         }
     }
@@ -61,7 +61,7 @@ namespace EPImmersive.Utils
         {
             unchecked
             {
-                return (Position.GetHashCode() * 397) ^ NodeIndex.GetHashCode();
+                return Position.GetHashCode() * 397 ^ NodeIndex.GetHashCode();
             }
         }
     }
@@ -76,7 +76,7 @@ namespace EPImmersive.Utils
         private PriorityQueue<NodeState, int> _queue = new();
         private Dictionary<NodeState, NodeState> _cameFrom = new();
         private Dictionary<NodeState, int> _costSoFar = new();
-        private HashSet<NodeState> _visited = new();
+        private HashSet<NodeState> _visited = [];
 
         // Буфер для хранения соседних узлов и весов переходов к ним
         private List<(NodeState state, int cost)> _neighborsBuffer = new(10);
@@ -131,7 +131,7 @@ namespace EPImmersive.Utils
                 _costSoFar[startState] = 0;
             }
 
-            float pathLength = 0f;
+            var pathLength = 0f;
 
             while (_queue.Count > 0)
             {
@@ -162,9 +162,10 @@ namespace EPImmersive.Utils
                     // Используем длину провода как стоимость перехода (округляем до int для очереди)
                     var newCost = _costSoFar[current] + neighbor.cost;
 
-                    if (!_costSoFar.ContainsKey(neighbor.state) || newCost < _costSoFar[neighbor.state])
+                    if (!_costSoFar.TryGetValue(neighbor.state, out var value) || newCost < value)
                     {
-                        _costSoFar[neighbor.state] = newCost;
+                        value = newCost;
+                        _costSoFar[neighbor.state] = value;
                         // Приоритет = стоимость пути + эвристика до цели
                         var priority = newCost + Heuristic(neighbor.state.Position.Pos, end);
                         _queue.Enqueue(neighbor.state, priority);
@@ -182,15 +183,15 @@ namespace EPImmersive.Utils
         /// <summary>
         /// Рассчитывает фактическую длину пути на основе WireLength соединений
         /// </summary>
-        private float CalculatePathLength(BlockPos[] path, byte[] nodeIndices,
+        private static float CalculatePathLength(BlockPos[] path, byte[] nodeIndices,
             ImmersiveNetwork network, Dictionary<BlockPos, ImmersiveNetworkPart> parts)
         {
             if (path == null || nodeIndices == null || path.Length <= 1)
                 return 0f;
 
-            float totalLength = 0f;
+            var totalLength = 0f;
 
-            for (int i = 0; i < path.Length - 1; i++)
+            for (var i = 0; i < path.Length - 1; i++)
             {
                 var currentPos = path[i];
                 var nextPos = path[i + 1];
@@ -223,6 +224,7 @@ namespace EPImmersive.Utils
         /// <param name="network">Сеть</param>
         /// <param name="parts">Части сети</param>
         /// <param name="neighbors">Список для заполнения (сосед, стоимость перехода)</param>
+
         private void GetNeighbors(
             NodeState current,
             ImmersiveNetwork network,
@@ -255,7 +257,7 @@ namespace EPImmersive.Utils
                     {
                         // Используем длину провода как стоимость перехода
                         // Округляем вверх, так как длина провода обычно дробная
-                        int cost = (int)Math.Ceiling(connection.WireLength);
+                        var cost = (int)Math.Ceiling(connection.WireLength);
                         neighbors.Add((neighborState, cost));
                     }
                 }

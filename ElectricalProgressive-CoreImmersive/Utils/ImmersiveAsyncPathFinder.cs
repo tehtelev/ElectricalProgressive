@@ -1,11 +1,12 @@
-﻿using System;
+﻿using EPImmersive.Utils;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Vintagestory.API.MathTools;
 
-namespace EPImmersive.Utils
+namespace ElectricalProgressive.Utils
 {
     public class ImmersiveAsyncPathFinder
     {
@@ -19,10 +20,10 @@ namespace EPImmersive.Utils
 
         public ImmersiveAsyncPathFinder(Dictionary<BlockPos, ImmersiveNetworkPart> parts, int maxConcurrentTasks)
         {
-            this._parts = parts;
-            this._maxConcurrentTasks = maxConcurrentTasks;
-            this._sizeOfQueue = 1000 * maxConcurrentTasks;
-            this._sizeOfNotBusy = 200 * maxConcurrentTasks;
+            _parts = parts;
+            _maxConcurrentTasks = maxConcurrentTasks;
+            _sizeOfQueue = 1000 * maxConcurrentTasks;
+            _sizeOfNotBusy = 200 * maxConcurrentTasks;
 
             for (var i = 0; i < maxConcurrentTasks; i++)
             {
@@ -52,7 +53,7 @@ namespace EPImmersive.Utils
 
             while (_isRunning)
             {
-                if (_requestQueue.Count == 0)
+                if (_requestQueue.IsEmpty)
                 {
                     pathFinder.Clear();
                     Thread.Sleep(50);
@@ -100,7 +101,7 @@ namespace EPImmersive.Utils
                             */
                         }
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         // Логирование ошибки
                     }

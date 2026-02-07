@@ -1,4 +1,5 @@
-﻿using ElectricalProgressive.Interface;
+﻿using ElectricalProgressive.Content.Block;
+using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
 using EPImmersive.Utils;
 using System;

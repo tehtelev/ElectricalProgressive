@@ -32,7 +32,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
 
     private static float _maxTargetTemp = 1350f; //максимальная температура для нагрева
 
-    public virtual string DialogTitle => Lang.Get("ehammer-title-gui");
+    public override string DialogTitle => Lang.Get("ehammer-title-gui");
 
     public override InventoryBase Inventory => (InventoryBase)this.inventory;
 

@@ -76,7 +76,7 @@ namespace ElectricalProgressive.Utils
             while (_isRunning)
             {
                 // Если очередь пуста, очищаем PathFinder и ждем
-                if (_requestQueue.Count == 0)
+                if (_requestQueue.IsEmpty)
                 {
                     pathFinder.Clear();
                     Thread.Sleep(50); // Если очередь пуста, ждем 100 мс
@@ -114,7 +114,7 @@ namespace ElectricalProgressive.Utils
 
 
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         //sapi.Logger.Error($"Ошибка в асинхронном поиске пути от {request.Start} до {request.End}: {ex.Message}");
                     }
