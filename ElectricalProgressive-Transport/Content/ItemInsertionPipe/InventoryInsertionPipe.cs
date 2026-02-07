@@ -6,9 +6,9 @@ namespace ElectricalProgressiveTransport.ItemInsertionPipe;
 
 public class InventoryInsertionPipe : InventoryGeneric
 {
-    private BEInsertionPipe _entity;
+    private BEItemInsertionPipe _entity;
 
-    public InventoryInsertionPipe(int slots, string className, string instanceID, ICoreAPI api, BEInsertionPipe entity)
+    public InventoryInsertionPipe(int slots, string className, string instanceID, ICoreAPI api, BEItemInsertionPipe entity)
         : base(slots, className, instanceID, api)
     {
         _entity = entity;

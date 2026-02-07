@@ -282,7 +282,7 @@ public class BEPipe : BlockEntity
         {
             neighborPipe.UpdateSingleConnection(fromDirection, Pos, false);
         }
-        else if (Api.World.BlockAccessor.GetBlockEntity(neighborPos) is BEInsertionPipe neighborInserter)
+        else if (Api.World.BlockAccessor.GetBlockEntity(neighborPos) is BEItemInsertionPipe neighborInserter)
         {
             neighborInserter.UpdateSingleConnection(fromDirection, Pos);
         }
@@ -944,7 +944,7 @@ public class BEPipe : BlockEntity
         {
             neighborPipe.BreakConnection(direction.Opposite);
         }
-        else if (Api.World.BlockAccessor.GetBlockEntity(neighborPos) is BEInsertionPipe neighborInserter)
+        else if (Api.World.BlockAccessor.GetBlockEntity(neighborPos) is BEItemInsertionPipe neighborInserter)
         {
             neighborInserter.BreakConnection(direction.Opposite);
         }

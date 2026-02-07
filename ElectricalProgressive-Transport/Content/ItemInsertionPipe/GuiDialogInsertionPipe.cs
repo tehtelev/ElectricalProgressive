@@ -9,9 +9,9 @@ namespace ElectricalProgressiveTransport.ItemInsertionPipe;
 
 public class GuiDialogInsertionPipe : GuiDialogBlockEntity
 {
-    private BEInsertionPipe blockEntity;
+    private BEItemInsertionPipe blockEntity;
     private int transferRate = 1;
-    private BEInsertionPipe.FilterMode filterMode = BEInsertionPipe.FilterMode.AllowList;
+    private BEItemInsertionPipe.FilterMode filterMode = BEItemInsertionPipe.FilterMode.AllowList;
     private bool matchMod = false;
     private bool matchType = true;
     private bool matchAttributes = false;
@@ -21,7 +21,7 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
         InventoryBase Inventory,
         BlockPos BlockEntityPosition,
         ICoreClientAPI capi,
-        BEInsertionPipe blockEntity)
+        BEItemInsertionPipe blockEntity)
         : base(DialogTitle, Inventory, BlockEntityPosition, capi)
     {
         this.blockEntity = blockEntity;
@@ -153,12 +153,12 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
 
         if (btnAllow != null)
         {
-            btnAllow.Enabled = filterMode != BEInsertionPipe.FilterMode.AllowList;
+            btnAllow.Enabled = filterMode != BEItemInsertionPipe.FilterMode.AllowList;
         }
 
         if (btnDeny != null)
         {
-            btnDeny.Enabled = filterMode != BEInsertionPipe.FilterMode.DenyList;
+            btnDeny.Enabled = filterMode != BEItemInsertionPipe.FilterMode.DenyList;
         }
 
     }
@@ -206,7 +206,7 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
 
     private bool OnAllowListClicked()
     {
-        filterMode = BEInsertionPipe.FilterMode.AllowList;
+        filterMode = BEItemInsertionPipe.FilterMode.AllowList;
         UpdateFilterButtons();
         SendFilterSettings();
         return true;
@@ -214,7 +214,7 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
 
     private bool OnDenyListClicked()
     {
-        filterMode = BEInsertionPipe.FilterMode.DenyList;
+        filterMode = BEItemInsertionPipe.FilterMode.DenyList;
         UpdateFilterButtons();
         SendFilterSettings();
         return true;

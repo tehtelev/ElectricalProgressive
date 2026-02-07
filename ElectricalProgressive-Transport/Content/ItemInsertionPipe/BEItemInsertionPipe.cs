@@ -11,7 +11,7 @@ using Vintagestory.GameContent;
 
 namespace ElectricalProgressiveTransport.ItemInsertionPipe;
 
-public class BEInsertionPipe : BlockEntityPipeBase
+public class BEItemInsertionPipe : BlockEntityPipeBase
 {
     private long transferTimer;
     private int transferRate = 1;
@@ -61,7 +61,7 @@ public class BEInsertionPipe : BlockEntityPipeBase
     public float PerishRateMultiplier => perishRateMultiplier;
     public bool StopAllTransitions => stopAllTransitions;
 
-    public BEInsertionPipe()
+    public BEItemInsertionPipe()
     {
         // 12 слотов для фильтров (6x2 в GUI)
         _inventory = new InventoryInsertionPipe(12, "insertionpipe", null, null, this);
@@ -515,7 +515,7 @@ public class BEInsertionPipe : BlockEntityPipeBase
             if (!inserterPos.Equals(Pos))
             {
                 excludePositions.Add(inserterPos);
-                BEInsertionPipe otherPipe = Api.World.BlockAccessor.GetBlockEntity(inserterPos) as BEInsertionPipe;
+                BEItemInsertionPipe otherPipe = Api.World.BlockAccessor.GetBlockEntity(inserterPos) as BEItemInsertionPipe;
                 if (otherPipe != null && otherPipe.outputFacing != null)
                 {
                     excludePositions.Add(inserterPos.AddCopy(otherPipe.outputFacing));

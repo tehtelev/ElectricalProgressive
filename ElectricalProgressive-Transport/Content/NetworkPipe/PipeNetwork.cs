@@ -25,7 +25,7 @@ public class PipeNetwork
         {
             Pipes.Add(pos.Copy());
 
-            if (pipe is BEInsertionPipe)
+            if (pipe is BEItemInsertionPipe)
             {
                 Inserters.Add(pos.Copy());
             }

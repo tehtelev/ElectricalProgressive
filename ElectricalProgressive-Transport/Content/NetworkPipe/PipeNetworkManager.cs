@@ -166,7 +166,7 @@ public class PipeNetworkManager
             {
                 connectedSides = pipe.ConnectedSides;
             }
-            else if (pipeEntity is BEInsertionPipe inserter)
+            else if (pipeEntity is BEItemInsertionPipe inserter)
             {
                 connectedSides = inserter.ConnectedSides;
             }

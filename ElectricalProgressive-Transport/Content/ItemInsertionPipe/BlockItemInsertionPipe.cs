@@ -7,7 +7,7 @@ using Vintagestory.API.Util;
 
 namespace ElectricalProgressiveTransport.ItemInsertionPipe;
 
-public class BlockInsertionPipe : BlockPipeBase
+public class BlockItemInsertionPipe : BlockPipeBase
 {
 
     public override WorldInteraction[] GetPlacedBlockInteractionHelp(
@@ -22,7 +22,6 @@ public class BlockInsertionPipe : BlockPipeBase
             {
                 ActionLangCode = Lang.Get("electricalprogressivetransport:blockhelp-filter-settings"),
                 MouseButton = EnumMouseButton.Right,
-                HotKeyCode = "sneak" // Добавляем информацию о горячей клавише
             }
         }.Append<WorldInteraction>(base.GetPlacedBlockInteractionHelp(world, selection, forPlayer));
     }
@@ -31,7 +30,7 @@ public class BlockInsertionPipe : BlockPipeBase
     {
         StringBuilder sb = new StringBuilder();
         sb.AppendLine(Lang.Get("electricalprogressivetransport:pipe-insertion-info"));
-        BEInsertionPipe pipe = world.BlockAccessor.GetBlockEntity(pos) as BEInsertionPipe;
+        BEItemInsertionPipe pipe = world.BlockAccessor.GetBlockEntity(pos) as BEItemInsertionPipe;
         if (pipe != null)
         {
             pipe.GetBlockInfo(forPlayer, sb);

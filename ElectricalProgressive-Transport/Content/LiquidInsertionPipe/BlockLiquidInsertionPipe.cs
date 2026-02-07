@@ -22,7 +22,6 @@ public class BlockLiquidInsertionPipe : BlockPipeBase
             {
                 ActionLangCode = Lang.Get("electricalprogressivetransport:blockhelp-liquid-filter-settings"),
                 MouseButton = EnumMouseButton.Right,
-                HotKeyCode = "sneak"
             }
         }.Append<WorldInteraction>(base.GetPlacedBlockInteractionHelp(world, selection, forPlayer));
     }
