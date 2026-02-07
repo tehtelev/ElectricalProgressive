@@ -80,7 +80,7 @@ namespace EPImmersive.Content.Block.HVSFonar
             }
 
             stringBuilder.AppendLine(StringHelper.Progressbar(this.LightLevel * 100.0f / _maxConsumption));
-            stringBuilder.AppendLine("└ " + Lang.Get("Consumption") + ": " + this.LightLevel + "/" + _maxConsumption + " " + Lang.Get("W"));
+            stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Consumption") + ": " + this.LightLevel + "/" + _maxConsumption + " " + Lang.Get("electricalprogressivebasics:W"));
 
             stringBuilder.AppendLine();
         }

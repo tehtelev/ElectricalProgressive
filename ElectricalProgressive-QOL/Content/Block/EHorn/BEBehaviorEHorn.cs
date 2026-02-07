@@ -67,7 +67,7 @@ public class BEBehaviorEHorn : BlockEntityBehavior, IElectricConsumer
         }
 
         stringBuilder.AppendLine(StringHelper.Progressbar(_powerReceive / _maxConsumption * 100));
-        stringBuilder.AppendLine("└ " + Lang.Get("Consumption") + ": " + ((int)_powerReceive).ToString() + "/" + _maxConsumption + " " + Lang.Get("W"));
+        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Consumption") + ": " + ((int)_powerReceive).ToString() + "/" + _maxConsumption + " " + Lang.Get("electricalprogressivebasics:W"));
         stringBuilder.AppendLine("└ " + Lang.Get("Temperature") + ": " + ((int)_maxTemp).ToString() + "° (" + Lang.Get("max") + ")");
 
         stringBuilder.AppendLine();

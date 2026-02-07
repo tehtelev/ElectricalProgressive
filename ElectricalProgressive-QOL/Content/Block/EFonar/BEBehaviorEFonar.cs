@@ -167,7 +167,7 @@ namespace ElectricalProgressive.Content.Block.EFonar
             }
 
             stringBuilder.AppendLine(StringHelper.Progressbar(LightLevel * 100.0f / _maxConsumption));
-            stringBuilder.AppendLine("└ " + Lang.Get("Consumption") + ": " + LightLevel + "/" + _maxConsumption + " " + Lang.Get("W"));
+            stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Consumption") + ": " + LightLevel + "/" + _maxConsumption + " " + Lang.Get("electricalprogressivebasics:W"));
 
             stringBuilder.AppendLine();
         }

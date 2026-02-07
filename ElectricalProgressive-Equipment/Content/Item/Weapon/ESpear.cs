@@ -20,6 +20,8 @@ public class ESpear : Vintagestory.API.Common.Item
     int lightstrike;
     public SkillItem[] toolModes = [];
 
+    private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
+
     public override void OnLoaded(ICoreAPI api)
     {
         base.OnLoaded(api);
@@ -47,14 +49,28 @@ public class ESpear : Vintagestory.API.Common.Item
             new SkillItem
             {
                 Code = new AssetLocation("1size"),
-                Name = Lang.Get("spear_common")
+                Name = Lang.Get("electricalprogressiveequipment:spear_common")
             }.WithIcon(capi, capi.Gui.LoadSvg(new AssetLocation("electricalprogressiveequipment:textures/icons/spear-common.svg"),252,256,252,256,ColorUtil.WhiteArgb)),
             new SkillItem
             {
                 Code = new AssetLocation("3size"),
-                Name = Lang.Get("spear_flash")
+                Name = Lang.Get("electricalprogressiveequipment:spear_flash")
             }.WithIcon(capi, capi.Gui.LoadSvg(new AssetLocation("electricalprogressiveequipment:textures/icons/spear-flash.svg"), 252, 266, 252, 266, ColorUtil.WhiteArgb))
         });
+
+
+        _interactions = ObjectCacheUtil.GetOrCreate(api, "ESpearInteractions", () =>
+        {
+            return new WorldInteraction[] {
+                new()
+                {
+                    ActionLangCode = "heldhelp-throw",
+                    MouseButton = EnumMouseButton.Right,
+                }
+            };
+        });
+
+
     }
 
 
@@ -346,7 +362,7 @@ public class ESpear : Vintagestory.API.Common.Item
         var energy = inSlot.Itemstack.Attributes.GetInt("durability") * consume; //текущая энергия
         var maxEnergy = inSlot.Itemstack.Collectible.GetMaxDurability(inSlot.Itemstack) * consume;       //максимальная энергия
 
-        dsc.AppendLine(energy + "/" + maxEnergy + " " + Lang.Get("J"));
+        dsc.AppendLine(energy + "/" + maxEnergy + " " + Lang.Get("electricalprogressivebasics:J"));
 
         if (inSlot.Itemstack.Collectible.Attributes != null)
         {
@@ -371,12 +387,6 @@ public class ESpear : Vintagestory.API.Common.Item
     /// <returns></returns>
     public override WorldInteraction[] GetHeldInteractionHelp(ItemSlot inSlot)
     {
-        return new WorldInteraction[] {
-                new()
-                {
-                    ActionLangCode = "heldhelp-throw",
-                    MouseButton = EnumMouseButton.Right,
-                }
-            }.Append(base.GetHeldInteractionHelp(inSlot));
+        return _interactions;
     }
 }

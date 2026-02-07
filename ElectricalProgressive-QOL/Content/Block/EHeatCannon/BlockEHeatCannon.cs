@@ -172,9 +172,9 @@ namespace ElectricalProgressive.Content.Block.EHeatCannon
             base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
             var block = inSlot.Itemstack.Block;
 
-            dsc.AppendLine(Lang.Get("Voltage") + ": " + MyMiniLib.GetAttributeInt(block, "voltage", 0) + " " + Lang.Get("V"));
-            dsc.AppendLine(Lang.Get("Consumption") + ": " + MyMiniLib.GetAttributeFloat(block, "maxConsumption", 0) + " " + Lang.Get("W"));
-            dsc.AppendLine(Lang.Get("WResistance") + ": " + (MyMiniLib.GetAttributeBool(block, "isolatedEnvironment", false) ? Lang.Get("Yes") : Lang.Get("No")));
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:Consumption") + ": " + MyMiniLib.GetAttributeFloat(block, "maxConsumption", 0) + " " + Lang.Get("electricalprogressivebasics:W"));
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + (MyMiniLib.GetAttributeBool(block, "isolatedEnvironment", false) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
         }
 
     }

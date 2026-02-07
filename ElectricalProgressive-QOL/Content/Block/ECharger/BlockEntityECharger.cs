@@ -585,7 +585,7 @@ public class BlockEntityECharger : BlockEntityContainer, ITexPositionSource
             stringBuilder.AppendLine();
             stringBuilder.AppendLine(stack.GetName());
             stringBuilder.AppendLine(StringHelper.Progressbar(energy * 100.0F / maxEnergy));
-            stringBuilder.AppendLine("└ " + Lang.Get("Storage") + ": " + energy + "/" + maxEnergy + " " + Lang.Get("J"));
+            stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Capacity") + ": " + energy + "/" + maxEnergy + " " + Lang.Get("electricalprogressivebasics:J"));
         }
         else if (stack?.Block is IEnergyStorageItem) //блок
         {
@@ -596,7 +596,7 @@ public class BlockEntityECharger : BlockEntityContainer, ITexPositionSource
             stringBuilder.AppendLine();
             stringBuilder.AppendLine(stack.GetName());
             stringBuilder.AppendLine(StringHelper.Progressbar(energy * 100.0F / maxEnergy));
-            stringBuilder.AppendLine("└ " + Lang.Get("Storage") + ": " + energy + "/" + maxEnergy + " " + Lang.Get("J"));
+            stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Capacity") + ": " + energy + "/" + maxEnergy + " " + Lang.Get("electricalprogressivebasics:J"));
         }
     }
 }

@@ -126,7 +126,7 @@ namespace EPImmersive.Content.Block.HVTransformator
             stringBuilder.AppendLine(StringHelper.Progressbar(_storedEnergy * 100.0f / _maxCapacity));
             stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:buffer") + ": " +
                                     ((int)_storedEnergy).ToString() + "/" +
-                                    ((int)_maxCapacity).ToString() + " " + Lang.Get("W"));
+                                    ((int)_maxCapacity).ToString() + " " + Lang.Get("electricalprogressivebasics:W"));
         }
 
         #region IEImmersiveConsumer Implementation

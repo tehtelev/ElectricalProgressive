@@ -75,7 +75,7 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
 
     public override InventoryBase Inventory => inventory;
     public override string InventoryClassName => "blockestove";
-    public virtual string DialogTitle => Lang.Get("BlockEStove");
+    public virtual string DialogTitle => Lang.Get("electricalprogressiveqol:BlockEStove");
     #endregion
 
 

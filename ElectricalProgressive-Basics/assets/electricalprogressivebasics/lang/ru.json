@@ -104,7 +104,6 @@
   "item-engineshaft": "Ротор",
 
 
-  "game:tabname-electricity": "Электричество",
 
   "block-handbooktitle-accumulator-tier1": "Использование",
   "block-handbooktext-accumulator-tier1": "Позволяет хранить электрическую энергию.<br>Заряженный аккумулятор, при необходимости, можно носить с собой.",
@@ -183,6 +182,7 @@
   "res_speed": "Ном. сопротивление при ном. скорости",
 
   "Production": "Выработка",
+  "Power": "Мощность",
 
   "termogen": "Термогенератор",
   "gui-word-seconds": "сек.",
@@ -273,7 +273,7 @@
   "cable_same_type": "Кабеля должны быть того же типа",
   "not_enough_cables": "Недостаточно кабелей для размещения",
   "enough_lines": "Линий уже достаточно",
-  "game:Prod_potential": "Потенциал выраб.",
+  "Prod_potential": "Потенциал выраб.",
 
   "too_much_wires": "Вы не можете подключить больше, чем 8 проводов в эту точку.",
   "select_second_point": "Выберите вторую точку.",

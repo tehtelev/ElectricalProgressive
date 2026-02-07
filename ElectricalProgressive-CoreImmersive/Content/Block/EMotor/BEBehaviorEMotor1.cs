@@ -429,10 +429,10 @@ public class BEBehaviorEMotor1 : BEBehaviorMPBase, IEImmersiveConsumer
             return;
 
         stringBuilder.AppendLine(StringHelper.Progressbar(powerReceive / I_max * 100));
-        stringBuilder.AppendLine("└ " + Lang.Get("Consumption") + ": " + ((int)powerReceive).ToString() + "/" + I_max + " " + Lang.Get("W"));
+        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Consumption") + ": " + ((int)powerReceive).ToString() + "/" + I_max + " " + Lang.Get("electricalprogressivebasics:W"));
 
         var speed = network?.Speed * GearedRatio ?? 0.0F;
-        stringBuilder.AppendLine("└ " + Lang.Get("Speed") + ": " + speed.ToString("F3") + " " + Lang.Get("rps"));
+        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Speed") + ": " + speed.ToString("F3") + " " + Lang.Get("electricalprogressivebasics:rps"));
 
     }
 

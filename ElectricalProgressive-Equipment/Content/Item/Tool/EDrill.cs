@@ -36,22 +36,22 @@ class EDrill : Vintagestory.API.Common.Item
             new SkillItem
             {
                 Code = new AssetLocation("11size"),
-                Name = Lang.Get("drill11")
+                Name = Lang.Get("electricalprogressiveequipment:drill11")
             }.WithIcon(capi, IconStorage.DrawTool1x1),
             new SkillItem
             {
                 Code = new AssetLocation("13size"),
-                Name = Lang.Get("drill13")
+                Name = Lang.Get("electricalprogressiveequipment:drill13")
             }.WithIcon(capi, IconStorage.DrawTool1x3),
             new SkillItem
             {
                 Code = new AssetLocation("31size"),
-                Name = Lang.Get("drill31")
+                Name = Lang.Get("electricalprogressiveequipment:drill31")
             }.WithIcon(capi, IconStorage.DrawTool3x1),
             new SkillItem
             {
                 Code = new AssetLocation("33size"),
-                Name = Lang.Get("drill33")
+                Name = Lang.Get("electricalprogressiveequipment:drill33")
             }.WithIcon(capi, IconStorage.DrawTool3x3)
         });
     }
@@ -135,7 +135,7 @@ class EDrill : Vintagestory.API.Common.Item
 
         var energy = inSlot.Itemstack.Attributes.GetInt("durability") * consume; //текущая энергия
         var maxEnergy = inSlot.Itemstack.Collectible.GetMaxDurability(inSlot.Itemstack) * consume;       //максимальная энергия
-        dsc.AppendLine(energy + "/" + maxEnergy + " " + Lang.Get("J"));
+        dsc.AppendLine(energy + "/" + maxEnergy + " " + Lang.Get("electricalprogressivebasics:J"));
     }
 
 

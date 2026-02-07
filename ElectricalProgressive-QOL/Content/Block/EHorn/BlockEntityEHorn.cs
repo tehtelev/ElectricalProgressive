@@ -339,6 +339,8 @@ public class BlockEntityEHorn : BlockEntityContainer, IHeatSource
         tree.SetInt("burning", this._burning ? 1 : 0);
         tree.SetDouble("lastTickTotalHours", this._lastTickTotalHours);
     }
+
+
     /// <summary>
     /// Получение информации о блоке
     /// </summary>

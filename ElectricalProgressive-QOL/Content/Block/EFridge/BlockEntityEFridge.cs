@@ -670,7 +670,7 @@ class BlockEntityEFridge : ContainerEFridge, ITexPositionSource
 
                 if (_freezerDialog == null)
                 {
-                    _freezerDialog = new(Lang.Get("freezer-title-gui"), Inventory, Pos, Api as ICoreClientAPI, this);
+                    _freezerDialog = new(Lang.Get("electricalprogressiveqol:freezer-title-gui"), Inventory, Pos, Api as ICoreClientAPI, this);
                     _freezerDialog.OnClosed += () =>
                     {
                         _freezerDialog = null;

@@ -61,7 +61,7 @@ namespace ElectricalProgressive.Content.Block.EHeatCannon
             
 
             stringBuilder.AppendLine(StringHelper.Progressbar(this.HeatLevel * 100.0f / _maxConsumption));
-            stringBuilder.AppendLine("└ " + Lang.Get("Consumption") + ": " + this.HeatLevel + "/" + _maxConsumption + " " + Lang.Get("W"));
+            stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Consumption") + ": " + this.HeatLevel + "/" + _maxConsumption + " " + Lang.Get("electricalprogressivebasics:W"));
 
 
 

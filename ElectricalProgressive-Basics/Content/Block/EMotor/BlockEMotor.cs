@@ -344,7 +344,7 @@ public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
     public bool HasMechPowerConnectorAt(IWorldAccessor world, BlockPos pos, BlockFacing face, BlockMPBase forBlock)
     {
         var entity = world.BlockAccessor.GetBlockEntity(pos) as BlockEntityEMotor;
-        var powerOutFacing = FacingHelper.Faces(entity.Facing).First();
+        var powerOutFacing = FacingHelper.Directions(entity.Facing).First();
         return face == powerOutFacing;
     }
 }

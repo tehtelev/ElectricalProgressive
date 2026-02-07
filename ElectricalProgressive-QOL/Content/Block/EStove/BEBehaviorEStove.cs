@@ -63,7 +63,7 @@ public class BEBehaviorEStove : BlockEntityBehavior, IElectricConsumer
         }
 
         stringBuilder.AppendLine(StringHelper.Progressbar(PowerSetting * 100.0f / _maxConsumption));
-        stringBuilder.AppendLine("├ " + Lang.Get("Consumption") + ": " + PowerSetting + "/" + _maxConsumption + " " + Lang.Get("W"));
+        stringBuilder.AppendLine("├ " + Lang.Get("electricalprogressivebasics:Consumption") + ": " + PowerSetting + "/" + _maxConsumption + " " + Lang.Get("electricalprogressivebasics:W"));
         stringBuilder.AppendLine("└ " + Lang.Get("Temperature") + ": " + ((int)_stoveTemperature).ToString() + "°");
 
         stringBuilder.AppendLine();

@@ -25,7 +25,7 @@ class BlockEFridge : BlockEBase
         {
             return new[]
             {
-                new WorldInteraction { ActionLangCode = "freezer-over-help", MouseButton = EnumMouseButton.Right, }
+                new WorldInteraction { ActionLangCode = "electricalprogressiveqol:freezer-over-help", MouseButton = EnumMouseButton.Right, }
             };
         });
     }

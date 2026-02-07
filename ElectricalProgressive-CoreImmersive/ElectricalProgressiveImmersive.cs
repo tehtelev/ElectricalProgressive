@@ -235,7 +235,7 @@ namespace EPImmersive
         /// </summary>
         private void RegisterAltKeys()
         {
-            _capi.Input.RegisterHotKey("AltPressForNetwork", Lang.Get("AltPressForNetworkName"), GlKeys.LAlt);
+            _capi.Input.RegisterHotKey("AltPressForNetwork", Lang.Get("electricalprogressivecore:AltPressForNetworkName"), GlKeys.LAlt);
         }
 
         /// <summary>

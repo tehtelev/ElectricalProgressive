@@ -5,10 +5,22 @@
   "block-estove-*": "Electric Stove",
   "block-estove-burned-south": "Electric Stove (Burned)",
 
-
-
   "block-eoven-*": "Electric Oven",
   "block-eoven-burned-north": "Electric Oven (Burned)",
+
+  "block-nasteniy_fonar-*": "Street Wall Lamp",
+  "block-nasteniy_fonar-burned": "Street Wall Lamp (Burned)",
+
+  "block-stolb_fonar-*": "Street Ground Lamp",
+  "block-stolb_fonar-2-i-burned": "Street Ground Lamp (Burned)",
+  "block-stolb_fonar-3-i-burned": "Street Ground Lamp (Burned)",
+  "block-stolb_fonar-3-r-burned": "Street Ground Lamp (Burned)",
+  "block-stolb_fonar-3-t-burned": "Street Ground Lamp (Burned)",
+  "block-stolb_fonar-3-x-burned": "Street Ground Lamp (Burned)",
+  "block-stolb_fonar-4-i-burned": "Street Ground Lamp (Burned)",
+  "block-stolb_fonar-4-r-burned": "Street Ground Lamp (Burned)",
+  "block-stolb_fonar-4-t-burned": "Street Ground Lamp (Burned)",
+  "block-stolb_fonar-4-x-burned": "Street Ground Lamp (Burned)",
 
   "block-ehorn-*": "Electric Forge",
   "block-ehorn-burned-south": "Electric Forge (Burned)",
@@ -18,28 +30,13 @@
 
   "block-eheatcannon-*": "Heat Cannon",
 
-  "block-nasteniy_fonar-*": "Street wall lamp",
-  "block-nasteniy_fonar-burned": "Street wall lamp (Burned)",
-
-  "block-stolb_fonar-*": "Street ground lamp",
-  "block-stolb_fonar-2-i-burned": "Street ground lamp (Burned)",
-  "block-stolb_fonar-3-i-burned": "Street ground lamp (Burned)",
-  "block-stolb_fonar-3-r-burned": "Street ground lamp (Burned)",
-  "block-stolb_fonar-3-t-burned": "Street ground lamp (Burned)",
-  "block-stolb_fonar-3-x-burned": "Street ground lamp (Burned)",
-  "block-stolb_fonar-4-i-burned": "Street ground lamp (Burned)",
-  "block-stolb_fonar-4-r-burned": "Street ground lamp (Burned)",
-  "block-stolb_fonar-4-t-burned": "Street ground lamp (Burned)",
-  "block-stolb_fonar-4-x-burned": "Street ground lamp (Burned)",
-
-
   "block-elamp-3000-*": "Electric Lamp: Orange-Warm (3000K)",
   "block-elamp-4000-*": "Electric Lamp: Yellow-Warm (4000K)",
   "block-elamp-5000-*": "Electric Lamp: Warm White (5000K)",
   "block-elamp-6000-*": "Electric Lamp: Neutral White (6000K)",
-  "block-elamp-7000-*": "Electric Lamp: Cool White (7000K)",
-  "block-elamp-8000-*": "Electric Lamp: Cold White (8000K)",
-  "block-elamp-9000-*": "Electric Lamp: Blue-Cold (9000K)",
+  "block-elamp-7000-*": "Electric Lamp: Bluish White (7000K)",
+  "block-elamp-8000-*": "Electric Lamp: Cool White (8000K)",
+  "block-elamp-9000-*": "Electric Lamp: Blue-Cool (9000K)",
 
   "block-elamp-3000-burned": "Electric Lamp (Burned)",
   "block-elamp-4000-burned": "Electric Lamp (Burned)",
@@ -49,99 +46,90 @@
   "block-elamp-8000-burned": "Electric Lamp (Burned)",
   "block-elamp-9000-burned": "Electric Lamp (Burned)",
 
-  "block-elamp_small-3000-*": "Small Electric Lamp: Orange-Warm (3000K)",
-  "block-elamp_small-4000-*": "Small Electric Lamp: Yellow-Warm (4000K)",
-  "block-elamp_small-5000-*": "Small Electric Lamp: Warm White (5000K)",
-  "block-elamp_small-6000-*": "Small Electric Lamp: Neutral White (6000K)",
-  "block-elamp_small-7000-*": "Small Electric Lamp: Cool White (7000K)",
-  "block-elamp_small-8000-*": "Small Electric Lamp: Cold White (8000K)",
-  "block-elamp_small-9000-*": "Small Electric Lamp: Blue-Cold (9000K)",
+  "block-elamp_small-3000-*": "Elec. Lamp (Small): Orange-Warm (3000K)",
+  "block-elamp_small-4000-*": "Elec. Lamp (Small): Yellow-Warm (4000K)",
+  "block-elamp_small-5000-*": "Elec. Lamp (Small): Warm White (5000K)",
+  "block-elamp_small-6000-*": "Elec. Lamp (Small): Neutral White (6000K)",
+  "block-elamp_small-7000-*": "Elec. Lamp (Small): Bluish White (7000K)",
+  "block-elamp_small-8000-*": "Elec. Lamp (Small): Cool White (8000K)",
+  "block-elamp_small-9000-*": "Elec. Lamp (Small): Blue-Cool (9000K)",
 
-  "block-elamp_small-3000-burned": "Small Electric Lamp (Burned)",
-  "block-elamp_small-4000-burned": "Small Electric Lamp (Burned)",
-  "block-elamp_small-5000-burned": "Small Electric Lamp (Burned)",
-  "block-elamp_small-6000-burned": "Small Electric Lamp (Burned)",
-  "block-elamp_small-7000-burned": "Small Electric Lamp (Burned)",
-  "block-elamp_small-8000-burned": "Small Electric Lamp (Burned)",
-  "block-elamp_small-9000-burned": "Small Electric Lamp (Burned)",
-
+  "block-elamp_small-3000-burned": "Elec. Lamp (Small, Burned)",
+  "block-elamp_small-4000-burned": "Elec. Lamp (Small, Burned)",
+  "block-elamp_small-5000-burned": "Elec. Lamp (Small, Burned)",
+  "block-elamp_small-6000-burned": "Elec. Lamp (Small, Burned)",
+  "block-elamp_small-7000-burned": "Elec. Lamp (Small, Burned)",
+  "block-elamp_small-8000-burned": "Elec. Lamp (Small, Burned)",
+  "block-elamp_small-9000-burned": "Elec. Lamp (Small, Burned)",
 
   "block-handbooktitle-eoven": "Usage",
-  "block-handbooktext-eoven": "The electric oven completely replaces the furnace. It turns off automatically when the baking process is finished. No more burning!<br>Supports automatic loading and unloading via chutes.",
-
+  "block-handbooktext-eoven": "The Electric Oven can completely replace the standard furnace. Automatically turns off when the baking process is complete. No more burning!<br>Supports automatic loading and unloading using hoppers.",
 
   "block-handbooktitle-heater": "Usage",
-  "block-handbooktext-heater": "A small heat source that can provide an additional temperature bonus to beds, fruit trees, regular trees (seeds and saplings), berry bushes, and hives in a greenhouse. One such heater at full power provides +5 degrees for 100 blocks of the greenhouse's internal volume. This volume also includes the beds themselves. The effects of heaters can be cumulative: you can view the total bonus on any of them. Bonus information is updated as soon as one of the plants recalculates. <br>Growing fruit trees won't become easier: you'll still have to follow all their growth cycles, so you'll need to use heaters to regulate the resulting temperature according to the tree's current stage. Cuttings must overwinter for several days at low temperatures, and then by gradually increasing the temperature, wait for them to take root (or not). After that, you can further increase the internal temperature to comfortable values for that particular tree, and it will begin to flower, bear fruit, etc. Each tree has its own temperature ranges, so be careful not to harm it. Once it has finished bearing fruit, you can forcibly put the tree back into dormancy. The cycle then repeats as many times as needed.",
+  "block-handbooktext-heater": "A small heat source that can provide a temperature bonus to planting beds, fruit trees, regular trees (seeds and saplings), berry bushes, and beehives inside a greenhouse. At full power, one such heater provides +5°C per 100 blocks of the greenhouse's interior volume. This volume includes the planting beds themselves. The effect of heaters can be cumulative: the total bonus can be viewed on any heater. The bonus information updates as soon as one of the plants recalculates.<br>Growing fruit trees won't become easier: you still need to follow all their growth cycles, so you'll need to use heaters to adjust the resulting temperature according to the tree's current stage. Cuttings need to overwinter for several days at low temperatures, then gradually increase the temperature until they take root (or not). After that, you can further increase the internal temperature to comfortable values for that tree, and it will begin to bloom, fruit, etc. Each tree has its own temperature ranges, so be careful not to harm it. Once it has fruited, you can force the tree back into dormancy. The cycle can then be repeated as needed.",
+
   "block-handbooktitle-eheatcannon": "Usage",
-  "block-handbooktext-eheatcannon": "A powerful heat source that can provide an additional temperature bonus to beds, fruit trees, regular trees (seeds and saplings), berry bushes, and hives in a greenhouse. One such heater at full power provides +50 degrees for 100 blocks of the greenhouse's internal volume. This volume also includes the beds themselves. The effects of heaters can be cumulative: you can view the total bonus on any of them. Bonus information is updated as soon as one of the plants recalculates. <br>Growing fruit trees won't become easier: you'll still have to follow all their growth cycles, so you'll need to use heaters to regulate the resulting temperature according to the tree's current stage. Cuttings must overwinter for several days at low temperatures, and then by gradually increasing the temperature, wait for them to take root (or not). After that, you can further increase the internal temperature to comfortable values for that particular tree, and it will begin to flower, bear fruit, etc. Each tree has its own temperature ranges, so be careful not to harm it. Once it has finished bearing fruit, you can forcibly put the tree back into dormancy. The cycle then repeats as many times as needed.",
+  "block-handbooktext-eheatcannon": "A powerful heat source that can provide a temperature bonus to planting beds, fruit trees, regular trees (seeds and saplings), berry bushes, and beehives inside a greenhouse. At full power, one such heater provides +50°C per 100 blocks of the greenhouse's interior volume. This volume includes the planting beds themselves. The effect of heaters can be cumulative: the total bonus can be viewed on any heater. The bonus information updates as soon as one of the plants recalculates.<br>Growing fruit trees won't become easier: you still need to follow all their growth cycles, so you'll need to use heaters to adjust the resulting temperature according to the tree's current stage. Cuttings need to overwinter for several days at low temperatures, then gradually increase the temperature until they take root (or not). After that, you can further increase the internal temperature to comfortable values for that tree, and it will begin to bloom, fruit, etc. Each tree has its own temperature ranges, so be careful not to harm it. Once it has fruited, you can force the tree back into dormancy. The cycle can then be repeated as needed.",
 
-  "electricalprogressiveqol:heater-no-bonus": "No temperature bonus provided",
-  "electricalprogressiveqol:heater-bonus": "Bonus from heaters: +{0} °C",
-
+  "heater-no-bonus": "No temperature bonus provided",
+  "heater-bonus": "Heater bonus: +{0} °C",
 
   "block-handbooktitle-elamp": "Usage",
-  "block-handbooktext-elamp": "A reliable light source that consumes electricity.",
+  "block-handbooktext-elamp": "A good light source that consumes electrical energy.",
 
   "block-handbooktitle-elamp_small": "Usage",
-  "block-handbooktext-elamp_small": "A compact light source that consumes electricity.",
-
-
+  "block-handbooktext-elamp_small": "A light source that consumes electrical energy.",
 
   "block-handbooktitle-nasteniy_fonar": "Usage",
-  "block-handbooktext-nasteniy_fonar": "A wall-mounted electric lamp variant.",
+  "block-handbooktext-nasteniy_fonar": "A variant of an electric lamp with wall mounting.",
 
   "block-handbooktitle-stolb_fonar": "Usage",
-  "block-handbooktext-stolb_fonar": "An electric lamp variant for street lighting.",
-
-
+  "block-handbooktext-stolb_fonar": "A variant of an electric lamp for street lighting.",
 
   "block-handbooktitle-ehorn": "Usage",
-  "block-handbooktext-ehorn": "The electric forge fully replaces the traditional forge.<br><br>Maximum heating temperature: 1100 °C.",
+  "block-handbooktext-ehorn": "The Electric Forge can completely replace the standard blacksmith's forge.<br><br>Maximum heating temperature: 1100 °C.<br>Supports automatic loading and unloading using hoppers.",
 
   "block-handbooktitle-charger": "Usage",
-  "block-handbooktext-charger": "The charging station allows recharging batteries and devices with built-in batteries.<br>Supports automatic loading and unloading via chutes.",
+  "block-handbooktext-charger": "The Charging Station allows you to charge accumulators and devices with built-in batteries.<br>Supports automatic loading and unloading using hoppers.",
 
   "block-handbooktitle-estove": "Usage",
-  "block-handbooktext-estove": "The electric stove completely replaces a conventional campfire.<br>Supports automatic loading and unloading via chutes.<br><br>Maximum heating temperature of the stove: 1350 °C.",
+  "block-handbooktext-estove": "The Electric Stove can completely replace the standard campfire.<br>Supports automatic loading and unloading using hoppers.<br><br>Maximum stove heating temperature: 1350 °C.",
 
+  "BlockEStove": "Electric Stove",
+  "freezer-title-gui": "Freezer",
 
+  "freezer-over-help": "Open the door and place food inside to preserve it.",
 
+  "max-light": "Maximum Light",
+  "height": "Height",
 
+  "block-efridge-*": "Electric Refrigerator",
+  "block-handbooktitle-efridge": "Usage",
+  "block-handbooktext-efridge": "The Electric Refrigerator allows food to be stored longer.<br><br>Storage slots: 6.<br>Food spoilage rate: 0.1x.<br>Can retain cold inside for up to 6 in-game hours after losing power.",
 
-  "game:BlockEStove": "Electric Stove",
-  "game:freezer-title-gui": "Freezer",
-  "game:freezer-over-sneak-help": "Open/close door.",
-  "game:freezer-over-help": "Open the door and place food to preserve it.",
+  "block-efreezer-*": "Electric Freezer",
+  "block-handbooktitle-efreezer": "Usage",
+  "block-handbooktext-efreezer": "The Electric Freezer allows food to be stored for a very long time. Can also store one animal carcass from the Butchering mod.<br><br>Storage slots: 6.<br>Food spoilage rate: 0.025x.<br>Can retain cold inside for up to 6 in-game hours after losing power.",
 
-  "game:Put-into-1-items": "Need at least 1 item for baking.",
-
-
-  "game:max-light": "Max light",
-  "game:height": "Height",
-
-
-  "block-efreezer2-*": "Electric Refrigerator",
-  "block-efreezer2-burned-north": "Electric Refrigerator (Burned)",
-  "block-handbooktitle-efreezer2": "In Use",
-  "block-handbooktext-efreezer2": "The electric refrigerator allows food to be stored longer.<br><br>Storage slots: 6.<br>Food spoilage rate: 0.05x.<br>Can keep contents cold for up to 6 in-game hours after a power outage.",
   "cold_reserve": "Cold reserve: {0} hours",
 
   "block-efence-*": "Electric Fence",
   "block-handbooktitle-efence": "Usage",
-  "block-handbooktext-efence": "A good defense against unwanted guests. Deals electric damage on contact. Doesn't consume energy, but must be connected to an electrical circuit to function.",
+  "block-handbooktext-efence": "Good protection against unwanted guests. Inflicts electrical damage on contact. Does not consume energy but requires connection to an electrical circuit to operate.",
+
+  "progress": "Progress: {0:P0}",
+
+  "update_heater_info": "Update heater info",
 
   "block-ehotspringsgenerator-*": "Hot Springs Generator",
   "block-ehotspringsgenerator-burned-south": "Hot Springs Generator (Burned)",
   "block-handbooktitle-ehotspringsgenerator": "Usage",
-  "block-handbooktext-ehotspringsgenerator": "A generator that harnesses hot springs to produce electricity. The generator must be surrounded by hot springs on all sides. Efficiency can be improved by placing <a href=\"handbook:\/\/block-electricalprogressiveqol:eheatexchanger\">heat exchangers</a> adjacent to the generator. Multiple Hot Springs Generators nearby will significantly reduce efficiency.",
-  "hotsprings-nearby-penalty": "Multiple Generators nearby, efficiency reduced",
-  "hotsprings-not-surrounded": "Must be surrounded by Hot Springs",
+  "block-handbooktext-ehotspringsgenerator": "A generator that uses the energy of hot springs to produce electricity. Must be surrounded by hot springs on all sides. Efficiency can be increased by placing <a href=\"handbook://block-electricalprogressiveqol:eheatexchanger\">Heat Exchangers</a> near the generator. Having multiple generators nearby significantly reduces efficiency.",
+  "hotsprings-nearby-penalty": "Multiple generators nearby, efficiency reduced",
+  "hotsprings-not-surrounded": "Must be surrounded by hot springs",
 
   "block-eheatexchanger": "Heat Exchanger",
   "block-handbooktitle-eheatexchanger": "Usage",
-  "block-handbooktext-eheatexchanger": "A heat exchanger that must be placed adjacent to a Hot Springs Generator (including diagonally). Each heat exchanger improves the generator's efficiency, scaling from 5% with none to 100% with 7 heat exchangers.",
-  "heatexchanger-placement-hint": "Must be placed next to a Hot Spring Generator",
-
-  "progress": "Progress: {0:P0}"
-
+  "block-handbooktext-eheatexchanger": "A Heat Exchanger that must be placed adjacent to a Hot Springs Generator (including diagonal cells). Each heat exchanger increases the generator's efficiency, from 5% with none to 100% with 7 heat exchangers.",
+  "heatexchanger-placement-hint": "Must be placed adjacent to a Hot Springs Generator"
 }

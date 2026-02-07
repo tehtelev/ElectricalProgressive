@@ -63,7 +63,7 @@ class EArmor : ItemWearable
 
         var energy = inSlot.Itemstack.Attributes.GetInt("durability") * consume; //текущая энергия
         var maxEnergy = inSlot.Itemstack.Collectible.GetMaxDurability(inSlot.Itemstack) * consume;       //максимальная энергия
-        dsc.AppendLine(energy + "/" + maxEnergy + " " + Lang.Get("J"));
+        dsc.AppendLine(energy + "/" + maxEnergy + " " + Lang.Get("electricalprogressivebasics:J"));
     }
 
    

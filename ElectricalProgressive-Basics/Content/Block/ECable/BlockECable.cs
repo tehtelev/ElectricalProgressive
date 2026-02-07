@@ -1056,7 +1056,7 @@ namespace ElectricalProgressive.Content.Block.ECable
             dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + text.Substring(0, text.Length - 1) + " " + Lang.Get("electricalprogressivebasics:V"));
             dsc.AppendLine(Lang.Get("electricalprogressivebasics:MaxCurrent") + ": " + MyMiniLib.GetAttributeFloat(inSlot.Itemstack.Block, "maxCurrent", 0) + " " + Lang.Get("electricalprogressivebasics:A"));
             dsc.AppendLine(Lang.Get("electricalprogressivebasics:Resistivity") + ": " + MyMiniLib.GetAttributeFloat(inSlot.Itemstack.Block, "res", 0) + " " + Lang.Get("electricalprogressivebasics:Units"));
-            dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + (inSlot.Itemstack.Block.Code.Path.Contains("isolated") ? Lang.Get("Yes") : Lang.Get("electricalprogressivebasics:No")));
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + (inSlot.Itemstack.Block.Code.Path.Contains("isolated") ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
         }
 
 

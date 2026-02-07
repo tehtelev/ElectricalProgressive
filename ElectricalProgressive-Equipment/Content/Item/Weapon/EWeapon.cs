@@ -19,7 +19,7 @@ public class EWeapon : Vintagestory.API.Common.Item
     private double lastUpdateTime = 0;
     private const double interval = 5000; //интервал обновления меча
 
-
+    private WorldInteraction[] _interactions = Array.Empty<WorldInteraction>();
 
     public override void OnLoaded(ICoreAPI api)
     {
@@ -40,6 +40,18 @@ public class EWeapon : Vintagestory.API.Common.Item
         consume = MyMiniLib.GetAttributeInt(this, "consume", 20);
         fireCost = MyMiniLib.GetAttributeInt(this, "fireCost", 0);
 
+
+
+        _interactions = ObjectCacheUtil.GetOrCreate(api, "EWeaponInteractions", () =>
+        {
+            return new WorldInteraction[] {
+                new()
+                {
+                    ActionLangCode = "electricalprogressiveequipment:saber_right",
+                    MouseButton = EnumMouseButton.Right,
+                }
+            };
+        });
     }
 
 
@@ -379,7 +391,7 @@ public class EWeapon : Vintagestory.API.Common.Item
 
         var energy = inSlot.Itemstack.Attributes.GetInt("durability") * consume; //текущая энергия
         var maxEnergy = inSlot.Itemstack.Collectible.GetMaxDurability(inSlot.Itemstack) * consume;       //максимальная энергия
-        dsc.AppendLine(energy + "/" + maxEnergy + " " + Lang.Get("J"));
+        dsc.AppendLine(energy + "/" + maxEnergy + " " + Lang.Get("electricalprogressivebasics:J"));
     }
 
 
@@ -391,12 +403,6 @@ public class EWeapon : Vintagestory.API.Common.Item
     /// <returns></returns>
     public override WorldInteraction[] GetHeldInteractionHelp(ItemSlot inSlot)
     {
-        return new WorldInteraction[] {
-                new()
-                {
-                    ActionLangCode = "saber_right",
-                    MouseButton = EnumMouseButton.Right,
-                }
-            }.Append(base.GetHeldInteractionHelp(inSlot));
+        return _interactions;
     }
 }

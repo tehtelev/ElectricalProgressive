@@ -20,7 +20,6 @@
   "block-transformator-*": "Transformer",
   "block-transformator-burned-south": "Transformer (Burned)",
 
-
   "block-accumulator-tier1-*": "Accumulator (32V)",
   "block-accumulator-tier1-burned": "Accumulator (32V) (Burned)",
 
@@ -34,7 +33,7 @@
   "block-ecable-32v-gold-*-part": "Gold Cable (32V)",
   "block-ecable-32v-steel-*-part": "Steel Cable (32V)",
   "block-ecable-32v-iron-*-part": "Iron Cable (32V)",
-  "block-ecable-32v-tinbronze-*-part": "Tin Bronze Cable (32V)",
+  "block-ecable-32v-tinbronze-*-part": "Bronze Cable (32V)",
   "block-ecable-32v-brass-*-part": "Brass Cable (32V)",
   "block-ecable-32v-electrum-*-part": "Electrum Cable (32V)",
 
@@ -45,7 +44,7 @@
   "block-ecable-128v-gold-*-part": "Gold Cable (128V)",
   "block-ecable-128v-steel-*-part": "Steel Cable (128V)",
   "block-ecable-128v-iron-*-part": "Iron Cable (128V)",
-  "block-ecable-128v-tinbronze-*-part": "Tin Bronze Cable (128V)",
+  "block-ecable-128v-tinbronze-*-part": "Bronze Cable (128V)",
   "block-ecable-128v-brass-*-part": "Brass Cable (128V)",
   "block-ecable-128v-electrum-*-part": "Electrum Cable (128V)",
 
@@ -56,7 +55,7 @@
   "block-ecable-32v-gold-*-isolated": "Insulated Gold Cable (32V)",
   "block-ecable-32v-steel-*-isolated": "Insulated Steel Cable (32V)",
   "block-ecable-32v-iron-*-isolated": "Insulated Iron Cable (32V)",
-  "block-ecable-32v-tinbronze-*-isolated": "Insulated Tin Bronze Cable (32V)",
+  "block-ecable-32v-tinbronze-*-isolated": "Insulated Bronze Cable (32V)",
   "block-ecable-32v-brass-*-isolated": "Insulated Brass Cable (32V)",
   "block-ecable-32v-electrum-*-isolated": "Insulated Electrum Cable (32V)",
 
@@ -67,7 +66,7 @@
   "block-ecable-128v-gold-*-isolated": "Insulated Gold Cable (128V)",
   "block-ecable-128v-steel-*-isolated": "Insulated Steel Cable (128V)",
   "block-ecable-128v-iron-*-isolated": "Insulated Iron Cable (128V)",
-  "block-ecable-128v-tinbronze-*-isolated": "Insulated Tin Bronze Cable (128V)",
+  "block-ecable-128v-tinbronze-*-isolated": "Insulated Bronze Cable (128V)",
   "block-ecable-128v-brass-*-isolated": "Insulated Brass Cable (128V)",
   "block-ecable-128v-electrum-*-isolated": "Insulated Electrum Cable (128V)",
 
@@ -78,7 +77,7 @@
   "block-ecable-32v-gold-*-burned": "Burned Gold Cable (32V)",
   "block-ecable-32v-steel-*-burned": "Burned Steel Cable (32V)",
   "block-ecable-32v-iron-*-burned": "Burned Iron Cable (32V)",
-  "block-ecable-32v-tinbronze-*-burned": "Burned Tin Bronze Cable (32V)",
+  "block-ecable-32v-tinbronze-*-burned": "Burned Bronze Cable (32V)",
   "block-ecable-32v-brass-*-burned": "Burned Brass Cable (32V)",
   "block-ecable-32v-electrum-*-burned": "Burned Electrum Cable (32V)",
 
@@ -89,125 +88,109 @@
   "block-ecable-128v-gold-*-burned": "Burned Gold Cable (128V)",
   "block-ecable-128v-steel-*-burned": "Burned Steel Cable (128V)",
   "block-ecable-128v-iron-*-burned": "Burned Iron Cable (128V)",
-  "block-ecable-128v-tinbronze-*-burned": "Burned Tin Bronze Cable (128V)",
+  "block-ecable-128v-tinbronze-*-burned": "Burned Bronze Cable (128V)",
   "block-ecable-128v-brass-*-burned": "Burned Brass Cable (128V)",
   "block-ecable-128v-electrum-*-burned": "Burned Electrum Cable (128V)",
 
-
   "block-switch-*": "Manual Switch",
 
-  "block-blockwire": "Pass-Through Connector",
-
+  "block-blockwire": "Through-Wall Connector (Standard)",
 
   "item-coil": "Copper Coil",
 
   "item-engineshaft": "Rotor",
 
-
-  "game:tabname-electricity": "Electricity",
-
   "block-handbooktitle-accumulator-tier1": "Usage",
-  "block-handbooktext-accumulator-tier1": "Allows storing electrical energy.<br>A charged accumulator can be carried with you when needed.",
+  "block-handbooktext-accumulator-tier1": "Allows you to store electrical energy.<br>A charged accumulator can be carried with you when needed.",
 
   "block-handbooktitle-blockwire": "Usage",
   "block-handbooktext-blockwire": "Allows energy transfer through walls without breaking room integrity.",
 
-
   "block-handbooktitle-accumulator-tier2": "Usage",
-  "block-handbooktext-accumulator-tier2": "Allows storing electrical energy. A more capacious version of the standard <a href=\"handbooksearch:\/\/accumulator\">accumulator</a>.<br>A charged accumulator can be carried with you when needed, but only in the bag slot.",
-
+  "block-handbooktext-accumulator-tier2": "Allows you to store electrical energy. A higher capacity version of the standard <a href=\"handbooksearch://аккумулятор\">accumulator</a>.<br>A charged accumulator can be carried with you when needed, but only in the bag slot.",
 
   "block-handbooktitle-ecable": "Usage",
-  "block-handbooktext-ecable": "Allows transferring electrical energy over distance. Insulated cable variants halve energy loss!<br>For details on how it works, see the <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-princip\">guide</a>.",
+  "block-handbooktext-ecable": "Allows transmission of electrical energy over distance. Insulated cable variants halve losses!<br>For operational details, see the <a href=\"handbook://gamemechanicinfo-electricalprogressive-princip\">handbook</a>.",
 
   "block-handbooktitle-switch": "Usage",
   "block-handbooktext-switch": "Allows breaking an electrical circuit. Installed on a cable. Click on it to toggle.",
 
   "block-handbooktitle-transformator": "Usage",
-  "block-handbooktext-transformator": "Used to convert electrical energy from one voltage to another: can step up or step down voltage. It is recommended to connect cables/devices only to any two sides of the transformer!<br>Transformation ratio: 1:4.",
-
+  "block-handbooktext-transformator": "Used to transform electrical energy from one voltage to another: can step up or step down voltage. It is recommended to connect cables/devices only to any two sides of the transformer!<br>Transformation ratio: 1:4.",
 
   "game:gamemechanicinfo-electricalprogressive-title": "Electricity: ElectricalProgressive Mod",
-  "game:gamemechanicinfo-electricalprogressive-text": "<strong>Electricity: ElectricalProgressive Mod</strong><br>The mod adds electrical energy, electrical appliances, devices, weapons, and armor to the game. All of this helps to ease (or not) survival in the game world, reduce routine tasks, and diversify the gameplay.<br><br><strong>Basics</strong><br>The law of conservation of energy states that energy does not appear from nowhere and does not disappear. Energy only transforms from one form to another or transfers from one body to another. The same applies in the game.<br><br>The main source of mechanical energy is windmills. Generators can convert mechanical energy into electrical energy. To do this, use a shaft and/or gear to transmit torque from the windmill to the generator shaft. Electricity generation will then begin.<br><br>Electrical energy can be transmitted via cables to consumers. Simply place cables block by block in the desired direction. Up to 4 cables can be placed on each block face, pointing in different directions. This allows routing cables in any direction and branching the electrical circuit. The cable must be connected to the iron plate of an electrical device for it to start working. Electrical devices, metal blocks, and pass-through connectors can also conduct current.<br><br>Since the wind doesn't always blow at full strength, generator output may be insufficient to power all electrical devices. To avoid this, connect your electrical circuit to an accumulator (or several). They will continuously store electrical energy and supply it to the circuit to power devices at any time, even when there is no wind.<br><br>To save energy, some devices need to be disconnected from the circuit when not in use. For this, a manual switch is used. Install it on a section of the circuit where you need to quickly toggle power.<br><br>For some devices that still require mechanical energy to operate, a motor is needed. It converts electrical energy into mechanical energy. Connect it to the device via a shaft. When turned on, the motor will strive to deliver maximum power to the shaft, so ensure the circuit has sufficient energy.",
+  "game:gamemechanicinfo-electricalprogressive-text": "<strong>Electricity: ElectricalProgressive Mod</strong><br>The mod adds electrical energy, electrical appliances, devices, weapons, and armor to the game. All of this helps to simplify (or not) survival in the game world, reduce routine, and diversify the gameplay.<br><br><strong>Basics</strong><br>The law of conservation of energy states that energy cannot be created or destroyed. Energy only transforms from one form to another or transfers from one body to another. The same applies in-game.<br><br>The primary source of mechanical energy is windmills. Using generators, mechanical energy can be converted into electrical energy. To do this, transmit torque from the mill to the generator shaft using a shaft and/or gear. After that, the generator will start producing electricity.<br><br>Electrical energy can be transmitted via cables to consumers. Simply place cables block by block in the desired direction. Up to 4 cables can be placed on each block face, pointing in different directions. This allows cables to be routed in any direction and electrical circuits to be branched. Cables must be connected to the iron plate of an electrical device for it to operate. Electrical devices, metal blocks, and through-wall connectors can also conduct current.<br><br>Since the wind does not always blow at full strength, generator output may be insufficient to power all electrical devices. To prevent this, connect your electrical circuit to an accumulator (or multiple). They will continuously store electrical energy and release it into the circuit to power devices at any time, even when there is no wind.<br><br>To save energy, some devices must be disconnected from the circuit when not in use. For this purpose, use a manual switch. Install it on a section of the circuit where quick power disconnection is needed.<br><br>For some devices that still require mechanical energy to operate, a motor will be needed. It converts electrical energy into mechanical energy. Connect it to the device with a shaft. When turned on, the motor will strive to deliver maximum power to the shaft, so ensure the circuit has sufficient energy.",
 
   "game:gamemechanicinfo-electricalprogressive-rotors-title": "Electricity: Motors and Generators",
-  "game:gamemechanicinfo-electricalprogressive-rotors-text": "<strong>Electricity: Motors and Generators</strong><br>Motors and generators in the mod allow converting electrical energy into mechanical energy and vice versa. To do this, cables must be connected to them, and they must be coupled via a shaft.<br><br><strong>Game Mechanics Specifics</strong><br>Motors and generators closely model the behavior of real-life devices. As an example, DC machines were taken. Therefore, to better understand how to use them and in what situations, one needs to understand the laws they operate by.<br>All rotating mechanisms in the game, including shafts and gears, have two basic parameters: torque and resistance. Torque characterizes the force with which a mechanism rotates a shaft, while resistance represents friction forces and losses that may occur during operation. The torque of shafts and gears is zero. The game engine sums all torques and calculates the shaft speed and its acceleration/deceleration. If torque is greater than resistance, the shaft speed increases. If the opposite is true, it decreases. Both parameters change according to specific laws. Usually, resistance increases with speed.<br><br><strong>Generators</strong><br>In the mod, generators have the following additional parameters:<br><i>I_max</i> – maximum energy output;<br><i>speed_max</i> – maximum rated rotation speed;<br><i>resistance_factor</i> – multiplier for resistance torque;<br><i>resistance_load</i> – constant component of resistance torque (achieved at I_max).<br><br>Generator energy output depends only on shaft speed and is calculated proportionally to shaft speed. When exceeding <i>speed_max</i>, output equals <i>power = I_max</i>.<br>Resistance torque first increases linearly, and after exceeding <i>speed_max</i>, it increases quadratically. Resistance torque is also directly proportional to the electrical load on this generator. Therefore, with no consumption, the generator will create minimal resistance torque.<br><br><strong>Motors</strong><br>In the mod, motors have the following additional parameters:<br><i>I_min</i> – minimum energy required for the motor to start working;<br><i>I_max</i> – maximum energy consumption;<br><i>torque_max</i> – maximum torque;<br><i>kpd_max</i> – Efficiency;<br><i>speed_max</i> – maximum rated rotation speed;<br><i>resistance_factor</i> – multiplier for resistance torque.<br><br>A motor delivers torque directly proportional to the energy available to it. The motor also accounts for its own efficiency.<br><br>Motor resistance torque is calculated similarly to a generator, only <i>resistance_load</i> is zero.",
+  "game:gamemechanicinfo-electricalprogressive-rotors-text": "<strong>Electricity: Motors and Generators</strong><br>Motors and generators in the mod allow conversion of electrical energy into mechanical energy and vice versa. To do this, connect cables and attach a shaft to them.<br><br><strong>Game Mechanics Features</strong><br>Motors and generators closely mimic the behavior of real-life devices. As an example, DC machines were used. Therefore, to better understand how to use them and in what situations, it is necessary to understand the principles they operate on.<br>All rotating mechanisms in the game, including shafts and gears, have two basic parameters: torque and resistance. Torque characterizes the force with which a mechanism rotates a shaft, and resistance characterizes friction forces and losses that may occur during operation. The torque of shafts and gears is zero. The game engine sums all torques and calculates shaft speed and its acceleration/deceleration. If the torque is greater than the resistance, the shaft speed will increase. If the opposite is true, it will decrease. In this process, both parameters change according to specific laws. Usually, resistance increases with speed.<br><br><strong>Generators</strong><br>In the mod, generators have the following additional parameters:<br><i>I_max</i> – maximum energy output value;<br><i>speed_max</i> – maximum rated rotation speed;<br><i>resistance_factor</i> – multiplier for resistance torque;<br><i>resistance_load</i> – constant component of resistance torque (achieved at I_max).<br><br>Generator energy output depends only on shaft speed and is calculated proportionally to shaft speed. When <i>speed_max</i> is exceeded, output equals <i>power = I_max</i>.<br>Resistance torque initially increases linearly, and after exceeding <i>speed_max</i>, it increases quadratically. Also, resistance torque is directly proportional to the electrical circuit load on this generator. Therefore, with no consumption, the generator will create minimal resistance torque.<br><br><strong>Motors</strong><br>In the mod, motors have the following additional parameters:<br><i>I_min</i> – minimum energy value required for the motor to start operating;<br><i>I_max</i> – maximum energy consumption value;<br><i>torque_max</i> – maximum torque;<br><i>kpd_max</i> – efficiency;<br><i>speed_max</i> – maximum rated rotation speed;<br><i>resistance_factor</i> – multiplier for resistance torque.<br><br>A motor delivers torque directly proportional to the energy available to it. The motor also accounts for its own efficiency.<br><br>The motor's resistance torque is calculated similarly to the generator, only <i>resistance_load</i> is zero.",
 
   "game:gamemechanicinfo-electricalprogressive-princip-title": "Electricity: Current Behavior, Voltage",
-  "game:gamemechanicinfo-electricalprogressive-princip-text": "<strong>Electricity: Current Behavior, Voltage</strong><br>Electric current now flows through conductors obeying the laws of physics. Some may need to reopen their physics textbooks!<br><br><strong>New Behavior Specifics</strong><br>Electric current moves in conductors as energy packets, except in instant mode. Energy packets move along the shortest path from power sources to consumers. Also, cables and devices now have their own electrical conductor parameters: resistivity (depends on material), cross-sectional area, maximum current (exceeding risks burning), maximum voltage. Current value is calculated using Ohm's law for a circuit segment, for all energy packets passing through that face/block at the moment. The direction of energy movement is also considered: if energy moves in opposite directions, their corresponding currents are algebraically subtracted (a consequence of Kirchhoff's first law). To prevent cables from burning out, they can be thickened. To do this, hold a cable of the same type as the one already placed and click on it while holding the Shift key. This increases the current capacity of the circuit. But note, conductor loss is calculated using Joule-Lenz law. Increasing the passing current significantly increases energy loss. For long-distance energy transmission, voltage can be increased, or accumulators can be used as buffer storage.<br><br><strong>Voltages</strong><br>Now different devices require not only different amounts of energy but also different voltages. Exceeding voltage for a device/cable risks burning it. Voltage can be stepped up or down using a transformer - it works both ways. Therefore, be careful when connecting wires of different voltages! Higher voltage allows pumping more energy through wires.<br><br><strong>Interaction with the Environment</strong><br>Now uninsulated cables and metal blocks will damage all entities upon contact. The higher the voltage in the circuit, the more damage they will receive. Burned appliances and cables will also cause damage. Insulated cables and all working appliances are safe to touch.<br>All cables and devices have a moisture resistance parameter. If there is no moisture resistance, your device/cable risks burning when in contact with rain, snow, hail, or spilled water nearby! Contact with lava will cause them to burn, break, and most likely be destroyed. Be careful.",
-
+  "game:gamemechanicinfo-electricalprogressive-princip-text": "<strong>Electricity: Current Behavior, Voltage</strong><br>Electric current now flows through conductors obeying the laws of physics. Some may need to reopen their physics textbooks!<br><br><strong>New Behavior Features</strong><br>Electric current moves through conductors as packets of energy, except in instant mode. Energy packets travel along the shortest path from power sources to consumers. Also, cables and devices now have their own electrical conductor parameters: resistivity (depends on material), cross-sectional area, maximum current (exceeding risks burning), maximum voltage. Current value is calculated using Ohm's law for a circuit section, for all energy packets passing through that face/block at the moment. The direction of energy movement is also considered: if energy moves in opposite directions, their corresponding currents are subtracted algebraically (a consequence of Kirchhoff's first law). To prevent cables from burning out, they can be thickened. To do this, hold a cable of the same type as the one already placed and click on it while holding Shift. This increases the current margin in the circuit. However, note that losses in the conductor are calculated using Joule's law. Increasing the passing current significantly increases energy losses. For long-distance energy transmission, voltage can be increased, or accumulators can be used as buffer storage.<br><br><strong>Voltages</strong><br>Now, different devices require not only different amounts of energy but also different voltages. Exceeding the voltage for a device/cable risks burning it. Voltage can be stepped up or down using a transformer – it works in both directions. Therefore, be careful when connecting wires of different voltages! Higher voltage allows more energy to be transmitted through wires.<br><br><strong>Interaction with the Environment</strong><br>Now, uninsulated cables and metal blocks will damage all entities upon contact. The higher the voltage in the circuit, the more damage they will inflict. Burned devices and cables will also cause damage. Insulated cables and all operating devices are safe to touch.<br>All cables and devices have a moisture resistance parameter. If there is no moisture resistance, your device/cable risks burning upon contact with rain, snow, hail, and spilled water nearby! Upon contact with lava, they burn, break, and are likely destroyed. Be careful.",
 
   "block-handbooktitle-emotor-tier1": "Usage",
-  "block-handbooktext-emotor-tier1": "The motor converts electrical energy into mechanical energy. It has low power and rotation speed.<br> <br>For details on how it works, see the <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-rotors\">guide</a>.",
+  "block-handbooktext-emotor-tier1": "A motor converts electrical energy into mechanical energy. Has low power and rotation speed.<br> <br>For operational details, see the <a href=\"handbook://gamemechanicinfo-electricalprogressive-rotors\">handbook</a>.",
 
   "block-handbooktitle-emotor-tier2": "Usage",
-  "block-handbooktext-emotor-tier2": "The upgraded motor converts electrical energy into mechanical energy. It has increased output power and rotation speed compared to the <a href=\"handbooksearch:\/\/Motor\">motor</a>.<br><br>For details on how it works, see the <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-rotors\">guide</a>.",
+  "block-handbooktext-emotor-tier2": "An upgraded motor converts electrical energy into mechanical energy. Has increased output power and rotation speed compared to the <a href=\"handbooksearch://Двигатель\">Motor</a>.<br><br>For operational details, see the <a href=\"handbook://gamemechanicinfo-electricalprogressive-rotors\">handbook</a>.",
 
   "block-handbooktitle-emotor-tier3": "Usage",
-  "block-handbooktext-emotor-tier3": "The high-performance motor converts electrical energy into mechanical energy. Thanks to the use of better materials, it has higher output power compared to the <a href=\"handbooksearch:\/\/Upgraded Motor\">upgraded motor</a>.<br> <br>For details on how it works, see the <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-rotors\">guide</a>.",
-
+  "block-handbooktext-emotor-tier3": "A high-performance motor converts electrical energy into mechanical energy. Due to the use of better materials, it has higher output power compared to the <a href=\"handbooksearch://Модернизированный двигатель\">Upgraded Motor</a>.<br> <br>For operational details, see the <a href=\"handbook://gamemechanicinfo-electricalprogressive-rotors\">handbook</a>.",
 
   "block-handbooktitle-egenerator-tier1": "Usage",
-  "block-handbooktext-egenerator-tier1": "The generator converts mechanical energy into electrical energy. It has low power and rotation speed.<br>For details on how it works, see the <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-rotors\">guide</a>.",
+  "block-handbooktext-egenerator-tier1": "A generator converts mechanical energy into electrical energy. Has low power and rotation speed.<br>For operational details, see the <a href=\"handbook://gamemechanicinfo-electricalprogressive-rotors\">handbook</a>.",
 
   "block-handbooktitle-egenerator-tier2": "Usage",
-  "block-handbooktext-egenerator-tier2": "The upgraded generator converts mechanical energy into electrical energy. It has increased power compared to the <a href=\"handbooksearch:\/\/Generator\">generator</a>.<br>For details on how it works, see the <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-rotors\">guide</a>.",
+  "block-handbooktext-egenerator-tier2": "An upgraded generator converts mechanical energy into electrical energy. Has increased power compared to the <a href=\"handbooksearch://Генератор\">Generator</a>.<br>For operational details, see the <a href=\"handbook://gamemechanicinfo-electricalprogressive-rotors\">handbook</a>.",
 
   "block-handbooktitle-egenerator-tier3": "Usage",
-  "block-handbooktext-egenerator-tier3": "The high-performance generator converts mechanical energy into electrical energy. Thanks to the use of better materials, it has higher power compared to the <a href=\"handbooksearch:\/\/Upgraded Generator\">upgraded generator</a>.<br>For details on how it works, see the <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-rotors\">guide</a>.",
+  "block-handbooktext-egenerator-tier3": "A high-performance generator converts mechanical energy into electrical energy. Due to the use of better materials, it has higher power compared to the <a href=\"handbooksearch://Модернизированный генератор\">Upgraded Generator</a>.<br>For operational details, see the <a href=\"handbook://gamemechanicinfo-electricalprogressive-rotors\">handbook</a>.",
 
   "item-handbooktitle-coil": "Usage",
-  "item-handbooktext-coil": "And where would we be without copper coils in electrical appliances?",
-
+  "item-handbooktext-coil": "What are electrical devices without copper coils?",
 
   "item-handbooktitle-engineshaft": "Usage",
-  "item-handbooktext-engineshaft": "Usually a rotor is needed in motors/generators, but not only.",
+  "item-handbooktext-engineshaft": "Usually a rotor is needed in motors/generators, but not only there.",
 
+  "Voltage": "Voltage",
+  "Voltage_immersive": "Voltage (Immersive)",
+  "High Voltage": "High Voltage",
+  "Low Voltage": "Low Voltage",
+  "max_speed": "Rated Speed",
+  "rps": "rps",
 
+  "kpd": "Efficiency",
+  "max_torque": "Max Torque",
 
-  "game:Voltage": "Voltage",
-  "game:High Voltage": "High Voltage",
-  "game:Low Voltage": "Low Voltage",
-  "game:max_speed": "Rated Speed",
-  "game:rps": "rps",
+  "WResistance": "Moisture Resistance",
+  "Yes": "Yes",
+  "No": "No",
 
-  "game:kpd": "Efficiency",
-  "game:max_torque": "Max Torque",
+  "res_load": "Rated Resistance at Rated Load",
+  "res_speed": "Rated Resistance at Rated Speed",
 
-  "game:WResistance": "Moisture Resistance",
-  "game:Yes": "Yes",
-  "game:No": "No",
+  "Production": "Output",
+  "Power": "Power",
 
-  "game:res_load": "Rated Resistance at Rated Load",
-  "game:res_speed": "Rated Resistance at Rated Speed",
-
-
-  "game:Capacity": "Capacity",
-
-
-  "game:termogen": "Thermal Generator",
-  "game:gui-word-seconds": "sec.",
+  "termogen": "Thermogenerator",
+  "gui-word-seconds": "sec.",
 
   "block-etermogenerator-*": "Thermoelectric Generator",
   "block-handbooktitle-etermogenerator": "Usage",
-  "block-handbooktext-etermogenerator": "Converts thermal energy into electrical energy! Runs on anything that supports combustion. The higher the combustion temperature of the fuel, the greater the output power. Output power also slightly depends on ambient temperature: the lower the ambient air temperature, the greater the energy generation. By itself, it does not function - <a href=\"handbook:\/\/block-electricalprogressivebasics:termoplastini\">thermoelectric plates</a> must be installed on top.<br><br>Can be automatically loaded with fuel using hoppers.",
+  "block-handbooktext-etermogenerator": "Converts thermal energy into electrical energy! Runs on anything that supports combustion. The higher the combustion temperature of the fuel, the greater the output power. Output power also slightly depends on ambient temperature: the lower the ambient air temperature, the greater the energy output. Does not work by itself – thermoelectric plates must be installed at the back.<br><br>Can be automatically loaded with fuel using hoppers.",
 
-
-  "block-termoplastini": "Thermoelectric Plates",
+  "termoplastini": "Thermoelectric Plates",
+  "block-termoplastini-*": "Thermoelectric Plates",
   "block-handbooktitle-termoplastini": "Usage",
-  "block-handbooktext-termoplastini": "Thermoelectric plates are used in thermoelectric generators to convert thermal energy into electrical energy. The operating principle is based on the occurrence of a thermal electromotive force at the junction of two dissimilar metals. The temperature difference is created by smoke from the burning fuel on one side and ambient air on the other side.<br><br>Placed on a <a href=\"handbook:\/\/block-electricalprogressivebasics:etermogenerator-south\">thermoelectric generator</a>, up to 10 pieces. Each subsequent section provides a smaller power increase. In total, 10 thermoplates will give 100% power to the thermogenerator. Note that any blocks placed directly adjacent to the thermoplates will reduce their contribution to the overall system efficiency, as air cannot effectively cool them.",
+  "block-handbooktext-termoplastini": "Thermoelectric plates are used in thermoelectric generators to convert thermal energy into electrical energy. The operating principle is based on the thermoelectric effect where a temperature difference creates an electric voltage between two dissimilar metals. The temperature difference is created by the smoke from burning fuel on one side and ambient air on the other.<br><br>Placed behind the <a href=\"handbook://block-electricalprogressivebasics:etermogenerator-south\">thermoelectric generator</a>, up to 10 pieces. Can only be attached to the copper pad of the heat exchanger. Each subsequent section provides a smaller power increase. In total, 10 thermoplates give 100% power to the thermogenerator. Two generators can use the same set of thermoelectric plates.",
 
-  "game:Speed": "Speed",
-  "game:ThickenCables": "Cable Thickening",
+  "Speed": "Speed",
+  "ThickenCables": "Thicken Cables",
 
-  "game:causeCurrent": "Current Overload",
-  "game:causeVoltage": "Voltage Exceeded",
-  "game:causeEnvironment": "Fluid Exposure",
+  "causeCurrent": "Current Overload",
+  "causeVoltage": "Voltage Exceeded",
+  "causeEnvironment": "Fluid Exposure",
 
-
-
-
-  "Electricity": "Electrical Network",
+  "Electricity": "Electrical Network (Standard)",
   "Consumers": "Consumers",
   "Generators": "Generators",
   "Batteries": "Accumulators",
@@ -228,7 +211,7 @@
   "PressForDetails": "Hold {0} for details",
   "ConnectedWires": "Connected wires: {0}",
   "WaitingNetworkInfo": "Waiting for network info...",
-  "NetworkInfo": "=== Electrical Network Info ===",
+  "NetworkInfo": "Electrical Network (Immersive)",
   "BlockParameters": "--- Block Parameters ---",
   "NetworkStatus": "--- Network Summary ---",
   "ConductorOpen": "Conductor status: nodes not connected",
@@ -247,7 +230,7 @@
   "V": "V",
   "Om": "Ω",
   "OmLine": "Ω/line",
-  "Units": "units",
+  "Units": "u.",
   "Pcs": "pcs",
 
   "GeneratorsShort": "Generators",
@@ -261,18 +244,68 @@
   "CauseVoltage": "Voltage Exceeded",
   "CauseEnvironment": "Fluid Exposure",
 
-
   "switch": "Toggle",
+  "buffer": "Buffer",
 
-
-  "block-esolargenerator-*": "Solar Panel Generator",
+  "block-esolargenerator-*": "Solar Generator",
   "block-handbooktitle-esolargenerator": "Usage",
-  "block-handbooktext-esolargenerator": "Converts light into electrical energy! The more sunlight hitting the solar panel, the more energy it can produce. Blocks placed above the solar panel will reduce its efficiency. In the late fall and winter months there is less sunlight which causes a decrease in its efficiency.",
-
+  "block-handbooktext-esolargenerator": "Converts light into electrical energy! The more sunlight hits the solar panel, the more energy it can produce. Blocks placed above the solar panel will reduce its efficiency. In late autumn and winter, sunlight decreases, leading to reduced efficiency.",
 
   "remove_burned_cable": "Remove the burned cable first",
   "cable_same_type": "Cables must be of the same type",
   "not_enough_cables": "Not enough cables to place",
   "enough_lines": "Already enough lines",
-  "game:Prod_potential": "Prod. Potential"
+  "Prod_potential": "Prod. potential",
+
+  "too_much_wires": "You cannot connect more than 8 wires to this point.",
+  "select_second_point": "Select the second point.",
+  "wire_connection_cancelled": "Wire connection cancelled.",
+  "hold_same_cable": "You must hold the same wire to complete the connection.",
+  "same_block_connection": "Cannot connect a wire to the same block.",
+  "invalid_connection_point": "Invalid connection point.",
+  "connection_already_exists": "Such a connection already exists.",
+  "max_wire_length": "Maximum wire length cannot exceed 32 blocks.",
+  "not_enough_cable": "Not enough wire. Need {0} pcs., only have {1}.",
+  "wire_connected_successfully": "Wire connected successfully. Used {0} pcs. of wire.",
+  "wire_disconnected": "Wire disconnected. Returned {0} pcs. of wire.",
+
+  "block-cabledotdown-*": "Insulator (Floor)",
+  "block-handbooktitle-cabledotdown": "Usage",
+  "block-handbooktext-cabledotdown": "A variant of an insulator for immersive wires with floor mounting.",
+
+  "block-cabledotroof-*": "Insulator (Ceiling)",
+  "block-handbooktitle-cabledotroof": "Usage",
+  "block-handbooktext-cabledotroof": "A variant of an insulator for immersive wires with ceiling mounting.",
+
+  "block-cabledotwall-*": "Insulator (Wall)",
+  "block-handbooktitle-cabledotwall": "Usage",
+  "block-handbooktext-cabledotwall": "A variant of an insulator for immersive wires with wall mounting.",
+
+  "block-cableswitchwall-*": "Switch (Wall)",
+  "block-handbooktitle-cableswitchwall": "Usage",
+  "block-handbooktext-cableswitchwall": "A wall-mounted switch. Can break/connect a circuit between two switch insulators.",
+
+  "block-hv2lvtransformator-*": "High Voltage Transformer (512V->128V)",
+  "block-handbooktitle-hv2lvtransformator": "Usage",
+  "block-handbooktext-hv2lvtransformator": "Allows transforming voltage from immersive 512V to 128V of the standard wire system.",
+
+  "block-lv2hvtransformator-*": "High Voltage Transformer (128V->512V)",
+  "block-handbooktitle-lv2hvtransformator": "Usage",
+  "block-handbooktext-lv2hvtransformator": "Allows transforming voltage from standard 128V to 512V of the immersive wire system.",
+
+  "block-hvcabletower-*": "Power Line Tower",
+  "block-handbooktitle-hvcabletower": "Usage",
+  "block-handbooktext-hvcabletower": "Allows mounting several independent immersive wire lines on a single tower.",
+
+  "block-hvstreetlamp-*": "Street Lamp",
+  "block-handbooktitle-hvstreetlamp": "Usage",
+  "block-handbooktext-hvstreetlamp": "A street lighting variant using immersive wires.",
+
+  "block-wallconnectorhor-*": "Through-Wall Connector (Horizontal)",
+  "block-handbooktitle-wallconnectorhor": "Usage",
+  "block-handbooktext-wallconnectorhor": "Allows energy transfer through walls without breaking room integrity.",
+
+  "block-wallconnectorver-*": "Through-Wall Connector (Vertical)",
+  "block-handbooktitle-wallconnectorver": "Usage",
+  "block-handbooktext-wallconnectorver": "Allows energy transfer through walls without breaking room integrity."
 }

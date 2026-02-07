@@ -1,4 +1,4 @@
-using ElectricalProgressive.Interface;
+﻿using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
 using System;
 using System.Text;
@@ -114,8 +114,8 @@ public class BEBehaviorHotSpringsEGenerator : BlockEntityBehavior, IElectricProd
         stringBuilder.AppendLine(StringHelper.Progressbar(Math.Min(_powerGive, _powerOrder) / entity.Power * 100));
         stringBuilder.AppendLine("└ " + Lang.Get("Production") + ": " +
                                  ((int)Math.Min(_powerGive, _powerOrder)).ToString() + "/" +
-                                 ((int)entity.Power).ToString() + " " + Lang.Get("W"));
-        stringBuilder.AppendLine("└ " + Lang.Get("kpd") + ": " + (entity.Kpd * 100).ToString("F1") + " %");
+                                 ((int)entity.Power).ToString() + " " + Lang.Get("electricalprogressivebasics:W"));
+        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:kpd") + ": " + (entity.Kpd * 100).ToString("F1") + " %");
 
         if (!string.IsNullOrEmpty(entity.ErrorMessage)) stringBuilder.AppendLine(Lang.Get(entity.ErrorMessage));
     }
