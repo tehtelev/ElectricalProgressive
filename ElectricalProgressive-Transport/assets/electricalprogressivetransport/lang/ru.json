@@ -1,7 +1,7 @@
 ﻿{
   "game:tabname-electricalprogressivetransport": "Транспортные трубы",
   "electricalprogressivetransport:block-pipe-normal-*": "Транспортная труба",
-  "electricalprogressivetransport:block-pipe-insertion": "Помещающая труба",
+  "electricalprogressivetransport:block-pipe-item-*": "Предметная помещающая труба",
   "electricalprogressivetransport:pipe-normal-info": "Обычная транспортная труба",
   "electricalprogressivetransport:pipe-insertion-info": "Труба с фильтром для помещения предметов",
   "electricalprogressivetransport:blockhelp-filter-settings": "Открыть настройки фильтра",
@@ -27,7 +27,7 @@
   "electricalprogressivetransport:filter-speet-up": "Прибавить",
   "electricalprogressivetransport:filter-speet-down": "Убавить",
 
-  "electricalprogressivetransport:block-pipe-liquid-insertion": "Жидкостная помещающая труба",
+  "electricalprogressivetransport:block-pipe-liquid-*": "Жидкостная помещающая труба",
   "electricalprogressivetransport:filter-liquidpipe-comment": "Положите жидкости в слоты для фильтрации",
   "electricalprogressivetransport:pipe-liquid-insertion-info": "Труба для фильтрации и помещения жидкостей",
   "electricalprogressivetransport:blockhelp-liquid-filter-settings": "Открыть настройки жидкостного фильтра",
