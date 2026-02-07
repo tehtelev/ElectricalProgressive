@@ -18,6 +18,9 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
 {
     internal InventoryHammer inventory;
     private GuiDialogHammer _clientDialog;
+
+    private static MeshData? _mesh; // кеш для меша, который используется в анимации. Кеш нужен, чтобы не загружать меш из ресурсов каждый раз при тесселяции блока, а использовать уже загруженный и обработанный меш.
+    private static Shape? _resultingShape; // кеш для формы, которая используется в анимации. Кеш нужен, чтобы не загружать форму из ресурсов каждый раз при тесселяции блока, а использовать уже загруженную и обработанную форму.
     public override string InventoryClassName => "ehammer";
     public HammerRecipe CurrentRecipe;
     private readonly int _maxConsumption;
@@ -100,7 +103,8 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
 
             if (AnimUtil != null)
             {
-                AnimUtil.InitializeAnimator(InventoryClassName, null, null, new Vec3f(0, GetRotation(), 0f));
+                PrepareAnimUtil(api, InventoryClassName);
+                AnimUtil.InitializeAnimator(InventoryClassName, _mesh, _resultingShape, new Vec3f(0, GetRotation(), 0f));
             }
 
             _soundHammer = new AssetLocation("electricalprogressiveindustry:sounds/ehammer/hammer.ogg");
@@ -109,6 +113,26 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             this.RegisterGameTickListener(new Action<float>(this.CheckAnimationFrame), 50);
         }
     }
+
+
+    /// <summary>
+    /// Подготавливает анимационный утилит для блока, загружая меш и форму из ресурсов
+    /// </summary>
+    /// <param name="api"></param>
+    private void PrepareAnimUtil(ICoreAPI api, string cacheDictKey)
+    {
+        if (_mesh == null || _resultingShape == null)
+        {
+            AssetLocation shapePath = Block.Shape.Base.Clone().WithPathPrefixOnce("shapes/")
+                .WithPathAppendixOnce(".json");
+
+            Shape _shape = Shape.TryGet(api, shapePath);
+
+            _mesh = AnimUtil.CreateMesh(cacheDictKey, _shape, out _resultingShape, null);
+
+        }
+    }
+
 
     public int GetRotation()
     {
@@ -822,6 +846,8 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         }
 
         // Очистка как в холодильнике
+        _mesh.Dispose();
+        _resultingShape = null;
         _meshes = null;
         _nowTesselatingShape = null;
         _nowTesselatingObj = null;
@@ -864,6 +890,8 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         }
 
         // Очищаем ссылки как в холодильнике
+        _mesh.Dispose();
+        _resultingShape = null;
         _meshes = null;
         _nowTesselatingShape = null;
         _nowTesselatingObj = null;

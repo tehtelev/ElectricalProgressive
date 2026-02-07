@@ -7,7 +7,7 @@ using Vintagestory.GameContent;
 
 namespace ElectricalProgressive.Content.Item.Armor;
 
-class EArmor : ItemWearable
+class EArmor : ItemWearableAttachment
 {
     public int consume;
     public int consumefly;

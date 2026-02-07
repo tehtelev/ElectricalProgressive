@@ -17,7 +17,12 @@ namespace EPImmersive.Content.Block.CableSwitch
     {
         private BEBehaviorCableSwitch Behavior => GetBehavior<BEBehaviorCableSwitch>();
 
-        private ICoreClientAPI _capi;
+
+
+        private static MeshData? _mesh; // кеш для меша, который используется в анимации. Кеш нужен, чтобы не загружать меш из ресурсов каждый раз при тесселяции блока, а использовать уже загруженный и обработанный меш.
+        private static Shape? _resultingShape; // кеш для формы, которая используется в анимации. Кеш нужен, чтобы не загружать форму из ресурсов каждый раз при тесселяции блока, а использовать уже загруженную и обработанную форму.
+
+
 
         public override void Initialize(ICoreAPI api)
         {
@@ -28,12 +33,12 @@ namespace EPImmersive.Content.Block.CableSwitch
 
             if (api.Side == EnumAppSide.Client)
             {
-                _capi = api as ICoreClientAPI;
 
                 // инициализируем аниматор
                 if (animUtil != null)
                 {
-                    animUtil.InitializeAnimator("cableswitchwall", null, null, new Vec3f(0, GetRotation(), 0f));
+                    PrepareAnimUtil(api, "cableswitchwall");
+                    animUtil.InitializeAnimator("cableswitchwall", _mesh, _resultingShape, new Vec3f(0, GetRotation(), 0f));
 
                     var beh = GetBehavior<BEBehaviorCableSwitch>();
 
@@ -52,6 +57,24 @@ namespace EPImmersive.Content.Block.CableSwitch
             }
 
             
+        }
+
+        /// <summary>
+        /// Подготавливает анимационный утилит для блока, загружая меш и форму из ресурсов
+        /// </summary>
+        /// <param name="api"></param>
+        private void PrepareAnimUtil(ICoreAPI api, string cacheDictKey)
+        {
+            if (_mesh == null || _resultingShape == null)
+            {
+                AssetLocation shapePath = Block.Shape.Base.Clone().WithPathPrefixOnce("shapes/")
+                    .WithPathAppendixOnce(".json");
+
+                Shape _shape = Shape.TryGet(api, shapePath);
+
+                _mesh = animUtil.CreateMesh(cacheDictKey, _shape, out _resultingShape, null);
+
+            }
         }
 
 
@@ -166,6 +189,9 @@ namespace EPImmersive.Content.Block.CableSwitch
             base.OnBlockUnloaded();
             
             animUtil?.Dispose();
+
+            _mesh.Dispose();
+            _resultingShape = null;
         }
 
         /// <summary>
@@ -176,6 +202,9 @@ namespace EPImmersive.Content.Block.CableSwitch
             base.OnBlockRemoved();
 
             animUtil?.Dispose();
+
+            _mesh.Dispose();
+            _resultingShape = null;
         }
 
 

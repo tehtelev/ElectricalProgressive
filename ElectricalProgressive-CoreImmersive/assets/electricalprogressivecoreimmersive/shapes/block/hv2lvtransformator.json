@@ -1,4 +1,4 @@
-﻿{
+{
 	"editor": {
 		"collapsedPaths": ",Root/Cube1/panel/pCube166/pCube167,Root/Lamp-Base,Root/Cube1/panel/pCube166/Cube169,Root/Cube1",
 		"allAngles": true,
@@ -33258,11 +33258,6 @@
 					"frame": 0,
 					"elements": {
 						"Cube769": {
-							"rotationX": 0.0,
-							"rotationY": 0.0,
-							"rotationZ": 0.0
-						},
-						"Cube770": {
 							"rotationX": 0.0,
 							"rotationY": 0.0,
 							"rotationZ": 0.0

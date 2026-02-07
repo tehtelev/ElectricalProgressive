@@ -16,6 +16,8 @@ namespace ElectricalProgressive.Content.Block.EHeatCannon
         private ILoadedSound _ambientSound;
         private AssetLocation _heatCannonSound;
 
+        private static MeshData? _mesh; // кеш для меша, который используется в анимации. Кеш нужен, чтобы не загружать меш из ресурсов каждый раз при тесселяции блока, а использовать уже загруженный и обработанный меш.
+        private static Shape? _resultingShape; // кеш для формы, которая используется в анимации. Кеш нужен, чтобы не загружать форму из ресурсов каждый раз при тесселяции блока, а использовать уже загруженную и обработанную форму.
         public bool IsEnabled => this.Behavior?.HeatLevel >= 1;
 
         public override Facing GetConnection(Facing value)
@@ -37,7 +39,8 @@ namespace ElectricalProgressive.Content.Block.EHeatCannon
                 this.RegisterGameTickListener(new Action<float>(this.Every1000Ms), 1000);
                 if (AnimUtil != null)
                 {
-                    AnimUtil.InitializeAnimator("eheatcannon", null, null, new Vec3f(0, GetRotation(), 0f));
+                    PrepareAnimUtil(api, "eheatcannon");
+                    AnimUtil.InitializeAnimator("eheatcannon", _mesh, _resultingShape, new Vec3f(0, GetRotation(), 0f));
                 }
 
                 _heatCannonSound = new AssetLocation("electricalprogressiveqol:sounds/eheatcannon.ogg");
@@ -46,6 +49,23 @@ namespace ElectricalProgressive.Content.Block.EHeatCannon
 
         }
 
+        /// <summary>
+        /// Подготавливает анимационный утилит для блока, загружая меш и форму из ресурсов
+        /// </summary>
+        /// <param name="api"></param>
+        private void PrepareAnimUtil(ICoreAPI api, string cacheDictKey)
+        {
+            if (_mesh == null || _resultingShape == null)
+            {
+                AssetLocation shapePath = Block.Shape.Base.Clone().WithPathPrefixOnce("shapes/")
+                    .WithPathAppendixOnce(".json");
+
+                Shape _shape = Shape.TryGet(api, shapePath);
+
+                _mesh = AnimUtil.CreateMesh(cacheDictKey, _shape, out _resultingShape, null);
+
+            }
+        }
 
         private void Every1000Ms(float dt)
         {
@@ -194,6 +214,9 @@ namespace ElectricalProgressive.Content.Block.EHeatCannon
                 this._ambientSound.Stop();
                 this._ambientSound.Dispose();
             }
+
+            _mesh.Dispose();
+            _resultingShape = null;
         }
 
 
@@ -217,6 +240,9 @@ namespace ElectricalProgressive.Content.Block.EHeatCannon
                 this._ambientSound.Stop();
                 this._ambientSound.Dispose();
             }
+
+            _mesh.Dispose();
+            _resultingShape = null;
         }
 
 

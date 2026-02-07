@@ -21,6 +21,10 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
 
     public BEBehaviorElectricalProgressive? ElectricalProgressive => GetBehavior<BEBehaviorElectricalProgressive>();
 
+    private static MeshData? _mesh; // кеш для меша, который используется в анимации. Кеш нужен, чтобы не загружать меш из ресурсов каждый раз при тесселяции блока, а использовать уже загруженный и обработанный меш.
+    private static Shape? _resultingShape; // кеш для формы, которая используется в анимации. Кеш нужен, чтобы не загружать форму из ресурсов каждый раз при тесселяции блока, а использовать уже загруженную и обработанную форму.
+
+
     public Facing Facing
     {
         get => this._facing;
@@ -118,6 +122,24 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
             }
             else
                 return 1f;
+        }
+    }
+
+    /// <summary>
+    /// Подготавливает анимационный утилит для блока, загружая меш и форму из ресурсов
+    /// </summary>
+    /// <param name="api"></param>
+    private void PrepareAnimUtil(ICoreAPI api, string cacheDictKey)
+    {
+        if (_mesh == null || _resultingShape == null)
+        {
+            AssetLocation shapePath = Block.Shape.Base.Clone().WithPathPrefixOnce("shapes/")
+                .WithPathAppendixOnce(".json");
+
+            Shape _shape = Shape.TryGet(api, shapePath);
+
+            _mesh = AnimUtil.CreateMesh(cacheDictKey, _shape, out _resultingShape, null);
+
         }
     }
 
@@ -301,7 +323,8 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
             // инициализируем аниматор
             if (AnimUtil != null)
             {
-                AnimUtil.InitializeAnimator(InventoryClassName, null, null, new Vec3f(0, GetRotation(), 0f));
+                PrepareAnimUtil(api, InventoryClassName);
+                AnimUtil.InitializeAnimator(InventoryClassName, _mesh, _resultingShape, new Vec3f(0, GetRotation(), 0f));
             }
 
         }
@@ -414,6 +437,9 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
         {
             this.AnimUtil.Dispose();
         }
+
+        _mesh.Dispose();
+        _resultingShape = null;
 
         // очищаем ссылки на API
         _capi = null;
@@ -739,6 +765,9 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
         {
             this.AnimUtil.Dispose();
         }
+
+        _mesh.Dispose();
+        _resultingShape = null;
 
         // очищаем ссылки на API
         _capi = null;

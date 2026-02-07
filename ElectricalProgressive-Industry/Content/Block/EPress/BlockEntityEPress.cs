@@ -36,6 +36,8 @@ namespace ElectricalProgressive.Content.Block.EPress
         public override string DialogTitle => Lang.Get("epress-title-gui");
         public override InventoryBase Inventory => inventory;
 
+        private static MeshData? _mesh; // кеш для меша, который используется в анимации. Кеш нужен, чтобы не загружать меш из ресурсов каждый раз при тесселяции блока, а использовать уже загруженный и обработанный меш.
+        private static Shape? _resultingShape; // кеш для формы, которая используется в анимации. Кеш нужен, чтобы не загружать форму из ресурсов каждый раз при тесселяции блока, а использовать уже загруженную и обработанную форму.
         private BlockEntityAnimationUtil AnimUtil => GetBehavior<BEBehaviorAnimatable>()?.animUtil;
         private int _lastSoundFrame = -1;
         private long _lastAnimationCheckTime;
@@ -98,12 +100,31 @@ namespace ElectricalProgressive.Content.Block.EPress
 
                 if (AnimUtil != null)
                 {
-                    AnimUtil.InitializeAnimator(InventoryClassName, null, null, new Vec3f(0, GetRotation(), 0f));
+                    PrepareAnimUtil(api, InventoryClassName);
+                    AnimUtil.InitializeAnimator(InventoryClassName, _mesh, _resultingShape, new Vec3f(0, GetRotation(), 0f));
                 }
 
                 _soundPress = new AssetLocation("electricalprogressiveindustry:sounds/epress/press.ogg");
 
                 this.RegisterGameTickListener(new Action<float>(this.CheckAnimationFrame), 50);
+            }
+        }
+
+        /// <summary>
+        /// Подготавливает анимационный утилит для блока, загружая меш и форму из ресурсов
+        /// </summary>
+        /// <param name="api"></param>
+        private void PrepareAnimUtil(ICoreAPI api, string cacheDictKey)
+        {
+            if (_mesh == null || _resultingShape == null)
+            {
+                AssetLocation shapePath = Block.Shape.Base.Clone().WithPathPrefixOnce("shapes/")
+                    .WithPathAppendixOnce(".json");
+
+                Shape _shape = Shape.TryGet(api, shapePath);
+
+                _mesh = AnimUtil.CreateMesh(cacheDictKey, _shape, out _resultingShape, null);
+
             }
         }
 
@@ -797,6 +818,9 @@ namespace ElectricalProgressive.Content.Block.EPress
                 this.AnimUtil.Dispose();
             }
 
+            _mesh.Dispose();
+            _resultingShape = null;
+
             // Очистка как в холодильнике
             _meshes = null!;
             _nowTesselatingShape = null!;
@@ -809,6 +833,9 @@ namespace ElectricalProgressive.Content.Block.EPress
             this._clientDialog?.TryClose();
 
             // Очищаем ссылки как в холодильнике
+            _mesh.Dispose();
+            _resultingShape = null;
+
             _meshes = null!;
             _nowTesselatingShape = null!;
             _nowTesselatingObj = null!;

@@ -23,7 +23,10 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
     private ICoreServerAPI _sapi;
     private InventoryFuelGenerator _inventory;
     private GuiBlockEntityEFuelGenerator _clientDialog;
-    
+
+    private static MeshData? _mesh; // кеш для меша, который используется в анимации. Кеш нужен, чтобы не загружать меш из ресурсов каждый раз при тесселяции блока, а использовать уже загруженный и обработанный меш.
+    private static Shape? _resultingShape; // кеш для формы, которая используется в анимации. Кеш нужен, чтобы не загружать форму из ресурсов каждый раз при тесселяции блока, а использовать уже загруженную и обработанную форму.
+
     private float _genTemp = 20f;                    // Текущая температура генератора
     private const float WaterConsumptionRate = 0.1f; // Скорость потребления воды
     private float _waterAmount = 0f;                 // Текущее количество воды
@@ -187,7 +190,11 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
             _capi = api as ICoreClientAPI;
             // Инициализация аниматора на клиенте
             if (AnimUtil != null)
-                AnimUtil.InitializeAnimator(InventoryClassName, null, null, new Vec3f(0, GetRotation(), 0f));
+            {
+                PrepareAnimUtil(api, InventoryClassName);
+                AnimUtil.InitializeAnimator(InventoryClassName, _mesh, _resultingShape, new Vec3f(0, GetRotation(), 0f));
+            }
+
         }
         
         _inventory.Pos = Pos;
@@ -197,7 +204,26 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
         _listenerId = RegisterGameTickListener(OnBurnTick, 1000);
         CanDoBurn();
     }
-    
+
+    /// <summary>
+    /// Подготавливает анимационный утилит для блока, загружая меш и форму из ресурсов
+    /// </summary>
+    /// <param name="api"></param>
+    private void PrepareAnimUtil(ICoreAPI api, string cacheDictKey)
+    {
+        if (_mesh == null || _resultingShape == null)
+        {
+            AssetLocation shapePath = Block.Shape.Base.Clone().WithPathPrefixOnce("shapes/")
+                .WithPathAppendixOnce(".json");
+
+            Shape _shape = Shape.TryGet(api, shapePath);
+
+            _mesh = AnimUtil.CreateMesh(cacheDictKey, _shape, out _resultingShape, null);
+
+        }
+    }
+
+
     /// <summary>
     /// Получить угол поворота на основе стороны блока
     /// </summary>
@@ -271,7 +297,9 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
         // Очистка анимаций на клиенте
         if (Api.Side == EnumAppSide.Client && AnimUtil != null)
             AnimUtil.Dispose();
-        
+
+        _mesh.Dispose();
+        _resultingShape = null;
         // Очистка ссылок на API
         _capi = null;
         _sapi = null;
@@ -650,7 +678,10 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
         // Очистка анимаций
         if (Api.Side == EnumAppSide.Client && AnimUtil != null)
             AnimUtil.Dispose();
-        
+
+        _mesh.Dispose();
+        _resultingShape = null;
+
         // Очистка ссылок
         _capi = null;
         _sapi = null;

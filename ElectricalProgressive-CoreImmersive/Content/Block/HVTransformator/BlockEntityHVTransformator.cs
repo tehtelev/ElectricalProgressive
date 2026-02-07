@@ -13,55 +13,48 @@ namespace EPImmersive.Content.Block.HVTransformator
 {
     internal class BlockEntityHVTransformator : BlockEntityEIBase
     {
+        
         public BEBehaviorElectricalProgressive? ElectricalProgressive => GetBehavior<BEBehaviorElectricalProgressive>();
 
+        private static MeshData? _mesh; // кеш для меша, который используется в анимации. Кеш нужен, чтобы не загружать меш из ресурсов каждый раз при тесселяции блока, а использовать уже загруженный и обработанный меш.
+        private static Shape? _resultingShape; // кеш для формы, которая используется в анимации. Кеш нужен, чтобы не загружать форму из ресурсов каждый раз при тесселяции блока, а использовать уже загруженную и обработанную форму.
 
-
-        public override void OnBlockPlaced(ItemStack? byItemStack = null)
-        {
-            base.OnBlockPlaced(byItemStack);
-
-            if (this.EPImmersive == null || byItemStack == null || this.ElectricalProgressive == null) 
-                return;
-
-            //задаем электрические параметры блока/проводника
-            LoadEProperties.Load(this.Block, this);
-            LoadImmersiveEProperties.Load(this.Block, this);
-        }
-
-
-        public override void OnBlockUnloaded()
-        {
-            base.OnBlockUnloaded();
-            StopAnim();
-            this.ElectricalProgressive?.OnBlockUnloaded();
-            animUtil?.Dispose();
-        }
-
-
-        private ICoreClientAPI _capi;
 
         public override void Initialize(ICoreAPI api)
         {
             base.Initialize(api);
-
+            
             RotationCache = CreateRotationCache();
-
-
+            
             if (api.Side == EnumAppSide.Client)
             {
-                _capi = api as ICoreClientAPI;
-
                 // инициализируем аниматор
                 if (animUtil != null)
                 {
-                    animUtil.InitializeAnimator("hvtransformator", null, null, new Vec3f(0, GetRotation(), 0f));
-
-                    StartAnim();
+                    PrepareAnimUtil(api, "hvtransformator");
+                    animUtil.InitializeAnimator("hvtransformator", _mesh, _resultingShape, new Vec3f(0, GetRotation(), 0f));
                 }
             }
+            
+        }
 
 
+        /// <summary>
+        /// Подготавливает анимационный утилит для блока, загружая меш и форму из ресурсов
+        /// </summary>
+        /// <param name="api"></param>
+        private void PrepareAnimUtil(ICoreAPI api, string cacheDictKey)
+        {
+            if (_mesh == null || _resultingShape==null)
+            {
+                AssetLocation shapePath = Block.Shape.Base.Clone().WithPathPrefixOnce("shapes/")
+                    .WithPathAppendixOnce(".json");
+
+                Shape _shape = Shape.TryGet(api, shapePath);
+                
+                _mesh = animUtil.CreateMesh(cacheDictKey, _shape, out _resultingShape, null);
+
+            }
         }
 
 
@@ -97,15 +90,27 @@ namespace EPImmersive.Content.Block.HVTransformator
         }
 
 
+        public override void OnBlockPlaced(ItemStack? byItemStack = null)
+        {
+            base.OnBlockPlaced(byItemStack);
+
+            if (this.EPImmersive == null || byItemStack == null || this.ElectricalProgressive == null)
+                return;
+
+            //задаем электрические параметры блока/проводника
+            LoadEProperties.Load(this.Block, this);
+            LoadImmersiveEProperties.Load(this.Block, this);
+        }
+
+
+
+
 
         /// <summary>
         /// Запускает анимацию открытия дверцы
         /// </summary>
         public void StartAnim()
         {
-            //animUtil.Dispose();
-            animUtil.InitializeAnimator("hvtransformator", null, null, new Vec3f(0, GetRotation(), 0f));
-
             if (animUtil?.activeAnimationsByAnimCode.ContainsKey("work") == false)
             {
                 animUtil?.StartAnimation(new AnimationMetaData()
@@ -113,8 +118,8 @@ namespace EPImmersive.Content.Block.HVTransformator
                     Animation = "work",
                     Code = "work",
                     AnimationSpeed = 1.8f,
-                    EaseOutSpeed = 6,
-                    EaseInSpeed = 6
+                    EaseOutSpeed = 15,
+                    EaseInSpeed = 15
                 });
 
                 //применяем цвет и яркость
@@ -158,7 +163,7 @@ namespace EPImmersive.Content.Block.HVTransformator
 
 
             // если анимации нет, то рисуем блок базовый
-            if (animUtil?.activeAnimationsByAnimCode.ContainsKey("work") == false)
+            if (animUtil?.activeAnimationsByAnimCode.Count==0)
             {
                 (this.Block as ImmersiveWireBlock)._drawBaseMesh = true;
                 return false;
@@ -178,8 +183,25 @@ namespace EPImmersive.Content.Block.HVTransformator
             base.OnBlockRemoved();
             StopAnim();
             animUtil?.Dispose();
+
+            _mesh.Dispose();
+            _resultingShape = null;
         }
-        
+
+        /// <summary>
+        /// Вызывается при выгрузке блока из мира (например, при удалении чанка)
+        /// </summary>
+        public override void OnBlockUnloaded()
+        {
+            base.OnBlockUnloaded();
+            StopAnim();
+            this.ElectricalProgressive?.OnBlockUnloaded();
+            animUtil?.Dispose();
+
+            _mesh.Dispose();
+            _resultingShape = null;
+        }
+
 
         private static Dictionary<Facing, RotationData> CreateRotationCache()
         {

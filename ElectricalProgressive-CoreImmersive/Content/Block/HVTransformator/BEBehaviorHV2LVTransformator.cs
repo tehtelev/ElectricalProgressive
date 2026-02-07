@@ -50,7 +50,37 @@ namespace EPImmersive.Content.Block.HVTransformator
 
             // Получаем скорость электричества
             _speedOfElectricity = ElectricalProgressive.ElectricalProgressive.speedOfElectricity;
+
+            // Регистрируем слушатель для обновления анимации, если мы на клиенте
+            if (api.Side == EnumAppSide.Client)
+            {
+                Blockentity.RegisterGameTickListener(animUpdate, 2000);
+            }
         }
+
+
+        /// <summary>
+        /// Управляет анимацией трансформатора в зависимости от наличия энергии в буфере. Если энергия есть, анимация включается, если нет - выключается.
+        /// </summary>
+        /// <param name="obj"></param>
+        private void animUpdate(float obj)
+        {
+            var entity = Blockentity as BlockEntityHVTransformator;
+
+            if (entity == null)
+                return;
+
+            if (_storedEnergy == 0)
+            {
+                entity.StopAnim();
+            }
+            else
+            {
+                entity.StartAnim();
+            }
+
+        }
+
 
         public void Update()
         {

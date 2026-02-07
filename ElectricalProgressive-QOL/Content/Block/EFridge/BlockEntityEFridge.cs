@@ -19,6 +19,9 @@ class BlockEntityEFridge : ContainerEFridge, ITexPositionSource
     public bool IsOpened { get; set; }
     private int _closedDelay;
 
+    private static MeshData? _mesh; // кеш для меша, который используется в анимации. Кеш нужен, чтобы не загружать меш из ресурсов каждый раз при тесселяции блока, а использовать уже загруженный и обработанный меш.
+    private static Shape? _resultingShape; // кеш для формы, которая используется в анимации. Кеш нужен, чтобы не загружать форму из ресурсов каждый раз при тесселяции блока, а использовать уже загруженную и обработанную форму.
+
     private InventoryBase _inventory;
     private GuiEFridge? _freezerDialog;
     private ICoreClientAPI _capi;
@@ -106,6 +109,10 @@ class BlockEntityEFridge : ContainerEFridge, ITexPositionSource
         _nowTesselatingShape = null;
         _nowTesselatingObj = null!;
         animUtil?.Dispose();
+
+        _mesh.Dispose();
+        _resultingShape = null;
+
         // Удаляем слушатель тиков
         UnregisterGameTickListener(_listenerId);
     }
@@ -239,8 +246,8 @@ class BlockEntityEFridge : ContainerEFridge, ITexPositionSource
             // инициализируем аниматор
             if (animUtil != null)
             {
-                animUtil.InitializeAnimator(InventoryClassName, null, null, new Vec3f(0, GetRotation(), 0f));
-                
+                PrepareAnimUtil(api, InventoryClassName);
+                animUtil.InitializeAnimator(InventoryClassName, _mesh, _resultingShape, new Vec3f(0, GetRotation(), 0f));
             }
         }
 
@@ -271,10 +278,27 @@ class BlockEntityEFridge : ContainerEFridge, ITexPositionSource
         UpdateMeshes();
         MarkDirty(true);
 
-        // Слушатель для обновления содержимого 
+        // Слушатель для обновления на клиенте и сервере
         _listenerId=RegisterGameTickListener(FreezerTick, 500);
     }
 
+    /// <summary>
+    /// Подготавливает анимационный утилит для блока, загружая меш и форму из ресурсов
+    /// </summary>
+    /// <param name="api"></param>
+    private void PrepareAnimUtil(ICoreAPI api, string cacheDictKey)
+    {
+        if (_mesh == null || _resultingShape == null)
+        {
+            AssetLocation shapePath = Block.Shape.Base.Clone().WithPathPrefixOnce("shapes/")
+                .WithPathAppendixOnce(".json");
+
+            Shape _shape = Shape.TryGet(api, shapePath);
+
+            _mesh = animUtil.CreateMesh(cacheDictKey, _shape, out _resultingShape, null);
+
+        }
+    }
 
     /// <summary>
     /// Обновляем mesh для конкретного слота
@@ -740,6 +764,11 @@ class BlockEntityEFridge : ContainerEFridge, ITexPositionSource
             _freezerDialog?.Dispose();
             _freezerDialog = null;
         }
+
+        animUtil?.Dispose();
+
+        _mesh.Dispose();
+        _resultingShape = null;
     }
 
 
