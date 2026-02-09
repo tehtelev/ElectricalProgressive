@@ -1,4 +1,4 @@
-﻿﻿using ElectricalProgressive.Utils;
+﻿using ElectricalProgressive.Utils;
 using System;
 using System.Text;
 using Vintagestory.API.Client;
@@ -426,7 +426,7 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
             // Добавляем сок в бак
             ExtractJuice(_totalJuiceAvailable);
             
-            // Создаем жмых
+            // Создаем жмых (с проверкой на соты)
             var props = GetJuiceableProperties(FruitSlot.Itemstack);
             CreatePressedMash(props, FruitSlot.Itemstack.StackSize);
             
@@ -497,28 +497,76 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         // Добавляем жмых
         if (mashStack != null)
         {
-            // Количество жмыха = количество литров сока (округляем вверх)
-            int mashCount = (int)Math.Ceiling(_totalJuiceAvailable);
-            mashStack.StackSize = Math.Max(1, mashCount);
+            int mashCount = 0;
+            
+            // ПРОВЕРЯЕМ: если это соты (honeycomb), то жмых = количеству сот
+            var fruitStack = FruitSlot.Itemstack;
+            if (fruitStack != null && IsHoneycomb(fruitStack))
+            {
+                // Для сот: жмых = количество сот (1:1)
+                mashCount = fruitsUsed;
+            }
+            else
+            {
+                // Для обычных фруктов: количество жмыха = количество литров сока (округляем вверх)
+                mashCount = (int)Math.Ceiling(_totalJuiceAvailable);
+            }
+            
+            // Гарантируем минимум 1 предмет
+            mashCount = Math.Max(1, mashCount);
+            mashStack.StackSize = mashCount;
             
             if (MashSlot.Empty)
             {
                 MashSlot.Itemstack = mashStack;
+                MashSlot.MarkDirty();
             }
             else if (MashSlot.Itemstack.Collectible.Code == mashStack.Collectible.Code)
             {
-                MashSlot.Itemstack.StackSize = Math.Min(
-                    MashSlot.Itemstack.StackSize + mashStack.StackSize,
-                    MashSlot.Itemstack.Collectible.MaxStackSize
-                );
+                // Проверяем, сколько можно добавить в слот
+                int maxStackSize = MashSlot.Itemstack.Collectible.MaxStackSize;
+                int currentStackSize = MashSlot.Itemstack.StackSize;
+                int availableSpace = maxStackSize - currentStackSize;
+                
+                if (availableSpace > 0)
+                {
+                    int toAdd = Math.Min(mashCount, availableSpace);
+                    MashSlot.Itemstack.StackSize += toAdd;
+                    MashSlot.MarkDirty();
+                    
+                    // Если остались лишние жмыхи - выбрасываем их в мир
+                    int remaining = mashCount - toAdd;
+                    if (remaining > 0)
+                    {
+                        ItemStack remainingStack = mashStack.Clone();
+                        remainingStack.StackSize = remaining;
+                        Api.World.SpawnItemEntity(remainingStack, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
+                    }
+                }
+                else
+                {
+                    // Нет места в слоте - выбрасываем все жмыхи в мир
+                    Api.World.SpawnItemEntity(mashStack, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
+                }
             }
             else
             {
+                // Слот содержит другой предмет - выбрасываем жмыхи в мир
                 Api.World.SpawnItemEntity(mashStack, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
             }
-            
-            MashSlot.MarkDirty();
         }
+    }
+    
+    // Новый метод для проверки, является ли предмет сотами
+    private bool IsHoneycomb(ItemStack stack)
+    {
+        if (stack == null) return false;
+        
+        // Проверяем по коду предмета
+        var code = stack.Collectible.Code;
+        
+        // Проверяем, содержит ли код "honeycomb"
+        return code.Path.Contains("honeycomb", StringComparison.OrdinalIgnoreCase);
     }
     
     private void StartAnimation()
