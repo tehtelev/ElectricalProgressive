@@ -19,7 +19,7 @@ namespace ElectricalProgressive.Utils
         };
 
         //сила отталкивания
-        private const double KnockbackStrength = 0.4;
+        private const double KnockbackStrength = 0.1;
 
         // Интервал в миллисекундах (2 секунды)
         private const long DamageIntervalMs = 2000;
@@ -221,13 +221,15 @@ namespace ElectricalProgressive.Utils
 
                 // 2) Вычисляем вектор от блока к сущности и отталкиваем
                 var center = pos.ToVec3d().Add(0.5, 0.5, 0.5);
-                var diff = entity.Pos.XYZ - center;
+                var entityPos = entity.Pos.XYZ.Clone();
+                entityPos.Y += entity.SelectionBox.Y2 / 2.0; // центр сущности по высоте
+                var diff = entityPos - center;
                 diff.Y = 0.2; // небольшой подъём
-                diff.Normalize();
+                //diff.Normalize();
 
-                entity.Attributes.SetDouble("kbdirX", diff.X * KnockbackStrength);
-                entity.Attributes.SetDouble("kbdirY", diff.Y * KnockbackStrength);
-                entity.Attributes.SetDouble("kbdirZ", diff.Z * KnockbackStrength);
+                entity.WatchedAttributes.SetDouble("kbdirX", diff.X * KnockbackStrength);
+                entity.WatchedAttributes.SetDouble("kbdirY", diff.Y * KnockbackStrength);
+                entity.WatchedAttributes.SetDouble("kbdirZ", diff.Z * KnockbackStrength);
 
                 // 3) Запоминаем время удара
                 entity.Attributes.SetDouble(Key, now);

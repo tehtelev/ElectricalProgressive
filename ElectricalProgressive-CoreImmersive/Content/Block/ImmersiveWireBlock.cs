@@ -1305,7 +1305,7 @@ namespace ElectricalProgressive.Content.Block
             if (cableBlock == null)
             {
                 // Fallback на базовый кабель
-                cableBlock = api.World.GetBlock(new AssetLocation("electricalprogressivebasics:wire-512v-copper-single-part"));
+                cableBlock = api.World.GetBlock(new AssetLocation("electricalprogressivecoreimmersive:wire-512v-copper-part"));
             }
 
             return new ItemStack(cableBlock);

@@ -1282,6 +1282,23 @@ namespace EPImmersive
 
             // Этап 13: Проверка сгорания проводов и трансформаторов ----------------------------------------------------------------------------
 
+
+            // Проверяем коллизии проводов раз в 10 тиков для оптимизации производительности
+            // Это означает, что провода будут разрываться с небольшой задержкой после установки блока
+            if (_envUpdater % 10 == 0)
+            {
+                try
+                {
+                    WireCollisionSystem.CheckWireCollisions(_sapi, Parts, this);
+                }
+                catch (Exception ex)
+                {
+                    _sapi.Logger.Error($"[WireCollision] Error during collision check: {ex.Message}");
+                    _sapi.Logger.Error($"[WireCollision] Stack trace: {ex.StackTrace}");
+                }
+            }
+
+
             var bAccessor = _sapi!.World.BlockAccessor; // аксессор для блоков
             BlockPos partPos;                        // Временная переменная для позиции части сети
             ImmersiveNetworkPart part;                        // Временная переменная для части сети

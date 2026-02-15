@@ -215,7 +215,7 @@ namespace ElectricalProgressive.Content.Block.EHeatCannon
                 this._ambientSound.Dispose();
             }
 
-            _mesh.Dispose();
+            _mesh?.Dispose();
             _resultingShape = null;
         }
 
