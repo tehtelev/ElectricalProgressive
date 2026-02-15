@@ -262,20 +262,29 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
                 {
                     ParticleManager.SpawnParticlesAsync(manager, Blockentity.Pos.ToVec3d().Offset(partPos).Add(0.5d, 0d, 0.5d), 1);
                 }
-                
+
                 // частицы собственные для блока
                 if (ParticlesType > 1 && !hasBurnout && !prepareBurnout)
                 {
-                    // настреок анимации нет?
-                    if (ParticlesFramesAnim==null || ParticlesFramesAnim[k][0]==-1 || ParticlesFramesAnim[k][1] == -1)
-                        ParticleManager.SpawnParticlesAsync(manager, Blockentity.Pos.ToVec3d().Offset(partPos), ParticlesType);
+                    // Проверяем, что индекс k существует в ParticlesFramesAnim
+                    bool framesValid = ParticlesFramesAnim != null && k < ParticlesFramesAnim.Count;
 
-                    // ищем аниматор
-                    if (AnimUtil != null && AnimUtil.animator!=null && AnimUtil.animator.Animations.Length>0)
+                    // Если нет кадров анимации или они не заданы (значения -1)
+                    if (!framesValid || ParticlesFramesAnim[k][0] == -1 || ParticlesFramesAnim[k][1] == -1)
                     {
-                        float buf = AnimUtil.animator.Animations[0].CurrentFrame;
-                        if (buf> ParticlesFramesAnim[k][0] && buf < ParticlesFramesAnim[k][1])
-                            ParticleManager.SpawnParticlesAsync(manager, Blockentity.Pos.ToVec3d().Offset(partPos), ParticlesType);
+                        ParticleManager.SpawnParticlesAsync(manager, Blockentity.Pos.ToVec3d().Offset(partPos), ParticlesType);
+                    }
+                    else
+                    {
+                        // Используем аниматор, только если он доступен и кадры корректны
+                        if (AnimUtil?.animator != null && AnimUtil.animator.Animations.Length > 0)
+                        {
+                            float currentFrame = AnimUtil.animator.Animations[0].CurrentFrame;
+                            if (currentFrame > ParticlesFramesAnim[k][0] && currentFrame < ParticlesFramesAnim[k][1])
+                            {
+                                ParticleManager.SpawnParticlesAsync(manager, Blockentity.Pos.ToVec3d().Offset(partPos), ParticlesType);
+                            }
+                        }
                     }
                 }
 

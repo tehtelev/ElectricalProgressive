@@ -23,8 +23,6 @@ namespace ElectricalProgressive.Content.Block.HVTransformator
             _skipNonCenterCollisions = true;
         }
         
-        
-
      
         
         public override ItemStack OnPickBlock(IWorldAccessor world, BlockPos pos)
@@ -61,12 +59,7 @@ namespace ElectricalProgressive.Content.Block.HVTransformator
         }
 
 
-        public override void OnJsonTesselation(ref MeshData sourceMesh, ref int[] lightRgbsByCorner, BlockPos pos, Vintagestory.API.Common.Block[] chunkExtBlocks, int extIndex3d)
-        {
-           
 
-            base.OnJsonTesselation(ref sourceMesh, ref lightRgbsByCorner, pos, chunkExtBlocks, extIndex3d);
-        }
 
         /// <summary>
         /// Получение информации о предмете в инвентаре

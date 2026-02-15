@@ -1,4 +1,4 @@
-{
+﻿{
 	"editor": {
 		"collapsedPaths": ",Root/Cube1/panel/pCube166/pCube167,Root/Lamp-Base,Root/Cube1/panel/pCube166/Cube169,Root/Cube1",
 		"allAngles": true,
@@ -32120,38 +32120,6 @@
 					]
 				},
 				{
-					"name": "Cube787",
-					"from": [ -0.1, 0.0, 7.0 ],
-					"to": [ 16.1, 2.0, 9.0 ],
-					"rotationOrigin": [ -0.1, 0.0, 7.0 ],
-					"faces": {
-						"north": {
-							"texture": "#copper",
-							"uv": [ 0.0, 0.0, 16.0, 2.0 ]
-						},
-						"east": {
-							"texture": "#copper",
-							"uv": [ 0.0, 0.0, 2.0, 2.0 ]
-						},
-						"south": {
-							"texture": "#copper",
-							"uv": [ 0.0, 0.0, 16.0, 2.0 ]
-						},
-						"west": {
-							"texture": "#copper",
-							"uv": [ 0.0, 0.0, 2.0, 2.0 ]
-						},
-						"up": {
-							"texture": "#copper",
-							"uv": [ 0.0, 0.0, 16.0, 2.0 ]
-						},
-						"down": {
-							"texture": "#copper",
-							"uv": [ 0.0, 0.0, 16.0, 2.0 ]
-						}
-					}
-				},
-				{
 					"name": "Cube788",
 					"from": [ 7.0, 0.0, 16.1 ],
 					"to": [ 23.2, 2.0, 18.1 ],
@@ -32180,38 +32148,6 @@
 						},
 						"down": {
 							"texture": "#copper",
-							"uv": [ 0.0, 0.0, 16.0, 2.0 ]
-						}
-					}
-				},
-				{
-					"name": "Cube789",
-					"from": [ 0.0, -0.1, 6.9 ],
-					"to": [ 16.0, 2.1, 9.1 ],
-					"rotationOrigin": [ 0.0, -0.1, 6.9 ],
-					"faces": {
-						"north": {
-							"texture": "#gray",
-							"uv": [ 0.0, 0.0, 16.0, 2.0 ]
-						},
-						"east": {
-							"texture": "#gray",
-							"uv": [ 0.0, 0.0, 2.0, 2.0 ]
-						},
-						"south": {
-							"texture": "#gray",
-							"uv": [ 0.0, 0.0, 16.0, 2.0 ]
-						},
-						"west": {
-							"texture": "#gray",
-							"uv": [ 0.0, 0.0, 2.0, 2.0 ]
-						},
-						"up": {
-							"texture": "#gray",
-							"uv": [ 0.0, 0.0, 16.0, 2.0 ]
-						},
-						"down": {
-							"texture": "#gray",
 							"uv": [ 0.0, 0.0, 16.0, 2.0 ]
 						}
 					}

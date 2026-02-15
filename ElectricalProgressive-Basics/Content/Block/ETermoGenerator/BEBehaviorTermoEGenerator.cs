@@ -88,6 +88,7 @@ public class BEBehaviorTermoEGenerator : BlockEntityBehavior, IElectricProducer
             if (entity.GenTemp > 20)
             {
                 entity.ElectricalProgressive.ParticlesType = 3;
+                //entity.ElectricalProgressive.ParticlesType = 0;
             }
             else
             {
