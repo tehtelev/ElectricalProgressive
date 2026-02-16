@@ -1,6 +1,6 @@
-﻿using ElectricalProgressive.Interface;
-using ElectricalProgressive.Utils;
-using Vintagestory.API.MathTools;
+﻿using Vintagestory.API.MathTools;
+
+namespace ElectricalProgressive.Interface;
 
 public class VirtualConductor : IElectricConductor
 {

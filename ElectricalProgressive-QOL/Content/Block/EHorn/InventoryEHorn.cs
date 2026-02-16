@@ -2,6 +2,8 @@
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 
+namespace ElectricalProgressive.Content.Block.EHorn;
+
 /// <summary>
 /// Инвентарь для горна с автозагрузкой/выгрузкой
 /// </summary>

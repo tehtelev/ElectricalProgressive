@@ -8,7 +8,7 @@ using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
 
-namespace ElectricalProgressiveTransport.LiquidInsertionPipe;
+namespace ElectricalProgressive.Content.LiquidInsertionPipe;
 
 public class BELiquidInsertionPipe : BlockEntityPipeBase
 {
@@ -232,7 +232,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     // Универсальный метод для получения реальной позиции (с учетом мультиблоков)
     private BlockPos GetRealPosition(BlockPos pos)
     {
-        Block block = Api.World.BlockAccessor.GetBlock(pos);
+        Vintagestory.API.Common.Block block = Api.World.BlockAccessor.GetBlock(pos);
 
         if (block is BlockMultiblock multiblock)
         {
@@ -253,7 +253,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     // Метод для получения ILiquidSink из позиции (с учетом мультиблоков)
     private ILiquidSink GetLiquidSinkAtPosition(BlockPos pos)
     {
-        Block block = Api.World.BlockAccessor.GetBlock(pos);
+        Vintagestory.API.Common.Block block = Api.World.BlockAccessor.GetBlock(pos);
 
         // 1. Проверяем сам блок
         if (block is ILiquidSink sink)
@@ -267,7 +267,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         if (block is BlockMultiblock multiblock)
         {
             BlockPos controlPos = multiblock.GetControlBlockPos(pos);
-            Block controlBlock = Api.World.BlockAccessor.GetBlock(controlPos);
+            Vintagestory.API.Common.Block controlBlock = Api.World.BlockAccessor.GetBlock(controlPos);
 
             if (controlBlock is ILiquidSink controlSink)
             {
@@ -289,7 +289,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     // Метод для получения ILiquidSource из позиции (с учетом мультиблоков)
     private ILiquidSource GetLiquidSourceAtPosition(BlockPos pos)
     {
-        Block block = Api.World.BlockAccessor.GetBlock(pos);
+        Vintagestory.API.Common.Block block = Api.World.BlockAccessor.GetBlock(pos);
 
         // 1. Проверяем сам блок
         if (block is ILiquidSource source)
@@ -303,7 +303,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         if (block is BlockMultiblock multiblock)
         {
             BlockPos controlPos = multiblock.GetControlBlockPos(pos);
-            Block controlBlock = Api.World.BlockAccessor.GetBlock(controlPos);
+            Vintagestory.API.Common.Block controlBlock = Api.World.BlockAccessor.GetBlock(controlPos);
 
             if (controlBlock is ILiquidSource controlSource)
             {
@@ -335,7 +335,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
             BlockPos checkPos = Pos.AddCopy(facing);
 
             // Пропускаем трубы
-            Block checkBlock = Api.World.BlockAccessor.GetBlock(checkPos);
+            Vintagestory.API.Common.Block checkBlock = Api.World.BlockAccessor.GetBlock(checkPos);
             if (checkBlock is BlockPipeBase)
             {
                 continue;
@@ -409,7 +409,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
                 Api.Logger.Notification($"=== Целевой блок реализует ILiquidSink ===");
 
                 // Показываем реальную позицию
-                Block targetBlock = Api.World.BlockAccessor.GetBlock(targetPos);
+                Vintagestory.API.Common.Block targetBlock = Api.World.BlockAccessor.GetBlock(targetPos);
                 if (targetBlock is BlockMultiblock)
                 {
                     BlockPos realPos = GetRealPosition(targetPos);
@@ -472,7 +472,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
                 if (excludePositions.Contains(sourcePos)) continue;
 
                 // Пропускаем другие трубы
-                Block sourceBlock = Api.World.BlockAccessor.GetBlock(sourcePos);
+                Vintagestory.API.Common.Block sourceBlock = Api.World.BlockAccessor.GetBlock(sourcePos);
                 if (sourceBlock is BlockPipeBase)
                     continue;
 
@@ -614,8 +614,8 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
                 Api.Logger.Notification($"=== НЕУДАЧА: TryPutLiquid вернул 0 ===");
 
                 // Диагностика
-                Block sourceBlock = Api.World.BlockAccessor.GetBlock(realSourcePos);
-                Block targetBlock = Api.World.BlockAccessor.GetBlock(realTargetPos);
+                Vintagestory.API.Common.Block sourceBlock = Api.World.BlockAccessor.GetBlock(realSourcePos);
+                Vintagestory.API.Common.Block targetBlock = Api.World.BlockAccessor.GetBlock(realTargetPos);
 
                 Api.Logger.Notification($"=== Реальный блок источника: {sourceBlock?.GetType().Name} ===");
                 Api.Logger.Notification($"=== Реальный блок цели: {targetBlock?.GetType().Name} ===");

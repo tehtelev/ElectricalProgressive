@@ -2,7 +2,7 @@
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 
-namespace ElectricalProgressiveTransport.ItemInsertionPipe;
+namespace ElectricalProgressive.Content.ItemInsertionPipe;
 
 public class InventoryInsertionPipe : InventoryGeneric
 {

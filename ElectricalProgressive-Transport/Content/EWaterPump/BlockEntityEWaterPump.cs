@@ -1,3 +1,4 @@
+﻿using ElectricalProgressive.Content.Block;
 using ElectricalProgressive.Utils;
 using System;
 using System.Text;
@@ -8,7 +9,7 @@ using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
 
-namespace ElectricalProgressive.Content.Block.EWaterPump;
+namespace ElectricalProgressive.Content.EWaterPump;
 
 public class BlockEntityEWaterPump : BlockEntityGenericTypedContainer
 {

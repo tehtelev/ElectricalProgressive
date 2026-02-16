@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 18
-VisualStudioVersion = 18.2.11415.280 d18.0
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36930.0 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CakeBuild", "CakeBuild\CakeBuild.csproj", "{2C774B24-E3EF-4B84-92E2-A2A3AD323E76}"
 EndProject
@@ -19,8 +19,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricalProgressive-CoreImmersive", "ElectricalProgressive-CoreImmersive\ElectricalProgressive-CoreImmersive.csproj", "{B5C4D90A-7623-6165-11AC-02DDBD3865EE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElectricalProgressive-Transport", "ElectricalProgressive-Transport\ElectricalProgressive-Transport.csproj", "{8CCFA9C7-8523-464E-8FF1-E97511D3631E}"
 EndProject
@@ -80,14 +78,6 @@ Global
 		{E38CB2F3-818F-4DD5-AD53-B58EB92506EB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E38CB2F3-818F-4DD5-AD53-B58EB92506EB}.Release|x86.ActiveCfg = Release|Any CPU
 		{E38CB2F3-818F-4DD5-AD53-B58EB92506EB}.Release|x86.Build.0 = Release|Any CPU
-		{B5C4D90A-7623-6165-11AC-02DDBD3865EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B5C4D90A-7623-6165-11AC-02DDBD3865EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B5C4D90A-7623-6165-11AC-02DDBD3865EE}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{B5C4D90A-7623-6165-11AC-02DDBD3865EE}.Debug|x86.Build.0 = Debug|Any CPU
-		{B5C4D90A-7623-6165-11AC-02DDBD3865EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B5C4D90A-7623-6165-11AC-02DDBD3865EE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B5C4D90A-7623-6165-11AC-02DDBD3865EE}.Release|x86.ActiveCfg = Release|Any CPU
-		{B5C4D90A-7623-6165-11AC-02DDBD3865EE}.Release|x86.Build.0 = Release|Any CPU
 		{8CCFA9C7-8523-464E-8FF1-E97511D3631E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8CCFA9C7-8523-464E-8FF1-E97511D3631E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CCFA9C7-8523-464E-8FF1-E97511D3631E}.Debug|x86.ActiveCfg = Debug|x86

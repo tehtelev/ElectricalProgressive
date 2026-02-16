@@ -1,16 +1,15 @@
-﻿using ElectricalProgressiveTransport.NetworkPipe;
+﻿using ElectricalProgressive.Content.NetworkPipe;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
 
-namespace ElectricalProgressiveTransport
+namespace ElectricalProgressive.Content
 {
     /// <summary>
     /// Базовый класс для всех типов труб (наследуется от контейнера)
@@ -80,7 +79,7 @@ namespace ElectricalProgressiveTransport
                 BlockPos checkPos = Pos.AddCopy(facing);
 
                 // Получаем блок соседа
-                Block neighborBlock = Api?.World.BlockAccessor.GetBlock(checkPos);
+                Vintagestory.API.Common.Block neighborBlock = Api?.World.BlockAccessor.GetBlock(checkPos);
 
                 if (Api?.Side == EnumAppSide.Server)
                 {
@@ -148,7 +147,7 @@ namespace ElectricalProgressiveTransport
         /// <summary>
         /// Проверяет, является ли блок трубой
         /// </summary>
-        protected virtual bool IsPipeBlock(Block block)
+        protected virtual bool IsPipeBlock(Vintagestory.API.Common.Block block)
         {
             if (block == null) return false;
 
@@ -167,7 +166,7 @@ namespace ElectricalProgressiveTransport
             try
             {
                 // Получаем блок
-                Block block = Api.World.BlockAccessor.GetBlock(pos);
+                Vintagestory.API.Common.Block block = Api.World.BlockAccessor.GetBlock(pos);
                 if (block == null) return false;
 
                 // ПЕРВЫЙ СПОСОБ: проверка на BlockEntityContainer
@@ -295,7 +294,7 @@ namespace ElectricalProgressiveTransport
             if (Api == null) return null;
 
             // Сначала пытаемся получить BlockEntityContainer
-            Block block = Api.World.BlockAccessor.GetBlock(pos);
+            Vintagestory.API.Common.Block block = Api.World.BlockAccessor.GetBlock(pos);
             BlockEntityContainer container = block?.GetBlockEntity<BlockEntityContainer>(pos);
 
             if (container != null)
@@ -370,7 +369,7 @@ namespace ElectricalProgressiveTransport
             if (Api == null || Api.Side != EnumAppSide.Server) return;
 
             // Получаем текущий блок
-            Block currentBlock = Api.World.BlockAccessor.GetBlock(Pos);
+            Vintagestory.API.Common.Block currentBlock = Api.World.BlockAccessor.GetBlock(Pos);
             if (currentBlock == null) return;
 
             // Определяем базовый код блока (без типа)
@@ -381,7 +380,7 @@ namespace ElectricalProgressiveTransport
             string newBlockCodeString = $"{baseBlockCode}-{pipeType}";
             AssetLocation newBlockCode = new AssetLocation(newBlockCodeString);
 
-            Block newBlock = Api.World.GetBlock(newBlockCode);
+            Vintagestory.API.Common.Block newBlock = Api.World.GetBlock(newBlockCode);
 
             if (newBlock == null)
             {

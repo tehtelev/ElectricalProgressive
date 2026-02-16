@@ -1,5 +1,4 @@
-﻿using ElectricalProgressive.Content;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using Vintagestory.API.Client;
@@ -9,7 +8,7 @@ using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
 
-namespace ElectricalProgressiveTransport.ItemInsertionPipe;
+namespace ElectricalProgressive.Content.ItemInsertionPipe;
 
 public class BEItemInsertionPipe : BlockEntityPipeBase
 {
@@ -253,7 +252,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
             BlockPos checkPos = Pos.AddCopy(facing);
 
             // Пропускаем позиции с трубами
-            Block checkBlock = Api.World.BlockAccessor.GetBlock(checkPos);
+            Vintagestory.API.Common.Block checkBlock = Api.World.BlockAccessor.GetBlock(checkPos);
             if (checkBlock is BlockPipeBase)
             {
                 continue;
@@ -458,7 +457,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
 
         // Получаем целевой контейнер
         BlockPos containerPos = Pos.AddCopy(outputFacing);
-        Block block = Api.World.BlockAccessor.GetBlock(containerPos);
+        Vintagestory.API.Common.Block block = Api.World.BlockAccessor.GetBlock(containerPos);
 
         // Используем подход как желоб
         BlockEntityContainer targetContainer = block.GetBlockEntity<BlockEntityContainer>(containerPos);
@@ -567,7 +566,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         }
 
         // ПОЛУЧАЕМ КОНТЕЙНЕР ИСТОЧНИКА
-        Block sourceBlock = Api.World.BlockAccessor.GetBlock(sourcePos);
+        Vintagestory.API.Common.Block sourceBlock = Api.World.BlockAccessor.GetBlock(sourcePos);
         BlockEntityContainer sourceContainer = sourceBlock.GetBlockEntity<BlockEntityContainer>(sourcePos);
 
         if (sourceContainer == null)

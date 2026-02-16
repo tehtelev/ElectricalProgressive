@@ -2,7 +2,7 @@
 using Vintagestory.API.Common;
 using Vintagestory.GameContent;
 
-namespace ElectricalProgressiveTransport.LiquidInsertionPipe;
+namespace ElectricalProgressive.Content.LiquidInsertionPipe;
 
     public class InventoryLiquidInsertionPipe : InventoryGeneric
     {
@@ -296,7 +296,7 @@ namespace ElectricalProgressiveTransport.LiquidInsertionPipe;
                 if (emptiedBlockCode != null)
                 {
                     AssetLocation emptiedAsset = AssetLocation.Create(emptiedBlockCode, sourceSlot.Itemstack.Collectible.Code.Domain);
-                    Block emptiedBlock = world.GetBlock(emptiedAsset);
+                    Vintagestory.API.Common.Block emptiedBlock = world.GetBlock(emptiedAsset);
                     
                     if (emptiedBlock != null)
                     {

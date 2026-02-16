@@ -1,10 +1,10 @@
+﻿using Cairo;
 using System;
-using Cairo;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 
-namespace ElectricalProgressive.Content.Block.EWaterPump;
+namespace ElectricalProgressive.Content.EWaterPump;
 
 public class GuiDialogEWaterPump : GuiDialogBlockEntity
 {

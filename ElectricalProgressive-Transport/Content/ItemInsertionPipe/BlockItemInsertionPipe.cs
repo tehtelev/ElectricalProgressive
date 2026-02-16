@@ -5,7 +5,7 @@ using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
 
-namespace ElectricalProgressiveTransport.ItemInsertionPipe;
+namespace ElectricalProgressive.Content.ItemInsertionPipe;
 
 public class BlockItemInsertionPipe : BlockPipeBase
 {

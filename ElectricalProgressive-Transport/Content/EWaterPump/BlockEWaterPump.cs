@@ -1,3 +1,4 @@
+﻿using ElectricalProgressive.Content.Block;
 using ElectricalProgressive.Utils;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,7 @@ using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
 
-namespace ElectricalProgressive.Content.Block.EWaterPump;
+namespace ElectricalProgressive.Content.EWaterPump;
 
 /// <summary>
 /// Блок электрической помпы для воды.

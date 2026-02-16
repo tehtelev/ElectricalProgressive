@@ -5,7 +5,7 @@ using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 
-namespace ElectricalProgressiveTransport.ItemInsertionPipe;
+namespace ElectricalProgressive.Content.ItemInsertionPipe;
 
 public class GuiDialogInsertionPipe : GuiDialogBlockEntity
 {

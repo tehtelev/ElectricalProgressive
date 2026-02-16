@@ -24,42 +24,6 @@ public struct FastPosKeyByteComparer : IEqualityComparer<(FastPosKey key, byte f
 }
 
 
-// Структура для быстрого сравнения и хеширования позиций с учетом измерения (dimension)
-public struct FastPosKey : IEquatable<FastPosKey>
-{
-    public int X, Y, Z, Dim;
-    public BlockPos Pos;
-    public FastPosKey(int x, int y, int z, int dim, BlockPos pos=null)
-    {
-        X = x;
-        Y = y;
-        Z = z;
-        Dim = dim;
-        Pos = pos;
-    }
-
-
-
-    // Реализация интерфейса IEquatable для быстрого сравнения
-    public bool Equals(FastPosKey other) =>
-        X == other.X && Y == other.Y && Z == other.Z && Dim == other.Dim;
-
-    public override bool Equals(object obj) => obj is FastPosKey other && Equals(other);
-
-    // Оптимизированный хеш-код для минимизации коллизий
-    public override int GetHashCode()
-    {
-        unchecked
-        {
-            // Быстрая версия с битовыми операциями и минимальным количеством операций
-            var hash = this.X;
-            hash = (hash << 9) ^ (hash >> 23) ^ this.Y;  // Сдвиги и XOR вместо умножения
-            hash = (hash << 9) ^ (hash >> 23) ^ this.Z;
-            return hash ^ (this.Dim * 269023); // Умножение на простое число для учета измерения
-        }
-    }
-}
-
 
 
 

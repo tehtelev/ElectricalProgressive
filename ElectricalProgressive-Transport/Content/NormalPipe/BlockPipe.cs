@@ -3,7 +3,7 @@ using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 
-namespace ElectricalProgressiveTransport.NormalPipe;
+namespace ElectricalProgressive.Content.NormalPipe;
 
 public class BlockPipe : BlockPipeBase
 {

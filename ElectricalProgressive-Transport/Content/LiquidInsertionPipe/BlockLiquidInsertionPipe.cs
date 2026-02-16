@@ -4,9 +4,8 @@ using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
-using Vintagestory.GameContent;
 
-namespace ElectricalProgressiveTransport.LiquidInsertionPipe;
+namespace ElectricalProgressive.Content.LiquidInsertionPipe;
 
 public class BlockLiquidInsertionPipe : BlockPipeBase
 {

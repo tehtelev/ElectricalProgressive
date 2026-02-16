@@ -1,8 +1,9 @@
-﻿using ElectricalProgressive.Content.Block.EWaterPump;
-using ElectricalProgressiveTransport.ItemInsertionPipe;
-using ElectricalProgressiveTransport.LiquidInsertionPipe;
-using ElectricalProgressiveTransport.NetworkPipe;
-using ElectricalProgressiveTransport.NormalPipe;
+﻿using ElectricalProgressive.Content;
+using ElectricalProgressive.Content.EWaterPump;
+using ElectricalProgressive.Content.ItemInsertionPipe;
+using ElectricalProgressive.Content.LiquidInsertionPipe;
+using ElectricalProgressive.Content.NetworkPipe;
+using ElectricalProgressive.Content.NormalPipe;
 using Vintagestory.API.Common;
 
 [assembly: ModDependency("game", "1.21.6")]
@@ -20,7 +21,7 @@ using Vintagestory.API.Common;
 )]
 
 
-namespace ElectricalProgressiveTransport;
+namespace ElectricalProgressive;
 
 public class ElectricalProgressiveTransport : ModSystem
 {

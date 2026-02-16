@@ -1,10 +1,10 @@
-﻿using ElectricalProgressiveTransport.ItemInsertionPipe;
-using ElectricalProgressiveTransport.NormalPipe;
+﻿using ElectricalProgressive.Content.ItemInsertionPipe;
+using ElectricalProgressive.Content.NormalPipe;
 using System.Collections.Generic;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 
-namespace ElectricalProgressiveTransport.NetworkPipe;
+namespace ElectricalProgressive.Content.NetworkPipe;
 
 public class PipeNetwork
 {
@@ -87,7 +87,7 @@ public class PipeNetwork
 
                     if (!visited.Contains(neighborPos))
                     {
-                        Block neighborBlock = world.BlockAccessor.GetBlock(neighborPos);
+                        Vintagestory.API.Common.Block neighborBlock = world.BlockAccessor.GetBlock(neighborPos);
                         if (neighborBlock is BlockPipeBase)
                         {
                             visited.Add(neighborPos.Copy());

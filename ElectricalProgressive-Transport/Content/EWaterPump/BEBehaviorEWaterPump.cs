@@ -1,14 +1,11 @@
-using ElectricalProgressive.Interface;
+﻿using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
-using System;
-using System.Linq;
 using System.Text;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
-using Vintagestory.API.MathTools;
 
-namespace ElectricalProgressive.Content.Block.EWaterPump;
+namespace ElectricalProgressive.Content.EWaterPump;
 
 public class BEBehaviorEWaterPump : BlockEntityBehavior, IElectricConsumer
 {

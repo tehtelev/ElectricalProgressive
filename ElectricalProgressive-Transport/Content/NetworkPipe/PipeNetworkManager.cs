@@ -1,11 +1,11 @@
-﻿using ElectricalProgressiveTransport.ItemInsertionPipe;
-using ElectricalProgressiveTransport.NormalPipe;
+﻿using ElectricalProgressive.Content.ItemInsertionPipe;
+using ElectricalProgressive.Content.NormalPipe;
 using System.Collections.Generic;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 
-namespace ElectricalProgressiveTransport.NetworkPipe;
+namespace ElectricalProgressive.Content.NetworkPipe;
 
 public class PipeNetworkManager
 {
@@ -238,7 +238,7 @@ public class PipeNetworkManager
                                         chunkPos.Z + cz
                                     );
 
-                                    Block block = api.World.BlockAccessor.GetBlock(blockPos);
+                                    Vintagestory.API.Common.Block block = api.World.BlockAccessor.GetBlock(blockPos);
                                     if (block is BlockPipeBase)
                                     {
                                         allPipes.Add(blockPos.Copy());

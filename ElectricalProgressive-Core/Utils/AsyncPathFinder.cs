@@ -142,20 +142,5 @@ namespace ElectricalProgressive.Utils
 
     }
 
-    /// <summary>
-    /// Класс для представления запроса на поиск пути
-    /// </summary>
-    public class PathRequest
-    {
-        public BlockPos Start { get; }
-        public BlockPos End { get; }
-        public Network Network { get; }
 
-        public PathRequest(BlockPos start, BlockPos end, Network network)
-        {
-            Start = start;
-            End = end;
-            Network = network;
-        }
-    }
 }

@@ -1,17 +1,17 @@
-﻿using ElectricalProgressiveTransport.ItemInsertionPipe;
-using ElectricalProgressiveTransport.LiquidInsertionPipe;
-using ElectricalProgressiveTransport.NetworkPipe;
+﻿using ElectricalProgressive.Content.ItemInsertionPipe;
+using ElectricalProgressive.Content.LiquidInsertionPipe;
+using ElectricalProgressive.Content.NetworkPipe;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
-using System.Collections.Generic;
-using System.Linq;
-using System;
 using Vintagestory.GameContent;
 
-namespace ElectricalProgressiveTransport.NormalPipe;
+namespace ElectricalProgressive.Content.NormalPipe;
 
 public class BEPipe : BlockEntity
 {
@@ -59,7 +59,7 @@ public class BEPipe : BlockEntity
             BlockPos checkPos = Pos.AddCopy(facing);
 
             // Получаем блок соседа
-            Block neighborBlock = Api?.World.BlockAccessor.GetBlock(checkPos);
+            Vintagestory.API.Common.Block neighborBlock = Api?.World.BlockAccessor.GetBlock(checkPos);
 
             if (Api?.Side == EnumAppSide.Server)
             {
@@ -125,7 +125,7 @@ public class BEPipe : BlockEntity
         MarkDirty();
     }
 
-    private static bool IsPipeBlock(Block block)
+    private static bool IsPipeBlock(Vintagestory.API.Common.Block block)
     {
         if (block == null) return false;
 
@@ -141,7 +141,7 @@ public class BEPipe : BlockEntity
         try
         {
             // Получаем блок
-            Block block = Api.World.BlockAccessor.GetBlock(pos);
+            Vintagestory.API.Common.Block block = Api.World.BlockAccessor.GetBlock(pos);
             if (block == null) return false;
 
             // ПЕРВЫЙ СПОСОБ: как в BEInsertionPipe - проверка на BlockEntityContainer
@@ -263,7 +263,7 @@ public class BEPipe : BlockEntity
         if (Api == null) return null;
 
         // Сначала пытаемся получить BlockEntityContainer
-        Block block = Api.World.BlockAccessor.GetBlock(pos);
+        Vintagestory.API.Common.Block block = Api.World.BlockAccessor.GetBlock(pos);
         BlockEntityContainer container = block?.GetBlockEntity<BlockEntityContainer>(pos);
 
         if (container != null)
@@ -326,7 +326,7 @@ public class BEPipe : BlockEntity
         string pipeType = DeterminePipeType(connectedFacings);
 
         // Получаем текущий блок
-        Block currentBlock = Api.World.BlockAccessor.GetBlock(Pos);
+        Vintagestory.API.Common.Block currentBlock = Api.World.BlockAccessor.GetBlock(Pos);
         if (currentBlock == null) return;
 
         // Создаем правильный код блока
@@ -335,7 +335,7 @@ public class BEPipe : BlockEntity
 
         Api.Logger.Notification($"Пытаемся получить блок: {newBlockCode}");
 
-        Block newBlock = Api.World.GetBlock(newBlockCode);
+        Vintagestory.API.Common.Block newBlock = Api.World.GetBlock(newBlockCode);
 
         if (newBlock == null)
         {

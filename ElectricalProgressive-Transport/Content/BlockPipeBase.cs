@@ -1,9 +1,7 @@
-﻿using ElectricalProgressiveTransport.ItemInsertionPipe;
-using ElectricalProgressiveTransport.LiquidInsertionPipe;
-using ElectricalProgressiveTransport.NormalPipe;
-using System;
+﻿using ElectricalProgressive.Content.ItemInsertionPipe;
+using ElectricalProgressive.Content.LiquidInsertionPipe;
+using ElectricalProgressive.Content.NormalPipe;
 using System.Collections.Generic;
-using System.Linq;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -11,9 +9,9 @@ using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
 
-namespace ElectricalProgressiveTransport
+namespace ElectricalProgressive.Content
 {
-    public class BlockPipeBase : Block
+    public class BlockPipeBase : Vintagestory.API.Common.Block
     {
         public override bool OnBlockInteractStart(
             IWorldAccessor world,
@@ -59,7 +57,7 @@ namespace ElectricalProgressiveTransport
         protected virtual bool TransformPipeType(IWorldAccessor world, BlockPos pos, IPlayer player)
         {
             // Получаем текущий блок
-            Block currentBlock = world.BlockAccessor.GetBlock(pos);
+            Vintagestory.API.Common.Block currentBlock = world.BlockAccessor.GetBlock(pos);
             string currentCode = currentBlock.Code.Path;
             
             // Для отладки
@@ -160,7 +158,7 @@ namespace ElectricalProgressiveTransport
                 : nextBaseType;
             
             // Получаем новый блок
-            Block newBlock = world.GetBlock(new AssetLocation($"electricalprogressivetransport:{newBlockCode}"));
+            Vintagestory.API.Common.Block newBlock = world.GetBlock(new AssetLocation($"electricalprogressivetransport:{newBlockCode}"));
             
             // Если блок с конфигурацией не найден, пробуем найти с дефолтной конфигурацией
             if (newBlock == null && !string.IsNullOrEmpty(configuration))
@@ -291,7 +289,7 @@ namespace ElectricalProgressiveTransport
                 BlockFacing facing = BlockFacing.ALLFACES[i];
                 BlockPos neighborPos = pos.AddCopy(facing);
                 
-                Block neighborBlock = world.BlockAccessor.GetBlock(neighborPos);
+                Vintagestory.API.Common.Block neighborBlock = world.BlockAccessor.GetBlock(neighborPos);
                 
                 if (neighborBlock is BlockPipeBase)
                 {

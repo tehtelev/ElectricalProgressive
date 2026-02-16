@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
 
-namespace ElectricalProgressive.Content.Block.EWaterPump;
+namespace ElectricalProgressive.Content.EWaterPump;
 
 public class InventoryEWaterPump : InventoryBase, ISlotProvider
 {
