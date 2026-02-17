@@ -19,7 +19,7 @@
     "isolated": true,
     "isolatedEnvironment": true,
     "handbook": {
-      "groupBy": [ "cabledotdown-*" ],
+      "groupBy": [ "cabledotdown" ],
       "extraSections": [
         {
           "title": "electricalprogressivebasics:block-handbooktitle-cabledotdown",

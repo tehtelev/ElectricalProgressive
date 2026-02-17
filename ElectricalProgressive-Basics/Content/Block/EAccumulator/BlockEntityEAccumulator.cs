@@ -1,7 +1,5 @@
 ﻿using ElectricalProgressive.Utils;
-using System.Linq;
 using Vintagestory.API.Common;
-using Vintagestory.API.Common.Entities;
 
 namespace ElectricalProgressive.Content.Block.EAccumulator;
 

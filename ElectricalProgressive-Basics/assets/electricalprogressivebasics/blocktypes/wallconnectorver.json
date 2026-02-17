@@ -19,7 +19,7 @@
     "IsOpen": false,
     "particlesOffsetPos": [ [ 0.1, 0.5, 0.1 ] ],
     "handbook": {
-      "groupBy": [ "wallconnectorver-*" ],
+      "groupBy": [ "wallconnectorver" ],
       "extraSections": [
         {
           "title": "electricalprogressivebasics:block-handbooktitle-wallconnectorver",

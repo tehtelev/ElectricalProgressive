@@ -117,7 +117,7 @@
 
 
   "block-handbooktitle-ecable": "Использование",
-  "block-handbooktext-ecable": "Позволяет передавать электрическую энергию на расстояние. Изолированные варианты кабеля снижают потери в два раза!<br>Об особенностях работы читайте в <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-princip\">руководстве<\/a>.",
+  "block-handbooktext-ecable": "Позволяет передавать электрическую энергию на расстояние. Можно размещать только на сплошных гранях блоков. Изолированные варианты кабеля снижают потери в два раза!<br>Об особенностях работы читайте в <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-princip\">руководстве<\/a>.",
 
   "block-handbooktitle-switch": "Использование",
   "block-handbooktext-switch": "Позволяет разрывать электрическую цепь. Устанавливается на кабель. Кликните по нему, чтобы переключить его.",
@@ -288,19 +288,19 @@
   "wire_disconnected": "Провод отключен. Возвращено {0} шт. провода.",
 
 
-  "block-cabledotdown-*": "Изолятор (пол)",
+  "block-cabledotdown": "Изолятор (пол)",
   "block-handbooktitle-cabledotdown": "Использование",
   "block-handbooktext-cabledotdown": "Вариант изолятора для иммерсивных проводов с креплением на полу.",
 
-  "block-cabledotroof-*": "Изолятор (потолок)",
+  "block-cabledotroof": "Изолятор (потолок)",
   "block-handbooktitle-cabledotroof": "Использование",
   "block-handbooktext-cabledotroof": "Вариант изолятора для иммерсивных проводов с креплением на потолке.",
 
-  "block-cabledotwall-*": "Изолятор (стена)",
+  "block-cabledotwall": "Изолятор (стена)",
   "block-handbooktitle-cabledotwall": "Использование",
   "block-handbooktext-cabledotwall": "Вариант изолятора для иммерсивных проводов с креплением на стене.",
 
-  "block-cableswitchwall-*": "Рубильник (стена)",
+  "block-cableswitchwall": "Рубильник (стена)",
   "block-handbooktitle-cableswitchwall": "Использование",
   "block-handbooktext-cableswitchwall": "Рубильник с креплением на стене. Может разрывать/или соединять цепь между двумя изоляторами рубильника.",
 
@@ -324,7 +324,32 @@
   "block-handbooktitle-wallconnectorhor": "Использование",
   "block-handbooktext-wallconnectorhor": "Позволяет передавать энергию скозь стены не нарушая целостность комнат.",
 
-  "block-wallconnectorver-*": "Сквозной соединитель (вертикальный)",
+  "block-wallconnectorver": "Сквозной соединитель (вертикальный)",
   "block-handbooktitle-wallconnectorver": "Использование",
-  "block-handbooktext-wallconnectorver": "Позволяет передавать энергию скозь стены не нарушая целостность комнат."
+  "block-handbooktext-wallconnectorver": "Позволяет передавать энергию скозь потолок/пол не нарушая целостность комнат.",
+
+  // 512В
+  "block-wire-512v-copper-part": "Медный иммерсивный провод (512В)",
+  "block-wire-512v-silver-part": "Серебряный иммерсивный провод (512В)",
+  "block-wire-512v-lead-part": "Свинцовый иммерсивный провод (512В)",
+  "block-wire-512v-gold-part": "Золотой иммерсивный провод (512В)",
+  "block-wire-512v-steel-part": "Стальной иммерсивный провод (512В)",
+  "block-wire-512v-iron-part": "Железный иммерсивный провод (512В)",
+  "block-wire-512v-tinbronze-part": "Бронзовый иммерсивный провод (512В)",
+  "block-wire-512v-brass-part": "Латунный иммерсивный провод (512В)",
+  "block-wire-512v-electrum-part": "Иммерсивный провод из электрума (512В)",
+
+  "block-wire-512v-copper-isolated": "Медный изолированный иммерсивный провод (512В)",
+  "block-wire-512v-silver-isolated": "Серебряный изолированный иммерсивный провод (512В)",
+  "block-wire-512v-lead-isolated": "Свинцовый изолированный иммерсивный провод (512В)",
+  "block-wire-512v-gold-isolated": "Золотой изолированный иммерсивный провод (512В)",
+  "block-wire-512v-steel-isolated": "Стальной изолированный иммерсивный провод (512В)",
+  "block-wire-512v-iron-isolated": "Железный изолированный иммерсивный провод (512В)",
+  "block-wire-512v-tinbronze-isolated": "Бронзовый изолированный иммерсивный провод (512В)",
+  "block-wire-512v-brass-isolated": "Латунный изолированный иммерсивный провод (512В)",
+  "block-wire-512v-electrum-isolated": "Изолированный иммерсивный провод из электрума (512В)",
+
+
+  "block-handbooktitle-wire": "Использование",
+  "block-handbooktext-wire": "Позволяет передавать электрическую энергию на большие расстояния. Можно крепить только на изоляторы. Максимальная длина для крепления: 32 блока. Изолированные варианты кабеля снижают потери в два раза!<br>Об особенностях работы читайте в <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-princip\">руководстве<\/a>."
 }

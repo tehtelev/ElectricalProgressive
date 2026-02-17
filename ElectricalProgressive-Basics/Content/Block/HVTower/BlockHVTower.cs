@@ -1,12 +1,8 @@
 ﻿using ElectricalProgressive.Utils;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
-using Vintagestory.GameContent;
 
 
 namespace ElectricalProgressive.Content.Block.HVTower

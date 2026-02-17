@@ -1,5 +1,4 @@
 ﻿using ElectricalProgressive.Utils;
-using System.Linq;
 using Vintagestory.API.Common;
 
 namespace ElectricalProgressive.Content.Block.ETransformator;

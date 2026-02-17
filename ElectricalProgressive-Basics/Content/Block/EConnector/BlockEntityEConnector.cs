@@ -1,5 +1,4 @@
-﻿using ElectricalProgressive.Content.Block.ECable;
-using ElectricalProgressive.Utils;
+﻿using ElectricalProgressive.Utils;
 using Vintagestory.API.Common;
 
 namespace ElectricalProgressive.Content.Block.EConnector;

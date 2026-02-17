@@ -1,5 +1,4 @@
 ﻿using ElectricalProgressive.Utils;
-using System;
 using System.Linq;
 using System.Text;
 using Vintagestory.API.Client;

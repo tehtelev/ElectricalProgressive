@@ -19,7 +19,7 @@
     "isolated": true,
     "isolatedEnvironment": true,
     "handbook": {
-      "groupBy": [ "cabledotroof-*" ],
+      "groupBy": [ "cabledotroof" ],
       "extraSections": [
         {
           "title": "electricalprogressivebasics:block-handbooktitle-cabledotroof",

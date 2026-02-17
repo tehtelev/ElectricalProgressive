@@ -1,8 +1,4 @@
 ﻿using ElectricalProgressive.Utils;
-using System;
-using Vintagestory.API.Common;
-using Vintagestory.API.Datastructures;
-using Vintagestory.API.Util;
 
 namespace ElectricalProgressive.Content.Block.EGenerator;
 

@@ -1,11 +1,8 @@
 ﻿using ElectricalProgressive.Content.Block.ECable;
 using ElectricalProgressive.Utils;
-using Microsoft.VisualBasic;
-using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.MathTools;
-using Vintagestory.API.Util;
 
 namespace ElectricalProgressive.Content.Block.ESwitch;
 

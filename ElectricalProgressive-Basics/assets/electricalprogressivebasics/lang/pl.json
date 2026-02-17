@@ -1,1 +1,337 @@
-﻿{}
+﻿{
+  "block-emotor-tier1-*": "Silnik",
+  "block-emotor-tier1-burned": "Silnik (spalony)",
+
+  "block-emotor-tier2-*": "Ulepszony silnik",
+  "block-emotor-tier2-burned": "Ulepszony silnik (spalony)",
+
+  "block-emotor-tier3-*": "Silnik wysokowydajny",
+  "block-emotor-tier3-burned": "Silnik wysokowydajny (spalony)",
+
+  "block-egenerator-tier1-*": "Generator",
+  "block-egenerator-tier1-burned": "Generator (spalony)",
+
+  "block-egenerator-tier2-*": "Ulepszony generator",
+  "block-egenerator-tier2-burned": "Ulepszony generator (spalony)",
+
+  "block-egenerator-tier3-*": "Generator wysokowydajny",
+  "block-egenerator-tier3-burned": "Generator wysokowydajny (spalony)",
+
+  "block-transformator-*": "Transformator",
+  "block-transformator-burned-south": "Transformator (spalony)",
+
+  "block-accumulator-tier1-*": "Akumulator (32V)",
+  "block-accumulator-tier1-burned": "Akumulator (32V) (spalony)",
+
+  "block-accumulator-tier2-*": "Akumulator (128V)",
+  "block-accumulator-tier2-burned": "Akumulator (128V) (spalony)",
+
+  // 32V
+  "block-ecable-32v-copper-*-part": "Kabel miedziany (32V)",
+  "block-ecable-32v-silver-*-part": "Kabel srebrny (32V)",
+  "block-ecable-32v-lead-*-part": "Kabel ołowiany (32V)",
+  "block-ecable-32v-gold-*-part": "Kabel złoty (32V)",
+  "block-ecable-32v-steel-*-part": "Kabel stalowy (32V)",
+  "block-ecable-32v-iron-*-part": "Kabel żelazny (32V)",
+  "block-ecable-32v-tinbronze-*-part": "Kabel brązowy (32V)",
+  "block-ecable-32v-brass-*-part": "Kabel mosiężny (32V)",
+  "block-ecable-32v-electrum-*-part": "Kabel z elektrum (32V)",
+
+  // 128V
+  "block-ecable-128v-copper-*-part": "Kabel miedziany (128V)",
+  "block-ecable-128v-silver-*-part": "Kabel srebrny (128V)",
+  "block-ecable-128v-lead-*-part": "Kabel ołowiany (128V)",
+  "block-ecable-128v-gold-*-part": "Kabel złoty (128V)",
+  "block-ecable-128v-steel-*-part": "Kabel stalowy (128V)",
+  "block-ecable-128v-iron-*-part": "Kabel żelazny (128V)",
+  "block-ecable-128v-tinbronze-*-part": "Kabel brązowy (128V)",
+  "block-ecable-128v-brass-*-part": "Kabel mosiężny (128V)",
+  "block-ecable-128v-electrum-*-part": "Kabel z elektrum (128V)",
+
+  // 32V
+  "block-ecable-32v-copper-*-isolated": "Izolowany kabel miedziany (32V)",
+  "block-ecable-32v-silver-*-isolated": "Izolowany kabel srebrny (32V)",
+  "block-ecable-32v-lead-*-isolated": "Izolowany kabel ołowiany (32V)",
+  "block-ecable-32v-gold-*-isolated": "Izolowany kabel złoty (32V)",
+  "block-ecable-32v-steel-*-isolated": "Izolowany kabel stalowy (32V)",
+  "block-ecable-32v-iron-*-isolated": "Izolowany kabel żelazny (32V)",
+  "block-ecable-32v-tinbronze-*-isolated": "Izolowany kabel brązowy (32V)",
+  "block-ecable-32v-brass-*-isolated": "Izolowany kabel mosiężny (32V)",
+  "block-ecable-32v-electrum-*-isolated": "Izolowany kabel z elektrum (32V)",
+
+  // 128V
+  "block-ecable-128v-copper-*-isolated": "Izolowany kabel miedziany (128V)",
+  "block-ecable-128v-silver-*-isolated": "Izolowany kabel srebrny (128V)",
+  "block-ecable-128v-lead-*-isolated": "Izolowany kabel ołowiany (128V)",
+  "block-ecable-128v-gold-*-isolated": "Izolowany kabel złoty (128V)",
+  "block-ecable-128v-steel-*-isolated": "Izolowany kabel stalowy (128V)",
+  "block-ecable-128v-iron-*-isolated": "Izolowany kabel żelazny (128V)",
+  "block-ecable-128v-tinbronze-*-isolated": "Izolowany kabel brązowy (128V)",
+  "block-ecable-128v-brass-*-isolated": "Izolowany kabel mosiężny (128V)",
+  "block-ecable-128v-electrum-*-isolated": "Izolowany kabel z elektrum (128V)",
+
+  // 32V
+  "block-ecable-32v-copper-*-burned": "Spalony kabel miedziany (32V)",
+  "block-ecable-32v-silver-*-burned": "Spalony kabel srebrny (32V)",
+  "block-ecable-32v-lead-*-burned": "Spalony kabel ołowiany (32V)",
+  "block-ecable-32v-gold-*-burned": "Spalony kabel złoty (32V)",
+  "block-ecable-32v-steel-*-burned": "Spalony kabel stalowy (32V)",
+  "block-ecable-32v-iron-*-burned": "Spalony kabel żelazny (32V)",
+  "block-ecable-32v-tinbronze-*-burned": "Spalony kabel brązowy (32V)",
+  "block-ecable-32v-brass-*-burned": "Spalony kabel mosiężny (32V)",
+  "block-ecable-32v-electrum-*-burned": "Spalony kabel z elektrum (32V)",
+
+  // 128V
+  "block-ecable-128v-copper-*-burned": "Spalony kabel miedziany (128V)",
+  "block-ecable-128v-silver-*-burned": "Spalony kabel srebrny (128V)",
+  "block-ecable-128v-lead-*-burned": "Spalony kabel ołowiany (128V)",
+  "block-ecable-128v-gold-*-burned": "Spalony kabel złoty (128V)",
+  "block-ecable-128v-steel-*-burned": "Spalony kabel stalowy (128V)",
+  "block-ecable-128v-iron-*-burned": "Spalony kabel żelazny (128V)",
+  "block-ecable-128v-tinbronze-*-burned": "Spalony kabel brązowy (128V)",
+  "block-ecable-128v-brass-*-burned": "Spalony kabel mosiężny (128V)",
+  "block-ecable-128v-electrum-*-burned": "Spalony kabel z elektrum (128V)",
+
+  "block-switch-*": "Ręczny przełącznik",
+
+  "block-blockwire": "Przelotka (standardowa)",
+
+  "item-coil": "Cewka miedziana",
+
+  "item-engineshaft": "Wirnik",
+
+  "block-handbooktitle-accumulator-tier1": "Zastosowanie",
+  "block-handbooktext-accumulator-tier1": "Pozwala magazynować energię elektryczną.<br>Naładowany akumulator można w razie potrzeby nosić przy sobie.",
+
+  "block-handbooktitle-blockwire": "Zastosowanie",
+  "block-handbooktext-blockwire": "Pozwala przesyłać energię przez ściany bez naruszania integralności pomieszczeń.",
+
+  "block-handbooktitle-accumulator-tier2": "Zastosowanie",
+  "block-handbooktext-accumulator-tier2": "Pozwala magazynować energię elektryczną. Pojemniejsza wersja zwykłego <a href=\"handbooksearch:\/\/akumulator\">akumulatora<\/a>.<br>Naładowany akumulator można w razie potrzeby nosić przy sobie, ale tylko w slocie na torby.",
+
+  "block-handbooktitle-ecable": "Zastosowanie",
+  "block-handbooktext-ecable": "Pozwala przesyłać energię elektryczną na odległość. Można umieszczać tylko na pełnych ścianach bloków. Izolowane wersje kabla zmniejszają straty o połowę!<br>O cechach działania przeczytasz w <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-princip\">poradniku<\/a>.",
+
+  "block-handbooktitle-switch": "Zastosowanie",
+  "block-handbooktext-switch": "Pozwala przerywać obwód elektryczny. Instalowany na kablu. Kliknij na niego, aby go przełączyć.",
+
+  "block-handbooktitle-transformator": "Zastosowanie",
+  "block-handbooktext-transformator": "Służy do przekształcania energii elektrycznej z jednego napięcia na inne: może obniżać i podwyższać napięcie. Zaleca się podłączanie kabli/urządzeń tylko do dwóch dowolnych stron transformatora!<br>Przekładnia transformatora: 1:4.",
+
+  "game:gamemechanicinfo-electricalprogressive-title": "Elektryczność: modyfikacja ElectricalProgressive",
+  "game:gamemechanicinfo-electricalprogressive-text": "<strong>Elektryczność: modyfikacja ElectricalProgressive<\/strong><br>Modyfikacja dodaje do gry energię elektryczną, urządzenia elektryczne, sprzęty, broń i pancerz. Wszystko to pomaga ułatwić (lub nie) przetrwanie w świecie gry, zmniejszyć ilość codziennych czynności oraz urozmaicić doświadczenie z gry.<br><br><strong>Podstawy<\/strong><br>Zasada zachowania energii głosi, że energia nie powstaje znikąd i nie znika bez śladu. Energia jedynie przechodzi z jednej formy w drugą lub z jednego ciała do drugiego. Tak samo jest w grze.<br><br>Głównym źródłem energii mechanicznej są wiatraki. Za pomocą generatorów można przekształcić energię mechaniczną w elektryczną. Aby to zrobić, należy za pomocą wału i/lub kół zębatych przekazać moment obrotowy z wiatraka na wał generatora. Następnie generator zacznie wytwarzać energię elektryczną.<br><br>Energię elektryczną można przesyłać kablami do odbiorników. Wystarczy umieszczać kable na blokach w pożądanym kierunku. Na każdej ścianie bloku można umieścić do 4 kabli skierowanych w różne strony. Pozwala to na prowadzenie kabli w dowolnym kierunku i rozgałęzianie obwodu elektrycznego. Kabel należy podłączyć do żelaznej płytki urządzenia elektrycznego, aby zaczęło ono działać. Urządzenia elektryczne, bloki metalowe i przelotki również mogą przewodzić prąd.<br><br>Ponieważ wiatr nie wieje zawsze i nie z pełną siłą, produkcja energii przez generatory może być niewystarczająca do zasilania wszystkich urządzeń elektrycznych. Aby tego uniknąć, należy podłączyć obwód elektryczny do akumulatora(ów). Będą one stale gromadzić energię elektryczną i oddawać ją do obwodu do zasilania urządzeń w każdej chwili, nawet przy braku wiatru.<br><br>Aby oszczędzać energię, niektóre urządzenia należy odłączać od obwodu, gdy nie są używane. Służy do tego ręczny przełącznik. Zainstaluj go na odcinku obwodu, gdzie potrzebne jest szybkie odcięcie zasilania.<br><br>Do niektórych urządzeń, które jednak potrzebują energii mechanicznej do działania, potrzebny będzie silnik. Przekształca on energię elektryczną w mechaniczną. Należy go podłączyć wałem do urządzenia. Po włączeniu silnik będzie dążył do oddania maksymalnej mocy na wale, więc upewnij się, że w obwodzie jest wystarczająco dużo energii.",
+
+  "game:gamemechanicinfo-electricalprogressive-rotors-title": "Elektryczność: silniki i generatory",
+  "game:gamemechanicinfo-electricalprogressive-rotors-text": "<strong>Elektryczność: silniki i generatory<\/strong><br>Silniki i generatory w modyfikacji umożliwiają przekształcanie energii elektrycznej w mechaniczną i odwrotnie. W tym celu należy doprowadzić do nich kable i połączyć je wałem. <br><br><strong>Cechy mechaniki gry<\/strong><br>Silniki i generatory w najbardziej przybliżony sposób modelują zachowanie takich urządzeń z rzeczywistego świata. Za przykład posłużyły maszyny prądu stałego. Dlatego, aby lepiej zrozumieć, jak i w jakich sytuacjach ich używać, trzeba znać prawa, według których działają. <br>Wszystkie obracające się mechanizmy w grze, w tym wały i koła zębate, mają dwa podstawowe parametry: moment obrotowy i moment oporu. Moment obrotowy charakteryzuje siłę, z jaką mechanizm obraca wał, a moment oporu – siły tarcia i straty, które mogą powstawać podczas ich pracy. Moment obrotowy wałów i kół zębatych wynosi zero. Silnik gry sumuje wszystkie momenty i oblicza prędkość wału oraz jego przyspieszenie/opóźnienie. Jeśli moment obrotowy jest większy od momentu oporu, prędkość wału będzie wzrastać. Jeśli odwrotnie – będzie spadać. Przy tym oba te parametry zmieniają się według określonych praw. Zazwyczaj moment oporu rośnie wraz ze wzrostem prędkości.<br><br><strong>Generatory<\/strong><br>W modyfikacji generatory mają następujące dodatkowe parametry: <br><i>I_max<\/i> – maksymalna wartość produkcji energii; <br><i>speed_max<\/i> – maksymalna nominalna prędkość obrotowa; <br><i>resistance_factor<\/i> – mnożnik momentu oporu; <br><i>resistance_load<\/i> – stała składowa momentu oporu (osiągana przy I_max). <br><br>Produkcja energii przez generator zależy tylko od prędkości na wale i jest obliczana proporcjonalnie do prędkości wału. Po przekroczeniu wartości <i>speed_max<\/i> produkcja wynosi <i>power = I_max<\/i>. <br>Przy tym moment oporu najpierw rośnie liniowo, a po przekroczeniu <i>speed_max<\/i> rośnie już kwadratowo. Moment oporu jest również wprost proporcjonalny do obciążenia obwodu elektrycznego tym generatorem. Dlatego przy braku odbioru generator będzie wytwarzał minimalny moment oporu.<br><br><strong>Silniki<\/strong><br>W modyfikacji silniki mają następujące dodatkowe parametry: <br><i>I_min<\/i> – minimalna wartość energii potrzebna do rozpoczęcia pracy przez silnik; <br><i>I_max<\/i> – maksymalna wartość poboru energii; <br><i>torque_max<\/i> – maksymalny moment obrotowy; <br><i>kpd_max<\/i> – sprawność;<br><i>speed_max<\/i> – maksymalna nominalna prędkość obrotowa; <br><i>resistance_factor<\/i> – mnożnik momentu oporu. <br><br>Silnik wytwarza moment obrotowy wprost proporcjonalny do dostępnej mu energii. Przy tym silnik uwzględnia również własną sprawność.<br><br>Moment oporu silnika oblicza się analogicznie do generatora, z tym że <i>resistance_load<\/i> wynosi zero.",
+
+  "game:gamemechanicinfo-electricalprogressive-princip-title": "Elektryczność: zachowanie prądu, napięcie",
+  "game:gamemechanicinfo-electricalprogressive-princip-text": "<strong>Elektryczność: zachowanie prądu, napięcie<\/strong><br>Prąd elektryczny płynie teraz przez przewodniki, przestrzegając praw fizyki. Ktoś być może będzie musiał ponownie otworzyć podręcznik do fizyki!<br><br><strong>Cechy nowego zachowania<\/strong><br>Prąd elektryczny przemieszcza się w przewodnikach w postaci pakietów energii, z wyjątkiem trybu natychmiastowego. Pakiety energii poruszają się najkrótszą drogą od źródeł prądu do odbiorników. Ponadto kable i urządzenia mają teraz własne parametry elektryczne przewodnika: opór właściwy (zależy od materiału), pole przekroju poprzecznego, maksymalny prąd (przekroczenie grozi przepaleniem), maksymalne napięcie. Wartość prądu obliczana jest zgodnie z prawem Ohma dla odcinka obwodu, dla wszystkich pakietów energii przechodzących w danym momencie przez tę ścianę/ten blok. Uwzględniany jest również kierunek ruchu energii: jeśli energia porusza się w przeciwnych kierunkach, odpowiadające im prądy są algebraicznie odejmowane (konsekwencja pierwszego prawa Kirchhoffa). Aby kable się nie przepalały, można je pogrubiać. W tym celu weź do ręki kabel tego samego typu, co już umieszczony, i kliknij na niego z wciśniętym klawiszem Shift. W ten sposób można zwiększyć zapas prądu w obwodzie. Należy jednak pamiętać, że straty w przewodniku obliczane są zgodnie z prawem Joule'a-Lenza. Zwiększenie przepływającego prądu znacznie zwiększa straty energii. Do przesyłania energii na duże odległości można podwyższyć napięcie albo użyć akumulatorów jako buforów magazynujących.<br><br><strong>Napięcia<\/strong><br>Teraz do działania różnych urządzeń wymagana jest nie tylko różna ilość energii, ale także napięcie. Przekroczenie napięcia dla urządzenia/kabla grozi jego przepaleniem. Napięcie można podwyższać i obniżać za pomocą transformatora – działa on w obie strony. Dlatego należy zachować ostrożność przy podłączaniu przewodów o różnych napięciach! Wyższe napięcie pozwala przesłać przez przewody więcej energii.<br><br><strong>Interakcja z otoczeniem<\/strong><br>Teraz kable bez izolacji i bloki metalowe będą zadawać obrażenia wszystkim istotom przy kontakcie z nimi. Im wyższe napięcie w obwodzie, tym większe obrażenia będą otrzymywać. Spalone urządzenia i kable również będą zadawać obrażenia. Kable w izolacji i wszystkie działające urządzenia są bezpieczne w dotyku.<br>Wszystkie kable i urządzenia mają parametr odporności na wilgoć. Jeśli nie ma odporności na wilgoć, Twoje urządzenie/kabel ryzykuje przepaleniem przy kontakcie z deszczem, śniegiem, gradem lub rozlaną w pobliżu wodą! Przy kontakcie z lawą przepalają się, psują i najprawdopodobniej ulegną zniszczeniu. Zachowaj ostrożność.",
+
+  "block-handbooktitle-emotor-tier1": "Zastosowanie",
+  "block-handbooktext-emotor-tier1": "Silnik przekształca energię elektryczną w mechaniczną. Ma niewielką moc i prędkość obrotową.<br> <br>O cechach działania przeczytasz w <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-rotors\">poradniku<\/a>.",
+
+  "block-handbooktitle-emotor-tier2": "Zastosowanie",
+  "block-handbooktext-emotor-tier2": "Ulepszony silnik przekształca energię elektryczną w mechaniczną. Ma zwiększoną moc wyjściową i prędkość obrotową w porównaniu do <a href=\"handbooksearch:\/\/Silnik\">silnika<\/a>.<br><br>O cechach działania przeczytasz w <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-rotors\">poradniku<\/a>.",
+
+  "block-handbooktitle-emotor-tier3": "Zastosowanie",
+  "block-handbooktext-emotor-tier3": "Silnik wysokowydajny przekształca energię elektryczną w mechaniczną. Dzięki zastosowaniu lepszych materiałów ma wyższą moc wyjściową w porównaniu do <a href=\"handbooksearch:\/\/Ulepszony silnik\">ulepszonego silnika<\/a>.<br> <br>O cechach działania przeczytasz w <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-rotors\">poradniku<\/a>.",
+
+  "block-handbooktitle-egenerator-tier1": "Zastosowanie",
+  "block-handbooktext-egenerator-tier1": "Generator przekształca energię mechaniczną w elektryczną. Ma niewielką moc i prędkość obrotową.<br>O cechach działania przeczytasz w <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-rotors\">poradniku<\/a>.",
+
+  "block-handbooktitle-egenerator-tier2": "Zastosowanie",
+  "block-handbooktext-egenerator-tier2": "Ulepszony generator przekształca energię mechaniczną w elektryczną. Ma zwiększoną moc w porównaniu do <a href=\"handbooksearch:\/\/Generator\">generatora<\/a>.<br>O cechach działania przeczytasz w <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-rotors\">poradniku<\/a>.",
+
+  "block-handbooktitle-egenerator-tier3": "Zastosowanie",
+  "block-handbooktext-egenerator-tier3": "Generator wysokowydajny przekształca energię mechaniczną w elektryczną. Dzięki zastosowaniu lepszych materiałów ma wyższą moc w porównaniu do <a href=\"handbooksearch:\/\/Ulepszony generator\">ulepszonego generatora<\/a>.<br>O cechach działania przeczytasz w <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-rotors\">poradniku<\/a>.",
+
+  "item-handbooktitle-coil": "Zastosowanie",
+  "item-handbooktext-coil": "A gdzie byśmy byli bez miedzianych cewek w urządzeniach elektrycznych?",
+
+  "item-handbooktitle-engineshaft": "Zastosowanie",
+  "item-handbooktext-engineshaft": "Zazwyczaj wirnik jest potrzebny w silnikach/generatorach, ale nie tylko.",
+
+  "Voltage": "Napięcie",
+  "Voltage_immersive": "Napięcie (immersyjne)",
+  "High Voltage": "Wysokie napięcie",
+  "Low Voltage": "Niskie napięcie",
+  "max_speed": "Prędkość nom.",
+  "rps": "obr/s",
+
+  "kpd": "Sprawność",
+  "max_torque": "Maks. moment",
+
+  "WResistance": "Odporność na wilgoć",
+  "Yes": "Tak",
+  "No": "Nie",
+
+  "res_load": "Nom. opór przy nom. obciążeniu",
+  "res_speed": "Nom. opór przy nom. prędkości",
+
+  "Production": "Produkcja",
+  "Power": "Moc",
+
+  "termogen": "Termogenerator",
+  "gui-word-seconds": "sek.",
+
+  "block-etermogenerator-*": "Generator termoelektryczny",
+  "block-handbooktitle-etermogenerator": "Zastosowanie",
+  "block-handbooktext-etermogenerator": "Przekształca energię cieplną w elektryczną! Działa na wszystkim, co wspiera spalanie. Im wyższa temperatura spalania paliwa, tym większa będzie moc wyjściowa. Moc wyjściowa zależy też nieznacznie od temperatury otoczenia: im niższa temperatura otaczającego powietrza, tym większa będzie produkcja energii. Sam nie działa - z tyłu wymaga zainstalowania <a href=\"handbook:\/\/block-electricalprogressivebasics:termoplastini-south\">płytek termoelektrycznych<\/a>.<br><br>Może być automatycznie ładowany paliwem za pomocą rynien.",
+
+  "termoplastini": "Płytki termoelektryczne",
+  "block-termoplastini-*": "Płytki termoelektryczne",
+  "block-handbooktitle-termoplastini": "Zastosowanie",
+  "block-handbooktext-termoplastini": "Płytki termoelektryczne są używane w generatorach termoelektrycznych do przekształcania energii cieplnej w elektryczną. Zasada działania opiera się na powstawaniu termicznej siły elektromotorycznej w miejscu styku dwóch różnych metali. Różnica temperatur powstaje dzięki dymowi ze spalanego paliwa z jednej strony i otaczającemu powietrzu z drugiej strony.<br><br>Umieszcza się je z tyłu <a href=\"handbook:\/\/block-electricalprogressivebasics:etermogenerator-south\">generatora termoelektrycznego<\/a>, do 10 sztuk. Można je mocować tylko do miedzianej płytki wymiennika ciepła. Każda kolejna sekcja daje mniejszy przyrost mocy. Łącznie 10 sztuk termopłytek da 100% mocy termogeneratora. Można używać dwóch generatorów na tym samym zestawie płytek termoelektrycznych.",
+
+  "Speed": "Prędkość",
+  "ThickenCables": "Pogrubianie kabli",
+
+  "causeCurrent": "Przeciążenie prądowe",
+  "causeVoltage": "Przekroczone napięcie",
+  "causeEnvironment": "Kontakt z cieczą",
+
+  "game:tabname-electricity": "Elektryczność",
+
+  "Electricity": "Sieć elektryczna (standardowa)",
+  "Consumers": "Odbiorników",
+  "Generators": "Generatorów",
+  "Batteries": "Akumulatorów",
+  "Transformers": "Transformatorów",
+  "Blocks": "Bloków",
+  "Generation": "Generacja",
+  "Consumption": "Pobór",
+  "Request": "Zapotrzebowanie",
+  "Capacity": "Pojemność",
+  "Block": "Blok",
+  "MaxCurrent": "Maks. prąd",
+  "Current": "Prąd",
+  "Resistivity": "Opór wł.",
+  "Resistance": "Opór",
+  "Lines": "Linii",
+  "SectionSize": "Pole przekr.",
+  "MaxVoltage": "Maks. napięcie",
+  "PressForDetails": "Przytrzymaj {0} dla szczegółów",
+  "ConnectedWires": "Podłączonych przewodów: {0}",
+  "WaitingNetworkInfo": "Oczekiwanie na informacje o sieci...",
+  "NetworkInfo": "Sieć elektryczna (immersyjna)",
+  "BlockParameters": "--- Parametry bloku ---",
+  "NetworkStatus": "--- Sieć uogólniona ---",
+  "ConductorOpen": "Status przewodnika: węzły niepołączone",
+  "ConductorClosed": "Status przewodnika: węzły połączone",
+  "Summary": "--- Podsumowanie ---",
+  "TotalBlocks": "Razem bloków",
+  "TotalGenerators": "Razem generatorów",
+  "TotalConsumers": "Razem odbiorników",
+  "TotalBatteries": "Razem akumulatorów",
+  "TotalProduction": "Razem produkcja",
+  "TotalConsumption": "Razem pobór",
+
+  "W": "W",
+  "J": "J",
+  "A": "A",
+  "V": "V",
+  "Om": "Ω",
+  "OmLine": "Ω/linię",
+  "Units": "j.",
+  "Pcs": "szt.",
+
+  "GeneratorsShort": "Generatorów",
+  "ConsumersShort": "Odbiorników",
+  "BatteriesShort": "Akumulatorów",
+  "TransformersShort": "Transformatorów",
+  "ConductorsShort": "Przewodników",
+
+  "Burned": "!!!Spalony!!!",
+  "CauseCurrent": "Przeciążenie prądowe",
+  "CauseVoltage": "Przekroczone napięcie",
+  "CauseEnvironment": "Kontakt z cieczą",
+
+  "switch": "Przełącz",
+  "buffer": "Bufor",
+
+  "block-esolargenerator-*": "Generator słoneczny",
+  "block-handbooktitle-esolargenerator": "Zastosowanie",
+  "block-handbooktext-esolargenerator": "Przekształca światło w energię elektryczną! Im więcej światła słonecznego pada na panel słoneczny, tym więcej energii może on wyprodukować. Bloki umieszczone nad panelem słonecznym zmniejszą jego wydajność. Pod koniec jesieni i zimą światła słonecznego jest mniej, co prowadzi do spadku wydajności.",
+
+  "remove_burned_cable": "Najpierw usuń spalony kabel",
+  "cable_same_type": "Kable muszą być tego samego typu",
+  "not_enough_cables": "Niewystarczająca liczba kabli do umieszczenia",
+  "enough_lines": "Linii jest już wystarczająco",
+  "Prod_potential": "Potencjał prod.",
+
+  "too_much_wires": "Nie możesz podłączyć więcej niż 8 przewodów w tym punkcie.",
+  "select_second_point": "Wybierz drugi punkt.",
+  "wire_connection_cancelled": "Anulowano podłączanie przewodu.",
+  "hold_same_cable": "Musisz trzymać ten sam przewód, aby dokończyć podłączanie.",
+  "same_block_connection": "Nie można podłączyć przewodu do tego samego bloku.",
+  "invalid_connection_point": "Nieprawidłowy punkt podłączenia.",
+  "connection_already_exists": "Takie połączenie już istnieje.",
+  "max_wire_length": "Maksymalna długość przewodu nie może przekraczać 32 bloków.",
+  "not_enough_cable": "Niewystarczająca ilość przewodu. Potrzeba {0} szt., a jest tylko {1}.",
+  "wire_connected_successfully": "Przewód podłączony pomyślnie. Zużyto {0} szt. przewodu.",
+  "wire_disconnected": "Przewód odłączony. Zwrócono {0} szt. przewodu.",
+
+  "block-cabledotdown": "Izolator (podłoga)",
+  "block-handbooktitle-cabledotdown": "Zastosowanie",
+  "block-handbooktext-cabledotdown": "Wariant izolatora dla przewodów immersyjnych z mocowaniem do podłogi.",
+
+  "block-cabledotroof": "Izolator (sufit)",
+  "block-handbooktitle-cabledotroof": "Zastosowanie",
+  "block-handbooktext-cabledotroof": "Wariant izolatora dla przewodów immersyjnych z mocowaniem do sufitu.",
+
+  "block-cabledotwall": "Izolator (ściana)",
+  "block-handbooktitle-cabledotwall": "Zastosowanie",
+  "block-handbooktext-cabledotwall": "Wariant izolatora dla przewodów immersyjnych z mocowaniem do ściany.",
+
+  "block-cableswitchwall": "Rozłącznik (ścienny)",
+  "block-handbooktitle-cableswitchwall": "Zastosowanie",
+  "block-handbooktext-cableswitchwall": "Rozłącznik z mocowaniem do ściany. Może przerywać/łączyć obwód między dwoma izolatorami rozłącznika.",
+
+  "block-hv2lvtransformator-*": "Transformator wysokiego napięcia (512V -> 128V)",
+  "block-handbooktitle-hv2lvtransformator": "Zastosowanie",
+  "block-handbooktext-hv2lvtransformator": "Pozwala transformować napięcie z immersyjnych 512V na 128V zwykłego systemu przewodów.",
+
+  "block-lv2hvtransformator-*": "Transformator wysokiego napięcia (128V -> 512V)",
+  "block-handbooktitle-lv2hvtransformator": "Zastosowanie",
+  "block-handbooktext-lv2hvtransformator": "Pozwala transformować napięcie ze zwykłych 128V na 512V immersyjnego systemu przewodów.",
+
+  "block-hvcabletower-*": "Słup energetyczny",
+  "block-handbooktitle-hvcabletower": "Zastosowanie",
+  "block-handbooktext-hvcabletower": "Pozwala zamocować kilka niezależnych linii przewodów immersyjnych na jednym słupie.",
+
+  "block-hvstreetlamp-*": "Oświetlenie uliczne",
+  "block-handbooktitle-hvstreetlamp": "Zastosowanie",
+  "block-handbooktext-hvstreetlamp": "Uliczna wersja oświetlenia z wykorzystaniem przewodów immersyjnych.",
+
+  "block-wallconnectorhor-*": "Przelotka ścienna (pozioma)",
+  "block-handbooktitle-wallconnectorhor": "Zastosowanie",
+  "block-handbooktext-wallconnectorhor": "Pozwala przesyłać energię przez ściany bez naruszania integralności pomieszczeń.",
+
+  "block-wallconnectorver": "Przelotka ścienna (pionowa)",
+  "block-handbooktitle-wallconnectorver": "Zastosowanie",
+  "block-handbooktext-wallconnectorver": "Pozwala przesyłać energię przez sufit/podłogę bez naruszania integralności pomieszczeń.",
+
+  // 512V
+  "block-wire-512v-copper-part": "Miedziany przewód immersyjny (512V)",
+  "block-wire-512v-silver-part": "Srebrny przewód immersyjny (512V)",
+  "block-wire-512v-lead-part": "Ołowiany przewód immersyjny (512V)",
+  "block-wire-512v-gold-part": "Złoty przewód immersyjny (512V)",
+  "block-wire-512v-steel-part": "Stalowy przewód immersyjny (512V)",
+  "block-wire-512v-iron-part": "Żelazny przewód immersyjny (512V)",
+  "block-wire-512v-tinbronze-part": "Brązowy przewód immersyjny (512V)",
+  "block-wire-512v-brass-part": "Mosiężny przewód immersyjny (512V)",
+  "block-wire-512v-electrum-part": "Przewód immersyjny z elektrum (512V)",
+
+  "block-wire-512v-copper-isolated": "Izolowany miedziany przewód immersyjny (512V)",
+  "block-wire-512v-silver-isolated": "Izolowany srebrny przewód immersyjny (512V)",
+  "block-wire-512v-lead-isolated": "Izolowany ołowiany przewód immersyjny (512V)",
+  "block-wire-512v-gold-isolated": "Izolowany złoty przewód immersyjny (512V)",
+  "block-wire-512v-steel-isolated": "Izolowany stalowy przewód immersyjny (512V)",
+  "block-wire-512v-iron-isolated": "Izolowany żelazny przewód immersyjny (512V)",
+  "block-wire-512v-tinbronze-isolated": "Izolowany brązowy przewód immersyjny (512V)",
+  "block-wire-512v-brass-isolated": "Izolowany mosiężny przewód immersyjny (512V)",
+  "block-wire-512v-electrum-isolated": "Izolowany przewód immersyjny z elektrum (512V)",
+
+  "block-handbooktitle-wire": "Zastosowanie",
+  "block-handbooktext-wire": "Pozwala przesyłać energię elektryczną na duże odległości. Można mocować tylko do izolatorów. Maksymalna długość mocowania: 32 bloki. Izolowane wersje kabla zmniejszają straty o połowę!<br>O cechach działania przeczytasz w <a href=\"handbook:\/\/gamemechanicinfo-electricalprogressive-princip\">poradniku<\/a>."
+}

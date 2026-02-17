@@ -23,7 +23,7 @@
     "isolatedEnvironment": true,
     "IsOpen": true,
     "handbook": {
-      "groupBy": [ "cableswitchwall-*" ],
+      "groupBy": [ "cableswitchwall" ],
       "extraSections": [
         {
           "title": "electricalprogressivebasics:block-handbooktitle-cableswitchwall",
