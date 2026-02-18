@@ -438,7 +438,7 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
             this.AnimUtil.Dispose();
         }
 
-        _mesh.Dispose();
+        _mesh?.Dispose();
         _resultingShape = null;
 
         // очищаем ссылки на API

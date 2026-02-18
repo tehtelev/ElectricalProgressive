@@ -85,7 +85,7 @@ namespace ElectricalProgressive
 
             soundElectricShok = new AssetLocation("electricalprogressivecore:sounds/electric-shock.ogg");
 
-
+            /*
             api.RegisterBlockClass("BlockEIAccumulator1", typeof(BlockEIAccumulator1));
             api.RegisterBlockEntityClass("BlockEntityEIAccumulator1", typeof(BlockEntityEIAccumulator1));
             api.RegisterBlockEntityBehaviorClass("BEBehaviorEIAccumulator1", typeof(BEBehaviorEIAccumulator1));
@@ -98,6 +98,7 @@ namespace ElectricalProgressive
             api.RegisterBlockClass("BlockEGenerator1", typeof(BlockEGenerator1));
             api.RegisterBlockEntityClass("BlockEntityEGenerator1", typeof(BlockEntityEGenerator1));
             api.RegisterBlockEntityBehaviorClass("BEBehaviorEGenerator1", typeof(BEBehaviorEGenerator1));
+            */
 
             api.RegisterBlockClass("BlockHVSFonar", typeof(BlockHVSFonar));
             api.RegisterBlockEntityClass("BlockEntityHVSFonar", typeof(BlockEntityHVSFonar));
