@@ -10,6 +10,7 @@ using ElectricalProgressive.Content.Block.ESwitch;
 using ElectricalProgressive.Content.Block.ETermoGenerator;
 using ElectricalProgressive.Content.Block.ETransformator;
 using ElectricalProgressive.Content.Block.Termoplastini;
+using ElectricalProgressive.Content.Item.Tool;
 using ElectricalProgressive.Patch;
 using HarmonyLib;
 using System.Collections.Generic;
@@ -115,6 +116,8 @@ public class ElectricalProgressiveBasics : ModSystem
 
 
         api.RegisterBlockClass("BlockTermoplastini", typeof(BlockTermoplastini));
+
+        api.RegisterItemClass("EAxe", typeof(ESoldering));
 
         // Регистрируем патч для механики
         harmony = new Harmony("electricalprogressive.mechanicalpowermod");

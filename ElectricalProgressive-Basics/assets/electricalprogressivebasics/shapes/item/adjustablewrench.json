@@ -7,9 +7,9 @@
   "textureWidth": 16,
   "textureHeight": 16,
   "textures": {
-    "brass": "block/metal/plate/brass",
-    "iron": "block/metal/plate/iron",
-    "steel": "block/metal/plate/steel"
+    "brass": "game:block/metal/plate/brass",
+    "iron": "game:block/metal/plate/iron",
+    "steel": "game:block/metal/plate/steel"
   },
   "elements": [
     {

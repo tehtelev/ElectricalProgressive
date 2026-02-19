@@ -150,22 +150,19 @@
     }
   },
   "groundTransformbytype": {
-    "translation": {
-      "x": 0,
-      "y": 0,
-      "z": 0
-    },
-    "rotation": {
-      "x": 0,
-      "y": 0,
-      "z": 0
-    },
-    "origin": {
-      "x": 0.5,
-      "y": 0,
-      "z": 0.5
-    },
-    "scale": 4.5
+    "wrench-adjustable": {
+      "translation": {
+        "x": 0,
+        "y": -0.16,
+        "z": 0
+      },
+      "rotation": {
+        "x": -180,
+        "y": -1,
+        "z": 0
+      },
+      "scale": 2.11
+    }
   },
   "tpHandTransformbytype": {
     "wrench-adjustable": {
@@ -182,8 +179,7 @@
       "scale": 0.83
     }
   },
-
-  "tpOffHandTransform": {
+  "tpOffHandTransformbytype": {
     "wrench-adjustable": {
       "translation": {
         "x": -0.9,
