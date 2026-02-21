@@ -1,6 +1,6 @@
 ﻿{
   "code": "electricsolderingiron",
-  "class": "EAxe",
+  "class": "ESoldering",
   "attributes": {
     "chargable": true,
     "consume": 20,
@@ -21,14 +21,14 @@
     },
     "groundStorageTransform": {
       "translation": {
-        "x": 0.4,
-        "y": -0.29,
-        "z": 0.38
+        "x": -0,
+        "y": -0.09,
+        "z": 0.06
       },
       "rotation": {
-        "x": -60,
+        "x": -61,
         "y": 0,
-        "z": -90
+        "z": 0
       },
       "scale": 0.88
     }
@@ -103,13 +103,13 @@
   },
   "tpHandTransform": {
     "translation": {
-      "x": -0.78,
-      "y": -0.09,
+      "x": -0.7799,
+      "y": -0.06,
       "z": -0.67
     },
     "rotation": {
-      "x": 9,
-      "y": -1,
+      "x": 5,
+      "y": -89,
       "z": -16
     },
     "origin": {

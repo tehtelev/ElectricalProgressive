@@ -117,7 +117,7 @@ public class ElectricalProgressiveBasics : ModSystem
 
         api.RegisterBlockClass("BlockTermoplastini", typeof(BlockTermoplastini));
 
-        api.RegisterItemClass("EAxe", typeof(ESoldering));
+        api.RegisterItemClass("ESoldering", typeof(ESoldering));
 
         // Регистрируем патч для механики
         harmony = new Harmony("electricalprogressive.mechanicalpowermod");
