@@ -63,7 +63,7 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
     public global::ElectricalProgressive.ElectricalProgressive? System =>
         this.Api?.ModLoader.GetModSystem<global::ElectricalProgressive.ElectricalProgressive>();
 
-    
+
     public Facing Connection
     {
         get => this.connection;
@@ -101,7 +101,7 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
         get => (this.eparams, this.eparamsFace);
         set
         {
-            if (this.eparams==null || !this.eparams.Equals(value.Item1) || this.eparamsFace != value.Item2)
+            if (this.eparams == null || !this.eparams.Equals(value.Item1) || this.eparamsFace != value.Item2)
             {
                 this.eparams = value.Item1;
                 this.eparamsFace = value.Item2;
@@ -181,11 +181,11 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
     private void GetParticles()
     {
         // тип частиц
-        ParticlesType = MyMiniLib.GetAttributeInt(this.Block, "particlesType", 0 );
+        ParticlesType = MyMiniLib.GetAttributeInt(this.Block, "particlesType", 0);
 
         // получаем позиции частиц из атрибутов блока
         ParticlesOffsetPos.Clear(); // чистим данные из сохранений
-        var arrayOffsetPos = MyMiniLib.GetAttributeArrayArrayFloat(this.Block, "particlesOffsetPos", new float[1][]{[0,0,0]});
+        var arrayOffsetPos = MyMiniLib.GetAttributeArrayArrayFloat(this.Block, "particlesOffsetPos", new float[1][] { [0, 0, 0] });
         if (arrayOffsetPos != null)
         {
             for (int i = 0; i < arrayOffsetPos.Length; i++)
@@ -229,8 +229,8 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
     {
         // еще не загружено или нет параметров
         if (!this.isLoaded || AllEparams is null)
-            return true; 
-        
+            return true;
+
         var hasBurnout = false;
         var prepareBurnout = false;
 
@@ -254,9 +254,9 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
                 // Обработка prepareBurnout
                 if (prepareBurnout)
                 {
-                    ParticleManager.SpawnParticlesAsync(manager, Blockentity.Pos.ToVec3d().Offset(partPos).Add(0.5d,0d,0.5d), 0);
+                    ParticleManager.SpawnParticlesAsync(manager, Blockentity.Pos.ToVec3d().Offset(partPos).Add(0.5d, 0d, 0.5d), 0);
                 }
-                
+
                 // Обработка burnout
                 if (hasBurnout)
                 {
@@ -343,16 +343,16 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
             // Собираем все позиции частей мультиблока
             var parts = new List<BlockPos>();
             for (var dx = 0; dx < sizeX; dx++)
-            for (var dy = 0; dy < sizeY; dy++)
-            for (var dz = 0; dz < sizeZ; dz++)
-            {
-                var partPos = zeroPartPos.AddCopy(dx, dy, dz);
-                // Для "all_down" добавляем только нижние блоки (dy == 0), для "all" — все
-                if (blockEProperties == "all" || (blockEProperties == "all_down" && dy == 0))
-                {
-                    parts.Add(partPos);
-                }
-            }
+                for (var dy = 0; dy < sizeY; dy++)
+                    for (var dz = 0; dz < sizeZ; dz++)
+                    {
+                        var partPos = zeroPartPos.AddCopy(dx, dy, dz);
+                        // Для "all_down" добавляем только нижние блоки (dy == 0), для "all" — все
+                        if (blockEProperties == "all" || (blockEProperties == "all_down" && dy == 0))
+                        {
+                            parts.Add(partPos);
+                        }
+                    }
             multiblockParts = parts.ToArray();
         }
         else
@@ -474,7 +474,7 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
         }
         networkInformation = null;
 
-        
+
         AnimUtil?.Dispose();
     }
 
@@ -507,7 +507,7 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
         AnimUtil?.Dispose();
     }
 
- 
+
 
     /// <summary>
     /// Принимает сигнал от клиента, который наводится на блок, что инициирует обновление информации о блоке-энтити
@@ -521,9 +521,9 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
         {
             var dataTuple = SerializerUtil.Deserialize<(BlockPos, Facing, string)>(data);
             networkInformation = this.System?.GetNetworks(dataTuple.Item1, dataTuple.Item2, dataTuple.Item3);
-            var sapi= (ICoreServerAPI)Api;
+            var sapi = (ICoreServerAPI)Api;
             var fromServerPlayer = fromPlayer as IServerPlayer;
-            sapi.Network.SendBlockEntityPacket(fromServerPlayer,this.Blockentity.Pos, MyPacketIdForClient, NetworkInformationSerializer.Serialize(networkInformation!));
+            sapi.Network.SendBlockEntityPacket(fromServerPlayer, this.Blockentity.Pos, MyPacketIdForClient, NetworkInformationSerializer.Serialize(networkInformation!));
             this.Blockentity.MarkDirty();
         }
 
@@ -540,7 +540,7 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
     {
         if (packetid == MyPacketIdForClient) // проверяем, что пакет именно мой
         {
-            networkInformation= NetworkInformationSerializer.Deserialize(data);
+            networkInformation = NetworkInformationSerializer.Deserialize(data);
         }
 
         base.OnReceivedServerPacket(packetid, data);
@@ -553,12 +553,9 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
     public override void GetBlockInfo(IPlayer forPlayer, StringBuilder stringBuilder)
     {
         base.GetBlockInfo(forPlayer, stringBuilder);
-
-
-
+        
         if (Api is not ICoreClientAPI)
             return;
-
         
 
         //храним направления проводов в этом блоке
@@ -647,8 +644,21 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
 
         //отслеживаем состояние кнопки для подробностей
         var capi = (ICoreClientAPI)Api;
+
+
+        // если игрок держит в руках набор электрика, то показываем полную информацию
+        if ((!forPlayer.InventoryManager.ActiveHotbarSlot?.Itemstack?.Item?.Code.Path.Contains("electricianskit") ??
+             true) &&
+            (!forPlayer.InventoryManager.OffhandHotbarSlot?.Itemstack?.Item?.Code.Path.Contains("electricianskit") ??
+             true))
+        {
+            stringBuilder.AppendLine(Lang.Get("electricalprogressivebasics:EKitForDetails"));
+            return;
+        }
+
+        // Проверяем нажатие Alt для подробной информации
         var altPressed = capi.Input.IsHotKeyPressed("AltPressForNetwork");
-        var nameAltPressed = capi.Input.GetHotKeyByCode("AltPressForNetwork").CurrentMapping.ToString();
+        var nameAltPressed = capi.Input.GetHotKeyByCode("AltPressForNetwork")?.CurrentMapping.ToString() ?? "Alt";
 
         if (!altPressed)
         {
@@ -656,7 +666,8 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
             return;
         }
 
-        stringBuilder.AppendLine(Lang.Get("electricalprogressivebasics:Electricity"));
+
+        stringBuilder.AppendLine("  " + Lang.Get("electricalprogressivebasics:Electricity"));
         stringBuilder.AppendLine("├ " + Lang.Get("electricalprogressivebasics:Consumers") + ": " + networkInformation.NumberOfConsumers);
         stringBuilder.AppendLine("├ " + Lang.Get("electricalprogressivebasics:Generators") + ": " + networkInformation.NumberOfProducers);
         stringBuilder.AppendLine("├ " + Lang.Get("electricalprogressivebasics:Batteries") + ": " + networkInformation.NumberOfAccumulators);
@@ -670,7 +681,8 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
 
         stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Capacity") + ": " + (int)networkInformation.Capacity + "/" + (int)networkInformation.MaxCapacity + " " + Lang.Get("electricalprogressivebasics:J") + " (" + capacity.ToString("F3") + " %)");
 
-        stringBuilder.AppendLine(Lang.Get("electricalprogressivebasics:Block"));
+        // информация о блоке
+        stringBuilder.AppendLine(Lang.Get("electricalprogressivebasics:BlockParameters"));
         stringBuilder.AppendLine("├ " + Lang.Get("electricalprogressivebasics:MaxCurrent") + ": " + networkInformation.eParamsInNetwork.maxCurrent * networkInformation.eParamsInNetwork.lines + " " + Lang.Get("electricalprogressivebasics:A"));
         stringBuilder.AppendLine("├ " + Lang.Get("electricalprogressivebasics:Current") + ": " + Math.Abs(networkInformation.current).ToString("F3") + " " + Lang.Get("electricalprogressivebasics:A"));
 
@@ -760,7 +772,7 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
         ParticlesType = tree.GetInt("ParticlesType", 0);
 
         int count = tree.GetInt("ParticlesOffsetPosCount", 0);
-        ParticlesOffsetPos = new (count);
+        ParticlesOffsetPos = new(count);
         for (int i = 0; i < count; i++)
         {
             double x = tree.GetDouble($"ParticlesOffsetPosX_{i}", 0.0);
@@ -770,12 +782,12 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
         }
 
         count = tree.GetInt("ParticlesFramesAnimCount", 0);
-        ParticlesFramesAnim = new (count);
+        ParticlesFramesAnim = new(count);
         for (int i = 0; i < count; i++)
         {
             int min = tree.GetInt($"ParticlesFramesAnimMin_{i}", -1);
             int max = tree.GetInt($"ParticlesFramesAnimMax_{i}", -1);
-            ParticlesFramesAnim.Add([min,max]);
+            ParticlesFramesAnim.Add([min, max]);
         }
 
 

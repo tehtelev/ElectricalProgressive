@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -186,7 +187,7 @@ namespace ElectricalProgressive.Content.Block
                 var capi = (ICoreClientAPI)api;
 
                 // Показываем точки подключения когда игрок держит провод
-                if (IsHoldingWireTool(capi.World.Player) || IsHoldingWrench(capi.World.Player))
+                if (IsHoldingWireTool(capi.World.Player) || IsHoldingEKit(capi.World.Player))
                 {
                     boxes.AddRange(GetNodeSelectionBoxes(blockAccessor, pos));
                     return boxes.ToArray();
@@ -230,7 +231,7 @@ namespace ElectricalProgressive.Content.Block
                 var capi = (ICoreClientAPI)api;
 
                 // Показываем точки подключения когда игрок держит провод
-                if (IsHoldingWireTool(capi.World.Player) || IsHoldingWrench(capi.World.Player))
+                if (IsHoldingWireTool(capi.World.Player) || IsHoldingEKit(capi.World.Player))
                 {
                     var coll = GetNodeSelectionBoxes(blockAccessor, pos.AddCopy(offset));
                     
@@ -407,18 +408,26 @@ namespace ElectricalProgressive.Content.Block
             // Если игрок держит кабель для подключения проводов
             if (IsHoldingWireTool(byPlayer))
             {
-                var behavior = world.BlockAccessor.GetBlockEntity(blockSel.Position)?.GetBehavior<BEBehaviorEPImmersive>();
-                var wireNodes = behavior.GetWireNodes();
-                if (behavior != null && wireNodes != null && blockSel.SelectionBoxIndex < wireNodes.Count)
+                if (IsHoldingEKit(byPlayer))
                 {
-                    // Начинаем процесс подключения провода
-                    HandleWireConnection(capi, byPlayer, blockSel, behavior);
-                    return;
+                    var behavior = world.BlockAccessor.GetBlockEntity(blockSel.Position)?.GetBehavior<BEBehaviorEPImmersive>();
+                    var wireNodes = behavior.GetWireNodes();
+                    if (behavior != null && wireNodes != null && blockSel.SelectionBoxIndex < wireNodes.Count)
+                    {
+                        // Начинаем процесс подключения провода
+                        HandleWireConnection(capi, byPlayer, blockSel, behavior);
+                        return;
+                    }
+                }
+                else
+                {
+                    capi?.TriggerIngameError(this, "EKit1", Lang.Get("electricalprogressivebasics:UseEKitFor"));
                 }
             }
+            
 
-            // Если игрок держит гаечный ключ для отключения
-            if (IsHoldingWrench(byPlayer))
+            // Если игрок держит набор электрика
+            if (IsHoldingEKit(byPlayer))
             {
                 var behavior = world.BlockAccessor.GetBlockEntity(blockSel.Position)?.GetBehavior<BEBehaviorEPImmersive>();
                 if (behavior != null)
@@ -447,10 +456,18 @@ namespace ElectricalProgressive.Content.Block
         /// </summary>
         /// <param name="player"></param>
         /// <returns></returns>
-        public static bool IsHoldingWrench(IPlayer player)
+        public static bool IsHoldingEKit(IPlayer player)
         {
-            var activeSlot = player.InventoryManager.ActiveHotbarSlot;
-            return activeSlot?.Itemstack?.Item?.Tool == EnumTool.Wrench;
+            // если игрок держит в руках набор электрика
+            if ((player.InventoryManager.ActiveHotbarSlot?.Itemstack?.Item?.Code.Path.Contains("electricianskit") ??
+                 false) ||
+                (player.InventoryManager.OffhandHotbarSlot?.Itemstack?.Item?.Code.Path.Contains("electricianskit") ??
+                 false))
+            {
+                return true;
+            }
+
+            return false;
         }
 
 
@@ -468,10 +485,7 @@ namespace ElectricalProgressive.Content.Block
 
             if (behavior.FindConnection(nodeIndex).Count >= 8)
             {
-                if (capi != null)
-                {
-                    capi.ShowChatMessage(Lang.Get("electricalprogressivebasics:too_much_wires"));
-                }
+                capi?.TriggerIngameError(this, "too_much_wires", Lang.Get("electricalprogressivebasics:too_much_wires"));
                 return;
             }
 
@@ -489,7 +503,6 @@ namespace ElectricalProgressive.Content.Block
             if (capi != null)
             {
                 capi.ShowChatMessage(Lang.Get("electricalprogressivebasics:select_second_point"));
-
             }
 
 
@@ -524,8 +537,7 @@ namespace ElectricalProgressive.Content.Block
             // Проверяем что в руках все еще тот же кабель
             if (!IsHoldingWireTool(byPlayer) || !byPlayer.InventoryManager.ActiveHotbarSlot.Itemstack.Block.Code.ToString().Equals(connectionData.Asset))
             {
-                if (capi != null)
-                    capi.ShowChatMessage(Lang.Get("electricalprogressivebasics:hold_same_cable"));
+                capi?.TriggerIngameError(this, "hold_same_cable", Lang.Get("electricalprogressivebasics:hold_same_cable"));
                 ClearConnection(byPlayer);
                 return;
             }
@@ -533,8 +545,7 @@ namespace ElectricalProgressive.Content.Block
             // Проверяем что вторая точка на другом блоке
             if (blockSel.Position.Equals(connectionData.StartPos))
             {
-                if (capi != null)
-                    capi.ShowChatMessage(Lang.Get("electricalprogressivebasics:same_block_connection"));
+                capi?.TriggerIngameError(this, "same_block_connection", Lang.Get("electricalprogressivebasics:same_block_connection"));
                 ClearConnection(byPlayer);
                 return;
             }
@@ -543,8 +554,7 @@ namespace ElectricalProgressive.Content.Block
 
             if (endBehavior == null || blockSel.SelectionBoxIndex >= endBehavior.GetWireNodes().Count)
             {
-                if (capi != null)
-                    capi.ShowChatMessage(Lang.Get("electricalprogressivebasics:invalid_connection_point"));
+                capi?.TriggerIngameError(this, "invalid_connection_point", Lang.Get("electricalprogressivebasics:invalid_connection_point"));
                 ClearConnection(byPlayer);
                 return;
             }
@@ -556,8 +566,7 @@ namespace ElectricalProgressive.Content.Block
             if (startBehavior.FindConnection(connectionData.StartNodeIndex,
                     blockSel.Position, (byte)blockSel.SelectionBoxIndex) != null)
             {
-                if (capi != null)
-                    capi.ShowChatMessage(Lang.Get("electricalprogressivebasics:connection_already_exists"));
+                capi?.TriggerIngameError(this, "connection_already_exists", Lang.Get("electricalprogressivebasics:connection_already_exists"));
                 ClearConnection(byPlayer);
                 return;
             }
@@ -565,8 +574,7 @@ namespace ElectricalProgressive.Content.Block
             // Проверяем ограничение на 8 подключений у второго нода
             if (endBehavior.FindConnection((byte)blockSel.SelectionBoxIndex).Count >= 8)
             {
-                if (capi != null)
-                    capi.ShowChatMessage(Lang.Get("electricalprogressivebasics:too_much_wires"));
+                capi?.TriggerIngameError(this, "too_much_wires", Lang.Get("electricalprogressivebasics:too_much_wires"));
                 ClearConnection(byPlayer);
                 return;
             }
@@ -599,8 +607,7 @@ namespace ElectricalProgressive.Content.Block
             // ограничиваем максимальную длину провода
             if (cableLength > 32)
             {
-                if (capi != null)
-                    capi.ShowChatMessage(Lang.Get("electricalprogressivebasics:max_wire_length"));
+                capi?.TriggerIngameError(this, "max_wire_length", Lang.Get("electricalprogressivebasics:max_wire_length"));
                 ClearConnection(byPlayer);
                 return;
             }
@@ -609,8 +616,7 @@ namespace ElectricalProgressive.Content.Block
             var activeSlot = byPlayer.InventoryManager.ActiveHotbarSlot;
             if (byPlayer.WorldData.CurrentGameMode != EnumGameMode.Creative && activeSlot.StackSize < cableLength)
             {
-                if (capi != null)
-                    capi.ShowChatMessage(Lang.Get("electricalprogressivebasics:not_enough_cable", cableLength, activeSlot.StackSize));
+                capi?.TriggerIngameError(this, "not_enough_cable", Lang.Get("electricalprogressivebasics:not_enough_cable", cableLength, activeSlot.StackSize));
                 ClearConnection(byPlayer);
                 return;
             }

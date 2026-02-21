@@ -181,6 +181,14 @@ namespace ElectricalProgressive.Utils
                 if (!entity.Alive || !entity.IsCreature)
                     continue;
 
+                // если игрок держит в руках набор электрика, то не надо его бить током
+                if (entity is EntityPlayer player)
+                {
+                    if ((player.LeftHandItemSlot?.Itemstack?.Item?.Code.Path.Contains("electricianskit") ?? false) ||
+                        (player.RightHandItemSlot?.Itemstack?.Item?.Code.Path.Contains("electricianskit") ?? false))
+                        continue;
+                }
+
                 // Получаем коллизионный бокс сущности
                 var entityBox = entity.CollisionBox.ToDouble();
                 entityBox.Translate(entity.Pos.X, entity.Pos.Y, entity.Pos.Z);

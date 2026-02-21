@@ -49,6 +49,14 @@ public abstract class BlockEBase : Vintagestory.API.Common.Block
         if (!entity.Alive || !entity.IsCreature)
             return;
 
+        // если игрок держит в руках набор электрика, то не надо его бить током
+        if (entity is EntityPlayer player)
+        {
+            if((player.LeftHandItemSlot?.Itemstack?.Item?.Code.Path.Contains("electricianskit")?? false) ||
+               (player.RightHandItemSlot?.Itemstack?.Item?.Code.Path.Contains("electricianskit")?? false))
+                return;
+        }
+
         // если блокэнтити не найден, выходим
         if (world.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEBase blockEntityEBase)
             return;

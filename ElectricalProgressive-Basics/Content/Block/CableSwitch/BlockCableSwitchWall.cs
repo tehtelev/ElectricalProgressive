@@ -214,7 +214,7 @@ namespace ElectricalProgressive.Content.Block.CableSwitch
             base.OnBlockInteractStop(secondsUsed, world, byPlayer, blockSel);
             
             // если игрок держит провод или инструмент, то не переключаем
-            if (IsHoldingWireTool(byPlayer) || IsHoldingWrench(byPlayer))
+            if (IsHoldingWireTool(byPlayer) || IsHoldingEKit(byPlayer))
                 return;
 
             var entity = world.BlockAccessor.GetBlockEntity(blockSel.Position);

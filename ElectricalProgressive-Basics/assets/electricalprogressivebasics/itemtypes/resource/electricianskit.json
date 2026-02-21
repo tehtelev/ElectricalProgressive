@@ -93,5 +93,18 @@
       "z": -102
     },
     "scale": 0.67
+  },
+  "tpOffHandTransform": {
+    "translation": {
+      "x": -1,
+      "y": -0.7,
+      "z": -1.12
+    },
+    "rotation": {
+      "x": -90,
+      "y": -95,
+      "z": 7
+    },
+    "scale": 0.67
   }
 }
