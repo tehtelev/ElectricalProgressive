@@ -1,9 +1,12 @@
 ﻿using ElectricalProgressive.Content.Block;
 using ElectricalProgressive.Content.Block.EAccumulator;
 using ElectricalProgressive.Content.Block.ECable;
+using ElectricalProgressive.Content.Block.ECharger;
 using ElectricalProgressive.Content.Block.EConnector;
 using ElectricalProgressive.Content.Block.EFuelGenerator;
 using ElectricalProgressive.Content.Block.EGenerator;
+using ElectricalProgressive.Content.Block.EHotSpringsGenerator;
+using ElectricalProgressive.Content.Block.EHotSpringsGenerator.EHeatExchanger;
 using ElectricalProgressive.Content.Block.EMotor;
 using ElectricalProgressive.Content.Block.ESolarGenerator;
 using ElectricalProgressive.Content.Block.ESwitch;
@@ -21,14 +24,14 @@ using Vintagestory.API.Config;
 
 
 
-[assembly: ModDependency("game", "1.21.0")]
-[assembly: ModDependency("electricalprogressivecore", "2.6.4")]
+[assembly: ModDependency("game", "1.22.0-pre.3")]
+[assembly: ModDependency("electricalprogressivecore", "3.0.0-pre.1")]
 [assembly: ModInfo(
     "Electrical Progressive: Basics",
     "electricalprogressivebasics",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Basic electrical devices.",
-    Version = "2.6.4",
+    Version = "3.0.0-pre.1",
     Authors =
     [
         "Tehtelev",
@@ -45,6 +48,8 @@ public class ElectricalProgressiveBasics : ModSystem
 
     private ICoreAPI api = null!;
     private ICoreClientAPI capi = null!;
+
+    public static AssetLocation soundElectricShok;
 
     /// <summary>
     /// Причины сгорания электрических блоков
@@ -118,6 +123,18 @@ public class ElectricalProgressiveBasics : ModSystem
         api.RegisterBlockClass("BlockTermoplastini", typeof(BlockTermoplastini));
 
         api.RegisterItemClass("ESoldering", typeof(ESoldering));
+
+        api.RegisterBlockClass("BlockECharger", typeof(BlockECharger));
+        api.RegisterBlockEntityClass("BlockEntityECharger", typeof(BlockEntityECharger));
+        api.RegisterBlockEntityBehaviorClass("BEBehaviorECharger", typeof(BEBehaviorECharger));
+
+        api.RegisterBlockClass("BlockEHotSpringsGenerator", typeof(BlockEHotSpringsGenerator));
+        api.RegisterBlockEntityClass("BlockEntityEHotSpringsGenerator", typeof(BlockEntityEHotSpringsGenerator));
+        api.RegisterBlockEntityBehaviorClass("BEBehaviorHotSpringsEGenerator", typeof(BEBehaviorHotSpringsEGenerator));
+
+        api.RegisterBlockClass("BlockEHeatExchanger", typeof(BlockEHeatExchanger));
+
+        
 
         // Регистрируем патч для механики
         harmony = new Harmony("electricalprogressive.mechanicalpowermod");

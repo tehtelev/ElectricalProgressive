@@ -1,26 +1,4 @@
 ﻿[
-  {
-    "ingredientPattern": "HI",
-    "width": 1,
-    "height": 2,
-    "ingredients": {
-      "H": {
-        "type": "item",
-        "code": "game:hammer-*",
-        "isTool": true,
-        "toolDurabilityCost": 8
-      },
-      "I": {
-        "type": "block",
-        "code": "electricalprogressiveqol:charger-burned-south"
-      }
-    },
-    "output": {
-      "type": "item",
-      "code": "game:metalbit-iron",
-      "quantity": 20
-    }
-  },
 
 
   {
@@ -273,32 +251,6 @@
       "quantity": 20
     }
   },
-
-  {
-    "ingredientPattern": "HI",
-    "width": 1,
-    "height": 2,
-    "ingredients": {
-      "H": {
-        "type": "item",
-        "code": "game:hammer-*",
-        "isTool": true,
-        "toolDurabilityCost": 8
-      },
-      "I": {
-        "type": "block",
-        "code": "electricalprogressiveqol:efridge-burned-north"
-      }
-    },
-    "output": {
-      "type": "item",
-      "code": "game:metalbit-copper",
-      "quantity": 160
-    }
-  },
-
-
-
 
   {
     "ingredientPattern": "HI",

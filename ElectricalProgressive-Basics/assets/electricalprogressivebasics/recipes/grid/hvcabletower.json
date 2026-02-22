@@ -1,0 +1,37 @@
+﻿[
+	{
+		"ingredientPattern": "MS,WH",
+		"width": 2,
+		"height": 2,
+		"ingredients": {
+			"W": {
+				"type": "block",
+				"code": "electricalprogressivebasics:cabledotdown",
+				"quantity": 2
+			},
+			"M": {
+				"type": "item",
+				"code": "game:metalplate-iron",
+				"quantity": 1
+			},
+			"S": {
+				"type": "item",
+				"code": "game:saw-*",
+				"isTool": true,
+				"toolDurabilityCost": 32
+			},
+			"H": {
+				"type": "item",
+				"code": "game:hammer-*",
+				"isTool": true,
+				"toolDurabilityCost": 8
+			}
+		},
+		"output": {
+			"type": "block",
+			"code": "electricalprogressivebasics:hvcabletower-north",
+			"quantity": 1
+		}
+	}
+	
+]

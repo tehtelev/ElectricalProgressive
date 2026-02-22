@@ -6,8 +6,8 @@
     "ingredients": {
       "E": {
         "type": "item",
-        "code": "electricalprogressivebasics:coil",
-        "quantity": 2
+        "code": "game:clay-fire",
+        "quantity": 16
       },
       "X": {
         "type": "item",
@@ -33,7 +33,7 @@
     },
     "output": {
       "type": "block",
-      "code": "electricalprogressiveqol:efridge-melted-north",
+      "code": "electricalprogressiveqol:efridge-north",
       "quantity": 1
     }
   }

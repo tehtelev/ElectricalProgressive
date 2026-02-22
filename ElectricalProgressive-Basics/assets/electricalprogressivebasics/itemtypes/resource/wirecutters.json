@@ -1,6 +1,15 @@
 ﻿{
   "code": "wirecutters",
   "attributes": {
+    "handbook": {
+      "groupBy": [ "wirecutters" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivebasics:item-handbooktitle-wirecutters",
+          "text": "electricalprogressivebasics:item-handbooktext-wirecutters"
+        }
+      ]
+    },
     "rackable": true,
     "toolrackTransform": {
       "translation": {
@@ -57,7 +66,7 @@
   ],
   "shape": { "base": "electricalprogressivebasics:item/wirecutters" },
   "enabled": true,
-  "heldTpHitAnimation": "breaktool",
+  "heldTpHitAnimation": "shears",
   "creativeinventory": {
     "electricity": [ "*" ]
   },

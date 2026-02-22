@@ -15,9 +15,6 @@ using Vintagestory.GameContent;
 
 namespace ElectricalProgressive.Content.Block;
 
-
-
-
 public class BEBehaviorEPImmersive : BlockEntityBehavior
 {
     // Единый список всех соединений
@@ -768,9 +765,6 @@ public class BEBehaviorEPImmersive : BlockEntityBehavior
             stringBuilder.AppendLine(Lang.Get("electricalprogressivebasics:WaitingNetworkInfo"));
             return;
         }
-
-
-        stringBuilder.AppendLine("" + Lang.Get("electricalprogressivebasics:ConnectedWires", networkInformation.NumberOfConnections));
 
 
         // если игрок держит в руках набор электрика, то показываем полную информацию 

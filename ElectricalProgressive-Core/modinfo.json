@@ -7,8 +7,8 @@
     "Kotl"
   ],
   "description": "Electrical logic library.",
-  "Version": "2.6.4",
+  "Version": "3.0.0-pre.1",
   "dependencies": {
-    "game": "1.21.0"
+    "game": "1.22.0-pre.3"
   }
 }

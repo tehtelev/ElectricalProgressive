@@ -210,16 +210,16 @@
 
   "tpHandTransform": {
     "translation": {
-      "x": -1.2,
+      "x": -1.4,
       "y": -0.99,
-      "z": -1.2
+      "z": -0.7
     },
     "rotation": {
       "x": 5,
-      "y": 99,
+      "y": 10,
       "z": -78
     },
-    "scale": 0.51
+    "scale": 0.42
   }
 
 }

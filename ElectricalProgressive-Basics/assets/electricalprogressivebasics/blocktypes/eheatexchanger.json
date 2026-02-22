@@ -1,4 +1,4 @@
-{
+﻿{
   "code": "eheatexchanger",
   "class": "BlockEHeatExchanger",
 
@@ -7,8 +7,8 @@
       "groupBy": [ "eheatexchanger-*" ],
       "extraSections": [
         {
-          "title": "electricalprogressiveqol:block-handbooktitle-eheatexchanger",
-          "text": "electricalprogressiveqol:block-handbooktext-eheatexchanger"
+          "title": "electricalprogressivebasics:block-handbooktitle-eheatexchanger",
+          "text": "electricalprogressivebasics:block-handbooktext-eheatexchanger"
         }
       ]
     }

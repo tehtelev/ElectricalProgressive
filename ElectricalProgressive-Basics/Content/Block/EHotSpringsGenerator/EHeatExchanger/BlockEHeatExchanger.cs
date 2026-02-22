@@ -76,6 +76,6 @@ public class BlockEHeatExchanger : Vintagestory.API.Common.Block
     public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
     {
         base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
-        dsc.AppendLine(Lang.Get("electricalprogressiveqol:heatexchanger-placement-hint"));
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:heatexchanger-placement-hint"));
     }
 }

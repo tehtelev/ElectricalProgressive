@@ -1,6 +1,15 @@
 ﻿{
   "code": "electricianskitcase",
   "attributes": {
+    "handbook": {
+      "groupBy": [ "electricianskitcase" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivebasics:item-handbooktitle-electricianskitcase",
+          "text": "electricalprogressivebasics:item-handbooktext-electricianskitcase"
+        }
+      ]
+    },
     "groundStorageTransform": {
       "translation": {
         "x": 0,

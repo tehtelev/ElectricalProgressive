@@ -2,6 +2,15 @@
   "code": "electricsolderingiron",
   "class": "ESoldering",
   "attributes": {
+    "handbook": {
+      "groupBy": [ "electricsolderingiron" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivebasics:item-handbooktitle-electricsolderingiron",
+          "text": "electricalprogressivebasics:item-handbooktext-electricsolderingiron"
+        }
+      ]
+    },
     "chargable": true,
     "consume": 20,
     "attachableToEntity": { "categoryCode": "toolholding" },

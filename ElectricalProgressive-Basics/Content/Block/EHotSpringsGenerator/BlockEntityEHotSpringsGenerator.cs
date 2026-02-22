@@ -149,7 +149,7 @@ public class BlockEntityEHotSpringsGenerator : BlockEntityEFacingBase
         if (!surrounded)
         {
             Kpd = 0;
-            ErrorMessage = "electricalprogressiveqol:hotsprings-not-surrounded";
+            ErrorMessage = "electricalprogressivebasics:hotsprings-not-surrounded";
             return;
         }
 
@@ -175,7 +175,7 @@ public class BlockEntityEHotSpringsGenerator : BlockEntityEFacingBase
         // Set error message based on the most significant issue
         if (nearbyGenerators > 0)
         {
-            ErrorMessage = "electricalprogressiveqol:hotsprings-nearby-penalty";
+            ErrorMessage = "electricalprogressivebasics:hotsprings-nearby-penalty";
         }
         else // Clears message in case there was one from before
         {

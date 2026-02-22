@@ -97,6 +97,16 @@
     "handbook": {
       "groupBy": [ "wrench-*" ]
     },
+    "handbookbytype": {
+      "wrench-adjustable": {
+        "extraSections": [
+          {
+            "title": "electricalprogressivebasics:item-handbooktitle-wrench-adjustable",
+            "text": "electricalprogressivebasics:item-handbooktext-wrench-adjustable"
+          }
+        ]
+      }
+    },
     "onMetalTongTransformbytype": {
       "translation": {
         "x": -1.48,

@@ -63,7 +63,7 @@ namespace ElectricalProgressive.Content.LiquidInsertionPipe;
                     {
                         // Получаем предмет содержимого
                         AssetLocation contentAsset = AssetLocation.Create(contentCode, sourceStack.Collectible.Code.Domain);
-                        Item contentItem = this.inventory.Api.World.GetItem(contentAsset);
+                        Vintagestory.API.Common.Item contentItem = this.inventory.Api.World.GetItem(contentAsset);
                         
                         if (contentItem != null && contentItem.IsLiquid())
                         {
@@ -272,7 +272,7 @@ namespace ElectricalProgressive.Content.LiquidInsertionPipe;
             }
             
             AssetLocation contentAsset = AssetLocation.Create(contentCode, sourceSlot.Itemstack.Collectible.Code.Domain);
-            Item contentItem = world.GetItem(contentAsset);
+            Vintagestory.API.Common.Item contentItem = world.GetItem(contentAsset);
             
             if (contentItem == null)
             {

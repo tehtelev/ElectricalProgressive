@@ -15,13 +15,13 @@ using Vintagestory.GameContent;
 using static ElectricalProgressive.ElectricalProgressive;
 
 
-[assembly: ModDependency("game", "1.21.0")]
+[assembly: ModDependency("game", "1.22.0-pre.3")]
 [assembly: ModInfo(
     "Electrical Progressive: Core",
     "electricalprogressivecore",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Electrical logic library.",
-    Version = "2.6.4",
+    Version = "3.0.0-pre.1",
     Authors = ["Tehtelev", "Kotl"]
 )]
 

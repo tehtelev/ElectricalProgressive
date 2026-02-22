@@ -1,0 +1,41 @@
+﻿[
+	{
+		"ingredientPattern": "MW",
+		"width": 2,
+		"height": 1,
+		"ingredients": {
+			"W": {
+				"type": "block",
+				"code": "electricalprogressivebasics:cabledotdown",
+				"quantity": 4
+			},
+			"M": {
+				"type": "item",
+				"code": "game:metalplate-iron",
+				"quantity": 1
+			}
+		},
+		"output": {
+			"type": "block",
+			"code": "electricalprogressivebasics:cabledotwall",
+			"quantity": 4
+		}
+	},
+	{
+		"ingredientPattern": "W",
+		"width": 1,
+		"height": 1,
+		"ingredients": {
+			"W": {
+				"type": "block",
+				"code": "electricalprogressivebasics:cabledotroof",
+				"quantity": 1
+			}
+		},
+		"output": {
+			"type": "block",
+			"code": "electricalprogressivebasics:cabledotwall",
+			"quantity": 1
+		}
+	}
+]

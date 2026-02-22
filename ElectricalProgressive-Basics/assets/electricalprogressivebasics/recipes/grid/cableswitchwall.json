@@ -1,0 +1,24 @@
+﻿[
+	{
+		"ingredientPattern": "MWW",
+		"width": 3,
+		"height": 1,
+		"ingredients": {
+			"W": {
+				"type": "block",
+				"code": "electricalprogressivebasics:cabledotdown",
+				"quantity": 1
+			},
+			"M": {
+				"type": "item",
+				"code": "game:metalplate-iron",
+				"quantity": 1
+			}
+		},
+		"output": {
+			"type": "block",
+			"code": "electricalprogressivebasics:cableswitchwall",
+			"quantity": 1
+		}
+	}
+]

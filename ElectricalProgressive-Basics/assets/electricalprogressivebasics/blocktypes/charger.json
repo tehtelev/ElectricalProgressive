@@ -26,8 +26,8 @@
       "groupBy": [ "charger-*" ],
       "extraSections": [
         {
-          "title": "electricalprogressiveqol:block-handbooktitle-charger",
-          "text": "electricalprogressiveqol:block-handbooktext-charger"
+          "title": "electricalprogressivebasics:block-handbooktitle-charger",
+          "text": "electricalprogressivebasics:block-handbooktext-charger"
         }
       ]
     }

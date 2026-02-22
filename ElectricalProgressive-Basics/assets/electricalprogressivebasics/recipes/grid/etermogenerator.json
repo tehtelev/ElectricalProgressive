@@ -23,7 +23,7 @@
       },
       "H": {
         "type": "item",
-        "code": "game:burnedbrick-*",
+        "code": "game:burnedbrick-fire",
         "quantity": 24
       },
       "M": {

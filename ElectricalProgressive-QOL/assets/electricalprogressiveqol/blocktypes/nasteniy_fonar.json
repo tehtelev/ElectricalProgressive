@@ -17,7 +17,7 @@
     "voltage": 128,
     "maxCurrent": 20.0,
     "isolated": true,
-    "isolatedEnvironment": false,
+    "isolatedEnvironment": true,
     "HSV": 20,
     "handbook": {
       "groupBy": [ "nasteniy_fonar-*" ],

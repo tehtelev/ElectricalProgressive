@@ -1,6 +1,15 @@
 ﻿{
   "code": "insulatedgloves",
   "attributes": {
+    "handbook": {
+      "groupBy": [ "insulatedgloves" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivebasics:item-handbooktitle-insulatedgloves",
+          "text": "electricalprogressivebasics:item-handbooktext-insulatedgloves"
+        }
+      ]
+    },
     "groundStorageTransform": {
       "translation": {
         "x": 0,

@@ -1,23 +1,20 @@
-[
+﻿[
   {
-    "ingredientPattern": "SCH,GG_",
+    "ingredientPattern": "GIH,GIE",
     "width": 3,
     "height": 2,
     "ingredients": {
-      "C": {
-        "type": "item",
-        "code": "game:metalplate-copper",
-        "quantity": 4
+      "E": {
+        "type": "block",
+        "code": "electricalprogressivebasics:egenerator-tier1-stator"
       },
       "G": {
         "type": "item",
-        "code": "game:metalbit-gold",
-        "quantity": 4
+        "code": "game:metalplate-gold"
       },
-      "S": {
+      "I": {
         "type": "item",
-        "code": "game:metalbit-silver",
-        "quantity": 2
+        "code": "game:metalplate-iron"
       },
       "H": {
         "type": "item",
@@ -28,7 +25,7 @@
     },
     "output": {
       "type": "block",
-      "code": "electricalprogressiveqol:eheatexchanger",
+      "code": "electricalprogressivebasics:ehotspringsgenerator-off-south",
       "quantity": 1
     }
   }

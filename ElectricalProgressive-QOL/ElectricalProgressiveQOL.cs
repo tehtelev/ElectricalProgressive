@@ -1,5 +1,4 @@
-﻿using ElectricalProgressive.Content.Block.ECharger;
-using ElectricalProgressive.Content.Block.EFence;
+﻿using ElectricalProgressive.Content.Block.EFence;
 using ElectricalProgressive.Content.Block.EFonar;
 using ElectricalProgressive.Content.Block.EFreezer;
 using ElectricalProgressive.Content.Block.EFridge;
@@ -7,8 +6,6 @@ using ElectricalProgressive.Content.Block.EFruitPress;
 using ElectricalProgressive.Content.Block.EHeatCannon;
 using ElectricalProgressive.Content.Block.EHeater;
 using ElectricalProgressive.Content.Block.EHorn;
-using ElectricalProgressive.Content.Block.EHotSpringsGenerator;
-using ElectricalProgressive.Content.Block.EHotSpringsGenerator.EHeatExchanger;
 using ElectricalProgressive.Content.Block.ELamp;
 using ElectricalProgressive.Content.Block.EOven;
 using ElectricalProgressive.Content.Block.ESFonar;
@@ -25,15 +22,15 @@ using Vintagestory.API.Server;
 
 
 
-[assembly: ModDependency("game", "1.21.6")]
-[assembly: ModDependency("electricalprogressivecore", "2.6.4")]
-[assembly: ModDependency("electricalprogressivebasics", "2.6.4")]
+[assembly: ModDependency("game", "1.22.0-pre.3")]
+[assembly: ModDependency("electricalprogressivecore", "3.0.0-pre.1")]
+[assembly: ModDependency("electricalprogressivebasics", "3.0.0-pre.1")]
 [assembly: ModInfo(
     "Electrical Progressive: QoL",
     "electricalprogressiveqol",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Additional electrical devices.",
-    Version = "2.6.6",
+    Version = "3.0.0-pre.1",
     Authors =
     [
         "Tehtelev",
@@ -102,9 +99,7 @@ public class ElectricalProgressiveQOL : ModSystem
         api.RegisterBlockEntityClass("BlockEntityEHeatCannon", typeof(BlockEntityEHeatCannon));
         api.RegisterBlockEntityBehaviorClass("BEBehaviorEHeatCannon", typeof(BEBehaviorEHeatCannon));
 
-        api.RegisterBlockClass("BlockECharger", typeof(BlockECharger));
-        api.RegisterBlockEntityClass("BlockEntityECharger", typeof(BlockEntityECharger));
-        api.RegisterBlockEntityBehaviorClass("BEBehaviorECharger", typeof(BEBehaviorECharger));
+
 
 
         api.RegisterBlockClass("BlockEStove", typeof(BlockEStove));
@@ -130,15 +125,13 @@ public class ElectricalProgressiveQOL : ModSystem
         api.RegisterBlockEntityClass("BlockEntityEFence", typeof(BlockEntityEFence));
         api.RegisterBlockEntityBehaviorClass("BEBehaviorEFence", typeof(BEBehaviorEFence));
 
-        api.RegisterBlockClass("BlockEHotSpringsGenerator", typeof(BlockEHotSpringsGenerator));
-        api.RegisterBlockEntityClass("BlockEntityEHotSpringsGenerator", typeof(BlockEntityEHotSpringsGenerator));
-        api.RegisterBlockEntityBehaviorClass("BEBehaviorHotSpringsEGenerator", typeof(BEBehaviorHotSpringsEGenerator));
-        
+
+
         api.RegisterBlockClass("BlockEFruitPress", typeof(BlockEFruitPress));
         api.RegisterBlockEntityBehaviorClass("BEBehaviorEFruitPress", typeof(BEBehaviorEFruitPress));
         api.RegisterBlockEntityClass("BlockEntityEFruitPress", typeof(BlockEntityEFruitPress));
 
-        api.RegisterBlockClass("BlockEHeatExchanger", typeof(BlockEHeatExchanger));
+
 
         // xskills интеграция через рефлексию
         if (api.ModLoader.IsModEnabled("xskillsrabite") || api.ModLoader.IsModEnabled("xskills"))

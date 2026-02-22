@@ -1,0 +1,38 @@
+﻿[
+  {
+    "ingredientPattern": "GSW,MC_",
+    "width": 3,
+    "height": 2,
+    "ingredients": {
+      "G": {
+        "type": "block",
+        "code": "game:glass-plain"
+      },
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "M": {
+        "type": "item",
+        "code": "game:metalplate-iron"
+      },
+      "C": {
+        "type": "block",
+        "code": "electricalprogressivebasics:wire-512v-copper-part",
+        "quantity": 8
+      },
+      "W": {
+        "type": "block",
+        "code": "electricalprogressivebasics:cabledotdown",
+        "quantity": 1
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:hvstreetlamp-disabled-north",
+      "quantity": 1
+    }
+  }
+]

@@ -1,0 +1,130 @@
+﻿{
+	"code": "insulatorfired",
+	"behaviors": [
+		{
+			"name": "GroundStorable",
+			"properties": {
+				"layout": "Quadrants",
+				"collisionBox": {
+					"x1": 0,
+					"y1": 0,
+					"z1": 0,
+					"x2": 1,
+					"y2": 0.5,
+					"z2": 1
+				}
+			}
+		},
+		{ "name": "Unplaceable" }, // The ground storable obsoletes this being a block. Should be an item, but is kept a block for backwards compatibility
+		{ "name": "RightClickPickup" }
+	],
+	"shape": {
+		"base": "block/clay/insulator"
+	},
+	"textures": {
+		"mat": { "base": "game:block/clay/ceramic" },
+		"floor": { "base": "game:block/clay/ceramic" }
+	},
+	"attributes": {
+		"handbook": {
+			"ignoreCreativeInvStacks": true,
+			"groupBy": [ "insulator" ],
+			"extraSections": [
+				{
+					"title": "electricalprogressivebasics:block-handbooktitle-insulatorfired",
+					"text": "electricalprogressivebasics:block-handbooktext-insulatorfired"
+				}
+			]
+		},
+		"shelvable": true,
+		"onTongTransform": {
+			"translation": {
+				"x": -1.2,
+				"y": -0.87,
+				"z": -0.2
+			},
+			"rotation": {
+				"x": 30,
+				"y": 90,
+				"z": -67
+			},
+			"scale": 0.9
+		},
+		"onMetalTongTransform": {
+			"translation": {
+				"x": -1.2,
+				"y": -0.17,
+				"z": -0.6
+			},
+			"rotation": {
+				"x": -1,
+				"y": -2,
+				"z": 6
+			},
+			"origin": {
+				"x": 0.5,
+				"y": 0,
+				"z": 0.5
+			},
+			"scale": 0.9
+		}
+	},
+
+	"creativeinventory": {
+		"general": [ "*" ],
+		"electricity": [ "*" ]
+	},
+	"heldTpIdleAnimation": "holdbothhandslarge",
+	"doNotRenderAtLod2": true,
+	"blockmaterial": "Ceramic",
+	"replaceable": 300,
+	"resistance": 0.75,
+	"maxStackSize": 8,
+	"lightAbsorption": 0,
+	"sounds": {
+		"walk": "walk/stone"
+	},
+	"sideopaque": {
+		"all": false
+	},
+	"sidesolid": {
+		"all": false
+	},
+	"collisionbox": {
+		"x1": 0.3125,
+		"y1": 0,
+		"z1": 0.3125,
+		"x2": 0.6875,
+		"y2": 0.125,
+		"z2": 0.6875
+	},
+	"selectionbox": {
+		"x1": 0.3125,
+		"y1": 0,
+		"z1": 0.3125,
+		"x2": 0.6875,
+		"y2": 0.125,
+		"z2": 0.6875
+	},
+	"guiTransform": {
+		"origin": {
+			"x": 0.5,
+			"y": 0.27,
+			"z": 0.5
+		},
+		"scale": 2.37
+	},
+	"tpHandTransform": {
+		"translation": {
+			"x": -1,
+			"y": -0.44,
+			"z": -0.2
+		},
+		"rotation": {
+			"x": -80,
+			"y": 15,
+			"z": -103
+		},
+		"scale": 0.9
+	}
+}

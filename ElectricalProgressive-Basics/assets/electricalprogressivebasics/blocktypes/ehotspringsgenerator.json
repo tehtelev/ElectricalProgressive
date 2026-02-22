@@ -1,4 +1,4 @@
-{
+﻿{
   "code": "ehotspringsgenerator",
   "class": "BlockEHotSpringsGenerator",
   "entityClass": "BlockEntityEHotSpringsGenerator",
@@ -34,8 +34,8 @@
       "groupBy": [ "ehotspringsgenerator-*" ],
       "extraSections": [
         {
-          "title": "electricalprogressiveqol:block-handbooktitle-ehotspringsgenerator",
-          "text": "electricalprogressiveqol:block-handbooktext-ehotspringsgenerator"
+          "title": "electricalprogressivebasics:block-handbooktitle-ehotspringsgenerator",
+          "text": "electricalprogressivebasics:block-handbooktext-ehotspringsgenerator"
         }
       ]
     }

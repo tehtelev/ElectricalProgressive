@@ -1,4 +1,26 @@
-[
+﻿[
+  {
+    "ingredientPattern": "HI",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "I": {
+        "type": "block",
+        "code": "electricalprogressivebasics:charger-burned-south"
+      }
+    },
+    "output": {
+      "type": "item",
+      "code": "game:metalbit-iron",
+      "quantity": 20
+    }
+  },
 
   {
     "ingredientPattern": "HI",
@@ -167,7 +189,7 @@
     }
   },
 
- 
+
 
   {
     "ingredientPattern": "HI",

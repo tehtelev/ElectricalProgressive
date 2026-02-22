@@ -263,8 +263,8 @@ namespace ElectricalProgressive.Content.Block.EHeater
             {
                 var wrenchItems = new List<ItemStack>();
 
-                Item[] wrenches = capi.World.SearchItems(new AssetLocation("wrench-*"));
-                foreach (Item item in wrenches)
+                Vintagestory.API.Common.Item[] wrenches = capi.World.SearchItems(new AssetLocation("wrench-*"));
+                foreach (Vintagestory.API.Common.Item item in wrenches)
                     wrenchItems.Add(new ItemStack(item));
 
                 return new[] {

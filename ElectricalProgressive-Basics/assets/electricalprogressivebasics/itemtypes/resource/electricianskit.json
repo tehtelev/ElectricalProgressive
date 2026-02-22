@@ -2,6 +2,15 @@
   "code": "electricianskit",
   "storageFlags": 257,
   "attributes": {
+    "handbook": {
+      "groupBy": [ "electricianskit" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivebasics:item-handbooktitle-electricianskit",
+          "text": "electricalprogressivebasics:item-handbooktext-electricianskit"
+        }
+      ]
+    },
     "groundStorageTransform": {
       "translation": {
         "x": 0,
@@ -88,9 +97,9 @@
       "z": -0.3
     },
     "rotation": {
-      "x": -84,
-      "y": -2,
-      "z": -102
+      "x": 105,
+      "y": 7,
+      "z": -75
     },
     "scale": 0.67
   },
