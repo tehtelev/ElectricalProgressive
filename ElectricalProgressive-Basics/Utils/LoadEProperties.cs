@@ -39,10 +39,7 @@ public static class LoadEProperties
         var maxCurrent = MyMiniLib.GetAttributeFloat(block, "maxCurrent", 5.0F);
         var isolated = MyMiniLib.GetAttributeBool(block, "isolated", false);
         var isolatedEnvironment = MyMiniLib.GetAttributeBool(block, "isolatedEnvironment", false);
-
         
-
-
         // если грань не указана, то берем из массива в json
         if (faceNumber < 0)
         {

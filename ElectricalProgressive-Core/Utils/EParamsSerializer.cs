@@ -5,6 +5,11 @@ namespace ElectricalProgressive.Utils
 {
     public static class EParamsSerializer
     {
+        /// <summary>
+        /// Сериализует массив объектов EParams в байтовый массив.
+        /// </summary>
+        /// <param name="eparamsArray"></param>
+        /// <returns></returns>
         public static byte[] Serialize(EParams[] eparamsArray)
         {
             using var ms = new MemoryStream();
@@ -20,6 +25,11 @@ namespace ElectricalProgressive.Utils
             return ms.ToArray();
         }
 
+        /// <summary>
+        /// Десериализует байтовый массив обратно в массив объектов EParams.
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public static EParams[] Deserialize(byte[] data)
         {
             using var ms = new MemoryStream(data);
@@ -33,6 +43,7 @@ namespace ElectricalProgressive.Utils
             }
             return eparamsArray;
         }
+
 
         /// <summary>
         /// Сериализует один объект EParams
@@ -73,6 +84,7 @@ namespace ElectricalProgressive.Utils
             writer.Write(eparam.current);            // float, 4 байта
         }
 
+        /// Читает один объект EParams из BinaryReader
         private static EParams ReadEParams(BinaryReader reader)
         {
             return new EParams

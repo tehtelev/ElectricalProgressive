@@ -3,6 +3,11 @@
 
 public static class StringHelper
 {
+    /// <summary>
+    /// Рисует прогресс-бар в виде строки, состоящей из 16 символов, где заполненные символы (■) представляют процент выполнения
+    /// </summary>
+    /// <param name="percentage"></param>
+    /// <returns></returns>
     public static string Progressbar(float percentage)
     {
         var temp = "";

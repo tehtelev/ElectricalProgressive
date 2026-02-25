@@ -12,7 +12,7 @@ using Vintagestory.API.Common;
     "electricalprogressivetransport",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Additional electrical devices.",
-    Version = "2.6.6",
+    Version = "3.0.0-pre.1",
     Authors =
     [
         "Tehtelev",

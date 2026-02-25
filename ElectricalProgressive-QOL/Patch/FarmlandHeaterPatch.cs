@@ -31,6 +31,8 @@ public class FarmlandHeaterPatch
     private static HarmonyMethod saplingTranspilerMethod;
 
 
+    private static List<CodeInstruction> codes; // Временное поле для хранения инструкций в транспайлерах
+
     /// <summary>
     /// Метод для регистрации всех патчей
     /// </summary>
@@ -212,7 +214,7 @@ public class FarmlandHeaterPatch
     /// </summary>
     static List<CodeInstruction> TranspilerFarmland(IEnumerable<CodeInstruction> instructions)
     {
-        var codes = new List<CodeInstruction>(instructions);
+        codes = new List<CodeInstruction>(instructions);
         var found = false;
         for (int i = 0; i < codes.Count - 2; i++)
         {
@@ -238,7 +240,7 @@ public class FarmlandHeaterPatch
                         codes[j + 5].opcode == OpCodes.Stfld)
                     {
                         // Вставляем вызов HeaterBonus после baseClimate.Temperature += 5f
-                        var newCodes = new List<CodeInstruction>();
+                        var newCodes = new List<CodeInstruction>(9);
 
                         // Загружаем baseClimate в стек
                         newCodes.Add(new CodeInstruction(OpCodes.Ldloc_S, codes[j].operand));
@@ -289,7 +291,7 @@ public class FarmlandHeaterPatch
     /// </summary>
     static List<CodeInstruction> TranspilerBerryBush(IEnumerable<CodeInstruction> instructions)
     {
-        var codes = new List<CodeInstruction>(instructions);
+        codes = new List<CodeInstruction>(instructions);
         var found = false;
 
         for (int i = 0; i < codes.Count - 2; i++)
@@ -313,7 +315,7 @@ public class FarmlandHeaterPatch
                         codes[j + 3].opcode == OpCodes.Stloc_S)
                     {
                         // Вставляем вызов HeaterBonusBerryBush после temperature += 5
-                        var newCodes = new List<CodeInstruction>();
+                        var newCodes = new List<CodeInstruction>(5);
 
                         // Загружаем temperature в стек
                         newCodes.Add(new CodeInstruction(OpCodes.Ldloc_S, codes[j].operand));
@@ -352,7 +354,7 @@ public class FarmlandHeaterPatch
 
     static List<CodeInstruction> TranspilerBeehive(IEnumerable<CodeInstruction> instructions)
     {
-        var codes = new List<CodeInstruction>(instructions);
+        codes = new List<CodeInstruction>(instructions);
         var found = false;
 
         for (int i = 0; i < codes.Count - 2; i++)
@@ -377,7 +379,7 @@ public class FarmlandHeaterPatch
                         codes[j + 3].opcode == OpCodes.Stloc_1)
                     {
                         // Вставляем вызов HeaterBonusBeehive после temp += 5
-                        var newCodes = new List<CodeInstruction>();
+                        var newCodes = new List<CodeInstruction>(5);
 
                         // Загружаем temp в стек
                         newCodes.Add(new CodeInstruction(OpCodes.Ldloc_1, codes[j].operand));
@@ -415,7 +417,7 @@ public class FarmlandHeaterPatch
     // Добавить новый транспайлер для FruitTreeRootBH с проверкой roomness
     static List<CodeInstruction> TranspilerFruitTree(IEnumerable<CodeInstruction> instructions)
     {
-        var codes = new List<CodeInstruction>(instructions);
+        codes = new List<CodeInstruction>(instructions);
         var found = false;
 
         for (int i = 0; i < codes.Count - 4; i++)
@@ -432,7 +434,7 @@ public class FarmlandHeaterPatch
                 codes[i + 3].opcode == OpCodes.Ret)
             {
                 // Вставляем вызов HeaterBonusFruitTree перед возвратом
-                var newCodes = new List<CodeInstruction>();
+                var newCodes = new List<CodeInstruction>(5);
 
                 // Загружаем текущее значение 5
                 newCodes.Add(new CodeInstruction(OpCodes.Ldc_R4, codes[i + 2].operand));
@@ -468,7 +470,7 @@ public class FarmlandHeaterPatch
     // Добавить новый транспайлер для FruitTreeGrowingBranchBH.OnTick
     static List<CodeInstruction> TranspilerFruitTreeGrowing(IEnumerable<CodeInstruction> instructions)
     {
-        var codes = new List<CodeInstruction>(instructions);
+        codes = new List<CodeInstruction>(instructions);
         var found = false;
 
         for (int i = 0; i < codes.Count - 2; i++)
@@ -484,7 +486,7 @@ public class FarmlandHeaterPatch
                 // Вставляем вызов HeaterBonusFruitTreeGrowing перед сравнением
 
                 // Создаем новые инструкции для вставки перед сравнением
-                var newCodes = new List<CodeInstruction>();
+                var newCodes = new List<CodeInstruction>(3);
 
                 // Вызываем HeaterBonusFruitTreeGrowing (результат будет в стеке)
                 newCodes.Add(new CodeInstruction(OpCodes.Ldarg_0)); // this
@@ -511,7 +513,7 @@ public class FarmlandHeaterPatch
 
     static List<CodeInstruction> TranspilerSapling(IEnumerable<CodeInstruction> instructions)
     {
-        var codes = new List<CodeInstruction>(instructions);
+        codes = new List<CodeInstruction>(instructions);
         var found = false;
 
         for (int i = 0; i < codes.Count - 1; i++)
@@ -527,7 +529,7 @@ public class FarmlandHeaterPatch
                 // Вставляем вызов HeaterBonusSapling перед сравнением
 
                 // Создаем новые инструкции для вставки перед сравнением
-                var newCodes = new List<CodeInstruction>();
+                var newCodes = new List<CodeInstruction>(3);
 
                 // Вызываем HeaterBonusSapling (результат будет в стеке)
                 newCodes.Add(new CodeInstruction(OpCodes.Ldarg_0)); // this
@@ -555,7 +557,7 @@ public class FarmlandHeaterPatch
 
 
     /// <summary>
-    /// Новый универсальный метод для расчета бонуса от обогревателей
+    /// Универсальный метод для расчета бонуса от обогревателей
     /// </summary>
     /// <param name="api"></param>
     /// <param name="targetPos"></param>
@@ -585,17 +587,23 @@ public class FarmlandHeaterPatch
         var heatersInRoom = new List<dynamic>();
 
         // Ищем обогреватели в пределах 20 блоков и в той же комнате
+        dynamic heater;
         foreach (var part in electricalMod.Parts.Values)
         {
-            dynamic heater = part.Consumer as BEBehaviorEHeater;
+            // определяем какой из обогревателей
+            heater = part.Consumer as BEBehaviorEHeater;
             if (heater == null)
                 heater = part.Consumer as BEBehaviorEHeatCannon;
+
+            // не обогреватель, пропускаем
             if (heater == null)
                 continue;
 
+            // обогреватель не запитан, пропускаем
             if (heater.getPowerRequest() <= 0)
                 continue;
 
+            // проверяем расстояние до обогревателя
             if (Math.Abs(heater.Pos.X - targetPos.X) <= 20 &&
                 Math.Abs(heater.Pos.Y - targetPos.Y) <= 20 &&
                 Math.Abs(heater.Pos.Z - targetPos.Z) <= 20)
@@ -611,13 +619,14 @@ public class FarmlandHeaterPatch
             }
         }
 
-        foreach (var heater in heatersInRoom)
+        // сообщаем ообогревателям бонус
+        foreach (var heater2 in heatersInRoom)
         {
-            if (heater.HeatLevel>0)
-                heater.GreenhouseBonus = totalBonus;
+            if (heater2.HeatLevel>0)
+                heater2.GreenhouseBonus = totalBonus;
             else
             {
-                heater.GreenhouseBonus = 0;
+                heater2.GreenhouseBonus = 0;
             }
         }
 

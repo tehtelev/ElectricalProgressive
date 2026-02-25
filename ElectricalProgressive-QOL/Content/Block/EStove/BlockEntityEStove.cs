@@ -511,6 +511,7 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
 
     private void On500msTick(float dt)
     {
+        // лишний раз не синхронизируем 
         if (Api is ICoreServerAPI && (IsBurning || PrevStoveTemperature != StoveTemperature))
             MarkDirty();
 
@@ -527,15 +528,22 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
         return fromTemp + dt;
     }
 
+
     public void HeatInput(float dt)
     {
         float oldTemp = InputStackTemp, nowTemp = oldTemp;
         var meltingPoint = InputSlot.Itemstack.Collectible.GetMeltingPoint(Api.World, inventory, InputSlot);
+        int stackSize = InputSlot.Itemstack.StackSize;  
+
         if (oldTemp < StoveTemperature)
         {
             var f = (1 + GameMath.Clamp((StoveTemperature - oldTemp) / 30, 0, 1.6f)) * dt;
             if (nowTemp >= meltingPoint) f /= 11;
+
             var newTemp = ChangeTemperature(oldTemp, StoveTemperature, f);
+            // Усреднение температуры по всему стаку (как в костре)
+            newTemp = (newTemp + (stackSize - 1) * oldTemp) / stackSize;   
+
             var maxTemp = 0;
             if (InputStack.ItemAttributes != null)
             {
@@ -643,8 +651,55 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
 
     public void SmeltItems()
     {
-        InputStack.Collectible.DoSmelt(Api.World, inventory, InputSlot, OutputSlot);
-        InputStackTemp = EnviromentTemperature();
+        // Запоминаем температуру входного стака до плавки
+        float inputTemp = InputStackTemp;
+        ItemSlot outputSlot = OutputSlot;
+        ItemStack oldOutputStack = outputSlot.Itemstack;
+        float oldOutputTemp = (oldOutputStack != null) ? GetTemp(oldOutputStack) : 0;
+        int oldOutputSize = oldOutputStack?.StackSize ?? 0;
+
+        // Вызываем стандартную логику переплавки
+        InputStack.Collectible.DoSmelt(Api.World, inventory, InputSlot, outputSlot);
+
+        ItemStack newOutputStack = outputSlot.Itemstack;
+        if (newOutputStack == null) return; // на всякий случай
+
+        // Определяем, сколько предметов добавилось в выходной слот
+        int addedCount;
+        if (oldOutputStack == null)
+        {
+            // Выходной слот был пуст – теперь в нём новый стак
+            addedCount = newOutputStack.StackSize;
+        }
+        else if (oldOutputStack.Equals(Api.World, newOutputStack, GlobalConstants.IgnoredStackAttributes))
+        {
+            // Тот же тип предмета – произошло объединение
+            addedCount = newOutputStack.StackSize - oldOutputSize;
+            if (addedCount <= 0) addedCount = newOutputStack.StackSize; // подстраховка
+        }
+        else
+        {
+            // Тип предмета изменился – старый стак полностью заменён
+            addedCount = newOutputStack.StackSize;
+        }
+
+        if (addedCount > 0)
+        {
+            float newTemp;
+            if (oldOutputStack != null && oldOutputStack.Equals(Api.World, newOutputStack, GlobalConstants.IgnoredStackAttributes))
+            {
+                // Объединение со старым стаком того же типа – усредняем температуру
+                newTemp = (inputTemp * addedCount + oldOutputTemp * oldOutputSize) / newOutputStack.StackSize;
+            }
+            else
+            {
+                // Просто новый стак – берём температуру входного
+                newTemp = inputTemp;
+            }
+            SetTemp(newOutputStack, newTemp);
+        }
+
+        // Сбрасываем время готовки и помечаем слоты как изменённые
         InputStackCookingTime = 0;
         MarkDirty(true);
         InputSlot.MarkDirty();
