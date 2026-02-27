@@ -1,34 +1,31 @@
 ﻿[
   {
-    "ingredientPattern": "HS,XM,CL",
+    "ingredientPattern": "HS,XM,C_",
     "width": 2,
     "height": 3,
     "ingredients": {
-      "L": {
-        "type": "item",
-        "code": "game:metalplate-copper",
-        "quantity": 1
-      },
       "S": {
         "type": "item",
-        "code": "game:solderingiron",
+        "code": "game:saw-*",
         "isTool": true,
-        "toolDurabilityCost": 50
+        "toolDurabilityCost": 8
       },
       "X": {
         "type": "item",
-        "code": "game:metalplate-gold",
-        "quantity": 1
+        "code": "game:chisel-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
       },
       "H": {
         "type": "item",
-        "code": "game:clearquartz",
-        "quantity": 16
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
       },
       "M": {
         "type": "item",
-        "code": "game:metalplate-iron",
-        "quantity": 1
+        "code": "game:metalplate-brass",
+        "quantity": 2
       },
       "C": {
         "type": "block",
@@ -38,7 +35,7 @@
     },
     "output": {
       "type": "block",
-      "code": "electricalprogressivebasics:esolargenerator-off-south",
+      "code": "electricalprogressivebasics:blockwire",
       "quantity": 1
     }
   }

@@ -223,5 +223,17 @@
   "cable_same_type": "Kable muszą być tego samego typu",
   "not_enough_cables": "Za mało kabli do umieszczenia",
   "enough_lines": "Jest już wystarczająco dużo linii",
-  "game:Prod_potential": "Potencjał prod."
+  "game:Prod_potential": "Potencjał prod.",
+
+
+  // ----- Złącze przelotowe -----
+  "block-blockwire": "Złącze przelotowe (standardowe)",
+  "block-handbooktitle-blockwire": "Zastosowanie",
+  "block-handbooktext-blockwire": "Pozwala przesyłać energię przez ściany bez naruszania integralności pomieszczeń.",
+
+  // ==================== Generator słoneczny ====================
+  "block-esolargenerator-*": "Generator paneli słonecznych",
+  "block-handbooktitle-esolargenerator": "Zastosowanie",
+  "block-handbooktext-esolargenerator": "Przekształca światło w energię elektryczną! Im więcej światła słonecznego pada na panel słoneczny, tym więcej energii może on wyprodukować. Bloki umieszczone nad panelem słonecznym zmniejszą jego wydajność. Późną jesienią i zimą ilość światła słonecznego maleje, co prowadzi do zmniejszenia wydajności."
+
 }

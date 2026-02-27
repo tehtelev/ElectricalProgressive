@@ -1,0 +1,1105 @@
+﻿{
+	"editor": {
+		"collapsedPaths": "Root/SolarPannelT1/PannelWire/ZIncWire,Root/SolarPannelT1/PannelWire/CopperWire,Root/SolarPannelT1/PannelWire/WireOutput",
+		"allAngles": false,
+		"entityTextureMode": false
+	},
+	"textureWidth": 16,
+	"textureHeight": 16,
+	"textureSizes": {
+	},
+	"textures": {
+		"brass": "game:block/metal/plate/brass",
+		"copper": "game:block/metal/plate/copper",
+		"iron": "game:block/metal/plate/iron",
+		"steel": "game:block/metal/plate/steel",
+		"zinc": "game:block/metal/plate/zinc",
+		"copper1": "game:block/metal/sheet-plain/copper1",
+		"emeral": "game:block/stone/gem/emeral",
+		"ruby": "game:block/stone/gem/ruby"
+	},
+	"elements": [
+		{
+			"name": "SolarPannelT1",
+			"from": [ 0.0, 0.0, 0.0 ],
+			"to": [ 0.0, 0.0, 0.0 ],
+			"rotationOrigin": [ 8.0, 0.0, 8.0 ],
+			"rotationY": -90.0,
+			"faces": {
+				"north": {
+					"texture": "#copper",
+					"uv": [ 7.5, 5.0, 8.0, 5.5 ]
+				},
+				"east": {
+					"texture": "#copper",
+					"uv": [ 2.0, 4.5, 2.5, 5.0 ]
+				},
+				"south": {
+					"texture": "#copper",
+					"uv": [ 6.5, 6.5, 7.0, 7.0 ]
+				},
+				"west": {
+					"texture": "#copper",
+					"uv": [ 5.0, 9.5, 5.5, 10.0 ]
+				},
+				"up": {
+					"texture": "#copper",
+					"uv": [ 2.5, 13.0, 3.0, 13.5 ]
+				},
+				"down": {
+					"texture": "#copper",
+					"uv": [ 7.0, 3.0, 7.5, 3.5 ]
+				}
+			},
+			"children": [
+				{
+					"name": "PannelBase",
+					"from": [ 0.0, 0.0, 0.0 ],
+					"to": [ 0.0, 0.0, 0.0 ],
+					"rotationOrigin": [ 8.0, 0.0, 8.0 ],
+					"faces": {
+						"north": {
+							"texture": "#null",
+							"uv": [ 4.0, 8.0, 4.5, 8.5 ]
+						},
+						"east": {
+							"texture": "#null",
+							"uv": [ 0.0, 10.0, 0.5, 10.5 ]
+						},
+						"south": {
+							"texture": "#null",
+							"uv": [ 7.0, 0.0, 7.5, 0.5 ]
+						},
+						"west": {
+							"texture": "#null",
+							"uv": [ 6.0, 6.5, 6.5, 7.0 ]
+						},
+						"up": {
+							"texture": "#null",
+							"uv": [ 13.5, 8.5, 14.0, 9.0 ]
+						},
+						"down": {
+							"texture": "#null",
+							"uv": [ 14.0, 3.5, 14.5, 4.0 ]
+						}
+					},
+					"children": [
+						{
+							"name": "PannelBaseCopper",
+							"from": [ 0.0, 0.5, 0.0 ],
+							"to": [ 16.0, 1.0, 16.0 ],
+							"faces": {
+								"north": {
+									"texture": "#copper1",
+									"uv": [ 0.0, 4.0, 16.0, 4.5 ]
+								},
+								"east": {
+									"texture": "#copper1",
+									"uv": [ 0.0, 10.5, 16.0, 11.0 ]
+								},
+								"south": {
+									"texture": "#copper1",
+									"uv": [ 0.0, 14.5, 16.0, 15.0 ]
+								},
+								"west": {
+									"texture": "#copper1",
+									"uv": [ 0.0, 0.0, 16.0, 0.5 ]
+								},
+								"up": {
+									"texture": "#copper1",
+									"uv": [ 0.0, 0.0, 16.0, 16.0 ]
+								},
+								"down": {
+									"texture": "#copper1",
+									"uv": [ 0.0, 0.0, 16.0, 16.0 ]
+								}
+							}
+						},
+						{
+							"name": "PannelBaseIron",
+							"from": [ 0.0, 0.0, 0.0 ],
+							"to": [ 16.0, 0.5, 16.0 ],
+							"faces": {
+								"north": {
+									"texture": "#iron",
+									"uv": [ 0.0, 7.0, 16.0, 7.5 ]
+								},
+								"east": {
+									"texture": "#iron",
+									"uv": [ 0.0, 13.0, 16.0, 13.5 ]
+								},
+								"south": {
+									"texture": "#iron",
+									"uv": [ 0.0, 8.0, 16.0, 8.5 ]
+								},
+								"west": {
+									"texture": "#iron",
+									"uv": [ 0.0, 2.0, 16.0, 2.5 ]
+								},
+								"up": {
+									"texture": "#iron",
+									"uv": [ 0.0, 0.0, 16.0, 16.0 ]
+								},
+								"down": {
+									"texture": "#iron",
+									"uv": [ 0.0, 0.0, 16.0, 16.0 ]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "PannelWire",
+					"from": [ 0.0, 0.0, 0.0 ],
+					"to": [ 0.0, 0.0, 0.0 ],
+					"faces": {
+						"north": {
+							"texture": "#copper",
+							"uv": [ 12.0, 3.0, 12.5, 3.5 ]
+						},
+						"east": {
+							"texture": "#copper",
+							"uv": [ 15.0, 9.5, 15.5, 10.0 ]
+						},
+						"south": {
+							"texture": "#copper",
+							"uv": [ 14.5, 7.5, 15.0, 8.0 ]
+						},
+						"west": {
+							"texture": "#copper",
+							"uv": [ 3.5, 9.5, 4.0, 10.0 ]
+						},
+						"up": {
+							"texture": "#copper",
+							"uv": [ 8.0, 1.5, 8.5, 2.0 ]
+						},
+						"down": {
+							"texture": "#copper",
+							"uv": [ 13.5, 6.5, 14.0, 7.0 ]
+						}
+					},
+					"children": [
+						{
+							"name": "WireBox",
+							"from": [ 0.0, 0.0, 0.0 ],
+							"to": [ 0.0, 0.0, 0.0 ],
+							"faces": {
+								"north": {
+									"texture": "#steel",
+									"uv": [ 8.0, 5.5, 8.5, 6.0 ]
+								},
+								"east": {
+									"texture": "#steel",
+									"uv": [ 10.5, 5.5, 11.0, 6.0 ]
+								},
+								"south": {
+									"texture": "#steel",
+									"uv": [ 8.5, 8.0, 9.0, 8.5 ]
+								},
+								"west": {
+									"texture": "#steel",
+									"uv": [ 3.0, 13.5, 3.5, 14.0 ]
+								},
+								"up": {
+									"texture": "#steel",
+									"uv": [ 8.5, 2.0, 9.0, 2.5 ]
+								},
+								"down": {
+									"texture": "#steel",
+									"uv": [ 12.5, 13.0, 13.0, 13.5 ]
+								}
+							},
+							"children": [
+								{
+									"name": "IndicatorLight",
+									"from": [ 0.0, 0.0, 0.0 ],
+									"to": [ 0.0, 0.0, 0.0 ],
+									"faces": {
+										"north": {
+											"texture": "#copper",
+											"uv": [ 10.0, 14.5, 10.5, 15.0 ]
+										},
+										"east": {
+											"texture": "#copper",
+											"uv": [ 0.0, 10.5, 0.5, 11.0 ]
+										},
+										"south": {
+											"texture": "#copper",
+											"uv": [ 4.5, 11.5, 5.0, 12.0 ]
+										},
+										"west": {
+											"texture": "#copper",
+											"uv": [ 13.5, 13.5, 14.0, 14.0 ]
+										},
+										"up": {
+											"texture": "#copper",
+											"uv": [ 7.0, 8.0, 7.5, 8.5 ]
+										},
+										"down": {
+											"texture": "#copper",
+											"uv": [ 13.5, 13.5, 14.0, 14.0 ]
+										}
+									},
+									"children": [
+										{
+											"name": "IndicatorLightBase1",
+											"from": [ 15.125, 1.4, 6.125 ],
+											"to": [ 15.875, 1.5, 6.875 ],
+											"rotationOrigin": [ 16.0, 2.0, 6.0 ],
+											"faces": {
+												"north": {
+													"texture": "#brass",
+													"uv": [ 0.5, 12.0, 1.0, 12.5 ]
+												},
+												"east": {
+													"texture": "#brass",
+													"uv": [ 7.5, 7.0, 8.0, 7.5 ]
+												},
+												"south": {
+													"texture": "#brass",
+													"uv": [ 5.5, 10.5, 6.0, 11.0 ]
+												},
+												"west": {
+													"texture": "#brass",
+													"uv": [ 8.5, 11.0, 9.0, 11.5 ]
+												},
+												"up": {
+													"texture": "#brass",
+													"uv": [ 10.0, 12.0, 10.5, 12.5 ]
+												},
+												"down": {
+													"texture": "#brass",
+													"uv": [ 7.0, 9.5, 7.5, 10.0 ]
+												}
+											},
+											"children": [
+												{
+													"name": "InddicatorLight1",
+													"from": [ 0.075, 0.1, 0.075 ],
+													"to": [ 0.675, 0.2, 0.675 ],
+													"faces": {
+														"north": {
+															"texture": "#emeral",
+															"uv": [ 8.0, 1.5, 8.5, 2.0 ],
+															"glow": 50
+														},
+														"east": {
+															"texture": "#emeral",
+															"uv": [ 15.0, 4.5, 15.5, 5.0 ]
+														},
+														"south": {
+															"texture": "#emeral",
+															"uv": [ 14.0, 0.0, 14.5, 0.5 ]
+														},
+														"west": {
+															"texture": "#emeral",
+															"uv": [ 2.0, 2.0, 2.5, 2.5 ]
+														},
+														"up": {
+															"texture": "#emeral",
+															"uv": [ 10.0, 11.5, 10.5, 12.0 ]
+														},
+														"down": {
+															"texture": "#emeral",
+															"uv": [ 1.0, 9.5, 1.5, 10.0 ]
+														}
+													}
+												}
+											]
+										},
+										{
+											"name": "IndicatorLightBase2",
+											"from": [ 15.12, 1.4, 7.12 ],
+											"to": [ 15.87, 1.5, 7.87 ],
+											"rotationOrigin": [ 16.0, 2.0, 7.0 ],
+											"faces": {
+												"north": {
+													"texture": "#brass",
+													"uv": [ 10.5, 9.0, 11.0, 9.5 ]
+												},
+												"east": {
+													"texture": "#brass",
+													"uv": [ 9.0, 8.0, 9.5, 8.5 ]
+												},
+												"south": {
+													"texture": "#brass",
+													"uv": [ 0.5, 15.0, 1.0, 15.5 ]
+												},
+												"west": {
+													"texture": "#brass",
+													"uv": [ 9.0, 6.5, 9.5, 7.0 ]
+												},
+												"up": {
+													"texture": "#brass",
+													"uv": [ 12.5, 10.5, 13.0, 11.0 ]
+												},
+												"down": {
+													"texture": "#brass",
+													"uv": [ 5.5, 7.0, 6.0, 7.5 ]
+												}
+											},
+											"children": [
+												{
+													"name": "InddicatorLight2",
+													"from": [ 0.08, 0.1, 0.08 ],
+													"to": [ 0.68, 0.2, 0.68 ],
+													"rotationOrigin": [ 0.005, 0.0, 0.005 ],
+													"faces": {
+														"north": {
+															"texture": "#ruby",
+															"uv": [ 3.0, 5.5, 3.5, 6.0 ],
+															"glow": 220,
+															"windMode": [ -1, -1, -1, -1 ]
+														},
+														"east": {
+															"texture": "#ruby",
+															"uv": [ 12.0, 3.0, 12.5, 3.5 ],
+															"glow": 220,
+															"windMode": [ -1, -1, -1, -1 ]
+														},
+														"south": {
+															"texture": "#ruby",
+															"uv": [ 13.5, 14.0, 14.0, 14.5 ],
+															"glow": 220,
+															"windMode": [ -1, -1, -1, -1 ]
+														},
+														"west": {
+															"texture": "#ruby",
+															"uv": [ 11.5, 2.0, 12.0, 2.5 ],
+															"glow": 220,
+															"windMode": [ -1, -1, -1, -1 ]
+														},
+														"up": {
+															"texture": "#ruby",
+															"uv": [ 14.0, 9.5, 14.5, 10.0 ],
+															"glow": 220,
+															"windMode": [ -1, -1, -1, -1 ]
+														},
+														"down": {
+															"texture": "#ruby",
+															"uv": [ 8.5, 6.5, 9.0, 7.0 ],
+															"glow": 220,
+															"windMode": [ -1, -1, -1, -1 ]
+														}
+													}
+												}
+											]
+										}
+									]
+								},
+								{
+									"name": "WireBox1",
+									"from": [ 15.0, 1.0, 6.0 ],
+									"to": [ 16.0, 1.4, 10.0 ],
+									"rotationOrigin": [ 15.0, 1.0, 6.0 ],
+									"faces": {
+										"north": {
+											"texture": "#iron",
+											"uv": [ 0.5, 4.0, 1.5, 4.5 ]
+										},
+										"east": {
+											"texture": "#iron",
+											"uv": [ 1.5, 15.0, 5.5, 15.5 ]
+										},
+										"south": {
+											"texture": "#iron",
+											"uv": [ 2.5, 11.5, 3.5, 12.0 ]
+										},
+										"west": {
+											"texture": "#iron",
+											"uv": [ 3.5, 10.5, 7.5, 11.0 ]
+										},
+										"up": {
+											"texture": "#iron",
+											"uv": [ 1.0, 10.5, 2.0, 14.5 ]
+										},
+										"down": {
+											"texture": "#iron",
+											"uv": [ 3.5, 3.0, 4.5, 7.0 ]
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "ZIncWire",
+							"from": [ 0.25, 1.0, 0.25 ],
+							"to": [ 0.25, 1.0, 0.25 ],
+							"rotationOrigin": [ 0.2, 1.0, 0.2 ],
+							"faces": {
+								"north": {
+									"texture": "#zinc",
+									"uv": [ 12.5, 14.5, 13.0, 15.0 ]
+								},
+								"east": {
+									"texture": "#zinc",
+									"uv": [ 2.5, 13.0, 3.0, 13.5 ]
+								},
+								"south": {
+									"texture": "#zinc",
+									"uv": [ 7.5, 11.0, 8.0, 11.5 ]
+								},
+								"west": {
+									"texture": "#zinc",
+									"uv": [ 2.0, 11.0, 2.5, 11.5 ]
+								},
+								"up": {
+									"texture": "#zinc",
+									"uv": [ 12.0, 6.5, 12.5, 7.0 ]
+								},
+								"down": {
+									"texture": "#zinc",
+									"uv": [ 7.0, 12.5, 7.5, 13.0 ]
+								}
+							},
+							"children": [
+								{
+									"name": "ZIncWire1",
+									"from": [ 0.0, 0.0, 0.0 ],
+									"to": [ 0.5, 0.1, 15.5 ],
+									"rotationOrigin": [ -0.2, 0.0, -0.2 ],
+									"faces": {
+										"north": {
+											"texture": "#zinc",
+											"uv": [ 8.0, 14.0, 8.5, 14.5 ]
+										},
+										"east": {
+											"texture": "#zinc",
+											"uv": [ 0.0, 9.5, 15.5, 10.0 ]
+										},
+										"south": {
+											"texture": "#zinc",
+											"uv": [ 1.0, 3.5, 1.5, 4.0 ]
+										},
+										"west": {
+											"texture": "#zinc",
+											"uv": [ 0.0, 6.0, 15.5, 6.5 ]
+										},
+										"up": {
+											"texture": "#zinc",
+											"uv": [ 10.5, 0.0, 11.0, 15.5 ]
+										},
+										"down": {
+											"texture": "#zinc",
+											"uv": [ 15.0, 0.0, 15.5, 15.5 ]
+										}
+									}
+								},
+								{
+									"name": "ZincWire2",
+									"from": [ 0.5, 0.0, 0.0 ],
+									"to": [ 15.5, 0.1, 0.5 ],
+									"faces": {
+										"north": {
+											"texture": "#zinc",
+											"uv": [ 0.5, 7.0, 15.5, 7.5 ]
+										},
+										"east": {
+											"texture": "#zinc",
+											"uv": [ 4.5, 5.5, 5.0, 6.0 ]
+										},
+										"south": {
+											"texture": "#zinc",
+											"uv": [ 0.5, 12.5, 15.5, 13.0 ]
+										},
+										"west": {
+											"texture": "#zinc",
+											"uv": [ 10.0, 7.5, 10.5, 8.0 ]
+										},
+										"up": {
+											"texture": "#zinc",
+											"uv": [ 0.5, 9.5, 15.5, 10.0 ]
+										},
+										"down": {
+											"texture": "#zinc",
+											"uv": [ 0.0, 6.5, 15.0, 7.0 ]
+										}
+									}
+								},
+								{
+									"name": "ZincWire3",
+									"from": [ 15.0, 0.0, 0.5 ],
+									"to": [ 15.5, 0.1, 6.0 ],
+									"rotationOrigin": [ 15.0, 0.0, 1.0 ],
+									"faces": {
+										"north": {
+											"texture": "#zinc",
+											"uv": [ 4.5, 11.0, 5.0, 11.5 ]
+										},
+										"east": {
+											"texture": "#zinc",
+											"uv": [ 9.5, 2.5, 15.0, 3.0 ]
+										},
+										"south": {
+											"texture": "#zinc",
+											"uv": [ 1.0, 3.0, 1.5, 3.5 ]
+										},
+										"west": {
+											"texture": "#zinc",
+											"uv": [ 3.5, 11.0, 9.0, 11.5 ]
+										},
+										"up": {
+											"texture": "#zinc",
+											"uv": [ 15.0, 2.5, 15.5, 8.0 ]
+										},
+										"down": {
+											"texture": "#zinc",
+											"uv": [ 15.0, 3.5, 15.5, 9.0 ]
+										}
+									}
+								},
+								{
+									"name": "ZincWire4",
+									"from": [ 2.0, 0.0, 0.5 ],
+									"to": [ 2.5, 0.1, 14.5 ],
+									"rotationOrigin": [ 2.0, 0.0, 1.0 ],
+									"faces": {
+										"north": {
+											"texture": "#zinc",
+											"uv": [ 1.5, 5.5, 2.0, 6.0 ]
+										},
+										"east": {
+											"texture": "#zinc",
+											"uv": [ 1.0, 3.0, 15.0, 3.5 ]
+										},
+										"south": {
+											"texture": "#zinc",
+											"uv": [ 11.0, 13.5, 11.5, 14.0 ]
+										},
+										"west": {
+											"texture": "#zinc",
+											"uv": [ 1.5, 15.0, 15.5, 15.5 ]
+										},
+										"up": {
+											"texture": "#zinc",
+											"uv": [ 10.0, 0.5, 10.5, 14.5 ]
+										},
+										"down": {
+											"texture": "#zinc",
+											"uv": [ 2.5, 1.5, 3.0, 15.5 ]
+										}
+									}
+								},
+								{
+									"name": "ZincWire5",
+									"from": [ 4.0, 0.0, 0.5 ],
+									"to": [ 4.5, 0.1, 14.5 ],
+									"rotationOrigin": [ 4.0, 0.0, 1.0 ],
+									"faces": {
+										"north": {
+											"texture": "#zinc",
+											"uv": [ 1.5, 15.0, 2.0, 15.5 ]
+										},
+										"east": {
+											"texture": "#zinc",
+											"uv": [ 1.5, 14.0, 15.5, 14.5 ]
+										},
+										"south": {
+											"texture": "#zinc",
+											"uv": [ 3.5, 11.0, 4.0, 11.5 ]
+										},
+										"west": {
+											"texture": "#zinc",
+											"uv": [ 1.0, 4.5, 15.0, 5.0 ]
+										},
+										"up": {
+											"texture": "#zinc",
+											"uv": [ 7.5, 1.0, 8.0, 15.0 ]
+										},
+										"down": {
+											"texture": "#zinc",
+											"uv": [ 10.5, 1.0, 11.0, 15.0 ]
+										}
+									}
+								},
+								{
+									"name": "ZincWire6",
+									"from": [ 6.0, 0.0, 0.5 ],
+									"to": [ 6.5, 0.1, 14.5 ],
+									"rotationOrigin": [ 6.0, 0.0, 1.0 ],
+									"faces": {
+										"north": {
+											"texture": "#zinc",
+											"uv": [ 4.5, 3.0, 5.0, 3.5 ]
+										},
+										"east": {
+											"texture": "#zinc",
+											"uv": [ 1.0, 3.5, 15.0, 4.0 ]
+										},
+										"south": {
+											"texture": "#zinc",
+											"uv": [ 3.0, 10.0, 3.5, 10.5 ]
+										},
+										"west": {
+											"texture": "#zinc",
+											"uv": [ 0.0, 14.0, 14.0, 14.5 ]
+										},
+										"up": {
+											"texture": "#zinc",
+											"uv": [ 1.5, 1.5, 2.0, 15.5 ]
+										},
+										"down": {
+											"texture": "#zinc",
+											"uv": [ 5.0, 0.0, 5.5, 14.0 ]
+										}
+									}
+								},
+								{
+									"name": "ZincWire7",
+									"from": [ 8.0, 0.0, 0.5 ],
+									"to": [ 8.5, 0.1, 14.5 ],
+									"rotationOrigin": [ 8.0, 0.0, 1.0 ],
+									"faces": {
+										"north": {
+											"texture": "#zinc",
+											"uv": [ 10.5, 6.0, 11.0, 6.5 ]
+										},
+										"east": {
+											"texture": "#zinc",
+											"uv": [ 0.5, 14.5, 14.5, 15.0 ]
+										},
+										"south": {
+											"texture": "#zinc",
+											"uv": [ 11.0, 1.0, 11.5, 1.5 ]
+										},
+										"west": {
+											"texture": "#zinc",
+											"uv": [ 0.5, 9.5, 14.5, 10.0 ]
+										},
+										"up": {
+											"texture": "#zinc",
+											"uv": [ 7.0, 0.0, 7.5, 14.0 ]
+										},
+										"down": {
+											"texture": "#zinc",
+											"uv": [ 11.0, 1.5, 11.5, 15.5 ]
+										}
+									}
+								},
+								{
+									"name": "ZincWire8",
+									"from": [ 10.0, 0.0, 0.5 ],
+									"to": [ 10.5, 0.1, 14.5 ],
+									"rotationOrigin": [ 10.0, 0.0, 1.0 ],
+									"faces": {
+										"north": {
+											"texture": "#zinc",
+											"uv": [ 12.5, 13.5, 13.0, 14.0 ]
+										},
+										"east": {
+											"texture": "#zinc",
+											"uv": [ 1.5, 11.5, 15.5, 12.0 ]
+										},
+										"south": {
+											"texture": "#zinc",
+											"uv": [ 0.5, 3.0, 1.0, 3.5 ]
+										},
+										"west": {
+											"texture": "#zinc",
+											"uv": [ 1.0, 0.5, 15.0, 1.0 ]
+										},
+										"up": {
+											"texture": "#zinc",
+											"uv": [ 6.0, 1.5, 6.5, 15.5 ]
+										},
+										"down": {
+											"texture": "#zinc",
+											"uv": [ 1.5, 0.0, 2.0, 14.0 ]
+										}
+									}
+								},
+								{
+									"name": "ZincWire9",
+									"from": [ 12.0, 0.0, 0.5 ],
+									"to": [ 12.5, 0.1, 14.5 ],
+									"rotationOrigin": [ 12.0, 0.0, 1.0 ],
+									"faces": {
+										"north": {
+											"texture": "#zinc",
+											"uv": [ 3.0, 6.0, 3.5, 6.5 ]
+										},
+										"east": {
+											"texture": "#zinc",
+											"uv": [ 1.0, 2.5, 15.0, 3.0 ]
+										},
+										"south": {
+											"texture": "#zinc",
+											"uv": [ 12.0, 3.0, 12.5, 3.5 ]
+										},
+										"west": {
+											"texture": "#zinc",
+											"uv": [ 0.5, 8.0, 14.5, 8.5 ]
+										},
+										"up": {
+											"texture": "#zinc",
+											"uv": [ 4.5, 0.5, 5.0, 14.5 ]
+										},
+										"down": {
+											"texture": "#zinc",
+											"uv": [ 10.0, 0.5, 10.5, 14.5 ]
+										}
+									}
+								},
+								{
+									"name": "ZincWire10",
+									"from": [ 14.0, 0.0, 0.5 ],
+									"to": [ 14.5, 0.1, 14.5 ],
+									"rotationOrigin": [ 14.0, 0.0, 1.0 ],
+									"faces": {
+										"north": {
+											"texture": "#zinc",
+											"uv": [ 7.0, 9.0, 7.5, 9.5 ]
+										},
+										"east": {
+											"texture": "#zinc",
+											"uv": [ 0.0, 10.5, 14.0, 11.0 ]
+										},
+										"south": {
+											"texture": "#zinc",
+											"uv": [ 9.5, 9.0, 10.0, 9.5 ]
+										},
+										"west": {
+											"texture": "#zinc",
+											"uv": [ 1.0, 4.5, 15.0, 5.0 ]
+										},
+										"up": {
+											"texture": "#zinc",
+											"uv": [ 10.5, 1.0, 11.0, 15.0 ]
+										},
+										"down": {
+											"texture": "#zinc",
+											"uv": [ 1.0, 1.5, 1.5, 15.5 ]
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "CopperWire",
+							"from": [ 0.0, 0.0, 0.0 ],
+							"to": [ 0.0, 0.0, 0.0 ],
+							"rotationOrigin": [ 16.0, 1.0, 16.0 ],
+							"faces": {
+								"north": {
+									"texture": "#copper",
+									"uv": [ 8.5, 10.5, 9.0, 11.0 ]
+								},
+								"east": {
+									"texture": "#copper",
+									"uv": [ 10.0, 10.5, 10.5, 11.0 ]
+								},
+								"south": {
+									"texture": "#copper",
+									"uv": [ 15.0, 12.5, 15.5, 13.0 ]
+								},
+								"west": {
+									"texture": "#copper",
+									"uv": [ 15.0, 1.5, 15.5, 2.0 ]
+								},
+								"up": {
+									"texture": "#copper",
+									"uv": [ 12.5, 1.0, 13.0, 1.5 ]
+								},
+								"down": {
+									"texture": "#copper",
+									"uv": [ 15.0, 6.0, 15.5, 6.5 ]
+								}
+							},
+							"children": [
+								{
+									"name": "CopperWire1",
+									"from": [ 15.25, 1.0, 9.25 ],
+									"to": [ 15.75, 1.1, 15.75 ],
+									"rotationOrigin": [ 16.0, 1.0, 9.0 ],
+									"faces": {
+										"north": {
+											"texture": "#copper",
+											"uv": [ 13.5, 2.5, 14.0, 3.0 ]
+										},
+										"east": {
+											"texture": "#copper",
+											"uv": [ 5.0, 8.0, 11.5, 8.5 ]
+										},
+										"south": {
+											"texture": "#copper",
+											"uv": [ 7.5, 10.0, 8.0, 10.5 ]
+										},
+										"west": {
+											"texture": "#copper",
+											"uv": [ 5.0, 13.0, 11.5, 13.5 ]
+										},
+										"up": {
+											"texture": "#copper",
+											"uv": [ 1.0, 8.0, 1.5, 14.5 ]
+										},
+										"down": {
+											"texture": "#copper",
+											"uv": [ 12.5, 8.0, 13.0, 14.5 ]
+										}
+									}
+								},
+								{
+									"name": "CopperWire2",
+									"from": [ 14.75, 1.0, 14.25 ],
+									"to": [ 28.75, 1.1, 14.75 ],
+									"rotationOrigin": [ 15.0, 1.0, 15.0 ],
+									"rotationY": -180.0,
+									"faces": {
+										"north": {
+											"texture": "#copper",
+											"uv": [ 0.5, 3.5, 14.5, 4.0 ]
+										},
+										"east": {
+											"texture": "#copper",
+											"uv": [ 6.5, 6.0, 7.0, 6.5 ]
+										},
+										"south": {
+											"texture": "#copper",
+											"uv": [ 1.0, 5.0, 15.0, 5.5 ]
+										},
+										"west": {
+											"texture": "#copper",
+											"uv": [ 10.0, 14.5, 10.5, 15.0 ]
+										},
+										"up": {
+											"texture": "#copper",
+											"uv": [ 1.5, 7.0, 15.5, 7.5 ]
+										},
+										"down": {
+											"texture": "#copper",
+											"uv": [ 1.5, 11.0, 15.5, 11.5 ]
+										}
+									}
+								},
+								{
+									"name": "CopperWire3",
+									"from": [ 1.25, 1.0, 1.25 ],
+									"to": [ 1.75, 1.1, 15.25 ],
+									"rotationOrigin": [ 1.0, 1.0, 1.0 ],
+									"faces": {
+										"north": {
+											"texture": "#copper",
+											"uv": [ 14.5, 10.0, 15.0, 10.5 ]
+										},
+										"east": {
+											"texture": "#copper",
+											"uv": [ 0.5, 13.5, 14.5, 14.0 ]
+										},
+										"south": {
+											"texture": "#copper",
+											"uv": [ 7.5, 1.5, 8.0, 2.0 ]
+										},
+										"west": {
+											"texture": "#copper",
+											"uv": [ 0.5, 3.0, 14.5, 3.5 ]
+										},
+										"up": {
+											"texture": "#copper",
+											"uv": [ 6.5, 0.5, 7.0, 14.5 ]
+										},
+										"down": {
+											"texture": "#copper",
+											"uv": [ 13.5, 0.5, 14.0, 14.5 ]
+										}
+									}
+								},
+								{
+									"name": "CopperWire4",
+									"from": [ 3.25, 1.0, 1.25 ],
+									"to": [ 3.75, 1.1, 15.25 ],
+									"rotationOrigin": [ 3.0, 1.0, 1.0 ],
+									"faces": {
+										"north": {
+											"texture": "#copper",
+											"uv": [ 4.5, 13.0, 5.0, 13.5 ]
+										},
+										"east": {
+											"texture": "#copper",
+											"uv": [ 1.0, 4.5, 15.0, 5.0 ]
+										},
+										"south": {
+											"texture": "#copper",
+											"uv": [ 7.5, 8.0, 8.0, 8.5 ]
+										},
+										"west": {
+											"texture": "#copper",
+											"uv": [ 1.5, 9.5, 15.5, 10.0 ]
+										},
+										"up": {
+											"texture": "#copper",
+											"uv": [ 8.5, 1.5, 9.0, 15.5 ]
+										},
+										"down": {
+											"texture": "#copper",
+											"uv": [ 4.0, 0.0, 4.5, 14.0 ]
+										}
+									}
+								},
+								{
+									"name": "CopperWire5",
+									"from": [ 5.25, 1.0, 1.25 ],
+									"to": [ 5.75, 1.1, 15.25 ],
+									"rotationOrigin": [ 5.0, 1.0, 1.0 ],
+									"faces": {
+										"north": {
+											"texture": "#copper",
+											"uv": [ 0.5, 13.0, 1.0, 13.5 ]
+										},
+										"east": {
+											"texture": "#copper",
+											"uv": [ 1.0, 11.0, 15.0, 11.5 ]
+										},
+										"south": {
+											"texture": "#copper",
+											"uv": [ 6.5, 10.0, 7.0, 10.5 ]
+										},
+										"west": {
+											"texture": "#copper",
+											"uv": [ 0.0, 1.0, 14.0, 1.5 ]
+										},
+										"up": {
+											"texture": "#copper",
+											"uv": [ 10.0, 0.5, 10.5, 14.5 ]
+										},
+										"down": {
+											"texture": "#copper",
+											"uv": [ 0.5, 0.5, 1.0, 14.5 ]
+										}
+									}
+								},
+								{
+									"name": "CopperWire6",
+									"from": [ 7.25, 1.0, 1.25 ],
+									"to": [ 7.75, 1.1, 15.25 ],
+									"rotationOrigin": [ 7.0, 1.0, 1.0 ],
+									"faces": {
+										"north": {
+											"texture": "#copper",
+											"uv": [ 3.5, 11.0, 4.0, 11.5 ]
+										},
+										"east": {
+											"texture": "#copper",
+											"uv": [ 0.5, 3.0, 14.5, 3.5 ]
+										},
+										"south": {
+											"texture": "#copper",
+											"uv": [ 7.5, 0.0, 8.0, 0.5 ]
+										},
+										"west": {
+											"texture": "#copper",
+											"uv": [ 0.5, 5.0, 14.5, 5.5 ]
+										},
+										"up": {
+											"texture": "#copper",
+											"uv": [ 7.0, 0.5, 7.5, 14.5 ]
+										},
+										"down": {
+											"texture": "#copper",
+											"uv": [ 9.5, 0.5, 10.0, 14.5 ]
+										}
+									}
+								},
+								{
+									"name": "CopperWire7",
+									"from": [ 9.25, 1.0, 1.25 ],
+									"to": [ 9.75, 1.1, 15.25 ],
+									"rotationOrigin": [ 9.0, 1.0, 1.0 ],
+									"faces": {
+										"north": {
+											"texture": "#copper",
+											"uv": [ 12.0, 11.5, 12.5, 12.0 ]
+										},
+										"east": {
+											"texture": "#copper",
+											"uv": [ 1.5, 12.0, 15.5, 12.5 ]
+										},
+										"south": {
+											"texture": "#copper",
+											"uv": [ 12.5, 7.0, 13.0, 7.5 ]
+										},
+										"west": {
+											"texture": "#copper",
+											"uv": [ 1.0, 1.0, 15.0, 1.5 ]
+										},
+										"up": {
+											"texture": "#copper",
+											"uv": [ 1.0, 1.5, 1.5, 15.5 ]
+										},
+										"down": {
+											"texture": "#copper",
+											"uv": [ 1.0, 1.0, 1.5, 15.0 ]
+										}
+									}
+								},
+								{
+									"name": "CopperWire8",
+									"from": [ 11.25, 1.0, 1.25 ],
+									"to": [ 11.75, 1.1, 15.25 ],
+									"rotationOrigin": [ 11.0, 1.0, 1.0 ],
+									"faces": {
+										"north": {
+											"texture": "#copper",
+											"uv": [ 1.5, 5.0, 2.0, 5.5 ]
+										},
+										"east": {
+											"texture": "#copper",
+											"uv": [ 0.0, 3.5, 14.0, 4.0 ]
+										},
+										"south": {
+											"texture": "#copper",
+											"uv": [ 10.0, 5.5, 10.5, 6.0 ]
+										},
+										"west": {
+											"texture": "#copper",
+											"uv": [ 0.0, 14.0, 14.0, 14.5 ]
+										},
+										"up": {
+											"texture": "#copper",
+											"uv": [ 11.5, 0.5, 12.0, 14.5 ]
+										},
+										"down": {
+											"texture": "#copper",
+											"uv": [ 9.5, 1.0, 10.0, 15.0 ]
+										}
+									}
+								},
+								{
+									"name": "CopperWire9",
+									"from": [ 13.25, 1.0, 1.25 ],
+									"to": [ 13.75, 1.1, 15.25 ],
+									"rotationOrigin": [ 13.0, 1.0, 1.0 ],
+									"faces": {
+										"north": {
+											"texture": "#copper",
+											"uv": [ 9.5, 2.5, 10.0, 3.0 ]
+										},
+										"east": {
+											"texture": "#copper",
+											"uv": [ 1.0, 9.0, 15.0, 9.5 ]
+										},
+										"south": {
+											"texture": "#copper",
+											"uv": [ 12.5, 9.0, 13.0, 9.5 ]
+										},
+										"west": {
+											"texture": "#copper",
+											"uv": [ 0.0, 4.0, 14.0, 4.5 ]
+										},
+										"up": {
+											"texture": "#copper",
+											"uv": [ 2.0, 0.0, 2.5, 14.0 ]
+										},
+										"down": {
+											"texture": "#copper",
+											"uv": [ 2.5, 1.5, 3.0, 15.5 ]
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

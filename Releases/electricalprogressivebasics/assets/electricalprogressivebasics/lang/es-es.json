@@ -230,6 +230,17 @@
   "cable_same_type": "Los cables deben ser del mismo tipo",
   "not_enough_cables": "No hay suficientes cables para colocar",
   "enough_lines": "Ya hay suficientes líneas",
-  "game:Prod_potential": "Potencial prod."
+  "game:Prod_potential": "Potencial prod.",
+
+  // ----- Conector Pasante -----
+  "block-blockwire": "Conector Pasante (común)",
+  "block-handbooktitle-blockwire": "Uso",
+  "block-handbooktext-blockwire": "Permite transmitir energía a través de paredes sin romper la integridad de las habitaciones.",
+
+  // ==================== Generador Solar ====================
+  "block-esolargenerator-*": "Generador de Paneles Solares",
+  "block-handbooktitle-esolargenerator": "Uso",
+  "block-handbooktext-esolargenerator": "¡Convierte la luz en energía eléctrica! Cuanta más luz solar incide sobre el panel solar, más energía puede producir. Los bloques colocados sobre el panel solar reducirán su eficiencia. A finales de otoño y en invierno, la luz solar disminuye, lo que lleva a una eficiencia reducida."
+
 
 }

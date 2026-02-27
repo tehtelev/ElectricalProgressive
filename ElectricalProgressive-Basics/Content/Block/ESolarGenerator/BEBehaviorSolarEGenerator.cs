@@ -112,10 +112,10 @@ public class BEBehaviorSolarEGenerator : BlockEntityBehavior, IElectricProducer
 
 
         stringBuilder.AppendLine(StringHelper.Progressbar(Math.Min(_powerGive, _powerOrder) / entity.Power * 100));
-        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Production") + ": " +
+        stringBuilder.AppendLine("└ " + Lang.Get("Production") + ": " +
                                  ((int)Math.Min(_powerGive, _powerOrder)).ToString() + "/" +
-                                 ((int)entity.Power).ToString() + " " + Lang.Get("electricalprogressivebasics:W"));
-        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:kpd") + ": " + (entity.Kpd * 100).ToString("F1") + " %");
+                                 ((int)entity.Power).ToString() + " " + Lang.Get("W"));
+        stringBuilder.AppendLine("└ " + Lang.Get("kpd") + ": " + (entity.Kpd * 100).ToString("F1") + " %");
     }
 
 

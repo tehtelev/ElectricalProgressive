@@ -222,7 +222,18 @@
   "cable_same_type": "Kabel müssen vom gleichen Typ sein",
   "not_enough_cables": "Nicht genug Kabel zum Platzieren",
   "enough_lines": "Es sind bereits genug Leitungen vorhanden",
-  "game:Prod_potential": "Prod.-Potential"
+  "game:Prod_potential": "Prod.-Potential",
+
+  // ----- Durchgangsverbinder -----
+  "block-blockwire": "Durchgangsverbinder (Standard)",
+  "block-handbooktitle-blockwire": "Verwendung",
+  "block-handbooktext-blockwire": "Ermöglicht die Übertragung von Energie durch Wände, ohne die Raumintegrität zu beeinträchtigen.",
+
+  // ==================== Solargenerator ====================
+  "block-esolargenerator-*": "Solarmodul-Generator",
+  "block-handbooktitle-esolargenerator": "Verwendung",
+  "block-handbooktext-esolargenerator": "Wandelt Licht in elektrische Energie um! Je mehr Sonnenlicht auf das Solarmodul fällt, desto mehr Energie kann es erzeugen. Blöcke, die über dem Solarmodul platziert werden, verringern seinen Wirkungsgrad. Im Spätherbst und Winter nimmt das Sonnenlicht ab, was zu einem geringeren Wirkungsgrad führt."
+
 
 
 }
