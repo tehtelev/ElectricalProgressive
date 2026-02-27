@@ -5,6 +5,7 @@ using ElectricalProgressive.Content.Block.EConnector;
 using ElectricalProgressive.Content.Block.EFuelGenerator;
 using ElectricalProgressive.Content.Block.EGenerator;
 using ElectricalProgressive.Content.Block.EMotor;
+using ElectricalProgressive.Content.Block.ESolarGenerator;
 using ElectricalProgressive.Content.Block.ESwitch;
 using ElectricalProgressive.Content.Block.ETermoGenerator;
 using ElectricalProgressive.Content.Block.ETransformator;
@@ -26,7 +27,7 @@ using Vintagestory.API.Config;
     "electricalprogressivebasics",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Basic electrical devices.",
-    Version = "2.6.4",
+    Version = "2.6.5",
     Authors =
     [
         "Tehtelev",
