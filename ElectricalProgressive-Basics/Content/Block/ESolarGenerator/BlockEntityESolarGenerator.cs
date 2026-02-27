@@ -128,34 +128,30 @@ public class BlockEntityESolarGenerator : BlockEntityEFacingBase
     /// </summary>
     private void Calculate_kpd()
     {
-        
+
         var accessor = Api.World.BlockAccessor;
 
-        var daylightStrength = Api.World.Calendar.GetDayLightStrength(Pos);
-        
         /*
          * We don't want the player to be able to put panels underground. There needs to be at least 10 sunlight reaching the block
          */
-        var sunLightReachingBlock = accessor.GetLightLevel(Pos, EnumLightLevelType.OnlySunLight) > 10;
 
-        if (!sunLightReachingBlock)
+        var strength = accessor.GetLightLevel(Pos, EnumLightLevelType.OnlySunLight);
+        var strength2 = accessor.GetLightLevel(Pos, EnumLightLevelType.TimeOfDaySunLight);
+
+        if (!(strength > 10 && strength2 >= 6))
         {
             Kpd = 0;
         }
         else
         {
-            /*
-             * We want to clamp daylight strength to drop after 0.6 because there is a large perceived loss of light at levels
-             * below this.
-             */
-            var strength =daylightStrength > 0.60 ? daylightStrength : 0;
-
+            strength -= 6;
+            strength2 -= 6;
             /*
              * We don't want to encourage the player to place blocks right on top of the solar panel or within several blocks directly above.
              * This check penalizes that behavior.
              */
             var blocksAbovePenalty = CalculateAbovePenalty(Pos);
-            
+
             /*
              * The sun is less strong in the winter months. Let's add a penalty since there is no API for it.
              */
@@ -167,7 +163,7 @@ public class BlockEntityESolarGenerator : BlockEntityEFacingBase
              *
              *  Clamp the value to 1 at most for floating point math errors.
              */
-            Kpd = MathF.Min(1f, strength * blocksAbovePenalty * monthPenalty);
+            Kpd = MathF.Min(1f, strength2 * 1.0f / strength * blocksAbovePenalty * monthPenalty);
         }
     }
 
@@ -175,15 +171,14 @@ public class BlockEntityESolarGenerator : BlockEntityEFacingBase
     {
         return currentMonth switch
         {
-            9 => 0.9f,
-            10 => 0.75f,
+            3 or 9 => 0.9f,
+            2 or 10 => 0.75f,
             11 or 12 or 1 => 0.6f,
-            2 => 0.75f,
-            3 => 0.9f,
+            4 or 8 => 1.3f,
             _ => 1.9f
         };
     }
-    
+
     /**
      * Calculates a penalty for having blocks above the solar panel. The farther away the blocks are above the solar
      * panel the less penalty there is. 
