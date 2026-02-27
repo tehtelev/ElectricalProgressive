@@ -226,5 +226,16 @@
   "cable_same_type": "Les câbles doivent être du même type",
   "not_enough_cables": "Pas assez de câbles à placer",
   "enough_lines": "Il y a déjà assez de lignes",
-  "game:Prod_potential": "Potentiel prod."
+  "game:Prod_potential": "Potentiel prod.",
+
+  // ----- Connecteur traversant -----
+  "block-blockwire": "Connecteur traversant (standard)",
+  "block-handbooktitle-blockwire": "Utilisation",
+  "block-handbooktext-blockwire": "Permet de transmettre l'énergie à travers les murs sans briser l'intégrité des pièces.",
+
+  // ==================== Générateur solaire ====================
+  "block-esolargenerator-*": "Générateur à panneaux solaires",
+  "block-handbooktitle-esolargenerator": "Utilisation",
+  "block-handbooktext-esolargenerator": "Convertit la lumière en énergie électrique ! Plus la lumière du soleil frappe le panneau solaire, plus il peut produire d'énergie. Les blocs placés au-dessus du panneau solaire réduiront son efficacité. À la fin de l'automne et en hiver, la lumière du soleil diminue, ce qui entraîne une réduction de l'efficacité."
+
 }

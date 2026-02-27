@@ -1,0 +1,42 @@
+﻿[
+  {
+    "ingredientPattern": "HS,XM,C_",
+    "width": 2,
+    "height": 3,
+    "ingredients": {
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "X": {
+        "type": "item",
+        "code": "game:chisel-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "M": {
+        "type": "item",
+        "code": "game:metalplate-brass",
+        "quantity": 2
+      },
+      "C": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-32v-copper-single-part",
+        "quantity": 16
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:blockwire",
+      "quantity": 1
+    }
+  }
+]

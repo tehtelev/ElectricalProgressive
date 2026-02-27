@@ -229,6 +229,17 @@
   "cable_same_type": "Cables must be of the same type",
   "not_enough_cables": "Not enough cables to place",
   "enough_lines": "There are already enough lines",
-  "game:Prod_potential": "Prod. potential"
+  "game:Prod_potential": "Prod. potential",
+
+  // ----- Through Connector -----
+  "block-blockwire": "Through Connector (standard)",
+  "block-handbooktitle-blockwire": "Usage",
+  "block-handbooktext-blockwire": "Allows transmitting energy through walls without breaking room integrity.",
+
+  // ==================== Solar Generator ====================
+  "block-esolargenerator-*": "Solar Panel Generator",
+  "block-handbooktitle-esolargenerator": "Usage",
+  "block-handbooktext-esolargenerator": "Converts light into electrical energy! The more sunlight hits the solar panel, the more energy it can produce. Blocks placed above the solar panel will reduce its efficiency. In late autumn and winter, sunlight decreases, leading to reduced efficiency."
+
 
 }

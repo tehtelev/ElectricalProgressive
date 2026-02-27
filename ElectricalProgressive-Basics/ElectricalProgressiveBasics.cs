@@ -111,6 +111,12 @@ public class ElectricalProgressiveBasics : ModSystem
 
         api.RegisterBlockClass("BlockTermoplastini", typeof(BlockTermoplastini));
 
+        api.RegisterBlockClass("BlockESolarGenerator", typeof(BlockESolarGenerator));
+        api.RegisterBlockEntityClass("BlockEntityESolarGenerator", typeof(BlockEntityESolarGenerator));
+        api.RegisterBlockEntityBehaviorClass("BEBehaviorSolarEGenerator", typeof(BEBehaviorSolarEGenerator));
+
+
+
         // Регистрируем патч для механики
         harmony = new Harmony("electricalprogressive.mechanicalpowermod");
         MechanicalPowerMod_RebuildNetwork_Patch.RegisterPatch(harmony);

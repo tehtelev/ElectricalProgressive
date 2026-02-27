@@ -225,5 +225,17 @@
   "cable_same_type": "Kabely musí být stejného typu",
   "not_enough_cables": "Nedostatek kabelů k umístění",
   "enough_lines": "Už je dostatek linek",
-  "game:Prod_potential": "Výr. potenciál"
+  "game:Prod_potential": "Výr. potenciál",
+
+
+  // ----- Průchozí konektor -----
+  "block-blockwire": "Průchozí konektor (běžný)",
+  "block-handbooktitle-blockwire": "Použití",
+  "block-handbooktext-blockwire": "Umožňuje přenášet energii skrz zdi, aniž by byla narušena celistvost místností.",
+
+  // ==================== Solární generátor ====================
+  "block-esolargenerator-*": "Generátor se solárními panely",
+  "block-handbooktitle-esolargenerator": "Použití",
+  "block-handbooktext-esolargenerator": "Přeměňuje světlo na elektrickou energii! Čím více slunečního světla dopadá na solární panel, tím více energie může vyrobit. Bloky umístěné nad solárním panelem sníží jeho účinnost. Na konci podzimu a v zimě slunečního světla ubývá, což vede ke snížení účinnosti."
+
 }
