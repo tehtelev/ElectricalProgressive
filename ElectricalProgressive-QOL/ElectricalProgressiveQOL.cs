@@ -184,9 +184,9 @@ public class ElectricalProgressiveQOL : ModSystem
         }
 
 
-        // применение патчика на механику и вылеты
-        var harmony = new Harmony("electricalprogressive.farmland.patches");
-        harmony.PatchAll(Assembly.GetExecutingAssembly());
+
+        //var harmony = new Harmony("electricalprogressive.farmland.patches");
+        //harmony.PatchAll(Assembly.GetExecutingAssembly());
 
 
     }
