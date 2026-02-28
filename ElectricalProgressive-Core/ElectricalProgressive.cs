@@ -393,123 +393,135 @@ namespace ElectricalProgressive
         /// <param name="producerGive"></param>
         /// <param name="sim"></param>
         private void LogisticalTask(Network network,
-            List<BlockPos> consumerPositions,
-            List<float> consumerRequests,
-            List<BlockPos> producerPositions,
-            List<float> producerGive,
-            Simulation sim)
+                  List<BlockPos> consumerPositions,
+                  List<float> consumerRequests,
+                  List<BlockPos> producerPositions,
+                  List<float> producerGive,
+                  Simulation sim)
         {
-            var cP = sim.CountWorkingCustomers = consumerPositions.Count; // Количество потребителей
-            var pP = sim.CountWorkingStores = producerPositions.Count; // Количество производителей
+            int cP = sim.CountWorkingCustomers = consumerPositions.Count;
+            int pP = sim.CountWorkingStores = producerPositions.Count;
 
+            // 1. Кешируем часто используемые поля Simulation
+            var distances = sim.Distances;
+            var paths = sim.Path;
+            var facingFrom = sim.FacingFrom;
+            var nowProcessed = sim.NowProcessedFaces;
+            var usedConn = sim.UsedConnection;
+            var voltages = sim.Voltage;
 
-            BlockPos start;
-            BlockPos end;
-
-            // обновляем массив для расстояний, магазинов и клиентов
-            if (sim.Distances.Length < cP * pP)
+            // 2. Убеждаемся, что массивы достаточного размера
+            int totalSize = cP * pP;
+            if (distances.Length < totalSize)
             {
-                Array.Resize(ref sim.Distances, cP * pP);
-                Array.Resize(ref sim.Path, cP * pP);
-                Array.Resize(ref sim.FacingFrom, cP * pP);
-                Array.Resize(ref sim.NowProcessedFaces, cP * pP);
-                Array.Resize(ref sim.UsedConnection, cP * pP);
-                Array.Resize(ref sim.Voltage, cP * pP);
+                Array.Resize(ref distances, totalSize);
+                sim.Distances = distances;
+                Array.Resize(ref paths, totalSize);
+                sim.Path = paths;
+                Array.Resize(ref facingFrom, totalSize);
+                sim.FacingFrom = facingFrom;
+                Array.Resize(ref nowProcessed, totalSize);
+                sim.NowProcessedFaces = nowProcessed;
+                Array.Resize(ref usedConn, totalSize);
+                sim.UsedConnection = usedConn;
+                Array.Resize(ref voltages, totalSize);
+                sim.Voltage = voltages;
             }
 
+            // 3. Массивы для Store и Customer
             if (sim.Stores == null || sim.Stores.Length < pP)
                 sim.Stores = new Store[pP];
-
             if (sim.Customers == null || sim.Customers.Length < cP)
                 sim.Customers = new Customer[cP];
 
+            // 4. Кешируем максимальную дистанцию поиска
+            int maxDist = ElectricalProgressive.maxDistanceForFinding;
 
-
-
-            for (var i = 0; i < cP; i++)
+            // 5. Основной цикл: для каждой пары (потребитель, производитель)
+            for (int i = 0; i < cP; i++)
             {
-                for (var j = 0; j < pP; j++)
+                BlockPos start = consumerPositions[i];
+                int baseIdx = i * pP; // базовый индекс для этой строки
+
+                for (int j = 0; j < pP; j++)
                 {
-                    start = consumerPositions[i];
-                    end = producerPositions[j];
+                    int idx = baseIdx + j; // единственное вычисление индекса
 
-                    if (PathFinder.Heuristic(start, end) < ElectricalProgressive.maxDistanceForFinding)
+                    // Проверяем эвристику
+                    if (PathFinder.Heuristic(start, producerPositions[j]) < maxDist)
                     {
-                        if (PathCacheManager.TryGet(start, end, out var cachedPath, out var facingFrom,
-                                out var nowProcessed, out var usedConnections, out var version, out var voltage))
+                        if (PathCacheManager.TryGet(start, producerPositions[j],
+                                out var cachedPath, out var fFrom, out var nProc,
+                                out var usedConns, out var version, out var volt))
                         {
-                            sim.Distances[i * pP + j] = cachedPath != null ? cachedPath.Length : int.MaxValue;
-                            if (version != network
-                                    .version) // Если версия сети не совпадает, то добавляем запрос в очередь
-                            {
-                                _asyncPathFinder.EnqueueRequest(start, end, network); // Добавляем запрос в очередь
-                            }
+                            distances[idx] = cachedPath?.Length ?? int.MaxValue;
+                            paths[idx] = cachedPath;
+                            facingFrom[idx] = fFrom;
+                            nowProcessed[idx] = nProc;
+                            usedConn[idx] = usedConns;
+                            voltages[idx] = volt;
 
-                            sim.Path[i * pP + j] = cachedPath;
-                            sim.FacingFrom[i * pP + j] = facingFrom;
-                            sim.NowProcessedFaces[i * pP + j] = nowProcessed;
-                            sim.UsedConnection[i * pP + j] = usedConnections;
-                            sim.Voltage[i * pP + j] = voltage;
+                            if (version != network.version)
+                                _asyncPathFinder.EnqueueRequest(start, producerPositions[j], network);
                         }
                         else
                         {
-                            _asyncPathFinder.EnqueueRequest(start, end, network); // Добавляем запрос в очередь
-                            sim.Distances[i * pP + j] = int.MaxValue; // Пока маршрута нет, ставим максимальное значение
-
-                            sim.Path[i * pP + j] = null;
-                            sim.FacingFrom[i * pP + j] = null;
-                            sim.NowProcessedFaces[i * pP + j] = null;
-                            sim.UsedConnection[i * pP + j] = null;
-                            sim.Voltage[i * pP + j] = 0;
+                            _asyncPathFinder.EnqueueRequest(start, producerPositions[j], network);
+                            // Заполняем значениями по умолчанию
+                            distances[idx] = int.MaxValue;
+                            paths[idx] = null;
+                            facingFrom[idx] = null;
+                            nowProcessed[idx] = null;
+                            usedConn[idx] = null;
+                            voltages[idx] = 0;
                         }
                     }
                     else
                     {
-                        sim.Distances[i * pP + j] = int.MaxValue;
-                        sim.Path[i * pP + j] = null;
-                        sim.FacingFrom[i * pP + j] = null;
-                        sim.NowProcessedFaces[i * pP + j] = null;
-                        sim.UsedConnection[i * pP + j] = null;
-                        sim.Voltage[i * pP + j] = 0;
+                        distances[idx] = int.MaxValue;
+                        paths[idx] = null;
+                        facingFrom[idx] = null;
+                        nowProcessed[idx] = null;
+                        usedConn[idx] = null;
+                        voltages[idx] = 0;
                     }
                 }
             }
 
-
-
-            // инициализируем магазины
-            for (var j = 0; j < pP; j++)
+            // 6. Инициализация магазинов (Store)
+            for (int j = 0; j < pP; j++)
             {
                 var store = sim.Stores[j];
                 if (store == null)
-                    sim.Stores[j] = store = new Store(j, producerGive[j]);
-                store.Update(j, producerGive[j]);
+                    sim.Stores[j] = new Store(j, producerGive[j]);
+                else
+                    store.Update(j, producerGive[j]);
             }
 
-
-
-
-            // инициализируем клиентов
-            for (var i = 0; i < cP; i++)
+            // 7. Инициализация потребителей (Customer) с переиспользованием буфера
+            //    ВНИМАНИЕ: предполагается, что Customer.Update() копирует данные из переданного массива,
+            //    а не сохраняет ссылку на него. Если это не так, использовать пул или новый массив.
+            int[] distBuffer = null; // будет создан при необходимости
+            for (int i = 0; i < cP; i++)
             {
-                var distBuffer = new int[pP];
+                int baseIdx = i * pP;
 
-                for (var j = 0; j < pP; j++)
-                {
-                    distBuffer[j] = sim.Distances[i * pP + j];
-                }
+                // Создаём или переиспользуем буфер нужного размера
+                if (distBuffer == null || distBuffer.Length < pP)
+                    distBuffer = new int[pP];
+
+                // Копируем строку расстояний во временный буфер
+                Array.Copy(distances, baseIdx, distBuffer, 0, pP);
 
                 var cust = sim.Customers[i];
                 if (cust == null)
-                    sim.Customers[i] = cust = new Customer(i, consumerRequests[i], distBuffer);
+                    sim.Customers[i] = new Customer(i, consumerRequests[i], distBuffer);
                 else
                     cust.Update(i, consumerRequests[i], distBuffer);
             }
 
-
-            sim.Run(); // Запускаем симуляцию для распределения энергии между потребителями и производителями
-
-
+            // 8. Запуск симуляции
+            sim.Run();
         }
 
 
