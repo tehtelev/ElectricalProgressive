@@ -333,44 +333,49 @@ namespace ElectricalProgressive
         /// </summary>
         public void Cleaner()
         {
-            foreach (var part in Parts)
+            NetworkPart part;
+            EParams[] eparams;
+
+            foreach (var kvp in Parts)
             {
+                part = kvp.Value; // сохраняем ссылку 
 
-                // подчищаем списки пакетов, но не в ноль
-                part.Value.packets?.Clear();
+                // очистка списка пакетов
+                part.packets?.Clear();
 
-                //не трогать тут ничего 
-                if (part.Value.eparams != null && part.Value.eparams.Length == 6) // если проводник существует и имеет 6 проводников
+                eparams = part.eparams;
+
+                // проверка и обновление eparams
+                if (eparams is { Length: 6 })
                 {
-                    for (var i = 0; i < 6; i++)
+                    // уменьшаем ticksBeforeBurnout только для реальных проводников
+                    if (part.Conductor is not VirtualConductor)
                     {
-                        if (!part.Value.eparams[i].burnout && part.Value.eparams[i].ticksBeforeBurnout > 0 && part.Value.Conductor is not VirtualConductor) // если проводник не сгорел и есть тики до сгорания
-                            part.Value.eparams[i].ticksBeforeBurnout--;                               // уменьшаем тики до сгорания
+                        for (int i = 0; i < 6; i++)
+                        {
+                            ref var ep = ref eparams[i];
+                            if (!ep.burnout && ep.ticksBeforeBurnout > 0)
+                                ep.ticksBeforeBurnout--;
+                        }
                     }
-
                 }
                 else
                 {
-                    part.Value.eparams =
-                    [
-                        new EParams(), new EParams(), new EParams(),
-                            new EParams(), new EParams(), new EParams()
-                    ];
+                    // создаём новый массив, если он некорректен
+                    eparams = new EParams[6]
+                    {
+                        new(), new(), new(),
+                        new(), new(), new()
+                    };
+                    part.eparams = eparams;
                 }
 
+                // обнуление токов
+                for (int i = 0; i < 6; i++)
+                    eparams[i].current = 0f;
 
-                //заполняем нулями токи и выданные энергии с пакетов
-                if (!_sumEnergy.TryAdd(part.Key, 0F))
-                {
-                    _sumEnergy[part.Key] = 0F;
-                }
-
-                part.Value.eparams[0].current = 0f;       //обнуляем токи
-                part.Value.eparams[1].current = 0f;       //обнуляем токи
-                part.Value.eparams[2].current = 0f;       //обнуляем токи
-                part.Value.eparams[3].current = 0f;       //обнуляем токи
-                part.Value.eparams[4].current = 0f;       //обнуляем токи
-                part.Value.eparams[5].current = 0f;       //обнуляем токи
+                // сброс накопленной энергии
+                _sumEnergy[kvp.Key] = 0f;
             }
         }
 
