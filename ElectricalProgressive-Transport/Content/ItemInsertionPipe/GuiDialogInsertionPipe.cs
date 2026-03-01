@@ -75,7 +75,7 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
                 CairoFont.WhiteDetailText().WithWeight(Cairo.FontWeight.Bold),
                 ElementBounds.Fixed(10, 165, 300, 25))
             // Разделительная линия
-            .AddStaticText("══════════════════════════════",
+            .AddStaticText("═════════════════════════════",
                 CairoFont.WhiteDetailText(),
                 ElementBounds.Fixed(10, 175, 300, 25))
 
@@ -103,7 +103,7 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
                 ElementBounds.Fixed(55, 305, 150, 25))
 
             // Еще одна разделительная линия
-            .AddStaticText("══════════════════════════════",
+            .AddStaticText("═════════════════════════════",
                 CairoFont.WhiteDetailText(),
                 ElementBounds.Fixed(10, 345, 300, 25))
 

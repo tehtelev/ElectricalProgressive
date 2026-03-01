@@ -68,21 +68,21 @@ public class GuiDialogLiquidInsertionPipe : GuiDialogBlockEntity
                 CairoFont.WhiteDetailText().WithWeight(Cairo.FontWeight.Bold),
                 ElementBounds.Fixed(10, 160, 260, 25))
 
-            .AddStaticText("═════════════════════════════",
+            .AddStaticText("══════════════════════════════",
                 CairoFont.WhiteDetailText(),
-                ElementBounds.Fixed(10, 170, 300, 25))
+                ElementBounds.Fixed(10, 170, 310, 25))
 
             // Кнопки режима фильтра
             .AddSmallButton(Lang.Get("electricalprogressivetransport:filter-mode-allow"), OnAllowListClicked,
                 ElementBounds.Fixed(10, 185, 130, 30), EnumButtonStyle.Normal,
                 "btnAllowList")
             .AddSmallButton(Lang.Get("electricalprogressivetransport:filter-mode-deny"), OnDenyListClicked,
-                ElementBounds.Fixed(170, 185, 130, 30), EnumButtonStyle.Normal,
+                ElementBounds.Fixed(180, 185, 130, 30), EnumButtonStyle.Normal,
                 "btnDenyList")
 
-            .AddStaticText("═════════════════════════════",
+            .AddStaticText("══════════════════════════════",
                 CairoFont.WhiteDetailText(),
-                ElementBounds.Fixed(10, 225, 300, 25))
+                ElementBounds.Fixed(10, 225, 310, 25))
 
             // Скорость передачи жидкостей
             .AddStaticText(Lang.Get("electricalprogressivetransport:liquid-transfer-speed"),
@@ -98,7 +98,7 @@ public class GuiDialogLiquidInsertionPipe : GuiDialogBlockEntity
                 ElementBounds.Fixed(150, 240, 40, 30), "txtTransferRate")
 
             .AddSmallButton("+10", OnIncreaseRateClicked,
-                ElementBounds.Fixed(200, 240, 100, 30), EnumButtonStyle.Normal,
+                ElementBounds.Fixed(210, 240, 100, 30), EnumButtonStyle.Normal,
                 "btnIncrease")
 
             .EndChildElements()
