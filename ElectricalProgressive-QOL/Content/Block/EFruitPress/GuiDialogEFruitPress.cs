@@ -56,15 +56,14 @@ public class GuiDialogEFruitPress : GuiDialogBlockEntity
         
         // Слоты: 0 - фрукты, 1 - бак, 2 - жмых
         var bounds1 = ElementBounds.Fixed(0.0, 0.0, 300.0, 150.0);
-        var fruitBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 30.0, 70.0, 1, 1);
-        var bucketBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 105.0, 70.0, 1, 1);
+        var fruitBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 5.0, 70.0, 1, 1);
         var mashBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 180.0, 70.0, 1, 1);
         
         // Границы для уровня жидкости
         var waterBounds = ElementBounds.Fixed(250, 40, 40, 100);
         
         // Границы для прогресс-бара
-        var progressBounds = ElementBounds.Fixed(30, 40, 200, 20);
+        var progressBounds = ElementBounds.Fixed(55, 85, 123, 20);
         
         var bounds4 = ElementBounds.Fill.WithFixedPadding(GuiStyle.ElementToDialogPadding);
         bounds4.BothSizing = ElementSizing.FitToChildren;
@@ -89,12 +88,10 @@ public class GuiDialogEFruitPress : GuiDialogBlockEntity
             
             // Слоты
             .AddItemSlotGrid(Inventory, new Action<object>(this.SendInvPacket), 1, [0], fruitBounds, "fruitSlot")
-            .AddItemSlotGrid(Inventory, new Action<object>(this.SendInvPacket), 1, [1], bucketBounds, "bucketSlot")
             .AddItemSlotGrid(Inventory, new Action<object>(this.SendInvPacket), 1, [2], mashBounds, "mashSlot")
             
             // Подписи
-            .AddStaticText("Fruit", CairoFont.WhiteDetailText(), ElementBounds.Fixed(30, 120, 50, 20))
-            .AddStaticText("Bucket", CairoFont.WhiteDetailText(), ElementBounds.Fixed(105, 120, 50, 20))
+            .AddStaticText("Fruit", CairoFont.WhiteDetailText(), ElementBounds.Fixed(10, 120, 50, 20))
             .AddStaticText("Mash", CairoFont.WhiteDetailText(), ElementBounds.Fixed(180, 120, 50, 20))
             
             .EndChildElements()
@@ -319,7 +316,6 @@ public class GuiDialogEFruitPress : GuiDialogBlockEntity
         if (this.SingleComposer != null)
         {
             this.SingleComposer.GetSlotGrid("fruitSlot").OnGuiClosed(this._capi);
-            this.SingleComposer.GetSlotGrid("bucketSlot").OnGuiClosed(this._capi);
             this.SingleComposer.GetSlotGrid("mashSlot").OnGuiClosed(this._capi);
         }
         base.OnGuiClosed();
