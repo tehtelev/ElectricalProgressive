@@ -82,7 +82,21 @@
     "maxCurrent": 1024.0,
     "isolated": true,
     "isolatedEnvironment": true,
-    "maxHeat": 10.0, // достигает при 1300 градусах
+    "maxHeat": 10.0,
+
+    // Конфигурация жидкости с температурной зависимостью расхода
+    "liquidConfig": {
+      "allowedLiquids": ["waterportion"],
+      "consumptionRate": 0.1,
+      "minTemperature": 200,
+      "capacityLitres": 100,
+      "liquidRequired": true,
+      "requireSpecificLiquid": true,
+      "enableTemperatureDependentConsumption": true,
+      "maxExpectedTemperature": 1300,
+      "maxConsumptionMultiplier": 3.0
+    },
+
     "handbook": {
       "groupBy": [ "efuelgenerator-*" ],
       "extraSections": [
@@ -137,7 +151,6 @@
     }
   },
 
-
   "shapebytype": {
     "*-north": {
       "base": "block/fuelgenerator/fuelgenerator",
@@ -156,8 +169,6 @@
       "rotateY": 90
     }
   },
-
-
 
   "blockmaterial": "Stone",
   "sidesolid": {

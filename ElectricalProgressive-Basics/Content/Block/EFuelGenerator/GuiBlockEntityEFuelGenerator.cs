@@ -15,45 +15,44 @@ namespace ElectricalProgressive.Content.Block.EFuelGenerator;
 public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
 {
     // === Поля ===
-    private BlockEntityEFuelGenerator betestgen;     // Ссылка на сущность генератора
-    private float _gentemp;                          // Текущая температура
-    private float _fuelBurntime;                     // Время горения
-    private float _waterAmount;                      // Количество жидкости
+    private BlockEntityEFuelGenerator _betestgen;
+    private float _gentemp;
+    private float _fuelBurntime;
+    private float _waterAmount;
+    private bool _liquidAllowed;
+    private float _currentConsumptionRate;
+    
+    // Таймер для ограничения частоты обновлений
+    private long _lastUpdateTime = 0;
+    private const int UPDATE_INTERVAL_MS = 500; // Обновляем не чаще чем раз в 500 мс
+    
+    // Кэш для отображаемых значений
+    private int _lastDisplayTemp = -1;
+    private int _lastDisplayBurnTime = -1;
+    private string _lastDisplayWater = "";
     
     // === Конструктор ===
     
-    /// <summary>
-    /// Создание GUI для генератора
-    /// </summary>
     public GuiBlockEntityEFuelGenerator(string dialogTitle, InventoryBase inventory, 
         BlockPos blockEntityPos, ICoreClientAPI capi, BlockEntityEFuelGenerator bentity) 
         : base(dialogTitle, inventory, blockEntityPos, capi)
     {
         if (IsDuplicate) return;
         
-        // Открытие инвентаря игроком
         capi.World.Player.InventoryManager.OpenInventory(inventory);
-        betestgen = bentity;
+        _betestgen = bentity;
         SetupDialog();
     }
     
     // === Основные методы ===
     
-    /// <summary>
-    /// Обработка изменения слота инвентаря
-    /// </summary>
     private void OnSlotModified(int slotid)
     {
-        // Перестройка диалога в основном потоке
         capi.Event.EnqueueMainThreadTask(SetupDialog, "termogen");
     }
     
-    /// <summary>
-    /// Настройка и создание элементов GUI
-    /// </summary>
     public void SetupDialog()
     {
-        // Определение границ элементов
         ElementBounds dialogBounds = ElementBounds.Fixed(250, 60);
         ElementBounds dialog = ElementBounds.Fill.WithFixedPadding(0);
         ElementBounds fuelGrid = ElementStdBounds.SlotGrid(EnumDialogArea.None, 80, 50, 1, 1);
@@ -65,7 +64,6 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
         dialog.BothSizing = ElementSizing.FitToChildren;
         dialog.WithChildren(dialogBounds, fuelGrid, textBounds);
         
-        // Настройка позиции окна
         ElementBounds window = ElementStdBounds.AutosizedMainDialog
             .WithAlignment(EnumDialogArea.RightMiddle)
             .WithFixedAlignmentOffset(-GuiStyle.DialogToScreenPadding, 0);
@@ -77,7 +75,6 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
         
         var outputText = CairoFont.WhiteDetailText().WithWeight(FontWeight.Normal);
         
-        // Создание композитора GUI
         SingleComposer = capi.Gui.CreateCompo("termogen" + BlockEntityPosition, window)
             .AddShadedDialogBG(dialog, true, 5)
             .AddDialogTitleBar(Lang.Get("electricalprogressivebasics:termogen"), OnTitleBarClose)
@@ -90,13 +87,19 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
             .EndChildElements()
             .Compose();
         
-        // Инициализация значений
-        Update(betestgen.GenTemp, betestgen.GetFuelBurnTime(), betestgen.WaterAmount);
+        var config = _betestgen?.GetLiquidConfig();
+        
+        // Сбрасываем кэш
+        _lastDisplayTemp = -1;
+        _lastDisplayBurnTime = -1;
+        _lastDisplayWater = "";
+        _lastUpdateTime = 0;
+        
+        Update(_betestgen.GenTemp, _betestgen.GetFuelBurnTime(), _betestgen.WaterAmount, 
+               config?.IsLiquidAllowed(_betestgen.WaterSlot.Itemstack) ?? true,
+               _betestgen.CurrentConsumptionRate);
     }
     
-    /// <summary>
-    /// Отправка пакета изменения инвентаря
-    /// </summary>
     private void SendInvPacket(object packet)
     {
         capi.Network.SendBlockEntityPacket(BlockEntityPosition.X, BlockEntityPosition.Y, 
@@ -105,69 +108,70 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
     
     // === Методы отрисовки ===
     
-    /// <summary>
-    /// Отрисовка фона и индикатора температуры
-    /// </summary>
     private void OnBgDraw(Context ctx, ImageSurface surface, ElementBounds currentBounds)
     {
         ctx.Save();
         
-        // Настройка трансформации для иконки огня
         var m = ctx.Matrix;
         m.Translate(GuiElement.scaled(5), GuiElement.scaled(53));
         m.Scale(GuiElement.scaled(0.25), GuiElement.scaled(0.25));
         ctx.Matrix = m;
         
-        // Отрисовка базовой иконки огня
         capi.Gui.Icons.DrawFlame(ctx);
         
-        // Расчет уровня температуры для градиента
         double dy = 210 - 210 * (_gentemp / 1300);
         ctx.Rectangle(0, dy, 200, 210 - dy);
         ctx.Clip();
         
-        // Создание градиента для индикатора температуры
         var gradient = new LinearGradient(0, GuiElement.scaled(250), 0, 0);
-        gradient.AddColorStop(0, new Color(1, 1, 0, 1));  // Желтый (холодный)
-        gradient.AddColorStop(1, new Color(1, 0, 0, 1));  // Красный (горячий)
+        gradient.AddColorStop(0, new Color(1, 1, 0, 1));
+        gradient.AddColorStop(1, new Color(1, 0, 0, 1));
         ctx.SetSource(gradient);
         
-        // Отрисовка цветной части огня
         capi.Gui.Icons.DrawFlame(ctx, 0, false, false);
         gradient.Dispose();
         
         ctx.Restore();
     }
     
-    /// <summary>
-    /// Отрисовка уровня жидкости
-    /// </summary>
     private void OnWaterDraw(Context ctx, ImageSurface surface, ElementBounds currentBounds)
     {
         ItemSlot liquidSlot = Inventory[1];
         if (liquidSlot.Empty)
+        {
+            // Если слот пуст, показываем серый фон
+            ctx.Save();
+            ctx.SetSourceRGBA(0.3, 0.3, 0.3, 0.5);
+            ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
+            ctx.Fill();
+            ctx.Restore();
             return;
+        }
         
         float itemsPerLitre = 1f;
-        float capacity = betestgen?.WaterCapacity ?? 100f;
+        float capacity = _betestgen?.WaterCapacity ?? 100f;
         
-        // Получение свойств жидкости
         WaterTightContainableProps containableProps = BlockLiquidContainerBase.GetContainableProps(liquidSlot.Itemstack);
         if (containableProps != null)
         {
             itemsPerLitre = containableProps.ItemsPerLitre;
         }
         
-        // Расчет уровня заполнения
         float fullnessRelative = (float)liquidSlot.StackSize / itemsPerLitre / capacity;
         fullnessRelative = Math.Min(Math.Max(fullnessRelative, 0f), 1f);
         
         double y = (1.0 - fullnessRelative) * currentBounds.InnerHeight;
         
-        // Определение области для отрисовки жидкости
         ctx.Rectangle(0, y, currentBounds.InnerWidth, currentBounds.InnerHeight - y);
         
-        // Получение текстуры жидкости
+        // Если жидкость не разрешена, рисуем с красным оттенком
+        if (!_liquidAllowed)
+        {
+            ctx.SetSourceRGBA(1, 0.3, 0.3, 0.7);
+            ctx.Fill();
+            return;
+        }
+        
         CompositeTexture compositeTexture = containableProps?.Texture ?? 
             liquidSlot.Itemstack.Collectible.Attributes?["inContainerTexture"]
                 .AsObject<CompositeTexture>(null, liquidSlot.Itemstack.Collectible.Code.Domain);
@@ -179,7 +183,6 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
             matrix.Scale(GuiElement.scaled(3.0), GuiElement.scaled(3.0));
             ctx.Matrix = matrix;
             
-            // Загрузка и отрисовка текстуры
             AssetLocation textureLoc = compositeTexture.Base.Clone().WithPathAppendixOnce(".png");
             GuiElement.fillWithPattern(capi, ctx, textureLoc, true, false, compositeTexture.Alpha);
             
@@ -188,33 +191,95 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
     }
     
     /// <summary>
-    /// Обновление данных в GUI
+    /// Обновление данных в GUI с ограничением по времени
     /// </summary>
-    public void Update(float gentemp, float burntime, float waterAmount)
+    public void Update(float gentemp, float burntime, float waterAmount, bool liquidAllowed = true, float currentConsumptionRate = 0.1f)
     {
         if (!IsOpened()) return;
         
-        _gentemp = gentemp;
-        _fuelBurntime = burntime;
-        _waterAmount = waterAmount;
+        long currentTime = capi.ElapsedMilliseconds;
         
-        // Получение названия жидкости
-        string liquidName = "Empty";
+        // Обновляем графику всегда (полоски должны двигаться плавно)
+        _gentemp = gentemp;
+        _waterAmount = waterAmount;
+        _liquidAllowed = liquidAllowed;
+        
+        // Ограничиваем обновление текста по времени
+        if (currentTime - _lastUpdateTime < UPDATE_INTERVAL_MS)
+        {
+            // Обновляем только графику
+            if (SingleComposer != null)
+            {
+                SingleComposer.GetCustomDraw("symbolDrawer").Redraw();
+                SingleComposer.GetCustomDraw("waterDrawer").Redraw();
+            }
+            return;
+        }
+        
+        // Обновляем остальные значения
+        _fuelBurntime = burntime;
+        _currentConsumptionRate = currentConsumptionRate;
+        
+        string liquidName = Lang.Get("electricalprogressivebasics:empty");
+        
         if (Inventory[1] != null && !Inventory[1].Empty)
         {
             liquidName = Inventory[1].Itemstack.GetName();
         }
         
-        // Получение вместимости из сущности генератора
-        float capacity = betestgen?.WaterCapacity ?? 100f;
+        float capacity = _betestgen?.WaterCapacity ?? 100f;
+        var config = _betestgen?.GetLiquidConfig();
         
-        // Формирование текста информации
-        var newText = (int)gentemp + " °C\n" + 
-                     (int)burntime + " " + Lang.Get("electricalprogressivebasics:gui-word-seconds") + "\n" +
-                     "Liquid: " + waterAmount.ToString("0.0") + "/" + capacity.ToString("0.0") + " L\n" +
-                     liquidName;
+        // Округляем значения для отображения
+        int displayTemp = (int)Math.Round(gentemp);
+        int displayBurnTime = (int)Math.Round(burntime);
+        string displayWater = waterAmount.ToString("0.0");
         
-        // Обновление элементов GUI
+        // Проверяем, изменилось ли что-то существенно
+        if (displayTemp == _lastDisplayTemp && 
+            displayBurnTime == _lastDisplayBurnTime && 
+            displayWater == _lastDisplayWater)
+        {
+            _lastUpdateTime = currentTime;
+            
+            // Обновляем графику
+            if (SingleComposer != null)
+            {
+                SingleComposer.GetCustomDraw("symbolDrawer").Redraw();
+                SingleComposer.GetCustomDraw("waterDrawer").Redraw();
+            }
+            return;
+        }
+        
+        // Сохраняем новые значения
+        _lastDisplayTemp = displayTemp;
+        _lastDisplayBurnTime = displayBurnTime;
+        _lastDisplayWater = displayWater;
+        _lastUpdateTime = currentTime;
+        
+        // Формируем новый текст
+        string newText = displayTemp + " °C\n" + 
+                        displayBurnTime + " " + Lang.Get("electricalprogressivebasics:gui-word-seconds") + "\n" +
+                        Lang.Get("electricalprogressivebasics:liquid") + displayWater + "/" + capacity.ToString("0.0") + " L";
+        
+        if (!liquidAllowed && !Inventory[1].Empty)
+        {
+            newText += " (" + Lang.Get("electricalprogressivebasics:Wrong type") + ")";
+        }
+        
+        newText += "\n" + liquidName;
+        
+        // Добавляем информацию о текущем расходе, если генератор работает
+        if (burntime > 0.1f && gentemp > (config?.MinTemperature ?? 200))
+        {
+            newText += $"\n{Lang.Get("electricalprogressivebasics:Consumption")}: {currentConsumptionRate:F2} L/s";
+        }
+        
+        if (config != null && config.RequireSpecificLiquid && !liquidAllowed && !Inventory[1].Empty)
+        {
+            newText += "\n" + Lang.Get("electricalprogressivebasics:Requires") + ": " + config.GetAllowedLiquidsText();
+        }
+        
         if (SingleComposer != null)
         {
             SingleComposer.GetDynamicText("outputText").SetNewText(newText);
@@ -225,30 +290,27 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
     
     // === Обработка событий GUI ===
     
-    /// <summary>
-    /// Обработка закрытия через заголовок
-    /// </summary>
     private void OnTitleBarClose()
     {
         TryClose();
     }
     
-    /// <summary>
-    /// Обработка открытия GUI
-    /// </summary>
     public override void OnGuiOpened()
     {
         base.OnGuiOpened();
         Inventory.SlotModified += OnSlotModified;
+        
+        // Сбрасываем кэш при открытии
+        _lastDisplayTemp = -1;
+        _lastDisplayBurnTime = -1;
+        _lastDisplayWater = "";
+        _lastUpdateTime = 0;
     }
     
-    /// <summary>
-    /// Обработка закрытия GUI
-    /// </summary>
     public override void OnGuiClosed()
     {
         Inventory.SlotModified -= OnSlotModified;
-        SingleComposer.GetSlotGrid("fuelSlot").OnGuiClosed(capi);
+        SingleComposer?.GetSlotGrid("fuelSlot")?.OnGuiClosed(capi);
         base.OnGuiClosed();
     }
 }

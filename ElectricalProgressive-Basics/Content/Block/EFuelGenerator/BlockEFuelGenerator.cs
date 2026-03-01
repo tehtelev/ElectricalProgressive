@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Utils;
+﻿﻿using ElectricalProgressive.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +21,18 @@ namespace ElectricalProgressive.Content.Block.EFuelGenerator;
 public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
 {
     // === Параметры контейнера для жидкости ===
-    public float CapacityLitres => 100f;
+    public float CapacityLitres 
+    { 
+        get
+        {
+            if (Attributes?["liquidConfig"]?["capacityLitres"].Exists == true)
+            {
+                return Attributes["liquidConfig"]["capacityLitres"].AsFloat(100f);
+            }
+            return 100f;
+        }
+    }
+    
     public bool AllowHeldLiquidTransfer => true;
     public static int ContainerSlotId => 1;
     public float TransferSizeLitres => 1f;
@@ -45,43 +56,25 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
                 new() { ActionLangCode = "blockhelp-watergen-fillliquid", MouseButton = EnumMouseButton.Right }
             };
         });
-
     }
-
 
     #region Реализация интерфейса ILiquidSource/ILiquidSink для BlockPos
 
-    /// <summary>
-    /// Получить ID слота для контейнера по позиции блока
-    /// </summary>
     public static int GetContainerSlotId(BlockPos pos) => ContainerSlotId;
-    
-    /// <summary>
-    /// Получить ID слота для контейнера по ItemStack
-    /// </summary>
     public static int GetContainerSlotId(ItemStack containerStack) => ContainerSlotId;
     
-    /// <summary>
-    /// Получить текущее количество жидкости в блоке
-    /// </summary>
     public float GetCurrentLitres(BlockPos pos)
     {
         var be = GetBlockEntity(pos);
         return be?.WaterAmount ?? 0;
     }
     
-    /// <summary>
-    /// Получить содержимое контейнера
-    /// </summary>
     public ItemStack GetContent(BlockPos pos)
     {
         var be = GetBlockEntity(pos);
         return be?.WaterSlot.Itemstack?.Clone();
     }
     
-    /// <summary>
-    /// Взять жидкость из контейнера
-    /// </summary>
     public ItemStack TryTakeContent(BlockPos pos, int quantityItems)
     {
         var be = GetBlockEntity(pos);
@@ -100,9 +93,6 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
         return takenStack;
     }
     
-    /// <summary>
-    /// Положить жидкость в контейнер
-    /// </summary>
     public int TryPutLiquid(BlockPos pos, ItemStack liquidStack, float desiredLitres)
     {
         var be = GetBlockEntity(pos);
@@ -115,24 +105,9 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
 
     #region Реализация интерфейса ILiquidSource/ILiquidSink для ItemStack (упрощенная)
 
-    /// <summary>
-    /// Получить текущее количество жидкости (для генератора в руке всегда 0)
-    /// </summary>
     public float GetCurrentLitres(ItemStack containerStack) => 0;
-    
-    /// <summary>
-    /// Получить содержимое (для генератора в руке всегда null)
-    /// </summary>
     public ItemStack GetContent(ItemStack containerStack) => null;
-    
-    /// <summary>
-    /// Положить жидкость (для генератора в руке нельзя)
-    /// </summary>
     public static int TryPutLiquid(ItemStack containerStack, ItemStack liquidStack, float desiredLitres) => 0;
-    
-    /// <summary>
-    /// Взять жидкость (для генератора в руке нельзя)
-    /// </summary>
     public static ItemStack TryTakeContent(ItemStack containerStack, int quantityItems) => null;
 
     #endregion
@@ -148,9 +123,6 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
 
     #region Вспомогательные методы
 
-    /// <summary>
-    /// Получить BlockEntity генератора по позиции
-    /// </summary>
     private BlockEntityEFuelGenerator GetBlockEntity(BlockPos pos)
     {
         return api?.World?.BlockAccessor.GetBlockEntity(pos) as BlockEntityEFuelGenerator;
@@ -171,11 +143,6 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
         }
     }
     
-    /// <summary>
-    /// Sets the containers contents to given stack
-    /// </summary>
-    /// <param name="containerStack"></param>
-    /// <param name="content"></param>
     public void SetContent(ItemStack containerStack, ItemStack content)
     {
         if (content == null)
@@ -186,9 +153,6 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
         SetContents(containerStack, [content]);
     }
     
-    /// <summary>
-    /// Установить содержимое контейнера по позиции блока
-    /// </summary>
     public void SetContent(BlockPos pos, ItemStack content)
     {
         var be = api?.World?.BlockAccessor.GetBlockEntity(pos) as BlockEntityContainer;
@@ -208,9 +172,6 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
         be.MarkDirty(true);
     }
     
-    /// <summary>
-    /// Воспроизведение звуковых эффектов при работе с жидкостью
-    /// </summary>
     private void DoLiquidMovedEffects(IPlayer player, ItemStack contentStack, int moved, BlockLiquidContainerBase.EnumLiquidDirection dir)
     {
         if (player == null) return;
@@ -220,16 +181,13 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
 
         (player as IClientPlayer)?.TriggerFpAnimation(EnumHandInteract.HeldItemInteract);
         api.World.PlaySoundAt(dir == BlockLiquidContainerBase.EnumLiquidDirection.Fill ? 
-            props?.FillSound ?? "sounds/effect/water-fill.ogg" : 
-            props?.PourSound ?? "sounds/effect/water-pour.ogg", 
+            props?.FillSound ?? "game:sounds/effect/water-fill.ogg" : 
+            props?.PourSound ?? "game:sounds/effect/water-pour.ogg", 
             player.Entity, player, true, 16, GameMath.Clamp(litresMoved / 5f, 0.35f, 1f));
         api.World.SpawnCubeParticles(player.Entity.Pos.AheadCopy(0.25).XYZ.Add(0, player.Entity.SelectionBox.Y2 / 2, 0), 
             contentStack, 0.75f, (int)litresMoved * 2, 0.45f);
     }
     
-    /// <summary>
-    /// Разделение стека и выполнение действия
-    /// </summary>
     public int SplitStackAndPerformAction(Entity byEntity, ItemSlot slot, System.Func<ItemStack, int> action)
     {
         if (slot.Itemstack == null) return 0;
@@ -239,7 +197,6 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
 
             if (moved > 0)
             {
-                // Автоматическое объединение с другими стеками в инвентаре
                 (byEntity as EntityPlayer)?.WalkInventory((pslot) =>
                 {
                     if (pslot.Empty || pslot is ItemSlotCreative || pslot.StackSize == pslot.Itemstack.Collectible.MaxStackSize) 
@@ -267,7 +224,6 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
         }
         else
         {
-            // Разделение стека перед выполнением действия
             ItemStack containerStack = slot.Itemstack.Clone();
             containerStack.StackSize = 1;
 
@@ -288,9 +244,6 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
         }
     }
     
-    /// <summary>
-    /// Получить свойства жидкости из ItemStack
-    /// </summary>
     public static WaterTightContainableProps? GetContainableProps(ItemStack? stack)
     {
         try
@@ -306,9 +259,6 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
         }
     }
 
-    /// <summary>
-    /// Получить свойства содержимого контейнера по позиции блока
-    /// </summary>
     public WaterTightContainableProps? GetContentProps(BlockPos pos)
     {
         BlockEntityContainer becontainer = api.World.BlockAccessor.GetBlockEntity(pos) as BlockEntityContainer;
@@ -323,26 +273,17 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
         return GetContainableProps(stack);
     }
     
-    /// <summary>
-    /// Получить свойства содержимого контейнера по ItemStack
-    /// </summary>
     public WaterTightContainableProps? GetContentProps(ItemStack containerStack)
     {
         ItemStack? stack = GetContent(containerStack);
         return GetContainableProps(stack);
     }
     
-    /// <summary>
-    /// Проверить, полон ли контейнер в ItemStack
-    /// </summary>
     public bool IsFull(ItemStack containerStack)
     {
         return GetCurrentLitres(containerStack) >= CapacityLitres;
     }
 
-    /// <summary>
-    /// Проверить, полон ли контейнер по позиции блока
-    /// </summary>
     public bool IsFull(BlockPos pos)
     {
         return GetCurrentLitres(pos) >= CapacityLitres;
@@ -352,9 +293,6 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
 
     #region Основные методы блока
 
-    /// <summary>
-    /// Попытка разместить блок в мире
-    /// </summary>
     public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack,
        BlockSelection blockSel, ref string failureCode)
     {
@@ -370,7 +308,6 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
             return false;
         }
 
-        // Проверка возможности размещения на соседнем блоке
         if (FacingHelper.Faces(facing).First() is { } blockFacing &&
             !world.BlockAccessor.GetBlock(blockSel.Position.AddCopy(blockFacing)).SideSolid[blockFacing.Opposite.Index])
         {
@@ -380,9 +317,6 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
         return base.TryPlaceBlock(world, byPlayer, itemstack, blockSel, ref failureCode);
     }
 
-    /// <summary>
-    /// Размещение блока в мире
-    /// </summary>
     public override bool DoPlaceBlock(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel,
         ItemStack byItemStack)
     {
@@ -399,16 +333,12 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
         return true;
     }
 
-    /// <summary>
-    /// Обработка изменения соседнего блока
-    /// </summary>
     public override void OnNeighbourBlockChange(IWorldAccessor world, BlockPos pos, BlockPos neibpos)
     {
         base.OnNeighbourBlockChange(world, pos, neibpos);
 
         if (world.BlockAccessor.GetBlockEntity(pos) is BlockEntityEFuelGenerator)
         {
-            // Проверка опоры под блоком
             if (!world.BlockAccessor.GetBlock(pos.AddCopy(BlockFacing.DOWN)).SideSolid[4])
             {
                 world.BlockAccessor.BreakBlock(pos, null);
@@ -416,9 +346,6 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
         }
     }
 
-    /// <summary>
-    /// Обработка взаимодействия с блоком
-    /// </summary>
     public override bool OnBlockInteractStart(
         IWorldAccessor world,
         IPlayer byPlayer,
@@ -482,32 +409,45 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
     }
     
 
-    /// <summary>
-    /// Получить дроп при разрушении блока
-    /// </summary>
     public override ItemStack[] GetDrops(IWorldAccessor world, BlockPos pos, IPlayer byPlayer,
         float dropQuantityMultiplier = 1)
     {
         return [OnPickBlock(world, pos)];
     }
 
-    /// <summary>
-    /// Получить подсказки по взаимодействию с блоком
-    /// </summary>
     public override WorldInteraction[] GetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection selection, IPlayer forPlayer)
     {
         return _interactions;
     }
 
-    /// <summary>
-    /// Получить информацию о предмете в руке
-    /// </summary>
     public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
     {
         base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + (MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Liquid capacity") + ": 100 L");
+        
+        // Информация о жидкости
+        float capacity = CapacityLitres;
+        var config = inSlot.Itemstack.Block?.Attributes?["liquidConfig"];
+        if (config != null && config.Exists)
+        {
+            var liquidConfig = config.AsObject<LiquidConfig>();
+            if (liquidConfig != null)
+            {
+                dsc.AppendLine(Lang.Get("electricalprogressivebasics:Liquid capacity") + ": " + capacity + " L");
+                if (liquidConfig.RequireSpecificLiquid)
+                {
+                    dsc.AppendLine(Lang.Get("electricalprogressivebasics:Requires liquid") + ": " + liquidConfig.GetAllowedLiquidsText());
+                }
+                else
+                {
+                    dsc.AppendLine(Lang.Get("electricalprogressivebasics:Accepts any liquid"));
+                }
+                return;
+            }
+        }
+        
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Liquid capacity") + ": " + capacity + " L");
     }
 
     #endregion
