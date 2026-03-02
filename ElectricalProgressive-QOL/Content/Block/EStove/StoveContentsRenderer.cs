@@ -23,8 +23,6 @@ public class StoveContentsRenderer : IRenderer, IDisposable
 
     public void SetChildRenderer(ItemStack contentStack, IInFirepitRenderer contentStackRenderer)
     {
-
-
         this.ContentStack = contentStack?.Clone();
 
         // Освобождаем старый рендерер
