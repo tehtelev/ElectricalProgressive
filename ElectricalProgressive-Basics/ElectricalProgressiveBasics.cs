@@ -27,7 +27,7 @@ using Vintagestory.API.Config;
     "electricalprogressivebasics",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Basic electrical devices.",
-    Version = "2.6.5",
+    Version = "2.6.6",
     Authors =
     [
         "Tehtelev",
@@ -120,7 +120,7 @@ public class ElectricalProgressiveBasics : ModSystem
 
         // Регистрируем патч для механики
         harmony = new Harmony("electricalprogressive.mechanicalpowermod");
-        MechanicalPowerMod_RebuildNetwork_Patch.RegisterPatch(harmony);
+        MechanicalPowerMod_RebuildNetwork_Patch.RegisterPatch(harmony, api);
 
     }
 

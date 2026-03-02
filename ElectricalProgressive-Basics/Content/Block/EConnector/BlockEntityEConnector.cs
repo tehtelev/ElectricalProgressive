@@ -1,10 +1,9 @@
-﻿using ElectricalProgressive.Content.Block.ECable;
-using ElectricalProgressive.Utils;
+﻿using ElectricalProgressive.Utils;
 using Vintagestory.API.Common;
 
 namespace ElectricalProgressive.Content.Block.EConnector;
 
-public class BlockEntityEConnector : BlockEntityECable
+public class BlockEntityEConnector : BlockEntityEFacingBase
 {
     public override void OnBlockPlaced(ItemStack? byItemStack = null)
     {
@@ -17,6 +16,6 @@ public class BlockEntityEConnector : BlockEntityECable
         //задаем электрические параметры блока/проводника
         LoadEProperties.Load(this.Block, this);
 
-        
+
     }
 }

@@ -17,15 +17,17 @@ public class MechanicalPowerMod_RebuildNetwork_Patch
     /// </summary>
     /// <param name="harmony"></param>
     /// <exception cref="Exception"></exception>
-    public static void RegisterPatch(Harmony harmony)
+    public static void RegisterPatch(Harmony harmony, ICoreAPI api)
     {
         // Ищем метод RebuildNetwork в MechanicalPowerMod
         var originalMethod = typeof(MechanicalPowerMod).GetMethod("RebuildNetwork",
             BindingFlags.Public | BindingFlags.Instance);
 
+
         if (originalMethod == null)
         {
-            throw new Exception("Could not find MechanicalPowerMod.RebuildNetwork method!");
+            api.Logger.Error("Could not find MechanicalPowerMod.RebuildNetwork method!");
+            return;
         }
 
         prefixMethod = new HarmonyMethod(typeof(MechanicalPowerMod_RebuildNetwork_Patch).GetMethod("Prefix", BindingFlags.Static | BindingFlags.NonPublic));
