@@ -9,7 +9,7 @@ using ElectricalProgressive.Content.Item.Tool;
 
 
 [assembly: ModDependency("game", "1.21.0")]
-[assembly: ModDependency("electricalprogressivecore", "2.5.0")]
+[assembly: ModDependency("electricalprogressivecore", "2.6.6")]
 [assembly: ModDependency("electricalprogressivebasics", "2.5.0")]
 [assembly: ModDependency("electricalprogressiveqol", "2.5.0")]
 [assembly: ModInfo(
@@ -17,7 +17,7 @@ using ElectricalProgressive.Content.Item.Tool;
     "electricalprogressiveequipment",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Electric weapons, armor and tools",
-    Version = "2.5.1",
+    Version = "2.6.0",
     Authors =
     [
         "Tehtelev",

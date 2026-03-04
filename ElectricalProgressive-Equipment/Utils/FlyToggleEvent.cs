@@ -5,7 +5,7 @@ using Vintagestory.API.Server;
 using ElectricalProgressive.Content.Item.Armor;
 using ElectricalProgressive.Net;
 using System.Linq;
-
+using ElectricalProgressive;
 
 namespace ElectricalProgressive.Utils;
 
@@ -62,6 +62,10 @@ public class FlyToggleEvent : ModSystem
     public override void StartClientSide(ICoreClientAPI api)
     {
         base.StartClientSide(api);
+
+        if (!ElectricalProgressive.enableFlyingArmor)
+            return;
+
         this.capi = api;
         RegisterFlyKeys();
 
@@ -77,6 +81,10 @@ public class FlyToggleEvent : ModSystem
     public override void StartServerSide(ICoreServerAPI api)
     {
         base.StartServerSide(api);
+
+        if (!ElectricalProgressive.enableFlyingArmor)
+            return;
+
         this.sapi = api;
         serverChannel = sapi.Network.RegisterChannel("EP").RegisterMessageType(typeof
             (FlyToggle)). RegisterMessageType(typeof(FlyResponse)).SetMessageHandler<FlyToggle>(new
@@ -93,14 +101,25 @@ public class FlyToggleEvent : ModSystem
     {
         var totalHours = this.sapi!.World.Calendar.TotalHours;
         var num = totalHours - this.lastCheckTotalHours;
+
+        // прошло слишком мало времени с последней проверки, пропускаем
         if (num <= 0.05)
             return;
+
+
+        IInventory inventory;
+
+        // проверяем всех игроков
         foreach (var player in this.sapi!.World.AllOnlinePlayers)
         {
-            var inventory = player.InventoryManager.GetOwnInventory("character");
-            if (inventory == null) continue;
+            inventory = player.InventoryManager.GetOwnInventory("character");
+            // если инвентарь недоступен, пропускаем игрока
+            if (inventory == null)
+                continue;
 
             var (armor, itemSlot) = FindEquippedArmor(inventory);
+
+            // если броня найдена, обновляем ее энергию и проверяем возможность полета
             if (armor != null)
             {
                 consumeFly = armor.consumefly;
@@ -110,6 +129,8 @@ public class FlyToggleEvent : ModSystem
                 UpdateArmorEnergy(itemSlot, player, num);
             }
         }
+
+        // обновляем время последней проверки
         this.lastCheckTotalHours = totalHours;
     }
 
@@ -141,7 +162,8 @@ public class FlyToggleEvent : ModSystem
     /// <param name="timeDelta"></param>
     private void UpdateArmorEnergy(ItemSlot itemSlot, IPlayer player, double timeDelta)
     {
-        if (itemSlot?.Itemstack == null) return;
+        if (itemSlot?.Itemstack == null)
+            return;
 
         var energy = itemSlot.Itemstack.Attributes.GetInt("durability") * consume;
         
@@ -154,7 +176,8 @@ public class FlyToggleEvent : ModSystem
         }
         else
         {
-            DisableFlight(itemSlot);
+            if (itemSlot.Itemstack.Attributes.GetBool("flying")) // обязательно проверяем, чтобы не отключать полет вызванный другими средствами
+                DisableFlight(itemSlot);
         }
     }
 
@@ -306,12 +329,16 @@ public class FlyToggleEvent : ModSystem
         }
     }
 
+
+
     public bool Toggle(IPlayer player, FlyToggle bt)
     {
         var ownInventory = player.InventoryManager.GetOwnInventory("character"); 
         var itemSlot = FindEquippedArmor(ownInventory).Item2;
+
         if (itemSlot == null)
             return false;
+
         if (!itemSlot.Itemstack.Attributes.GetBool("flying") &&
             itemSlot.Itemstack.Attributes.GetInt("durability")*consume > consumeFly / 0.05)
         {
