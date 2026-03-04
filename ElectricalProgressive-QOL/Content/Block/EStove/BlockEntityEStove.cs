@@ -148,6 +148,12 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
         return false;
     }
 
+    private bool forceStaticMesh()
+    {
+        return (InputStack != null && StoveTemperature < 50) && (InputStack.Block?.Code.Path.Contains("claypot") ?? false);
+    }
+
+
     public void UpdateMesh(int slotid)
     {
         if (Api == null || Api.Side == EnumAppSide.Server)
@@ -158,7 +164,19 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
         if (slotid == 0 || slotid>2)
             return;
 
-        
+        if (slotid == 1 && inventory[1].Itemstack != null && forceStaticMesh())
+        {
+            // Удаляем динамический рендерер, если он был активен
+            if (renderer.contentStackRenderer != null)
+            {
+                renderer.contentStackRenderer.Dispose();
+                renderer.contentStackRenderer = null;
+            }
+            // Сбрасываем статический меш (будет добавлен позже в OnTesselation)
+            Meshes[slotid] = null;
+            return;
+        }
+
         // если тут пусто
         if (inventory[slotid].Empty)
         {
@@ -233,6 +251,36 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
         }
     }
 
+
+    private void AddPotStaticMesh(ITerrainMeshPool mesher, ITesselatorAPI tesselator, ItemStack potStack)
+    {
+        Vintagestory.API.Common.Block potBlock = potStack.Block;
+        if (potBlock == null) return;
+
+        string potKey = "estove-pot-static-" + potBlock.Code;
+        string lidKey = "estove-lid-static-" + potBlock.Code;
+
+        MeshData potMesh = ObjectCacheUtil.GetOrCreate<MeshData>(Api, potKey, () =>
+        {
+            Shape shape = Shape.TryGet(Api, "shapes/block/clay/pot-opened-empty.json");
+            if (shape == null) return null;
+            tesselator.TesselateShape(potBlock, shape, out MeshData mesh);
+            mesh.Translate(0, 1.04f, 0);
+            return mesh;
+        });
+
+        MeshData lidMesh = ObjectCacheUtil.GetOrCreate<MeshData>(Api, lidKey, () =>
+        {
+            Shape shape = Shape.TryGet(Api, "shapes/block/clay/pot-part-lid.json");
+            if (shape == null) return null;
+            tesselator.TesselateShape(potBlock, shape, out MeshData mesh);
+            mesh.Translate(0, 1.38375f, 0);
+            return mesh;
+        });
+
+        if (potMesh != null) mesher.AddMeshData(potMesh);
+        if (lidMesh != null) mesher.AddMeshData(lidMesh);
+    }
 
     private void UpdateRenderer(int slotId, bool outt)
     {
@@ -434,6 +482,12 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
         {
             if (Meshes[i] != null) mesher.AddMeshData(Meshes[i]);
         }
+
+        if (forceStaticMesh())
+        {
+            AddPotStaticMesh(mesher, tessThreadTesselator, InputStack);
+        }
+
         return false;
     }
 
