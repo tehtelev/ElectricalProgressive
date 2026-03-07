@@ -29,7 +29,7 @@ using Vintagestory.API.Server;
     "electricalprogressiveqol",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Additional electrical devices.",
-    Version = "2.6.9",
+    Version = "2.6.10",
     Authors =
     [
         "Tehtelev",
@@ -189,6 +189,10 @@ public class ElectricalProgressiveQOL : ModSystem
         //harmony.PatchAll(Assembly.GetExecutingAssembly());
 
 
+        // применение патча для грядки обогревателю
+        harmony = new Harmony("electricalprogressive.farmlandheater");
+        FarmlandHeaterPatch.RegisterPatch(harmony, api);
+
     }
 
 
@@ -206,9 +210,7 @@ public class ElectricalProgressiveQOL : ModSystem
     {
         base.StartServerSide(api);
 
-        // применение патча для грядки обогревателю
-        harmony = new Harmony("electricalprogressive.farmlandheater");
-        FarmlandHeaterPatch.RegisterPatch(harmony);
+
 
     }
 

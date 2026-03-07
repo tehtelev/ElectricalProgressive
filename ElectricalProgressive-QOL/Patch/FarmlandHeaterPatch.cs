@@ -33,13 +33,17 @@ public class FarmlandHeaterPatch
 
     private static List<CodeInstruction> codes; // Временное поле для хранения инструкций в транспайлерах
 
+    private static ICoreAPI Api;
+
     /// <summary>
     /// Метод для регистрации всех патчей
     /// </summary>
     /// <param name="harmony"></param>
     /// <exception cref="Exception"></exception>
-    public static void RegisterPatch(Harmony harmony)
+    public static void RegisterPatch(Harmony harmony, ICoreAPI api)
     {
+        Api = api;
+
         // Патч для грядки
         var farmlandMethod = typeof(BlockEntityFarmland).GetMethod("Update",
             BindingFlags.NonPublic | BindingFlags.Instance,
@@ -49,11 +53,19 @@ public class FarmlandHeaterPatch
 
         if (farmlandMethod == null)
         {
-            throw new Exception("Could not find BlockEntityFarmland.Update method!");
+            Api.Logger.Error("Could not find BlockEntityFarmland.Update method!");
         }
 
-        farmlandTranspilerMethod = new HarmonyMethod(typeof(FarmlandHeaterPatch).GetMethod("TranspilerFarmland", BindingFlags.Static | BindingFlags.NonPublic));
-        harmony.Patch(farmlandMethod, transpiler: farmlandTranspilerMethod);
+        try
+        {
+            farmlandTranspilerMethod = new HarmonyMethod(typeof(FarmlandHeaterPatch).GetMethod("TranspilerFarmland", BindingFlags.Static | BindingFlags.NonPublic));
+            harmony.Patch(farmlandMethod, transpiler: farmlandTranspilerMethod);
+        }
+        catch
+        {
+            Api.Logger.Error("The following method failed to patch: BlockEntityFarmland.Update");
+        }
+
 
         // Патч для куста ягод
         var berryBushMethod = typeof(BlockEntityBerryBush).GetMethod("CheckGrow",
@@ -64,11 +76,20 @@ public class FarmlandHeaterPatch
 
         if (berryBushMethod == null)
         {
-            throw new Exception("Could not find BlockEntityBerryBush.CheckGrow method!");
+            Api.Logger.Error("Could not find BlockEntityBerryBush.CheckGrow method!");
         }
 
-        berryBushTranspilerMethod = new HarmonyMethod(typeof(FarmlandHeaterPatch).GetMethod("TranspilerBerryBush", BindingFlags.Static | BindingFlags.NonPublic));
-        harmony.Patch(berryBushMethod, transpiler: berryBushTranspilerMethod);
+
+        try
+        {
+            berryBushTranspilerMethod = new HarmonyMethod(typeof(FarmlandHeaterPatch).GetMethod("TranspilerBerryBush", BindingFlags.Static | BindingFlags.NonPublic));
+            harmony.Patch(berryBushMethod, transpiler: berryBushTranspilerMethod);
+        }
+        catch
+        {
+            Api.Logger.Error("The following method failed to patch: BlockEntityBerryBush.CheckGrow");
+        }
+
 
         // Патч для улья
         var beehiveMethod = typeof(BlockEntityBeehive).GetMethod("TestHarvestable",
@@ -79,11 +100,20 @@ public class FarmlandHeaterPatch
 
         if (beehiveMethod == null)
         {
-            throw new Exception("Could not find BlockEntityBeehive.TestHarvestable method!");
+            Api.Logger.Error("Could not find BlockEntityBeehive.TestHarvestable method!");
         }
 
-        beehiveTranspilerMethod = new HarmonyMethod(typeof(FarmlandHeaterPatch).GetMethod("TranspilerBeehive", BindingFlags.Static | BindingFlags.NonPublic));
-        harmony.Patch(beehiveMethod, transpiler: beehiveTranspilerMethod);
+
+        try
+        {
+            beehiveTranspilerMethod = new HarmonyMethod(typeof(FarmlandHeaterPatch).GetMethod("TranspilerBeehive", BindingFlags.Static | BindingFlags.NonPublic));
+            harmony.Patch(beehiveMethod, transpiler: beehiveTranspilerMethod);
+        }
+        catch
+        {
+            Api.Logger.Error("The following method failed to patch: BlockEntityBeehive.TestHarvestable");
+        }
+
 
         // Патч для фруктового дерева
         var fruitTreeMethod = typeof(FruitTreeRootBH).GetMethod("getGreenhouseTempBonus",
@@ -94,11 +124,20 @@ public class FarmlandHeaterPatch
 
         if (fruitTreeMethod == null)
         {
-            throw new Exception("Could not find FruitTreeRootBH.getGreenhouseTempBonus method!");
+            Api.Logger.Error("Could not find FruitTreeRootBH.getGreenhouseTempBonus method!");
         }
 
-        fruitTreeTranspilerMethod = new HarmonyMethod(typeof(FarmlandHeaterPatch).GetMethod("TranspilerFruitTree", BindingFlags.Static | BindingFlags.NonPublic));
-        harmony.Patch(fruitTreeMethod, transpiler: fruitTreeTranspilerMethod);
+
+        try
+        {
+            fruitTreeTranspilerMethod = new HarmonyMethod(typeof(FarmlandHeaterPatch).GetMethod("TranspilerFruitTree", BindingFlags.Static | BindingFlags.NonPublic));
+            harmony.Patch(fruitTreeMethod, transpiler: fruitTreeTranspilerMethod);
+        }
+        catch
+        {
+            Api.Logger.Error("The following method failed to patch: FruitTreeRootBH.getGreenhouseTempBonus");
+        }
+
 
 
         // патч для растущего фруктового дерева
@@ -110,11 +149,19 @@ public class FarmlandHeaterPatch
 
         if (fruitTreeGrowingMethod == null)
         {
-            throw new Exception("Could not find FruitTreeGrowingBranchBH.OnTick method!");
+            Api.Logger.Error("Could not find FruitTreeGrowingBranchBH.OnTick method!");
         }
 
-        fruitTreeGrowingTranspilerMethod = new HarmonyMethod(typeof(FarmlandHeaterPatch).GetMethod("TranspilerFruitTreeGrowing", BindingFlags.Static | BindingFlags.NonPublic));
-        harmony.Patch(fruitTreeGrowingMethod, transpiler: fruitTreeGrowingTranspilerMethod);
+
+        try
+        {
+            fruitTreeGrowingTranspilerMethod = new HarmonyMethod(typeof(FarmlandHeaterPatch).GetMethod("TranspilerFruitTreeGrowing", BindingFlags.Static | BindingFlags.NonPublic));
+            harmony.Patch(fruitTreeGrowingMethod, transpiler: fruitTreeGrowingTranspilerMethod);
+        }
+        catch
+        {
+            Api.Logger.Error("The following method failed to patch: FruitTreeGrowingBranchBH.OnTick");
+        }
 
 
         // Патч для саженца (обычные деревья)
@@ -126,11 +173,20 @@ public class FarmlandHeaterPatch
 
         if (saplingMethod == null)
         {
-            throw new Exception("Could not find BESapling.CheckGrow method!");
+            Api.Logger.Error("Could not find BESapling.CheckGrow method!");
         }
 
-        saplingTranspilerMethod = new HarmonyMethod(typeof(FarmlandHeaterPatch).GetMethod("TranspilerSapling", BindingFlags.Static | BindingFlags.NonPublic));
-        harmony.Patch(saplingMethod, transpiler: saplingTranspilerMethod);
+
+        try
+        {
+            saplingTranspilerMethod = new HarmonyMethod(typeof(FarmlandHeaterPatch).GetMethod("TranspilerSapling", BindingFlags.Static | BindingFlags.NonPublic));
+            harmony.Patch(saplingMethod, transpiler: saplingTranspilerMethod);
+        }
+        catch
+        {
+            Api.Logger.Error("The following method failed to patch: BESapling.CheckGrow");
+        }
+
     }
 
 
@@ -149,7 +205,7 @@ public class FarmlandHeaterPatch
 
         if (farmlandMethod != null)
         {
-            harmony.Unpatch(farmlandMethod, farmlandTranspilerMethod.method);
+            harmony?.Unpatch(farmlandMethod, farmlandTranspilerMethod.method);
         }
 
         var berryBushMethod = typeof(BlockEntityBerryBush).GetMethod("CheckGrow",
@@ -160,7 +216,7 @@ public class FarmlandHeaterPatch
 
         if (berryBushMethod != null)
         {
-            harmony.Unpatch(berryBushMethod, berryBushTranspilerMethod.method);
+            harmony?.Unpatch(berryBushMethod, berryBushTranspilerMethod.method);
         }
 
         var beehiveMethod = typeof(BlockEntityBeehive).GetMethod("TestHarvestable",
@@ -171,7 +227,7 @@ public class FarmlandHeaterPatch
 
         if (beehiveMethod != null)
         {
-            harmony.Unpatch(beehiveMethod, beehiveTranspilerMethod.method);
+            harmony?.Unpatch(beehiveMethod, beehiveTranspilerMethod.method);
         }
 
         var fruitTreeMethod = typeof(FruitTreeRootBH).GetMethod("getGreenhouseTempBonus",
@@ -182,7 +238,7 @@ public class FarmlandHeaterPatch
 
         if (fruitTreeMethod != null)
         {
-            harmony.Unpatch(fruitTreeMethod, fruitTreeTranspilerMethod.method);
+            harmony?.Unpatch(fruitTreeMethod, fruitTreeTranspilerMethod.method);
         }
 
         var fruitTreeGrowingMethod = typeof(FruitTreeGrowingBranchBH).GetMethod("OnTick",
@@ -193,7 +249,7 @@ public class FarmlandHeaterPatch
 
         if (fruitTreeGrowingMethod != null)
         {
-            harmony.Unpatch(fruitTreeGrowingMethod, fruitTreeGrowingTranspilerMethod.method);
+            harmony?.Unpatch(fruitTreeGrowingMethod, fruitTreeGrowingTranspilerMethod.method);
         }
 
 
@@ -205,7 +261,7 @@ public class FarmlandHeaterPatch
 
         if (saplingMethod != null)
         {
-            harmony.Unpatch(saplingMethod, saplingTranspilerMethod.method);
+            harmony?.Unpatch(saplingMethod, saplingTranspilerMethod.method);
         }
     }
 
@@ -280,7 +336,8 @@ public class FarmlandHeaterPatch
 
         if (!found)
         {
-            throw new Exception("FarmlandHeaterPatch: Could not find injection point for farmland!");
+            Api.Logger.Error("FarmlandHeaterPatch: Could not find injection point for farmland!");
+            return new List<CodeInstruction>(instructions);
         }
 
         return codes;
@@ -344,7 +401,8 @@ public class FarmlandHeaterPatch
 
         if (!found)
         {
-            throw new Exception("FarmlandHeaterPatch: Could not find injection point for berry bush!");
+            Api.Logger.Error("FarmlandHeaterPatch: Could not find injection point for berry bush!");
+            return new List<CodeInstruction>(instructions);
         }
 
         return codes;
@@ -408,7 +466,8 @@ public class FarmlandHeaterPatch
 
         if (!found)
         {
-            throw new Exception("FarmlandHeaterPatch: Could not find injection point for beehive!");
+            Api.Logger.Error("FarmlandHeaterPatch: Could not find injection point for beehive!");
+            return new List<CodeInstruction>(instructions);
         }
 
         return codes;
@@ -459,7 +518,8 @@ public class FarmlandHeaterPatch
 
         if (!found)
         {
-            throw new Exception("FarmlandHeaterPatch: Could not find injection point for fruit tree!");
+            Api.Logger.Error("FarmlandHeaterPatch: Could not find injection point for fruit tree!");
+            return new List<CodeInstruction>(instructions);
         }
 
         return codes;
@@ -504,7 +564,8 @@ public class FarmlandHeaterPatch
 
         if (!found)
         {
-            throw new Exception("FarmlandHeaterPatch: Could not find injection point for fruit tree growing!");
+            Api.Logger.Error("FarmlandHeaterPatch: Could not find injection point for fruit tree growing!");
+            return new List<CodeInstruction>(instructions);
         }
 
         return codes;
@@ -547,7 +608,8 @@ public class FarmlandHeaterPatch
 
         if (!found)
         {
-            throw new Exception("FarmlandHeaterPatch: Could not find injection point for sapling!");
+            Api.Logger.Error("FarmlandHeaterPatch: Could not find injection point for sapling!");
+            return new List<CodeInstruction>(instructions);
         }
 
         return codes;
@@ -648,7 +710,13 @@ public class FarmlandHeaterPatch
             if (blockFarmland == null)
                 return 0f;
 
-            Room roomForPosition = blockFarmland.roomreg?.GetRoomForPosition(upPos);
+
+            RoomRegistry roomreg = Api.ModLoader.GetModSystem<RoomRegistry>();
+            if (roomreg == null)
+                return 0f;
+
+            Room roomForPosition = roomreg.GetRoomForPosition(upPos);
+
             int roomness = roomForPosition == null || roomForPosition.SkylightCount <= roomForPosition.NonSkylightCount || roomForPosition.ExitCount != 0 ? 0 : 1;
             if (roomness <= 0)
                 return 0f;
