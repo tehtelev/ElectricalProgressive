@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
+using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Server;
 using Vintagestory.GameContent;
@@ -17,19 +18,58 @@ namespace ElectricalProgressive.Utils
     {
         // Размер коллизионного бокса для условной точки провода
         private const float COLLISION_BOX_SIZE = 0.05f;
+        private const double IGNITION_REQUIRED_TIME = 10000; // мс
+        private static EntityAgent dummyAgent;
 
-        /// <summary>
-        /// Структура для хранения данных о сегменте провода с точками коллизии
-        /// </summary>
+        // Класс для хранения прогресса поджигания
+        private class IgnitionProgress
+        {
+            public long LastContactTime;
+            public double AccumulatedTime;
+            public double RequiredTime;
+        }
+
+        // Ключ для идентификации контакта провода с блоком
+        private class WireContactKey
+        {
+            public BlockPos WirePos;
+            public byte LocalNodeIndex;
+            public BlockPos NeighborPos;
+            public BlockPos CollidingBlockPos;
+
+            public override bool Equals(object obj)
+            {
+                return obj is WireContactKey other &&
+                       EqualityComparer<BlockPos>.Default.Equals(WirePos, other.WirePos) &&
+                       LocalNodeIndex == other.LocalNodeIndex &&
+                       EqualityComparer<BlockPos>.Default.Equals(NeighborPos, other.NeighborPos) &&
+                       EqualityComparer<BlockPos>.Default.Equals(CollidingBlockPos, other.CollidingBlockPos);
+            }
+
+            public override int GetHashCode()
+            {
+                int hash = 17;
+                hash = hash * 23 + WirePos.GetHashCode();
+                hash = hash * 23 + LocalNodeIndex.GetHashCode();
+                hash = hash * 23 + NeighborPos.GetHashCode();
+                hash = hash * 23 + CollidingBlockPos.GetHashCode();
+                return hash;
+            }
+        }
+
         private class WireCollisionData
         {
             public BlockPos LocalPos { get; set; }
             public byte LocalNodeIndex { get; set; }
             public BlockPos NeighborPos { get; set; }
             public byte NeighborNodeIndex { get; set; }
-            public List<Vec3d> CollisionPoints { get; set; }
+            public Vec3d CollisionPoint { get; set; } // точка, вызвавшая разрыв
             public ConnectionData Connection { get; set; }
         }
+
+        private static Dictionary<WireContactKey, IgnitionProgress> ignitionProgresses = new Dictionary<WireContactKey, IgnitionProgress>();
+
+
 
         /// <summary>
         /// Проверяет коллизии всех проводов в сети и разрывает соединения при необходимости
@@ -43,6 +83,10 @@ namespace ElectricalProgressive.Utils
         {
             var blockAccessor = sapi.World.BlockAccessor;
             var connectionsToBreak = new List<WireCollisionData>();
+            var activeKeys = new HashSet<WireContactKey>(); // контакты, активные в этом тике
+
+            // Получаем блок огня (для последующей установки)
+            Block blockFire = sapi.World.GetBlock(new AssetLocation("fire"));
 
             // Проходим по всем частям сети
             foreach (var partEntry in parts)
@@ -50,11 +94,9 @@ namespace ElectricalProgressive.Utils
                 var partPos = partEntry.Key;
                 var part = partEntry.Value;
 
-                // Проверяем только загруженные части
                 if (!part.IsLoaded)
                     continue;
 
-                // Получаем BlockEntity для доступа к BEBehaviorElectricalProgressive
                 var blockEntity = blockAccessor.GetBlockEntity(partPos);
                 var behavior = blockEntity?.GetBehavior<BEBehaviorEPImmersive>();
 
@@ -65,48 +107,169 @@ namespace ElectricalProgressive.Utils
                 foreach (var connection in part.Connections)
                 {
                     // Получаем точки провода для коллизии
-                    var collisionPoints = CalculateWireCollisionPoints(
-                        behavior,
-                        connection,
-                        partPos
-                    );
-
+                    var collisionPoints = CalculateWireCollisionPoints(behavior, connection, partPos);
                     if (collisionPoints == null || collisionPoints.Count == 0)
                         continue;
 
-                    // Проверяем каждую точку на коллизию с блоками
+                    bool shouldBreak = false;      // флаг разрыва провода
+                    Vec3d breakPoint = null;       // точка, где произошёл разрыв (для выброса предмета)
+
                     foreach (var point in collisionPoints)
                     {
-                        if (CheckPointCollisionWithBlock(blockAccessor, point, partPos, connection.NeighborPos))
-                        {
-                            // выходим, если этот кабель уже числится в connectionsToBreak
-                            if (connectionsToBreak.Any(wd => wd.NeighborPos == partPos))
-                                break;
+                        // Проверяем коллизию с блоками
+                        if (!CheckPointCollisionWithBlock(blockAccessor, point, partPos, connection.NeighborPos))
+                            continue;
 
-                            // Нашли коллизию - добавляем в список для разрыва
-                            connectionsToBreak.Add(new WireCollisionData
+                        // Определяем позицию блока, с которым столкнулись
+                        var collidingBlockPos = new BlockPos(
+                            (int)Math.Floor(point.X),
+                            (int)Math.Floor(point.Y),
+                            (int)Math.Floor(point.Z),
+                            partPos.dimension
+                        );
+
+                        // Коррекция для мультиблоков
+                        var block = blockAccessor.GetBlock(collidingBlockPos);
+                        if (block is BlockMultiblock)
+                        {
+                            var realPos = GetRealPosition(blockAccessor, collidingBlockPos);
+                            block = blockAccessor.GetBlock(realPos);
+                            collidingBlockPos = realPos;
+                        }
+
+                        // Получаем горючие свойства блока
+                        var combustible = block.GetCombustibleProperties(sapi.World, null, collidingBlockPos);
+                        // если блок может гореть и провод не изолирован
+                        if (combustible != null && !connection.Parameters.isolated)
+                        {
+                            // Блок горючий – обновляем прогресс поджигания
+                            var key = new WireContactKey
                             {
-                                LocalPos = partPos,
+                                WirePos = partPos,
                                 LocalNodeIndex = connection.LocalNodeIndex,
                                 NeighborPos = connection.NeighborPos,
-                                NeighborNodeIndex = connection.NeighborNodeIndex,
-                                CollisionPoints = collisionPoints,
-                                Connection = connection
-                            });
-                            break; // Достаточно одной коллизии для разрыва соединения
+                                CollidingBlockPos = collidingBlockPos
+                            };
+                            activeKeys.Add(key);
+
+                            long now = sapi.World.ElapsedMilliseconds;
+                            if (!ignitionProgresses.TryGetValue(key, out var progress))
+                            {
+                                progress = new IgnitionProgress
+                                {
+                                    LastContactTime = now,
+                                    AccumulatedTime = 0,
+                                    RequiredTime = IGNITION_REQUIRED_TIME
+                                };
+                                ignitionProgresses[key] = progress;
+                            }
+                            else
+                            {
+                                long delta = now - progress.LastContactTime;
+                                // Защита от больших скачков времени
+
+                                progress.AccumulatedTime += delta;
+
+                            }
+
+                            // Достигнуто ли необходимое время контакта?
+                            if (progress.AccumulatedTime >= progress.RequiredTime)
+                            {
+                                // Пытаемся поджечь блок (ищем позицию для огня)
+                                BlockPos firePos = FindFirePosition(sapi.World, collidingBlockPos, blockFire);
+                                if (firePos != null)
+                                {
+                                    // Ставим огонь
+                                    blockAccessor.SetBlock(blockFire.BlockId, firePos);
+                                    var befire = blockAccessor.GetBlockEntity(firePos);
+                                    befire?.GetBehavior<BEBehaviorBurning>()?.OnFirePlaced(GetFacingTowardsBlock(collidingBlockPos, firePos), null);
+
+                                    // Визуальные эффекты
+                                    ParticleManager.SpawnElectricSparks(sapi.World, firePos.ToVec3d().Add(0.5, 0.5, 0.5));
+                                    sapi.World.PlaySoundAt(new AssetLocation("sounds/torch-ignite"), firePos.X, firePos.Y, firePos.Z, null, false, 16);
+
+                                    // Разрываем провод после возгорания
+                                    shouldBreak = true;
+                                    breakPoint = point;
+                                    break;
+                                }
+                                // Если не удалось найти место для огня – не разрываем, продолжаем копить время? 
+                                // По логике, если нет места, то и зажечь не получится, поэтому, возможно, не разрываем,
+                                // но и не сбрасываем прогресс – ждём, когда появится возможность.
+                                // Можно оставить как есть: прогресс остаётся, но провод не рвётся.
+                            }
+                        }
+                        else
+                        {
+                            // Блок негорючий → разрываем провод
+                            shouldBreak = true;
+                            breakPoint = point;
+                            break;
                         }
                     }
 
-                    // Проверяем коллизии с сущностями (урон от провода)
+                    if (shouldBreak)
+                    {
+                        // Если соединение уже есть в списке на разрыв – пропускаем
+                        if (connectionsToBreak.Any(wd => wd.NeighborPos == partPos))
+                            continue;
+
+                        connectionsToBreak.Add(new WireCollisionData
+                        {
+                            LocalPos = partPos,
+                            LocalNodeIndex = connection.LocalNodeIndex,
+                            NeighborPos = connection.NeighborPos,
+                            NeighborNodeIndex = connection.NeighborNodeIndex,
+                            CollisionPoint = breakPoint,
+                            Connection = connection
+                        });
+                    }
+
+                    // Проверяем коллизии с сущностями (урон от провода) – без изменений
                     CheckWireEntityCollisions(sapi, connection, collisionPoints, partPos, modSystem);
                 }
             }
 
-            // Разрываем все соединения, у которых обнаружена коллизия
+            // Удаляем прогрессы для контактов, которые больше не активны
+            foreach (var key in ignitionProgresses.Keys.ToList())
+            {
+                if (!activeKeys.Contains(key))
+                    ignitionProgresses.Remove(key);
+            }
+
+            // Разрываем все накопленные соединения
             foreach (var wireData in connectionsToBreak)
             {
                 BreakWireConnection(sapi, wireData);
             }
+        }
+
+        private static BlockPos FindFirePosition(IWorldAccessor world, BlockPos pos, Block blockFire)
+        {
+            // Сначала проверим сам блок, если он может быть заменён огнём (например, трава, куст)
+            var block = world.BlockAccessor.GetBlock(pos);
+            if (block.Replaceable > 6000) // большинство заменяемых блоков
+                return pos;
+
+            // Иначе проверим соседей
+            foreach (var face in BlockFacing.ALLFACES)
+            {
+                BlockPos npos = pos.AddCopy(face);
+                Block nblock = world.BlockAccessor.GetBlock(npos);
+                if (nblock.IsReplacableBy(blockFire))
+                    return npos;
+            }
+            return null;
+        }
+
+        private static BlockFacing GetFacingTowardsBlock(BlockPos from, BlockPos to)
+        {
+            foreach (var face in BlockFacing.ALLFACES)
+            {
+                if (from.AddCopy(face).Equals(to))
+                    return face;
+            }
+            return null;
         }
 
         /// <summary>
@@ -309,7 +472,7 @@ namespace ElectricalProgressive.Utils
                 entityPos.Y += entity.SelectionBox.Y2 / 2.0; // Также используем середину для фоллбэка
                 direction = entityPos - wireCenter;
                 direction.Y = Math.Max(direction.Y, 0.2); // Небольшой подъём в фоллбэке
-               // direction.Normalize();
+                                                          // direction.Normalize();
             }
 
 
@@ -576,7 +739,7 @@ namespace ElectricalProgressive.Utils
                     cableStack.StackSize = cableLength;
 
                     // Выбрасываем кабель в месте коллизии (первая точка коллизии)
-                    var dropPos = wireData.CollisionPoints.FirstOrDefault() ?? wireData.LocalPos.ToVec3d();
+                    var dropPos = wireData.CollisionPoint ?? wireData.LocalPos.ToVec3d();
                     sapi.World.SpawnItemEntity(cableStack, dropPos);
                 }
 

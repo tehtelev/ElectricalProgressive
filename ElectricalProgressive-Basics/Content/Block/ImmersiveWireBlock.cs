@@ -212,7 +212,7 @@ namespace ElectricalProgressive.Content.Block
 
         public Cuboidf[] MBGetCollisionBoxes(IBlockAccessor blockAccessor, BlockPos pos, Vec3i offset)
         {
-            var boxes = new List<Cuboidf>();
+            var boxes = new List<Cuboidf>(6);
 
             if (_skipNonCenterCollisions && (Math.Abs(offset.X) > 0 || Math.Abs(offset.Z) > 0))
                 return boxes.ToArray();
@@ -224,7 +224,7 @@ namespace ElectricalProgressive.Content.Block
 
         public Cuboidf[] MBGetSelectionBoxes(IBlockAccessor blockAccessor, BlockPos pos, Vec3i offset)
         {
-            var boxes = new List<Cuboidf>();
+            var boxes = new List<Cuboidf>(6);
 
             if (api.Side == EnumAppSide.Client)
             {
