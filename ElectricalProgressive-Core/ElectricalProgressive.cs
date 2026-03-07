@@ -70,7 +70,7 @@ namespace ElectricalProgressive
         public static int maxDistanceForFinding; // Максимальное расстояние для поиска пути
         public static float energyLossFactor; // Коэффициент потерь энергии на проводах
         public static bool enableLossCompensation; // Включить компенсацию потерь энергии на проводах
-
+        public static bool enableFlyingArmor; // Включить возможность летать в броне
 
         public static AssetLocation soundElectricShok;
 
@@ -170,6 +170,7 @@ namespace ElectricalProgressive
             maxDistanceForFinding = Math.Clamp(_config.MaxDistanceForFinding, 8, 1000);
             energyLossFactor = Math.Clamp(_config.EnergyLossFactor, 0.0f, 2.0f);
             enableLossCompensation = _config.EnableLossCompensation;
+            enableFlyingArmor = _config.EnableFlyingArmor;
 
             // устанавливаем время между тиками
             TickTimeMs = 1000 / speedOfElectricity;
@@ -2000,6 +2001,7 @@ namespace ElectricalProgressive
         public int MaxDistanceForFinding = 200;
         public float EnergyLossFactor = 1.0f;
         public bool EnableLossCompensation = false;
+        public bool EnableFlyingArmor = true;
     }
 
     /// <summary>

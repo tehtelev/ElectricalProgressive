@@ -62,6 +62,10 @@ public class FlyToggleEvent : ModSystem
     public override void StartClientSide(ICoreClientAPI api)
     {
         base.StartClientSide(api);
+
+        if (!ElectricalProgressive.enableFlyingArmor)
+            return;
+
         this.capi = api;
         RegisterFlyKeys();
 
@@ -76,6 +80,10 @@ public class FlyToggleEvent : ModSystem
     public override void StartServerSide(ICoreServerAPI api)
     {
         base.StartServerSide(api);
+
+        if (!ElectricalProgressive.enableFlyingArmor)
+            return;
+
         this.sapi = api;
         serverChannel = sapi.Network.RegisterChannel("EP").RegisterMessageType<FlyToggle>().RegisterMessageType<FlyResponse>().SetMessageHandler<FlyToggle>(new
             NetworkClientMessageHandler<FlyToggle>(this.OnClientSent));
@@ -139,7 +147,8 @@ public class FlyToggleEvent : ModSystem
     /// <param name="timeDelta"></param>
     private void UpdateArmorEnergy(ItemSlot itemSlot, IPlayer player, double timeDelta)
     {
-        if (itemSlot?.Itemstack == null) return;
+        if (itemSlot?.Itemstack == null)
+            return;
 
         var energy = itemSlot.Itemstack.Attributes.GetInt("durability") * consume;
         
@@ -152,7 +161,8 @@ public class FlyToggleEvent : ModSystem
         }
         else
         {
-            DisableFlight(itemSlot);
+            if (itemSlot.Itemstack.Attributes.GetBool("flying")) // обязательно проверяем, чтобы не отключать полет вызванный другими средствами
+                DisableFlight(itemSlot);
         }
     }
 
