@@ -196,10 +196,14 @@ public class ElectricalProgressiveQOL : ModSystem
 
 
         // применение патчика на механику и вылеты
-        var harmony = new Harmony("electricalprogressive.farmland.patches");
-        harmony.PatchAll(Assembly.GetExecutingAssembly());
+        //var harmony = new Harmony("electricalprogressive.farmland.patches");
+        //harmony.PatchAll(Assembly.GetExecutingAssembly());
 
 
+
+        // применение патча для грядки обогревателю
+        harmony = new Harmony("electricalprogressive.farmlandheater");
+        FarmlandHeaterPatch.RegisterPatch(harmony, api);
     }
 
 
@@ -217,10 +221,7 @@ public class ElectricalProgressiveQOL : ModSystem
     {
         base.StartServerSide(api);
 
-        // применение патча для грядки обогревателю
-        harmony = new Harmony("electricalprogressive.farmlandheater");
-        FarmlandHeaterPatch.RegisterPatch(harmony);
-
+        
     }
 
 

@@ -10,19 +10,22 @@
       {
         "name": "ElectricalProgressive"
       }
-    ]
+    ],
+    "side": "server"
   },
   {
     "file": "game:blocktypes/metal/metalblock",
     "path": "/entityClass",
     "op": "add",
-    "value": "BlockEntityEConnector"
+    "value": "BlockEntityEConnector",
+    "side": "server"
   },
   {
     "file": "game:blocktypes/metal/metalblock",
     "path": "/class",
     "op": "add",
-    "value": "BlockConnector"
+    "value": "BlockConnector",
+    "side": "server"
   },
   {
     "file": "game:blocktypes/metal/metalblock",
@@ -35,6 +38,7 @@
       "maxCurrent": 1024.0,
       "isolated": false,
       "isolatedEnvironment": true
-    }
+    },
+    "side": "server"
   }
 ]

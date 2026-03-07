@@ -138,7 +138,7 @@ public class ElectricalProgressiveBasics : ModSystem
 
         // Регистрируем патч для механики
         harmony = new Harmony("electricalprogressive.mechanicalpowermod");
-        MechanicalPowerMod_RebuildNetwork_Patch.RegisterPatch(harmony);
+        MechanicalPowerMod_RebuildNetwork_Patch.RegisterPatch(harmony, api);
 
     }
 

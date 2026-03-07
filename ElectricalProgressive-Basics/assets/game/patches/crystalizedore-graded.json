@@ -1,6 +1,7 @@
 ﻿[
 	{
 		"file": "game:itemtypes/resource/crystalizedore-graded.json",
+		"side": "server",
 		"op": "addmerge",
 		"path": "/crushingPropsByType",
 		"value": {
