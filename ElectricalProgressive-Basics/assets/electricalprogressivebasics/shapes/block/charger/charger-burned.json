@@ -1,4 +1,4 @@
-{
+﻿{
 	"editor": {
 		"collapsedPaths": "Root/Cube11/Cube13/Cube63,Root/Cube11/Cube12,Root/Cube11/Cube13",
 		"allAngles": false,
@@ -9,16 +9,16 @@
 	"textureSizes": {
 	},
 	"textures": {
-		"bismuthbronze": "electricalprogressivebasics:block/bismuthbronze",
-		"brass": "electricalprogressivebasics:block/brass",
+		"bismuthbronze": "game:block/metal/plate/bismuthbronze",
+		"brass": "game:block/metal/plate/brass",
 		"brass-sgorevshiy": "electricalprogressivebasics:block/brass-sgorevshiy",
 		"copper-okalina-polosa": "electricalprogressivebasics:block/copper-okalina-polosa",
 		"frame-sgorevshiy": "electricalprogressivebasics:block/frame-sgorevshiy",
-		"iron": "electricalprogressivebasics:block/iron",
+		"iron": "game:block/metal/plate/iron",
 		"iron-okalina-krug": "electricalprogressivebasics:block/iron-okalina-krug",
-		"steel": "electricalprogressivebasics:block/steel",
+		"steel": "game:block/metal/plate/steel",
 		"steel-okalina-polosa": "electricalprogressivebasics:block/steel-okalina-polosa",
-		"zinc": "electricalprogressivebasics:block/zinc",
+		"zinc": "game:block/metal/plate/zinc",
 		"zinc-sgorevshiy": "electricalprogressivebasics:block/zinc-sgorevshiy"
 	},
 	"elements": [

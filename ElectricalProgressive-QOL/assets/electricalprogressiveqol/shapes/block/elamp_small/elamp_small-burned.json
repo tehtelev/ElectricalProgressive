@@ -1,4 +1,4 @@
-{
+﻿{
 	"editor": {
 		"allAngles": false,
 		"entityTextureMode": false
@@ -8,9 +8,9 @@
 	"textureSizes": {
 	},
 	"textures": {
-		"iron": "electricalprogressivebasics:block/iron",
-		"steel": "electricalprogressivebasics:block/steel",
-		"brass": "electricalprogressivebasics:block/brass",
+		"iron": "game:block/metal/plate/iron",
+		"steel": "game:block/metal/plate/steel",
+		"brass": "game:block/metal/plate/brass",
 		"brass-okalina-krug": "electricalprogressivebasics:block/brass-okalina-krug",
 		"copper-okalina-polosa": "electricalprogressivebasics:block/copper-okalina-polosa",
 		"frame-sgorevshiy": "electricalprogressivebasics:block/frame-sgorevshiy",

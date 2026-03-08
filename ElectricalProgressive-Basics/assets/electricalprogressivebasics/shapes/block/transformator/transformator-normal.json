@@ -1,4 +1,4 @@
-{
+﻿{
 	"editor": {
 		"collapsedPaths": "",
 		"allAngles": false,
@@ -9,10 +9,10 @@
 	"textureSizes": {
 	},
 	"textures": {
-		"copper": "block/copper",
-		"iron": "block/iron",
+		"copper": "game:block/metal/plate/copper",
+		"iron": "game:block/metal/plate/iron",
 		"linen": "block/linen",
-		"steel": "block/steel"
+		"steel": "game:block/metal/plate/steel"
 	},
 	"elements": [
 		{

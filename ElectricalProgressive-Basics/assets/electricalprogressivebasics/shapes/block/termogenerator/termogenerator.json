@@ -1,4 +1,4 @@
-{
+﻿{
 	"editor": {
 		"collapsedPaths": ",Root/FrameMain2/Cube153/InvAxisFrame4,Root/FrameMain2/Cube153/InvAxisFrame5,Root/FrameMain2/Cube153/InvAxisFrame2,Root/FrameMain2/Cube153/InvAxisFrame3,Root/FrameMain2/Cube153/InvAxisFrame15,Root/FrameMain2/Cube153/InvAxisFrame16,Root/FrameMain2/Cube153/InvAxisFrame13,Root/FrameMain2/Cube153/InvAxisFrame14,Root/FrameMain2/Cube153/InvAxisFrame8,Root/FrameMain2/Cube153/InvAxisFrame11,Root/FrameMain2/Cube153/InvAxisFrame9,Root/FrameMain2/Cube153/InvAxisFrame12,Root/FrameMain2/Cube153/InvAxisFrame6,Root/FrameMain2/Cube153/InvAxisFrame7,Root/FrameMain2/Cube153/InvAxisFrame10",
 		"allAngles": false,
@@ -10,7 +10,7 @@
 	},
 	"textures": {
 		"iron96x96": "block/iron96x96",
-		"lead": "block/lead",
+		"lead": "game:block/metal/plate/lead",
 		"red1": "game:block/clay/brick/irregular/red1",
 		"red2": "game:block/clay/brick/irregular/red2",
 		"red3": "game:block/clay/brick/irregular/red3",

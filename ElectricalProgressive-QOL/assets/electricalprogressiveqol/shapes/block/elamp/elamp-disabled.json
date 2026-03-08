@@ -9,16 +9,16 @@
 	"textureSizes": {
 	},
 	"textures": {
-		"brass": "electricalprogressivebasics:block/brass",
-		"copper": "electricalprogressivebasics:block/copper",
+		"brass": "game:block/metal/plate/brass",
+		"copper": "game:block/metal/plate/copper",
 		"copper-hot": "electricalprogressivebasics:block/copper-hot",
 		"emeral": "electricalprogressivebasics:block/emeral",
-		"iron": "electricalprogressivebasics:block/iron",
+		"iron": "game:block/metal/plate/iron",
 		"quartzglass": "electricalprogressivebasics:block/quartzglass",
 		"stainlesssteel": "electricalprogressivebasics:block/stainlesssteel",
-		"steel": "electricalprogressivebasics:block/steel",
+		"steel": "game:block/metal/plate/steel",
 		"topaz": "electricalprogressivebasics:block/topaz",
-		"zinc": "electricalprogressivebasics:block/zinc"
+		"zinc": "game:block/metal/plate/zinc"
 	},
 	"elements": [
 		{

@@ -1,4 +1,4 @@
-{
+﻿{
 	"editor": {
 		"collapsedPaths": "Root/stator,Root/rotor",
 		"allAngles": false,
@@ -9,9 +9,9 @@
 	"textureSizes": {
 	},
 	"textures": {
-		"brass": "block/brass",
-		"iron": "block/iron",
-		"steel": "block/steel",
+		"brass": "game:block/metal/plate/brass",
+		"iron": "game:block/metal/plate/iron",
+		"steel": "game:block/metal/plate/steel",
 		"ebony1": "block/ebony1",
 		"copper-okalina-polosa": "block/copper-okalina-polosa",
 		"iron-okalina-krug": "block/iron-okalina-krug",

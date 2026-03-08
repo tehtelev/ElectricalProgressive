@@ -1,4 +1,4 @@
-{
+﻿{
 	"editor": {
 		"collapsedPaths": "Root/Base/Molding 1",
 		"allAngles": false,
@@ -9,12 +9,12 @@
 	"textureSizes": {
 	},
 	"textures": {
-		"brass": "electricalprogressivebasics:block/brass",
+		"brass": "game:block/metal/plate/brass",
 		"brass-sgorevshiy": "electricalprogressivebasics:block/brass-sgorevshiy",
 		"copper-okalina-polosa": "electricalprogressivebasics:block/copper-okalina-polosa",
-		"iron": "electricalprogressivebasics:block/iron",
+		"iron": "game:block/metal/plate/iron",
 		"stainlesssteel": "electricalprogressivebasics:block/stainlesssteel",
-		"steel": "electricalprogressivebasics:block/steel",
+		"steel": "game:block/metal/plate/steel",
 		"steel1-sgorevshiy": "electricalprogressivebasics:block/steel1-sgorevshiy"
 	},
 	"elements": [

@@ -10,9 +10,9 @@
 	},
 	"textures": {
 		"frame": "electricalprogressivebasics:block/quartzglasstrans",
-		"iron": "electricalprogressivebasics:block/iron",
-		"copper": "electricalprogressivebasics:block/copper",
-		"steel": "electricalprogressivebasics:block/steel"
+		"iron": "game:block/metal/plate/iron",
+		"copper": "game:block/metal/plate/copper",
+		"steel": "game:block/metal/plate/steel"
 	},
 	"elements": [
 		{

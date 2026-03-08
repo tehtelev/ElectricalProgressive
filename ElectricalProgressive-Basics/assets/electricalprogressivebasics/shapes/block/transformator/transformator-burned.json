@@ -1,4 +1,4 @@
-{
+﻿{
 	"editor": {
 		"collapsedPaths": "",
 		"allAngles": false,
@@ -10,8 +10,8 @@
 	},
 	"textures": {
 		"linen": "block/linen",
-		"copper": "block/copper",
-		"iron": "block/iron",
+		"copper": "game:block/metal/plate/copper",
+		"iron": "game:block/metal/plate/iron",
 		"iron-okalina-krug": "block/iron-okalina-krug",
 		"zinc-sgorevshiy": "block/zinc-sgorevshiy"
 	},

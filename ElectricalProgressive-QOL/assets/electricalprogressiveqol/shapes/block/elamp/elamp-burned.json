@@ -9,12 +9,12 @@
 	"textureSizes": {
 	},
 	"textures": {
-		"brass": "electricalprogressivebasics:block/brass",
+		"brass": "game:block/metal/plate/brass",
 		"brass-okalina-krug": "electricalprogressivebasics:block/brass-okalina-krug",
 		"copper-okalina-polosa": "electricalprogressivebasics:block/copper-okalina-polosa",
 		"frame-sgorevshiy": "electricalprogressivebasics:block/frame-sgorevshiy",
-		"iron": "electricalprogressivebasics:block/iron",
-		"steel": "electricalprogressivebasics:block/steel",
+		"iron": "game:block/metal/plate/iron",
+		"steel": "game:block/metal/plate/steel",
 		"steel-okalina-polosa": "electricalprogressivebasics:block/steel-okalina-polosa",
 		"zinc-sgorevshiy": "electricalprogressivebasics:block/zinc-sgorevshiy"
 	},

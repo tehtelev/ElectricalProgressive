@@ -1,4 +1,4 @@
-{
+﻿{
 	"editor": {
 		"collapsedPaths": "Root/Rotor/Cube13,Root/Rotor/Cube89,Root/Rotor/Cube23,Root/stator,Root/Rotor/Cube29,Root/Rotor/Cube18,Root/Rotor/Cube84,Root/Rotor/Cube94,Root/Rotor/Cube99,Root/stator/Cube36,Root/stator/Cube46,Root/Rotor,Root/stator/Cube39",
 		"allAngles": false,
@@ -9,8 +9,8 @@
 	"textureSizes": {
 	},
 	"textures": {
-		"iron": "block/iron",
-		"steel": "block/steel",
+		"iron": "game:block/metal/plate/iron",
+		"steel": "game:block/metal/plate/steel",
 		"ebony1": "block/ebony1",
 		"brass-sgorevshiy": "block/brass-sgorevshiy",
 		"copper-okalina-polosa": "block/copper-okalina-polosa",

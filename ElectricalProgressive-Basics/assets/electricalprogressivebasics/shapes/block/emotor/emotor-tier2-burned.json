@@ -1,4 +1,4 @@
-{
+﻿{
 	"editor": {
 		"collapsedPaths": "Root/stator",
 		"allAngles": false,
@@ -11,9 +11,9 @@
 	"textures": {
 		"brass-sgorevshiy": "block/brass-sgorevshiy",
 		"copper-okalina-polosa": "block/copper-okalina-polosa",
-		"iron": "block/iron",
+		"iron": "game:block/metal/plate/iron",
 		"iron-okalina-krug": "block/iron-okalina-krug",
-		"steel": "block/steel",
+		"steel": "game:block/metal/plate/steel",
 		"steel-okalina-polosa": "block/steel-okalina-polosa",
 		"zinc-sgorevshiy": "block/zinc-sgorevshiy"
 	},

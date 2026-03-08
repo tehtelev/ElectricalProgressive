@@ -1,4 +1,4 @@
-{
+﻿{
 	"editor": {
 		"allAngles": false,
 		"entityTextureMode": false
@@ -10,8 +10,8 @@
 	"textures": {
 		"brass-sgorevshiy": "electricalprogressivebasics:block/brass-sgorevshiy",
 		"copper-okalina-polosa": "electricalprogressivebasics:block/copper-okalina-polosa",
-		"iron": "electricalprogressivebasics:block/iron",
-		"steel": "electricalprogressivebasics:block/steel",
+		"iron": "game:block/metal/plate/iron",
+		"steel": "game:block/metal/plate/steel",
 		"zinc-sgorevshiy": "electricalprogressivebasics:block/zinc-sgorevshiy"
 	},
 	"elements": [

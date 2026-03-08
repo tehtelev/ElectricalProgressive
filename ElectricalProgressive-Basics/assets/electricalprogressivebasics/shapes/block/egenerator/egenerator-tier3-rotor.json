@@ -1,4 +1,4 @@
-{
+﻿{
 	"editor": {
 		"allAngles": false,
 		"entityTextureMode": false
@@ -8,14 +8,14 @@
 	"textureSizes": {
 	},
 	"textures": {
-		"brass": "block/brass",
-		"copper": "block/copper",
-		"gold": "block/gold",
-		"iron": "block/iron",
+		"brass": "game:block/metal/plate/brass",
+		"copper": "game:block/metal/plate/copper",
+		"gold": "game:block/metal/plate/gold",
+		"iron": "game:block/metal/plate/iron",
 		"oak": "block/oak",
 		"stainlesssteel": "block/stainlesssteel",
-		"steel": "block/steel",
-		"zinc": "block/zinc",
+		"steel": "game:block/metal/plate/steel",
+		"zinc": "game:block/metal/plate/zinc",
 		"steel1": "block/plate/steel1"
 	},
 	"elements": [

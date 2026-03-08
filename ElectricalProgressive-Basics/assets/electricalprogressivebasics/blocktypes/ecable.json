@@ -94,13 +94,13 @@
   "texturesByType": {
     "*-32v-*": {
       "coke": { "base": "block/coke" },
-      "material": { "base": "block/{material}" },
+      "material": { "base": "game:block/metal/plate/{material}" },
       "fix": { "base": "block/rubber" },
       "isolation": { "base": "block/liquid/dye/gray" }
     },
     "*-128v-*": {
       "coke": { "base": "block/coke" },
-      "material": { "base": "block/{material}" },
+      "material": { "base": "game:block/metal/plate/{material}" },
       "fix": { "base": "block/rubber" },
       "isolation": { "base": "block/liquid/dye/gray" }
     }

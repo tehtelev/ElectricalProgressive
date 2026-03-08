@@ -1,4 +1,4 @@
-{
+﻿{
 	"editor": {
 		"allAngles": false,
 		"entityTextureMode": false
@@ -8,8 +8,8 @@
 	"textureSizes": {
 	},
 	"textures": {
-		"bismuthbronze": "block/bismuthbronze",
-		"copper": "block/copper"
+		"bismuthbronze": "game:block/metal/plate/bismuthbronze",
+		"copper": "game:block/metal/plate/copper"
 	},
 	"elements": [
 		{

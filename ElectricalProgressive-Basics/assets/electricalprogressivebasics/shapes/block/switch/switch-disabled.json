@@ -1,4 +1,4 @@
-{
+﻿{
 	"editor": {
 		"collapsedPaths": ",Root/Cube1",
 		"allAngles": false,
@@ -9,7 +9,7 @@
 	"textureSizes": {
 	},
 	"textures": {
-		"copper": "block/copper",
+		"copper": "game:block/metal/plate/copper",
 		"oak": "block/oak"
 	},
 	"elements": [

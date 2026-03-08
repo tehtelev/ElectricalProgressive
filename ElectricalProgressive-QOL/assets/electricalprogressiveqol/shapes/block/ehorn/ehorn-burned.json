@@ -1,4 +1,4 @@
-{
+﻿{
 	"editor": {
 		"allAngles": false,
 		"entityTextureMode": false
@@ -8,12 +8,12 @@
 	"textureSizes": {
 	},
 	"textures": {
-		"bismuthbronze": "electricalprogressivebasics:block/bismuthbronze",
-		"brass": "electricalprogressivebasics:block/brass",
+		"bismuthbronze": "game:block/metal/plate/bismuthbronze",
+		"brass": "game:block/metal/plate/brass",
 		"brass-sgorevshiy": "electricalprogressivebasics:block/brass-sgorevshiy",
-		"iron": "electricalprogressivebasics:block/iron",
-		"steel": "electricalprogressivebasics:block/steel",
-		"zinc": "electricalprogressivebasics:block/zinc"
+		"iron": "game:block/metal/plate/iron",
+		"steel": "game:block/metal/plate/steel",
+		"zinc": "game:block/metal/plate/zinc"
 	},
 	"elements": [
 		{

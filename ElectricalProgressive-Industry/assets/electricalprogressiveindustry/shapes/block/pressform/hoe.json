@@ -1,4 +1,4 @@
-{
+﻿{
 	"editor": {
 		"collapsedPaths": "Root/Cube3",
 		"allAngles": false,
@@ -9,7 +9,7 @@
 	"textureSizes": {
 	},
 	"textures": {
-		"steel": "electricalprogressivebasics:block/steel"
+		"steel": "game:block/metal/plate/steel"
 	},
 	"elements": [
 		{

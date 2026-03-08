@@ -1,4 +1,4 @@
-{
+﻿{
 	"editor": {
 		"collapsedPaths": "Root/Floor/Cube7,Root/N4,Root/N/Cube27,Root/N2,Root/N/Cube27/Cube46,Root/N6",
 		"allAngles": false,
@@ -9,12 +9,12 @@
 	"textureSizes": {
 	},
 	"textures": {
-		"brass": "electricalprogressivebasics:block/brass",
-		"copper": "electricalprogressivebasics:block/copper",
+		"brass": "game:block/metal/plate/brass",
+		"copper": "game:block/metal/plate/copper",
 		"emeral": "electricalprogressivebasics:block/emeral",
-		"iron": "electricalprogressivebasics:block/iron",
-		"steel": "electricalprogressivebasics:block/steel",
-		"zinc": "electricalprogressivebasics:block/zinc"
+		"iron": "game:block/metal/plate/iron",
+		"steel": "game:block/metal/plate/steel",
+		"zinc": "game:block/metal/plate/zinc"
 	},
 	"elements": [
 		{

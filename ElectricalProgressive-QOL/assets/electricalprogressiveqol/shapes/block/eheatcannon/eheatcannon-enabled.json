@@ -9,10 +9,10 @@
 	"textureSizes": {
 	},
 	"textures": {
-		"brass": "electricalprogressivebasics:block/brass",
+		"brass": "game:block/metal/plate/brass",
 		"copper-hot": "electricalprogressivebasics:block/copper-hot",
 		"emeral": "electricalprogressivebasics:block/emeral",
-		"iron": "electricalprogressivebasics:block/iron",
+		"iron": "game:block/metal/plate/iron",
 		"iron96x96": "electricalprogressivebasics:block/iron96x96",
 		"steel1": "electricalprogressivebasics:block/plate/steel1",
 		"steel4-96x96": "electricalprogressivebasics:block/plate/steel4-96x96",

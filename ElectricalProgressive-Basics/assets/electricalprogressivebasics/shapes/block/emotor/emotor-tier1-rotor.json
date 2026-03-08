@@ -1,4 +1,4 @@
-{
+﻿{
 	"editor": {
 		"allAngles": false,
 		"entityTextureMode": false
@@ -8,9 +8,9 @@
 	"textureSizes": {
 	},
 	"textures": {
-		"iron": "block/iron",
+		"iron": "game:block/metal/plate/iron",
 		"oak": "block/oak",
-		"steel": "block/steel"
+		"steel": "game:block/metal/plate/steel"
 	},
 	"elements": [
 		{

@@ -1,4 +1,4 @@
-{
+﻿{
 	"editor": {
 		"collapsedPaths": "Root/Layer_5top,Root/Layer_4,Root/Base/Countertop17/Countertop18/Cube5/Cube29,Root/hammer,Root/Cube2/Cube4,Root/Cube2/Cube6,Root/Cube39,Root/Layer_1shoulder,Root/gearAxis3/Cube331/Cube332,Root/gearAxis3/gearAxis5,Root/upPress/gearAxis3,Root/Base/Countertop17/Countertop18/Cube5/Cube31,Root/Cube4,Root/Cube2/Cube15,Root/Cube7,Root/Cube2/Cube17,Root/Layer_2neck,Root/gearAxis3,Root/downPress/gearAxis4,Root/gearAxis4,Root/downPress/gearAxis4/Cube388,Root/downPress/gearAxis4/gearAxis6,Root/Layer_0_middle",
 		"allAngles": false,
@@ -9,18 +9,18 @@
 	"textureSizes": {
 	},
 	"textures": {
-		"bismuthbronze": "electricalprogressivebasics:block/bismuthbronze",
-		"brass": "electricalprogressivebasics:block/brass",
-		"copper": "electricalprogressivebasics:block/copper",
+		"bismuthbronze": "game:block/metal/plate/bismuthbronze",
+		"brass": "game:block/metal/plate/brass",
+		"copper": "game:block/metal/plate/copper",
 		"copper-hot": "electricalprogressivebasics:block/copper-hot",
 		"copper_coil": "electricalprogressivebasics:block/copper_coil",
 		"emeral": "electricalprogressivebasics:block/emeral",
 		"iron-s-jrfntovkoy": "electricalprogressivebasics:block/iron-s-jrfntovkoy",
-		"steel": "electricalprogressivebasics:block/steel",
-		"tinbronze": "electricalprogressivebasics:block/tinbronze",
+		"steel": "game:block/metal/plate/steel",
+		"tinbronze": "game:block/metal/plate/tinbronze",
 		"topaz": "electricalprogressivebasics:block/topaz",
-		"zinc": "electricalprogressivebasics:block/zinc",
-		"iron": "electricalprogressivebasics:block/iron"
+		"zinc": "game:block/metal/plate/zinc",
+		"iron": "game:block/metal/plate/iron"
 	},
 	"elements": [
 		{
