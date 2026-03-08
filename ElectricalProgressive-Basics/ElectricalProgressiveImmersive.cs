@@ -85,21 +85,6 @@ namespace ElectricalProgressive
 
             soundElectricShok = new AssetLocation("electricalprogressivecore:sounds/electric-shock.ogg");
 
-            /*
-            api.RegisterBlockClass("BlockEIAccumulator1", typeof(BlockEIAccumulator1));
-            api.RegisterBlockEntityClass("BlockEntityEIAccumulator1", typeof(BlockEntityEIAccumulator1));
-            api.RegisterBlockEntityBehaviorClass("BEBehaviorEIAccumulator1", typeof(BEBehaviorEIAccumulator1));
-
-            api.RegisterBlockClass("BlockEMotor1", typeof(BlockEMotor1));
-            api.RegisterBlockEntityClass("BlockEntityEMotor1", typeof(BlockEntityEMotor1));
-            api.RegisterBlockEntityBehaviorClass("BEBehaviorEMotor1", typeof(BEBehaviorEMotor1));
-
-
-            api.RegisterBlockClass("BlockEGenerator1", typeof(BlockEGenerator1));
-            api.RegisterBlockEntityClass("BlockEntityEGenerator1", typeof(BlockEntityEGenerator1));
-            api.RegisterBlockEntityBehaviorClass("BEBehaviorEGenerator1", typeof(BEBehaviorEGenerator1));
-            */
-
             api.RegisterBlockClass("BlockHVSFonar", typeof(BlockHVSFonar));
             api.RegisterBlockEntityClass("BlockEntityHVSFonar", typeof(BlockEntityHVSFonar));
             api.RegisterBlockEntityBehaviorClass("BEBehaviorHVSFonar", typeof(BEBehaviorHVSFonar));
@@ -767,7 +752,7 @@ namespace ElectricalProgressive
                     start = consumerPositions[i];
                     end = producerPositions[j];
 
-                    if (ImmersivePathFinder.Heuristic(start, end) < global::ElectricalProgressive.ElectricalProgressive.maxDistanceForFinding * 3)
+                    if (ImmersivePathFinder.Heuristic(start, end) < ElectricalProgressive.maxDistanceForFinding * 32)
                     {
                         // Изменяем вызов TryGet - добавляем получение длины пути
                         if (ImmersivePathCacheManager.TryGet(start, end, out var cachedPath,

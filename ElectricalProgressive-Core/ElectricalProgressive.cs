@@ -1,5 +1,7 @@
 ﻿using ElectricalProgressive.Interface;
+using ElectricalProgressive.Patch;
 using ElectricalProgressive.Utils;
+using HarmonyLib;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -31,6 +33,12 @@ namespace ElectricalProgressive
 {
     public class ElectricalProgressive : ModSystem
     {
+
+        private Harmony harmony;
+        private Harmony harmony2;
+        private Harmony harmony3;
+
+
         public readonly HashSet<Network> Networks = [];
         public readonly Dictionary<BlockPos, NetworkPart> Parts = new(new BlockPosComparer()); // Хранит все элементы всех цепей
 
@@ -95,6 +103,16 @@ namespace ElectricalProgressive
             this.Api = api;
 
             soundElectricShok = new AssetLocation("electricalprogressivecore:sounds/electric-shock.ogg");
+
+
+            harmony = new Harmony("electricalprogressive.mat4fmultiplypatch");
+            Mat4fMultiplyPatch.RegisterPatch(harmony, api);
+
+            harmony2 = new Harmony("electricalprogressive.MechBlockRendererPatch");
+            MechBlockRendererPatch.RegisterPatch(harmony2, api);
+
+            harmony3 = new Harmony("electricalprogressive.ShapeElementPatch");
+            ShapeElementPatch.RegisterPatch(harmony3, api);
         }
 
 
@@ -146,6 +164,16 @@ namespace ElectricalProgressive
             Networks.Clear();
             Parts.Clear();
             PathCacheManager.Dispose();
+
+
+            if (harmony != null)
+                Mat4fMultiplyPatch.UnregisterPatch(harmony);
+
+            if (harmony2 != null)
+                MechBlockRendererPatch.UnregisterPatch(harmony2);
+
+            if (harmony3 != null)
+                ShapeElementPatch.UnregisterPatch(harmony3);
         }
 
 
