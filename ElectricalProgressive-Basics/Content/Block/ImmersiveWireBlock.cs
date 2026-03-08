@@ -190,7 +190,7 @@ namespace ElectricalProgressive.Content.Block
                 if (IsHoldingWireTool(capi.World.Player) || IsHoldingEKit(capi.World.Player))
                 {
                     boxes.AddRange(GetNodeSelectionBoxes(blockAccessor, pos));
-                    return boxes.ToArray();
+                    //return boxes.ToArray();
                 }
             }
 
@@ -246,7 +246,7 @@ namespace ElectricalProgressive.Content.Block
                     }
 
                     boxes.AddRange(coll);
-                    return boxes.ToArray();
+                    //return boxes.ToArray();
                 }
             }
 

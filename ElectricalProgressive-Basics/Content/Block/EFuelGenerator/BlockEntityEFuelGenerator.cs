@@ -735,8 +735,12 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
     public override void OnBlockRemoved()
     {
         base.OnBlockRemoved();
-        ElectricalProgressive.Connection = Facing.None;
-        
+
+        if (ElectricalProgressive != null)
+        {
+            ElectricalProgressive.Connection = Facing.None;
+        }
+
         if (_clientDialog != null)
         {
             _clientDialog.TryClose();
