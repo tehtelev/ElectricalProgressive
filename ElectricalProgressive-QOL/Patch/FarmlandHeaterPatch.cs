@@ -32,8 +32,11 @@ public class FarmlandHeaterPatch
 
 
     private static List<CodeInstruction> codes; // Временное поле для хранения инструкций в транспайлерах
-
     private static ICoreAPI Api;
+
+    private static bool serverFlag = false;
+    private static bool clientFlag = false;
+
 
     /// <summary>
     /// Метод для регистрации всех патчей
@@ -42,10 +45,26 @@ public class FarmlandHeaterPatch
     /// <exception cref="Exception"></exception>
     public static void RegisterPatch(Harmony harmony, ICoreAPI api)
     {
+        // Защита от двойной регистрации патча на сервере и клиенте
+        if (api.Side == EnumAppSide.Server)
+        {
+            // Если патч уже зарегистрирован на сервере, пропускаем регистрацию
+            if (serverFlag)
+                return;
+
+        }
+        else
+        {
+            // Если патч уже зарегистрирован на клиенте, пропускаем регистрацию
+            if (clientFlag)
+                return;
+
+        }
+
         Api = api;
 
         // Патч для грядки
-        var farmlandMethod = typeof(BlockEntityFarmland).GetMethod("Update",
+        var farmlandMethod = typeof(BlockEntityFastForwardGrowth).GetMethod("Update",
             BindingFlags.NonPublic | BindingFlags.Instance,
             null,
             [typeof(float)],
@@ -187,6 +206,18 @@ public class FarmlandHeaterPatch
             Api.Logger.Error("The following method failed to patch: BESapling.CheckGrow");
         }
 
+
+
+
+        // Защита от двойной регистрации патча на сервере и клиенте
+        if (api.Side == EnumAppSide.Server)
+        {
+            serverFlag = true;
+        }
+        else
+        {
+            clientFlag = true;
+        }
     }
 
 
@@ -197,6 +228,16 @@ public class FarmlandHeaterPatch
     /// <param name="harmony"></param>
     public static void UnregisterPatch(Harmony harmony)
     {
+        // Сбрасываем флаги при отмене патча
+        if (Api.Side == EnumAppSide.Server)
+        {
+            serverFlag = false;
+        }
+        else
+        {
+            clientFlag = false;
+        }
+
         var farmlandMethod = typeof(BlockEntityFarmland).GetMethod("Update",
             BindingFlags.NonPublic | BindingFlags.Instance,
             null,
