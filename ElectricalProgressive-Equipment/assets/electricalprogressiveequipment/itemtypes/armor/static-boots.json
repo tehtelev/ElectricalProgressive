@@ -1,7 +1,7 @@
 ﻿{
 	"code": "static-boots",
-	"class": "EArmor",
 	"behaviors": [
+		{ "name": "EArmor" }
 	],
 	"shapeByType": {
 		"*": { "base": "entity/armor/static-boots" }
@@ -44,12 +44,12 @@
 			}
 		},
 
-		"scaleX": 0.5,
-		"scaleY": 0.5,
-		"scaleZ": 0.5,
-		"translateX": 0.0,
+		"scaleX": 0.75,
+		"scaleY": 0.75,
+		"scaleZ": 0.75,
+		"translateX": 0.3,
 		"translateY": 0.37,
-		"translateZ": 0.0,
+		"translateZ": 0.3,
 		"rotateX": 0,
 		"rotateY": 0,
 		"rotateZ": 0

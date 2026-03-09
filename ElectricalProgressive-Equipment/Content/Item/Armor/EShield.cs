@@ -12,7 +12,7 @@ class EShield : Vintagestory.API.Common.Item
     int consume;
 
 
-    
+
     public override void OnLoaded(ICoreAPI api)
     {
         base.OnLoaded(api);
@@ -65,9 +65,9 @@ class EShield : Vintagestory.API.Common.Item
         var durability = slot.Itemstack.Attributes.GetInt("durability");
 
         if (durability > 1)
-            slot.Itemstack.Item.LightHsv = new byte[3] {   7,     3,   20  };
+            slot.Itemstack.Item.LightHsv = new byte[3] { 7, 3, 20 };
         else if (durability <= 1)
-            slot.Itemstack.Item.LightHsv = new byte[3] { 0, 0, 0 } ;
+            slot.Itemstack.Item.LightHsv = new byte[3] { 0, 0, 0 };
 
         base.OnHeldIdle(slot, byEntity);
     }
@@ -97,14 +97,14 @@ class EShield : Vintagestory.API.Common.Item
             var num2 = itemAttribute["protectionChance"]["passive-projectile"].AsFloat();
             var num3 = itemAttribute["projectileDamageAbsorption"].AsFloat();
             dsc.AppendLine("<strong>" + Lang.Get("Projectile protection") + "</strong>");
-            dsc.AppendLine(Lang.Get("shield-stats",  (int) (100.0 * (double) num1),  (int) (100.0 * (double) num2),  num3));
+            dsc.AppendLine(Lang.Get("shield-stats", (int)(100.0 * (double)num1), (int)(100.0 * (double)num2), num3));
             dsc.AppendLine();
         }
         var num4 = itemAttribute["damageAbsorption"].AsFloat();
         var num5 = itemAttribute["protectionChance"]["active"].AsFloat();
         var num6 = itemAttribute["protectionChance"]["passive"].AsFloat();
         dsc.AppendLine("<strong>" + Lang.Get("Melee attack protection") + "</strong>");
-        dsc.AppendLine(Lang.Get("shield-stats",  (int) (100.0 * (double) num5),  (int) (100.0 * (double) num6),  num4));
+        dsc.AppendLine(Lang.Get("shield-stats", (int)(100.0 * (double)num5), (int)(100.0 * (double)num6), num4));
         dsc.AppendLine();
 
         var energy = inSlot.Itemstack!.Attributes.GetInt("durability") * consume; //текущая энергия

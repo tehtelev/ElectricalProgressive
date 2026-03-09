@@ -131,7 +131,7 @@ public class FlyToggleEvent : ModSystem
         foreach (var slot in ArmorSlots)
         {
             var itemSlot = inventory[slot];
-            if (itemSlot?.Itemstack?.Collectible is EArmor armor)
+            if (itemSlot?.Itemstack?.Collectible.CollectibleBehaviors.FirstOrDefault() is EArmor armor)
             {
                 return (armor, itemSlot);
             }

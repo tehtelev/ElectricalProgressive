@@ -9,9 +9,9 @@ using ElectricalProgressive.Content.Item.Tool;
 
 
 [assembly: ModDependency("game", "1.22.0-pre.3")]
-[assembly: ModDependency("electricalprogressivecore", "3.0.0-rc.1")]
-[assembly: ModDependency("electricalprogressivebasics", "3.0.0-rc.1")]
-[assembly: ModDependency("electricalprogressiveqol", "3.0.0-rc.1")]
+[assembly: ModDependency("electricalprogressivecore", "3.0.0-rc.3")]
+[assembly: ModDependency("electricalprogressivebasics", "3.0.0-rc.3")]
+[assembly: ModDependency("electricalprogressiveqol", "3.0.0-rc.3")]
 [assembly: ModInfo(
     "Electrical Progressive: Equipment",
     "electricalprogressiveequipment",
@@ -43,7 +43,8 @@ public class ElectricalProgressiveEquipment : ModSystem
 
         this.api = api;
 
-        api.RegisterItemClass("EArmor", typeof(EArmor));
+        api.RegisterCollectibleBehaviorClass("EArmor", typeof(EArmor));
+
         api.RegisterItemClass("EWeapon", typeof(EWeapon));
         api.RegisterItemClass("ESpear", typeof(ESpear));
         api.RegisterItemClass("EShield", typeof(EShield));
@@ -81,5 +82,5 @@ public class ElectricalProgressiveEquipment : ModSystem
                     
         WeatherSystemServer = api.ModLoader.GetModSystem<WeatherSystemServer>();
 
-        }
+    }
 }

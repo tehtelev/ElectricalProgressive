@@ -1,6 +1,7 @@
 ﻿{
   "code": "static-spear-projectile",
   "class": "EntityESpear",
+  "tags": [ "inanimate", "projectile" ],
   "hitboxSize": {
     "x": 0.125,
     "y": 0.125
@@ -40,7 +41,8 @@
       {
         "code": "despawn",
         "minSeconds": 600
-      }
+      },
+      { "code": "entitystatetags" }
     ]
   },
   "sounds": {}

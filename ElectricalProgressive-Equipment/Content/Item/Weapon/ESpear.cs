@@ -21,7 +21,6 @@ public class ESpear : Vintagestory.API.Common.Item
     public SkillItem[] toolModes = [];
 
     private WorldInteraction[] _interactions = [];
-
     public override void OnLoaded(ICoreAPI api)
     {
         base.OnLoaded(api);
@@ -236,6 +235,7 @@ public class ESpear : Vintagestory.API.Common.Item
         entityProjectile.World = byEntity.World;
         entityProjectile.SetInitialRotation();
 
+        (entityProjectile as IProjectile).PreInitialize();
         byEntity.World.SpawnEntity(entityProjectile);
         byEntity.StartAnimation("throw");
         if (byEntity is EntityPlayer)

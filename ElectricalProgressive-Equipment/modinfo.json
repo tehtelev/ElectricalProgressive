@@ -10,8 +10,8 @@
   "Version": "3.0.0-rc.1",
   "dependencies": {
     "game": "1.22.0-pre.3",
-    "electricalprogressivecore": "3.0.0-rc.1",
-    "electricalprogressivebasics": "3.0.0-rc.1",
-    "electricalprogressiveqol": "3.0.0-rc.1"
+    "electricalprogressivecore": "3.0.0-rc.3",
+    "electricalprogressivebasics": "3.0.0-rc.3",
+    "electricalprogressiveqol": "3.0.0-rc.3"
   }
 }
