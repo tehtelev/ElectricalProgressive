@@ -22,19 +22,20 @@
   },
 
   {
-    "ingredientPattern": "HS,XM,LC",
+    "ingredientPattern": "HS,XM,L_",
     "width": 2,
     "height": 3,
     "ingredients": {
       "L": {
-        "type": "block",
-        "code": "game:log-*"
+        "type": "item",
+        "code": "electricalprogressivebasics:engineshaft",
+        "quantity": 4
       },
       "S": {
         "type": "item",
         "code": "game:saw-*",
         "isTool": true,
-        "toolDurabilityCost": 32
+        "toolDurabilityCost": 8
       },
       "X": {
         "type": "item",
@@ -52,11 +53,6 @@
         "type": "item",
         "code": "game:metalplate-iron",
         "quantity": 4
-      },
-      "C": {
-        "type": "block",
-        "code": "electricalprogressivebasics:ecable-32v-copper-single-part",
-        "quantity": 32
       }
     },
     "output": {

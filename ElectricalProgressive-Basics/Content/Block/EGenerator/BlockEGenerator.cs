@@ -337,10 +337,12 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
     public bool HasMechPowerConnectorAt(IWorldAccessor world, BlockPos pos, BlockFacing face, BlockMPBase forBlock)
     {
         var entity = world.BlockAccessor.GetBlockEntity(pos) as BlockEntityEGenerator;
-        if (entity.Facing == Facing.None)
+        // блокэнтити не готов или не существует
+        if (entity==null || entity.Facing == Facing.None)
         {
             return false;
         }
+
         var powerOutFacing = FacingHelper.Directions(entity.Facing).First();
         return face == powerOutFacing;
     }

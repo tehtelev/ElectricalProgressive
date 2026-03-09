@@ -330,7 +330,8 @@ public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
     public bool HasMechPowerConnectorAt(IWorldAccessor world, BlockPos pos, BlockFacing face, BlockMPBase forBlock)
     {
         var entity = world.BlockAccessor.GetBlockEntity(pos) as BlockEntityEMotor;
-        if (entity.Facing == Facing.None)
+        // блокэнтити не готов или не существует
+        if (entity == null || entity.Facing == Facing.None)
         {
             return false;
         }
