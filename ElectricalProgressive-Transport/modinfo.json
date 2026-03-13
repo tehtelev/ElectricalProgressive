@@ -9,6 +9,8 @@
   "description": "Electrical Progressive addon transport aand logic",
   "Version": "3.0.0-pre.1",
   "dependencies": {
-    "game": "1.21.0"
+    "game": "1.21.0",
+    "electricalprogressivecore": "3.0.0-rc.1",
+    "electricalprogressivebasics": "3.0.0-rc.1"
   }
 }
