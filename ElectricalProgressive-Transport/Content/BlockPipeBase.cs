@@ -44,7 +44,6 @@ namespace ElectricalProgressive.Content
                 {
                     liquidPipe.OnPlayerRightClick(byPlayer, blockSel);
                 }
-                return true;
             }
 
             return base.OnBlockInteractStart(world, byPlayer, blockSel);
