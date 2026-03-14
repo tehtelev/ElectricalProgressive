@@ -418,14 +418,14 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
     {
         base.OnBlockUnloaded();
 
-        MeshData.Clear(); //не забываем очищать кэш мэша при выгрузке блока
+        MeshData?.Clear(); //не забываем очищать кэш мэша при выгрузке блока
 
         this.ElectricalProgressive?.OnBlockUnloaded(); // вызываем метод OnBlockUnloaded у BEBehaviorElectricalProgressive
 
         // закрываем диалоговое окно, если оно открыто
         if (this.Api is ICoreClientAPI && this._clientDialog != null)
         {
-            this._clientDialog.TryClose();
+            this._clientDialog?.TryClose();
             this._clientDialog = null;
         }
 
@@ -435,7 +435,7 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
         // отключаем аниматор, если он есть
         if (this.Api.Side == EnumAppSide.Client && this.AnimUtil != null)
         {
-            this.AnimUtil.Dispose();
+            this.AnimUtil?.Dispose();
         }
 
         _mesh?.Dispose();
@@ -748,12 +748,12 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
         }
 
 
-        MeshData.Clear(); //не забываем очищать кэш мэша при выгрузке блока
+        MeshData?.Clear(); //не забываем очищать кэш мэша при выгрузке блока
 
         // закрываем диалоговое окно, если оно открыто
         if (this.Api is ICoreClientAPI && this._clientDialog != null)
         {
-            this._clientDialog.TryClose();
+            this._clientDialog?.TryClose();
             this._clientDialog = null;
         }
 
@@ -763,10 +763,10 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
         // отключаем аниматор, если он есть
         if (this.Api.Side == EnumAppSide.Client && this.AnimUtil != null)
         {
-            this.AnimUtil.Dispose();
+            this.AnimUtil?.Dispose();
         }
 
-        _mesh.Dispose();
+        _mesh?.Dispose();
         _resultingShape = null;
 
         // очищаем ссылки на API

@@ -148,7 +148,7 @@ namespace ElectricalProgressive.Utils
         /// </summary>
         public static void Dispose()
         {
-            Cache.Clear();
+            Cache?.Clear();
         }
     }
 }

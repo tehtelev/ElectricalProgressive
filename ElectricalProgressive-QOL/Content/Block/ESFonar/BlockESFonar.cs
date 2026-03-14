@@ -23,7 +23,7 @@ namespace ElectricalProgressive.Content.Block.ESFonar
         public override void OnUnloaded(ICoreAPI api)
         {
             base.OnUnloaded(api);
-            BlockESFonar.MeshDataCache.Clear();
+            BlockESFonar.MeshDataCache?.Clear();
         }
 
         public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack,

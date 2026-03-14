@@ -107,7 +107,7 @@ namespace ElectricalProgressive.Content.Block.CableSwitch
         /// </summary>
         public void Open()
         {
-            //animUtil.Dispose();
+            //animUtil?.Dispose();
             animUtil.InitializeAnimator("cableswitchwall", null, null, new Vec3f(0, GetRotation(), 0f));
 
             if (animUtil?.activeAnimationsByAnimCode.ContainsKey("open") == false)
@@ -184,7 +184,7 @@ namespace ElectricalProgressive.Content.Block.CableSwitch
             
             animUtil?.Dispose();
 
-            _mesh.Dispose();
+            _mesh?.Dispose();
             _resultingShape = null;
         }
 
@@ -197,7 +197,7 @@ namespace ElectricalProgressive.Content.Block.CableSwitch
 
             animUtil?.Dispose();
 
-            _mesh.Dispose();
+            _mesh?.Dispose();
             _resultingShape = null;
         }
 

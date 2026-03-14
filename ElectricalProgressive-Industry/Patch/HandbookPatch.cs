@@ -559,8 +559,8 @@ public class HandbookPatch
 
         public override void Dispose()
         {
-            groups.Clear();
-            _stackCache.Clear();
+            groups?.Clear();
+            _stackCache?.Clear();
             base.Dispose();
         }
     }

@@ -180,7 +180,7 @@ namespace ElectricalProgressive.Content.Block.HVTransformator
             StopAnim();
             animUtil?.Dispose();
 
-            _mesh.Dispose();
+            _mesh?.Dispose();
             _resultingShape = null;
         }
 
@@ -194,7 +194,7 @@ namespace ElectricalProgressive.Content.Block.HVTransformator
             this.ElectricalProgressive?.OnBlockUnloaded();
             animUtil?.Dispose();
 
-            _mesh.Dispose();
+            _mesh?.Dispose();
             _resultingShape = null;
         }
 

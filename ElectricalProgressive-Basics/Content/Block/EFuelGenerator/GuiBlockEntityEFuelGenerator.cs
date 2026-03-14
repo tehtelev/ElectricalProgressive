@@ -129,7 +129,7 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
         ctx.SetSource(gradient);
         
         capi.Gui.Icons.DrawFlame(ctx, 0, false, false);
-        gradient.Dispose();
+        gradient?.Dispose();
         
         ctx.Restore();
     }

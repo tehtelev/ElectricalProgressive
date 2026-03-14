@@ -54,10 +54,10 @@ namespace ElectricalProgressive.Utils
         /// </summary>
         public void Clear()
         {
-            _queue.Clear();
-            _cameFrom.Clear();
-            _costSoFar.Clear();
-            _visited.Clear();
+            _queue?.Clear();
+            _cameFrom?.Clear();
+            _costSoFar?.Clear();
+            _visited?.Clear();
         }
 
         /// <summary>
@@ -141,7 +141,7 @@ namespace ElectricalProgressive.Utils
                     }
                 }
 
-                _neighborsBuffer.Clear();
+                _neighborsBuffer?.Clear();
             }
 
             // Путь не найден

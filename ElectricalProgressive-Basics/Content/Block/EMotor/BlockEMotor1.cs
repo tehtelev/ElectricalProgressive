@@ -19,7 +19,7 @@ public class BlockEMotor1 : ImmersiveWireBlock, IMechanicalPowerBlock
     public override void OnUnloaded(ICoreAPI api)
     {
         base.OnUnloaded(api);
-        MeshData.Clear();
+        MeshData?.Clear();
     }
 
     public MechanicalNetwork? GetNetwork(IWorldAccessor world, BlockPos pos)

@@ -306,7 +306,7 @@ public class BEBehaviorEPImmersive : BlockEntityBehavior
     public void LoadWireNodes()
     {
 
-        _wireNodes.Clear();
+        _wireNodes?.Clear();
 
         var wireNodesAttribute = this.Block?.Attributes?["wireNodes"];
         if (wireNodesAttribute == null) return;
@@ -406,7 +406,7 @@ public class BEBehaviorEPImmersive : BlockEntityBehavior
     {
         ParticlesType = MyMiniLib.GetAttributeInt(this.Block, "particlesType", 0);
 
-        ParticlesOffsetPos.Clear();
+        ParticlesOffsetPos?.Clear();
         var arrayOffsetPos = MyMiniLib.GetAttributeArrayArrayFloat(this.Block, "particlesOffsetPos", new float[1][] { [0, 0, 0] });
         if (arrayOffsetPos != null)
         {
@@ -421,7 +421,7 @@ public class BEBehaviorEPImmersive : BlockEntityBehavior
             }
         }
 
-        ParticlesFramesAnim.Clear();
+        ParticlesFramesAnim?.Clear();
         var arrayFrames = MyMiniLib.GetAttributeArrayArrayInt(this.Block, "particlesFramesAnim", new int[1][] { [-1, -1] });
         if (arrayFrames != null)
         {
@@ -963,7 +963,7 @@ public class BEBehaviorEPImmersive : BlockEntityBehavior
         base.FromTreeAttributes(tree, worldAccessForResolve);
 
         // Загружаем соединения (новый формат)
-        _connections.Clear();
+        _connections?.Clear();
         var connectionsData = tree.GetBytes("ConnectionsData");
         if (connectionsData != null && connectionsData.Length > 0)
         {

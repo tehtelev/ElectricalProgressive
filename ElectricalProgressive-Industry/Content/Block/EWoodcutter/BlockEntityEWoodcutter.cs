@@ -542,8 +542,8 @@ public class BlockEntityEWoodcutter : BlockEntityOpenableContainer
 
         if (invDialog is not null)
         {
-            invDialog.TryClose();
-            invDialog.Dispose();
+            invDialog?.TryClose();
+            invDialog?.Dispose();
             invDialog = null;
         }
 

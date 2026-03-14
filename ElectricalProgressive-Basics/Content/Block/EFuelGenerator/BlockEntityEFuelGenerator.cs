@@ -407,14 +407,14 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
         
         if (_clientDialog != null)
         {
-            _clientDialog.TryClose();
+            _clientDialog?.TryClose();
             _clientDialog = null;
         }
         
         UnregisterGameTickListener(_listenerId);
         
         if (Api.Side == EnumAppSide.Client && AnimUtil != null)
-            AnimUtil.Dispose();
+            AnimUtil?.Dispose();
 
         _mesh?.Dispose();
         _resultingShape = null;
@@ -743,14 +743,14 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
 
         if (_clientDialog != null)
         {
-            _clientDialog.TryClose();
+            _clientDialog?.TryClose();
             _clientDialog = null;
         }
         
         UnregisterGameTickListener(_listenerId);
         
         if (Api.Side == EnumAppSide.Client && AnimUtil != null)
-            AnimUtil.Dispose();
+            AnimUtil?.Dispose();
 
         _mesh?.Dispose();
         _resultingShape = null;

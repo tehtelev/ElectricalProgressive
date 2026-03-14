@@ -225,7 +225,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         }
         else
         {
-            _clientDialog.TryClose();
+            _clientDialog?.TryClose();
         }
     }
 
@@ -898,7 +898,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         // Закрываем GUI если открыт
         if (_clientDialog != null && _clientDialog.IsOpened())
         {
-            _clientDialog.TryClose();
+            _clientDialog?.TryClose();
         }
     }
 
@@ -948,7 +948,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         {
             if (_clientDialog != null && _clientDialog.IsOpened())
             {
-                _clientDialog.TryClose();
+                _clientDialog?.TryClose();
             }
         }
         else if (packetid == 1002) // Обновление настроек фильтра
@@ -1024,7 +1024,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         // Только чистим инвентарь
         if (Inventory != null)
         {
-            Inventory.Clear();
+            Inventory?.Clear();
         }
         
         // Вызываем свой базовый код без дропа
@@ -1036,7 +1036,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         base.OnBlockUnloaded();
         if (_clientDialog != null && _clientDialog.IsOpened())
         {
-            _clientDialog.TryClose();
+            _clientDialog?.TryClose();
         }
     }
 }

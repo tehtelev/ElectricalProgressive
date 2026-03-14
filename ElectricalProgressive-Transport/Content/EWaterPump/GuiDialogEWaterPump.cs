@@ -258,7 +258,7 @@ public class GuiDialogEWaterPump : GuiDialogBlockEntity
             this.BlockEntityPosition.Z, p);
     }
     
-    private void OnTitleBarClose() => this.TryClose();
+    private void OnTitleBarClose() => this?.TryClose();
     
     private void RefreshPumpData()
     {

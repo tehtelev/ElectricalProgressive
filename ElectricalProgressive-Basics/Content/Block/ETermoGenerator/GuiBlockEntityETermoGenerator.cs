@@ -115,7 +115,7 @@ public class GuiBlockEntityETermoGenerator : GuiDialogBlockEntity
         gradient.AddColorStop(1, new Color(1, 0, 0, 1));
         ctx.SetSource(gradient);
         capi.Gui.Icons.DrawFlame(ctx, 0, false, false);
-        gradient.Dispose();
+        gradient?.Dispose();
         ctx.Restore();
     }
 
@@ -142,7 +142,7 @@ public class GuiBlockEntityETermoGenerator : GuiDialogBlockEntity
 
     private void OnTitleBarClose()
     {
-        this.TryClose();
+        this?.TryClose();
     }
 
 

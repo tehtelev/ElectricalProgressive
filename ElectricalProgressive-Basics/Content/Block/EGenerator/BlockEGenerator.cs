@@ -20,7 +20,7 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
     public override void OnUnloaded(ICoreAPI api)
     {
         base.OnUnloaded(api);
-        MeshData.Clear();
+        MeshData?.Clear();
     }
 
 

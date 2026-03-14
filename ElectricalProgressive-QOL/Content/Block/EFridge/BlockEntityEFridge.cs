@@ -110,7 +110,7 @@ class BlockEntityEFridge : ContainerEFridge, ITexPositionSource
         _nowTesselatingObj = null!;
         animUtil?.Dispose();
 
-        _mesh.Dispose();
+        _mesh?.Dispose();
         _resultingShape = null;
 
         // Удаляем слушатель тиков
@@ -767,7 +767,7 @@ class BlockEntityEFridge : ContainerEFridge, ITexPositionSource
 
         animUtil?.Dispose();
 
-        _mesh.Dispose();
+        _mesh?.Dispose();
         _resultingShape = null;
     }
 

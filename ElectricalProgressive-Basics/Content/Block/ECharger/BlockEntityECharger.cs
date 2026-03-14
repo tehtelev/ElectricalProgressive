@@ -466,7 +466,7 @@ public class BlockEntityECharger : BlockEntityContainer, ITexPositionSource
     {
         base.OnBlockBroken(byPlayer);
         var stack = Inventory[0].Itemstack;
-        if (stack != null)
+        if (stack != null && Api.Side==EnumAppSide.Server)
             Api.World.SpawnItemEntity(stack, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
     }
 

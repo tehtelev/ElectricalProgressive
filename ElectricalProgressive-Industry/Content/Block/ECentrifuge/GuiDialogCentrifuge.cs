@@ -91,7 +91,7 @@ public class GuiDialogCentrifuge : GuiDialogBlockEntity
     
       ctx.SetSource((Pattern)source);
       this.capi.Gui.Icons.DrawArrowRight(ctx, 0.0, false, false);
-      source.Dispose();
+      source?.Dispose();
       ctx.Restore();
   }
 
@@ -101,7 +101,7 @@ public class GuiDialogCentrifuge : GuiDialogBlockEntity
       this.BlockEntityPosition.Z, p);
   }
 
-  private void OnTitleBarClose() => this.TryClose();
+  private void OnTitleBarClose() => this?.TryClose();
 
   public override void OnGuiOpened()
   {

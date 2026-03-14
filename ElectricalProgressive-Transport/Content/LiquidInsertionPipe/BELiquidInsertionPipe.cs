@@ -225,7 +225,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         }
         else
         {
-            _clientDialog.TryClose();
+            _clientDialog?.TryClose();
         }
     }
 
@@ -794,7 +794,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
 
         if (_clientDialog != null && _clientDialog.IsOpened())
         {
-            _clientDialog.TryClose();
+            _clientDialog?.TryClose();
         }
     }
 
@@ -833,7 +833,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         {
             if (_clientDialog != null && _clientDialog.IsOpened())
             {
-                _clientDialog.TryClose();
+                _clientDialog?.TryClose();
             }
         }
         else if (packetid == 2002) // Обновление настроек фильтра
@@ -891,7 +891,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         // Только чистим инвентарь
         if (Inventory != null)
         {
-            Inventory.Clear();
+            Inventory?.Clear();
         }
         
         // Вызываем свой базовый код без дропа
@@ -903,7 +903,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         base.OnBlockUnloaded();
         if (_clientDialog != null && _clientDialog.IsOpened())
         {
-            _clientDialog.TryClose();
+            _clientDialog?.TryClose();
         }
     }
 }

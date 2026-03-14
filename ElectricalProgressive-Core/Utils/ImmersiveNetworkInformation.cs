@@ -42,7 +42,7 @@ namespace ElectricalProgressive.Utils
             NumberOfTransformators = 0;
             NumberOfConnections = 0;
             NumberOfNetworks = 0;
-            Networks.Clear();
+            Networks?.Clear();
             eParamsInNetwork = new();
             current = 0f;
         }

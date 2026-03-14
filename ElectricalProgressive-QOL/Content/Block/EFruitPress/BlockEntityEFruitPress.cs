@@ -623,7 +623,7 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
             return;
         
         _pressSound.Stop();
-        _pressSound.Dispose();
+        _pressSound?.Dispose();
         _pressSound = null;
     }
     
@@ -836,7 +836,7 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         
         if (this.Api is ICoreClientAPI && this._clientDialog != null)
         {
-            this._clientDialog.TryClose();
+            this._clientDialog?.TryClose();
             this._clientDialog = null;
         }
         

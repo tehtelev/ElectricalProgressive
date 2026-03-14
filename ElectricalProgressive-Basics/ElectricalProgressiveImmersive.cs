@@ -151,18 +151,18 @@ namespace ElectricalProgressive
             }
 
             // Очистка ресурсов
-            _globalEnergyPackets.Clear();
-            _sumEnergy.Clear();
-            _packetsByPosition.Clear();
-            _networkProcessingQueue.Dispose();
-            _networkProcessingCompleted.Dispose();
+            _globalEnergyPackets?.Clear();
+            _sumEnergy?.Clear();
+            _packetsByPosition?.Clear();
+            _networkProcessingQueue?.Dispose();
+            _networkProcessingCompleted?.Dispose();
 
             Api = null!;
             _capi = null!;
             _sapi = null!;
 
-            Networks.Clear();
-            Parts.Clear();
+            Networks?.Clear();
+            Parts?.Clear();
             ImmersivePathCacheManager.Dispose();
         }
 
@@ -309,7 +309,7 @@ namespace ElectricalProgressive
             // 1. Проверяем изменения в WireNodes
             if (!AreWireNodesEqual(part.WireNodes, wireNodes))
             {
-                part.WireNodes.Clear();
+                part.WireNodes?.Clear();
                 part.WireNodes.AddRange(wireNodes);
                 hasChanges = true;
             }
@@ -317,7 +317,7 @@ namespace ElectricalProgressive
             // 2. Проверяем изменения в соединениях
             if (!AreConnectionsEqual(part.Connections, connections))
             {
-                part.Connections.Clear();
+                part.Connections?.Clear();
                 part.Connections.AddRange(connections);
                 hasChanges = true;
             }
@@ -896,18 +896,18 @@ namespace ElectricalProgressive
 
             public void Clear()
             {
-                LocalConsumers.Clear();
-                LocalProducers.Clear();
-                LocalAccums.Clear();
-                LocalPackets.Clear();
-                ConsumerPositions.Clear();
-                ConsumerRequests.Clear();
-                ProducerPositions.Clear();
-                ProducerGive.Clear();
-                Consumer2Positions.Clear();
-                Consumer2Requests.Clear();
-                Producer2Positions.Clear();
-                Producer2Give.Clear();
+                LocalConsumers?.Clear();
+                LocalProducers?.Clear();
+                LocalAccums?.Clear();
+                LocalPackets?.Clear();
+                ConsumerPositions?.Clear();
+                ConsumerRequests?.Clear();
+                ProducerPositions?.Clear();
+                ProducerGive?.Clear();
+                Consumer2Positions?.Clear();
+                Consumer2Requests?.Clear();
+                Producer2Positions?.Clear();
+                Producer2Give?.Clear();
             }
         }
 
@@ -919,7 +919,7 @@ namespace ElectricalProgressive
         {
             if (_contextPool.TryTake(out var context))
             {
-                context.Clear();
+                context?.Clear();
                 return context;
             }
             return new NetworkProcessingContext();
@@ -1092,7 +1092,7 @@ namespace ElectricalProgressive
             // Этап 6: Зарядка аккумуляторов    ----------------------------------------------------------------------------
             cons = network.Accumulators.Count; // Количество аккумов в сети
 
-            context.LocalAccums.Clear();
+            context.LocalAccums?.Clear();
             foreach (var electricAccum in network.Accumulators)
             {
                 if (network.PartPositions.Contains(electricAccum.Pos)   // Проверяем, что аккумулятор находится в части сети
@@ -1196,7 +1196,7 @@ namespace ElectricalProgressive
             Cleaner();
 
             // Очищаем результаты предыдущего тика
-            _networkResults.Clear();
+            _networkResults?.Clear();
 
             // Сбрасываем CountdownEvent на количество сетей
             _networkProcessingCompleted.Reset(Networks.Count);
@@ -1836,7 +1836,7 @@ namespace ElectricalProgressive
             if (components.Count > 1)
             {
                 // Первая компонента остается в исходной сети
-                network.PartPositions.Clear();
+                network.PartPositions?.Clear();
                 network.PartPositions.UnionWith(components[0]);
 
                 // Очищаем и перезаполняем коллекции компонентов
@@ -1860,11 +1860,11 @@ namespace ElectricalProgressive
 
         private static void ClearNetworkComponents(ImmersiveNetwork network)
         {
-            network.Consumers.Clear();
-            network.Producers.Clear();
-            network.Accumulators.Clear();
-            network.Transformators.Clear();
-            network.Conductors.Clear();
+            network.Consumers?.Clear();
+            network.Producers?.Clear();
+            network.Accumulators?.Clear();
+            network.Transformators?.Clear();
+            network.Conductors?.Clear();
             // Иммерсивные соединения остаются - они фильтруются по PartPositions
         }
 
@@ -1974,8 +1974,8 @@ namespace ElectricalProgressive
                     // Переносим иммерсивные соединения
                     outNetwork.ImmersiveConnections.AddRange(network.ImmersiveConnections);
 
-                    network.PartPositions.Clear();
-                    network.ImmersiveConnections.Clear();
+                    network.PartPositions?.Clear();
+                    network.ImmersiveConnections?.Clear();
                     this.Networks.Remove(network);
                 }
             }

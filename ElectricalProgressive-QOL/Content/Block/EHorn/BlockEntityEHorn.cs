@@ -12,6 +12,7 @@ using Vintagestory.GameContent;
 namespace ElectricalProgressive.Content.Block.EHorn;
 public class BlockEntityEHorn : BlockEntityContainer, IHeatSource
 {
+    public BEBehaviorElectricalProgressive? ElectricalProgressive => GetBehavior<BEBehaviorElectricalProgressive>();
     public override InventoryBase Inventory => _inventory;
     public override string InventoryClassName => "ehorndata";
     private readonly InventoryEHorn _inventory;
@@ -306,7 +307,7 @@ public class BlockEntityEHorn : BlockEntityContainer, IHeatSource
     public override void OnBlockBroken(IPlayer? byPlayer = null)
     {
         base.OnBlockBroken(byPlayer);
-        if (this.Contents != null)
+        if (this.Contents != null && Api.Side==EnumAppSide.Server)
             this.Api.World.SpawnItemEntity(this.Contents, this.Pos.ToVec3d().Add(0.5, 0.5, 0.5));
         this._ambientSound?.Dispose();
         this._ambientSound = null;
@@ -410,5 +411,5 @@ public class BlockEntityEHorn : BlockEntityContainer, IHeatSource
         // отписываемся от тиков
         UnregisterGameTickListener(_listenerId);
     }
-    public BEBehaviorElectricalProgressive? ElectricalProgressive => GetBehavior<BEBehaviorElectricalProgressive>();
+   
 }

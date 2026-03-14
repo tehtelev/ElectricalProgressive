@@ -124,7 +124,7 @@ namespace ElectricalProgressive.Content.Block.EHeatCannon
             if (this._ambientSound == null)
                 return;
             this._ambientSound.Stop();
-            this._ambientSound.Dispose();
+            this._ambientSound?.Dispose();
             this._ambientSound = (ILoadedSound)null;
         }
 
@@ -206,13 +206,13 @@ namespace ElectricalProgressive.Content.Block.EHeatCannon
 
             if (this.Api.Side == EnumAppSide.Client && this.AnimUtil != null)
             {
-                this.AnimUtil.Dispose();
+                this.AnimUtil?.Dispose();
             }
 
             if (this._ambientSound != null)
             {
                 this._ambientSound.Stop();
-                this._ambientSound.Dispose();
+                this._ambientSound?.Dispose();
             }
 
             _mesh?.Dispose();
@@ -232,16 +232,16 @@ namespace ElectricalProgressive.Content.Block.EHeatCannon
 
             if (this.Api.Side == EnumAppSide.Client && this.AnimUtil != null)
             {
-                this.AnimUtil.Dispose();
+                this.AnimUtil?.Dispose();
             }
 
             if (this._ambientSound != null)
             {
                 this._ambientSound.Stop();
-                this._ambientSound.Dispose();
+                this._ambientSound?.Dispose();
             }
 
-            _mesh.Dispose();
+            _mesh?.Dispose();
             _resultingShape = null;
         }
 

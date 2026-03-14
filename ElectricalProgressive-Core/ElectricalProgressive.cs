@@ -23,7 +23,7 @@ using static ElectricalProgressive.ElectricalProgressive;
     "electricalprogressivecore",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Electrical logic library.",
-    Version = "3.0.0-rc.3",
+    Version = "3.0.0-rc.4",
     Authors = ["Tehtelev", "Kotl"]
 )]
 
@@ -149,11 +149,11 @@ namespace ElectricalProgressive
             }
 
             // Очистка ресурсов
-            _globalEnergyPackets.Clear();
-            _sumEnergy.Clear();
-            _packetsByPosition.Clear();
-            _networkProcessingQueue.Dispose();
-            _networkProcessingCompleted.Dispose();
+            _globalEnergyPackets?.Clear();
+            _sumEnergy?.Clear();
+            _packetsByPosition?.Clear();
+            _networkProcessingQueue?.Dispose();
+            _networkProcessingCompleted?.Dispose();
 
             Api = null!;
             _capi = null!;
@@ -161,8 +161,8 @@ namespace ElectricalProgressive
             damageManager = null;
             WeatherSystemServer = null;
 
-            Networks.Clear();
-            Parts.Clear();
+            Networks?.Clear();
+            Parts?.Clear();
             PathCacheManager.Dispose();
 
 
@@ -642,18 +642,18 @@ namespace ElectricalProgressive
 
             public void Clear()
             {
-                LocalConsumers.Clear();
-                LocalProducers.Clear();
-                LocalAccums.Clear();
-                LocalPackets.Clear();
-                ConsumerPositions.Clear();
-                ConsumerRequests.Clear();
-                ProducerPositions.Clear();
-                ProducerGive.Clear();
-                Consumer2Positions.Clear();
-                Consumer2Requests.Clear();
-                Producer2Positions.Clear();
-                Producer2Give.Clear();
+                LocalConsumers?.Clear();
+                LocalProducers?.Clear();
+                LocalAccums?.Clear();
+                LocalPackets?.Clear();
+                ConsumerPositions?.Clear();
+                ConsumerRequests?.Clear();
+                ProducerPositions?.Clear();
+                ProducerGive?.Clear();
+                Consumer2Positions?.Clear();
+                Consumer2Requests?.Clear();
+                Producer2Positions?.Clear();
+                Producer2Give?.Clear();
             }
         }
 
@@ -665,7 +665,7 @@ namespace ElectricalProgressive
         {
             if (_contextPool.TryTake(out var context))
             {
-                context.Clear();
+                context?.Clear();
                 return context;
             }
             return new NetworkProcessingContext();
@@ -845,7 +845,7 @@ namespace ElectricalProgressive
             // Этап 6: Зарядка аккумуляторов    ----------------------------------------------------------------------------
             cons = network.Accumulators.Count; // Количество аккумов в сети
 
-            context.LocalAccums.Clear();
+            context.LocalAccums?.Clear();
             foreach (var electricAccum in network.Accumulators)
             {
                 if (network.PartPositions.Contains(electricAccum.Pos)   // Проверяем, что аккумулятор находится в части сети
@@ -958,7 +958,7 @@ namespace ElectricalProgressive
             Cleaner();
 
             // Очищаем результаты предыдущего тика
-            _networkResults.Clear();
+            _networkResults?.Clear();
 
             // Сбрасываем CountdownEvent на количество сетей
             _networkProcessingCompleted.Reset(Networks.Count);
@@ -1454,7 +1454,7 @@ namespace ElectricalProgressive
                         outNetwork.PartPositions.Add(position);
                     }
 
-                    network.PartPositions.Clear();
+                    network.PartPositions?.Clear();
                     this.Networks.Remove(network);
                 }
             }

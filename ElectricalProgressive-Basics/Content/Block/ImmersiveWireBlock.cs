@@ -954,7 +954,7 @@ namespace ElectricalProgressive.Content.Block
 
             // Очищаем кэш для этого блока
 
-            //WireMeshesCache.Clear();
+            //WireMeshesCache?.Clear();
         }
 
         /// <summary>
@@ -966,7 +966,7 @@ namespace ElectricalProgressive.Content.Block
 
             // Очищаем кэш для этого блока
             InvalidateBlockMeshCache(pos);
-            //WireMeshesCache.Clear();
+            //WireMeshesCache?.Clear();
         }
 
 
@@ -1062,7 +1062,7 @@ namespace ElectricalProgressive.Content.Block
                 mesh.AddMeshData(segmentMesh);
 
                 // Освобождаем временный меш
-                segmentMesh.Dispose();
+                segmentMesh?.Dispose();
             }
 
             return mesh;

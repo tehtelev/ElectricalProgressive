@@ -201,7 +201,7 @@ public static class FacingHelper
     /// </summary>
     public static void FillFaces(Facing self, List<BlockFacing> buffer)
     {
-        buffer.Clear();
+        buffer?.Clear();
         if ((self & Facing.NorthAll) != 0) buffer.Add(BlockFacing.NORTH);
         if ((self & Facing.EastAll) != 0) buffer.Add(BlockFacing.EAST);
         if ((self & Facing.SouthAll) != 0) buffer.Add(BlockFacing.SOUTH);
@@ -216,7 +216,7 @@ public static class FacingHelper
     /// </summary>
     public static void FillDirections(Facing self, List<BlockFacing> buffer)
     {
-        buffer.Clear();
+        buffer?.Clear();
         if ((self & Facing.AllNorth) != 0) buffer.Add(BlockFacing.NORTH);
         if ((self & Facing.AllEast) != 0) buffer.Add(BlockFacing.EAST);
         if ((self & Facing.AllSouth) != 0) buffer.Add(BlockFacing.SOUTH);

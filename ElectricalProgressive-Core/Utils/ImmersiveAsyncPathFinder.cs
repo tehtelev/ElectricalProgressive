@@ -54,7 +54,7 @@ namespace ElectricalProgressive.Utils
             {
                 if (_requestQueue.IsEmpty)
                 {
-                    pathFinder.Clear();
+                    pathFinder?.Clear();
                     Thread.Sleep(50);
                 }
 

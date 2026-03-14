@@ -194,8 +194,8 @@ public class PipeNetworkManager
 
     private void RebuildAllNetworks()
     {
-        networks.Clear();
-        pipeToNetwork.Clear();
+        networks?.Clear();
+        pipeToNetwork?.Clear();
         nextNetworkId = 1;
 
         // Ищем все трубы в мире через проход по чанкам

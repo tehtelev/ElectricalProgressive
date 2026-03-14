@@ -169,7 +169,7 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
             // Удаляем динамический рендерер, если он был активен
             if (renderer.contentStackRenderer != null)
             {
-                renderer.contentStackRenderer.Dispose();
+                renderer.contentStackRenderer?.Dispose();
                 renderer.contentStackRenderer = null;
             }
             // Сбрасываем статический меш (будет добавлен позже в OnTesselation)
@@ -960,7 +960,7 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
     public override void OnBlockBroken(IPlayer? byPlayer = null)
     {
         base.OnBlockBroken(byPlayer);
-        if (InputStack != null)
+        if (InputStack != null && Api.Side==EnumAppSide.Server)
             Api.World.SpawnItemEntity(InputStack, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
 
 
@@ -1001,13 +1001,13 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
             SetDialogValues(dtree);
             if (_clientDialog != null)
             {
-                _clientDialog.TryClose();
+                _clientDialog?.TryClose();
                 _clientDialog = null!;
             }
             else
             {
                 _clientDialog = new GuiDialogBlockEntityEStove(dialogTitle, Inventory, Pos, dtree, _capi!);
-                _clientDialog.OnClosed += () => { _clientDialog.Dispose(); _clientDialog = null!; };
+                _clientDialog.OnClosed += () => { _clientDialog?.Dispose(); _clientDialog = null!; };
                 _clientDialog.TryOpen();
             }
         }

@@ -807,7 +807,7 @@ namespace ElectricalProgressive.Content.Block.EPress
 
             if (this.Api is ICoreClientAPI && this._clientDialog != null!)
             {
-                this._clientDialog.TryClose();
+                this._clientDialog?.TryClose();
                 this._clientDialog = null;
             }
 
@@ -815,10 +815,10 @@ namespace ElectricalProgressive.Content.Block.EPress
 
             if (this.Api.Side == EnumAppSide.Client && this.AnimUtil != null!)
             {
-                this.AnimUtil.Dispose();
+                this.AnimUtil?.Dispose();
             }
 
-            _mesh.Dispose();
+            _mesh?.Dispose();
             _resultingShape = null;
 
             // Очистка как в холодильнике
@@ -833,7 +833,7 @@ namespace ElectricalProgressive.Content.Block.EPress
             this._clientDialog?.TryClose();
 
             // Очищаем ссылки как в холодильнике
-            _mesh.Dispose();
+            _mesh?.Dispose();
             _resultingShape = null;
 
             _meshes = null!;

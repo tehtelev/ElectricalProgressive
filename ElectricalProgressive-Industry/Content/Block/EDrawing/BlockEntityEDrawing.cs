@@ -417,7 +417,7 @@ namespace ElectricalProgressive.Content.Block.EDrawing
             if (this._ambientSound == null)
                 return;
             this._ambientSound.Stop();
-            this._ambientSound.Dispose();
+            this._ambientSound?.Dispose();
             this._ambientSound = (ILoadedSound)null;
         }
 
@@ -589,7 +589,7 @@ namespace ElectricalProgressive.Content.Block.EDrawing
 
             if (this.Api is ICoreClientAPI && this._clientDialog != null)
             {
-                this._clientDialog.TryClose();
+                this._clientDialog?.TryClose();
                 this._clientDialog = null;
             }
 
@@ -597,16 +597,16 @@ namespace ElectricalProgressive.Content.Block.EDrawing
 
             if (this.Api.Side == EnumAppSide.Client && this.AnimUtil != null)
             {
-                this.AnimUtil.Dispose();
+                this.AnimUtil?.Dispose();
             }
 
             if (this._ambientSound != null)
             {
                 this._ambientSound.Stop();
-                this._ambientSound.Dispose();
+                this._ambientSound?.Dispose();
             }
 
-            _mesh.Dispose();
+            _mesh?.Dispose();
             _resultingShape = null;
         }
 
@@ -617,10 +617,10 @@ namespace ElectricalProgressive.Content.Block.EDrawing
             if (this._ambientSound == null)
                 return;
             this._ambientSound.Stop();
-            this._ambientSound.Dispose();
+            this._ambientSound?.Dispose();
             this._ambientSound = (ILoadedSound)null;
 
-            _mesh.Dispose();
+            _mesh?.Dispose();
             _resultingShape = null;
         }
 

@@ -21,9 +21,9 @@ namespace ElectricalProgressive.Content.Block.ELamp
         public override void OnUnloaded(ICoreAPI api)
         {
             base.OnUnloaded(api);
-            BlockESmallLamp.MeshDataCache.Clear();
-            BlockESmallLamp.SelectionBoxesCache.Clear();
-            BlockESmallLamp.CollisionBoxesCache.Clear();
+            BlockESmallLamp.MeshDataCache?.Clear();
+            BlockESmallLamp.SelectionBoxesCache?.Clear();
+            BlockESmallLamp.CollisionBoxesCache?.Clear();
         }
 
         public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack, BlockSelection blockSel, ref string failureCode)

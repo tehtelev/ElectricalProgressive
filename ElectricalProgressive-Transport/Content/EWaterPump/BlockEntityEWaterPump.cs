@@ -481,7 +481,7 @@ public class BlockEntityEWaterPump : BlockEntityGenericTypedContainer
             return;
         
         _pumpSound.Stop();
-        _pumpSound.Dispose();
+        _pumpSound?.Dispose();
         _pumpSound = null;
     }
     
@@ -613,7 +613,7 @@ public class BlockEntityEWaterPump : BlockEntityGenericTypedContainer
         
         if (this.Api is ICoreClientAPI && this._clientDialog != null)
         {
-            this._clientDialog.TryClose();
+            this._clientDialog?.TryClose();
             this._clientDialog = null;
         }
         

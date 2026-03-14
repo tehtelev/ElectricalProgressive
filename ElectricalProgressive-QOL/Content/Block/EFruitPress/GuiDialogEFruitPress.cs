@@ -142,7 +142,7 @@ public class GuiDialogEFruitPress : GuiDialogBlockEntity
             ctx.SetSource(gradient);
             ctx.Rectangle(0, 0, fillWidth, currentBounds.InnerHeight);
             ctx.Fill();
-            gradient.Dispose();
+            gradient?.Dispose();
         }
         
         // Текст прогресса
@@ -277,7 +277,7 @@ public class GuiDialogEFruitPress : GuiDialogBlockEntity
             this.BlockEntityPosition.Z, p);
     }
     
-    private void OnTitleBarClose() => this.TryClose();
+    private void OnTitleBarClose() => this?.TryClose();
     
     public override void OnGuiOpened()
     {

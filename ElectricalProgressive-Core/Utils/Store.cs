@@ -47,7 +47,7 @@ namespace ElectricalProgressive.Utils
         /// </summary>
         public void ResetRequests()
         {
-            CurrentRequests.Clear();
+            CurrentRequests?.Clear();
         }
 
 

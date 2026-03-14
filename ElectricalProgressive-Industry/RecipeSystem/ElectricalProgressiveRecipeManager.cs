@@ -14,205 +14,183 @@ public class ElectricalProgressiveRecipeManager : ModSystem
     public static List<HammerRecipe> HammerRecipes;
     public static List<PressRecipe> PressRecipes;
     public static List<DrawingRecipe> DrawingRecipes;
-    public static Dictionary<string, (string code, IEnumerable<dynamic> recipes)> machines;
+
+
+    public static Dictionary<string, (string code, IEnumerable<IRecipeMultyBase> recipes)> machines;
 
     private ICoreServerAPI api;
 
     public override void StartServerSide(ICoreServerAPI api)
     {
         this.api = api;
-        api.Event.SaveGameLoaded += CentrifugeRecipe;
-        api.Event.SaveGameLoaded += HammerRecipe;
-        api.Event.SaveGameLoaded += PressRecipe;
-        api.Event.SaveGameLoaded += DrawingRecipe;
 
-        machines = new Dictionary<string, (string code, IEnumerable<dynamic> recipes)>(4);
+        api.Event.SaveGameLoaded += LoadCentrifugeRecipes;
+        api.Event.SaveGameLoaded += LoadHammerRecipes;
+        api.Event.SaveGameLoaded += LoadPressRecipes;
+        api.Event.SaveGameLoaded += LoadDrawingRecipes;
+
+        machines = new Dictionary<string, (string, IEnumerable<IRecipeMultyBase>)>(4);
     }
 
-    /// <summary>
-    /// Загружает рецепты для электрической центрифуги из JSON-файлов.
-    /// </summary>
-    public void CentrifugeRecipe()
+    private void LoadCentrifugeRecipes()
     {
         CentrifugeRecipes = [];
-
-        LoadRecipes<CentrifugeRecipe>("Centrifuge Recipe", "recipes/electric/centrifugerecipe", (r) => CentrifugeRecipes.Add(r));
-        api.World.Logger.StoryEvent(Lang.Get("electricalprogressiveindustry:recipeloading"));
-
-        machines.Add("ecentrifuge-", ("electricalprogressiveindustry:ecentrifuge-north", ElectricalProgressiveRecipeManager.CentrifugeRecipes));
+        LoadRecipes<CentrifugeRecipe>("Centrifuge Recipe", "recipes/electric/centrifugerecipe", CentrifugeRecipes.Add);
+        api.World.Logger.Debug(Lang.Get("electricalprogressiveindustry:recipeloading"));
+        machines.Add("ecentrifuge-", ("electricalprogressiveindustry:ecentrifuge-north", CentrifugeRecipes));
     }
 
-    /// <summary>
-    /// Загружает рецепты для электрического молота из JSON-файлов.
-    /// </summary>
-    public void HammerRecipe()
+    private void LoadHammerRecipes()
     {
         HammerRecipes = [];
-        LoadRecipes<HammerRecipe>("Hammer Recipe", "recipes/electric/hammerrecipe", (r) => HammerRecipes.Add(r));
-        api.World.Logger.StoryEvent(Lang.Get("electricalprogressiveindustry:recipeloading"));
-
-        machines.Add("ehammer-", ("electricalprogressiveindustry:ehammer-north", ElectricalProgressiveRecipeManager.HammerRecipes));
+        LoadRecipes<HammerRecipe>("Hammer Recipe", "recipes/electric/hammerrecipe", HammerRecipes.Add);
+        api.World.Logger.Debug(Lang.Get("electricalprogressiveindustry:recipeloading"));
+        machines.Add("ehammer-", ("electricalprogressiveindustry:ehammer-north", HammerRecipes));
     }
 
-    /// <summary>
-    /// Загружает рецепты для электрического пресса из JSON-файлов.
-    /// </summary>
-    public void PressRecipe()
+    private void LoadPressRecipes()
     {
         PressRecipes = [];
-        LoadRecipes<PressRecipe>("Press Recipe", "recipes/electric/pressrecipe", (r) => PressRecipes.Add(r));
-        api.World.Logger.StoryEvent(Lang.Get("electricalprogressiveindustry:recipeloading"));
-
-        machines.Add("epress-", ("electricalprogressiveindustry:epress-north", ElectricalProgressiveRecipeManager.PressRecipes));
+        LoadRecipes<PressRecipe>("Press Recipe", "recipes/electric/pressrecipe", PressRecipes.Add);
+        api.World.Logger.Debug(Lang.Get("electricalprogressiveindustry:recipeloading"));
+        machines.Add("epress-", ("electricalprogressiveindustry:epress-north", PressRecipes));
     }
 
-    /// <summary>
-    /// Загружает рецепты для волочильного станка из JSON-файлов.
-    /// </summary>
-    public void DrawingRecipe()
+    private void LoadDrawingRecipes()
     {
         DrawingRecipes = [];
-        LoadRecipes<DrawingRecipe>("Drawing Recipe", "recipes/electric/drawingrecipe", (r) => DrawingRecipes.Add(r));
-        api.World.Logger.StoryEvent(Lang.Get("electricalprogressiveindustry:recipeloading"));
-
-        machines.Add("edrawing-", ("electricalprogressiveindustry:edrawing-north", ElectricalProgressiveRecipeManager.DrawingRecipes));
+        LoadRecipes<DrawingRecipe>("Drawing Recipe", "recipes/electric/drawingrecipe", DrawingRecipes.Add);
+        api.World.Logger.Debug(Lang.Get("electricalprogressiveindustry:recipeloading"));
+        machines.Add("edrawing-", ("electricalprogressiveindustry:edrawing-north", DrawingRecipes));
     }
 
-    /// <summary>
-    /// Загружает рецепты из JSON-файлов и регистрирует их с помощью указанного метода.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="name"></param>
-    /// <param name="path"></param>
-    /// <param name="RegisterMethod"></param>
-    public void LoadRecipes<T>(string name, string path, Action<T> RegisterMethod) where T : IRecipeMulty<T>
+    private void LoadRecipes<T>(string name, string path, Action<T> registerMethod)
+        where T : class, IRecipeMulty<T>
     {
-        var many = this.api.Assets.GetMany<JToken>(this.api.Server.Logger, path);
-        var num = 0;
+        var assets = api.Assets.GetMany<JToken>(api.Server.Logger, path);
         var quantityRegistered = 0;
         var quantityIgnored = 0;
-        foreach (var keyValuePair in many)
+
+        foreach (var kvp in assets)
         {
-            if (keyValuePair.Value is JObject)
+            if (kvp.Value is JObject)
             {
-                LoadGenericRecipe<T>(name, keyValuePair.Key, keyValuePair.Value.ToObject<T>(keyValuePair.Key.Domain), RegisterMethod, ref quantityRegistered, ref quantityIgnored);
-                ++num;
+                LoadGenericRecipe(name, kvp.Key, kvp.Value.ToObject<T>(kvp.Key.Domain), registerMethod, ref quantityRegistered, ref quantityIgnored);
             }
-            if (keyValuePair.Value is JArray)
+            else if (kvp.Value is JArray array)
             {
-                foreach (var token in keyValuePair.Value as JArray)
-                {
-                    LoadGenericRecipe<T>(name, keyValuePair.Key, token.ToObject<T>(keyValuePair.Key.Domain), RegisterMethod, ref quantityRegistered, ref quantityIgnored);
-                    ++num;
-                }
+                foreach (var token in array)
+                    LoadGenericRecipe(name, kvp.Key, token.ToObject<T>(kvp.Key.Domain), registerMethod, ref quantityRegistered, ref quantityIgnored);
             }
         }
-        this.api.World.Logger.Event("{0} {1}s loaded{2}", (object)quantityRegistered, (object)name, quantityIgnored > 0 ? (object)string.Format(" ({0} could not be resolved)", (object)quantityIgnored) : (object)"");
+
+        api.World.Logger.Event(
+            "{0} {1}s loaded{2}",
+            quantityRegistered,
+            name,
+            quantityIgnored > 0 ? $" ({quantityIgnored} could not be resolved)" : ""
+        );
     }
 
-    /// <summary>
-    /// Загружает и регистрирует рецепты с поддержкой подстановочных знаков.
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="className"></param>
-    /// <param name="path"></param>
-    /// <param name="recipe"></param>
-    /// <param name="RegisterMethod"></param>
-    /// <param name="quantityRegistered"></param>
-    /// <param name="quantityIgnored"></param>
     private void LoadGenericRecipe<T>(
         string className,
         AssetLocation path,
         T recipe,
-        Action<T> RegisterMethod,
+        Action<T> registerMethod,
         ref int quantityRegistered,
         ref int quantityIgnored)
-        where T : IRecipeMulty<T>
+        where T : class, IRecipeMulty<T>
     {
         if (!recipe.Enabled)
             return;
-        if (recipe.Name == (AssetLocation)null)
+
+        if (recipe.Name == null)
             recipe.Name = path;
 
-        var world1 = this.api.World;
-        var nameToCodeMapping = recipe.GetNameToCodeMapping((IWorldAccessor)world1);
+        var nameToCodeMapping = recipe.GetNameToCodeMapping(api.World);
+
         if (nameToCodeMapping.Count > 0)
         {
-            List<T> objList = [];
-            var num = 0;
-            var flag1 = true;
-            foreach (var keyValuePair in nameToCodeMapping)
+            List<T> expanded = [];
+
+            var num = 1;
+            var first = true;
+            foreach (var kvp in nameToCodeMapping)
             {
-                if (flag1)
-                    num = keyValuePair.Value.Length;
-                else
-                    num *= keyValuePair.Value.Length;
-                flag1 = false;
+                num = first ? kvp.Value.Length : num * kvp.Value.Length;
+                first = false;
             }
-            var flag2 = true;
-            foreach (var keyValuePair in nameToCodeMapping)
+
+            var firstKey = true;
+            foreach (var kvp in nameToCodeMapping)
             {
-                var key = keyValuePair.Key;
-                var strArray = keyValuePair.Value;
-                for (var index = 0; index < num; ++index)
+                var key = kvp.Key;
+                var variants = kvp.Value;
+
+                for (var index = 0; index < num; index++)
                 {
-                    T obj2;
-                    if (flag2)
-                        objList.Add(obj2 = (T)recipe.Clone());
-                    else
-                        obj2 = objList[index];
-                    if (obj2.Ingredients != null)
+                    T entry;
+                    if (firstKey)
                     {
-                        foreach (var ingredient in obj2.Ingredients)
+                        expanded.Add(entry = (T)recipe.Clone());
+                    }
+                    else
+                    {
+                        entry = expanded[index];
+                    }
+
+                    var variant = variants[index % variants.Length];
+
+                    if (entry.Ingredients != null)
+                    {
+                        foreach (var ingredient in entry.Ingredients)
                         {
                             if (ingredient.Name == key)
-                                ingredient.Code = ingredient.Code.CopyWithPath(ingredient.Code.Path.Replace("*", strArray[index % strArray.Length]));
+                                ingredient.Code = ingredient.Code.CopyWithPath(ingredient.Code.Path.Replace("*", variant));
                         }
                     }
 
-                    // Обработка всех выходов для подстановки wildcards
-                    if (obj2.Outputs != null)
+                    if (entry.Outputs != null)
                     {
-                        foreach (var output in obj2.Outputs)
-                        {
-                            output.FillPlaceHolder(keyValuePair.Key, strArray[index % strArray.Length]);
-                        }
+                        foreach (var output in entry.Outputs)
+                            output.FillPlaceHolder(key, variant);
                     }
                 }
-                flag2 = false;
+
+                firstKey = false;
             }
-            if (objList.Count == 0)
-                this.api.World.Logger.Warning("{1} file {0} make uses of wildcards, but no blocks or item matching those wildcards were found.", (object)path, (object)className);
-            foreach (var obj3 in objList)
+
+            if (expanded.Count == 0)
             {
-                if (!obj3.Resolve((IWorldAccessor)this.api.World, className + " " + (string)path))
-                {
-                    ++quantityIgnored;
-                }
+                api.World.Logger.Warning(
+                    "{1} file {0} makes use of wildcards, but no blocks or items matching those wildcards were found.",
+                    path, className
+                );
+            }
+
+            foreach (var entry in expanded)
+            {
+                if (!entry.Resolve(api.World, $"{className} {path}"))
+                    quantityIgnored++;
                 else
                 {
-                    RegisterMethod(obj3);
-                    ++quantityRegistered;
+                    registerMethod(entry);
+                    quantityRegistered++;
                 }
             }
         }
         else
         {
-            if (!recipe.Resolve((IWorldAccessor)this.api.World, className + " " + (string)path))
-            {
-                ++quantityIgnored;
-            }
+            if (!recipe.Resolve(api.World, $"{className} {path}"))
+                quantityIgnored++;
             else
             {
-                RegisterMethod(recipe);
-                ++quantityRegistered;
+                registerMethod(recipe);
+                quantityRegistered++;
             }
         }
     }
 
-    /// <summary>
-    /// Очистка ресурсов при выгрузке мода.
-    /// </summary>
     public override void Dispose()
     {
         base.Dispose();

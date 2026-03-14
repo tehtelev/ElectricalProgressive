@@ -113,7 +113,7 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
         _nowTesselatingShape = null;
         _nowTesselatingObj = null!;
         animUtil?.Dispose();
-        _mesh.Dispose();
+        _mesh?.Dispose();
         _resultingShape = null;
         // Удаляем слушатель тиков
         UnregisterGameTickListener(_listenerId);
@@ -793,7 +793,7 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
 
         animUtil?.Dispose();
 
-        _mesh.Dispose();
+        _mesh?.Dispose();
         _resultingShape = null;
     }
 

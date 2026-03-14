@@ -9,7 +9,7 @@
   "description": "Industrial electrical devices!",
   "Version": "0.6.0",
   "dependencies": {
-    "game": "1.22.0-pre.3",
+    "game": "1.22.0-rc.1",
     "electricalprogressivecore": "3.0.0-rc.1",
     "electricalprogressivebasics": "3.0.0-rc.1"
   }

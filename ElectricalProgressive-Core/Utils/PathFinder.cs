@@ -81,8 +81,8 @@ public class PathFinder
 
     public void Clear()
     {
-        nowProcessedFaces.Clear();
-        _processedFaces.Clear(); // Очистка состояния
+        nowProcessedFaces?.Clear();
+        _processedFaces?.Clear(); // Очистка состояния
     }
 
     // Эвристика для A* (манхэттенское расстояние)
@@ -96,13 +96,13 @@ public class PathFinder
         BlockPos start, BlockPos end, Network network, Dictionary<BlockPos, NetworkPart> parts)
     {
         // Инициализация коллекций
-        _startBlockFacing.Clear();
-        _endBlockFacing.Clear();
-        _queue.Clear();
-        _cameFrom.Clear();
-        _facingFrom.Clear();
-        _buf1.Clear();
-        _buf2.Clear();
+        _startBlockFacing?.Clear();
+        _endBlockFacing?.Clear();
+        _queue?.Clear();
+        _cameFrom?.Clear();
+        _facingFrom?.Clear();
+        _buf1?.Clear();
+        _buf2?.Clear();
         _buf3 = [];
         _buf4 = [];
 
@@ -322,10 +322,10 @@ public class PathFinder
     FastPosKey pos, bool[] processFaces, byte startFace,
     Network network, Dictionary<BlockPos, NetworkPart> parts)
     {
-        _neighborsFast.Clear();
-        _neighborsFace.Clear();
+        _neighborsFast?.Clear();
+        _neighborsFace?.Clear();
         _nowProcessed.Fill(false);
-        _queue2.Clear();
+        _queue2?.Clear();
         _processFacesBuf.Fill(false);
 
         if (!TryGetPart(parts, pos, out var part))

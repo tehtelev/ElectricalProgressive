@@ -82,9 +82,9 @@ namespace ElectricalProgressive.Content.Block.ECable
         public override void OnUnloaded(ICoreAPI api)
         {
             base.OnUnloaded(api);
-            BlockECable.CollisionBoxesCache.Clear();
-            BlockECable.SelectionBoxesCache.Clear();
-            BlockECable.MeshDataCache.Clear();
+            BlockECable.CollisionBoxesCache?.Clear();
+            BlockECable.SelectionBoxesCache?.Clear();
+            BlockECable.MeshDataCache?.Clear();
         }
 
         public override bool IsReplacableBy(Vintagestory.API.Common.Block block)

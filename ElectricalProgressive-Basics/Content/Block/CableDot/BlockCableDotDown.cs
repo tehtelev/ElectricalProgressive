@@ -20,9 +20,9 @@ namespace ElectricalProgressive.Content.Block.CableDot
         public override void OnUnloaded(ICoreAPI api)
         {
             base.OnUnloaded(api);
-            MeshDataCache.Clear();
-            SelectionBoxesCache.Clear();
-            CollisionBoxesCache.Clear();
+            MeshDataCache?.Clear();
+            SelectionBoxesCache?.Clear();
+            CollisionBoxesCache?.Clear();
         }
 
         public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack, BlockSelection blockSel, ref string failureCode)

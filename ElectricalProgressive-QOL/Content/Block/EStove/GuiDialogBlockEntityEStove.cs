@@ -208,7 +208,7 @@ public class GuiDialogBlockEntityEStove : GuiDialogBlockEntity
         gradient.AddColorStop(1, new Color(1, 0, 0, 1));
         ctx.SetSource(gradient);
         capi.Gui.Icons.DrawFlame(ctx, 0, false, false);
-        gradient.Dispose();
+        gradient?.Dispose();
         ctx.Restore();
 
 
@@ -230,7 +230,7 @@ public class GuiDialogBlockEntityEStove : GuiDialogBlockEntity
         gradient.AddColorStop(1, new Color(0.2, 0.6, 0.2, 1));
         ctx.SetSource(gradient);
         capi.Gui.Icons.DrawArrowRight(ctx, 0, false, false);
-        gradient.Dispose();
+        gradient?.Dispose();
         ctx.Restore();
     }
 

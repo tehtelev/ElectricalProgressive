@@ -834,7 +834,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
 
         if (this.Api is ICoreClientAPI && this._clientDialog != null)
         {
-            this._clientDialog.TryClose();
+            this._clientDialog?.TryClose();
             this._clientDialog = null;
         }
 
@@ -842,11 +842,11 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
 
         if (this.Api.Side == EnumAppSide.Client && this.AnimUtil != null)
         {
-            this.AnimUtil.Dispose();
+            this.AnimUtil?.Dispose();
         }
 
         // Очистка как в холодильнике
-        _mesh.Dispose();
+        _mesh?.Dispose();
         _resultingShape = null;
         _meshes = null;
         _nowTesselatingShape = null;
@@ -886,11 +886,11 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
 
         if (this.Api.Side == EnumAppSide.Client && this.AnimUtil != null)
         {
-            this.AnimUtil.Dispose();
+            this.AnimUtil?.Dispose();
         }
 
         // Очищаем ссылки как в холодильнике
-        _mesh.Dispose();
+        _mesh?.Dispose();
         _resultingShape = null;
         _meshes = null;
         _nowTesselatingShape = null;

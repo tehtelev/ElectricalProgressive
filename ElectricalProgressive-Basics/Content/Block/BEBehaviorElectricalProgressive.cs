@@ -184,7 +184,7 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
         ParticlesType = MyMiniLib.GetAttributeInt(this.Block, "particlesType", 0);
 
         // получаем позиции частиц из атрибутов блока
-        ParticlesOffsetPos.Clear(); // чистим данные из сохранений
+        ParticlesOffsetPos?.Clear(); // чистим данные из сохранений
         var arrayOffsetPos = MyMiniLib.GetAttributeArrayArrayFloat(this.Block, "particlesOffsetPos", new float[1][] { [0, 0, 0] });
         if (arrayOffsetPos != null)
         {
@@ -201,7 +201,7 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
         }
 
         // получаем привязку частиц к фрэймам анимации
-        ParticlesFramesAnim.Clear(); // чистим данные из сохранений
+        ParticlesFramesAnim?.Clear(); // чистим данные из сохранений
         var arrayFrames = MyMiniLib.GetAttributeArrayArrayInt(this.Block, "particlesFramesAnim", new int[1][] { [-1, -1] });
         if (arrayFrames != null)
         {

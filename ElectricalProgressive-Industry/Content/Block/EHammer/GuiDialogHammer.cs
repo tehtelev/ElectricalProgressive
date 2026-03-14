@@ -101,7 +101,7 @@ private void SetupDialog()
     
       ctx.SetSource((Pattern)source);
       this.capi.Gui.Icons.DrawArrowRight(ctx, 0.0, false, false);
-      source.Dispose();
+      source?.Dispose();
       ctx.Restore();
   }
 
@@ -111,7 +111,7 @@ private void SetupDialog()
       this.BlockEntityPosition.Z, p);
   }
 
-  private void OnTitleBarClose() => this.TryClose();
+  private void OnTitleBarClose() => this?.TryClose();
 
   public override void OnGuiOpened()
   {

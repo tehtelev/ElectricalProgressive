@@ -78,7 +78,7 @@ namespace ElectricalProgressive.Utils
                 // Если очередь пуста, очищаем PathFinder и ждем
                 if (_requestQueue.IsEmpty)
                 {
-                    pathFinder.Clear();
+                    pathFinder?.Clear();
                     Thread.Sleep(50); // Если очередь пуста, ждем 100 мс
                 }
 

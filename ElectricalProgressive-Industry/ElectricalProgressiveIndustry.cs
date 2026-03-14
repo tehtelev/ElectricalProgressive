@@ -11,7 +11,7 @@ using Vintagestory.API.Common;
 using Vintagestory.API.Server;
 
 
-[assembly: ModDependency("game", "1.22.0-pre.3")]
+[assembly: ModDependency("game", "1.22.0-rc.1")]
 [assembly: ModDependency("electricalprogressivecore", "3.0.0-rc.1")]
 [assembly: ModDependency("electricalprogressivebasics", "3.0.0-rc.1")]
 [assembly: ModInfo(

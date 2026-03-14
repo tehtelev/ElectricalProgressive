@@ -18,7 +18,7 @@ public class BlockConnector : BlockEBase
     public override void OnUnloaded(ICoreAPI api)
     {
         base.OnUnloaded(api);
-        MeshData.Clear();
+        MeshData?.Clear();
     }
 
 
