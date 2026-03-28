@@ -213,7 +213,7 @@ public class GuiDialogLiquidInsertionPipe : GuiDialogBlockEntity
         }
         catch (Exception ex)
         {
-            capi.Logger.Error($"Ошибка при отправке скорости передачи: {ex.Message}");
+            //Api.Logger.Error($"Ошибка при отправке скорости передачи: {ex.Message}");
         }
     }
 

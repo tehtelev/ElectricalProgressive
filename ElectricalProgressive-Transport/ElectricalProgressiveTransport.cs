@@ -6,15 +6,15 @@ using ElectricalProgressive.Content.NetworkPipe;
 using ElectricalProgressive.Content.NormalPipe;
 using Vintagestory.API.Common;
 
-[assembly: ModDependency("game", "1.21.6")]
+[assembly: ModDependency("game", "1.22.0-rc.1")]
 [assembly: ModDependency("electricalprogressivecore", "3.0.0-rc.3")]
 [assembly: ModDependency("electricalprogressivebasics", "3.0.0-rc.3")]
 [assembly: ModInfo(
     "Electrical Progressive: Transport",
     "electricalprogressivetransport",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
-    Description = "Additional electrical devices.",
-    Version = "3.0.0-pre.1",
+    Description = "Pipeline transport system",
+    Version = "1.0.0-rc.1",
     Authors =
     [
         "Tehtelev",
@@ -36,15 +36,16 @@ public class ElectricalProgressiveTransport : ModSystem
     {
         base.Start(api);
         instance = this;
-
-        // Регистрация труб
+        
+        // Регистрация 
         api.RegisterBlockClass("BlockPipeBase", typeof(BlockPipeBase));
         api.RegisterBlockClass("BlockPipe", typeof(BlockPipe));
         api.RegisterBlockClass("BlockInsertionPipe", typeof(BlockItemInsertionPipe));
-        api.RegisterBlockClass("BlockLiquidInsertionPipe", typeof(BlockLiquidInsertionPipe)); // НОВОЕ
+        api.RegisterBlockClass("BlockLiquidInsertionPipe", typeof(BlockLiquidInsertionPipe)); 
+
         api.RegisterBlockEntityClass("BEPipe", typeof(BEPipe));
         api.RegisterBlockEntityClass("BEInsertionPipe", typeof(BEItemInsertionPipe));
-        api.RegisterBlockEntityClass("BELiquidInsertionPipe", typeof(BELiquidInsertionPipe)); // НОВОЕ
+        api.RegisterBlockEntityClass("BELiquidInsertionPipe", typeof(BELiquidInsertionPipe)); 
         
         api.RegisterBlockClass("BlockEWaterPump", typeof(BlockEWaterPump));
         api.RegisterBlockEntityClass("BlockEntityEWaterPump", typeof(BlockEntityEWaterPump));

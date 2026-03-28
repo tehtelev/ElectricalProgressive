@@ -70,6 +70,25 @@
       ]
     }
   ],
+
+  "shapeInventoryByType": {
+    "*": {
+      "base": "block/pipe/straightinserter"
+    }
+  },
+
+  "attributes": {
+    "handbook": {
+      "groupBy": [ "pipe-item-insertion-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivetransport:block-handbooktitle-pipe-item-insertion",
+          "text": "electricalprogressivetransport:block-handbooktext-pipe-item-insertion"
+        }
+      ]
+    }
+  },
+
   "creativeinventory": { "electricalprogressivetransport": [ "*-cross" ] },
   "texturesByType": {
     "*-item-*": {

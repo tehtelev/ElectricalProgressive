@@ -71,14 +71,14 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         // Сначала вызываем базовую инициализацию
         base.Initialize(api);
 
-        api.Logger.Notification($"=== Фильтрующая труба Initialize на {Pos} ===");
+        //Api.Logger.Notification($"=== Фильтрующая труба Initialize на {Pos} ===");
 
         // Определяем направление вывода
         DetermineOutputDirection();
 
         if (api.Side == EnumAppSide.Server)
         {
-            api.Logger.Notification($"=== Регистрируем таймер на {Pos} ===");
+            //Api.Logger.Notification($"=== Регистрируем таймер на {Pos} ===");
             transferTimer = api.World.RegisterGameTickListener(OnTransferTick, 1000);
 
             // Также регистрируем тик для обработки порчи
@@ -161,53 +161,28 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         stopAllTransitions = stopAll;
         MarkDirty(true);
 
-        Api?.Logger?.Notification(
-            $"=== Настройки порчи обновлены: enabled={enabled}, multiplier={multiplier}, stopAll={stopAll} ===");
+        //Api?.Logger?.Notification($"=== Настройки порчи обновлены: enabled={enabled}, multiplier={multiplier}, stopAll={stopAll} ===");
     }
 
-    // Расчет скорости порчи
-    /*
-    public float GetPerishRate()
-    {
-        if (!stopPerishEnabled || Api == null)
-            return 1f;
 
-        // Если множитель установлен в 0 - полная остановка порчи
-        if (perishRateMultiplier <= 0.001f)
-            return 0f;
-
-        // Используем кэширование температуры для оптимизации
-        long currentTime = Api.World.ElapsedMilliseconds;
-        if (currentTime - lastTemperatureUpdate > 10000 || temperatureCached < -999f)
-        {
-            var sealevelpos = Pos.Copy();
-            sealevelpos.Y = Api.World.SeaLevel;
-
-            temperatureCached = Api.World.BlockAccessor.GetClimateAt(
-                sealevelpos,
-                EnumGetClimateMode.ForSuppliedDate_TemperatureOnly,
-                Api.World.Calendar.TotalDays
-            ).Temperature;
-
-            lastTemperatureUpdate = currentTime;
-        }
-
-        // Применяем наш множитель к базовой скорости
-        float baseRate = Math.Max(0.1f, Math.Min(2.4f, (float)Math.Pow(3, temperatureCached / 19 - 1.2) - 0.1f));
-        return baseRate * perishRateMultiplier;
-    }
-    */
     #endregion
 
     public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
     {
+        // Открываем свой GUI только на клиенте
         if (Api.Side == EnumAppSide.Client)
         {
             OpenGui(byPlayer as IClientPlayer);
         }
 
-        return true;
+        return true; // возвращаем результат базового метода (true)
     }
+
+
+
+
+
+
 
     private void OpenGui(IClientPlayer player)
     {
@@ -232,7 +207,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
     /// <summary>
     /// Получает базовый код блока для фильтрующей трубы
     /// </summary>
-    protected override string GetBaseBlockCode()
+    public override string GetBaseBlockCode()
     {
         return "electricalprogressivetransport:pipe-item-insertion";
     }
@@ -242,8 +217,8 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
     {
         if (Api == null) return;
 
-        if (debugCounter % 10 == 0)
-            Api.Logger.Notification($"=== Определяем вывод для {Pos} ===");
+        //if (debugCounter % 10 == 0)
+            //Api.Logger.Notification($"=== Определяем вывод для {Pos} ===");
 
         // Ищем контейнер в соседних блоках
         for (int i = 0; i < 6; i++)
@@ -252,30 +227,30 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
             BlockPos checkPos = Pos.AddCopy(facing);
 
             // Пропускаем позиции с трубами
-            Vintagestory.API.Common.Block checkBlock = Api.World.BlockAccessor.GetBlock(checkPos);
+            var checkBlock = Api.World.BlockAccessor.GetBlock(checkPos);
             if (checkBlock is BlockPipeBase)
             {
                 continue;
             }
 
             // Используем подход как желоб
-            BlockEntityContainer container = checkBlock.GetBlockEntity<BlockEntityContainer>(checkPos);
+            var container = checkBlock.GetBlockEntity<BlockEntityContainer>(checkPos);
 
             if (container != null)
             {
                 outputFacing = facing;
                 if (debugCounter % 5 == 0)
                 {
-                    Api.Logger.Notification($"=== НАЙДЕН КОНТЕЙНЕР! Направление: {facing.Code} на {checkPos} ===");
-                    Api.Logger.Notification($"=== Тип контейнера: {container.GetType().Name} ===");
+                    //Api.Logger.Notification($"=== НАЙДЕН КОНТЕЙНЕР! Направление: {facing.Code} на {checkPos} ===");
+                    //Api.Logger.Notification($"=== Тип контейнера: {container.GetType().Name} ===");
                 }
 
                 return;
             }
         }
 
-        if (debugCounter % 10 == 0)
-            Api.Logger.Notification($"=== Контейнер не найден для {Pos} ===");
+        //if (debugCounter % 10 == 0)
+            //Api.Logger.Notification($"=== Контейнер не найден для {Pos} ===");
         outputFacing = null;
     }
 
@@ -332,15 +307,15 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         AssetLocation itemCode = item.Collectible.Code;
         AssetLocation filterCode = filter.Collectible.Code;
 
-        Api?.Logger?.Debug($"Проверка: {itemCode} против {filterCode}");
-        Api?.Logger?.Debug($"Настройки: Mod={matchMod}, Type={matchType}, Attrs={matchAttributes}");
+        //Api?.Logger?.Debug($"Проверка: {itemCode} против {filterCode}");
+        //Api?.Logger?.Debug($"Настройки: Mod={matchMod}, Type={matchType}, Attrs={matchAttributes}");
 
         // 1. Проверка по мод-идентификатору (домену)
         if (matchMod)
         {
             if (itemCode?.Domain != filterCode?.Domain)
             {
-                Api?.Logger?.Debug($"Не совпадает мод: {itemCode?.Domain} != {filterCode?.Domain}");
+                //Api?.Logger?.Debug($"Не совпадает мод: {itemCode?.Domain} != {filterCode?.Domain}");
                 return false;
             }
         }
@@ -362,7 +337,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
             // Сравниваем базовую часть
             if (itemParts[0] != filterParts[0])
             {
-                Api?.Logger?.Debug($"Не совпадает тип: {itemParts[0]} != {filterParts[0]}");
+                //Api?.Logger?.Debug($"Не совпадает тип: {itemParts[0]} != {filterParts[0]}");
                 return false;
             }
         }
@@ -384,7 +359,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
 
                             if (itemValue != filterValue)
                             {
-                                Api?.Logger?.Debug($"Не совпадает атрибут {key}: {itemValue} != {filterValue}");
+                                //Api?.Logger?.Debug($"Не совпадает атрибут {key}: {itemValue} != {filterValue}");
                                 return false;
                             }
                         }
@@ -412,12 +387,12 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
             // то предмет должен точно совпадать с фильтром
             if (!itemCode?.Equals(filterCode) ?? false)
             {
-                Api?.Logger?.Debug($"Нет настроек сравнения, коды не совпадают");
+                //Api?.Logger?.Debug($"Нет настроек сравнения, коды не совпадают");
                 return false;
             }
         }
 
-        Api?.Logger?.Debug($"Предмет прошел фильтр!");
+        //Api?.Logger?.Debug($"Предмет прошел фильтр!");
         return true;
     }
 
@@ -437,10 +412,11 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         debugCounter++;
         if (debugCounter % 10 == 0)
         {
-            Api.Logger.Notification($"=== OnTransferTick #{debugCounter} на {Pos} ===");
+            //Api.Logger.Notification($"=== OnTransferTick #{debugCounter} на {Pos} ===");
         }
 
-        if (Api == null || networkManager == null) return;
+        if (Api == null || NetworkManager == null)
+            return;
 
         // Обновляем направление вывода, если нужно
         if (outputFacing == null || debugCounter % 20 == 0)
@@ -450,27 +426,27 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
 
         if (outputFacing == null)
         {
-            if (debugCounter % 20 == 0)
-                Api.Logger.Notification($"=== Нет вывода на {Pos} ===");
+            //if (debugCounter % 20 == 0)
+                //Api.Logger.Notification($"=== Нет вывода на {Pos} ===");
             return;
         }
 
         // Получаем целевой контейнер
         BlockPos containerPos = Pos.AddCopy(outputFacing);
-        Vintagestory.API.Common.Block block = Api.World.BlockAccessor.GetBlock(containerPos);
+        var block = Api.World.BlockAccessor.GetBlock(containerPos);
 
         // Используем подход как желоб
-        BlockEntityContainer targetContainer = block.GetBlockEntity<BlockEntityContainer>(containerPos);
+        var targetContainer = block.GetBlockEntity<BlockEntityContainer>(containerPos);
 
         if (targetContainer == null)
         {
-            if (debugCounter % 20 == 0)
-                Api.Logger.Error($"=== BlockEntityContainer не найден на {containerPos} ===");
+            //if (debugCounter % 20 == 0)
+                //Api.Logger.Error($"=== BlockEntityContainer не найден на {containerPos} ===");
             return;
         }
 
-        if (debugCounter % 5 == 0)
-            Api.Logger.Notification($"=== Целевой контейнер: {targetContainer.GetType().Name} на {containerPos} ===");
+        //if (debugCounter % 5 == 0)
+            //Api.Logger.Notification($"=== Целевой контейнер: {targetContainer.GetType().Name} на {containerPos} ===");
 
         // Ищем и переносим предметы
         FindAndTransferItems(targetContainer, containerPos);
@@ -482,26 +458,25 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
 
         if (targetInventory == null)
         {
-            if (debugCounter % 20 == 0)
-                Api.Logger.Error($"=== Не удалось получить инвентарь из контейнера на {targetPos} ===");
+            //if (debugCounter % 20 == 0)
+                //Api.Logger.Error($"=== Не удалось получить инвентарь из контейнера на {targetPos} ===");
             return;
         }
 
-        if (debugCounter % 10 == 0)
-            Api.Logger.Notification($"=== Получен инвентарь цели. Количество слотов: {targetInventory.Count} ===");
+        //if (debugCounter % 10 == 0)
+            //Api.Logger.Notification($"=== Получен инвентарь цели. Количество слотов: {targetInventory.Count} ===");
 
         // Используем сеть для поиска источников
-        var network = networkManager.GetNetwork(Pos);
+        var network = NetworkManager.GetNetwork(Pos);
         if (network == null)
         {
-            if (debugCounter % 20 == 0)
-                Api.Logger.Notification($"=== Нет сети для трубы на {Pos} ===");
+            //if (debugCounter % 20 == 0)
+                //Api.Logger.Notification($"=== Нет сети для трубы на {Pos} ===");
             return;
         }
 
-        if (debugCounter % 20 == 0)
-            Api.Logger.Notification(
-                $"=== Размер сети: {network.Pipes.Count} труб, {network.Inserters.Count} инсертеров ===");
+        //if (debugCounter % 20 == 0)
+            //Api.Logger.Notification($"=== Размер сети: {network.Pipes.Count} труб, {network.Inserters.Count} инсертеров ===");
 
         // Собираем все позиции для исключения
         var excludePositions = new HashSet<BlockPos>();
@@ -514,7 +489,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
             if (!inserterPos.Equals(Pos))
             {
                 excludePositions.Add(inserterPos);
-                BEItemInsertionPipe otherPipe = Api.World.BlockAccessor.GetBlockEntity(inserterPos) as BEItemInsertionPipe;
+                var otherPipe = Api.World.BlockAccessor.GetBlockEntity(inserterPos) as BEItemInsertionPipe;
                 if (otherPipe != null && otherPipe.outputFacing != null)
                 {
                     excludePositions.Add(inserterPos.AddCopy(otherPipe.outputFacing));
@@ -539,8 +514,8 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
                 // Проверяем, можно ли взять предмет из этого источника
                 if (TryTransferFromSource(checkPos, targetInventory, targetContainer, targetPos))
                 {
-                    if (debugCounter % 5 == 0)
-                        Api.Logger.Notification($"=== Успешно нашли и перенесли предмет из {checkPos} ===");
+                    //if (debugCounter % 5 == 0)
+                        //Api.Logger.Notification($"=== Успешно нашли и перенесли предмет из {checkPos} ===");
                     return; // Успешно перенесли предмет
                 }
                 else
@@ -550,8 +525,8 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
             }
         }
 
-        if (!foundSource && debugCounter % 10 == 0)
-            Api.Logger.Notification($"=== Не найдено подходящих источников в сети ===");
+        //if (!foundSource && debugCounter % 10 == 0)
+            //Api.Logger.Notification($"=== Не найдено подходящих источников в сети ===");
     }
 
     private bool TryTransferFromSource(BlockPos sourcePos, IInventory targetInventory,
@@ -560,44 +535,43 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         // Проверяем тайминг
         if (!CanTransferFrom(sourcePos))
         {
-            if (debugCounter % 30 == 0)
-                Api.Logger.Notification($"=== Слишком рано для переноса из {sourcePos} ===");
+            //if (debugCounter % 30 == 0)
+                //Api.Logger.Notification($"=== Слишком рано для переноса из {sourcePos} ===");
             return false;
         }
 
         // ПОЛУЧАЕМ КОНТЕЙНЕР ИСТОЧНИКА
-        Vintagestory.API.Common.Block sourceBlock = Api.World.BlockAccessor.GetBlock(sourcePos);
-        BlockEntityContainer sourceContainer = sourceBlock.GetBlockEntity<BlockEntityContainer>(sourcePos);
+        var sourceBlock = Api.World.BlockAccessor.GetBlock(sourcePos);
+        var sourceContainer = sourceBlock.GetBlockEntity<BlockEntityContainer>(sourcePos);
 
         if (sourceContainer == null)
         {
-            if (debugCounter % 30 == 0)
-                Api.Logger.Notification($"=== Источник не найден на {sourcePos} ===");
+            //if (debugCounter % 30 == 0)
+                //Api.Logger.Notification($"=== Источник не найден на {sourcePos} ===");
             return false;
         }
 
-        if (debugCounter % 20 == 0)
-            Api.Logger.Notification($"=== Проверяем источник: {sourceContainer.GetType().Name} на {sourcePos} ===");
+        //if (debugCounter % 20 == 0)
+            //Api.Logger.Notification($"=== Проверяем источник: {sourceContainer.GetType().Name} на {sourcePos} ===");
 
         // Получаем инвентарь источника
         IInventory sourceInventory = sourceContainer.Inventory;
         if (sourceInventory == null)
         {
-            if (debugCounter % 20 == 0)
-                Api.Logger.Notification(
-                    $"=== Не удалось получить инвентарь из источника {sourceContainer.GetType().Name} ===");
+            //if (debugCounter % 20 == 0)
+                //Api.Logger.Notification($"=== Не удалось получить инвентарь из источника {sourceContainer.GetType().Name} ===");
             return false;
         }
 
-        if (debugCounter % 20 == 0)
-            Api.Logger.Notification($"=== Инвентарь источника получен. Слотов: {sourceInventory.Count} ===");
+        //if (debugCounter % 20 == 0)
+            //Api.Logger.Notification($"=== Инвентарь источника получен. Слотов: {sourceInventory.Count} ===");
 
         // Определяем направление от источника к трубе
         BlockFacing directionFromSource = GetFacingFromTo(sourcePos, Pos);
         if (directionFromSource == null)
         {
-            if (debugCounter % 20 == 0)
-                Api.Logger.Notification($"=== Не удалось определить направление от источника ===");
+            //if (debugCounter % 20 == 0)
+                //Api.Logger.Notification($"=== Не удалось определить направление от источника ===");
             return false;
         }
 
@@ -606,15 +580,15 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
 
         if (sourceSlot == null || sourceSlot.Empty)
         {
-            if (debugCounter % 30 == 0)
-                Api.Logger.Notification($"=== В источнике нет подходящих предметов ===");
+            //if (debugCounter % 30 == 0)
+                //Api.Logger.Notification($"=== В источнике нет подходящих предметов ===");
             return false;
         }
 
         if (sourceSlot.Itemstack.Collectible.IsLiquid())
         {
-            if (debugCounter % 10 == 0)
-                Api.Logger.Notification($"=== Это жидкость не переносим: {sourceSlot.Itemstack.Collectible.Code} ===");
+            //if (debugCounter % 10 == 0)
+                //Api.Logger.Notification($"=== Это жидкость не переносим: {sourceSlot.Itemstack.Collectible.Code} ===");
             return false;
         }
 
@@ -622,8 +596,8 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         BlockFacing directionToTarget = GetFacingFromTo(Pos, targetPos);
         if (directionToTarget == null)
         {
-            if (debugCounter % 20 == 0)
-                Api.Logger.Notification($"=== Не удалось определить направление к цели ===");
+            //if (debugCounter % 20 == 0)
+                //Api.Logger.Notification($"=== Не удалось определить направление к цели ===");
             return false;
         }
 
@@ -631,30 +605,30 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         ItemSlot targetSlot = null;
         if (targetInventory is InventoryBase targetInventoryBase)
         {
-            if (debugCounter % 20 == 0)
-                Api.Logger.Notification($"=== Запрашиваем GetAutoPushIntoSlot у цели ===");
+            //if (debugCounter % 20 == 0)
+                //Api.Logger.Notification($"=== Запрашиваем GetAutoPushIntoSlot у цели ===");
 
             targetSlot = targetInventoryBase.GetAutoPushIntoSlot(directionToTarget.Opposite, sourceSlot);
 
             if (targetSlot != null)
             {
-                if (debugCounter % 10 == 0)
-                    Api.Logger.Notification($"=== GetAutoPushIntoSlot вернул целевой слот ===");
+                //if (debugCounter % 10 == 0)
+                    //Api.Logger.Notification($"=== GetAutoPushIntoSlot вернул целевой слот ===");
             }
         }
 
         // Если не получили целевой слот через GetAutoPushIntoSlot, ищем подходящий
         if (targetSlot == null)
         {
-            if (debugCounter % 20 == 0)
-                Api.Logger.Notification($"=== Ищем подходящий слот в цели вручную ===");
+            //if (debugCounter % 20 == 0)
+                //Api.Logger.Notification($"=== Ищем подходящий слот в цели вручную ===");
 
             targetSlot = FindSuitableTargetSlot(targetInventory, sourceSlot);
 
             if (targetSlot == null)
             {
-                if (debugCounter % 10 == 0)
-                    Api.Logger.Notification($"=== Не найден подходящий слот в цели ===");
+                //if (debugCounter % 10 == 0)
+                    //Api.Logger.Notification($"=== Не найден подходящий слот в цели ===");
                 return false;
             }
         }
@@ -662,8 +636,8 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         // Проверяем, может ли целевой слот принять предмет
         if (!targetSlot.CanHold(sourceSlot))
         {
-            if (debugCounter % 10 == 0)
-                Api.Logger.Notification($"=== Целевой слот не может принять предмет ===");
+            //if (debugCounter % 10 == 0)
+                //Api.Logger.Notification($"=== Целевой слот не может принять предмет ===");
             return false;
         }
 
@@ -734,9 +708,8 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
                 Math.Min(transferRate, sourceSlot.StackSize)
             );
 
-            if (debugCounter % 5 == 0)
-                Api.Logger.Notification(
-                    $"=== Пытаемся перенести {Math.Min(transferRate, sourceSlot.StackSize)} предметов ===");
+            //if (debugCounter % 5 == 0)
+                //Api.Logger.Notification($"=== Пытаемся перенести {Math.Min(transferRate, sourceSlot.StackSize)} предметов ===");
 
             // Используем TryPutInto
             int transferred = sourceSlot.TryPutInto(targetSlot, ref op);
@@ -754,21 +727,21 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
                 sourceBe.MarkDirty();
                 targetContainer.MarkDirty();
 
-                if (debugCounter % 2 == 0)
-                    Api.Logger.Notification($"=== Успешно перенесено {transferred} предметов через TryPutInto ===");
+                //if (debugCounter % 2 == 0)
+                    //Api.Logger.Notification($"=== Успешно перенесено {transferred} предметов через TryPutInto ===");
 
                 return true;
             }
             else
             {
-                if (debugCounter % 10 == 0)
-                    Api.Logger.Notification($"=== TryPutInto не смог перенести предметы (transferred = 0) ===");
+                //if (debugCounter % 10 == 0)
+                    //Api.Logger.Notification($"=== TryPutInto не смог перенести предметы (transferred = 0) ===");
             }
         }
         catch (Exception ex)
         {
-            Api.Logger.Error($"Ошибка при выполнении переноса: {ex.Message}");
-            Api.Logger.Error($"Stack trace: {ex.StackTrace}");
+            //Api.Logger.Error($"Ошибка при выполнении переноса: {ex.Message}");
+            //Api.Logger.Error($"Stack trace: {ex.StackTrace}");
         }
 
         return false;
@@ -811,19 +784,16 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
             return dz > 0 ? BlockFacing.SOUTH : BlockFacing.NORTH;
         }
 
-        if (debugCounter % 10 == 0)
-            Api.Logger.Notification(
-                $"=== Не удалось определить направление от {from} к {to} (dx={dx}, dy={dy}, dz={dz}) ===");
+        //if (debugCounter % 10 == 0)
+            //Api.Logger.Notification($"=== Не удалось определить направление от {from} к {to} (dx={dx}, dy={dy}, dz={dz}) ===");
 
         return null;
     }
 
     public override void GetBlockInfo(IPlayer forPlayer, StringBuilder sb)
     {
-        sb.AppendLine(Lang.Get("electricalprogressivetransport:pipe-insertion-info"));
-
         // Вызываем базовый метод для информации о соединениях
-        base.GetBlockInfo(forPlayer, sb);
+        //base.GetBlockInfo(forPlayer, sb);
 
         sb.AppendLine("══════════════════════════════════════════");
 
@@ -860,27 +830,28 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
 
         // Информация о настройках порчи
         sb.AppendLine("══════════════════════════════════════════");
-        sb.AppendLine(Lang.Get("Настройки сохранения продуктов:"));
+        sb.AppendLine(Lang.Get("electricalprogressivetransport:preservation-settings"));
 
         if (stopPerishEnabled)
         {
             if (perishRateMultiplier <= 0.001f)
             {
-                sb.AppendLine(Lang.Get("• Порча: полностью остановлена"));
+                sb.AppendLine(Lang.Get("electricalprogressivetransport:perish-fully-stopped"));
+
             }
             else
             {
-                sb.AppendLine(Lang.Get("• Порча: замедлена в {0} раз", Math.Round(1f / perishRateMultiplier, 1)));
+                sb.AppendLine(Lang.Get("electricalprogressivetransport:perish-slowed-factor", Math.Round(1f / perishRateMultiplier, 1)));
             }
 
             if (stopAllTransitions)
             {
-                sb.AppendLine(Lang.Get("• Все переходы: остановлены"));
+                sb.AppendLine(Lang.Get("electricalprogressivetransport:all-transitions-stopped"));
             }
         }
         else
         {
-            sb.AppendLine(Lang.Get("• Сохранение продуктов: отключено"));
+            sb.AppendLine(Lang.Get("electricalprogressivetransport:preservation-disabled"));
         }
     }
 
@@ -978,7 +949,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
                 {
                     transferRate = newRate;
 
-                    Api.Logger.Notification($"=== Скорость передачи обновлена: {transferRate} на {Pos} ===");
+                    //Api.Logger.Notification($"=== Скорость передачи обновлена: {transferRate} на {Pos} ===");
 
                     // Помечаем как измененное для сохранения
                     MarkDirty();

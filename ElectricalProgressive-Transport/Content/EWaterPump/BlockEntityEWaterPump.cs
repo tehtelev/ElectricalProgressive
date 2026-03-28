@@ -100,6 +100,8 @@ public class BlockEntityEWaterPump : BlockEntityGenericTypedContainer
         if (api.Side == EnumAppSide.Client)
         {
             _capi = api as ICoreClientAPI;
+
+            
             if (AnimUtil != null)
             {
                 AnimUtil.InitializeAnimator(InventoryClassName, null, null, new Vec3f(0, GetRotation(), 0f));
@@ -511,7 +513,7 @@ public class BlockEntityEWaterPump : BlockEntityGenericTypedContainer
     }
     
     // === СЕРИАЛИЗАЦИЯ ===
-    
+
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldForResolving)
     {
         base.FromTreeAttributes(tree, worldForResolving);

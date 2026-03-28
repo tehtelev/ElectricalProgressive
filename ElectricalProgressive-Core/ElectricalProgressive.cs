@@ -147,7 +147,7 @@ namespace ElectricalProgressive
                 _asyncPathFinder?.Stop();
                 _asyncPathFinder = null;
             }
-
+            
             // Очистка ресурсов
             _globalEnergyPackets?.Clear();
             _sumEnergy?.Clear();

@@ -18,7 +18,8 @@ namespace ElectricalProgressive.Content
             IPlayer byPlayer,
             BlockSelection blockSel)
         {
-            if (blockSel == null) return false;
+            if (blockSel == null)
+                return false;
 
             // Проверяем, есть ли в руке ключ для смены режима
             ItemSlot activeSlot = byPlayer.InventoryManager.ActiveHotbarSlot;
@@ -35,7 +36,6 @@ namespace ElectricalProgressive.Content
             var be = world.BlockAccessor.GetBlockEntity(blockSel.Position);
             if (be != null)
             {
-
                 if (be is BEItemInsertionPipe itempipe)
                 {
                     itempipe.OnPlayerRightClick(byPlayer, blockSel);
@@ -56,11 +56,11 @@ namespace ElectricalProgressive.Content
         protected virtual bool TransformPipeType(IWorldAccessor world, BlockPos pos, IPlayer player)
         {
             // Получаем текущий блок
-            Vintagestory.API.Common.Block currentBlock = world.BlockAccessor.GetBlock(pos);
+            var currentBlock = world.BlockAccessor.GetBlock(pos);
             string currentCode = currentBlock.Code.Path;
             
             // Для отладки
-            world.Logger.Notification($"Текущий код блока: {currentCode}");
+            //world.Logger.Notification($"Текущий код блока: {currentCode}");
 
             // Парсим текущий код блока
             // Формат: electricalprogressivetransport:{базовый-тип}-{конфигурация}
@@ -72,7 +72,7 @@ namespace ElectricalProgressive.Content
             string[] parts = currentCode.Split('-');
             if (parts.Length < 2)
             {
-                world.Logger.Warning($"Некорректный формат кода трубы: {currentCode}");
+                //world.Logger.Warning($"Некорректный формат кода трубы: {currentCode}");
                 return false;
             }
             
@@ -134,11 +134,11 @@ namespace ElectricalProgressive.Content
             }
             else
             {
-                world.Logger.Warning($"Неизвестный тип трубы: {currentCode}");
+                //world.Logger.Warning($"Неизвестный тип трубы: {currentCode}");
                 return false;
             }
             
-            world.Logger.Notification($"Базовый тип: {baseType}, Конфигурация: {configuration}");
+            //world.Logger.Notification($"Базовый тип: {baseType}, Конфигурация: {configuration}");
 
             // Определяем следующий тип в цикле
             string nextBaseType = baseType switch
@@ -149,7 +149,7 @@ namespace ElectricalProgressive.Content
                 _ => "pipe-normal"
             };
             
-            world.Logger.Notification($"Следующий тип: {nextBaseType}");
+            //world.Logger.Notification($"Следующий тип: {nextBaseType}");
 
             // Собираем новый код блока
             string newBlockCode = !string.IsNullOrEmpty(configuration) 
@@ -157,12 +157,12 @@ namespace ElectricalProgressive.Content
                 : nextBaseType;
             
             // Получаем новый блок
-            Vintagestory.API.Common.Block newBlock = world.GetBlock(new AssetLocation($"electricalprogressivetransport:{newBlockCode}"));
+            var newBlock = world.GetBlock(new AssetLocation($"electricalprogressivetransport:{newBlockCode}"));
             
             // Если блок с конфигурацией не найден, пробуем найти с дефолтной конфигурацией
             if (newBlock == null && !string.IsNullOrEmpty(configuration))
             {
-                world.Logger.Notification($"Блок {newBlockCode} не найден, пробуем дефолтную конфигурацию...");
+                //world.Logger.Notification($"Блок {newBlockCode} не найден, пробуем дефолтную конфигурацию...");
                 newBlock = world.GetBlock(new AssetLocation($"electricalprogressivetransport:{nextBaseType}-straight-ns"));
                 
                 // Если и с дефолтной не найден, пробуем базовый
@@ -174,11 +174,11 @@ namespace ElectricalProgressive.Content
             
             if (newBlock == null)
             {
-                world.Logger.Warning($"Не удалось найти блок: electricalprogressivetransport:{newBlockCode}");
+                //world.Logger.Warning($"Не удалось найти блок: electricalprogressivetransport:{newBlockCode}");
                 return false;
             }
             
-            world.Logger.Notification($"Новый блок найден: {newBlock.Code}");
+            //world.Logger.Notification($"Новый блок найден: {newBlock.Code}");
 
             // Получаем текущую сущность и сохраняем её данные
             BlockEntity currentEntity = world.BlockAccessor.GetBlockEntity(pos);
@@ -186,7 +186,7 @@ namespace ElectricalProgressive.Content
             
             if (currentEntity != null)
             {
-                world.Logger.Notification($"Сохраняем данные текущей сущности...");
+                //world.Logger.Notification($"Сохраняем данные текущей сущности...");
                 
                 tree = new TreeAttribute();
                 currentEntity.ToTreeAttributes(tree);
@@ -215,7 +215,7 @@ namespace ElectricalProgressive.Content
             }
 
             // Меняем блок
-            world.Logger.Notification($"Меняем блок {currentBlock.Code} на {newBlock.Code}...");
+            //world.Logger.Notification($"Меняем блок {currentBlock.Code} на {newBlock.Code}...");
             world.BlockAccessor.SetBlock(newBlock.BlockId, pos);
             
             // Ждем немного, чтобы сущность успела инициализироваться
@@ -227,7 +227,7 @@ namespace ElectricalProgressive.Content
                     BlockEntity newEntity = world.BlockAccessor.GetBlockEntity(pos);
                     if (newEntity != null)
                     {
-                        world.Logger.Notification($"Восстанавливаем данные в новую сущность типа {newEntity.GetType().Name}...");
+                       // world.Logger.Notification($"Восстанавливаем данные в новую сущность типа {newEntity.GetType().Name}...");
                         
                         try
                         {
@@ -240,7 +240,7 @@ namespace ElectricalProgressive.Content
                                 if (currentEntity is BEPipe)
                                 {
                                     // Переход из обычной в предметную фильтрующую
-                                    world.Logger.Notification($"Устанавливаем дефолтные настройки для предметной трубы...");
+                                    //world.Logger.Notification($"Устанавливаем дефолтные настройки для предметной трубы...");
                                     newItemPipe.UpdateFilterSettings(
                                         BEItemInsertionPipe.FilterMode.AllowList, 
                                         false, true, false);
@@ -251,7 +251,7 @@ namespace ElectricalProgressive.Content
                                 if (currentEntity is BEPipe)
                                 {
                                     // Переход из обычной в жидкостную фильтрующую
-                                    world.Logger.Notification($"Устанавливаем дефолтные настройки для жидкостной трубы...");
+                                    //world.Logger.Notification($"Устанавливаем дефолтные настройки для жидкостной трубы...");
                                     newLiquidPipe.UpdateFilterSettings(
                                         BELiquidInsertionPipe.FilterMode.AllowList);
                                 }
@@ -288,7 +288,7 @@ namespace ElectricalProgressive.Content
                 BlockFacing facing = BlockFacing.ALLFACES[i];
                 BlockPos neighborPos = pos.AddCopy(facing);
                 
-                Vintagestory.API.Common.Block neighborBlock = world.BlockAccessor.GetBlock(neighborPos);
+                var neighborBlock = world.BlockAccessor.GetBlock(neighborPos);
                 
                 if (neighborBlock is BlockPipeBase)
                 {
@@ -364,7 +364,7 @@ namespace ElectricalProgressive.Content
 
         public override string GetPlacedBlockInfo(IWorldAccessor world, BlockPos pos, IPlayer forPlayer)
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            var sb = new System.Text.StringBuilder();
             
             // Определяем режим трубы по коду
             string modeText;

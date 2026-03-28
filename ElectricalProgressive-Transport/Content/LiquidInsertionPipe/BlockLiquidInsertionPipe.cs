@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using ElectricalProgressive.Content.ItemInsertionPipe;
+using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -25,11 +26,64 @@ public class BlockLiquidInsertionPipe : BlockPipeBase
         }.Append<WorldInteraction>(base.GetPlacedBlockInteractionHelp(world, selection, forPlayer));
     }
 
+
+    public override ItemStack OnPickBlock(IWorldAccessor world, BlockPos pos)
+    {
+
+        var be = world.BlockAccessor.GetBlockEntity(pos) as BELiquidInsertionPipe;
+        if (be == null)
+            return null;
+
+        var blockCode = be.GetBaseBlockCode() + "-cross";
+
+        var block = world.BlockAccessor.GetBlock(blockCode);
+
+        return new(block);
+    }
+
+    public override ItemStack[] GetDrops(IWorldAccessor world, BlockPos pos, IPlayer byPlayer, float dropQuantityMultiplier = 1)
+    {
+        return [OnPickBlock(world, pos)];
+    }
+
+
+    /// <summary>
+    /// Обработка начала взаимодействия с блоком (например, при клике правой кнопкой мыши)
+    /// </summary>
+    /// <param name="world"></param>
+    /// <param name="byPlayer"></param>
+    /// <param name="blockSel"></param>
+    /// <returns></returns>
+    public override bool OnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel)
+    {
+
+        if (blockSel.Position == null || world.BlockAccessor.GetBlockEntity(blockSel.Position) is not BELiquidInsertionPipe be)
+            return false;
+
+        var handled = base.OnBlockInteractStart(world, byPlayer, blockSel);
+        if (!handled && blockSel.Position != null)
+        {
+            return true;
+        }
+
+        if (be is null)
+            return true;
+
+        return true;
+    }
+
+    /// <summary>
+    /// Получение информации о блоке для отображения в подсказке
+    /// </summary>
+    /// <param name="world"></param>
+    /// <param name="pos"></param>
+    /// <param name="forPlayer"></param>
+    /// <returns></returns>
     public override string GetPlacedBlockInfo(IWorldAccessor world, BlockPos pos, IPlayer forPlayer)
     {
         StringBuilder sb = new StringBuilder();
-        sb.AppendLine(Lang.Get("electricalprogressivetransport:pipe-liquid-insertion-info"));
-        BELiquidInsertionPipe pipe = world.BlockAccessor.GetBlockEntity(pos) as BELiquidInsertionPipe;
+
+        var pipe = world.BlockAccessor.GetBlockEntity(pos) as BELiquidInsertionPipe;
         if (pipe != null)
         {
             pipe.GetBlockInfo(forPlayer, sb);

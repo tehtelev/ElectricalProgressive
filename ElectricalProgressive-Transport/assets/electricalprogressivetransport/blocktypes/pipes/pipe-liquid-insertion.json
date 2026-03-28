@@ -102,6 +102,24 @@
       }
     }
   },
+
+  "shapeInventoryByType": {
+    "*": {
+      "base": "block/pipe/straightinserter"
+    }
+  },
+
+  "attributes": {
+    "handbook": {
+      "groupBy": [ "pipe-liquid-insertion-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivetransport:block-handbooktitle-pipe-liquid-insertion",
+          "text": "electricalprogressivetransport:block-handbooktext-pipe-liquid-insertion"
+        }
+      ]
+    }
+  },
   "lightAbsorption": 0.0,
   "drawType": "JSON",
   "emitSideAo": {

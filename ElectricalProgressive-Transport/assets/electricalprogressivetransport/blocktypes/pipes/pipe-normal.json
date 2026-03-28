@@ -70,7 +70,12 @@
       ]
     }
   ],
-  "creativeinventory": { "electricalprogressivetransport": [ "*-normal-cross" ] },
+  "shapeInventoryByType": {
+    "*": {
+      "base": "block/pipe/straight"
+    }
+  },
+  "creativeinventory": { "electricalprogressivetransport": [ "*-cross" ] },
   "texturesByType": {
     "*-normal-*": {
       "bismuthbronze": {
@@ -116,6 +121,19 @@
   "sideSolid": {
     "all": false
   },
+
+  "attributes": {
+    "handbook": {
+      "groupBy": [ "pipe-normal-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivetransport:block-handbooktitle-pipe-normal",
+          "text": "electricalprogressivetransport:block-handbooktext-pipe-normal"
+        }
+      ]
+    }
+  },
+
   "shapeByType": {
     // === ПРЯМЫЕ ТРУБЫ ===
     "*-straight-ns": {
@@ -431,15 +449,5 @@
     }
   }
 
-  // Пояснения:
-  // 1. four-n/e/s/w/u/d: отсутствует ОДНА сторона (5 соединений фактически)
-  // 2. four-nw/ne/sw/se: отсутствуют ДВЕ смежные горизонтальные стороны (угловые)
-  // 3. four-nu/su/eu/wu: отсутствует горизонтальная сторона + верх
-  // 4. four-nd/sd/ed/wd: отсутствует горизонтальная сторона + низ
-  //
-  // Для работы с этими моделями нужно создать соответствующие .json модели в assets:
-  // - block/pipe/four-horizontal.json (все 4 горизонтальных соединения)
-  // - block/pipe/four-diagonal.json (2 противоположных горизонтальных + 2 вертикальных)
-  // - block/pipe/four-corner-up.json (3 соединения в форме угла смотрящего вверх)
-  // - block/pipe/four-corner-down.json (3 соединения в форме угла смотрящего вниз)
+
 }
