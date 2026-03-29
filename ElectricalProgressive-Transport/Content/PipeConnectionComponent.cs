@@ -1,5 +1,4 @@
 ﻿using ElectricalProgressive.Content.NetworkPipe;
-using ElectricalProgressive.Content.NormalPipe;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -234,6 +233,13 @@ namespace ElectricalProgressive.Content
             UpdateBlockModel();
             _owner.MarkDirty();
         }
+
+        // Этот метод можно вызвать при удалении трубы, чтобы удалить ее из сети
+        public virtual void OnPipeRemoved()
+        {
+            _networkManager?.RemovePipe(_pos);
+        }
+
 
         public virtual void UpdateBlockModel()
         {

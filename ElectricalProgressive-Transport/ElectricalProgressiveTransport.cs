@@ -14,7 +14,7 @@ using Vintagestory.API.Common;
     "electricalprogressivetransport",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Pipeline transport system",
-    Version = "1.0.0-rc.1",
+    Version = "1.0.0-rc.2",
     Authors =
     [
         "Tehtelev",

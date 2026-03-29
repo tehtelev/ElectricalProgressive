@@ -58,6 +58,10 @@ public class BlockEntityPipeBase : BlockEntityGenericTypedContainer
         UpdateConnections(true);
     }
 
+
+    /// <summary>
+    /// При удалении трубы из мира
+    /// </summary>
     public override void OnBlockRemoved()
     {
         // Перед удалением сохраняем позиции соседей
@@ -72,6 +76,8 @@ public class BlockEntityPipeBase : BlockEntityGenericTypedContainer
                 }
             }
         }
+
+        _pipeConnection.OnPipeRemoved();
 
         base.OnBlockRemoved();
 

@@ -1,8 +1,5 @@
-﻿using ElectricalProgressive.Content.ItemInsertionPipe;
-using ElectricalProgressive.Content.NormalPipe;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Vintagestory.API.Common;
-using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 
 namespace ElectricalProgressive.Content.NetworkPipe;
@@ -17,7 +14,6 @@ public class PipeNetworkManager
     public void Initialize(ICoreAPI api)
     {
         this.api = api;
-        RebuildAllNetworks();
     }
 
     public void AddPipe(BlockPos pos, BlockEntity pipe)
@@ -84,67 +80,110 @@ public class PipeNetworkManager
         }
     }
 
+
+    // Метод для удаления трубы и проверки распада сети
     public void RemovePipe(BlockPos pos)
     {
-        if (pipeToNetwork.TryGetValue(pos, out long networkId))
+        if (!pipeToNetwork.TryGetValue(pos, out long networkId))
+            return;
+
+        pipeToNetwork.Remove(pos);
+
+        if (!networks.TryGetValue(networkId, out PipeNetwork network))
+            return;
+
+        network.RemovePipe(pos);
+
+        if (network.Pipes.Count == 0)
         {
-            pipeToNetwork.Remove(pos);
+            networks.Remove(networkId);
+            return;
+        }
 
-            if (networks.TryGetValue(networkId, out PipeNetwork network))
+        // BFS строго по позициям, оставшимся в сети
+        var remaining = new HashSet<BlockPos>(network.Pipes);
+        var components = new List<HashSet<BlockPos>>();
+
+        while (remaining.Count > 0)
+        {
+            BlockPos start = null;
+            foreach (var p in remaining) { start = p; break; }
+
+            var component = new HashSet<BlockPos>();
+            var queue = new Queue<BlockPos>();
+
+            component.Add(start);
+            remaining.Remove(start);
+            queue.Enqueue(start);
+
+            while (queue.Count > 0)
             {
-                network.RemovePipe(pos);
+                BlockPos current = queue.Dequeue();
+                bool[] connectedSides = GetConnectedSides(current);
+                if (connectedSides == null) continue;
 
-                // Проверяем, не развалилась ли сеть на части
-                if (network.Pipes.Count > 0)
+                for (int i = 0; i < 6; i++)
                 {
-                    // Ищем разъединенные компоненты
-                    var allPipes = new List<BlockPos>(network.Pipes);
-                    HashSet<BlockPos> processed = [];
+                    if (!connectedSides[i]) continue;
 
-                    foreach (var pipePos in allPipes)
+                    BlockPos neighborPos = current.AddCopy(BlockFacing.ALLFACES[i]);
+
+                    // Проходим ТОЛЬКО по трубам, которые ещё в сети
+                    if (remaining.Contains(neighborPos))
                     {
-                        if (!processed.Contains(pipePos))
-                        {
-                            BlockEntity pipe = api.World.BlockAccessor.GetBlockEntity(pipePos);
-                            if (pipe != null)
-                            {
-                                var component = FindConnectedComponent(pipePos);
-                                processed.UnionWith(component);
-
-                                if (component.Count < allPipes.Count)
-                                {
-                                    // Создаем новую сеть для этого компонента
-                                    long newId = nextNetworkId++;
-                                    PipeNetwork newNetwork = new PipeNetwork(newId);
-
-                                    foreach (var componentPos in component)
-                                    {
-                                        BlockEntity componentPipe =
-                                            api.World.BlockAccessor.GetBlockEntity(componentPos);
-                                        if (componentPipe != null)
-                                        {
-                                            newNetwork.AddPipe(componentPos, componentPipe);
-                                            pipeToNetwork[componentPos] = newId;
-                                            network.RemovePipe(componentPos);
-                                        }
-                                    }
-
-                                    networks[newId] = newNetwork;
-                                }
-                            }
-                        }
+                        component.Add(neighborPos);
+                        remaining.Remove(neighborPos);
+                        queue.Enqueue(neighborPos);
                     }
                 }
+            }
 
-                // Удаляем пустую сеть
-                if (network.Pipes.Count == 0)
-                {
-                    networks.Remove(networkId);
-                }
+            components.Add(component);
+        }
+
+        // Сеть не распалась — ничего не делаем
+        if (components.Count == 1)
+            return;
+
+        // Перестраиваем оригинальную сеть под первый компонент
+        network.Pipes.Clear();
+        network.Inserters.Clear();
+        foreach (var pipePos in components[0])
+        {
+            var pipe = api.World.BlockAccessor.GetBlockEntity(pipePos);
+            if (pipe != null)
+                network.AddPipe(pipePos, pipe);
+            pipeToNetwork[pipePos] = networkId;
+        }
+
+        // Создаём новые сети для остальных компонентов
+        for (int c = 1; c < components.Count; c++)
+        {
+            long newId = nextNetworkId++;
+            PipeNetwork newNetwork = new PipeNetwork(newId);
+            networks[newId] = newNetwork;
+
+            foreach (var pipePos in components[c])
+            {
+                var pipe = api.World.BlockAccessor.GetBlockEntity(pipePos);
+                if (pipe != null)
+                    newNetwork.AddPipe(pipePos, pipe);
+                pipeToNetwork[pipePos] = newId;
             }
         }
     }
 
+    private bool[] GetConnectedSides(BlockPos pos)
+    {
+        var entity = api.World.BlockAccessor.GetBlockEntity(pos);
+        if (entity is BEPipe pipe)
+            return pipe.ConnectedSides;
+        if (entity is BlockEntityPipeBase inserter)
+            return inserter.ConnectedSides;
+        return null;
+    }
+
+    /*
     private List<BlockPos> FindConnectedComponent(BlockPos startPos)
     {
         List<BlockPos> component = [];
@@ -166,12 +205,13 @@ public class PipeNetworkManager
             {
                 connectedSides = pipe.ConnectedSides;
             }
-            else if (pipeEntity is BEItemInsertionPipe inserter)
+            else if (pipeEntity is BlockEntityPipeBase inserter)
             {
                 connectedSides = inserter.ConnectedSides;
             }
 
-            if (connectedSides == null) continue;
+            if (connectedSides == null)
+                continue;
 
             for (int i = 0; i < 6; i++)
             {
@@ -192,147 +232,8 @@ public class PipeNetworkManager
         return component;
     }
 
-    private void RebuildAllNetworks()
-    {
-        networks?.Clear();
-        pipeToNetwork?.Clear();
-        nextNetworkId = 1;
+    */
 
-        // Ищем все трубы в мире через проход по чанкам
-        var allPipes = new List<BlockPos>();
-
-        // Используем IMapChunk для доступа к чанкам
-        int chunkSize = GlobalConstants.ChunkSize;
-        int worldSize = api.World.BlockAccessor.MapSizeY / chunkSize;
-
-        // Получаем все загруженные чанки
-        // Вместо GetChunks() используем GetMapChunkAtBlockPos для прохода по координатам
-        // или используем другой подход
-
-        // Простой подход - проход по всем блокам в радиусе от центра мира
-        // Это неэффективно, но работает
-        int searchRadius = 1000; // Большой радиус для поиска всех труб
-
-        for (int x = -searchRadius; x <= searchRadius; x += 16)
-        {
-            for (int z = -searchRadius; z <= searchRadius; z += 16)
-            {
-                for (int y = 0; y < api.World.BlockAccessor.MapSizeY; y += 16)
-                {
-                    BlockPos chunkPos = new BlockPos(x, y, z);
-
-                    // Пытаемся получить чанк
-                    IMapChunk mapChunk = api.World.BlockAccessor.GetMapChunkAtBlockPos(chunkPos);
-                    if (mapChunk != null)
-                    {
-                        // Проходим по всем блокам в чанке
-                        for (int cx = 0; cx < chunkSize; cx++)
-                        {
-                            for (int cy = 0; cy < chunkSize; cy++)
-                            {
-                                for (int cz = 0; cz < chunkSize; cz++)
-                                {
-                                    BlockPos blockPos = new BlockPos(
-                                        chunkPos.X + cx,
-                                        chunkPos.Y + cy,
-                                        chunkPos.Z + cz
-                                    );
-
-                                    Vintagestory.API.Common.Block block = api.World.BlockAccessor.GetBlock(blockPos);
-                                    if (block is BlockPipeBase)
-                                    {
-                                        allPipes.Add(blockPos.Copy());
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Альтернативный, более правильный подход:
-        // Используем IWorldChunk если доступно
-
-        /*
-        // Получаем размеры мира в чанках
-        int chunksX = api.World.BlockAccessor.MapSizeX / chunkSize;
-        int chunksZ = api.World.BlockAccessor.MapSizeZ / chunkSize;
-
-        for (int chunkX = 0; chunkX < chunksX; chunkX++)
-        {
-            for (int chunkZ = 0; chunkZ < chunksZ; chunkZ++)
-            {
-                for (int chunkY = 0; chunkY < worldSize; chunkY++)
-                {
-                    // Пытаемся получить чанк
-                    IWorldChunk chunk = api.World.BlockAccessor.GetChunk(chunkX, chunkY, chunkZ);
-                    if (chunk != null)
-                    {
-                        // Проходим по всем блокам в чанке
-                        for (int lx = 0; lx < chunkSize; lx++)
-                        {
-                            for (int ly = 0; ly < chunkSize; ly++)
-                            {
-                                for (int lz = 0; lz < chunkSize; lz++)
-                                {
-                                    int index = chunk.GetLocalBlockIndex(lx, ly, lz);
-                                    int blockId = chunk.Data.GetBlockId(index, 0);
-
-                                    if (blockId != 0)
-                                    {
-                                        Block block = api.World.GetBlock(blockId);
-                                        if (block is BlockPipeBase)
-                                        {
-                                            BlockPos blockPos = new BlockPos(
-                                                chunkX * chunkSize + lx,
-                                                chunkY * chunkSize + ly,
-                                                chunkZ * chunkSize + lz
-                                            );
-                                            allPipes.Add(blockPos);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        */
-
-        // Строим сети
-        HashSet<BlockPos> processed = [];
-
-        foreach (var pipePos in allPipes)
-        {
-            if (!processed.Contains(pipePos))
-            {
-                BEPipe pipe = api.World.BlockAccessor.GetBlockEntity(pipePos) as BEPipe;
-                if (pipe != null)
-                {
-                    var connected = FindConnectedComponent(pipePos);
-
-                    long networkId = nextNetworkId++;
-                    PipeNetwork network = new PipeNetwork(networkId);
-
-                    foreach (var connectedPos in connected)
-                    {
-                        BEPipe connectedPipe =
-                            api.World.BlockAccessor.GetBlockEntity(connectedPos) as BEPipe;
-                        if (connectedPipe != null)
-                        {
-                            network.AddPipe(connectedPos, connectedPipe);
-                            pipeToNetwork[connectedPos.Copy()] = networkId;
-                            processed.Add(connectedPos);
-                        }
-                    }
-
-                    networks[networkId] = network;
-                }
-            }
-        }
-    }
 
     public PipeNetwork GetNetwork(BlockPos pipePos)
     {

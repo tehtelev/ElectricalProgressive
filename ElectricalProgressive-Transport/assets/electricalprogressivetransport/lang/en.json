@@ -43,6 +43,8 @@
   "electricalprogressivetransport:perish-slowed-factor": "• Perish: slowed by {0}x",
   "electricalprogressivetransport:all-transitions-stopped": "• All transitions: stopped",
   "electricalprogressivetransport:preservation-disabled": "• Preservation: disabled",
+  "electricalprogressivetransport:inventory-connections": "Inventories connected: {0}",
+
 
   "block-handbooktitle-pipe-normal": "Usage",
   "block-handbooktext-pipe-normal": "Allows transferring items and liquids. Connect containers/inventories with this pipe. The last pipe before a container must be converted into an insertion pipe. To do so, hold a wrench and right-click the pipe. Then you can set filters in the GUI.",
@@ -52,4 +54,6 @@
 
   "block-handbooktitle-pipe-liquid-insertion": "Usage",
   "block-handbooktext-pipe-liquid-insertion": "Allows inserting liquids into adjacent containers. Set filters by placing any amount of the desired liquid into empty slots. If all filter slots are empty, all liquids will be moved without filtering."
+
+
 }

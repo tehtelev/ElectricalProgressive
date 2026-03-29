@@ -52,6 +52,9 @@ public class BEPipe : BlockEntity
         UpdateConnections(true);
     }
 
+    /// <summary>
+    /// При удалении трубы из мира
+    /// </summary>
     public override void OnBlockRemoved()
     {
         // Перед удалением сохраняем позиции соседей
@@ -66,6 +69,8 @@ public class BEPipe : BlockEntity
                 }
             }
         }
+
+        _pipeConnection.OnPipeRemoved();
 
         base.OnBlockRemoved();
 

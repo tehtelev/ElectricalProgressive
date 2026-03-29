@@ -1,11 +1,8 @@
 ﻿using ElectricalProgressive.Content.ItemInsertionPipe;
 using ElectricalProgressive.Content.LiquidInsertionPipe;
-using ElectricalProgressive.Content.NormalPipe;
 using System.Collections.Generic;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
-using Vintagestory.API.Common.Entities;
-using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
@@ -175,7 +172,7 @@ namespace ElectricalProgressive.Content
             //world.Logger.Notification($"Новый блок найден: {newBlock.Code}");
 
             // Получаем текущую сущность и сохраняем её данные
-            BlockEntity currentEntity = world.BlockAccessor.GetBlockEntity(pos);
+            var currentEntity = world.BlockAccessor.GetBlockEntity(pos);
             ITreeAttribute tree = null;
             
             if (currentEntity != null)
@@ -257,12 +254,11 @@ namespace ElectricalProgressive.Content
                         }
                     }
                 }
-                
+
                 // Обновляем соединения с соседями
+                // Там же и обновится модель, так что можно не вызывать UpdateBlockModel отдельно
                 UpdateNeighborConnections(world, pos);
                 
-                // Обновляем модель нового блока
-                UpdateBlockModel(world, pos);
                 
                 // Проигрываем звук
                 world.BlockAccessor.MarkBlockDirty(pos);
@@ -304,27 +300,7 @@ namespace ElectricalProgressive.Content
             }
         }
 
-        /// <summary>
-        /// Обновляет модель блока
-        /// </summary>
-        private void UpdateBlockModel(IWorldAccessor world, BlockPos pos)
-        {
-            var entity = world.BlockAccessor.GetBlockEntity(pos);
-            
-            if (entity is BEPipe normalPipe)
-            {
-                normalPipe.UpdateBlockModel();
-            }
-            else if (entity is BEItemInsertionPipe itemPipe)
-            {
-                itemPipe.UpdateBlockModel();
-            }
-            else if (entity is BELiquidInsertionPipe liquidPipe)
-            {
-                liquidPipe.UpdateBlockModel();
-            }
-        }
-       
+
         
         public override WorldInteraction[] GetPlacedBlockInteractionHelp(
             IWorldAccessor world,
@@ -355,6 +331,8 @@ namespace ElectricalProgressive.Content
                 }
             }.Append<WorldInteraction>(base.GetPlacedBlockInteractionHelp(world, selection, forPlayer));
         }
+
+
 
         /// <summary>
         /// При изменении соседей
