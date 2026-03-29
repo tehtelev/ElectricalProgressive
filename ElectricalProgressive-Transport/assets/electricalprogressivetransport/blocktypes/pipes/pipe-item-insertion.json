@@ -146,8 +146,8 @@
       "rotateY": 0
     },
     "*-straight-ud": {
-      "base": "block/pipe/straightinserter",
-      "rotateX": 90
+      "base": "block/pipe/verticalserter",
+      "rotateY": 0
     },
 
     // === ГОРИЗОНТАЛЬНЫЕ УГЛЫ ===
