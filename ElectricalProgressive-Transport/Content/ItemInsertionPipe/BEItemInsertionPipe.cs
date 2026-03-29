@@ -793,7 +793,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
     public override void GetBlockInfo(IPlayer forPlayer, StringBuilder sb)
     {
         // Вызываем базовый метод для информации о соединениях
-        //base.GetBlockInfo(forPlayer, sb);
+        base.GetBlockInfo(forPlayer, sb);
 
         sb.AppendLine("══════════════════════════════════════════");
 

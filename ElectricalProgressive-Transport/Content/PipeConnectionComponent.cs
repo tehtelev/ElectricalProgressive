@@ -32,16 +32,23 @@ namespace ElectricalProgressive.Content
         public bool[] ConnectedToInventory => _connectedToInventory;
         public BlockPos?[] ConnectedPipes => _connectedPipes;
 
-        private static string[] inventoryKeywords = new[]
-        {
+        private static string[] inventoryKeywords =
+        [
             "chest", "crate", "box", "barrel", "shelf",
             "hopper", "funnel", "container", "storage",
             "cabinet", "drawer", "bin", "basket", "bag",
             "vessel", "pot", "jar", "tub", "tank",
             "mill", "quern", "press", "forge", "crucible",
             "machine", "machinebase", "generator", "machinerack"
-        };
+        ];
 
+        private static Dictionary<string, string[]> adjacency = new()
+        {
+            { "north", ["west", "east"] },
+            { "east", ["north", "south"] },
+            { "south", ["east", "west"] },
+            { "west", ["south", "north"] }
+        };
 
         public PipeConnectionComponent(BlockEntity owner, ICoreAPI api, BlockPos pos)
         {
@@ -62,7 +69,8 @@ namespace ElectricalProgressive.Content
 
         public virtual void UpdateConnections(bool updateNeighbors = true)
         {
-            if (_isUpdating) return; // Защита от бесконечной рекурсии
+            if (_isUpdating)
+                return; // Защита от бесконечной рекурсии
             _isUpdating = true;
 
             try
@@ -374,9 +382,11 @@ namespace ElectricalProgressive.Content
 
         private static bool IsTripleCorner(List<BlockFacing> facings)
         {
-            if (facings.Count != 3) return false;
+            if (facings.Count != 3)
+                return false;
             foreach (var f in facings)
-                if (facings.Contains(f.Opposite)) return false;
+                if (facings.Contains(f.Opposite))
+                    return false;
             return facings.Select(f => f.Axis).Distinct().Count() == 3;
         }
 
@@ -400,9 +410,11 @@ namespace ElectricalProgressive.Content
 
         private static bool IsTeeConnection(List<BlockFacing> facings)
         {
-            if (facings.Count != 3) return false;
+            if (facings.Count != 3)
+                return false;
             foreach (var f in facings)
-                if (facings.Contains(f.Opposite)) return true;
+                if (facings.Contains(f.Opposite))
+                    return true;
             return false;
         }
 
@@ -533,13 +545,6 @@ namespace ElectricalProgressive.Content
 
         private static bool AreAdjacentHorizontal(BlockFacing f1, BlockFacing f2)
         {
-            var adjacency = new Dictionary<string, string[]>
-            {
-                { "north", new[] { "west", "east" } },
-                { "east", new[] { "north", "south" } },
-                { "south", new[] { "east", "west" } },
-                { "west", new[] { "south", "north" } }
-            };
             return adjacency.ContainsKey(f1.Code) && adjacency[f1.Code].Contains(f2.Code);
         }
 
@@ -579,20 +584,26 @@ namespace ElectricalProgressive.Content
 
         public IInventory GetInventoryAtPosition(BlockPos pos)
         {
-            if (_api == null) return null;
+            if (_api == null)
+                return null;
             var block = _api.World.BlockAccessor.GetBlock(pos);
             var container = block?.GetBlockEntity<BlockEntityContainer>(pos);
-            if (container?.Inventory != null) return container.Inventory;
+            if (container?.Inventory != null)
+                return container.Inventory;
             var blockEntity = _api.World.BlockAccessor.GetBlockEntity(pos);
             return GetInventoryFromBlockEntity(blockEntity);
         }
 
         public static IInventory GetInventoryFromBlockEntity(BlockEntity be)
         {
-            if (be == null) return null;
-            if (be is BlockEntityContainer container) return container.Inventory;
-            if (be is IBlockEntityContainer icon) return icon.Inventory;
-            if (be is IInventory inv) return inv;
+            if (be == null)
+                return null;
+            if (be is BlockEntityContainer container)
+                return container.Inventory;
+            if (be is IBlockEntityContainer icon)
+                return icon.Inventory;
+            if (be is IInventory inv)
+                return inv;
             try
             {
                 var prop = be.GetType().GetProperty("Inventory");
@@ -629,6 +640,10 @@ namespace ElectricalProgressive.Content
             tree.SetString("currentPipeType", _currentPipeType);
         }
 
+        /// <summary>
+        /// Информация при навелении на блок трубы
+        /// </summary>
+        /// <param name="sb"></param>
         public void GetBlockInfo(StringBuilder sb)
         {
             int connections = 0;
@@ -638,9 +653,11 @@ namespace ElectricalProgressive.Content
                 if (_connectedSides[i])
                 {
                     connections++;
-                    if (_connectedToInventory[i]) inventoryConnections++;
+                    if (_connectedToInventory[i])
+                        inventoryConnections++;
                 }
             }
+
             sb.AppendLine(Lang.Get("electricalprogressivetransport:connections", connections));
             if (inventoryConnections > 0)
                 sb.AppendLine(Lang.Get("electricalprogressivetransport:inventory-connections", inventoryConnections));

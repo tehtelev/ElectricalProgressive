@@ -81,7 +81,7 @@ public class BlockLiquidInsertionPipe : BlockPipeBase
     /// <returns></returns>
     public override string GetPlacedBlockInfo(IWorldAccessor world, BlockPos pos, IPlayer forPlayer)
     {
-        StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
 
         var pipe = world.BlockAccessor.GetBlockEntity(pos) as BELiquidInsertionPipe;
         if (pipe != null)

@@ -87,5 +87,10 @@ public class BEPipe : BlockEntity
         else if (neighbor is BEPipe simplePipe) simplePipe.BreakConnection(direction.Opposite);
     }
     public virtual string GetBaseBlockCode() => _pipeConnection?.GetBaseBlockCode();
-    public void GetBlockInfo(StringBuilder sb) => _pipeConnection?.GetBlockInfo(sb); // добавить метод в компонент
+
+    // Информация о блоке при наведении на него
+    public override void GetBlockInfo(IPlayer forPlayer, StringBuilder dsc)
+    {
+        _pipeConnection?.GetBlockInfo(dsc);
+    }
 }

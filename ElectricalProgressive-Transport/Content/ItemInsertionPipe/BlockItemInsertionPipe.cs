@@ -83,7 +83,7 @@ public class BlockItemInsertionPipe : BlockPipeBase
     /// <returns></returns>
     public override string GetPlacedBlockInfo(IWorldAccessor world, BlockPos pos, IPlayer forPlayer)
     {
-        StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
         var pipe = world.BlockAccessor.GetBlockEntity(pos) as BEItemInsertionPipe;
         if (pipe != null)
         {

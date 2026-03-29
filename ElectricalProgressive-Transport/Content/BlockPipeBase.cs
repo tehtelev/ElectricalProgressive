@@ -4,6 +4,7 @@ using ElectricalProgressive.Content.NormalPipe;
 using System.Collections.Generic;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
@@ -59,16 +60,9 @@ namespace ElectricalProgressive.Content
             var currentBlock = world.BlockAccessor.GetBlock(pos);
             string currentCode = currentBlock.Code.Path;
             
-            // Для отладки
-            //world.Logger.Notification($"Текущий код блока: {currentCode}");
+
 
             // Парсим текущий код блока
-            // Формат: electricalprogressivetransport:{базовый-тип}-{конфигурация}
-            // Примеры: 
-            // - electricalprogressivetransport:pipe-normal-straight-ns
-            // - electricalprogressivetransport:pipe-item-insertion-corner-ne
-            // - electricalprogressivetransport:pipe-liquid-insertion-tee-n
-            
             string[] parts = currentCode.Split('-');
             if (parts.Length < 2)
             {
@@ -362,49 +356,31 @@ namespace ElectricalProgressive.Content
             }.Append<WorldInteraction>(base.GetPlacedBlockInteractionHelp(world, selection, forPlayer));
         }
 
-        public override string GetPlacedBlockInfo(IWorldAccessor world, BlockPos pos, IPlayer forPlayer)
+        /// <summary>
+        /// При изменении соседей
+        /// </summary>
+        /// <param name="world"></param>
+        /// <param name="pos"></param>
+        /// <param name="neibpos"></param>
+        public override void OnNeighbourBlockChange(IWorldAccessor world, BlockPos pos, BlockPos neibpos)
         {
-            var sb = new System.Text.StringBuilder();
-            
-            // Определяем режим трубы по коду
-            string modeText;
-            string code = Code.ToString();
-            
-            if (code.Contains("pipe-item-insertion"))
-            {
-                modeText = Lang.Get("electricalprogressivetransport:pipe-mode-item-filter");
-            }
-            else if (code.Contains("pipe-liquid-insertion"))
-            {
-                modeText = Lang.Get("electricalprogressivetransport:pipe-mode-liquid-filter");
-            }
-            else
-            {
-                modeText = Lang.Get("electricalprogressivetransport:pipe-mode-normal");
-            }
-            
-            sb.AppendLine(Lang.Get("electricalprogressivetransport:pipe-mode", modeText));
-            sb.AppendLine(Lang.Get("electricalprogressivetransport:pipe-switch-help"));
-            
-            // Добавляем специфичную информацию для каждого типа трубы
-            var be = world.BlockAccessor.GetBlockEntity(pos);
-            if (be != null)
-            {
-                if (be is BEPipe normalPipe)
-                {
-                    normalPipe.GetBlockInfo(forPlayer, sb);
-                }
-                else if (be is BEItemInsertionPipe itemPipe)
-                {
-                    itemPipe.GetBlockInfo(forPlayer, sb);
-                }
-                else if (be is BELiquidInsertionPipe liquidPipe)
-                {
-                    liquidPipe.GetBlockInfo(forPlayer, sb);
-                }
-            }
-            
-            return sb.ToString();
+            base.OnNeighbourBlockChange(world, pos, neibpos);
+
+            var entity = world.BlockAccessor.GetBlockEntity(pos);
+
+            // Если сущности нет, то обновлять соединения не нужно
+            if (entity == null)
+                return;
+
+            // Обновляем соединения текущей трубы
+            if (entity is BEPipe pipe)
+                pipe.UpdateConnections(false);
+            else if (entity is BlockEntityPipeBase pipe2)
+                pipe2.UpdateConnections(false);
+
         }
+
+
+        
     }
 }

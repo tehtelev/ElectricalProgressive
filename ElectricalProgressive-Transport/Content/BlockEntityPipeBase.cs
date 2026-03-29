@@ -1,10 +1,8 @@
 ﻿using ElectricalProgressive.Content;
 using ElectricalProgressive.Content.NetworkPipe;
-using ElectricalProgressive.Content.NormalPipe;
 using System.Collections.Generic;
 using System.Text;
 using Vintagestory.API.Common;
-using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
@@ -98,7 +96,11 @@ public class BlockEntityPipeBase : BlockEntityGenericTypedContainer
         else if (neighbor is BEPipe simplePipe) simplePipe.BreakConnection(direction.Opposite);
     }
 
-    public virtual void GetPipeBlockInfo(StringBuilder sb) => _pipeConnection?.GetBlockInfo(sb);
+    // Информация о блоке при наведении на него
+    public override void GetBlockInfo(IPlayer forPlayer, StringBuilder dsc)
+    {
+        _pipeConnection?.GetBlockInfo(dsc);
+    }
 
     public virtual string GetBaseBlockCode() => _pipeConnection?.GetBaseBlockCode();
 }

@@ -27,10 +27,17 @@ public class BlockPipe : BlockPipeBase
         return [OnPickBlock(world, pos)];
     }
 
-    // Простая транспортная труба
+
+    /// <summary>
+    /// Получение информации о блоке для отображения в подсказке
+    /// </summary>
+    /// <param name="world"></param>
+    /// <param name="pos"></param>
+    /// <param name="forPlayer"></param>
+    /// <returns></returns>
     public override string GetPlacedBlockInfo(IWorldAccessor world, BlockPos pos, IPlayer forPlayer)
     {
-        StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
 
        var pipe = world.BlockAccessor.GetBlockEntity(pos) as BEPipe;
         if (pipe != null)
