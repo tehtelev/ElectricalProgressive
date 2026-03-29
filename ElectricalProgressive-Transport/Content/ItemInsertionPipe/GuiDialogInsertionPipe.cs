@@ -92,15 +92,15 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
             // Чекбоксы сравнения с выравниванием
             .AddSwitch(OnMatchModToggled, ElementBounds.Fixed(10, 230, 40, 25), "swMatchMod")
             .AddStaticText(Lang.Get("electricalprogressivetransport:filter-match-mod"), CairoFont.WhiteDetailText(),
-                ElementBounds.Fixed(55, 235, 150, 25))
+                ElementBounds.Fixed(55, 235, 160, 25))
 
             .AddSwitch(OnMatchTypeToggled, ElementBounds.Fixed(10, 265, 40, 25), "swMatchType")
             .AddStaticText(Lang.Get("electricalprogressivetransport:filter-match-type"), CairoFont.WhiteDetailText(),
-                ElementBounds.Fixed(55, 270, 150, 25))
+                ElementBounds.Fixed(55, 270, 160, 25))
 
             .AddSwitch(OnMatchAttrsToggled, ElementBounds.Fixed(10, 300, 40, 25), "swMatchAttrs")
             .AddStaticText(Lang.Get("electricalprogressivetransport:filter-match-attrs"), CairoFont.WhiteDetailText(),
-                ElementBounds.Fixed(55, 305, 150, 25))
+                ElementBounds.Fixed(55, 305, 160, 25))
 
             // Еще одна разделительная линия
             .AddStaticText("═════════════════════════════",
