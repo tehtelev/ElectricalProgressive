@@ -65,8 +65,7 @@ public static class LoadEProperties
 
                 faceNumber = face.Index;
 
-                electricity.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment),
-                    faceNumber);
+                electricity.Eparams = (new EParams(voltage, maxCurrent, "", 0, 1, 1, false, isolated, isolatedEnvironment), faceNumber);
 
             }
         }

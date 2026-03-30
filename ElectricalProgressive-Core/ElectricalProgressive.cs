@@ -1525,8 +1525,7 @@ namespace ElectricalProgressive
         {
             HashSet<Network>[] networksByFace =
             [
-                [], [], [], [], [],
-                []
+                [], [], [], [], [], []
             ];
 
             foreach (var face in FacingHelper.Faces(part.Connection))           //ищет к каким сетям эти провода могут относиться
@@ -1689,7 +1688,9 @@ namespace ElectricalProgressive
                 }
 
                 if (!setEparams.Item1.Equals(new EParams()) && part.eparams[face.Index].maxCurrent == 0)
-                    part.eparams[face.Index] = setEparams.Item1;      //аналогично с параметрами электричества
+                    part.eparams[face.Index] = setEparams.Item1.Clone(); 
+
+
             }
 
 

@@ -1067,7 +1067,7 @@ namespace ElectricalProgressive.Content.Block.ECable
             // Базовое взаимодействие для утолщения кабелей
             interactions.Add(new WorldInteraction()
             {
-                ActionLangCode = "ThickenCables",
+                ActionLangCode = "electricalprogressivebasics:ThickenCables",
                 HotKeyCode = "shift",
                 MouseButton = EnumMouseButton.Right
             });
