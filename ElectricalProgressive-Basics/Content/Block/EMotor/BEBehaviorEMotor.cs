@@ -432,6 +432,9 @@ public class BEBehaviorEMotor : BEBehaviorMPBase, IElectricConsumer
         var speed = network?.Speed * GearedRatio ?? 0.0F;
         stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Speed") + ": " + speed.ToString("F3") + " " + Lang.Get("electricalprogressivebasics:rps"));
 
+        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:resistance_moment", (int)(GetResistance() * 100)));
+        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:torque_moment", (int)(GetTorque(0, 0, out _) * 100)));
+
     }
 
     public override void WasPlaced(BlockFacing connectedOnFacing)

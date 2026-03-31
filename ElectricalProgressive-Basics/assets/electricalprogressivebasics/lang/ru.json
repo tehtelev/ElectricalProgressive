@@ -394,6 +394,9 @@
   // ==================== топливный генератор ====================
   "electricalprogressivebasics:empty": "Пусто",
   "electricalprogressivebasics:liquid": "Жидкость: ",
-  "electricalprogressivebasics:requires": "Для работы требуется жидкость"
+  "electricalprogressivebasics:requires": "Для работы требуется жидкость",
 
+
+  "resistance_moment": "Сопротивление вала: {0} кН",
+  "torque_moment": "Крутящий момент: {0} кН"
 }

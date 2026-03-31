@@ -22,7 +22,6 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
     public const string PowerGiveKey = "electricalprogressive:powerGive";
 
 
-
     /// <summary>
     /// Максимальный ток
     /// </summary>
@@ -331,6 +330,9 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
         stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Production") + ": " + ((int)Math.Min(PowerGive, PowerOrder)).ToString() + "/" + I_max + " " + Lang.Get("electricalprogressivebasics:W"));
         stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Prod_potential") + ": " + ((int)PowerGive).ToString() + " " + Lang.Get("electricalprogressivebasics:W"));
         stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Speed") + ": " + speed.ToString("F3") + " " + Lang.Get("electricalprogressivebasics:rps"));
+
+        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:resistance_moment", (int)(GetResistance()*100)));
+        
     }
 
 
