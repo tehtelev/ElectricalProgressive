@@ -689,18 +689,27 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
 
     public bool CanHeatInput()
     {
-        return CanSmeltInput() || (InputStack != null && InputStack.ItemAttributes?["allowHeating"]?.AsBool() == true);
+        return CanSmeltInput() || (InputStack != null && InputStack?.ItemAttributes?["allowHeating"] != null && InputStack.ItemAttributes["allowHeating"].AsBool());
     }
 
     public bool CanHeatOutput()
     {
-        return OutputStack?.ItemAttributes?["allowHeating"]?.AsBool() == true;
+        return OutputStack?.ItemAttributes?["allowHeating"] != null && OutputStack.ItemAttributes["allowHeating"].AsBool();
+        ;
     }
 
     public bool CanSmeltInput()
     {
-        return InputStack != null && InputStack.Collectible.CanSmelt(Api.World, inventory, InputSlot.Itemstack, OutputSlot.Itemstack) &&
-               (InputStack.Collectible.CombustibleProps == null || !InputStack.Collectible.CombustibleProps.RequiresContainer);
+        if (InputStack == null)
+            return false;
+
+        if (InputStack.Collectible.OnSmeltAttempt(inventory)) MarkDirty(true);
+
+        CombustibleProperties combustibleProps = InputStack.Collectible.GetCombustibleProperties(Api.World, InputStack, null);
+
+        return
+            InputStack.Collectible.CanSmelt(Api.World, inventory, InputSlot.Itemstack, OutputSlot.Itemstack)
+            && (combustibleProps == null || !combustibleProps.RequiresContainer);
     }
 
     public void SmeltItems()
