@@ -231,11 +231,11 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
 
         if (slotid == 2)
         {
-            if (!inventory[1].Empty)
-            {
-                Meshes[slotid] = null;
-                return;
-            }
+            //if (!inventory[1].Empty)
+            //{
+                //Meshes[slotid] = null;
+               // return;
+            //}
         }
 
         // генерируем статичный мэш тут
@@ -695,7 +695,6 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
     public bool CanHeatOutput()
     {
         return OutputStack?.ItemAttributes?["allowHeating"] != null && OutputStack.ItemAttributes["allowHeating"].AsBool();
-        ;
     }
 
     public bool CanSmeltInput()
