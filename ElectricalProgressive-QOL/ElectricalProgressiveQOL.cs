@@ -30,7 +30,7 @@ using Vintagestory.API.Server;
     "electricalprogressiveqol",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Additional electrical devices.",
-    Version = "3.0.0-rc.4",
+    Version = "3.0.0-rc.5",
     Authors =
     [
         "Tehtelev",
@@ -201,9 +201,7 @@ public class ElectricalProgressiveQOL : ModSystem
 
 
 
-        // применение патча для грядки обогревателю
-        harmony = new Harmony("electricalprogressive.farmlandheater");
-        FarmlandHeaterPatch.RegisterPatch(harmony, api);
+
     }
 
 
@@ -221,13 +219,18 @@ public class ElectricalProgressiveQOL : ModSystem
     {
         base.StartServerSide(api);
 
-        
+        // применение патча для грядки обогревателю
+        harmony = new Harmony("electricalprogressive.farmlandheater");
+        FarmlandHeaterPatch.RegisterPatch(harmony, api);
     }
 
 
 
 
-
+    /// <summary>
+    /// Делаем пометки всем предметам с возможностью стадии готовкности в духовке
+    /// </summary>
+    /// <param name="api"></param>
     public override void AssetsFinalize(ICoreAPI api)
     {
         foreach (CollectibleObject obj in api.World.Collectibles)
