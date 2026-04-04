@@ -3,10 +3,6 @@
 		"allAngles": false,
 		"entityTextureMode": false
 	},
-	"textureWidth": 16,
-	"textureHeight": 16,
-	"textureSizes": {
-	},
 	"textures": {
 		"brass": "game:block/metal/plate/brass",
 		"copper": "game:block/metal/plate/copper",

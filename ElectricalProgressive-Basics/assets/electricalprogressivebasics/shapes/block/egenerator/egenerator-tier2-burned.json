@@ -3,11 +3,7 @@
 		"collapsedPaths": "Root/rotor/Cube199,Root/rotor/Cube175,Root/rotor/Cube247,Root/rotor/Cube127,Root/rotor/Cube79,Root/rotor/Cube223,Root/rotor/Cube103,Root/stator/Cube36,Root/rotor,Root/rotor/Cube151,Root/rotor/Cube271",
 		"allAngles": false,
 		"entityTextureMode": false
-	},
-	"textureWidth": 16,
-	"textureHeight": 16,
-	"textureSizes": {
-	},
+	}
 	"textures": {
 		"brass": "game:block/metal/plate/brass",
 		"iron": "game:block/metal/plate/iron",

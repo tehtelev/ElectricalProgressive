@@ -4,10 +4,6 @@
 		"allAngles": false,
 		"entityTextureMode": false
 	},
-	"textureWidth": 16,
-	"textureHeight": 16,
-	"textureSizes": {
-	},
 	"textures": {
 		"brass-sgorevshiy": "block/brass-sgorevshiy",
 		"copper-okalina-polosa": "block/copper-okalina-polosa",

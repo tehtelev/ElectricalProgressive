@@ -3,10 +3,6 @@
 		"allAngles": false,
 		"entityTextureMode": false
 	},
-	"textureWidth": 16,
-	"textureHeight": 16,
-	"textureSizes": {
-	},
 	"textures": {
 		"iron": "game:block/metal/plate/iron",
 		"steel": "game:block/metal/plate/steel",

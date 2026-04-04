@@ -102,9 +102,10 @@
   },
 
 
+ 
+
 
   "resistance": 1,
-  "drawType": "JSON",
   "lightAbsorption": 0.0,
   "faceCullMode": "NeverCull",
   "renderPass": "OpaqueNoCull",

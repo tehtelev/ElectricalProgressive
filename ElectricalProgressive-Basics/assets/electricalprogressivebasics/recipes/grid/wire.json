@@ -142,6 +142,79 @@
       "code": "electricalprogressivebasics:wire-512v-{metal}-isolated",
       "quantity": 8
     }
+  },
+
+  {
+    "ingredientPattern": "PI",
+    "width": 2,
+    "height": 1,
+    "ingredients": {
+      "P": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-32v-*-single-part",
+        "quantity": 16,
+        "name": "metal",
+        "allowedVariants": [
+          "copper",
+          "silver",
+          "lead",
+          "gold",
+          "steel",
+          "iron",
+          "tinbronze",
+          "brass",
+          "electrum"
+        ]
+      },
+      "I": {
+        "type": "item",
+        "code": "electricalprogressivebasics:electricsolderingiron",
+        "isTool": true,
+        "toolDurabilityCost": 16
+      }
+
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:wire-512v-{metal}-part",
+      "quantity": 8
+    }
+  },
+  {
+    "ingredientPattern": "PI",
+    "width": 2,
+    "height": 1,
+    "ingredients": {
+      "P": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-32v-*-single-isolated",
+        "quantity": 16,
+        "name": "metal",
+        "allowedVariants": [
+          "copper",
+          "silver",
+          "lead",
+          "gold",
+          "steel",
+          "iron",
+          "tinbronze",
+          "brass",
+          "electrum"
+        ]
+      },
+      "I": {
+        "type": "item",
+        "code": "electricalprogressivebasics:electricsolderingiron",
+        "isTool": true,
+        "toolDurabilityCost": 16
+      }
+
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:wire-512v-{metal}-isolated",
+      "quantity": 8
+    }
   }
 
 ]

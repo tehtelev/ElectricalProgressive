@@ -387,6 +387,7 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
 
     public override bool OnTesselation(ITerrainMeshPool mesher, ITesselatorAPI tesselator)
     {
+        this.lightRbs = this.Api.World.BlockAccessor.GetLightRGBs(this.Blockentity.Pos);
         return false;
     }
 

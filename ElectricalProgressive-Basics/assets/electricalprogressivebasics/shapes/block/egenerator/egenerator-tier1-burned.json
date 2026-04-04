@@ -4,19 +4,20 @@
 		"allAngles": false,
 		"entityTextureMode": false
 	},
-	"textureWidth": 16,
-	"textureHeight": 16,
-	"textureSizes": {
-	},
 	"textures": {
-		"brass": "game:block/metal/plate/brass",
-		"iron": "game:block/metal/plate/iron",
-		"steel": "game:block/metal/plate/steel",
 		"ebony1": "block/ebony1",
 		"copper-okalina-polosa": "block/copper-okalina-polosa",
 		"iron-okalina-krug": "block/iron-okalina-krug",
 		"steel-okalina-polosa": "block/steel-okalina-polosa",
-		"zinc-sgorevshiy": "block/zinc-sgorevshiy"
+		"zinc-sgorevshiy": "block/zinc-sgorevshiy",
+		"oak": "game:block/wood/oak",
+		"iron": "game:block/metal/plate/iron",
+		"steel": "game:block/metal/plate/steel",
+		"stainlesssteel": "game:block/metal/plate/steel",
+		"copper": "game:block/metal/plate/copper",
+		"zinc": "game:block/metal/plate/zinc",
+		"brass": "game:block/metal/plate/brass",
+		"gold": "game:block/metal/plate/gold"
 	},
 	"elements": [
 		{

@@ -3,17 +3,15 @@
 		"allAngles": false,
 		"entityTextureMode": false
 	},
-	"textureWidth": 16,
-	"textureHeight": 16,
-	"textureSizes": {
-	},
 	"textures": {
-		"brass": "game:block/metal/plate/brass",
-		"oak": "block/oak",
-		"copper": "game:block/metal/plate/copper",
+		"oak": "game:block/wood/oak",
 		"iron": "game:block/metal/plate/iron",
 		"steel": "game:block/metal/plate/steel",
-		"zinc": "game:block/metal/plate/zinc"
+		"stainlesssteel": "game:block/metal/plate/steel",
+		"copper": "game:block/metal/plate/copper",
+		"zinc": "game:block/metal/plate/zinc",
+		"brass": "game:block/metal/plate/brass",
+		"gold": "game:block/metal/plate/gold"
 	},
 	"elements": [
 		{
