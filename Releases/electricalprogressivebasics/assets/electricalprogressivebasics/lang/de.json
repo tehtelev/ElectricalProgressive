@@ -232,8 +232,9 @@
   // ==================== Solargenerator ====================
   "block-esolargenerator-*": "Solarmodul-Generator",
   "block-handbooktitle-esolargenerator": "Verwendung",
-  "block-handbooktext-esolargenerator": "Wandelt Licht in elektrische Energie um! Je mehr Sonnenlicht auf das Solarmodul fällt, desto mehr Energie kann es erzeugen. Blöcke, die über dem Solarmodul platziert werden, verringern seinen Wirkungsgrad. Im Spätherbst und Winter nimmt das Sonnenlicht ab, was zu einem geringeren Wirkungsgrad führt."
+  "block-handbooktext-esolargenerator": "Wandelt Licht in elektrische Energie um! Je mehr Sonnenlicht auf das Solarmodul fällt, desto mehr Energie kann es erzeugen. Blöcke, die über dem Solarmodul platziert werden, verringern seinen Wirkungsgrad. Im Spätherbst und Winter nimmt das Sonnenlicht ab, was zu einem geringeren Wirkungsgrad führt.",
 
 
-
+  "resistance_moment": "Wellenwiderstand: {0} kN",
+  "torque_moment": "Drehmoment: {0} kN"
 }

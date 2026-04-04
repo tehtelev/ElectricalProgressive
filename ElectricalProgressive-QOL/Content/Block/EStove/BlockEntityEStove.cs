@@ -226,11 +226,11 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
 
         if (slotid == 2)
         {
-            if (!inventory[1].Empty)
-            {
-                Meshes[slotid] = null;
-                return;
-            }
+            //if (!inventory[1].Empty)
+            //{
+            //Meshes[slotid] = null;
+            // return;
+            //}
         }
 
         // генерируем статичный мэш тут
@@ -705,19 +705,29 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
 
     public bool CanHeatInput()
     {
-        return CanSmeltInput() || (InputStack != null && InputStack.ItemAttributes?["allowHeating"]?.AsBool() == true);
+        if (this.CanSmeltInput())
+            return true;
+        return this.InputStack?.ItemAttributes?["allowHeating"] != null && this.InputStack.ItemAttributes["allowHeating"].AsBool();
     }
 
     public bool CanHeatOutput()
     {
-        return OutputStack?.ItemAttributes?["allowHeating"]?.AsBool() == true;
+        return this.OutputStack?.ItemAttributes?["allowHeating"] != null && this.OutputStack.ItemAttributes["allowHeating"].AsBool();
     }
 
     public bool CanSmeltInput()
     {
-        return InputStack != null && InputStack.Collectible.CanSmelt(Api.World, inventory, InputSlot.Itemstack, OutputSlot.Itemstack) &&
-               (InputStack.Collectible.CombustibleProps == null || !InputStack.Collectible.CombustibleProps.RequiresContainer);
+        if (this.InputStack == null)
+            return false;
+        if (this.InputStack.Collectible.OnSmeltAttempt((InventoryBase)this.inventory))
+            this.MarkDirty(true);
+        if (!this.InputStack.Collectible.CanSmelt(this.Api.World, (ISlotProvider)this.inventory, this.InputSlot.Itemstack, this.OutputSlot.Itemstack))
+            return false;
+        return this.InputStack.Collectible.CombustibleProps == null || !this.InputStack.Collectible.CombustibleProps.RequiresContainer;
     }
+
+    
+
 
     public void SmeltItems()
     {

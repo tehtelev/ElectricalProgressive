@@ -237,7 +237,8 @@
   // ==================== Gerador Solar ====================
   "block-esolargenerator-*": "Gerador de Painel Solar",
   "block-handbooktitle-esolargenerator": "Uso",
-  "block-handbooktext-esolargenerator": "Converte luz em energia elétrica! Quanto mais luz solar incide sobre o painel solar, mais energia ele pode produzir. Blocos colocados acima do painel solar reduzirão sua eficiência. No final do outono e inverno, a luz solar diminui, levando a uma eficiência reduzida."
+  "block-handbooktext-esolargenerator": "Converte luz em energia elétrica! Quanto mais luz solar incide sobre o painel solar, mais energia ele pode produzir. Blocos colocados acima do painel solar reduzirão sua eficiência. No final do outono e inverno, a luz solar diminui, levando a uma eficiência reduzida.",
 
-
+  "resistance_moment": "Resistência do eixo: {0} kN",
+  "torque_moment": "Torque: {0} kN"
 }

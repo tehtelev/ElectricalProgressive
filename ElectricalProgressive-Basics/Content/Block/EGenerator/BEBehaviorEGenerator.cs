@@ -331,6 +331,8 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
         stringBuilder.AppendLine("└ " + Lang.Get("Production") + ": " + ((int)Math.Min(PowerGive, PowerOrder)).ToString() + "/" + I_max + " " + Lang.Get("W"));
         stringBuilder.AppendLine("└ " + Lang.Get("Prod_potential") + ": " + ((int)PowerGive).ToString() + " " + Lang.Get("W"));
         stringBuilder.AppendLine("└ " + Lang.Get("Speed") + ": " + speed.ToString("F3") + " " + Lang.Get("rps"));
+
+        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:resistance_moment", (int)(GetResistance() * 100)));
     }
 
 
@@ -385,6 +387,7 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
 
     public override bool OnTesselation(ITerrainMeshPool mesher, ITesselatorAPI tesselator)
     {
+        this.lightRbs = this.Api.World.BlockAccessor.GetLightRGBs(this.Blockentity.Pos);
         return false;
     }
 

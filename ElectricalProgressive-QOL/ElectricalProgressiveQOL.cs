@@ -29,7 +29,7 @@ using Vintagestory.API.Server;
     "electricalprogressiveqol",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Additional electrical devices.",
-    Version = "2.6.10",
+    Version = "2.6.11",
     Authors =
     [
         "Tehtelev",
@@ -189,9 +189,7 @@ public class ElectricalProgressiveQOL : ModSystem
         //harmony.PatchAll(Assembly.GetExecutingAssembly());
 
 
-        // применение патча для грядки обогревателю
-        harmony = new Harmony("electricalprogressive.farmlandheater");
-        FarmlandHeaterPatch.RegisterPatch(harmony, api);
+
 
     }
 
@@ -210,7 +208,9 @@ public class ElectricalProgressiveQOL : ModSystem
     {
         base.StartServerSide(api);
 
-
+        // применение патча для грядки обогревателю
+        harmony = new Harmony("electricalprogressive.farmlandheater");
+        FarmlandHeaterPatch.RegisterPatch(harmony, api);
 
     }
 
@@ -225,7 +225,7 @@ public class ElectricalProgressiveQOL : ModSystem
             if (HasTag(obj))
                 continue;
 
-            if (obj.Code.Path == "rot")
+            if (obj.Code.Path == "rot" && obj.Attributes != null)
             {
                 AddTag(obj, "finished");
                 continue;
@@ -240,7 +240,7 @@ public class ElectricalProgressiveQOL : ModSystem
     private bool ResolveBakeables(ICoreAPI api, CollectibleObject obj)
     {
         BakingProperties props = obj?.Attributes?["bakingProperties"]?.AsObject<BakingProperties>();
-        if (props == null || props.ResultCode != null)
+        if (props == null || props.ResultCode != null || obj.Attributes == null)
         {
             return false;
         }
@@ -248,7 +248,7 @@ public class ElectricalProgressiveQOL : ModSystem
         AddTag(obj, "finished"); // charred
 
         CollectibleObject perfectItem = GetCollectible(api, props.InitialCode);
-        if (perfectItem == null)
+        if (perfectItem == null || perfectItem.Attributes == null)
             return true;
 
         AddTag(perfectItem, "finished"); // perfect

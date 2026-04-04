@@ -236,6 +236,8 @@
   // ==================== Solární generátor ====================
   "block-esolargenerator-*": "Generátor se solárními panely",
   "block-handbooktitle-esolargenerator": "Použití",
-  "block-handbooktext-esolargenerator": "Přeměňuje světlo na elektrickou energii! Čím více slunečního světla dopadá na solární panel, tím více energie může vyrobit. Bloky umístěné nad solárním panelem sníží jeho účinnost. Na konci podzimu a v zimě slunečního světla ubývá, což vede ke snížení účinnosti."
+  "block-handbooktext-esolargenerator": "Přeměňuje světlo na elektrickou energii! Čím více slunečního světla dopadá na solární panel, tím více energie může vyrobit. Bloky umístěné nad solárním panelem sníží jeho účinnost. Na konci podzimu a v zimě slunečního světla ubývá, což vede ke snížení účinnosti.",
 
+  "resistance_moment": "Odpor hřídele: {0} kN",
+  "torque_moment": "Točivý moment: {0} kN"
 }

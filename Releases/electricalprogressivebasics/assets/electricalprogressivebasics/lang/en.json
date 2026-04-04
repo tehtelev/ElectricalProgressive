@@ -239,7 +239,8 @@
   // ==================== Solar Generator ====================
   "block-esolargenerator-*": "Solar Panel Generator",
   "block-handbooktitle-esolargenerator": "Usage",
-  "block-handbooktext-esolargenerator": "Converts light into electrical energy! The more sunlight hits the solar panel, the more energy it can produce. Blocks placed above the solar panel will reduce its efficiency. In late autumn and winter, sunlight decreases, leading to reduced efficiency."
+  "block-handbooktext-esolargenerator": "Converts light into electrical energy! The more sunlight hits the solar panel, the more energy it can produce. Blocks placed above the solar panel will reduce its efficiency. In late autumn and winter, sunlight decreases, leading to reduced efficiency.",
 
-
+  "resistance_moment": "Shaft resistance: {0} kN",
+  "torque_moment": "Torque: {0} kN"
 }
