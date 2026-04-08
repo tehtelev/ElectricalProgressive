@@ -17,11 +17,12 @@ using ElectricalProgressive.Content.Item.Tool;
 using ElectricalProgressive.Patch;
 using HarmonyLib;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
-
-
+using Vintagestory.GameContent.Mechanics;
 
 
 [assembly: ModDependency("game", "1.22.0-rc.1")]
@@ -140,22 +141,32 @@ public class ElectricalProgressiveBasics : ModSystem
         harmony = new Harmony("electricalprogressive.mechanicalpowermod");
         MechanicalPowerMod_RebuildNetwork_Patch.RegisterPatch(harmony, api);
 
+
+
     }
 
 
+
+    // Замените метод StartClientSide в ElectricalProgressiveBasics.cs на этот:
 
     public override void StartClientSide(ICoreClientAPI api)
     {
         base.StartClientSide(api);
         this.capi = api;
+
+
     }
+
 
 
     public override void Dispose()
     {
         // Отменяем все патчи при выгрузке мода
         MechanicalPowerMod_RebuildNetwork_Patch.UnregisterPatch(harmony);
-        harmony?.UnpatchAll();
+        harmony?.UnpatchAll("electricalprogressive.rendermechpatch");
+        harmony?.UnpatchAll("electricalprogressive.mechanicalpowermod");
         harmony = null;
+
+        base.Dispose();
     }
 }
