@@ -1,0 +1,259 @@
+﻿{
+  "code": "wire",
+  "class": "BlockWire",
+  "variantGroups": [
+    {
+      "code": "voltage",
+      "states": [
+        "512v"
+      ]
+    },
+    {
+      "code": "material",
+      "states": [
+        "copper",
+        "silver",
+        "lead",
+        "gold",
+        "steel",
+        "iron",
+        "tinbronze",
+        "brass",
+        "electrum"
+      ]
+    },
+    {
+      "code": "type",
+      "states": [
+        "part",
+        "block",
+        "burned",
+        "block_isolated",
+        "isolated"
+      ]
+    }
+  ],
+
+
+
+  "creativeInventory": {
+    "general": [
+      "*-part",
+      "*-isolated"
+    ],
+    "electricity": [
+      "*-part",
+      "*-isolated"
+    ]
+  },
+
+  "shapeInventoryByType": {
+    "*-isolated": {
+      "base": "block/wire/wire-{voltage}-block_isolated"
+    },
+
+    "*": {
+      "base": "block/wire/wire-{voltage}-block"
+    }
+  },
+
+
+  "shapeByType": {
+    "*": {
+      "base": "block/wire/wire-{voltage}-{type}"
+    }
+  },
+
+
+  "texturesByType": {
+    "*-512v-*": {
+      "coke": { "base": "block/coke" },
+      "material": { "base": "game:block/metal/plate/{material}" },
+      "fix": { "base": "block/rubber" },
+      "isolation": { "base": "block/liquid/dye/black" }
+    }
+  },
+
+
+  "collisionSelectionBoxesByType": {
+    "*-512v-*-part": [
+      {
+        "x1": 0.4625,
+        "y1": 0,
+        "z1": 0,
+        "x2": 0.5375,
+        "y2": 0.06875,
+        "z2": 0.46875
+      }
+    ],
+    "*-512v-*-burned": [
+      {
+        "x1": 0.4625,
+        "y1": 0,
+        "z1": 0,
+        "x2": 0.5375,
+        "y2": 0.06875,
+        "z2": 0.46875
+      }
+    ],
+    "*-512v-*-isolated": [
+      {
+        "x1": 0.4625,
+        "y1": 0,
+        "z1": 0,
+        "x2": 0.5375,
+        "y2": 0.06875,
+        "z2": 0.46875
+      }
+    ]
+  },
+
+
+  "resistance": 1,
+  "drawType": "JSON",
+  "lightAbsorption": 0.0,
+  "faceCullMode": "NeverCull",
+  "renderPass": "OpaqueNoCull",
+
+  "attributes": {
+    "particlesOffsetPos": [ [ 0.1, 0.0, 0.1 ] ],
+    "handbook": {
+      "groupBy": [ "wire-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivebasics:block-handbooktitle-wire",
+          "text": "electricalprogressivebasics:block-handbooktext-wire"
+        }
+      ]
+    },
+    "material": "{material}"
+  },
+
+  "attributesByType": {
+    "*-512v-electrum-*": {
+      "res": 0.065,
+      "maxCurrent": 27.2,
+      "crosssectional": 4
+    },
+    "*-512v-brass-*": {
+      "res": 0.08,
+      "maxCurrent": 24.0,
+      "crosssectional": 4
+    },
+    "*-512v-tinbronze-*": {
+      "res": 0.09,
+      "maxCurrent": 22.0,
+      "crosssectional": 4
+    },
+    "*-512v-iron-*": {
+      "res": 0.155,
+      "maxCurrent": 16.0,
+      "crosssectional": 4
+    },
+    "*-512v-steel-*": {
+      "res": 1.2,
+      "maxCurrent": 18.0,
+      "crosssectional": 4
+    },
+    "*-512v-gold-*": {
+      "res": 0.07,
+      "maxCurrent": 26,
+      "crosssectional": 4
+    },
+    "*-512v-copper-*": {
+      "res": 0.1,
+      "maxCurrent": 20,
+      "crosssectional": 4
+    },
+    "*-512v-silver-*": {
+      "res": 0.06,
+      "maxCurrent": 28,
+      "crosssectional": 4
+    },
+    "*-512v-lead-*": {
+      "res": 0.2,
+      "maxCurrent": 12,
+      "crosssectional": 4
+    }
+  },
+
+
+  "emitSideAo": {
+    "all": false
+  },
+  "sideAo": {
+    "all": false
+  },
+  "sideOpaque": {
+    "all": false
+  },
+  "sideSolid": {
+    "all": false
+  },
+  "sounds": {
+    "place": "game:block/anvil",
+    "walk": "game:walk/stone"
+  },
+  "fpHandTransform": {
+    "translation": {
+      "x": 0.0,
+      "y": 1.25,
+      "z": 0.0
+    },
+    "rotation": {
+      "x": 64,
+      "y": -40,
+      "z": 0
+    },
+    "origin": {
+      "x": 0.5,
+      "y": -0.5,
+      "z": 0.5
+    },
+    "scale": 1.5
+  },
+  "tpHandTransform": {
+    "translation": {
+      "x": -1.0,
+      "y": -0.076,
+      "z": -0.776
+    },
+    "rotation": {
+      "x": 35,
+      "y": 84,
+      "z": 41
+    },
+    "origin": {
+      "x": 0.5,
+      "y": 0.0,
+      "z": 0.5
+    },
+    "scale": 0.64
+  },
+  "guiTransform": {
+    "origin": {
+      "x": 0.5,
+      "y": 0.05,
+      "z": 0.5
+    },
+    "scale": 2.0
+  },
+  "groundTransform": {
+    "translation": {
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "rotation": {
+      "x": 0,
+      "y": -45,
+      "z": 0
+    },
+    "origin": {
+      "x": 0.5,
+      "y": 0,
+      "z": 0.5
+    },
+    "scale": 2.2
+  }
+}

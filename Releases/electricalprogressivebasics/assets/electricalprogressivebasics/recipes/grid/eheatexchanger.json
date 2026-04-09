@@ -1,0 +1,35 @@
+﻿[
+  {
+    "ingredientPattern": "SCH,GG_",
+    "width": 3,
+    "height": 2,
+    "ingredients": {
+      "C": {
+        "type": "item",
+        "code": "game:metalplate-copper",
+        "quantity": 4
+      },
+      "G": {
+        "type": "item",
+        "code": "game:metalbit-gold",
+        "quantity": 4
+      },
+      "S": {
+        "type": "item",
+        "code": "game:metalbit-silver",
+        "quantity": 2
+      },
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 4
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:eheatexchanger",
+      "quantity": 1
+    }
+  }
+]

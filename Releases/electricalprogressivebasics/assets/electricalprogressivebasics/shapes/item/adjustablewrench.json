@@ -1,0 +1,563 @@
+﻿{
+  "editor": {
+    "collapsedPaths": "Root/origin",
+    "allAngles": false,
+    "entityTextureMode": false
+  },
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textures": {
+    "brass": "game:block/metal/plate/brass",
+    "iron": "game:block/metal/plate/iron",
+    "steel": "game:block/metal/plate/steel"
+  },
+  "elements": [
+    {
+      "name": "AdjustableWrench",
+      "from": [ 0.0, 0.0, -2.0 ],
+      "to": [ 0.0, 0.0, -2.0 ],
+      "rotationOrigin": [ 0.0, 0.0, -2.0 ],
+      "faces": {
+        "north": {
+          "texture": "#steel",
+          "uv": [ 11.5, 11.5, 12.0, 12.0 ]
+        },
+        "east": {
+          "texture": "#steel",
+          "uv": [ 4.5, 6.0, 5.0, 6.5 ]
+        },
+        "south": {
+          "texture": "#steel",
+          "uv": [ 2.5, 9.5, 3.0, 10.0 ]
+        },
+        "west": {
+          "texture": "#steel",
+          "uv": [ 3.0, 4.0, 3.5, 4.5 ]
+        },
+        "up": {
+          "texture": "#steel",
+          "uv": [ 7.5, 4.5, 8.0, 5.0 ]
+        },
+        "down": {
+          "texture": "#steel",
+          "uv": [ 10.0, 4.5, 10.5, 5.0 ]
+        }
+      },
+      "children": [
+        {
+          "name": "AdjustableWrenchHead",
+          "from": [ 8.0, 0.0, 8.0 ],
+          "to": [ 8.0, 0.0, 8.0 ],
+          "rotationOrigin": [ 8.0, 0.0, 8.0 ],
+          "children": [
+            {
+              "name": "AdjustableWrenchHead1",
+              "from": [ -1.5, 0.0, -3.5 ],
+              "to": [ 1.5, 1.0, -3.0 ],
+              "rotationOrigin": [ -1.0, 0.0, -4.0 ],
+              "faces": {
+                "north": {
+                  "texture": "#steel",
+                  "uv": [ 3.5, 8.5, 6.5, 9.5 ]
+                },
+                "east": {
+                  "texture": "#steel",
+                  "uv": [ 14.5, 5.5, 15.0, 6.5 ]
+                },
+                "south": {
+                  "texture": "#steel",
+                  "uv": [ 4.0, 13.5, 7.0, 14.5 ]
+                },
+                "west": {
+                  "texture": "#steel",
+                  "uv": [ 1.5, 1.0, 2.0, 2.0 ]
+                },
+                "up": {
+                  "texture": "#steel",
+                  "uv": [ 10.0, 3.0, 13.0, 3.5 ]
+                },
+                "down": {
+                  "texture": "#steel",
+                  "uv": [ 7.5, 2.5, 10.5, 3.0 ]
+                }
+              }
+            },
+            {
+              "name": "AdjustableWrenchHead2",
+              "from": [ 0.5, 0.25, -3.0 ],
+              "to": [ 1.25, 0.75, 2.0 ],
+              "rotationOrigin": [ 0.5, 0.0, -3.0 ],
+              "faces": {
+                "north": {
+                  "texture": "#steel",
+                  "uv": [ 12.5, 5.5, 13.5, 6.5 ]
+                },
+                "east": {
+                  "texture": "#steel",
+                  "uv": [ 1.5, 14.0, 6.5, 15.0 ]
+                },
+                "south": {
+                  "texture": "#steel",
+                  "uv": [ 3.5, 13.5, 4.5, 14.5 ]
+                },
+                "west": {
+                  "texture": "#steel",
+                  "uv": [ 0.5, 6.0, 5.5, 7.0 ]
+                },
+                "up": {
+                  "texture": "#steel",
+                  "uv": [ 10.5, 3.5, 11.5, 8.5 ]
+                },
+                "down": {
+                  "texture": "#steel",
+                  "uv": [ 8.5, 10.0, 9.5, 15.0 ]
+                }
+              }
+            },
+            {
+              "name": "AdjustableWrenchHead3",
+              "from": [ -0.5, 0.0, -4.0 ],
+              "to": [ 1.5, 1.0, -3.5 ],
+              "rotationOrigin": [ 0.0, 0.0, -4.0 ],
+              "faces": {
+                "north": {
+                  "texture": "#steel",
+                  "uv": [ 3.5, 8.5, 5.5, 9.5 ]
+                },
+                "east": {
+                  "texture": "#steel",
+                  "uv": [ 14.5, 5.5, 15.0, 6.5 ]
+                },
+                "south": {
+                  "texture": "#steel",
+                  "uv": [ 4.0, 13.5, 6.0, 14.5 ]
+                },
+                "west": {
+                  "texture": "#steel",
+                  "uv": [ 1.5, 1.0, 2.0, 2.0 ]
+                },
+                "up": {
+                  "texture": "#steel",
+                  "uv": [ 10.0, 3.0, 12.0, 3.5 ]
+                },
+                "down": {
+                  "texture": "#steel",
+                  "uv": [ 7.5, 2.5, 9.5, 3.0 ]
+                }
+              }
+            },
+            {
+              "name": "AdjustableWrenchHead4",
+              "from": [ -1.5, 0.0, -3.5 ],
+              "to": [ -0.38, 1.0, -3.05 ],
+              "rotationOrigin": [ -1.5, 0.0, -3.5 ],
+              "rotationY": 26.55,
+              "faces": {
+                "north": {
+                  "texture": "#steel",
+                  "uv": [ 3.5, 8.5, 4.5, 9.5 ]
+                },
+                "east": {
+                  "texture": "#steel",
+                  "uv": [ 14.5, 5.5, 15.0, 6.5 ]
+                },
+                "south": {
+                  "texture": "#steel",
+                  "uv": [ 4.0, 13.5, 5.0, 14.5 ]
+                },
+                "west": {
+                  "texture": "#steel",
+                  "uv": [ 1.5, 1.0, 2.0, 2.0 ]
+                },
+                "up": {
+                  "texture": "#steel",
+                  "uv": [ 10.0, 3.0, 11.0, 3.5 ]
+                },
+                "down": {
+                  "texture": "#steel",
+                  "uv": [ 8.5, 2.5, 9.5, 3.0 ]
+                }
+              }
+            },
+            {
+              "name": "AdjustableWrenchHead5",
+              "from": [ 0.65, 0.25, -4.05 ],
+              "to": [ 1.15, 0.75, -4.0 ],
+              "rotationOrigin": [ 0.9, 0.3, -4.0 ],
+              "faces": {
+                "north": {
+                  "texture": "#brass",
+                  "uv": [ 0.0, 0.0, 0.5, 0.5 ]
+                },
+                "east": {
+                  "texture": "#brass",
+                  "uv": [ 0.0, 0.0, 0.5, 0.5 ]
+                },
+                "south": {
+                  "texture": "#brass",
+                  "uv": [ 0.0, 0.0, 0.5, 0.5 ]
+                },
+                "west": {
+                  "texture": "#brass",
+                  "uv": [ 0.0, 0.0, 0.5, 0.5 ]
+                },
+                "up": {
+                  "texture": "#brass",
+                  "uv": [ 0.0, 0.0, 0.5, 0.5 ]
+                },
+                "down": {
+                  "texture": "#brass",
+                  "uv": [ 0.0, 0.0, 0.5, 0.5 ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "AdjustableWrenchFrame",
+          "from": [ 8.0, 0.0, 8.0 ],
+          "to": [ 8.0, 0.0, 8.0 ],
+          "rotationOrigin": [ 8.0, 0.0, 8.0 ],
+          "children": [
+            {
+              "name": "AdjustableWrenchFrame1",
+              "from": [ -1.0, 0.0, -0.7 ],
+              "to": [ 1.5, 1.0, -0.2 ],
+              "rotationOrigin": [ -1.0, 0.0, -1.0 ],
+              "faces": {
+                "north": {
+                  "texture": "#iron",
+                  "uv": [ 2.0, 6.5, 4.0, 7.5 ]
+                },
+                "east": {
+                  "texture": "#iron",
+                  "uv": [ 9.5, 11.5, 10.5, 12.5 ]
+                },
+                "south": {
+                  "texture": "#iron",
+                  "uv": [ 2.0, 0.0, 4.0, 1.0 ]
+                },
+                "west": {
+                  "texture": "#iron",
+                  "uv": [ 5.0, 6.5, 6.0, 7.5 ]
+                },
+                "up": {
+                  "texture": "#iron",
+                  "uv": [ 6.0, 9.5, 8.0, 10.5 ]
+                },
+                "down": {
+                  "texture": "#iron",
+                  "uv": [ 12.0, 2.5, 14.0, 3.5 ]
+                }
+              }
+            },
+            {
+              "name": "AdjustableWrenchFrame2",
+              "from": [ -1.5, 0.0, 0.3 ],
+              "to": [ 1.5, 1.0, 0.8 ],
+              "rotationOrigin": [ -1.0, 0.0, 0.0 ],
+              "faces": {
+                "north": {
+                  "texture": "#iron",
+                  "uv": [ 12.5, 13.0, 15.5, 14.0 ]
+                },
+                "east": {
+                  "texture": "#iron",
+                  "uv": [ 7.5, 1.0, 8.0, 2.0 ]
+                },
+                "south": {
+                  "texture": "#iron",
+                  "uv": [ 7.0, 13.0, 10.0, 14.0 ]
+                },
+                "west": {
+                  "texture": "#iron",
+                  "uv": [ 1.5, 5.5, 2.0, 6.5 ]
+                },
+                "up": {
+                  "texture": "#iron",
+                  "uv": [ 3.0, 1.5, 6.0, 2.0 ]
+                },
+                "down": {
+                  "texture": "#iron",
+                  "uv": [ 12.0, 8.0, 15.0, 8.5 ]
+                }
+              }
+            },
+            {
+              "name": "AdjustableWrenchFrame3",
+              "from": [ -1.0, 0.0, -0.2 ],
+              "to": [ -0.3, 1.0, 0.3 ],
+              "rotationOrigin": [ -1.0, 0.0, -0.5 ],
+              "faces": {
+                "north": {
+                  "texture": "#iron",
+                  "uv": [ 13.5, 13.5, 14.0, 14.5 ]
+                },
+                "east": {
+                  "texture": "#iron",
+                  "uv": [ 3.5, 5.0, 4.0, 6.0 ]
+                },
+                "south": {
+                  "texture": "#iron",
+                  "uv": [ 13.0, 1.5, 13.5, 2.5 ]
+                },
+                "west": {
+                  "texture": "#iron",
+                  "uv": [ 11.5, 10.5, 12.0, 11.5 ]
+                },
+                "up": {
+                  "texture": "#iron",
+                  "uv": [ 7.0, 6.5, 7.5, 7.0 ]
+                },
+                "down": {
+                  "texture": "#iron",
+                  "uv": [ 13.5, 8.0, 14.0, 8.5 ]
+                }
+              }
+            },
+            {
+              "name": "AdjustableWrenchFrame4",
+              "from": [ -0.875, -0.05, -0.575 ],
+              "to": [ -0.625, 1.05, -0.325 ],
+              "rotationOrigin": [ -0.75, 0.0, -0.445 ],
+              "rotationY": 45.0,
+              "faces": {
+                "north": {
+                  "texture": "#brass",
+                  "uv": [ 11.0, 2.0, 11.5, 3.0 ]
+                },
+                "east": {
+                  "texture": "#brass",
+                  "uv": [ 10.0, 2.0, 10.5, 3.0 ]
+                },
+                "south": {
+                  "texture": "#brass",
+                  "uv": [ 14.0, 13.0, 14.5, 14.0 ]
+                },
+                "west": {
+                  "texture": "#brass",
+                  "uv": [ 10.5, 6.0, 11.0, 7.0 ]
+                },
+                "up": {
+                  "texture": "#brass",
+                  "uv": [ 9.0, 7.0, 9.5, 7.5 ]
+                },
+                "down": {
+                  "texture": "#brass",
+                  "uv": [ 0.5, 2.5, 1.0, 3.0 ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "AdjustableWrenchHandle",
+          "from": [ 8.0, 0.0, 7.5 ],
+          "to": [ 8.0, 0.0, 7.5 ],
+          "rotationOrigin": [ 8.0, 0.0, 7.5 ],
+          "children": [
+            {
+              "name": "AdjustableWrenchHandle1",
+              "from": [ -1.25, 0.25, 0.25 ],
+              "to": [ -0.5, 0.75, 2.25 ],
+              "rotationOrigin": [ -0.5, 0.0, -0.2 ],
+              "faces": {
+                "north": {
+                  "texture": "#steel",
+                  "uv": [ 0.5, 5.0, 1.0, 5.5 ]
+                },
+                "east": {
+                  "texture": "#steel",
+                  "uv": [ 5.0, 11.0, 7.0, 11.5 ]
+                },
+                "south": {
+                  "texture": "#steel",
+                  "uv": [ 3.0, 8.0, 3.5, 8.5 ]
+                },
+                "west": {
+                  "texture": "#steel",
+                  "uv": [ 6.0, 13.5, 8.0, 14.0 ]
+                },
+                "up": {
+                  "texture": "#steel",
+                  "uv": [ 11.5, 6.5, 12.0, 8.5 ]
+                },
+                "down": {
+                  "texture": "#steel",
+                  "uv": [ 3.0, 2.0, 3.5, 4.0 ]
+                }
+              }
+            },
+            {
+              "name": "AdjustalbeWrenchHandle2",
+              "from": [ -1.5, 0.0, -1.0 ],
+              "to": [ 0.5, 1.0, -0.5 ],
+              "rotationOrigin": [ -1.25, 0.25, -1.0 ],
+              "faces": {
+                "north": {
+                  "texture": "#steel",
+                  "uv": [ 9.5, 3.5, 11.5, 4.5 ]
+                },
+                "east": {
+                  "texture": "#steel",
+                  "uv": [ 3.5, 1.0, 4.5, 2.0 ]
+                },
+                "south": {
+                  "texture": "#steel",
+                  "uv": [ 6.5, 6.5, 8.5, 7.5 ]
+                },
+                "west": {
+                  "texture": "#steel",
+                  "uv": [ 1.5, 2.5, 2.5, 3.5 ]
+                },
+                "up": {
+                  "texture": "#steel",
+                  "uv": [ 9.5, 13.5, 11.5, 14.5 ]
+                },
+                "down": {
+                  "texture": "#steel",
+                  "uv": [ 0.5, 11.5, 2.5, 12.5 ]
+                }
+              }
+            },
+            {
+              "name": "AdjustableWrenchHandle3",
+              "from": [ -1.25, 0.25, -0.5 ],
+              "to": [ 0.25, 0.75, 0.25 ],
+              "rotationOrigin": [ -0.5, 0.0, -0.9 ],
+              "faces": {
+                "north": {
+                  "texture": "#steel",
+                  "uv": [ 10.0, 5.5, 11.5, 6.0 ]
+                },
+                "east": {
+                  "texture": "#steel",
+                  "uv": [ 10.5, 9.5, 11.0, 10.0 ]
+                },
+                "south": {
+                  "texture": "#steel",
+                  "uv": [ 13.0, 5.0, 14.5, 5.5 ]
+                },
+                "west": {
+                  "texture": "#steel",
+                  "uv": [ 6.0, 0.0, 6.5, 0.5 ]
+                },
+                "up": {
+                  "texture": "#steel",
+                  "uv": [ 12.5, 11.5, 14.0, 12.0 ]
+                },
+                "down": {
+                  "texture": "#steel",
+                  "uv": [ 8.5, 1.0, 10.0, 1.5 ]
+                }
+              }
+            },
+            {
+              "name": "AdjustableWrenchHandle4",
+              "from": [ -1.375, 0.25, 2.25 ],
+              "to": [ -0.375, 0.75, 9.25 ],
+              "rotationOrigin": [ -0.5, 0.0, 1.8 ],
+              "faces": {
+                "north": {
+                  "texture": "#steel",
+                  "uv": [ 0.5, 5.0, 1.5, 5.5 ]
+                },
+                "east": {
+                  "texture": "#steel",
+                  "uv": [ 5.0, 11.0, 12.0, 11.5 ]
+                },
+                "south": {
+                  "texture": "#steel",
+                  "uv": [ 3.0, 8.0, 4.0, 8.5 ]
+                },
+                "west": {
+                  "texture": "#steel",
+                  "uv": [ 6.0, 13.5, 13.0, 14.0 ]
+                },
+                "up": {
+                  "texture": "#steel",
+                  "uv": [ 11.5, 6.5, 12.5, 13.5 ]
+                },
+                "down": {
+                  "texture": "#steel",
+                  "uv": [ 3.0, 2.0, 4.0, 9.0 ]
+                }
+              }
+            },
+            {
+              "name": "AdjustableWrenchHandle5",
+              "from": [ -1.38, 0.225, 9.25 ],
+              "to": [ -0.28, 0.775, 9.35 ],
+              "rotationOrigin": [ -0.5, 0.0, 8.8 ],
+              "faces": {
+                "north": {
+                  "texture": "#brass",
+                  "uv": [ 0.5, 5.0, 1.5, 5.5 ]
+                },
+                "east": {
+                  "texture": "#brass",
+                  "uv": [ 5.0, 11.0, 5.5, 11.5 ]
+                },
+                "south": {
+                  "texture": "#brass",
+                  "uv": [ 3.0, 8.0, 4.0, 8.5 ]
+                },
+                "west": {
+                  "texture": "#brass",
+                  "uv": [ 6.0, 13.5, 6.5, 14.0 ]
+                },
+                "up": {
+                  "texture": "#brass",
+                  "uv": [ 11.5, 6.5, 12.5, 7.0 ]
+                },
+                "down": {
+                  "texture": "#brass",
+                  "uv": [ 3.0, 2.0, 4.0, 2.5 ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "AdjustableWrenchSpinnyDealy",
+          "from": [ 8.0, 0.0, 8.0 ],
+          "to": [ 8.0, 0.0, 8.0 ],
+          "rotationOrigin": [ 8.0, 0.0, 8.0 ],
+          "children": [
+            {
+              "name": "AdjustableWrenchSpinnyDealy1",
+              "from": [ 0.125, -0.25, -0.2 ],
+              "to": [ 1.625, 1.25, 0.3 ],
+              "faces": {
+                "north": {
+                  "texture": "#brass",
+                  "uv": [ 0.0, 0.0, 1.5, 1.5 ]
+                },
+                "east": {
+                  "texture": "#brass",
+                  "uv": [ 0.0, 0.0, 0.5, 1.5 ]
+                },
+                "south": {
+                  "texture": "#brass",
+                  "uv": [ 0.0, 0.0, 1.5, 1.5 ]
+                },
+                "west": {
+                  "texture": "#brass",
+                  "uv": [ 0.0, 0.0, 0.5, 1.5 ]
+                },
+                "up": {
+                  "texture": "#brass",
+                  "uv": [ 0.0, 0.0, 1.5, 0.5 ]
+                },
+                "down": {
+                  "texture": "#brass",
+                  "uv": [ 0.0, 0.0, 1.5, 0.5 ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

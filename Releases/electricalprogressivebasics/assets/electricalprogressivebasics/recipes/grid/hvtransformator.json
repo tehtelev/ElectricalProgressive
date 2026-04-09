@@ -1,0 +1,58 @@
+﻿[
+	{
+		"ingredientPattern": "W,M",
+		"width": 1,
+		"height": 2,
+		"ingredients": {
+			"W": {
+				"type": "block",
+				"code": "electricalprogressivebasics:hvcabletower-north",
+				"quantity": 1
+			},
+			"M": {
+				"type": "block",
+				"code": "electricalprogressivebasics:transformator-normal-south",
+				"quantity": 1
+			}
+		},
+		"output": {
+			"type": "block",
+			"code": "electricalprogressivebasics:lv2hvtransformator-north",
+			"quantity": 1
+		}
+	},
+	{
+		"ingredientPattern": "W",
+		"width": 1,
+		"height": 1,
+		"ingredients": {
+			"W": {
+				"type": "block",
+				"code": "electricalprogressivebasics:lv2hvtransformator-north",
+				"quantity": 1
+			}
+		},
+		"output": {
+			"type": "block",
+			"code": "electricalprogressivebasics:hv2lvtransformator-north",
+			"quantity": 1
+		}
+	},
+	{
+		"ingredientPattern": "W",
+		"width": 1,
+		"height": 1,
+		"ingredients": {
+			"W": {
+				"type": "block",
+				"code": "electricalprogressivebasics:hv2lvtransformator-north",
+				"quantity": 1
+			}
+		},
+		"output": {
+			"type": "block",
+			"code": "electricalprogressivebasics:lv2hvtransformator-north",
+			"quantity": 1
+		}
+	}
+]

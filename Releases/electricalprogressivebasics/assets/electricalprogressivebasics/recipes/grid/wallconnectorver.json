@@ -1,0 +1,19 @@
+﻿[ 
+  {
+    "ingredientPattern": "W",
+    "width": 1,
+    "height": 1,
+    "ingredients": {
+      "W": {
+        "type": "block",
+        "code": "electricalprogressivebasics:wallconnectorhor-north",
+        "quantity": 1
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:wallconnectorver",
+      "quantity": 1
+    }
+  }
+]

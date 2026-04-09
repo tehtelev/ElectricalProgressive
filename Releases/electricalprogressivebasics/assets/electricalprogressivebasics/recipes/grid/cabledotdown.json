@@ -1,0 +1,24 @@
+﻿[
+	{
+		"ingredientPattern": "W,R",
+		"width": 1,
+		"height": 2,
+		"ingredients": {
+			"W": {
+				"type": "block",
+				"code": "electricalprogressivebasics:insulatorfired",
+				"quantity": 2
+			},
+			"R": {
+				"type": "item",
+				"code": "game:rod-*",
+				"allowedVariants": [ "copper", "tinbronze", "bismuthbronze", "iron" ]
+			}
+		},
+		"output": {
+			"type": "block",
+			"code": "electricalprogressivebasics:cabledotdown",
+			"quantity": 2
+		}
+	}	
+]

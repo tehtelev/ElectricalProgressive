@@ -1,0 +1,23 @@
+﻿{
+	"ingredient": {
+		"type": "item",
+		"code": "game:ingot-*",
+		"name": "metal",
+		"allowedVariants": [ "iron", "meteoriciron", "steel" ]
+	},
+	"pattern": [
+		[
+			"___________",
+			"№######____",
+			"____##_____",
+			"№##########",
+			"___________"
+		]
+	],
+	"name": "wirecutters",
+	"output": {
+		"type": "item",
+		"code": "game:wrench-adjustable",
+		"stacksize": 1
+	}
+}

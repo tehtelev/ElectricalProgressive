@@ -1,0 +1,212 @@
+﻿{
+  "code": "wrench",
+  "class": "ItemWrench",
+  "tags": [ "tool", "tool-wrench" ],
+  "storageFlags": 257,
+  "behaviors": [
+    {
+      "name": "GroundStorable",
+      "properties": {
+        "layout": "WallHalves",
+        "wallOffY": 1,
+        "ctrlKey": true,
+        "selectionBox": {
+          "x1": 0,
+          "y1": 0,
+          "z1": 0,
+          "x2": 1,
+          "y2": 0.1,
+          "z2": 1
+        },
+        "collisionBox": {
+          "x1": 0,
+          "y1": 0,
+          "z1": 0,
+          "x2": 0,
+          "y2": 0,
+          "z2": 0
+        }
+      }
+    }
+  ],
+  "variantgroups": [
+    {
+      "code": "metal",
+      "states": [
+        "adjustable"
+      ]
+    }
+  ],
+  "shapeByType": {
+    "*-adjustable": { "base": "electricalprogressivebasics:item/adjustablewrench" }
+  },
+
+  "texturesByType": {
+    "*-adjustable": {
+      "brass": { "base": "block/metal/plate/brass" },
+      "iron": { "base": "block/metal/plate/iron" },
+      "steel": { "base": "block/metal/plate/steel" }
+    }
+  },
+
+  "attributes": {
+    "attachableToEntity": { "categoryCode": "toolholding" },
+    "toolrackTransformbytype": {
+      "wrench-adjustable": {
+        "translation": {
+          "x": 0,
+          "y": 0.8,
+          "z": 0
+        },
+        "rotation": {
+          "x": -90,
+          "y": -90,
+          "z": -90
+        },
+        "scale": 1.5
+      }
+    },
+    "groundStorageTransformbytype": {
+      "wrench-adjustable": {
+        "translation": {
+          "x": 0,
+          "y": 0,
+          "z": -0.05
+        },
+        "rotation": {
+          "x": -66,
+          "y": 0,
+          "z": 0
+        },
+        "scale": 0.88
+      }
+    },
+    "onTongTransformbytype": {
+      "translation": {
+        "x": -1.93,
+        "y": -1.24,
+        "z": -0.5
+      },
+      "rotation": {
+        "x": 95,
+        "y": 20,
+        "z": -82
+      },
+      "scale": 0.7
+    },
+    "handbook": {
+      "groupBy": [ "wrench-*" ]
+    },
+    "handbookbytype": {
+      "wrench-adjustable": {
+        "extraSections": [
+          {
+            "title": "electricalprogressivebasics:item-handbooktitle-wrench-adjustable",
+            "text": "electricalprogressivebasics:item-handbooktext-wrench-adjustable"
+          }
+        ]
+      }
+    },
+    "onMetalTongTransformbytype": {
+      "translation": {
+        "x": -1.48,
+        "y": -0.14,
+        "z": -0.8
+      },
+      "rotation": {
+        "x": 95,
+        "y": 103,
+        "z": -82
+      },
+      "origin": {
+        "x": 0.5,
+        "y": -0,
+        "z": 0.5
+      },
+      "scale": 0.7
+    }
+  },
+  "tool": "wrench",
+  "damagedby": [ "blockbreaking", "attacking" ],
+  "heldTpHitAnimation": "smithing",
+  "tooltierbytype": {
+    "*-adjustable": 5
+  },
+  "durabilitybytype": {
+    "wrench-adjustable": 8000
+  },
+  "attackpowerbytype": {
+    "wrench-adjustable": 3.0
+  },
+  "creativeinventory": {
+    "general": [ "*" ],
+    "items": [ "*" ],
+    "tools": [ "*" ],
+    "electricity": [ "*-adjustable" ]
+  },
+  "guiTransformbytype": {
+    "wrench-adjustable": {
+      "rotation": {
+        "x": -57,
+        "y": -47,
+        "z": 8
+      },
+      "origin": {
+        "x": 0.45,
+        "y": -0,
+        "z": 0.5
+      },
+      "scale": 2.37
+    }
+  },
+  "groundTransformbytype": {
+    "wrench-adjustable": {
+      "translation": {
+        "x": 0,
+        "y": -0.24,
+        "z": 0
+      },
+      "rotation": {
+        "x": -180,
+        "y": -1,
+        "z": 0
+      },
+      "origin": {
+        "x": 0.5,
+        "y": 0.5,
+        "z": 0.5299
+      },
+      "scale": 2.8
+    }
+  },
+  "tpHandTransformbytype": {
+    "wrench-adjustable": {
+      "translation": {
+        "x": -0.9,
+        "y": -0.1,
+        "z": -0.65
+      },
+      "rotation": {
+        "x": 0,
+        "y": -90,
+        "z": 0
+      },
+      "scale": 0.83
+    }
+  },
+  "tpOffHandTransformbytype": {
+    "wrench-adjustable": {
+      "translation": {
+        "x": -0.9,
+        "y": -0.1,
+        "z": -0.65
+      },
+      "rotation": {
+        "x": 0,
+        "y": -90,
+        "z": 0
+      },
+      "scale": 0.83
+    }
+  }
+}

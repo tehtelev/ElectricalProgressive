@@ -1,0 +1,59 @@
+﻿[
+  {
+    "ingredientPattern": "HS,XM,C_",
+    "width": 2,
+    "height": 3,
+    "ingredients": {
+      "S": {
+        "type": "item",
+        "code": "game:saw-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "X": {
+        "type": "item",
+        "code": "game:chisel-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      },
+      "M": {
+        "type": "item",
+        "code": "game:metalplate-brass",
+        "quantity": 2
+      },
+      "C": {
+        "type": "block",
+        "code": "electricalprogressivebasics:cabledotdown",
+        "quantity": 2
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:wallconnectorhor-north",
+      "quantity": 1
+    }
+  },
+  {
+    "ingredientPattern": "W",
+    "width": 1,
+    "height": 1,
+    "ingredients": {
+      "W": {
+        "type": "block",
+        "code": "electricalprogressivebasics:wallconnectorver",
+        "quantity": 1
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:wallconnectorhor-north",
+      "quantity": 1
+    }
+  }
+]

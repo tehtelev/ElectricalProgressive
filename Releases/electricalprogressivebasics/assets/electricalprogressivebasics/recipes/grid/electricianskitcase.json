@@ -1,0 +1,25 @@
+﻿{
+  "ingredientPattern": "GBG,_A_",
+  "ingredients": {
+    "B": {
+      "type": "item",
+      "code": "game:flaxtwine"
+    },
+    "G": {
+      "type": "item",
+      "code": "game:leather-normal-plain",
+      "quantity": 2
+    },
+    "A": {
+      "type": "item",
+      "code": "game:metalnailsandstrips-*",
+      "quantity": 1
+    }
+  },
+  "width": 3,
+  "height": 2,
+  "output": {
+    "type": "item",
+    "code": "electricalprogressivebasics:electricianskitcase"
+  }
+}

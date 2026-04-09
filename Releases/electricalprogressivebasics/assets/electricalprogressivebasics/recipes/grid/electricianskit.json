@@ -1,0 +1,39 @@
+﻿[
+  {
+    "ingredientPattern": "HS,XM,C_",
+    "width": 2,
+    "height": 3,
+    "ingredients": {
+      "C": {
+        "type": "item",
+        "code": "game:wrench-adjustable",
+        "quantity": 1
+      },
+      "S": {
+        "type": "item",
+        "code": "electricalprogressivebasics:electricsolderingiron",
+        "quantity": 1
+      },
+      "X": {
+        "type": "item",
+        "code": "electricalprogressivebasics:electricianskitcase",
+        "quantity": 1
+      },
+      "H": {
+        "type": "item",
+        "code": "electricalprogressivebasics:insulatedgloves",
+        "quantity": 1
+      },
+      "M": {
+        "type": "item",
+        "code": "electricalprogressivebasics:wirecutters",
+        "quantity": 1
+      }
+    },
+    "output": {
+      "type": "item",
+      "code": "electricalprogressivebasics:electricianskit",
+      "quantity": 1
+    }
+  }
+]

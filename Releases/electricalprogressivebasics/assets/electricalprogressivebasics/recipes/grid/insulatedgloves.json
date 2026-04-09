@@ -1,0 +1,20 @@
+﻿{
+  "ingredientPattern": "GBG",
+  "ingredients": {
+    "B": {
+      "type": "item",
+      "code": "game:flaxtwine"
+    },
+    "G": {
+      "type": "item",
+      "code": "game:leather-normal-black",
+      "quantity": 2
+    }
+  },
+  "width": 3,
+  "height": 1,
+  "output": {
+    "type": "item",
+    "code": "electricalprogressivebasics:insulatedgloves"
+  }
+}

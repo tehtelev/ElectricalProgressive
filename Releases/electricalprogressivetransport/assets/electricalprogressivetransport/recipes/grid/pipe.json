@@ -1,0 +1,71 @@
+﻿[
+  {
+    "ingredientPattern": "CAC,BAD,CAC",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "D": {
+        "type": "item",
+        "code": "game:chisel-*",
+        "isTool": true,
+        "toolDurabilityCost": 24
+      },
+      "C": {
+        "type": "block",
+        "code": "game:glass-plain",
+        "quantity": 1
+      },
+      "A": {
+        "type": "item",
+        "code": "game:chutesection-copper",
+        "quantity": 1
+      },
+      "B": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 24
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivetransport:pipe-normal-cross",
+      "quantity": 4
+    }
+  },
+  {
+    "ingredientPattern": "C",
+    "width": 1,
+    "height": 1,
+    "ingredients": {
+      "C": {
+        "type": "block",
+        "code": "electricalprogressivetransport:pipe-liquid-insertion-cross",
+        "quantity": 1
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivetransport:pipe-normal-cross",
+      "quantity": 1
+    }
+  },
+  {
+    "ingredientPattern": "C",
+    "width": 1,
+    "height": 1,
+    "ingredients": {
+      "C": {
+        "type": "block",
+        "code": "electricalprogressivetransport:pipe-item-insertion-cross",
+        "quantity": 1
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivetransport:pipe-normal-cross",
+      "quantity": 1
+    }
+  }
+
+]

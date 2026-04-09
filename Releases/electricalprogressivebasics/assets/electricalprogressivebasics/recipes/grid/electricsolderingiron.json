@@ -1,0 +1,22 @@
+﻿[
+  {
+    "ingredientPattern": "HI",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "H": {
+        "type": "item",
+        "code": "game:solderingiron"
+      },
+      "I": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-128v-iron-single-isolated",
+        "quantity": 4
+      }
+    },
+    "output": {
+      "type": "item",
+      "code": "electricalprogressivebasics:electricsolderingiron"
+    }
+  }
+]
