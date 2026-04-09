@@ -92,15 +92,17 @@ namespace ElectricalProgressive.Content.Block.EHeater
             if (roundAmount >= 1 && this.Block.Variant["state"] == "disabled")
             {
                 api.World.BlockAccessor.ExchangeBlock(api.World.GetBlock(Block.CodeWithVariant("state", "enabled")).BlockId, Pos);
+                this.Blockentity.MarkDirty(true);
             }
             // гасим если питание меньше 1
             else if (roundAmount < 1 && this.Block.Variant["state"] == "enabled")
             {
                 api.World.BlockAccessor.ExchangeBlock(api.World.GetBlock(Block.CodeWithVariant("state", "disabled")).BlockId, Pos);
+                this.Blockentity.MarkDirty(true);
             }
 
             this.HeatLevel = roundAmount;
-            this.Blockentity.MarkDirty(true);
+            
         }
 
         public void Update()

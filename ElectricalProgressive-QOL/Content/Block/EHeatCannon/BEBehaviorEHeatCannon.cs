@@ -97,16 +97,18 @@ namespace ElectricalProgressive.Content.Block.EHeatCannon
             {
                 api.World.BlockAccessor.ExchangeBlock(api.World.GetBlock(Block.CodeWithVariant("state", "enabled")).BlockId, Pos);
                 (Blockentity as BlockEntityEHeatCannon).ElectricalProgressive.ParticlesType = 5;
+                this.Blockentity.MarkDirty(true);
             }
             // гасим если питание меньше 1
             else if (roundAmount < 1 && this.Block.Variant["state"] == "enabled")
             {
                 api.World.BlockAccessor.ExchangeBlock(api.World.GetBlock(Block.CodeWithVariant("state", "disabled")).BlockId, Pos);
                 (Blockentity as BlockEntityEHeatCannon).ElectricalProgressive.ParticlesType = 0;
+                this.Blockentity.MarkDirty(true);
             }
 
             this.HeatLevel = roundAmount;
-            this.Blockentity.MarkDirty(true);
+
         }
 
         public void Update()
