@@ -1,4 +1,5 @@
 ﻿using ElectricalProgressive.Content.ItemInsertionPipe;
+using ElectricalProgressive.Content.LiquidInsertionPipe;
 using ElectricalProgressive.Content.NormalPipe;
 using System.Collections.Generic;
 using Vintagestory.API.Common;
@@ -31,10 +32,12 @@ public class PipeNetwork
         {
             Pipes.Add(pos.Copy());
 
-            if (pipe is BEItemInsertionPipe)
+            if (pipe is BEItemInsertionPipe || pipe is BELiquidInsertionPipe)
             {
                 Inserters.Add(pos.Copy());
             }
+
+
         }
     }
 

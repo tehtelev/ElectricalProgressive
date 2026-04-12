@@ -149,33 +149,29 @@ namespace ElectricalProgressive.Content
             // Сохраняем данные текущей сущности перед заменой блока
             ITreeAttribute tree = SaveEntityData(world, pos);
 
-            // Меняем блок в мире
             world.BlockAccessor.SetBlock(newBlock.BlockId, pos);
-
             // Запускаем асинхронное восстановление данных на главном потоке
             world.Api.Event.EnqueueMainThreadTask(() =>
             {
-                // Восстанавливаем данные в новую сущность
+                // Сначала восстанавливаем данные
                 if (tree != null)
                 {
                     BlockEntity newEntity = world.BlockAccessor.GetBlockEntity(pos);
-
                     if (newEntity != null)
                     {
-                        try
-                        {
-                            newEntity.FromTreeAttributes(tree, world);
-                            newEntity.MarkDirty();
-
-                            // Устанавливаем дефолтные настройки при переходе между разными типами труб
-                            ApplyDefaultSettings(newEntity, tree, world);
-                        }
-                        catch (System.Exception ex)
-                        {
-                            world.Logger.Error($"Ошибка при восстановлении данных: {ex.Message}");
-                        }
+                        newEntity.FromTreeAttributes(tree, world);
+                        newEntity.MarkDirty();
                     }
                 }
+
+                // Затем меняем блок
+                var currentBlock = world.BlockAccessor.GetBlock(pos);
+                if (currentBlock?.CodeWithoutParts(0) == newBlock.CodeWithoutParts(0))
+                {
+                    return;
+                }
+
+
 
                 // Обновляем соединения с соседями и перерисовываем модель блока
                 UpdateNeighborConnections(world, pos);

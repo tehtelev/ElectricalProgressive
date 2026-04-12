@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -489,8 +490,25 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
             if (!realTargetPos.Equals(targetPos))
                 Api.World.BlockAccessor.MarkBlockDirty(targetPos);
 
+
+            lastTransferTime[sourcePos] = Api.World.ElapsedMilliseconds;
+
+            // Очистка старых записей
+            var expiredKeys = lastTransferTime.Keys
+                .Where(k => Api.World.ElapsedMilliseconds - lastTransferTime[k] > MinTransferInterval * 10)
+                .ToList();
+
+            foreach (var key in expiredKeys)
+            {
+                lastTransferTime.Remove(key);
+            }
+
+
+
             return true;
         }
+
+
 
         return false;
     }
@@ -644,6 +662,9 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     public override void OnBlockRemoved()
     {
         base.OnBlockRemoved();
+
+        // очищаем словарь
+        lastTransferTime?.Clear();
 
         if (Api?.Side == EnumAppSide.Server)
         {

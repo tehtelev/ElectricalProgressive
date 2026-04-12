@@ -17,7 +17,12 @@ public class BlockEntityEWaterPump : BlockEntityGenericTypedContainer
 
     private InventoryEWaterPump _inventory;  // Инвентарь помпы для хранения воды
     private GuiDialogEWaterPump _clientDialog;  // Клиентское диалоговое окно управления
+    private bool _cachedHasWater;
+
     // === СВОЙСТВА ===
+    private long _lastWaterCheckTime;
+
+    private const int WATER_CHECK_INTERVAL_MS = 5000; // Проверка каждые 5 секунд
 
     public override InventoryBase Inventory => _inventory;
     public override string DialogTitle => Lang.Get("electricalprogressivebasics:ewaterpump");
@@ -165,8 +170,6 @@ public class BlockEntityEWaterPump : BlockEntityGenericTypedContainer
         if (PowerBehavior == null || ElectricalProgressive == null)
             return PumpStatus.NoPower;
 
-        // ИСПРАВЛЕНИЕ: Убрали проверку PowerSetting из определения статуса
-        // Теперь статус отражает физическую возможность работы
 
         if (IsFull())
             return PumpStatus.TankFull;
@@ -221,7 +224,12 @@ public class BlockEntityEWaterPump : BlockEntityGenericTypedContainer
     /// </summary>
     public bool HasEnoughWaterInArea()
     {
-        if (Api?.World == null) return false;
+        if (Api?.World == null)
+            return false;
+
+        // Кэшируем результат
+        if (Api.World.ElapsedMilliseconds - _lastWaterCheckTime < WATER_CHECK_INTERVAL_MS)
+            return _cachedHasWater;
 
         var blockAccessor = Api.World.BlockAccessor;
 
@@ -253,15 +261,25 @@ public class BlockEntityEWaterPump : BlockEntityGenericTypedContainer
 
                     // Если достигли неводного блока (камень, земля и т.д.), 
                     // продолжаем проверять глубже
-                    if (block.Id == 0) break; // Воздух - дальше пустота
+                    if (block.Id == 0)
+                        break; // Воздух - дальше пустота
                 }
             }
         }
 
-        if (totalBlocks == 0) return false;
+        if (totalBlocks == 0)
+        {
+            _cachedHasWater = false;
+            return _cachedHasWater;
+        }
 
         float waterPercentage = (float)waterBlocks / totalBlocks;
-        return waterPercentage >= REQUIRED_WATER_PERCENTAGE;
+
+        _cachedHasWater = waterPercentage >= REQUIRED_WATER_PERCENTAGE;
+        _lastWaterCheckTime = Api.World.ElapsedMilliseconds;
+        return _cachedHasWater;
+
+
     }
 
     /// <summary>
@@ -269,7 +287,8 @@ public class BlockEntityEWaterPump : BlockEntityGenericTypedContainer
     /// </summary>
     private bool IsWaterBlock(Vintagestory.API.Common.Block block)
     {
-        if (block == null) return false;
+        if (block == null)
+            return false;
 
         // Ванильная вода имеет код "water"
         return block.Code.Path == "water" ||

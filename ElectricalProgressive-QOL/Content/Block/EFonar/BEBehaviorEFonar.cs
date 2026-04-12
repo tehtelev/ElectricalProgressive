@@ -42,17 +42,7 @@ namespace ElectricalProgressive.Content.Block.EFonar
 
 
 
-        public override void ToTreeAttributes(ITreeAttribute tree)
-        {
-            base.ToTreeAttributes(tree);
-            tree.SetInt(LightLevelKey, LightLevel);
-        }
 
-        public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
-        {
-            base.FromTreeAttributes(tree, worldAccessForResolve);
-            LightLevel = tree.GetInt(LightLevelKey);
-        }
 
         public float Consume_request()
         {
@@ -170,6 +160,19 @@ namespace ElectricalProgressive.Content.Block.EFonar
             stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Consumption") + ": " + LightLevel + "/" + _maxConsumption + " " + Lang.Get("electricalprogressivebasics:W"));
 
             stringBuilder.AppendLine();
+        }
+
+
+        public override void ToTreeAttributes(ITreeAttribute tree)
+        {
+            base.ToTreeAttributes(tree);
+            tree.SetInt(LightLevelKey, LightLevel);
+        }
+
+        public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
+        {
+            base.FromTreeAttributes(tree, worldAccessForResolve);
+            LightLevel = tree.GetInt(LightLevelKey);
         }
     }
 }

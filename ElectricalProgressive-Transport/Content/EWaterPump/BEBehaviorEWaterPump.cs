@@ -11,6 +11,7 @@ public class BEBehaviorEWaterPump : BlockEntityBehavior, IElectricConsumer
 {
     // Настройки помпы
     public int PowerSetting { get; set; }  // Текущая установленная мощность в ваттах
+
     public const string PowerSettingKey = "electricalprogressive:powersetting";  // Ключ для сохранения настройки
 
     // Состояние помпы
@@ -127,5 +128,17 @@ public class BEBehaviorEWaterPump : BlockEntityBehavior, IElectricConsumer
     {
         // Алиас для Consume_request() для совместимости с интерфейсом IElectricConsumer
         return Consume_request();
+    }
+
+    public override void ToTreeAttributes(ITreeAttribute tree)
+    {
+        base.ToTreeAttributes(tree);
+        tree.SetInt(PowerSettingKey, PowerSetting);
+    }
+
+    public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
+    {
+        base.FromTreeAttributes(tree, worldAccessForResolve);
+        PowerSetting = tree.GetInt(PowerSettingKey);
     }
 }

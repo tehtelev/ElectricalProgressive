@@ -130,7 +130,7 @@ public class GuiDialogLiquidInsertionPipe : GuiDialogBlockEntity
                 // Отображение текущей скорости
                 .AddDynamicText(transferRate.ToString(),
                     CairoFont.WhiteDetailText().WithFontSize(16).WithWeight(Cairo.FontWeight.Bold),
-                    ElementBounds.Fixed(150, 240, 40, 30), "txtTransferRate")
+                    ElementBounds.Fixed(150, 245, 40, 30), "txtTransferRate")
 
                 // Кнопка увеличения скорости (+10)
                 .AddSmallButton("+10", OnIncreaseRateClicked,
@@ -154,20 +154,17 @@ public class GuiDialogLiquidInsertionPipe : GuiDialogBlockEntity
     /// </summary>
     private void UpdateFilterButtons()
     {
+        if (SingleComposer == null)
+            return; // Проверка на существование композера
+
         var btnAllow = SingleComposer.GetButton("btnAllowList");
         var btnDeny = SingleComposer.GetButton("btnDenyList");
 
-        if (btnAllow != null)
-        {
-            // Кнопка "Разрешить" активна, если режим не AllowList
+        if (btnAllow != null && !IsDuplicate)
             btnAllow.Enabled = filterMode != BELiquidInsertionPipe.FilterMode.AllowList;
-        }
 
-        if (btnDeny != null)
-        {
-            // Кнопка "Запретить" активна, если режим не DenyList  
+        if (btnDeny != null && !IsDuplicate)
             btnDeny.Enabled = filterMode != BELiquidInsertionPipe.FilterMode.DenyList;
-        }
     }
 
     /// <summary>
