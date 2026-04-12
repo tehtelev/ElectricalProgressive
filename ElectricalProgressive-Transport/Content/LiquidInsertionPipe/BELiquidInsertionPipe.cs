@@ -10,49 +10,83 @@ using Vintagestory.GameContent;
 
 namespace ElectricalProgressive.Content.LiquidInsertionPipe;
 
+/// <summary>
+/// Блок-сущность для жидкостной трубы с фильтрацией и управлением порчей предметов.
+/// </summary>
 public class BELiquidInsertionPipe : BlockEntityPipeBase
 {
+    #region Поля таймингов и состояния
+
     private long transferTimer;
-    private int transferRate = 100; // В миллилитрах
+    private int transferRate = 100; // Скорость передачи в миллилитрах за тик
     private BlockFacing outputFacing = null;
     private int debugCounter = 0;
 
-    // Собственный инвентарь (фильтры для жидкостей)
+    #endregion
+
+    #region Инвентарь и GUI
+
+    /// <summary>Собственный инвентарь (фильтры для жидкостей)</summary>
     internal InventoryLiquidInsertionPipe _inventory;
     private GuiDialogLiquidInsertionPipe _clientDialog;
 
-    // Режимы работы фильтра
+    #endregion
+
+    #region Фильтрация
+
+    /// <summary>Режимы работы фильтра</summary>
     public enum FilterMode
     {
-        AllowList = 0,
-        DenyList = 1,
+        AllowList = 0, // Разрешить только указанные жидкости
+        DenyList = 1   // Запретить указанные жидкости
     }
 
     private FilterMode currentFilterMode = FilterMode.AllowList;
 
-    // НАСТРОЙКИ ОСТАНОВКИ ПОРЧИ
+    #endregion
+
+    #region Настройки остановки порчи
+
+    /// <summary>Включена ли остановка порчи</summary>
     private bool stopPerishEnabled = true;
+    /// <summary>Множитель скорости порчи (0 = полностью остановить)</summary>
     private float perishRateMultiplier = 0f;
+    /// <summary>Останавливать все переходные состояния</summary>
     private bool stopAllTransitions = false;
 
-    // Кэширование температуры
+    #endregion
+
+    #region Кэширование температуры
+
     private float temperatureCached = -1000f;
     private long lastTemperatureUpdate = 0;
 
-    // Тайминги
+    #endregion
+
+    #region Тайминги передачи
+
+    /// <summary>Время последней передачи для каждой позиции источника</summary>
     private Dictionary<BlockPos, long> lastTransferTime = new Dictionary<BlockPos, long>();
+    /// <summary>Минимальный интервал между передачами в миллисекундах</summary>
     private const long MinTransferInterval = 100;
+
+    #endregion
 
     // Переопределяем свойство Inventory
     public override InventoryBase Inventory => _inventory;
     public override string InventoryClassName => "liquidinsertionpipe";
 
+    /// <summary>Скорость передачи жидкости</summary>
     public int TransferRate => transferRate;
+    /// <summary>Текущий режим фильтрации</summary>
     public FilterMode CurrentFilterMode => currentFilterMode;
 
     // Свойства для остановки порчи
+    /// <summary>Включена ли остановка порчи</summary>
     public bool StopPerishEnabled => stopPerishEnabled;
+    /// <summary>Множитель скорости порчи</summary>
     public float PerishRateMultiplier => perishRateMultiplier;
+    /// <summary>Останавливать все переходные состояния</summary>
     public bool StopAllTransitions => stopAllTransitions;
 
     public BELiquidInsertionPipe()
@@ -60,38 +94,34 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         _inventory = new InventoryLiquidInsertionPipe(6, InventoryClassName, null, null, this);
     }
 
+    /// <summary>Инициализация блок-сущности</summary>
     public override void Initialize(ICoreAPI api)
     {
-        // Сначала вызываем базовую инициализацию
         base.Initialize(api);
-
-        //Api.Logger.Notification($"=== Жидкостная труба Initialize на {Pos} ===");
 
         DetermineOutputDirection();
 
         if (api.Side == EnumAppSide.Server)
         {
             transferTimer = api.World.RegisterGameTickListener(OnTransferTick, 200);
-
-            // Также регистрируем тик для обработки порчи
+            // Тик для обработки порчи предметов в инвентаре
             api.World.RegisterGameTickListener(OnPerishTick, 2000);
         }
 
-        // Подписываемся на события инвентаря для контроля скорости порчи
         _inventory.OnAcquireTransitionSpeed += OnAcquireTransitionSpeed;
     }
 
-    /// <summary>
-    /// Получает базовый код блока для жидкостной трубы
-    /// </summary>
+    /// <summary>Получает базовый код блока для жидкостной трубы</summary>
     public override string GetBaseBlockCode()
     {
         return "electricalprogressivetransport:pipe-liquid-insertion";
     }
 
-    #region Методы для остановки порчи
+    #region Методы обработки порчи предметов
 
-    // Обработчик скорости переходных состояний
+    /// <summary>
+    /// Обработчик скорости переходных состояний для контроля порчи.
+    /// </summary>
     private float OnAcquireTransitionSpeed(EnumTransitionType transType, ItemStack stack, float baseMul)
     {
         // Если отключена остановка порчи или предмет не портится
@@ -110,27 +140,31 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         return baseMul * perishRateMultiplier;
     }
 
-    // Проверяет, нужно ли останавливать этот тип перехода
+    /// <summary>
+    /// Проверяет, нужно ли останавливать этот тип перехода состояния.
+    /// </summary>
     private static bool ShouldStopTransition(EnumTransitionType transType)
     {
         switch (transType)
         {
-            case EnumTransitionType.Perish: // Порча
-            case EnumTransitionType.Harden:
-            case EnumTransitionType.Melt:
-            case EnumTransitionType.None:
-            case EnumTransitionType.Burn:
-            case EnumTransitionType.Ripen: // Созревание
-            case EnumTransitionType.Convert: // Превращение
-            case EnumTransitionType.Dry: // Сушка
-            case EnumTransitionType.Cure: // Выдержка
+            case EnumTransitionType.Perish:     // Порча
+            case EnumTransitionType.Harden:     // Затвердевание
+            case EnumTransitionType.Melt:       // Плавление
+            case EnumTransitionType.None:       // Нет перехода
+            case EnumTransitionType.Burn:       // Сгорание
+            case EnumTransitionType.Ripen:      // Созревание
+            case EnumTransitionType.Convert:    // Превращение
+            case EnumTransitionType.Dry:        // Сушка
+            case EnumTransitionType.Cure:       // Выдержка
                 return true;
             default:
                 return false;
         }
     }
 
-    // Тик для обработки порчи
+    /// <summary>
+    /// Тик для обработки порчи предметов в инвентаре.
+    /// </summary>
     private void OnPerishTick(float dt)
     {
         if (Api?.Side != EnumAppSide.Server || !stopPerishEnabled)
@@ -144,7 +178,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
                 var before = slot.Itemstack.Clone();
                 slot.Itemstack.Collectible.UpdateAndGetTransitionStates(Api.World, slot);
 
-                // Если предмет изменился, помечаем как грязный
+                // Если предмет изменился, помечаем как грязный для сохранения
                 if (!slot.Itemstack.Equals(Api.World, before))
                 {
                     MarkDirty();
@@ -153,25 +187,22 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         }
     }
 
-    // Методы для управления настройками порчи
+    /// <summary>
+    /// Устанавливает настройки обработки порчи.
+    /// </summary>
     public void SetPerishSettings(bool enabled, float multiplier = 0f, bool stopAll = false)
     {
         stopPerishEnabled = enabled;
         perishRateMultiplier = GameMath.Clamp(multiplier, 0f, 10f);
         stopAllTransitions = stopAll;
         MarkDirty(true);
-
-        //Api?.Logger?.Notification($"=== Настройки порчи обновлены: enabled={enabled}, multiplier={multiplier}, stopAll={stopAll} ===");
     }
 
     #endregion
 
     /// <summary>
-    /// Игрок нажимает правой кнопкой мыши по блоку
+    /// Обработка клика игрока по блоку. Открывает GUI на клиенте.
     /// </summary>
-    /// <param name="byPlayer"></param>
-    /// <param name="blockSel"></param>
-    /// <returns></returns>
     public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
     {
         // Открываем свой GUI только на клиенте
@@ -180,9 +211,10 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
             OpenGui(byPlayer as IClientPlayer);
         }
 
-        return true; // возвращаем результат базового метода (true)
+        return true;
     }
 
+    /// <summary>Открывает или закрывает диалог управления трубой</summary>
     private void OpenGui(IClientPlayer player)
     {
         if (_clientDialog == null || !_clientDialog.IsOpened())
@@ -203,7 +235,10 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         }
     }
 
-    // Универсальный метод для получения реальной позиции (с учетом мультиблоков)
+    /// <summary>
+    /// Получает реальную позицию с учётом мультиблоков.
+    /// Рекурсивно проходит через вложенные мультиблоки.
+    /// </summary>
     private BlockPos GetRealPosition(BlockPos pos)
     {
         var block = Api.World.BlockAccessor.GetBlock(pos);
@@ -211,20 +246,16 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         if (block is BlockMultiblock multiblock)
         {
             BlockPos controlPos = multiblock.GetControlBlockPos(pos);
-
-            if (debugCounter % 20 == 0)
-            {
-                //Api.Logger.Notification($"=== Мультиблок {pos} -> контрольная позиция: {controlPos} ===");
-            }
-
-            // Рекурсивно (на случай вложенных мультиблоков)
+            // Рекурсивно обрабатываем вложенные мультиблоки
             return GetRealPosition(controlPos);
         }
 
         return pos;
     }
 
-    // Метод для получения ILiquidSink из позиции (с учетом мультиблоков)
+    /// <summary>
+    /// Получает ILiquidSink из позиции с учётом мультиблоков.
+    /// </summary>
     private ILiquidSink GetLiquidSinkAtPosition(BlockPos pos)
     {
         var block = Api.World.BlockAccessor.GetBlock(pos);
@@ -232,8 +263,6 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         // 1. Проверяем сам блок
         if (block is ILiquidSink sink)
         {
-            //if (debugCounter % 20 == 0)
-                //Api.Logger.Notification($"=== Блок имеет ILiquidSink: {block.GetType().Name} ===");
             return sink;
         }
 
@@ -245,20 +274,16 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
 
             if (controlBlock is ILiquidSink controlSink)
             {
-                //if (debugCounter % 10 == 0)
-                    //Api.Logger.Notification($"=== Мультиблок -> контрольный блок имеет ILiquidSink: {controlBlock.GetType().Name} ===");
                 return controlSink;
-            }
-            else if (debugCounter % 20 == 0)
-            {
-                //Api.Logger.Notification($"=== Контрольный блок {controlBlock?.GetType().Name} НЕ имеет ILiquidSink ===");
             }
         }
 
         return null;
     }
 
-    // Метод для получения ILiquidSource из позиции (с учетом мультиблоков)
+    /// <summary>
+    /// Получает ILiquidSource из позиции с учётом мультиблоков.
+    /// </summary>
     private ILiquidSource GetLiquidSourceAtPosition(BlockPos pos)
     {
         var block = Api.World.BlockAccessor.GetBlock(pos);
@@ -266,8 +291,6 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         // 1. Проверяем сам блок
         if (block is ILiquidSource source)
         {
-            //if (debugCounter % 20 == 0)
-                //Api.Logger.Notification($"=== Блок имеет ILiquidSource: {block.GetType().Name} ===");
             return source;
         }
 
@@ -279,69 +302,45 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
 
             if (controlBlock is ILiquidSource controlSource)
             {
-                //if (debugCounter % 10 == 0)
-                    //Api.Logger.Notification($"=== Мультиблок -> контрольный блок имеет ILiquidSource: {controlBlock.GetType().Name} ===");
                 return controlSource;
-            }
-            else if (debugCounter % 20 == 0)
-            {
-                //Api.Logger.Notification($"=== Контрольный блок {controlBlock?.GetType().Name} НЕ имеет ILiquidSource ===");
             }
         }
 
         return null;
     }
 
+    /// <summary>Определяет направление вывода жидкости в соседние блоки</summary>
     private void DetermineOutputDirection()
     {
         if (Api == null)
             return;
-
-        //if (debugCounter % 20 == 0)
-            //Api.Logger.Notification($"=== DetermineOutputDirection для {Pos} ===");
 
         for (int i = 0; i < 6; i++)
         {
             BlockFacing facing = BlockFacing.ALLFACES[i];
             BlockPos checkPos = Pos.AddCopy(facing);
 
-            // Пропускаем трубы
+            // Пропускаем трубы (не передаём жидкость в другие трубы)
             var checkBlock = Api.World.BlockAccessor.GetBlock(checkPos);
             if (checkBlock is BlockPipeBase)
             {
                 continue;
             }
 
-            // Ищем ILiquidSink (с учетом мультиблоков)
+            // Ищем ILiquidSink с учётом мультиблоков
             ILiquidSink liquidSink = GetLiquidSinkAtPosition(checkPos);
 
             if (liquidSink != null)
             {
                 outputFacing = facing;
-
-                if (debugCounter % 10 == 0)
-                {
-                    //Api.Logger.Notification($"=== НАЙДЕН ILiquidSink! ===");
-                    //Api.Logger.Notification($"=== Направление: {facing.Code} -> {checkPos} ===");
-                    //Api.Logger.Notification($"=== Блок: {checkBlock.GetType().Name} ===");
-
-                    // Показываем реальную позицию для мультиблоков
-                    if (checkBlock is BlockMultiblock)
-                    {
-                        BlockPos realPos = GetRealPosition(checkPos);
-                        //Api.Logger.Notification($"=== Реальная позиция: {realPos} ===");
-                    }
-                }
-
                 return;
             }
         }
 
         outputFacing = null;
-        //if (debugCounter % 20 == 0)
-            //Api.Logger.Notification($"=== ILiquidSink не найден в соседних блоках ===");
     }
 
+    /// <summary>Основной тик передачи жидкости</summary>
     private void OnTransferTick(float dt)
     {
         debugCounter++;
@@ -349,10 +348,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         if (Api == null || NetworkManager == null)
             return;
 
-        //if (debugCounter % 10 == 0)
-            //Api.Logger.Notification($"=== OnTransferTick #{debugCounter} на позиции {Pos} ===");
-
-        // Обновляем направление вывода
+        // Обновляем направление вывода периодически или если оно не установлено
         if (outputFacing == null || debugCounter % 20 == 0)
         {
             DetermineOutputDirection();
@@ -360,84 +356,54 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
 
         if (outputFacing == null)
         {
-            //if (debugCounter % 20 == 0)
-                //Api.Logger.Notification($"=== outputFacing is null, пропускаем тик ===");
             return;
         }
 
-        // Получаем целевой контейнер
+        // Получаем целевую позицию
         BlockPos targetPos = Pos.AddCopy(outputFacing);
 
-        //if (debugCounter % 10 == 0)
-            //Api.Logger.Notification($"=== Целевая позиция: {targetPos} ===");
-
-        // Ищем ILiquidSink (с учетом мультиблоков)
+        // Ищем ILiquidSink с учётом мультиблоков
         ILiquidSink sink = GetLiquidSinkAtPosition(targetPos);
 
         if (sink != null)
         {
-            if (debugCounter % 10 == 0)
-            {
-                //Api.Logger.Notification($"=== Целевой блок реализует ILiquidSink ===");
-
-                // Показываем реальную позицию
-                var targetBlock = Api.World.BlockAccessor.GetBlock(targetPos);
-                if (targetBlock is BlockMultiblock)
-                {
-                    //BlockPos realPos = GetRealPosition(targetPos);
-                    //Api.Logger.Notification($"=== Это мультиблок! Реальная позиция: {realPos} ===");
-                }
-            }
-
-            // Вызываем передачу
             TryTransferLiquidToSinkDirect(sink, targetPos);
         }
         else
         {
-            if (debugCounter % 10 == 0)
-            {
-                //Api.Logger.Notification($"=== Целевой блок НЕ реализует ILiquidSink! ===");
-                outputFacing = null; // Сбросим направление
-            }
-
-            return;
+            outputFacing = null; // Сбрасываем направление если цель не найдена
         }
     }
 
+    /// <summary>
+    /// Попытка передачи жидкости в sink через поиск источников в сети труб.
+    /// </summary>
     private void TryTransferLiquidToSinkDirect(ILiquidSink sink, BlockPos targetPos)
     {
         if (sink == null)
             return;
 
-        //if (debugCounter % 10 == 0)
-            //Api.Logger.Notification($"=== TryTransferLiquidToSinkDirect: цель на {targetPos} ===");
-
-        // Используем сеть для поиска источников
+        // Используем сеть для поиска источников жидкости
         var network = NetworkManager.GetNetwork(Pos);
         if (network == null)
         {
-            //if (debugCounter % 20 == 0)
-                //Api.Logger.Notification($"=== СЕТЬ НЕ НАЙДЕНА ===");
             return;
         }
 
-        //if (debugCounter % 20 == 0)
-            //Api.Logger.Notification($"=== Размер сети: {network.Pipes.Count} труб ===");
-
-        // Собираем все позиции для исключения
+        // Собираем позиции для исключения (текущая труба и цель)
         var excludePositions = new HashSet<BlockPos>();
         excludePositions.Add(Pos);
         excludePositions.Add(targetPos);
 
         int sourcesChecked = 0;
 
-        // Ищем источник жидкости в сети
+        // Ищем источник жидкости в сети труб
         foreach (var pipePos in network.Pipes)
         {
             if (excludePositions.Contains(pipePos))
                 continue;
 
-            // Проверяем все стороны трубы
+            // Проверяем все стороны трубы-источника
             for (int i = 0; i < 6; i++)
             {
                 BlockFacing facing = BlockFacing.ALLFACES[i];
@@ -453,168 +419,96 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
 
                 sourcesChecked++;
 
-                if (debugCounter % 5 == 0)
-                {
-                    //Api.Logger.Notification($"=== Проверяем источник #{sourcesChecked}: {sourcePos} ===");
-                    //Api.Logger.Notification($"=== Визуальный блок: {sourceBlock?.GetType().Name} ===");
-                }
-
-                // Ищем ILiquidSource (с учетом мультиблоков)
+                // Ищем ILiquidSource с учётом мультиблоков
                 ILiquidSource liquidSource = GetLiquidSourceAtPosition(sourcePos);
 
                 if (liquidSource != null)
                 {
-                    if (debugCounter % 5 == 0)
-                        //Api.Logger.Notification($"=== НАЙДЕН ILiquidSource! ===");
-
-                    // Пытаемся передать
                     if (TryTransferFromBlockSourceToSink(sourcePos, liquidSource, sink, targetPos))
                     {
-                        //if (debugCounter % 5 == 0)
-                            //Api.Logger.Notification($"=== Успешно перенесли жидкость из {sourcePos} ===");
-                        return;
+                        return; // Успешная передача, выходим
                     }
-                    else if (debugCounter % 10 == 0)
-                    {
-                        //Api.Logger.Notification($"=== Не удалось перенести жидкость из {sourcePos} ===");
-                    }
-                }
-                else if (debugCounter % 20 == 0)
-                {
-                    //Api.Logger.Notification($"=== Блок НЕ реализует ILiquidSource ===");
                 }
             }
         }
-
-        //if (sourcesChecked == 0 && debugCounter % 10 == 0)
-            //Api.Logger.Notification($"=== НЕ НАЙДЕНО НИ ОДНОГО ИСТОЧНИКА ===");
     }
 
-    private bool TryTransferFromBlockSourceToSink(BlockPos sourcePos, ILiquidSource source, ILiquidSink sink,
-        BlockPos targetPos)
+    /// <summary>
+    /// Попытка передачи жидкости от источника к sink.
+    /// </summary>
+    private bool TryTransferFromBlockSourceToSink(BlockPos sourcePos, ILiquidSource source, ILiquidSink sink, BlockPos targetPos)
     {
-        // Проверяем тайминг
+        // Проверяем тайминг (не передаём слишком часто из одного источника)
         if (!CanTransferFrom(sourcePos))
         {
-            //if (debugCounter % 30 == 0)
-                //Api.Logger.Notification($"=== Тайминг не позволяет передачу из {sourcePos} ===");
             return false;
         }
 
-        if (debugCounter % 5 == 0)
-        {
-            //Api.Logger.Notification($"=== TryTransferFromBlockSourceToSink ===");
-            //Api.Logger.Notification($"=== Визуальная позиция источника: {sourcePos} ===");
-            //Api.Logger.Notification($"=== Визуальная позиция цели: {targetPos} ===");
-        }
-
-        // Определяем РЕАЛЬНЫЕ позиции для обоих блоков
+        // Определяем РЕАЛЬНЫЕ позиции для обоих блоков (с учётом мультиблоков)
         BlockPos realSourcePos = GetRealPosition(sourcePos);
         BlockPos realTargetPos = GetRealPosition(targetPos);
 
-        if (debugCounter % 5 == 0 && (!realSourcePos.Equals(sourcePos) || !realTargetPos.Equals(targetPos)))
-        {
-            //Api.Logger.Notification($"=== Реальная позиция источника: {realSourcePos} ===");
-            //Api.Logger.Notification($"=== Реальная позиция цели: {realTargetPos} ===");
-        }
-
-        // Получаем содержимое из РЕАЛЬНОЙ позиции источника
+        // Получаем содержимое из реальной позиции источника
         var contentStack = source.GetContent(realSourcePos);
         if (contentStack == null)
         {
-            //if (debugCounter % 20 == 0)
-                //Api.Logger.Notification($"=== Источник пуст (GetContent вернул null) ===");
             return false;
         }
 
-        if (debugCounter % 5 == 0)
-        {
-            //Api.Logger.Notification($"=== Содержимое источника: {contentStack.Collectible?.Code}, StackSize: {contentStack.StackSize} ===");
-        }
-
-        // Проверяем фильтр
+        // Проверяем фильтр жидкости
         if (!CheckItemAgainstLiquidFilter(contentStack))
         {
-            //if (debugCounter % 10 == 0)
-                //Api.Logger.Notification($"=== Жидкость не прошла фильтр ===");
             return false;
         }
 
-        // Вычисляем количество для передачи (в литрах)
+        // Вычисляем количество для передачи в литрах
         float currentLitres = source.GetCurrentLitres(realSourcePos);
-
-        //if (debugCounter % 10 == 0)
-            //Api.Logger.Notification($"=== Текущее количество в источнике: {currentLitres} литров ===");
-
         float litresToTransfer = Math.Min(transferRate / 1000f, currentLitres);
+
         if (litresToTransfer <= 0)
         {
-            //if (debugCounter % 20 == 0)
-                //Api.Logger.Notification($"=== Недостаточно жидкости для передачи ===");
             return false;
         }
 
-        //if (debugCounter % 5 == 0)
-            //Api.Logger.Notification($"=== Пытаемся передать {litresToTransfer} литров жидкости ===");
-
-        // Пытаемся передать жидкость в РЕАЛЬНУЮ позицию цели
+        // Пытаемся передать жидкость в реальную позицию цели
         int movedItems = sink.TryPutLiquid(realTargetPos, contentStack, litresToTransfer);
 
         if (movedItems > 0)
         {
-            // Забираем переданное количество из РЕАЛЬНОЙ позиции источника
+            // Забираем переданное количество из реальной позиции источника
             ItemStack takenStack = source.TryTakeContent(realSourcePos, movedItems);
 
             lastTransferTime[sourcePos] = Api.World.ElapsedMilliseconds;
 
-            // Обновляем РЕАЛЬНЫЕ позиции
+            // Обновляем позиции для отрисовки (реальные и визуальные)
             Api.World.BlockAccessor.MarkBlockDirty(realSourcePos);
             Api.World.BlockAccessor.MarkBlockDirty(realTargetPos);
 
-            // Также обновляем визуальные позиции (для мультиблоков)
             if (!realSourcePos.Equals(sourcePos))
                 Api.World.BlockAccessor.MarkBlockDirty(sourcePos);
             if (!realTargetPos.Equals(targetPos))
                 Api.World.BlockAccessor.MarkBlockDirty(targetPos);
 
-            //if (debugCounter % 2 == 0)
-                //Api.Logger.Notification($"=== УСПЕХ: Передано {movedItems} единиц жидкости ===");
             return true;
-        }
-        else
-        {
-            if (debugCounter % 10 == 0)
-            {
-                //Api.Logger.Notification($"=== НЕУДАЧА: TryPutLiquid вернул 0 ===");
-
-                // Диагностика
-                //var sourceBlock = Api.World.BlockAccessor.GetBlock(realSourcePos);
-                //var targetBlock = Api.World.BlockAccessor.GetBlock(realTargetPos);
-
-                //Api.Logger.Notification($"=== Реальный блок источника: {sourceBlock?.GetType().Name} ===");
-                //Api.Logger.Notification($"=== Реальный блок цели: {targetBlock?.GetType().Name} ===");
-                //Api.Logger.Notification($"=== Код жидкости: {contentStack.Collectible?.Code} ===");
-            }
         }
 
         return false;
     }
 
+    /// <summary>Проверяет, можно ли передать жидкость из источника (по таймингу)</summary>
     private bool CanTransferFrom(BlockPos sourcePos)
     {
         if (!lastTransferTime.ContainsKey(sourcePos))
             return true;
 
         long elapsed = Api.World.ElapsedMilliseconds - lastTransferTime[sourcePos];
-        bool canTransfer = elapsed > MinTransferInterval;
-
-        //if (!canTransfer && debugCounter % 20 == 0)
-            //Api.Logger.Notification($"=== Тайминг: {elapsed}мс из {MinTransferInterval}мс ===");
-
-        return canTransfer;
+        return elapsed > MinTransferInterval;
     }
 
-    // Проверяет предмет через фильтр (если фильтры настроены)
+    /// <summary>
+    /// Проверяет предмет через фильтр жидкостей.
+    /// Возвращает true если жидкость проходит фильтрацию или фильтры не настроены.
+    /// </summary>
     private bool CheckItemAgainstLiquidFilter(ItemStack itemstack)
     {
         if (itemstack == null || itemstack.Collectible == null)
@@ -654,10 +548,11 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
             }
         }
 
-        // Возвращаем результат в зависимости от режима
+        // Возвращаем результат в зависимости от режима фильтрации
         return currentFilterMode == FilterMode.AllowList ? hasMatchingFilter : !hasMatchingFilter;
     }
 
+    /// <summary>Вычисляет направление между двумя позициями</summary>
     private static BlockFacing GetFacingFromTo(BlockPos from, BlockPos to)
     {
         int dx = to.X - from.X;
@@ -687,15 +582,16 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         return null;
     }
 
+    /// <summary>Обновляет настройки фильтрации</summary>
     public void UpdateFilterSettings(FilterMode mode)
     {
         this.currentFilterMode = mode;
         MarkDirty();
     }
 
+    /// <summary>Получает информацию о блоке для отображения в GUI игрока</summary>
     public override void GetBlockInfo(IPlayer forPlayer, StringBuilder sb)
     {
-        // Вызываем базовый метод для информации о соединениях
         base.GetBlockInfo(forPlayer, sb);
 
         sb.AppendLine("══════════════════════════════════════════");
@@ -715,21 +611,8 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         {
             if (!_inventory[i].Empty) activeFilters++;
         }
-     
-        sb.AppendLine(Lang.Get("electricalprogressivetransport:active-liquid-filters", activeFilters,
-            _inventory.Count));
 
-        // Информация о направлении вывода
-        /*
-        if (outputFacing != null)
-        {
-            sb.AppendLine(Lang.Get("electricalprogressivetransport:output-facing", outputFacing.Code));
-        }
-        else
-        {
-            sb.AppendLine(Lang.Get("electricalprogressivetransport:no-output-facing"));
-        }
-        */
+        sb.AppendLine(Lang.Get("electricalprogressivetransport:active-liquid-filters", activeFilters, _inventory.Count));
 
         // Информация о настройках порчи
         sb.AppendLine("══════════════════════════════════════════");
@@ -740,7 +623,6 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
             if (perishRateMultiplier <= 0.001f)
             {
                 sb.AppendLine(Lang.Get("electricalprogressivetransport:perish-fully-stopped"));
-
             }
             else
             {
@@ -756,17 +638,13 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         {
             sb.AppendLine(Lang.Get("electricalprogressivetransport:preservation-disabled"));
         }
-
-
-        
     }
 
+    /// <summary>Обработка удаления блока</summary>
     public override void OnBlockRemoved()
     {
-        // Сначала обрабатываем разрыв соединений через базовый класс
         base.OnBlockRemoved();
 
-        // Затем специфичную логику для жидкостной трубы
         if (Api?.Side == EnumAppSide.Server)
         {
             Api.World.UnregisterGameTickListener(transferTimer);
@@ -778,6 +656,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         }
     }
 
+    /// <summary>Загрузка атрибутов из дерева</summary>
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
     {
         base.FromTreeAttributes(tree, worldAccessForResolve);
@@ -792,6 +671,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         stopAllTransitions = tree.GetBool("stopAllTransitions", false);
     }
 
+    /// <summary>Сохранение атрибутов в дерево</summary>
     public override void ToTreeAttributes(ITreeAttribute tree)
     {
         base.ToTreeAttributes(tree);
@@ -805,6 +685,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         tree.SetBool("stopAllTransitions", stopAllTransitions);
     }
 
+    /// <summary>Обработка клиентских пакетов</summary>
     public override void OnReceivedClientPacket(IPlayer player, int packetid, byte[] data)
     {
         base.OnReceivedClientPacket(player, packetid, data);
@@ -852,7 +733,6 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
 
                 SetPerishSettings(enabled, multiplier, stopAll);
 
-                // Отправляем обновление другим клиентам
                 MarkDirty();
                 Api.World.BlockAccessor.MarkBlockDirty(Pos);
             }
@@ -862,22 +742,21 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
             }
         }
     }
-    
+
+    /// <summary>Обработка разрушения блока без дропа предметов</summary>
     public override void OnBlockBroken(IPlayer byPlayer = null)
     {
-        // Не вызываем базовый метод, чтобы не дропались предметы
-        // base.OnBlockBroken(byPlayer);
-        
-        // Только чистим инвентарь
+        // Очищаем инвентарь
         if (Inventory != null)
         {
             Inventory?.Clear();
         }
-        
-        // Вызываем свой базовый код без дропа
+
+        // Вызываем OnBlockRemoved без дропа предметов
         OnBlockRemoved();
     }
 
+    /// <summary>Обработка выгрузки чанка</summary>
     public override void OnBlockUnloaded()
     {
         base.OnBlockUnloaded();

@@ -32,7 +32,7 @@ using Vintagestory.GameContent.Mechanics;
     "electricalprogressivebasics",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Basic electrical devices.",
-    Version = "3.0.0-rc.5",
+    Version = "3.0.0-rc.6",
     Authors =
     [
         "Tehtelev",
@@ -163,7 +163,6 @@ public class ElectricalProgressiveBasics : ModSystem
     {
         // Отменяем все патчи при выгрузке мода
         MechanicalPowerMod_RebuildNetwork_Patch.UnregisterPatch(harmony);
-        harmony?.UnpatchAll("electricalprogressive.rendermechpatch");
         harmony?.UnpatchAll("electricalprogressive.mechanicalpowermod");
         harmony = null;
 

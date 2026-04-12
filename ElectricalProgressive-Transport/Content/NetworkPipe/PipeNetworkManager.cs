@@ -4,11 +4,14 @@ using Vintagestory.API.MathTools;
 
 namespace ElectricalProgressive.Content.NetworkPipe;
 
+/// <summary>
+/// Управляет множеством сетей труб, объединяет и разделяет их при изменении
+/// </summary>
 public class PipeNetworkManager
 {
     private ICoreAPI api;
-    private Dictionary<long, PipeNetwork> networks = new ();
-    private Dictionary<BlockPos, long> pipeToNetwork = new ();
+    private Dictionary<long, PipeNetwork> networks = new();
+    private Dictionary<BlockPos, long> pipeToNetwork = new();
     private long nextNetworkId = 1;
 
     public void Initialize(ICoreAPI api)
@@ -16,9 +19,12 @@ public class PipeNetworkManager
         this.api = api;
     }
 
+    /// <summary>
+    /// Добавляет трубу в сеть или объединяет соседние сети
+    /// </summary>
     public void AddPipe(BlockPos pos, BlockEntity pipe)
     {
-        // Ищем соседние сети
+        // Ищем соседние сети по 6 направлениям
         List<long> adjacentNetworks = [];
 
         for (int i = 0; i < 6; i++)
@@ -53,12 +59,11 @@ public class PipeNetworkManager
         }
         else
         {
-            // Объединяем сети
+            // Объединяем сети через главную
             long mainNetworkId = adjacentNetworks[0];
             PipeNetwork mainNetwork = networks[mainNetworkId];
             mainNetwork.AddPipe(pos, pipe);
 
-            // Объединяем остальные сети
             for (int i = 1; i < adjacentNetworks.Count; i++)
             {
                 long otherId = adjacentNetworks[i];
@@ -80,8 +85,9 @@ public class PipeNetworkManager
         }
     }
 
-
-    // Метод для удаления трубы и проверки распада сети
+    ///<summary>
+    /// Удаляет трубу и проверяет, не распалась ли сеть на компоненты
+    /// </summary>
     public void RemovePipe(BlockPos pos)
     {
         if (!pipeToNetwork.TryGetValue(pos, out long networkId))
@@ -100,7 +106,7 @@ public class PipeNetworkManager
             return;
         }
 
-        // BFS строго по позициям, оставшимся в сети
+        // BFS для поиска компонент связности среди оставшихся труб
         var remaining = new HashSet<BlockPos>(network.Pipes);
         var components = new List<HashSet<BlockPos>>();
 
@@ -128,7 +134,7 @@ public class PipeNetworkManager
 
                     BlockPos neighborPos = current.AddCopy(BlockFacing.ALLFACES[i]);
 
-                    // Проходим ТОЛЬКО по трубам, которые ещё в сети
+                    // Проходим только по трубам, которые ещё в сети
                     if (remaining.Contains(neighborPos))
                     {
                         component.Add(neighborPos);
@@ -173,6 +179,9 @@ public class PipeNetworkManager
         }
     }
 
+    /// <summary>
+    /// Возвращает массив подключенных сторон для указанной позиции
+    /// </summary>
     private bool[] GetConnectedSides(BlockPos pos)
     {
         var entity = api.World.BlockAccessor.GetBlockEntity(pos);
@@ -183,58 +192,9 @@ public class PipeNetworkManager
         return null;
     }
 
-    /*
-    private List<BlockPos> FindConnectedComponent(BlockPos startPos)
-    {
-        List<BlockPos> component = [];
-        Queue<BlockPos> queue = new Queue<BlockPos>();
-        HashSet<BlockPos> visited = [];
-
-        queue.Enqueue(startPos);
-        visited.Add(startPos);
-
-        while (queue.Count > 0)
-        {
-            BlockPos current = queue.Dequeue();
-            component.Add(current);
-
-            BlockEntity pipeEntity = api.World.BlockAccessor.GetBlockEntity(current);
-
-            bool[] connectedSides = null;
-            if (pipeEntity is BEPipe pipe)
-            {
-                connectedSides = pipe.ConnectedSides;
-            }
-            else if (pipeEntity is BlockEntityPipeBase inserter)
-            {
-                connectedSides = inserter.ConnectedSides;
-            }
-
-            if (connectedSides == null)
-                continue;
-
-            for (int i = 0; i < 6; i++)
-            {
-                if (connectedSides[i])
-                {
-                    BlockFacing facing = BlockFacing.ALLFACES[i];
-                    BlockPos neighborPos = current.AddCopy(facing);
-
-                    if (!visited.Contains(neighborPos))
-                    {
-                        visited.Add(neighborPos);
-                        queue.Enqueue(neighborPos);
-                    }
-                }
-            }
-        }
-
-        return component;
-    }
-
-    */
-
-
+    /// <summary>
+    /// Возвращает сеть, к которой принадлежит труба
+    /// </summary>
     public PipeNetwork GetNetwork(BlockPos pipePos)
     {
         if (pipeToNetwork.TryGetValue(pipePos, out long networkId))
@@ -248,12 +208,18 @@ public class PipeNetworkManager
         return null;
     }
 
+    /// <summary>
+    /// Возвращает список инсертеров в сети
+    /// </summary>
     public List<BlockPos> GetInsertersInNetwork(BlockPos pipePos)
     {
         var network = GetNetwork(pipePos);
         return network?.Inserters ?? [];
     }
 
+    /// <summary
+    /// >Возвращает количество активных сетей
+    /// </summary>
     public int GetNetworkCount()
     {
         return networks.Count;

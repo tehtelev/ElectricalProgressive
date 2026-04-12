@@ -1,128 +1,132 @@
-﻿using Vintagestory.API.Client;
+﻿using System.IO;
+using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 
 namespace ElectricalProgressive.Content.ItemInsertionPipe;
 
+/// <summary>
+/// Инвентарь для фильтрующей трубы. Обеспечивает фильтрацию предметов
+/// при передаче между соседними контейнерами.
+/// </summary>
 public class InventoryInsertionPipe : InventoryGeneric
 {
     private BEItemInsertionPipe _entity;
 
+    /// <summary>
+    /// Конструктор инвентаря трубы.
+    /// </summary>
     public InventoryInsertionPipe(int slots, string className, string instanceID, ICoreAPI api, BEItemInsertionPipe entity)
         : base(slots, className, instanceID, api)
     {
         _entity = entity;
     }
 
-    // Фабричный метод для создания специальных слотов
+    // --- Создание слотов фильтра ---
+
+    /// <summary>
+    /// Фабричный метод для создания специальных слотов фильтра.
+    /// </summary>
     private static ItemSlot CreateFilterSlot(int slotId, InventoryBase inventory)
     {
         return new FilterSlot(inventory);
     }
 
-    // Переопределяем метод, чтобы использовать наши слоты
+    /// <summary>
+    /// Переопределение метода создания слота для использования фильтрующих слотов.
+    /// </summary>
     protected override ItemSlot NewSlot(int i)
     {
         return CreateFilterSlot(i, this);
     }
 
-    // Автопуш из соседних контейнеров в инвентарь трубы
+    // --- Автопередача предметов ---
+
+    /// <summary>
+    /// Получение слота для автопуша из соседних контейнеров.
+    /// Фильтрующая труба принимает предметы в пустые слоты фильтра.
+    /// </summary>
     public override ItemSlot GetAutoPushIntoSlot(BlockFacing atBlockFace, ItemSlot fromSlot)
     {
-        // Фильтрующая труба может принимать предметы для фильтрации
-        // Проверяем, есть ли пустые слоты фильтра
+        // Ищем первый пустой слот для приема предмета фильтрации
         for (int i = 0; i < Count; i++)
         {
             if (this[i] != null && this[i].Empty)
-            {
-                // Можно принимать предметы для фильтров
                 return this[i];
-            }
         }
 
         return null;
     }
 
-    // Автопулл из инвентаря трубы в соседние контейнеры
+    /// <summary>
+    /// Получение слота для автопулла в соседние контейнеры.
+    /// Фильтрующая труба не отдает предметы автоматически (они остаются в фильтре).
+    /// </summary>
     public override ItemSlot GetAutoPullFromSlot(BlockFacing atBlockFace)
     {
-        // Фильтрующая труба не отдает предметы автоматически
-        // (фильтры должны оставаться в трубе)
         return null;
     }
-}
 
-public class FilterSlot : ItemSlotSurvival
-{
-    public FilterSlot(InventoryBase inventory) : base(inventory)
+    // --- Слот фильтра ---
+
+    /// <summary>
+    /// Специализированный слот для хранения одного предмета фильтрации.
+    /// Предметы в этом слоте удаляются при клике (исчезают).
+    /// </summary>
+    public class FilterSlot : ItemSlotSurvival
     {
-    }
-
-    public override int MaxSlotStackSize => 1;
-
-    // Основной метод активации слота (левый клик)
-    public override void ActivateSlot(ItemSlot sourceSlot, ref ItemStackMoveOperation op)
-    {
-        // Если кликаем по слоту ПУСТОЙ рукой (sourceSlot пустой)
-        if (sourceSlot == null || sourceSlot.Empty)
+        public FilterSlot(InventoryBase inventory) : base(inventory)
         {
-            // ЛКМ по заполненному слоту фильтра пустой рукой - предмет удаляется
-            if (!this.Empty)
+        }
+
+        /// <summary>
+        /// Максимальный размер стопки в слоте (всегда 1 предмет).
+        /// </summary>
+        public override int MaxSlotStackSize => 1;
+
+        /// <summary>
+        /// Обработка активации слота (левый клик).
+        /// </summary>
+        public override void ActivateSlot(ItemSlot sourceSlot, ref ItemStackMoveOperation op)
+        {
+            // --- Клик по заполненному слоту пустой рукой ---
+            if (sourceSlot == null || sourceSlot.Empty)
             {
-                // Удаляем предмет из фильтра (исчезает)
-                this.Itemstack = null;
-                this.MarkDirty();
-
-                op.MovedQuantity = 1;
-                op.RequestedQuantity = 1;
-
-                // Воспроизводим звук удаления
-                if (inventory.Api is ICoreClientAPI clientApi)
+                if (!this.Empty)
                 {
-                    clientApi.World.PlaySoundAt(new AssetLocation("sounds/player/drop"),
-                        clientApi.World.Player.Entity, null, true, 16f);
+                    // Удаление предмета из фильтра (предмет исчезает)
+                    this.Itemstack = null;
+                    this.MarkDirty();
+
+                    op.MovedQuantity = 1;
+                    op.RequestedQuantity = 1;
+
+                    // Воспроизведение звука удаления
+                    if (inventory.Api is ICoreClientAPI clientApi)
+                    {
+                        clientApi.World.PlaySoundAt(new AssetLocation("sounds/player/drop"),
+                            clientApi.World.Player.Entity, null, true, 16f);
+                    }
                 }
+                else
+                {
+                    // Клик по пустому слоту - ничего не происходит
+                    op.MovedQuantity = 0;
+                    op.RequestedQuantity = 0;
+                }
+
+                return;
             }
-            else
+
+            ItemStack sourceStack = sourceSlot.Itemstack;
+
+            // --- Заполнение пустого слота предметом из руки ---
+            if (this.Empty)
             {
-                // ЛКМ по пустому слоту пустой рукой - ничего не делаем
-                op.MovedQuantity = 0;
-                op.RequestedQuantity = 0;
-            }
-
-            return;
-        }
-
-        ItemStack sourceStack = sourceSlot.Itemstack;
-
-        // Если кликаем по слоту с предметом в руке
-        if (this.Empty)
-        {
-            // Слот фильтра пустой - кладем КОПИЮ предмета (предмет в руке остается)
-            this.Itemstack = sourceStack.Clone();
-            this.Itemstack.StackSize = 1;
-
-            // НЕ уменьшаем количество в руке - предмет остается у игрока
-            // sourceSlot.Itemstack не изменяется
-
-            this.MarkDirty();
-
-            op.MovedQuantity = 1;
-            op.RequestedQuantity = 1;
-        }
-        else
-        {
-            // Слот фильтра заполнен - проверяем, можно ли заменить
-            if (this.CanHold(sourceSlot))
-            {
-                // Удаляем старый предмет из фильтра (исчезает)
-                // И кладем КОПИЮ предмета из руки
                 this.Itemstack = sourceStack.Clone();
                 this.Itemstack.StackSize = 1;
 
-                // Старый предмет из фильтра просто исчезает
-                // Предмет в руке остается неизменным
-
+                // Предмет остается в руке, не уменьшается
                 this.MarkDirty();
 
                 op.MovedQuantity = 1;
@@ -130,82 +134,106 @@ public class FilterSlot : ItemSlotSurvival
             }
             else
             {
-                // Нельзя заменить - ничего не делаем
-                op.MovedQuantity = 0;
-                op.RequestedQuantity = 0;
+                // --- Замена предмета в заполненном слоте ---
+                if (this.CanHold(sourceSlot))
+                {
+                    // Удаляем старый предмет (исчезает) и кладем копию из руки
+                    this.Itemstack = sourceStack.Clone();
+                    this.Itemstack.StackSize = 1;
+
+                    this.MarkDirty();
+
+                    op.MovedQuantity = 1;
+                    op.RequestedQuantity = 1;
+                }
+                else
+                {
+                    // Нельзя заменить - операция отменяется
+                    op.MovedQuantity = 0;
+                    op.RequestedQuantity = 0;
+                }
             }
         }
-    }
 
-    // Правый клик - альтернативный способ удаления
-    protected override void ActivateSlotRightClick(ItemSlot sourceSlot, ref ItemStackMoveOperation op)
-    {
-        // ПКМ работает так же как ЛКМ пустой рукой
-        ActivateSlot(null, ref op);
-    }
-
-    // Предотвращаем стандартное поведение TryFlipWith
-    public override bool TryFlipWith(ItemSlot itemSlot)
-    {
-        if (itemSlot != null && itemSlot.StackSize > 0)
+        /// <summary>
+        /// Обработка правого клика (альтернативное удаление).
+        /// </summary>
+        protected override void ActivateSlotRightClick(ItemSlot sourceSlot, ref ItemStackMoveOperation op)
         {
-            // Если пытаются положить предмет
-            if (!this.Empty)
-            {
-                // Заменяем предмет в фильтре на копию
-                ItemStack singleStack = itemSlot.Itemstack.Clone();
-                singleStack.StackSize = 1;
-                this.Itemstack = singleStack;
-
-                // Предмет в itemSlot не уменьшается
-                this.MarkDirty();
-                return true;
-            }
-            else
-            {
-                // Кладем копию в пустой слот
-                ItemStack singleStack = itemSlot.Itemstack.Clone();
-                singleStack.StackSize = 1;
-                this.Itemstack = singleStack;
-
-                this.MarkDirty();
-                return true;
-            }
+            // ПКМ работает аналогично ЛКМ пустой рукой
+            ActivateSlot(null, ref op);
         }
 
-        return base.TryFlipWith(itemSlot);
-    }
-
-    // Гарантируем, что в слоте не больше 1 предмета
-    public override void OnItemSlotModified(ItemStack extractedStack = null)
-    {
-        if (!this.Empty && this.Itemstack.StackSize > 1)
+        /// <summary>
+        /// Предотвращение стандартного переворота слотов.
+        /// </summary>
+        public override bool TryFlipWith(ItemSlot itemSlot)
         {
-            this.Itemstack.StackSize = 1;
+            if (itemSlot != null && itemSlot.StackSize > 0)
+            {
+                // Заполнение пустого слота копией предмета
+                if (!this.Empty)
+                {
+                    ItemStack singleStack = itemSlot.Itemstack.Clone();
+                    singleStack.StackSize = 1;
+                    this.Itemstack = singleStack;
+
+                    this.MarkDirty();
+                    return true;
+                }
+                else
+                {
+                    // Заполнение пустого слота копией предмета
+                    ItemStack singleStack = itemSlot.Itemstack.Clone();
+                    singleStack.StackSize = 1;
+                    this.Itemstack = singleStack;
+
+                    this.MarkDirty();
+                    return true;
+                }
+            }
+
+            return base.TryFlipWith(itemSlot);
         }
 
-        base.OnItemSlotModified(extractedStack);
-    }
+        /// <summary>
+        /// Автоматическое ограничение размера стопки до 1 предмета.
+        /// </summary>
+        public override void OnItemSlotModified(ItemStack extractedStack = null)
+        {
+            if (!this.Empty && this.Itemstack.StackSize > 1)
+                this.Itemstack.StackSize = 1;
 
-    // Переопределяем CanTakeFrom - предметы можно брать только правым кликом для удаления
-    public override bool CanTakeFrom(ItemSlot sourceSlot, EnumMergePriority priority = EnumMergePriority.AutoMerge)
-    {
-        return false; // Нельзя брать предметы из этого слота стандартным способом
-    }
+            base.OnItemSlotModified(extractedStack);
+        }
 
-    // Переопределяем CanTake - предметы можно брать только кликом по слоту
-    public override bool CanTake()
-    {
-        return false; // Предотвращаем взятие предмета стандартным способом
-    }
+        /// <summary>
+        /// Предотвращение стандартного взятия предметов из слота.
+        /// </summary>
+        public override bool CanTakeFrom(ItemSlot sourceSlot, EnumMergePriority priority = EnumMergePriority.AutoMerge)
+        {
+            return false; // Взятие только через клики
+        }
 
-    // Переопределяем CanHold - всегда можно положить копию
-    public override bool CanHold(ItemSlot sourceSlot)
-    {
-        if (sourceSlot == null || sourceSlot.Empty)
+        /// <summary>
+        /// Предотвращение стандартного взятия предметов.
+        /// </summary>
+        public override bool CanTake()
+        {
+            return false; // Взятие только по клику на слот
+        }
+
+        /// <summary>
+        /// Проверка возможности размещения предмета в слоте.
+        /// Всегда возвращает true - можно положить копию любого предмета.
+        /// </summary>
+        public override bool CanHold(ItemSlot sourceSlot)
+        {
+            if (sourceSlot == null || sourceSlot.Empty)
+                return true;
+
+            // Можно разместить копию любого предмета
             return true;
-
-        // Всегда можно положить копию любого предмета
-        return true;
+        }
     }
 }

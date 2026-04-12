@@ -31,6 +31,7 @@ namespace ElectricalProgressive.Content
         public bool[] ConnectedToInventory => _connectedToInventory;
         public BlockPos?[] ConnectedPipes => _connectedPipes;
 
+        // Ключевые слова для определения блоков с инвентарём по коду блока
         private static string[] inventoryKeywords =
         [
             "chest", "crate", "box", "barrel", "shelf",
@@ -41,6 +42,7 @@ namespace ElectricalProgressive.Content
             "machine", "machinebase", "generator", "machinerack"
         ];
 
+        // Соседние стороны для определения угловых соединений (горизонтальные)
         private static Dictionary<string, string[]> adjacency = new()
         {
             { "north", ["west", "east"] },
@@ -57,15 +59,19 @@ namespace ElectricalProgressive.Content
             _networkManager = ElectricalProgressiveTransport.Instance?.GetNetworkManager();
         }
 
+        /// <summary>
+        /// Добавляет трубу в сеть и обновляет соединения
+        /// </summary>
         public void Initialize()
         {
             _networkManager?.AddPipe(_pos, _owner);
             UpdateConnections();
         }
 
-
-
-
+        /// <summary>
+        /// Обновляет все соединения трубы с соседями
+        /// </summary>
+        /// <param name="updateNeighbors">Если true, уведомляет соседей об обновлении</param>
         public virtual void UpdateConnections(bool updateNeighbors = true)
         {
             if (_isUpdating)
@@ -74,7 +80,7 @@ namespace ElectricalProgressive.Content
 
             try
             {
-                // 1. Сначала полностью сбрасываем и ищем соединения (как у вас и было)
+                // 1. Сброс и поиск соединений
                 for (int i = 0; i < 6; i++)
                 {
                     _connectedSides[i] = false;
@@ -101,18 +107,17 @@ namespace ElectricalProgressive.Content
                     }
                 }
 
-                // 2. ВАЖНО: Сначала обновляем визуальную модель САМОЙ трубы
+                // 2. Обновление визуальной модели самой трубы
                 UpdateBlockModel();
                 _owner.MarkDirty();
 
-                // 3. Только после того, как мы сами обновились, оповещаем соседей
+                // 3. Уведомление соседей после собственного обновления
                 if (updateNeighbors)
                 {
                     for (int i = 0; i < 6; i++)
                     {
                         if (_connectedSides[i] && !_connectedToInventory[i] && _connectedPipes[i] != null)
                         {
-                            // Вызываем ПОЛНОЕ обновление у соседа
                             NotifyNeighborOfUpdate(_connectedPipes[i]);
                         }
                     }
@@ -124,24 +129,25 @@ namespace ElectricalProgressive.Content
             }
         }
 
-        // Новый вспомогательный метод для уведомления соседа
+        /// <summary>
+        /// Уведомляет соседнюю трубу об обновлении без рекурсивного уведомления её соседей
+        /// </summary>
         private void NotifyNeighborOfUpdate(BlockPos neighborPos)
         {
             var be = _api.World.BlockAccessor.GetBlockEntity(neighborPos);
             if (be is BlockEntityPipeBase neighborPipe)
             {
-                // Вызываем обновление БЕЗ уведомления соседей (чтобы не вернуться к нам)
                 neighborPipe.UpdateConnections(false);
             }
             else if (be is BEPipe neighborSimplePipe)
             {
-                // Вызываем обновление БЕЗ уведомления соседей (чтобы не вернуться к нам)
                 neighborSimplePipe.UpdateConnections(false);
             }
-
-            // Если есть базовый класс для других труб, добавьте и его
         }
 
+        /// <summary>
+        /// Проверяет, является ли блок трубой
+        /// </summary>
         protected virtual bool IsPipeBlock(Vintagestory.API.Common.Block block)
         {
             if (block == null)
@@ -150,6 +156,9 @@ namespace ElectricalProgressive.Content
             return code.Contains("pipe") || block is BlockPipeBase;
         }
 
+        /// <summary>
+        /// Проверяет, содержит ли блок в данной позиции инвентарь
+        /// </summary>
         protected virtual bool HasValidInventoryBlock(BlockPos pos)
         {
             if (_api == null)
@@ -161,6 +170,7 @@ namespace ElectricalProgressive.Content
                 if (block == null)
                     return false;
 
+                // Проверка через BlockEntityContainer
                 var container = block.GetBlockEntity<BlockEntityContainer>(pos);
                 if (container?.Inventory?.Count > 0)
                     return true;
@@ -175,6 +185,7 @@ namespace ElectricalProgressive.Content
                     if (blockEntity is IInventory inv && inv.Count > 0)
                         return true;
 
+                    // Рефлексивная проверка свойства Inventory
                     try
                     {
                         var prop = blockEntity.GetType().GetProperty("Inventory");
@@ -184,8 +195,8 @@ namespace ElectricalProgressive.Content
                     catch { }
                 }
 
+                // Проверка по ключевым словам в коде блока
                 string code = block.Code?.ToString() ?? "";
-
                 foreach (var keyword in inventoryKeywords)
                 {
                     if (code.Contains(keyword, StringComparison.OrdinalIgnoreCase))
@@ -200,6 +211,9 @@ namespace ElectricalProgressive.Content
             }
         }
 
+        /// <summary>
+        /// Обновляет соединение с соседом через конкретную сторону
+        /// </summary>
         private void UpdateNeighborConnection(BlockPos neighborPos, BlockFacing fromDirection)
         {
             if (_api.World.BlockAccessor.GetBlockEntity(neighborPos) is BlockEntityPipeBase neighborPipe)
@@ -212,6 +226,9 @@ namespace ElectricalProgressive.Content
             }
         }
 
+        /// <summary>
+        /// Обновляет одно соединение (вызывается соседом при изменении его состояния)
+        /// </summary>
         public void UpdateSingleConnection(BlockFacing side, BlockPos fromPos, bool fromInventory = false)
         {
             int index = side.Index;
@@ -223,6 +240,9 @@ namespace ElectricalProgressive.Content
             _owner.MarkDirty();
         }
 
+        /// <summary>
+        /// Разрывает соединение с указанной стороны
+        /// </summary>
         public void BreakConnection(BlockFacing side)
         {
             int index = side.Index;
@@ -234,13 +254,17 @@ namespace ElectricalProgressive.Content
             _owner.MarkDirty();
         }
 
-        // Этот метод можно вызвать при удалении трубы, чтобы удалить ее из сети
+        /// <summary>
+        /// Вызывается при удалении трубы для очистки из сети
+        /// </summary>
         public virtual void OnPipeRemoved()
         {
             _networkManager?.RemovePipe(_pos);
         }
 
-
+        /// <summary>
+        /// Определяет текущий тип визуальной модели трубы на основе соединений
+        /// </summary>
         public virtual void UpdateBlockModel()
         {
             if (_api == null || _api.Side != EnumAppSide.Server)
@@ -262,6 +286,9 @@ namespace ElectricalProgressive.Content
             }
         }
 
+        /// <summary>
+        /// Обновляет визуальный тип блока на основе типа трубы
+        /// </summary>
         protected virtual void UpdateVisualBlockType(string pipeType)
         {
             if (_api == null || _api.Side != EnumAppSide.Server)
@@ -300,27 +327,28 @@ namespace ElectricalProgressive.Content
             }
         }
 
-
-
-
+        /// <summary>
+        /// Получает базовый код блока без вариантов (для построения кода визуального типа)
+        /// </summary>
         public string GetBaseBlockCode()
         {
             var currentBlock = _api.World.BlockAccessor.GetBlock(_pos);
             if (currentBlock == null)
                 return null;
-            // Считаем, сколько дефисов добавили варианты
+
+            // Подсчёт количества частей в вариантах для удаления их из кода
             int partsToRemove = 0;
             foreach (var variantValue in currentBlock.Variant.Values)
             {
-                // Считаем количество сегментов в значении варианта (например, "straight-ns" -> 2 сегмента)
                 partsToRemove += variantValue.Split('-').Length;
             }
 
-            // Отрезаем ровно столько частей, сколько пришло из вариантов
             return currentBlock.CodeWithoutParts(partsToRemove);
         }
 
-        // Методы определения типа трубы (копируются из существующего кода, но могут быть вынесены в статический класс)
+        /// <summary>
+        /// Определяет тип трубы на основе списка подключённых сторон
+        /// </summary>
         private static string DeterminePipeType(List<BlockFacing> facings)
         {
             int count = facings.Count;
@@ -344,9 +372,11 @@ namespace ElectricalProgressive.Content
             _ => "cross"
         };
 
+        /// <summary>
+        /// Определяет тип трубы при двух соединениях (прямая или угол)
+        /// </summary>
         private static string DetermineTwoConnectionType(BlockFacing f1, BlockFacing f2)
         {
-            // Сортировка для единообразия
             var sorted = new[] { f1, f2 }.OrderBy(f => f.Index).ToList();
             f1 = sorted[0];
             f2 = sorted[1];
@@ -376,6 +406,9 @@ namespace ElectricalProgressive.Content
             };
         }
 
+        /// <summary>
+        /// Определяет тип трубы при трёх соединениях (тройник, угол или вертикальное)
+        /// </summary>
         private static string DetermineThreeConnectionType(List<BlockFacing> facings)
         {
             if (IsTripleCorner(facings))
@@ -386,6 +419,9 @@ namespace ElectricalProgressive.Content
             return DetermineThreePlusVerticalType(facings);
         }
 
+        /// <summary>
+        /// Проверяет, является ли соединение тройным углом (3 оси без противоположных)
+        /// </summary>
         private static bool IsTripleCorner(List<BlockFacing> facings)
         {
             if (facings.Count != 3)
@@ -396,6 +432,9 @@ namespace ElectricalProgressive.Content
             return facings.Select(f => f.Axis).Distinct().Count() == 3;
         }
 
+        /// <summary>
+        /// Определяет тип тройного угла по кодам сторон
+        /// </summary>
         private static string DetermineTripleCornerType(List<BlockFacing> facings)
         {
             var codes = facings.Select(f => f.Code).OrderBy(c => c).ToList();
@@ -414,6 +453,9 @@ namespace ElectricalProgressive.Content
             };
         }
 
+        /// <summary>
+        /// Проверяет, является ли соединение Т-образным (есть противоположные стороны)
+        /// </summary>
         private static bool IsTeeConnection(List<BlockFacing> facings)
         {
             if (facings.Count != 3)
@@ -424,6 +466,9 @@ namespace ElectricalProgressive.Content
             return false;
         }
 
+        /// <summary>
+        /// Определяет тип Т-образного соединения по кодам сторон
+        /// </summary>
         private static string DetermineTeeType(List<BlockFacing> facings)
         {
             var codes = facings.Select(f => f.Code).OrderBy(c => c).ToList();
@@ -446,6 +491,9 @@ namespace ElectricalProgressive.Content
             };
         }
 
+        /// <summary>
+        /// Определяет тип трубы при 3 горизонтальных + 1 вертикальном соединении
+        /// </summary>
         private static string DetermineThreePlusVerticalType(List<BlockFacing> facings)
         {
             var horizontal = facings.Where(f => f.Axis != EnumAxis.Y).ToList();
@@ -456,11 +504,14 @@ namespace ElectricalProgressive.Content
                 var present = horizontal.Select(f => f.Code).ToList();
                 string missing = allHorizontal.FirstOrDefault(c => !present.Contains(c));
                 string vertCode = vertical[0].Code;
-                return vertCode == "up" ? "four-d" : "four-u"; // временно
+                return vertCode == "up" ? "four-d" : "four-u";
             }
             return "four-n";
         }
 
+        /// <summary>
+        /// Определяет тип трубы при четырёх соединениях
+        /// </summary>
         private static string DetermineFourConnectionType(List<BlockFacing> facings)
         {
             if (facings.Count != 4)
@@ -473,9 +524,11 @@ namespace ElectricalProgressive.Content
                 if (!facings.Contains(f)) missingSides.Add(f);
             }
             if (missingSides.Count != 2) return "four-n";
+
             var m1 = missingSides[0];
             var m2 = missingSides[1];
-            // обе горизонтальные
+
+            // Обе пропущенные стороны горизонтальные
             if (m1.Axis != EnumAxis.Y && m2.Axis != EnumAxis.Y)
             {
                 if (AreAdjacentHorizontal(m1, m2))
@@ -500,7 +553,8 @@ namespace ElectricalProgressive.Content
                     return "cross";
                 }
             }
-            // одна горизонтальная, одна вертикальная
+
+            // Одна горизонтальная, одна вертикальная
             if ((m1.Axis != EnumAxis.Y && m2.Axis == EnumAxis.Y) || (m1.Axis == EnumAxis.Y && m2.Axis != EnumAxis.Y))
             {
                 var horiz = m1.Axis != EnumAxis.Y ? m1 : m2;
@@ -526,7 +580,8 @@ namespace ElectricalProgressive.Content
                     _ => "four-n"
                 };
             }
-            // обе вертикальные
+
+            // Обе пропущенные стороны вертикальные
             if (m1.Code == "up" && m2.Code == "down")
             {
                 int horizontalCount = facings.Count(f => f.Axis != EnumAxis.Y);
@@ -549,11 +604,17 @@ namespace ElectricalProgressive.Content
             return "four-n";
         }
 
+        /// <summary>
+        /// Проверяет, являются ли две горизонтальные стороны соседними
+        /// </summary>
         private static bool AreAdjacentHorizontal(BlockFacing f1, BlockFacing f2)
         {
             return adjacency.ContainsKey(f1.Code) && adjacency[f1.Code].Contains(f2.Code);
         }
 
+        /// <summary>
+        /// Определяет тип трубы при пяти соединениях (по пропущенной стороне)
+        /// </summary>
         private static string DetermineFiveConnectionType(List<BlockFacing> facings)
         {
             for (int i = 0; i < 6; i++)
@@ -574,6 +635,9 @@ namespace ElectricalProgressive.Content
             return "five-n";
         }
 
+        /// <summary>
+        /// Получает список позиций подключённых инвентарей
+        /// </summary>
         public List<BlockPos> GetConnectedInventories()
         {
             var result = new List<BlockPos>();
@@ -583,11 +647,17 @@ namespace ElectricalProgressive.Content
             return result;
         }
 
+        /// <summary>
+        /// Получает инвентарь по позиции (публичный интерфейс)
+        /// </summary>
         public IInventory GetConnectedInventory(BlockPos inventoryPos)
         {
             return GetInventoryAtPosition(inventoryPos);
         }
 
+        /// <summary>
+        /// Получает инвентарь из блока в указанной позиции
+        /// </summary>
         public IInventory GetInventoryAtPosition(BlockPos pos)
         {
             if (_api == null)
@@ -600,6 +670,9 @@ namespace ElectricalProgressive.Content
             return GetInventoryFromBlockEntity(blockEntity);
         }
 
+        /// <summary>
+        /// Получает инвентарь из BlockEntity через проверку типов и рефлексию
+        /// </summary>
         public static IInventory GetInventoryFromBlockEntity(BlockEntity be)
         {
             if (be == null)
@@ -618,6 +691,9 @@ namespace ElectricalProgressive.Content
             catch { return null; }
         }
 
+        /// <summary>
+        /// Восстанавливает состояние компонента из атрибутов дерева (серийлизация)
+        /// </summary>
         public void FromTreeAttributes(ITreeAttribute tree)
         {
             var connBytes = tree.GetBytes("connections", null);
@@ -633,6 +709,9 @@ namespace ElectricalProgressive.Content
             _currentPipeType = tree.GetString("currentPipeType", "cross");
         }
 
+        /// <summary>
+        /// Сохраняет состояние компонента в атрибуты дерева (серийлизация)
+        /// </summary>
         public void ToTreeAttributes(ITreeAttribute tree)
         {
             var connBytes = new byte[6];
@@ -647,9 +726,8 @@ namespace ElectricalProgressive.Content
         }
 
         /// <summary>
-        /// Информация при навелении на блок трубы
+        /// Добавляет информацию о трубе в StringBuilder при наведении курсора
         /// </summary>
-        /// <param name="sb"></param>
         public void GetBlockInfo(StringBuilder sb)
         {
             int connections = 0;

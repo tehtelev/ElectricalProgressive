@@ -6,6 +6,9 @@ using Vintagestory.API.MathTools;
 
 namespace ElectricalProgressive.Content.NetworkPipe;
 
+/// <summary>
+/// Представляет сеть соединенных труб и инсертеров
+/// </summary>
 public class PipeNetwork
 {
     public long NetworkId { get; private set; }
@@ -19,6 +22,9 @@ public class PipeNetwork
         Inserters = [];
     }
 
+    /// <summary>
+    /// Добавляет трубу в сеть, если её ещё нет
+    /// </summary>
     public void AddPipe(BlockPos pos, BlockEntity pipe)
     {
         if (!Pipes.Contains(pos))
@@ -32,12 +38,18 @@ public class PipeNetwork
         }
     }
 
+    /// <summary>
+    /// Удаляет трубу из списка труб и инсертеров
+    /// </summary>
     public void RemovePipe(BlockPos pos)
     {
         Pipes.Remove(pos);
         Inserters.Remove(pos);
     }
 
+    /// <summary>
+    /// Объединяет текущую сеть с другой (без дублирования позиций)
+    /// </summary>
     public void Merge(PipeNetwork otherNetwork)
     {
         foreach (var pipePos in otherNetwork.Pipes)
@@ -57,6 +69,9 @@ public class PipeNetwork
         }
     }
 
+    /// <summary>
+    /// Находит все соединенные трубы через BFS
+    /// </summary>
     public static List<BlockPos> FindConnectedPipes(IWorldAccessor world, BlockPos startPos, BlockPos skipPos = null)
     {
         List<BlockPos> connected = [];
