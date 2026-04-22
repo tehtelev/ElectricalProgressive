@@ -6,15 +6,15 @@ using ElectricalProgressive.Content.NetworkPipe;
 using ElectricalProgressive.Content.NormalPipe;
 using Vintagestory.API.Common;
 
-[assembly: ModDependency("game", "1.22.0-rc.1")]
-[assembly: ModDependency("electricalprogressivecore", "3.0.0-rc.3")]
-[assembly: ModDependency("electricalprogressivebasics", "3.0.0-rc.3")]
+[assembly: ModDependency("game", "1.22.0")]
+[assembly: ModDependency("electricalprogressivecore", "3.0.0")]
+[assembly: ModDependency("electricalprogressivebasics", "3.0.0")]
 [assembly: ModInfo(
     "Electrical Progressive: Transport",
     "electricalprogressivetransport",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Pipeline transport system",
-    Version = "1.0.0-rc.4",
+    Version = "1.0.0",
     Authors =
     [
         "Tehtelev",
