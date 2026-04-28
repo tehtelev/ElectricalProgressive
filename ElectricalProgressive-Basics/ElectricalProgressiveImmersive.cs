@@ -48,7 +48,7 @@ namespace ElectricalProgressive
         public static IServerNetworkChannel? serverWireChannel;
 
 
-        private readonly BlockingCollection<ImmersiveNetwork> _networkProcessingQueue = new(); // коллекция для сетей
+        private readonly BlockingCollection<ImmersiveNetwork> _networkProcessingQueue = []; // коллекция для сетей
         private readonly List<Thread> _networkProcessingThreads = [];                //список потоков работников
         private volatile bool _networkProcessingRunning = true;                         //сети работают?
         private readonly CountdownEvent _networkProcessingCompleted = new(0); // ивент для окончания ожидания потоков
@@ -69,12 +69,10 @@ namespace ElectricalProgressive
         int _envUpdater = 0;
 
         private long _listenerId1;
-        //private long listenerId2;
 
-        //private ImmersiveNetworkInformation _result = new();
 
         /// <summary>
-        /// Запуск модификации
+        /// Запуск общего потока
         /// </summary>
         /// <param name="api"></param>
         public override void Start(ICoreAPI api)
@@ -121,7 +119,7 @@ namespace ElectricalProgressive
 
 
         /// <summary>
-        /// Освобождение ресурсов
+        /// Освобождение ресурсов после выгрузки мода
         /// </summary>
         public override void Dispose()
         {
@@ -131,7 +129,7 @@ namespace ElectricalProgressive
             _networkProcessingRunning = false;
 
             // Добавляем null-значения в очередь, чтобы разблокировать потоки
-            foreach (var thread in _networkProcessingThreads)
+            for (var i = 0; i < _networkProcessingThreads.Count; i++)
             {
                 _networkProcessingQueue.Add(null);
             }
@@ -193,20 +191,13 @@ namespace ElectricalProgressive
         {
             base.StartClientSide(api);
             this._capi = api;
-            RegisterAltKeys();
 
             // регистрируем канал для синхронизации данных о закрепляемых проводах
             clientWireChannel = api.Network.RegisterChannel("EPWireChannel").RegisterMessageType<ImmersiveWireBlock.WireConnectionData>();
         }
 
 
-        /// <summary>
-        /// Регистрация клавиш Alt
-        /// </summary>
-        private void RegisterAltKeys()
-        {
-            _capi.Input.RegisterHotKey("AltPressForNetwork", Lang.Get("electricalprogressivecore:AltPressForNetworkName"), GlKeys.LAlt);
-        }
+
 
         /// <summary>
         /// Серверная сторона
@@ -524,108 +515,7 @@ namespace ElectricalProgressive
 
             return newNetwork;
         }
-
-        /// <summary>
-        /// Добавляет иммерсивное соединение в сеть
-        /// </summary>
-        private void AddImmersiveConnection(ImmersiveNetworkPart part, ConnectionData connection, ImmersiveNetwork network)
-        {
-            // Проверяем, есть ли уже такое соединение
-            var existingConnection = network.ImmersiveConnections
-                .FirstOrDefault(c =>
-                    c.LocalPos.Equals(part.Position) &&
-                    c.LocalNodeIndex == connection.LocalNodeIndex &&
-                    c.NeighborPos.Equals(connection.NeighborPos) &&
-                    c.NeighborNodeIndex == connection.NeighborNodeIndex);
-
-            if (existingConnection == null)
-            {
-                // Создаем новое сетевое соединение
-                var networkConnection = new NetworkImmersiveConnection
-                {
-                    LocalPos = part.Position,
-                    LocalNodeIndex = connection.LocalNodeIndex,
-                    NeighborPos = connection.NeighborPos,
-                    NeighborNodeIndex = connection.NeighborNodeIndex,
-                    Parameters = connection.Parameters,
-                    WireLength = connection.WireLength
-                };
-                network.ImmersiveConnections.Add(networkConnection);
-                network.version++;
-            }
-            else
-            {
-                // Обновляем параметры существующего соединения
-                existingConnection.Parameters = connection.Parameters;
-            }
-
-            // Добавляем соседа в сеть если его там нет
-            if (!network.PartPositions.Contains(connection.NeighborPos))
-            {
-                // Ищем сеть, к которой принадлежит сосед
-                ImmersiveNetwork neighborNetwork = null;
-                foreach (var net in Networks)
-                {
-                    if (net.PartPositions.Contains(connection.NeighborPos))
-                    {
-                        neighborNetwork = net;
-                        break;
-                    }
-                }
-
-                if (neighborNetwork != null && neighborNetwork != network)
-                {
-                    // Если сосед уже в другой сети, объединяем сети
-                    var networksToMerge = new HashSet<ImmersiveNetwork> { network, neighborNetwork };
-                    var mergedNetwork = MergeNetworks(networksToMerge);
-
-                    // Обновляем ссылку на сеть
-                    network = mergedNetwork;
-                }
-                else if (neighborNetwork == null)
-                {
-                    // Сосед не в сети, добавляем его
-                    if (Parts.TryGetValue(connection.NeighborPos, out var neighborPart))
-                    {
-                        network.PartPositions.Add(connection.NeighborPos);
-
-                        // Добавляем компоненты соседа в сеть
-                        if (neighborPart.Conductor is { } conductor) network.Conductors.Add(conductor);
-                        if (neighborPart.Consumer is { } consumer) network.Consumers.Add(consumer);
-                        if (neighborPart.Producer is { } producer) network.Producers.Add(producer);
-                        if (neighborPart.Accumulator is { } accumulator) network.Accumulators.Add(accumulator);
-                        if (neighborPart.Transformator is { } transformator) network.Transformators.Add(transformator);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Удаляет устаревшие иммерсивные соединения
-        /// </summary>
-        private void RemoveStaleImmersiveConnections(ImmersiveNetworkPart part, ImmersiveNetwork network)
-        {
-            // Находим соединения которые больше не актуальны
-            var staleConnections = network.ImmersiveConnections
-                .Where(c => c.LocalPos.Equals(part.Position) &&
-                           !part.Connections.Any(pc =>
-                               pc.LocalNodeIndex == c.LocalNodeIndex &&
-                               pc.NeighborPos.Equals(c.NeighborPos) &&
-                               pc.NeighborNodeIndex == c.NeighborNodeIndex))
-                .ToList();
-
-            // Удаляем устаревшие соединения
-            foreach (var staleConnection in staleConnections)
-            {
-                network.ImmersiveConnections.Remove(staleConnection);
-                network.version++;
-            }
-
-            if (staleConnections.Count > 0)
-            {
-                CheckAndSplitNetwork(network);
-            }
-        }
+        
 
         /// <summary>
         /// Удаляем соединения
@@ -1380,16 +1270,10 @@ namespace ElectricalProgressive
 
                                 // ПОМЕТИТЬ БЛОК КАК ГРЯЗНЫЙ - отправка на клиент
                                 var blockEntity = Api.World.BlockAccessor.GetBlockEntity(partPos);
-                                if (blockEntity != null)
-                                {
-                                    blockEntity.MarkDirty();
-                                }
+                                blockEntity?.MarkDirty();
 
                                 blockEntity = Api.World.BlockAccessor.GetBlockEntity(connection.NeighborPos);
-                                if (blockEntity != null)
-                                {
-                                    blockEntity.MarkDirty();
-                                }
+                                blockEntity?.MarkDirty();
                             }
                         }
                     }
@@ -1453,16 +1337,10 @@ namespace ElectricalProgressive
 
                         // ПОМЕТИТЬ БЛОК КАК ГРЯЗНЫЙ - отправка на клиент
                         var blockEntity = Api.World.BlockAccessor.GetBlockEntity(partPos);
-                        if (blockEntity != null)
-                        {
-                            blockEntity.MarkDirty();
-                        }
+                        blockEntity.MarkDirty();
 
                         blockEntity = Api.World.BlockAccessor.GetBlockEntity(connection.NeighborPos);
-                        if (blockEntity != null)
-                        {
-                            blockEntity.MarkDirty();
-                        }
+                        blockEntity.MarkDirty();
 
                     }
                 }

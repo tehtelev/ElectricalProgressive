@@ -14,15 +14,11 @@ using ElectricalProgressive.Content.Block.ETermoGenerator;
 using ElectricalProgressive.Content.Block.ETransformator;
 using ElectricalProgressive.Content.Block.Termoplastini;
 using ElectricalProgressive.Content.Item.Tool;
-using ElectricalProgressive.Patch;
-using HarmonyLib;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
-using Vintagestory.GameContent.Mechanics;
+
 
 
 [assembly: ModDependency("game", "1.22.0")]
@@ -138,25 +134,25 @@ public class ElectricalProgressiveBasics : ModSystem
         
 
 
-
-
-
     }
 
 
 
-    // Замените метод StartClientSide в ElectricalProgressiveBasics.cs на этот:
-
+    /// <summary>
+    /// Старт клиентского потока
+    /// </summary>
+    /// <param name="api"></param>
     public override void StartClientSide(ICoreClientAPI api)
     {
         base.StartClientSide(api);
         this.capi = api;
 
-
     }
 
 
-
+    /// <summary>
+    /// Очистка ресурсов при выгрузке мода
+    /// </summary>
     public override void Dispose()
     {
         base.Dispose();

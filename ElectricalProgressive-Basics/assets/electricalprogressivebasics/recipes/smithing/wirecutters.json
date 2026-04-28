@@ -15,6 +15,7 @@
 		]
 	],
 	"name": "wirecutters",
+	"code": "wirecutters-{metal}",
 	"output": {
 		"type": "item",
 		"code": "electricalprogressivebasics:wirecutters",

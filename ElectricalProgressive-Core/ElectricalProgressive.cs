@@ -88,12 +88,12 @@ namespace ElectricalProgressive
         int _envUpdater = 0;
 
         private long _listenerId1;
-        //private long listenerId2;
+
 
         private NetworkInformation _result = new();
 
         /// <summary>
-        /// Запуск модификации
+        /// Запуск общего потока
         /// </summary>
         /// <param name="api"></param>
         public override void Start(ICoreAPI api)
@@ -119,7 +119,7 @@ namespace ElectricalProgressive
 
 
         /// <summary>
-        /// Освобождение ресурсов
+        /// Освобождение ресурсов после выгрузки мода
         /// </summary>
         public override void Dispose()
         {
@@ -165,7 +165,7 @@ namespace ElectricalProgressive
             Parts?.Clear();
             PathCacheManager.Dispose();
 
-
+            // Убираем патчи
             if (harmony != null)
                 Mat4fMultiplyPatch.UnregisterPatch(harmony);
 

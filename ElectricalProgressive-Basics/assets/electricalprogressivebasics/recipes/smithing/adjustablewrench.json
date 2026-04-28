@@ -14,7 +14,8 @@
 			"___________"
 		]
 	],
-	"name": "wirecutters",
+	"name": "wrench-adjustable",
+	"code": "wrench-adjustable-{metal}",
 	"output": {
 		"type": "item",
 		"code": "game:wrench-adjustable",
