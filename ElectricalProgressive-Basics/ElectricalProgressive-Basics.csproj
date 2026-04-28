@@ -74,6 +74,7 @@
     </ItemGroup>
     <ItemGroup>
       <Folder Include="assets\game\itemtypes\resource\" />
+      <Folder Include="Patch\" />
     </ItemGroup>
     <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 </Project>

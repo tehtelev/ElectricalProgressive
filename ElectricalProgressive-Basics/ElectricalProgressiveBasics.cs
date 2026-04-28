@@ -45,7 +45,7 @@ namespace ElectricalProgressive;
 
 public class ElectricalProgressiveBasics : ModSystem
 {
-    private Harmony harmony;
+    //private Harmony harmony;
 
     private ICoreAPI api = null!;
     private ICoreClientAPI capi = null!;
@@ -137,9 +137,7 @@ public class ElectricalProgressiveBasics : ModSystem
 
         
 
-        // Регистрируем патч для механики
-        harmony = new Harmony("electricalprogressive.mechanicalpowermod");
-        MechanicalPowerMod_RebuildNetwork_Patch.RegisterPatch(harmony, api);
+
 
 
 
@@ -161,11 +159,6 @@ public class ElectricalProgressiveBasics : ModSystem
 
     public override void Dispose()
     {
-        // Отменяем все патчи при выгрузке мода
-        MechanicalPowerMod_RebuildNetwork_Patch.UnregisterPatch(harmony);
-        harmony?.UnpatchAll("electricalprogressive.mechanicalpowermod");
-        harmony = null;
-
         base.Dispose();
     }
 }
