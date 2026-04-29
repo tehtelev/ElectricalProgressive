@@ -5,8 +5,8 @@
 		"allAngles": true,
 		"entityTextureMode": true
 	},
-	"textureWidth": 64,
-	"textureHeight": 64,
+	"textureWidth": 128,
+	"textureHeight": 128,
 	"textureSizes": {
 	},
 	"textures": {
@@ -258,34 +258,34 @@
 			"faces": {
 				"north": {
 					"texture": "#chain-iron",
-					"uv": [ 0.0, 0.0, 32.0, 64.0 ],
+					"uv": [ 0.0, 0.0, 64.0, 128.0 ],
 					"autoUv": false
 				},
 				"east": {
 					"texture": "#chain-iron",
-					"uv": [ 0.0, 0.0, 32.0, 64.0 ],
+					"uv": [ 0.0, 0.0, 64.0, 128.0 ],
 					"autoUv": false
 				},
 				"south": {
 					"texture": "#chain-iron",
-					"uv": [ 0.0, 0.0, 32.0, 64.0 ],
+					"uv": [ 0.0, 0.0, 64.0, 128.0 ],
 					"autoUv": false,
 					"windMode": [ -1, -1, -1, -1 ],
 					"windData": [ 1, 1, 1, 1 ]
 				},
 				"west": {
 					"texture": "#chain-iron",
-					"uv": [ 0.0, 0.0, 32.0, 64.0 ],
+					"uv": [ 0.0, 0.0, 64.0, 128.0 ],
 					"autoUv": false
 				},
 				"up": {
 					"texture": "#chain-iron",
-					"uv": [ 0.0, 0.0, 32.0, 28.0 ],
+					"uv": [ 0.0, 0.0, 64.0, 128.0 ],
 					"autoUv": false
 				},
 				"down": {
 					"texture": "#chain-iron",
-					"uv": [ 54.0, 34.0, 56.0, 36.0 ]
+					"uv": [ 108.0, 68.0, 112.0, 72.0 ]
 				}
 			},
 			"children": [
@@ -1279,31 +1279,31 @@
 			"faces": {
 				"north": {
 					"texture": "#scale-iron",
-					"uv": [ 0.0, 0.0, 64.0, 40.0 ],
+					"uv": [ 0.0, 0.0, 128.0, 128.0 ],
 					"autoUv": false
 				},
 				"east": {
 					"texture": "#scale-iron",
-					"uv": [ 0.0, 0.0, 64.0, 40.0 ],
+					"uv": [ 0.0, 0.0, 128.0, 128.0 ],
 					"autoUv": false
 				},
 				"south": {
 					"texture": "#scale-iron",
-					"uv": [ 0.0, 0.0, 64.0, 40.0 ],
+					"uv": [ 0.0, 0.0, 128.0, 128.0 ],
 					"autoUv": false
 				},
 				"west": {
 					"texture": "#scale-iron",
-					"uv": [ 0.0, 0.0, 64.0, 40.0 ],
+					"uv": [ 0.0, 0.0, 128.0, 128.0 ],
 					"autoUv": false
 				},
 				"up": {
 					"texture": "#scale-iron",
-					"uv": [ 11.0, 36.5, 16.0, 42.5 ]
+					"uv": [ 22.0, 73.0, 32.0, 85.0 ]
 				},
 				"down": {
 					"texture": "#scale-iron",
-					"uv": [ 16.0, 36.5, 21.0, 42.5 ]
+					"uv": [ 32.0, 73.0, 42.0, 85.0 ]
 				}
 			},
 			"children": [
@@ -1835,35 +1835,35 @@
 			"faces": {
 				"north": {
 					"texture": "#chain-iron",
-					"uv": [ 0.0, 0.0, 32.0, 64.0 ],
+					"uv": [ 0.0, 0.0, 64.0, 128.0 ],
 					"autoUv": false,
 					"windMode": [ -1, -1, -1, -1 ],
 					"windData": [ 0, 1, 1, 0 ]
 				},
 				"east": {
 					"texture": "#chain-iron",
-					"uv": [ 0.0, 0.0, 32.0, 64.0 ],
+					"uv": [ 0.0, 0.0, 64.0, 128.0 ],
 					"autoUv": false
 				},
 				"south": {
 					"texture": "#chain-iron",
-					"uv": [ 0.0, 0.0, 32.0, 64.0 ],
+					"uv": [ 0.0, 0.0, 64.0, 128.0 ],
 					"autoUv": false,
 					"windMode": [ -1, -1, -1, -1 ],
 					"windData": [ 0, 0, 1, 1 ]
 				},
 				"west": {
 					"texture": "#chain-iron",
-					"uv": [ 0.0, 0.0, 32.0, 64.0 ],
+					"uv": [ 0.0, 0.0, 64.0, 128.0 ],
 					"autoUv": false
 				},
 				"up": {
 					"texture": "#chain-iron",
-					"uv": [ 50.0, 52.0, 52.5, 54.0 ]
+					"uv": [ 100.0, 104.0, 105.0, 108.0 ]
 				},
 				"down": {
 					"texture": "#chain-iron",
-					"uv": [ 52.0, 52.0, 54.5, 54.0 ]
+					"uv": [ 104.0,104.0, 109.0, 108.0 ]
 				}
 			},
 			"children": [

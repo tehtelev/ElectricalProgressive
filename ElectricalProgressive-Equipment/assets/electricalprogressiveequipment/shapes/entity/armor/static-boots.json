@@ -3,10 +3,9 @@
 		"allAngles": true,
 		"entityTextureMode": true
 	},
-	"textureWidth": 64,
-	"textureHeight": 64,
-	"textureSizes": {
-	},
+	"textureWidth": 128,
+	"textureHeight": 128,
+
 	"textures": {
 		"seraph": "game:block/transparent",
 		"bismuthbronze": "game:block/metal/plate/bismuthbronze",
@@ -25,23 +24,43 @@
 			"stepParentName": "UpperFootR",
 			"from": [ -0.19, -0.5, -0.1 ],
 			"to": [ 4.41, 9.5, 3.4 ],
-			"autoUnwrap": false,
+			"autoUnwrap": true,
 			"uv": [ 17.5, 40.5 ],
 			"rotationOrigin": [ -0.2, -0.5, -0.1 ],
 			"faces": {
-				"north": { "texture": "#scale-iron", "uv": [ 0.0, 0.0, 32.0, 64.0 ], "autoUv": false, "windMode": [-1,-1,-1,-1] },
-				"east": { "texture": "#scale-iron", "uv": [ 0.0, 0.0, 32.0, 64.0 ], "autoUv": false, "windMode": [-1,-1,-1,-1] },
-				"south": { "texture": "#scale-iron", "uv": [ 0.0, 0.0, 32.0, 64.0 ], "autoUv": false, "windMode": [-1,-1,-1,-1] },
-				"west": { "texture": "#scale-iron", "uv": [ 0.0, 0.0, 32.0, 64.0 ], "autoUv": false, "windMode": [-1,-1,-1,-1] },
-				"up": { "texture": "#scale-iron", "uv": [ 0.0, 0.0, 28.0, 28.0 ], "autoUv": false, "windMode": [-1,-1,-1,-1] },
-				"down": { "texture": "#scale-iron", "uv": [ 0.0, 0.0, 28.0, 28.0 ], "autoUv": false, "windMode": [-1,-1,-1,-1] }
+				"north": { "texture": "#scale-iron", "uv": [ 0.0, 0.0, 64.0, 128.0 ], "autoUv": false, "windMode": [-1,-1,-1,-1] },
+				"east": {
+					"texture": "#scale-iron",
+					"uv": [ 0.0, 0.0, 64.0, 128.0 ],
+					"autoUv": false,
+					"windMode": [ -1, -1, -1, -1 ]
+				},
+				"south": {
+					"texture": "#scale-iron",
+					"uv": [ 0.0, 0.0, 64.0, 128.0 ],
+					"autoUv": false,
+					"windMode": [ -1, -1, -1, -1 ]
+				},
+				"west": {
+					"texture": "#scale-iron",
+					"uv": [ 0.0, 0.0, 64.0, 128.0 ],
+					"autoUv": false,
+					"windMode": [ -1, -1, -1, -1 ]
+				},
+				"up": { "texture": "#scale-iron", "uv": [ 0.0, 0.0, 56.0, 56.0 ], "autoUv": false, "windMode": [-1,-1,-1,-1] },
+				"down": {
+					"texture": "#scale-iron",
+					"uv": [ 0.0, 0.0, 56.0, 56.0 ],
+					"autoUv": false,
+					"windMode": [ -1, -1, -1, -1 ]
+				}
 			},
 			"children": [
 				{
 					"name": "Cube2",
 					"from": [ -0.4, 6.8, -0.3 ],
 					"to": [ 4.9, 7.5, 2.7 ],
-					"autoUnwrap": false,
+					"autoUnwrap": true,
 					"uv": [ 0.0, 0.0 ],
 					"rotationOrigin": [ -0.4, 6.8, -0.3 ],
 					"faces": {
@@ -57,7 +76,7 @@
 							"name": "Cube3",
 							"from": [ -0.35, -0.05, 0.3 ],
 							"to": [ 0.65, 0.75, 1.3 ],
-							"autoUnwrap": false,
+							"autoUnwrap": true,
 							"uv": [ 53.5, 1.0 ],
 							"rotationOrigin": [ -0.3, -0.1, 0.3 ],
 							"rotationY": 45.0,
@@ -74,7 +93,7 @@
 							"name": "Cube4",
 							"from": [ 5.0, -0.05, -0.4 ],
 							"to": [ 6.0, 0.75, 0.6 ],
-							"autoUnwrap": false,
+							"autoUnwrap": true,
 							"uv": [ 6.0, 17.5 ],
 							"rotationOrigin": [ 4.9, -0.1, -0.4 ],
 							"rotationY": -45.0,
@@ -91,7 +110,7 @@
 							"name": "Cube5",
 							"from": [ 0.0, -0.9, 0.0 ],
 							"to": [ 5.3, -0.2, 2.7 ],
-							"autoUnwrap": false,
+							"autoUnwrap": true,
 							"uv": [ 25.5, 0.5 ],
 							"rotationOrigin": [ 0.0, -0.9, 0.0 ],
 							"faces": {
@@ -107,7 +126,7 @@
 									"name": "Cube6",
 									"from": [ -0.35, -0.05, 0.3 ],
 									"to": [ 0.65, 0.75, 1.3 ],
-									"autoUnwrap": false,
+									"autoUnwrap": true,
 									"uv": [ 51.0, 42.0 ],
 									"rotationOrigin": [ -0.3, -0.1, 0.3 ],
 									"rotationY": 45.0,
@@ -124,7 +143,7 @@
 									"name": "Cube7",
 									"from": [ 5.0, -0.05, -0.4 ],
 									"to": [ 6.0, 0.75, 0.6 ],
-									"autoUnwrap": false,
+									"autoUnwrap": true,
 									"uv": [ 0.0, 21.0 ],
 									"rotationOrigin": [ 4.9, -0.1, -0.4 ],
 									"rotationY": -45.0,
@@ -143,7 +162,7 @@
 							"name": "Cube8",
 							"from": [ 0.0, -1.8, 0.0 ],
 							"to": [ 5.3, -1.1, 2.5 ],
-							"autoUnwrap": false,
+							"autoUnwrap": true,
 							"uv": [ 0.0, 29.5 ],
 							"rotationOrigin": [ 0.0, -1.8, 0.0 ],
 							"faces": {
@@ -159,7 +178,7 @@
 									"name": "Cube9",
 									"from": [ -0.35, -0.05, 0.3 ],
 									"to": [ 0.65, 0.75, 1.3 ],
-									"autoUnwrap": false,
+									"autoUnwrap": true,
 									"uv": [ 23.5, 50.0 ],
 									"rotationOrigin": [ -0.3, -0.1, 0.3 ],
 									"rotationY": 45.0,
@@ -176,7 +195,7 @@
 									"name": "Cube10",
 									"from": [ 5.0, -0.05, -0.4 ],
 									"to": [ 6.0, 0.75, 0.6 ],
-									"autoUnwrap": false,
+									"autoUnwrap": true,
 									"uv": [ 5.5, 52.0 ],
 									"rotationOrigin": [ 4.9, -0.1, -0.4 ],
 									"rotationY": -45.0,
@@ -195,7 +214,7 @@
 							"name": "Cube11",
 							"from": [ 0.0, -2.7, 0.0 ],
 							"to": [ 5.3, -2.0, 2.3 ],
-							"autoUnwrap": false,
+							"autoUnwrap": true,
 							"uv": [ 39.5, 31.0 ],
 							"rotationOrigin": [ 0.0, -2.7, 0.0 ],
 							"faces": {
@@ -211,7 +230,7 @@
 									"name": "Cube12",
 									"from": [ -0.35, -0.05, 0.3 ],
 									"to": [ 0.65, 0.75, 1.3 ],
-									"autoUnwrap": false,
+									"autoUnwrap": true,
 									"uv": [ 23.0, 0.0 ],
 									"rotationOrigin": [ -0.3, -0.1, 0.3 ],
 									"rotationY": 45.0,
@@ -228,7 +247,7 @@
 									"name": "Cube13",
 									"from": [ 5.0, -0.05, -0.4 ],
 									"to": [ 6.0, 0.75, 0.6 ],
-									"autoUnwrap": false,
+									"autoUnwrap": true,
 									"uv": [ 41.0, 3.0 ],
 									"rotationOrigin": [ 4.9, -0.1, -0.4 ],
 									"rotationY": -45.0,
@@ -252,7 +271,7 @@
 			"stepParentName": "UpperFootL",
 			"from": [ -0.19, -0.5, -0.2 ],
 			"to": [ 4.41, 9.5, 3.3 ],
-			"autoUnwrap": false,
+			"autoUnwrap": true,
 			"uv": [ 0.0, 40.0 ],
 			"rotationOrigin": [ -0.2, -0.5, -0.2 ],
 			"faces": {
@@ -268,16 +287,25 @@
 					"name": "Cube30",
 					"from": [ -0.1, 4.1, 0.6 ],
 					"to": [ 4.7, 10.1, 3.6 ],
-					"autoUnwrap": false,
+					"autoUnwrap": true,
 					"uv": [ 0.0, 0.0 ],
 					"rotationOrigin": [ -0.1, 4.1, 0.6 ],
 					"faces": {
-						"north": { "texture": "#chain-iron", "uv": [ 0.0, 0.0, 64.0, 64.0 ], "autoUv": false, "windMode": [-1,-1,-1,-1] },
-						"east": { "texture": "#chain-iron", "uv": [ 0.0, 0.0, 32.0, 64.0 ], "autoUv": false },
-						"south": { "texture": "#chain-iron", "uv": [ 0.0, 0.0, 64.0, 64.0 ], "autoUv": false, "windMode": [-1,-1,-1,-1] },
-						"west": { "texture": "#chain-iron", "uv": [ 0.0, 0.0, 32.0, 64.0 ], "autoUv": false },
-						"up": { "texture": "#chain-iron", "uv": [ 0.0, 0.0, 42.0, 24.0 ], "autoUv": false, "windMode": [-1,-1,-1,-1] },
-						"down": { "texture": "#chain-iron", "uv": [ 0.0, 0.0, 42.0, 24.0 ], "autoUv": false, "windMode": [-1,-1,-1,-1] }
+						"north": { "texture": "#chain-iron", "uv": [ 0.0, 0.0, 128.0, 128.0 ], "autoUv": false, "windMode": [-1,-1,-1,-1] },
+						"east": { "texture": "#chain-iron", "uv": [ 0.0, 0.0, 64.0, 128.0 ], "autoUv": false },
+						"south": {
+							"texture": "#chain-iron",
+							"uv": [ 0.0, 0.0, 128.0, 128.0 ],
+							"autoUv": false,
+							"windMode": [ -1, -1, -1, -1 ]
+						},
+						"west": {
+							"texture": "#chain-iron",
+							"uv": [ 0.0, 0.0, 64.0, 128.0 ],
+							"autoUv": false
+						},
+						"up": { "texture": "#chain-iron", "uv": [ 0.0, 0.0, 84.0, 48.0 ], "autoUv": false, "windMode": [-1,-1,-1,-1] },
+						"down": { "texture": "#chain-iron", "uv": [ 0.0, 0.0, 84.0, 48.0 ], "autoUv": false, "windMode": [-1,-1,-1,-1] }
 					}
 				}
 			]
@@ -287,7 +315,7 @@
 			"stepParentName": "LowerFootR",
 			"from": [ -0.45, -0.2, -0.8 ],
 			"to": [ 4.55, 9.3, 3.2 ],
-			"autoUnwrap": false,
+			"autoUnwrap": true,
 			"uv": [ 16.0, 51.0 ],
 			"rotationOrigin": [ -0.4, -0.2, -1.0 ],
 			"faces": {
@@ -304,7 +332,7 @@
 					"from": [ -0.8, 8.5, -0.3 ],
 					"to": [ 1.2, 11.8, 4.2 ],
 					"unwrapMode": 4,
-					"autoUnwrap": false,
+					"autoUnwrap": true,
 					"uv": [ 45.0, 34.5 ],
 					"rotationOrigin": [ -0.8, 8.5, -0.3 ],
 					"faces": {
@@ -321,7 +349,7 @@
 					"from": [ -1.4, 1.9, -0.3 ],
 					"to": [ 0.6, 5.2, 4.2 ],
 					"unwrapMode": 4,
-					"autoUnwrap": false,
+					"autoUnwrap": true,
 					"uv": [ 45.0, 42.0 ],
 					"rotationOrigin": [ -1.4, 1.9, -0.3 ],
 					"rotationZ": -25.0,
@@ -339,7 +367,7 @@
 					"from": [ 1.6, -0.1, -0.2 ],
 					"to": [ 3.6, 2.9, 4.1 ],
 					"unwrapMode": 4,
-					"autoUnwrap": false,
+					"autoUnwrap": true,
 					"uv": [ 45.5, 49.5 ],
 					"rotationOrigin": [ 1.6, -0.1, -0.2 ],
 					"rotationZ": 90.0,
@@ -357,7 +385,7 @@
 					"from": [ 5.2, -0.1, -0.2 ],
 					"to": [ 7.2, 3.6, 4.1 ],
 					"unwrapMode": 4,
-					"autoUnwrap": false,
+					"autoUnwrap": true,
 					"uv": [ 45.5, 57.0 ],
 					"rotationOrigin": [ 5.2, -0.1, -0.2 ],
 					"rotationZ": 90.0,
@@ -375,7 +403,7 @@
 					"from": [ -0.5, 2.7, 1.3 ],
 					"to": [ 0.7, 9.0, 2.6 ],
 					"unwrapMode": 4,
-					"autoUnwrap": false,
+					"autoUnwrap": true,
 					"uv": [ 45.0, 34.5 ],
 					"rotationOrigin": [ -0.5, 2.7, 1.3 ],
 					"faces": {
@@ -392,7 +420,7 @@
 					"from": [ -1.0, 8.8, 0.0 ],
 					"to": [ 0.0, 11.5, 3.9 ],
 					"unwrapMode": 4,
-					"autoUnwrap": false,
+					"autoUnwrap": true,
 					"uv": [ 45.0, 34.5 ],
 					"rotationOrigin": [ -1.0, 8.8, 0.0 ],
 					"faces": {
@@ -408,7 +436,7 @@
 					"name": "Cube22",
 					"from": [ 2.2, 8.7, -0.2 ],
 					"to": [ 5.2, 9.4, 2.8 ],
-					"autoUnwrap": false,
+					"autoUnwrap": true,
 					"uv": [ 0.0, 0.0 ],
 					"rotationOrigin": [ 2.2, 8.7, -0.2 ],
 					"faces": {
@@ -424,7 +452,7 @@
 							"name": "Cube23",
 							"from": [ 0.1, -0.9, 0.0 ],
 							"to": [ 3.0, -0.2, 2.9 ],
-							"autoUnwrap": false,
+							"autoUnwrap": true,
 							"uv": [ 0.0, 0.0 ],
 							"rotationOrigin": [ 0.1, -0.9, 0.0 ],
 							"faces": {
@@ -440,7 +468,7 @@
 							"name": "Cube24",
 							"from": [ 0.2, -1.8, 0.0 ],
 							"to": [ 3.0, -1.1, 2.8 ],
-							"autoUnwrap": false,
+							"autoUnwrap": true,
 							"uv": [ 0.0, 0.0 ],
 							"rotationOrigin": [ 0.2, -1.8, 0.0 ],
 							"faces": {
@@ -456,7 +484,7 @@
 							"name": "Cube25",
 							"from": [ 0.3, -2.7, 0.0 ],
 							"to": [ 3.0, -2.0, 2.7 ],
-							"autoUnwrap": false,
+							"autoUnwrap": true,
 							"uv": [ 0.0, 0.0 ],
 							"rotationOrigin": [ 0.3, -2.7, 0.0 ],
 							"faces": {
@@ -472,7 +500,7 @@
 							"name": "Cube26",
 							"from": [ 0.4, -3.6, 0.0 ],
 							"to": [ 3.0, -2.9, 2.6 ],
-							"autoUnwrap": false,
+							"autoUnwrap": true,
 							"uv": [ 0.0, 0.0 ],
 							"rotationOrigin": [ 0.4, -3.6, 0.0 ],
 							"faces": {
@@ -488,7 +516,7 @@
 							"name": "Cube27",
 							"from": [ 0.5, -4.5, 0.0 ],
 							"to": [ 3.0, -3.8, 2.5 ],
-							"autoUnwrap": false,
+							"autoUnwrap": true,
 							"uv": [ 0.0, 0.0 ],
 							"rotationOrigin": [ 0.5, -4.5, 0.0 ],
 							"faces": {
@@ -504,7 +532,7 @@
 							"name": "Cube28",
 							"from": [ 0.6, -5.4, 0.0 ],
 							"to": [ 3.0, -4.7, 2.4 ],
-							"autoUnwrap": false,
+							"autoUnwrap": true,
 							"uv": [ 0.0, 0.0 ],
 							"rotationOrigin": [ 0.6, -5.4, 0.0 ],
 							"faces": {
@@ -520,7 +548,7 @@
 							"name": "Cube29",
 							"from": [ 0.7, -6.3, 0.0 ],
 							"to": [ 3.0, -5.6, 2.3 ],
-							"autoUnwrap": false,
+							"autoUnwrap": true,
 							"uv": [ 0.0, 0.0 ],
 							"rotationOrigin": [ 0.7, -6.3, 0.0 ],
 							"faces": {
@@ -539,7 +567,7 @@
 					"from": [ 5.3, -0.2, 0.0 ],
 					"to": [ 7.1, 6.8, 3.9 ],
 					"unwrapMode": 4,
-					"autoUnwrap": false,
+					"autoUnwrap": true,
 					"uv": [ 45.5, 49.5 ],
 					"rotationOrigin": [ 5.3, -0.2, 0.0 ],
 					"rotationZ": 90.0,
@@ -559,7 +587,7 @@
 			"stepParentName": "LowerFootL",
 			"from": [ -0.45, -0.2, -0.15 ],
 			"to": [ 4.55, 9.3, 3.85 ],
-			"autoUnwrap": false,
+			"autoUnwrap": true,
 			"uv": [ 0.0, 51.0 ],
 			"rotationOrigin": [ -0.4, -0.2, -0.3 ],
 			"faces": {
@@ -576,7 +604,7 @@
 					"from": [ -0.8, 8.5, -0.3 ],
 					"to": [ 1.2, 11.8, 4.2 ],
 					"unwrapMode": 4,
-					"autoUnwrap": false,
+					"autoUnwrap": true,
 					"uv": [ 32.0, 34.5 ],
 					"rotationOrigin": [ -0.8, 8.5, -0.3 ],
 					"faces": {
@@ -593,7 +621,7 @@
 					"from": [ -1.4, 1.9, -0.3 ],
 					"to": [ 0.6, 5.2, 4.2 ],
 					"unwrapMode": 4,
-					"autoUnwrap": false,
+					"autoUnwrap": true,
 					"uv": [ 32.0, 42.0 ],
 					"rotationOrigin": [ -1.4, 1.9, -0.3 ],
 					"rotationZ": -25.0,
@@ -611,7 +639,7 @@
 					"from": [ 1.6, -0.1, -0.2 ],
 					"to": [ 3.6, 2.9, 4.1 ],
 					"unwrapMode": 4,
-					"autoUnwrap": false,
+					"autoUnwrap": true,
 					"uv": [ 32.5, 49.5 ],
 					"rotationOrigin": [ 1.6, -0.1, -0.2 ],
 					"rotationZ": 90.0,
@@ -629,7 +657,7 @@
 					"from": [ 5.2, -0.1, -0.2 ],
 					"to": [ 7.2, 3.6, 4.1 ],
 					"unwrapMode": 4,
-					"autoUnwrap": false,
+					"autoUnwrap": true,
 					"uv": [ 32.5, 57.0 ],
 					"rotationOrigin": [ 5.2, -0.1, -0.2 ],
 					"rotationZ": 90.0,
@@ -647,7 +675,7 @@
 					"from": [ -0.5, 2.5, 1.3 ],
 					"to": [ 0.5, 8.8, 2.6 ],
 					"unwrapMode": 4,
-					"autoUnwrap": false,
+					"autoUnwrap": true,
 					"uv": [ 32.0, 34.5 ],
 					"rotationOrigin": [ -0.5, 2.5, 1.3 ],
 					"faces": {
@@ -664,7 +692,7 @@
 					"from": [ -1.0, 8.8, 0.0 ],
 					"to": [ 0.0, 11.5, 3.9 ],
 					"unwrapMode": 4,
-					"autoUnwrap": false,
+					"autoUnwrap": true,
 					"uv": [ 32.0, 34.5 ],
 					"rotationOrigin": [ -1.0, 8.8, 0.0 ],
 					"faces": {
@@ -680,7 +708,7 @@
 					"name": "Cube14",
 					"from": [ 2.2, 8.7, 1.2 ],
 					"to": [ 5.2, 9.4, 4.2 ],
-					"autoUnwrap": false,
+					"autoUnwrap": true,
 					"uv": [ 0.0, 0.0 ],
 					"rotationOrigin": [ 2.2, 8.7, 1.2 ],
 					"faces": {
@@ -696,7 +724,7 @@
 							"name": "Cube15",
 							"from": [ 0.1, -0.9, 0.1 ],
 							"to": [ 3.0, -0.2, 3.0 ],
-							"autoUnwrap": false,
+							"autoUnwrap": true,
 							"uv": [ 0.0, 0.0 ],
 							"rotationOrigin": [ 0.1, -0.9, 0.1 ],
 							"faces": {
@@ -712,7 +740,7 @@
 							"name": "Cube16",
 							"from": [ 0.2, -1.8, 0.2 ],
 							"to": [ 3.0, -1.1, 3.0 ],
-							"autoUnwrap": false,
+							"autoUnwrap": true,
 							"uv": [ 0.0, 0.0 ],
 							"rotationOrigin": [ 0.2, -1.8, 0.2 ],
 							"faces": {
@@ -728,7 +756,7 @@
 							"name": "Cube17",
 							"from": [ 0.3, -2.7, 0.3 ],
 							"to": [ 3.0, -2.0, 3.0 ],
-							"autoUnwrap": false,
+							"autoUnwrap": true,
 							"uv": [ 0.0, 0.0 ],
 							"rotationOrigin": [ 0.3, -2.7, 0.3 ],
 							"faces": {
@@ -744,7 +772,7 @@
 							"name": "Cube18",
 							"from": [ 0.4, -3.6, 0.4 ],
 							"to": [ 3.0, -2.9, 3.0 ],
-							"autoUnwrap": false,
+							"autoUnwrap": true,
 							"uv": [ 0.0, 0.0 ],
 							"rotationOrigin": [ 0.4, -3.6, 0.4 ],
 							"faces": {
@@ -760,7 +788,7 @@
 							"name": "Cube19",
 							"from": [ 0.5, -4.5, 0.5 ],
 							"to": [ 3.0, -3.8, 3.0 ],
-							"autoUnwrap": false,
+							"autoUnwrap": true,
 							"uv": [ 0.0, 0.0 ],
 							"rotationOrigin": [ 0.5, -4.5, 0.5 ],
 							"faces": {
@@ -776,7 +804,7 @@
 							"name": "Cube20",
 							"from": [ 0.6, -5.4, 0.6 ],
 							"to": [ 3.0, -4.7, 3.0 ],
-							"autoUnwrap": false,
+							"autoUnwrap": true,
 							"uv": [ 0.0, 0.0 ],
 							"rotationOrigin": [ 0.6, -5.4, 0.6 ],
 							"faces": {
@@ -792,7 +820,7 @@
 							"name": "Cube21",
 							"from": [ 0.7, -6.3, 0.7 ],
 							"to": [ 3.0, -5.6, 3.0 ],
-							"autoUnwrap": false,
+							"autoUnwrap": true,
 							"uv": [ 0.0, 0.0 ],
 							"rotationOrigin": [ 0.7, -6.3, 0.7 ],
 							"faces": {
@@ -811,7 +839,7 @@
 					"from": [ 5.3, -0.2, 0.0 ],
 					"to": [ 7.1, 6.8, 3.9 ],
 					"unwrapMode": 4,
-					"autoUnwrap": false,
+					"autoUnwrap": true,
 					"uv": [ 32.5, 49.5 ],
 					"rotationOrigin": [ 5.3, -0.2, 0.0 ],
 					"rotationZ": 90.0,

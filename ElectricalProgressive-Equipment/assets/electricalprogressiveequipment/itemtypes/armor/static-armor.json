@@ -28,7 +28,9 @@
 			"*": "armorbody"
 		},
 		"attachableToEntity": {
-			"categoryCode": "armorbody"
+			"categoryCode": "armorbody",
+			"disableElements": [ "Waist", "hideupperarm", "hidelowerarm", "mittenfrill-l", "mittenfrill-r", "glovefrill-l", "glovefrill-r", "ShirtFrontTile", "ShirtBackTile", "coatFrontTile", "coatBackTile", "shouldertextureFrontTile", "shouldertextureBackTile" ],
+					
 		},
 
 		"defaultProtLoss": {
