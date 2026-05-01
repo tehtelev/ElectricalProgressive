@@ -4,7 +4,7 @@
   "variantgroups": [
     {
       "code": "tooltype",
-      "states": [ "axe", "pickaxe", "shovel", "falx", "hammer", "hoe", "prospectingpick" ]
+      "states": [ "axe", "pickaxe", "shovel", "falx", "hammer", "hoe", "prospectingpick", "nails", "rod" ]
     }
   ],
   "shapebytype": {
