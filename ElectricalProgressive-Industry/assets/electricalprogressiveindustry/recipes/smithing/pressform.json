@@ -173,5 +173,55 @@
       "type": "block",
       "code": "electricalprogressiveindustry:pressform-prospectingpick"
     }
+  },
+  {
+    "ingredient": {
+      "type": "item",
+      "code": "game:ingot-steel"
+    },
+    "pattern": [
+      [
+        "#########",
+        "#___#___#",
+        "##_###_##",
+        "##_###_##",
+        "#########",
+        "#___#___#",
+        "##_###_##",
+        "##_###_##",
+        "#########"
+      ]
+    ],
+    "name": "pressform-nails",
+    "code": "pressform-nails",
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveindustry:pressform-nails"
+    }
+  },
+  {
+    "ingredient": {
+      "type": "item",
+      "code": "game:ingot-steel"
+    },
+    "pattern": [
+      [
+        "#########",
+        "###___###",
+        "###___###",
+        "###___###",
+        "###___###",
+        "###___###",
+        "###___###",
+        "###___###",
+        "#########"
+      ]
+    ],
+    "name": "pressform-rod",
+    "code": "pressform-rod",
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveindustry:pressform-rod"
+    }
   }
 ]

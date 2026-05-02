@@ -420,5 +420,55 @@
         "stackSize": 30
       }
     ]
+  },
+  {
+    "code": "nails",
+    "energyOperation": 8000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:ingot-*",
+        "quantity": 1,
+        "name": "metal",
+        "allowedVariants": [ "copper", "tinbronze", "bismuthbronze", "blackbronze", "silver", "gold", "iron", "meteoriciron", "steel" ]
+      },
+      {
+        "type": "block",
+        "code": "electricalprogressiveindustry:pressform-nails",
+        "quantity": 0
+      }
+    ],
+    "outputs": [
+      {
+        "type": "item",
+        "code": "game:metalnailsandstrips-{metal}",
+        "stackSize": 4
+      }
+    ]
+  },
+  {
+    "code": "rod",
+    "energyOperation": 8000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:ingot-*",
+        "quantity": 1,
+        "name": "metal",
+        "allowedVariants": [ "copper", "tinbronze", "bismuthbronze", "blackbronze", "silver", "gold", "iron", "meteoriciron", "steel" ]
+      },
+      {
+        "type": "block",
+        "code": "electricalprogressiveindustry:pressform-rod",
+        "quantity": 0
+      }
+    ],
+    "outputs": [
+      {
+        "type": "item",
+        "code": "game:rod-{metal}",
+        "stackSize": 1
+      }
+    ]
   }
 ]
