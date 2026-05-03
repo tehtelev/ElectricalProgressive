@@ -7,7 +7,7 @@
     "Kotl"
   ],
   "description": "Industrial electrical devices!",
-  "Version": "0.6.1",
+  "Version": "0.6.2",
   "dependencies": {
     "game": "1.22.0",
     "electricalprogressivecore": "3.0.0",

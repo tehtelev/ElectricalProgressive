@@ -1,4 +1,4 @@
-{
+﻿{
 	"editor": {
 		"allAngles": false,
 		"entityTextureMode": false
@@ -220,10 +220,6 @@
 						"down": { "texture": "#steel", "uv": [ 0.0, 0.0, 1.0, 3.0 ] }
 					}
 				}
-			]
-		}
-	]
-}
 			]
 		}
 	]

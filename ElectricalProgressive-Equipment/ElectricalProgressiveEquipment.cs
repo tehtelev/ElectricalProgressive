@@ -17,7 +17,7 @@ using ElectricalProgressive.Content.Item.Tool;
     "electricalprogressiveequipment",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Electric weapons, armor and tools",
-    Version = "3.0.0",
+    Version = "3.0.1",
     Authors =
     [
         "Tehtelev",
