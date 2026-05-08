@@ -440,7 +440,7 @@ namespace ElectricalProgressive.Content.Block
             
 
             // Если игрок держит набор электрика
-            if (IsHoldingEKit(byPlayer))
+            if (IsHoldingEKit(byPlayer) && IsFreeRightHand(byPlayer))
             {
                 var behavior = world.BlockAccessor.GetBlockEntity(blockSel.Position)?.GetBehavior<BEBehaviorEPImmersive>();
                 if (behavior != null)
