@@ -189,8 +189,15 @@ namespace ElectricalProgressive.Content.Block
                 // Показываем точки подключения когда игрок держит провод
                 if (IsHoldingWireTool(capi.World.Player) || IsHoldingEKit(capi.World.Player))
                 {
-                    boxes.AddRange(GetNodeSelectionBoxes(blockAccessor, pos));
-                    //return boxes.ToArray();
+                    
+
+                    // не показываем коллизии блока, дабы не мешать подключать провода
+                    if (IsHoldingWireTool(capi.World.Player) || IsFreeRightHand(capi.World.Player))
+                    {
+                        boxes.AddRange(GetNodeSelectionBoxes(blockAccessor, pos));
+                        return boxes.ToArray();
+                    }
+
                 }
             }
 
@@ -245,8 +252,14 @@ namespace ElectricalProgressive.Content.Block
                         col.Z2 = col.Z2 + offset.Z;
                     }
 
-                    boxes.AddRange(coll);
-                    //return boxes.ToArray();
+                    
+                    // не показываем коллизии блока, дабы не мешать подключать провода
+                    if (IsHoldingWireTool(capi.World.Player) || IsFreeRightHand(capi.World.Player))
+                    {
+                        boxes.AddRange(coll);
+                        return boxes.ToArray();
+                    }
+
                 }
             }
 
@@ -449,6 +462,17 @@ namespace ElectricalProgressive.Content.Block
             var activeSlot = player.InventoryManager.ActiveHotbarSlot;
             return activeSlot?.Itemstack?.Block?.Code.ToString().Contains("wire-")==true;
         }
+
+        /// <summary>
+        /// Когда правая рука свободна 
+        /// </summary>
+        /// <param name="player"></param>
+        /// <returns></returns>
+        public static bool IsFreeRightHand(IPlayer player)
+        {
+            return player.InventoryManager.ActiveHotbarSlot.Empty;
+        }
+
 
 
         /// <summary>

@@ -28,7 +28,7 @@ using Vintagestory.API.Config;
     "electricalprogressivebasics",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Basic electrical devices.",
-    Version = "3.0.2",
+    Version = "3.0.3",
     Authors =
     [
         "Tehtelev",
