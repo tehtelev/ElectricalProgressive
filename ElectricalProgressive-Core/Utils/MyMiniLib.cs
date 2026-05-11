@@ -1,8 +1,14 @@
 ﻿using System;
+using System.Linq;
 using Vintagestory.API.Common;
+using Vintagestory.API.MathTools;
+using Vintagestory.GameContent;
 
 namespace ElectricalProgressive.Utils;
 
+/// <summary>
+/// Всякие полезные функции
+/// </summary>
 public static class MyMiniLib
 {
     /// <summary>
@@ -96,7 +102,7 @@ public static class MyMiniLib
     {
         if (block is { Attributes: not null } && block.Attributes[attrname] != null)
         {
-            return block.Attributes[attrname].AsArray<int>(def,"int");
+            return block.Attributes[attrname].AsArray<int>(def, "int");
         }
         return def;
     }
@@ -175,5 +181,46 @@ public static class MyMiniLib
             }
         }
         return def;
+    }
+
+
+    /// <summary>
+    /// Проверка, что грань блока под нужной цела
+    /// </summary>
+    /// <param name="blockAccessor"></param>
+    /// <param name="pos"></param>
+    /// <param name="facing"></param>
+    /// <returns></returns>
+    public static bool CheckSolidFace(IBlockAccessor blockAccessor, BlockPos pos, Facing facing)
+    {
+        var faces = FacingHelper.Faces(facing).ToList();
+
+        // генератор готов к проверке?
+        if (faces == null ||
+            faces.Count == 0 ||
+            faces.First() is not
+            {
+            }
+                blockFacing)
+        {
+            return false;
+        }
+
+        // соседний блок по направлению грани
+        BlockPos neighblock = pos.AddCopy(blockFacing);
+        var block = blockAccessor.GetBlock(neighblock);
+        var sideIndex = blockFacing.Opposite.Index;
+
+        // целая ли грань?
+        // для микроблоков это 14/16 целостности грани
+        var solidBlock = block.SideSolid[sideIndex];
+        var solidMicroblock = (block as BlockMicroBlock)?.SideIsSolid(neighblock, sideIndex);
+        if (solidBlock || solidMicroblock==true) 
+        {
+            return true;
+        }
+
+        return false;
+
     }
 }

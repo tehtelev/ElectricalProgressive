@@ -25,30 +25,21 @@ namespace ElectricalProgressive.Content.Block.CableDot
             CollisionBoxesCache?.Clear();
         }
 
+
+        
         public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack, BlockSelection blockSel, ref string failureCode)
         {
-            var selection = new Selection(blockSel);
-            // только вариации нижние
-            var facing = FacingHelper.From(BlockFacing.DOWN, selection.Direction);
-
-            //только на пол
-            if (facing != Facing.None &&
-                FacingHelper.Faces(facing).First() is { } blockFacing &&
-                selection.Face != BlockFacing.DOWN)
+            var block = world.BlockAccessor.GetBlock(blockSel.Position.AddCopy(BlockFacing.DOWN));
+            // просто проверяем наличие блока снизу
+            if (block == null || block.Id==0 || block.IsLiquid())
             {
-                var neighborBlock = world.BlockAccessor
-                    .GetBlock(blockSel.Position.AddCopy(blockFacing));
-
-                
-                if (!neighborBlock.SideSolid[blockFacing.Index])
-                {
-                    return false;
-                }
-                
+                return false;
             }
+    
 
             return base.TryPlaceBlock(world, byPlayer, itemstack, blockSel, ref failureCode);
         }
+        
 
         public override bool DoPlaceBlock(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel, ItemStack byItemStack)
         {
@@ -79,13 +70,15 @@ namespace ElectricalProgressive.Content.Block.CableDot
 
             if (world.BlockAccessor.GetBlockEntity(pos) is BlockEntityCableDotDown entity)
             {
-                var blockFacing = BlockFacing.FromVector(neibpos.X - pos.X, neibpos.Y - pos.Y, neibpos.Z - pos.Z);
-                var selectedFacing = FacingHelper.FromFace(blockFacing);
-
-                if ((entity.Facing & ~selectedFacing) == Facing.None)
+                var block = world.BlockAccessor.GetBlock(pos);
+                // просто проверяем наличие блока снизу
+                if (neibpos.Equals(pos.AddCopy(BlockFacing.DOWN)) &&
+                    block==null || block.Id == 0 || block.IsLiquid())
                 {
+                    // иначе ломаем
                     world.BlockAccessor.BreakBlock(pos, null);
                 }
+                
             }
         }
 

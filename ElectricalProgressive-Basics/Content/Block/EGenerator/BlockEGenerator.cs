@@ -6,6 +6,7 @@ using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
+using Vintagestory.GameContent;
 using Vintagestory.GameContent.Mechanics;
 
 namespace ElectricalProgressive.Content.Block.EGenerator;
@@ -64,12 +65,8 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
             return false;
         }
 
-
-        if (
-            FacingHelper.Faces(facing).First() is { } blockFacing &&
-            !world.BlockAccessor
-                .GetBlock(blockSel.Position.AddCopy(blockFacing)).SideSolid[blockFacing.Opposite.Index]
-        )
+        // целая ли грань, на которую ставим
+        if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSel.Position, facing))
         {
             return false;
         }
@@ -137,25 +134,26 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
     }
 
 
-
+   
 
     public override void OnNeighbourBlockChange(IWorldAccessor world, BlockPos pos, BlockPos neibpos)
     {
         base.OnNeighbourBlockChange(world, pos, neibpos);
 
+        // проверим целостность грани
         if (world.BlockAccessor.GetBlockEntity(pos) is BlockEntityEGenerator entity)
         {
-            var faces = FacingHelper.Faces(entity.Facing).ToList();
-            if (
-            faces != null &&
-            faces.Count != 0 &&
-            faces.First() is { } blockFacing &&
-            !world.BlockAccessor.GetBlock(pos.AddCopy(blockFacing)).SideSolid[blockFacing.Opposite.Index])
+            // целая ли грань еще
+            if (MyMiniLib.CheckSolidFace(world.BlockAccessor, pos, entity.Facing))
             {
-                world.BlockAccessor.BreakBlock(pos, null);
+                return;
             }
+
+            // иначе ломаем
+            world.BlockAccessor.BreakBlock(pos, null);
         }
     }
+
 
     public override void OnJsonTesselation(ref MeshData sourceMesh, ref int[] lightRgbsByCorner, BlockPos pos,
         Vintagestory.API.Common.Block[] chunkExtBlocks, int extIndex3d)

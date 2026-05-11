@@ -63,12 +63,8 @@ public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
             return false;
         }
 
-        if (
-            FacingHelper.Faces(facing).First() is { } blockFacing &&
-            !world.BlockAccessor
-                .GetBlock(blockSel.Position.AddCopy(blockFacing))
-                .SideSolid[blockFacing.Opposite.Index]
-        )
+        // целая ли грань, на которую ставим
+        if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSel.Position, facing))
         {
             return false;
         }
@@ -138,15 +134,14 @@ public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
 
         if (world.BlockAccessor.GetBlockEntity(pos) is BlockEntityEMotor entity)
         {
-            var faces = FacingHelper.Faces(entity.Facing).ToList();
-            if (
-            faces != null &&
-            faces.Count != 0 &&
-            faces.First() is { } blockFacing &&
-            !world.BlockAccessor.GetBlock(pos.AddCopy(blockFacing)).SideSolid[blockFacing.Opposite.Index])
+            // целая ли грань еще
+            if (MyMiniLib.CheckSolidFace(world.BlockAccessor, pos, entity.Facing))
             {
-                world.BlockAccessor.BreakBlock(pos, null);
+                return;
             }
+
+            // иначе ломаем
+            world.BlockAccessor.BreakBlock(pos, null);
         }
     }
 
