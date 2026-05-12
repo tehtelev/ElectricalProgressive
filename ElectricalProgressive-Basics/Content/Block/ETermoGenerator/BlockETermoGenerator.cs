@@ -48,24 +48,9 @@ public class BlockETermoGenerator : BlockEBase
     public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack,
        BlockSelection blockSel, ref string failureCode)
     {
-        var selection = new Selection(blockSel);
-        var facing = Facing.None;
-
-        try
-        {
-            facing = FacingHelper.From(selection.Face, selection.Direction);
-        }
-        catch
-        {
-            return false;
-        }
-
-
-        if (
-            FacingHelper.Faces(facing).First() is { } blockFacing &&
-            !world.BlockAccessor
-                .GetBlock(blockSel.Position.AddCopy(blockFacing)).SideSolid[blockFacing.Opposite.Index]
-        )
+        //неваляжка - только вертикально
+        // целая ли грань, на которую ставим
+        if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSel.Position, Facing.DownAll))
         {
             return false;
         }
@@ -106,8 +91,7 @@ public class BlockETermoGenerator : BlockEBase
             return false;
         }
 
-        if (
-            base.DoPlaceBlock(world, byPlayer, blockSel, byItemStack) &&
+        if (base.DoPlaceBlock(world, byPlayer, blockSel, byItemStack) &&
             world.BlockAccessor.GetBlockEntity(blockSel.Position) is BlockEntityETermoGenerator entity
         )
         {
@@ -135,10 +119,14 @@ public class BlockETermoGenerator : BlockEBase
         if (world.BlockAccessor.GetBlockEntity(pos) is BlockEntityETermoGenerator)
         {
 
-            if (!world.BlockAccessor.GetBlock(pos.AddCopy(BlockFacing.DOWN)).SideSolid[4]) //если блок под ним перестал быть сплошным
+            // целая ли грань еще
+            if (MyMiniLib.CheckSolidFace(world.BlockAccessor, pos, Facing.DownAll))
             {
-                world.BlockAccessor.BreakBlock(pos, null);
+                return;
             }
+
+            // иначе ломаем
+            world.BlockAccessor.BreakBlock(pos, null);
         }
     }
 

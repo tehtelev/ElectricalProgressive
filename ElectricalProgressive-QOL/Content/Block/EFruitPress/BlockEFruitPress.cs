@@ -329,32 +329,33 @@ public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource
 
     #region Основные методы блока
 
-    /// <summary>
-    /// Попытка разместить блок в мире
-    /// </summary>
     public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack,
-       BlockSelection blockSel, ref string failureCode)
+        BlockSelection blockSel, ref string failureCode)
     {
-        var selection = new Selection(blockSel);
-        var facing = Facing.None;
-
-        try
-        {
-            facing = FacingHelper.From(selection.Face, selection.Direction);
-        }
-        catch
-        {
-            return false;
-        }
-
-        // Проверка возможности размещения на соседнем блоке
-        if (FacingHelper.Faces(facing).First() is { } blockFacing &&
-            !world.BlockAccessor.GetBlock(blockSel.Position.AddCopy(blockFacing)).SideSolid[blockFacing.Opposite.Index])
+        //неваляжка - только вертикально
+        // целая ли грань, на которую ставим
+        if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSel.Position, Facing.DownAll))
         {
             return false;
         }
 
         return base.TryPlaceBlock(world, byPlayer, itemstack, blockSel, ref failureCode);
+    }
+
+    public override void OnNeighbourBlockChange(IWorldAccessor world, BlockPos pos, BlockPos neibpos)
+    {
+        base.OnNeighbourBlockChange(world, pos, neibpos);
+
+        //проверяем только блок под нами
+        // целая ли грань еще
+        if (MyMiniLib.CheckSolidFace(world.BlockAccessor, pos, Facing.DownAll))
+        {
+            return;
+        }
+
+        // иначе ломаем
+        world.BlockAccessor.BreakBlock(pos, null);
+
     }
 
     /// <summary>
@@ -376,22 +377,7 @@ public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource
         return true;
     }
 
-    /// <summary>
-    /// Обработка изменения соседнего блока
-    /// </summary>
-    public override void OnNeighbourBlockChange(IWorldAccessor world, BlockPos pos, BlockPos neibpos)
-    {
-        base.OnNeighbourBlockChange(world, pos, neibpos);
 
-        if (world.BlockAccessor.GetBlockEntity(pos) is BlockEntityEFruitPress)
-        {
-            // Проверка опоры под блоком
-            if (!world.BlockAccessor.GetBlock(pos.AddCopy(BlockFacing.DOWN)).SideSolid[4])
-            {
-                world.BlockAccessor.BreakBlock(pos, null);
-            }
-        }
-    }
 
     /// <summary>
     /// Обработка взаимодействия с блоком (ЖИДКОСТИ И ИНВЕНТАРЬ)

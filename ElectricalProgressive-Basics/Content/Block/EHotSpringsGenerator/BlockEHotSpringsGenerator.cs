@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Vintagestory.API.Common;
+using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 
@@ -22,23 +23,9 @@ public class BlockEHotSpringsGenerator : BlockEBase
     public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack,
        BlockSelection blockSel, ref string failureCode)
     {
-        var selection = new Selection(blockSel);
-        var facing = Facing.None;
-
-        try
-        {
-            facing = FacingHelper.From(selection.Face, selection.Direction);
-        }
-        catch
-        {
-            return false;
-        }
-
-
-        if (
-            FacingHelper.Faces(facing).First() is { } blockFacing &&
-            !world.BlockAccessor
-                .GetBlock(blockSel.Position.AddCopy(blockFacing)).SideSolid[blockFacing.Opposite.Index])
+        //неваляжка - только вертикально
+        // целая ли грань, на которую ставим
+        if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSel.Position, Facing.DownAll))
         {
             return false;
         }
@@ -110,13 +97,17 @@ public class BlockEHotSpringsGenerator : BlockEBase
     {
         base.OnNeighbourBlockChange(world, pos, neibpos);
 
-        if (world.BlockAccessor.GetBlockEntity(pos) is BlockEntityEHotSpringsGenerator)
+        if (world.BlockAccessor.GetBlockEntity(pos) is BlockEntityEHotSpringsGenerator entity)
         {
 
-            if (!world.BlockAccessor.GetBlock(pos.AddCopy(BlockFacing.DOWN)).SideSolid[4]) // if the block below is no longer solid
+            // целая ли грань еще
+            if (MyMiniLib.CheckSolidFace(world.BlockAccessor, pos, entity.Facing))
             {
-                world.BlockAccessor.BreakBlock(pos, null);
+                return;
             }
+
+            // иначе ломаем
+            world.BlockAccessor.BreakBlock(pos, null);
         }
     }
 

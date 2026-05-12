@@ -26,15 +26,7 @@ namespace ElectricalProgressive.Content.Block.ESFonar
             BlockESFonar.MeshDataCache?.Clear();
         }
 
-        public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack,
-            BlockSelection blockSel, ref string failureCode)
-        {
-            //неваляжка - только вертикально
-            return world.BlockAccessor
-                       .GetBlock(blockSel.Position.AddCopy(BlockFacing.DOWN))
-                       .SideSolid[BlockFacing.indexUP]
-                       && base.TryPlaceBlock(world, byPlayer, itemstack, blockSel, ref failureCode);
-        }
+
 
         /// <summary>
         /// Проверка на возможность установки блока
@@ -92,18 +84,33 @@ namespace ElectricalProgressive.Content.Block.ESFonar
             return [OnPickBlock(world, pos)];
         }
 
+        public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack,
+            BlockSelection blockSel, ref string failureCode)
+        {
+            //неваляжка - только вертикально
+            // целая ли грань, на которую ставим
+            if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSel.Position, Facing.DownAll))
+            {
+                return false;
+            }
+
+            return base.TryPlaceBlock(world, byPlayer, itemstack, blockSel, ref failureCode);
+        }
+
         public override void OnNeighbourBlockChange(IWorldAccessor world, BlockPos pos, BlockPos neibpos)
         {
             base.OnNeighbourBlockChange(world, pos, neibpos);
 
-            if (
-                !world.BlockAccessor
-                    .GetBlock(pos.AddCopy(BlockFacing.DOWN))
-                    .SideSolid[BlockFacing.indexUP]
-            )
+            //проверяем только блок под нами
+            // целая ли грань еще
+            if (MyMiniLib.CheckSolidFace(world.BlockAccessor, pos, Facing.DownAll))
             {
-                world.BlockAccessor.BreakBlock(pos, null);
+                return;
             }
+
+            // иначе ломаем
+            world.BlockAccessor.BreakBlock(pos, null);
+
         }
 
         public override void OnJsonTesselation(ref MeshData sourceMesh, ref int[] lightRgbsByCorner, BlockPos pos, Vintagestory.API.Common.Block[] chunkExtBlocks, int extIndex3d)

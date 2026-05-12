@@ -100,22 +100,17 @@
 		"scale": 5.38
 	},
 	"guiTransform": {
-		"translation": {
+		"rotation": {
+			"x": 28,
+			"y": 28,
+			"z": 63
+		},
+		"origin": {
 			"x": 0,
 			"y": 0,
 			"z": 0
 		},
-		"rotation": {
-			"x": 34,
-			"y": 32,
-			"z": -163
-		},
-		"origin": {
-			"x": 0.21,
-			"y": -0.21,
-			"z": 0.49
-		},
-		"scale": 1.8
+		"scale": 1.64
 	},
 	"groundTransform": {
 		"translation": {

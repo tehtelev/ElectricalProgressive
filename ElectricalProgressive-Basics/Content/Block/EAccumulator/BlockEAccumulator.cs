@@ -3,6 +3,7 @@ using ElectricalProgressive.Utils;
 using System;
 using System.Text;
 using Vintagestory.API.Common;
+using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools; 
 
@@ -46,10 +47,13 @@ public class BlockEAccumulator : BlockEBase, IEnergyStorageItem
         BlockSelection blockSel, ref string failureCode)
     {
         //неваляжка - только вертикально
-        return world.BlockAccessor
-                   .GetBlock(blockSel.Position.AddCopy(BlockFacing.DOWN))
-                   .SideSolid[BlockFacing.indexUP]
-                   && base.TryPlaceBlock(world, byPlayer, itemstack, blockSel, ref failureCode);
+        // целая ли грань, на которую ставим
+        if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSel.Position, Facing.DownAll))
+        {
+            return false;
+        }
+
+        return base.TryPlaceBlock(world, byPlayer, itemstack, blockSel, ref failureCode);
     }
 
     public override void OnNeighbourBlockChange(IWorldAccessor world, BlockPos pos, BlockPos neibpos)
@@ -57,14 +61,15 @@ public class BlockEAccumulator : BlockEBase, IEnergyStorageItem
         base.OnNeighbourBlockChange(world, pos, neibpos);
 
         //проверяем только блок под нами
-        if (
-            !world.BlockAccessor
-                .GetBlock(pos.AddCopy(BlockFacing.DOWN))
-                .SideSolid[BlockFacing.indexUP]
-        )
+        // целая ли грань еще
+        if (MyMiniLib.CheckSolidFace(world.BlockAccessor, pos, Facing.DownAll))
         {
-            world.BlockAccessor.BreakBlock(pos, null);
+            return;
         }
+
+        // иначе ломаем
+        world.BlockAccessor.BreakBlock(pos, null);
+
     }
 
     /// <summary>

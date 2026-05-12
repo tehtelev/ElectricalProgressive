@@ -33,6 +33,21 @@ namespace ElectricalProgressive.Content.Block.HVSFonar
             return new(block);
         }
 
+
+        public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack,
+            BlockSelection blockSel, ref string failureCode)
+        {
+            //неваляжка - только вертикально
+            // целая ли грань, на которую ставим
+            if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSel.Position, Facing.DownAll))
+            {
+                return false;
+            }
+
+            return base.TryPlaceBlock(world, byPlayer, itemstack, blockSel, ref failureCode);
+        }
+
+
         public override ItemStack[] GetDrops(IWorldAccessor world, BlockPos pos, IPlayer byPlayer, float dropQuantityMultiplier = 1)
         {
             return [OnPickBlock(world, pos)];
@@ -44,14 +59,14 @@ namespace ElectricalProgressive.Content.Block.HVSFonar
         {
             base.OnNeighbourBlockChange(world, pos, neibpos);
 
-            if (
-                !world.BlockAccessor
-                    .GetBlock(pos.AddCopy(BlockFacing.DOWN))
-                    .SideSolid[BlockFacing.indexUP]
-            )
+            // целая ли грань еще
+            if (MyMiniLib.CheckSolidFace(world.BlockAccessor, pos, Facing.DownAll))
             {
-                world.BlockAccessor.BreakBlock(pos, null);
+                return;
             }
+
+            // иначе ломаем
+            world.BlockAccessor.BreakBlock(pos, null);
         }
 
 

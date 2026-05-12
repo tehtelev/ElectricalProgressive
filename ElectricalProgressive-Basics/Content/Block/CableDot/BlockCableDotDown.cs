@@ -70,10 +70,11 @@ namespace ElectricalProgressive.Content.Block.CableDot
 
             if (world.BlockAccessor.GetBlockEntity(pos) is BlockEntityCableDotDown entity)
             {
-                var block = world.BlockAccessor.GetBlock(pos);
+                
+                var block = world.BlockAccessor.GetBlock(neibpos);
                 // просто проверяем наличие блока снизу
                 if (neibpos.Equals(pos.AddCopy(BlockFacing.DOWN)) &&
-                    block==null || block.Id == 0 || block.IsLiquid())
+                    (block==null || block.Id == 0 || block.IsLiquid()))
                 {
                     // иначе ломаем
                     world.BlockAccessor.BreakBlock(pos, null);

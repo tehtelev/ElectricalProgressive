@@ -23,7 +23,7 @@ using static ElectricalProgressive.ElectricalProgressive;
     "electricalprogressivecore",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Electrical logic library.",
-    Version = "3.0.1",
+    Version = "3.1.0",
     Authors = ["Tehtelev", "Kotl"]
 )]
 

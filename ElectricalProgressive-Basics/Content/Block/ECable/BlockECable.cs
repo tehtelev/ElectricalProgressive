@@ -111,8 +111,12 @@ namespace ElectricalProgressive.Content.Block.ECable
             // Если размещаем кабель в блоке без кабелей
             if (world.BlockAccessor.GetBlockEntity(blockSelection.Position) is not BlockEntityECable entity)
             {
-                if (!HasSolidNeighbor(world, blockSelection.Position, faceIndex))
+                
+                // целая ли грань, на которую ставим
+                if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSelection.Position, facing))
+                {
                     return false;
+                }
 
                 // если установка все же успешна
                 if (!base.DoPlaceBlock(world, byPlayer, blockSelection, byItemStack))
@@ -194,7 +198,7 @@ namespace ElectricalProgressive.Content.Block.ECable
             else
             {
                 //проверка на сплошную соседнюю грань
-                if (lines == 0 && !HasSolidNeighbor(world, blockSelection.Position, faceIndex))
+                if (lines == 0 && !MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSelection.Position, facing))
                     return false;
 
                 var indexV = VoltagesInvert[byItemStack.Block.Variant["voltage"]];    //определяем индекс напряжения
@@ -245,32 +249,7 @@ namespace ElectricalProgressive.Content.Block.ECable
             return true;
         }
 
-        /// <summary>
-        /// Проверяем соседний блок на сплошную грань
-        /// </summary>
-        /// <param name="world"></param>
-        /// <param name="pos"></param>
-        /// <param name="faceIndex"></param>
-        /// <returns></returns>
-        private static bool HasSolidNeighbor(IWorldAccessor world, BlockPos pos, int faceIndex)
-        {
-            var neighborPos = pos.Copy();
-            int checkFace;
-
-            switch (faceIndex)
-            {
-                case 0: neighborPos.Z--; checkFace = 2; break;
-                case 1: neighborPos.X++; checkFace = 3; break;
-                case 2: neighborPos.Z++; checkFace = 0; break;
-                case 3: neighborPos.X--; checkFace = 1; break;
-                case 4: neighborPos.Y++; checkFace = 5; break;
-                case 5: neighborPos.Y--; checkFace = 4; break;
-                default: return false;
-            }
-
-            var neighborBlock = world.BlockAccessor.GetBlock(neighborPos);
-            return neighborBlock != null && neighborBlock.SideIsSolid(neighborPos, checkFace);
-        }
+       
 
 
 
@@ -491,6 +470,10 @@ namespace ElectricalProgressive.Content.Block.ECable
 
             var blockFacing = BlockFacing.FromVector(neibpos.X - pos.X, neibpos.Y - pos.Y, neibpos.Z - pos.Z);
             var selectedFacing = FacingHelper.FromFace(blockFacing);
+
+            // грань еще целая7
+            if (MyMiniLib.CheckSolidFace(world.BlockAccessor, pos, selectedFacing))
+                return;
 
             var delayReturn = false;
             if ((entity.Connection & ~selectedFacing) == Facing.None)

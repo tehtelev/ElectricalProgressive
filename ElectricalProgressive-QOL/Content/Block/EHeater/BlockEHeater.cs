@@ -34,24 +34,7 @@ namespace ElectricalProgressive.Content.Block.EHeater
             CollisionBoxesCache?.Clear();
         }
 
-        public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack, BlockSelection blockSel, ref string failureCode)
-        {
-            var selection = new Selection(blockSel);
-            var facing = FacingHelper.From(selection.Face, selection.Direction);
-
-            if (FacingHelper.Faces(facing).FirstOrDefault() is BlockFacing blockFacing)
-            {
-                var neighborPos = blockSel.Position.AddCopy(blockFacing);
-                var neighborBlock = world.BlockAccessor.GetBlock(neighborPos);
-
-                if (!neighborBlock.SideSolid[blockFacing.Opposite.Index])
-                {
-                    return false;
-                }
-            }
-
-            return base.TryPlaceBlock(world, byPlayer, itemstack, blockSel, ref failureCode);
-        }
+        
 
         public override bool DoPlaceBlock(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel, ItemStack byItemStack)
         {
@@ -96,18 +79,33 @@ namespace ElectricalProgressive.Content.Block.EHeater
             return [OnPickBlock(world, pos)];
         }
 
+        public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack,
+            BlockSelection blockSel, ref string failureCode)
+        {
+            //неваляжка - только вертикально
+            // целая ли грань, на которую ставим
+            if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSel.Position, Facing.DownAll))
+            {
+                return false;
+            }
+
+            return base.TryPlaceBlock(world, byPlayer, itemstack, blockSel, ref failureCode);
+        }
+
         public override void OnNeighbourBlockChange(IWorldAccessor world, BlockPos pos, BlockPos neibpos)
         {
             base.OnNeighbourBlockChange(world, pos, neibpos);
 
-            if (world.BlockAccessor.GetBlockEntity(pos) is BlockEntityEHeater entity)
+            //проверяем только блок под нами
+            // целая ли грань еще
+            if (MyMiniLib.CheckSolidFace(world.BlockAccessor, pos, Facing.DownAll))
             {
-                var blockFacing = BlockFacing.FromVector(neibpos.X - pos.X, neibpos.Y - pos.Y, neibpos.Z - pos.Z);
-                var selectedFacing = FacingHelper.FromFace(blockFacing);
-
-                if ((entity.Facing & ~selectedFacing) == Facing.None)
-                    world.BlockAccessor.BreakBlock(pos, null);
+                return;
             }
+
+            // иначе ломаем
+            world.BlockAccessor.BreakBlock(pos, null);
+
         }
 
         public override Cuboidf[] GetCollisionBoxes(IBlockAccessor blockAccessor, BlockPos pos)

@@ -24,12 +24,6 @@ public class BlockConnector : BlockEBase
 
 
 
-
-
-
-
-
-
     //ставим блок
     public override bool DoPlaceBlock(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel,
         ItemStack byItemStack)

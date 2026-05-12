@@ -46,7 +46,34 @@ public class BlockEPress : Vintagestory.API.Common.Block
         return [OnPickBlock(world, pos)];
     }
 
+    public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack,
+        BlockSelection blockSel, ref string failureCode)
+    {
+        //неваляжка - только вертикально
+        // целая ли грань, на которую ставим
+        if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSel.Position, Facing.DownAll))
+        {
+            return false;
+        }
 
+        return base.TryPlaceBlock(world, byPlayer, itemstack, blockSel, ref failureCode);
+    }
+
+    public override void OnNeighbourBlockChange(IWorldAccessor world, BlockPos pos, BlockPos neibpos)
+    {
+        base.OnNeighbourBlockChange(world, pos, neibpos);
+
+        //проверяем только блок под нами
+        // целая ли грань еще
+        if (MyMiniLib.CheckSolidFace(world.BlockAccessor, pos, Facing.DownAll))
+        {
+            return;
+        }
+
+        // иначе ломаем
+        world.BlockAccessor.BreakBlock(pos, null);
+
+    }
 
     /// <summary>
     /// Получение информации о предмете в инвентаре

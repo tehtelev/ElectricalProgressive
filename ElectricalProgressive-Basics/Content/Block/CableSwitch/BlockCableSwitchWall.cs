@@ -49,20 +49,12 @@ namespace ElectricalProgressive.Content.Block.CableSwitch
         {
             var selection = new Selection(blockSel);
             var facing = FacingHelper.From(selection.Face, BlockFacing.DOWN);
+            
 
-            //только на стену и смотрит вниз
-            if (facing != Facing.None &&
-                FacingHelper.Faces(facing).First() is { } blockFacing &&
-                selection.Face != BlockFacing.UP &&
-                selection.Face != BlockFacing.DOWN)
+            // целая ли грань, на которую ставим
+            if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSel.Position, facing))
             {
-                var neighborBlock = world.BlockAccessor
-                    .GetBlock(blockSel.Position.AddCopy(blockFacing));
-
-                if (!neighborBlock.SideSolid[blockFacing.Opposite.Index])
-                {
-                    return false;
-                }
+                return false;
             }
 
             return base.TryPlaceBlock(world, byPlayer, itemstack, blockSel, ref failureCode);
@@ -99,13 +91,14 @@ namespace ElectricalProgressive.Content.Block.CableSwitch
 
             if (world.BlockAccessor.GetBlockEntity(pos) is BlockEntityCableSwitch entity)
             {
-                var blockFacing = BlockFacing.FromVector(neibpos.X - pos.X, neibpos.Y - pos.Y, neibpos.Z - pos.Z);
-                var selectedFacing = FacingHelper.FromFace(blockFacing);
-
-                if ((entity.Facing & ~selectedFacing) == Facing.None)
+                // целая ли грань еще
+                if (MyMiniLib.CheckSolidFace(world.BlockAccessor, pos, entity.Facing))
                 {
-                    world.BlockAccessor.BreakBlock(pos, null);
+                    return;
                 }
+
+                // иначе ломаем
+                world.BlockAccessor.BreakBlock(pos, null);
             }
         }
 
