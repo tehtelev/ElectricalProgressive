@@ -207,9 +207,6 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         DrawingRecipes = null;
         machines = null;
 
-        api.Event.SaveGameLoaded -= LoadCentrifugeRecipes;
-        api.Event.SaveGameLoaded -= LoadHammerRecipes;
-        api.Event.SaveGameLoaded -= LoadPressRecipes;
-        api.Event.SaveGameLoaded -= LoadDrawingRecipes;
+
     }
 }

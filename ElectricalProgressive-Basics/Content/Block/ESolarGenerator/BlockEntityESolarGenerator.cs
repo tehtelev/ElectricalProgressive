@@ -9,7 +9,7 @@ namespace ElectricalProgressive.Content.Block.ESolarGenerator;
 
 public class BlockEntityESolarGenerator : BlockEntityEFacingBase
 {
-    private Facing _facing = Facing.None;
+
 
     /// <summary>
     /// Maximum power output for solar panel
@@ -233,7 +233,6 @@ public class BlockEntityESolarGenerator : BlockEntityEFacingBase
     public override void ToTreeAttributes(ITreeAttribute tree)
     {
         base.ToTreeAttributes(tree);
-        tree.SetBytes("electricalprogressive:facing", SerializerUtil.Serialize(this._facing));
         tree.SetFloat("electricalprogressive:kpd", Kpd);
     }
 
@@ -247,14 +246,6 @@ public class BlockEntityESolarGenerator : BlockEntityEFacingBase
     {
         base.FromTreeAttributes(tree, worldForResolving);
 
-        try
-        {
-            this._facing = SerializerUtil.Deserialize<Facing>(tree.GetBytes("electricalprogressive:facing"));
-        }
-        catch (Exception exception)
-        {
-            this.Api?.Logger.Error(exception.ToString());
-        }
 
         Kpd = tree.GetFloat("electricalprogressive:kpd");
     }
