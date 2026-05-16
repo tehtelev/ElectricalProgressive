@@ -76,9 +76,20 @@ namespace ElectricalProgressive.Content.Block.ELamp
         public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack,
             BlockSelection blockSel, ref string failureCode)
         {
-            //неваляжка - только вертикально
+            var selection = new Selection(blockSel);
+            var facing = Facing.None;
+
+            try
+            {
+                facing = FacingHelper.From(selection.Face, selection.Direction);
+            }
+            catch
+            {
+                return false;
+            }
+
             // целая ли грань, на которую ставим
-            if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSel.Position, Facing.DownAll))
+            if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSel.Position, facing))
             {
                 return false;
             }
@@ -90,15 +101,18 @@ namespace ElectricalProgressive.Content.Block.ELamp
         {
             base.OnNeighbourBlockChange(world, pos, neibpos);
 
-            //проверяем только блок под нами
-            // целая ли грань еще
-            if (MyMiniLib.CheckSolidFace(world.BlockAccessor, pos, Facing.DownAll))
+            // проверим целостность грани
+            if (world.BlockAccessor.GetBlockEntity(pos) is BlockEntityELamp entity)
             {
-                return;
-            }
+                // целая ли грань еще
+                if (MyMiniLib.CheckSolidFace(world.BlockAccessor, pos, entity.Facing))
+                {
+                    return;
+                }
 
-            // иначе ломаем
-            world.BlockAccessor.BreakBlock(pos, null);
+                // иначе ломаем
+                world.BlockAccessor.BreakBlock(pos, null);
+            }
 
         }
 
