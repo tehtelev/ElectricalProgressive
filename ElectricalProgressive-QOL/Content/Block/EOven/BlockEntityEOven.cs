@@ -735,7 +735,7 @@ public class BlockEntityEOven : BlockEntityDisplay, IHeatSource
                     var abilitiesForSkill = indexer?.GetValue(playerSkillSet, [id]);
                     var specIndexer = abilitiesForSkill?.GetType().GetProperty("Item");
                     var playerAbility = specIndexer?.GetValue(abilitiesForSkill, [specId]);
-
+                    // проверка уровня кулинарии (должен быть больше единицы)
                     if (playerAbility != null && (int)(abilityType?.GetProperty("Tier")?.GetValue(playerAbility) ?? 0) >= 1)
                     {
                         for (var slotId = 0; slotId < this.BakeableCapacity; ++slotId)

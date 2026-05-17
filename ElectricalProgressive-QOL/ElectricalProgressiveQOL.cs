@@ -134,7 +134,9 @@ public class ElectricalProgressiveQOL : ModSystem
 
 
         // xskills интеграция через рефлексию
-        if (api.ModLoader.IsModEnabled("xskillsrabite") || api.ModLoader.IsModEnabled("xskills"))
+        if (api.ModLoader.IsModEnabled("xskillsrabite")
+            || api.ModLoader.IsModEnabled("xskills")
+            || api.ModLoader.IsModEnabled("xskillsfork"))
         {
             try
             {
@@ -194,10 +196,6 @@ public class ElectricalProgressiveQOL : ModSystem
             }
         }
 
-
-        // применение патчика на механику и вылеты
-        //var harmony = new Harmony("electricalprogressive.farmland.patches");
-        //harmony.PatchAll(Assembly.GetExecutingAssembly());
 
 
 
