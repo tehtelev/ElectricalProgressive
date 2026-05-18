@@ -5,7 +5,7 @@ using Vintagestory.API.Util;
 
 namespace ElectricalProgressive.RecipeSystem.Recipe;
 
-public class DrawingRecipe : BaseMultiRecipe<DrawingRecipe>
+public class ExtruderRecipe : BaseMultiRecipe<ExtruderRecipe>
 {
-    protected override DrawingRecipe CreateInstance() => new();
+    protected override ExtruderRecipe CreateInstance() => new();
 }

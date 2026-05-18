@@ -11,13 +11,13 @@ using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
 
-namespace ElectricalProgressive.Content.Block.EDrawing
+namespace ElectricalProgressive.Content.Block.EExtruder
 {
-    public class BlockEntityEDrawing : BlockEntityGenericTypedContainer
+    public class BlockEntityEExtruder : BlockEntityGenericTypedContainer
     {
         // Конфигурация
         internal InventoryDrawing inventory;
-        private GuiDialogDrawing _clientDialog;
+        private GuiDialogExtruder _clientDialog;
         public override string InventoryClassName => "edrawing";
         private readonly int _maxConsumption;
         private ICoreClientAPI _capi;
@@ -27,7 +27,7 @@ namespace ElectricalProgressive.Content.Block.EDrawing
         private static Shape? _resultingShape; // кеш для формы, которая используется в анимации. Кеш нужен, чтобы не загружать форму из ресурсов каждый раз при тесселяции блока, а использовать уже загруженную и обработанную форму.
 
         // Состояние крафта
-        public DrawingRecipe CurrentRecipe;
+        public ExtruderRecipe CurrentRecipe;
         public string CurrentRecipeName;
         public float RecipeProgress;
 
@@ -64,7 +64,7 @@ namespace ElectricalProgressive.Content.Block.EDrawing
         private ILoadedSound _ambientSound;
         private AssetLocation _centrifugeSound;
 
-        public BlockEntityEDrawing()
+        public BlockEntityEExtruder()
         {
             _maxConsumption = MyMiniLib.GetAttributeInt(Block, "maxConsumption", 100);
             this.inventory = new InventoryDrawing(3, InventoryClassName, (string)null, (ICoreAPI)null, null, this);
@@ -135,12 +135,12 @@ namespace ElectricalProgressive.Content.Block.EDrawing
 
         #region Логика рецептов
 
-        public static bool FindMatchingRecipe(ref DrawingRecipe currentRecipe, ref string currentRecipeName, InventoryDrawing inventory)
+        public static bool FindMatchingRecipe(ref ExtruderRecipe currentRecipe, ref string currentRecipeName, InventoryDrawing inventory)
         {
             currentRecipe = null;
             currentRecipeName = string.Empty;
 
-            foreach (var recipe in ElectricalProgressiveRecipeManager.DrawingRecipes)
+            foreach (var recipe in ElectricalProgressiveRecipeManager.ExtruderRecipes)
             {
                 if (MatchesRecipe(recipe, inventory))
                 {
@@ -159,7 +159,7 @@ namespace ElectricalProgressive.Content.Block.EDrawing
 
 
 
-        private static bool MatchesRecipe(DrawingRecipe recipe, InventoryDrawing inventory)
+        private static bool MatchesRecipe(ExtruderRecipe recipe, InventoryDrawing inventory)
         {
             var usedSlots = new List<int>();
 
@@ -323,7 +323,7 @@ namespace ElectricalProgressive.Content.Block.EDrawing
         #region Основной цикл работы
         private void Every1000Ms(float dt)
         {
-            var beh = GetBehavior<BEBehaviorEDrawing>();
+            var beh = GetBehavior<BEBehaviorEExtruder>();
             if (beh == null)
             {
                 StopAnimation();
@@ -506,7 +506,7 @@ namespace ElectricalProgressive.Content.Block.EDrawing
             {
                 toggleInventoryDialogClient(byPlayer, () =>
                 {
-                    _clientDialog = new GuiDialogDrawing(DialogTitle, Inventory, Pos, _capi);
+                    _clientDialog = new GuiDialogExtruder(DialogTitle, Inventory, Pos, _capi);
                     _clientDialog.Update(RecipeProgress);
                     return _clientDialog;
                 });

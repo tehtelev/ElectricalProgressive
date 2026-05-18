@@ -13,7 +13,7 @@ public class ElectricalProgressiveRecipeManager : ModSystem
     public static List<RecyclerRecipe> RecyclerRecipes;
     public static List<HammerRecipe> HammerRecipes;
     public static List<PressRecipe> PressRecipes;
-    public static List<DrawingRecipe> DrawingRecipes;
+    public static List<ExtruderRecipe> ExtruderRecipes;
 
 
     public static Dictionary<string, (string code, IEnumerable<IRecipeMultyBase> recipes)> machines;
@@ -27,7 +27,7 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         api.Event.SaveGameLoaded += LoadRecyclerRecipes;
         api.Event.SaveGameLoaded += LoadHammerRecipes;
         api.Event.SaveGameLoaded += LoadPressRecipes;
-        api.Event.SaveGameLoaded += LoadDrawingRecipes;
+        api.Event.SaveGameLoaded += LoadExtruderRecipes;
 
         machines = new Dictionary<string, (string, IEnumerable<IRecipeMultyBase>)>(4);
     }
@@ -56,12 +56,12 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         machines.Add("epress-", ("electricalprogressiveindustry:epress-north", PressRecipes));
     }
 
-    private void LoadDrawingRecipes()
+    private void LoadExtruderRecipes()
     {
-        DrawingRecipes = [];
-        LoadRecipes<DrawingRecipe>("Drawing Recipe", "recipes/electric/drawingrecipe", DrawingRecipes.Add);
+        ExtruderRecipes = [];
+        LoadRecipes<ExtruderRecipe>("Extruder Recipe", "recipes/electric/extruderrecipe", ExtruderRecipes.Add);
         api.World.Logger.Debug(Lang.Get("electricalprogressiveindustry:recipeloading"));
-        machines.Add("edrawing-", ("electricalprogressiveindustry:edrawing-north", DrawingRecipes));
+        machines.Add("eextruder-", ("electricalprogressiveindustry:eextruder-north", ExtruderRecipes));
     }
 
     private void LoadRecipes<T>(string name, string path, Action<T> registerMethod)
@@ -198,13 +198,13 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         RecyclerRecipes?.Clear();
         HammerRecipes?.Clear();
         PressRecipes?.Clear();
-        DrawingRecipes?.Clear();
+        ExtruderRecipes?.Clear();
         machines?.Clear();
 
         RecyclerRecipes = null;
         HammerRecipes = null;
         PressRecipes = null;
-        DrawingRecipes = null;
+        ExtruderRecipes = null;
         machines = null;
 
 

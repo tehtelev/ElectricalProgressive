@@ -132,7 +132,6 @@ public class BlockEntityERecycler : BlockEntityGenericTypedContainer
         // защита от горячей смены стака
         if (slotid == 0 && RecipeProgress<1f)
         {
-            // в любом случае сбрасываем прогресс
             RecipeProgress = 0f;
             UpdateState(RecipeProgress);
         }
@@ -140,9 +139,20 @@ public class BlockEntityERecycler : BlockEntityGenericTypedContainer
         if (this.InputSlot.Empty)
         {
             RecipeProgress = 0;
-            StopSound();
             StopAnimation();
+            StopSound();
+            CurrentRecipe = null;  // ОЧИЩАЕМ РЕЦЕПТ ПРИ ОЧИСТКЕ СЛОТА
         }
+        else
+        {
+            // ПРИ ДОБАВЛЕНИИ ПРЕДМЕТА - ПРИНУДИТЕЛЬНО ИЩЕМ РЕЦЕПТ
+            FindMatchingRecipe(ref CurrentRecipe, ref CurrentRecipeName, Inventory[0]);
+            if (CurrentRecipe == null)
+            {
+                FindPerishProperties(ref CurrentRecipe, ref CurrentRecipeName, Inventory[0]);
+            }
+        }
+    
         this.MarkDirty();
 
         if (this._clientDialog == null || !this._clientDialog.IsOpened())
@@ -152,7 +162,6 @@ public class BlockEntityERecycler : BlockEntityGenericTypedContainer
 
         if (Api?.Side == EnumAppSide.Server)
         {
-            BlockEntityERecycler.FindMatchingRecipe(ref CurrentRecipe, ref CurrentRecipeName, Inventory[0]);
             MarkDirty(true);
         }
     }
@@ -253,38 +262,44 @@ public class BlockEntityERecycler : BlockEntityGenericTypedContainer
         var beh = GetBehavior<BEBehaviorERecycler>();
         if (beh == null)
         {
-            StopSound();
             StopAnimation();
+            StopSound();
             return;
         }
-
 
         if (ElectricalProgressive == null &&
             ElectricalProgressive.AllEparams == null &&
             ElectricalProgressive.AllEparams.Any(e => e.burnout))
             return;
 
-
         var stack = InputSlot?.Itemstack;
-        
-        // со стаком что-то не так?
+
+        // со стаком что-то не так? - останавливаем звук если нет предмета
         if (stack is null ||
             stack.StackSize == 0 ||
             stack.Collectible == null ||
             stack.Collectible.Attributes == null)
+        {
+            if (_wasCraftingLastTick)
+            {
+                StopAnimation();
+                StopSound();
+                _wasCraftingLastTick = false;
+            }
+
             return;
-
-
-
-
+        }
 
         var hasPower = beh.PowerSetting >= _maxConsumption * 0.1F;
         var hasRecipe = !InputSlot.Empty
-                        && (BlockEntityERecycler.FindMatchingRecipe(ref CurrentRecipe, ref CurrentRecipeName, Inventory[0]) || FindPerishProperties(ref CurrentRecipe, ref CurrentRecipeName, Inventory[0]));
+                        && (BlockEntityERecycler.FindMatchingRecipe(ref CurrentRecipe, ref CurrentRecipeName,
+                                Inventory[0])
+                            || FindPerishProperties(ref CurrentRecipe, ref CurrentRecipeName, Inventory[0]));
         var isCraftingNow = hasPower && hasRecipe && CurrentRecipe != null;
 
         if (isCraftingNow)
         {
+            // Запускаем звук только если его нет или он не играет
             if (!_wasCraftingLastTick)
             {
                 StartSound();
@@ -300,8 +315,9 @@ public class BlockEntityERecycler : BlockEntityGenericTypedContainer
             {
                 ProcessCompletedCraft();
 
-                // Проверяем возможность следующего цикла без лишних вызовов
+                // Проверяем возможность следующего цикла
                 var canContinueCrafting = hasPower && !InputSlot.Empty && CurrentRecipe != null &&
+                                          InputSlot.Itemstack != null &&
                                           InputSlot.Itemstack.StackSize >= CurrentRecipe.Ingredients[0].Quantity;
 
                 if (!canContinueCrafting)
@@ -311,12 +327,13 @@ public class BlockEntityERecycler : BlockEntityGenericTypedContainer
                 }
 
                 // в любом случае сбрасываем прогресс
-                RecipeProgress = 0f; 
+                RecipeProgress = 0f;
                 UpdateState(RecipeProgress);
             }
         }
         else if (_wasCraftingLastTick)
         {
+            // Крафт прекратился - останавливаем анимацию и звук
             StopAnimation();
             StopSound();
             MarkDirty(true);

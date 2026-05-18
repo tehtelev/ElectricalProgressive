@@ -1,6 +1,5 @@
 ﻿using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
-using System;
 using System.Linq;
 using System.Text;
 using Vintagestory.API.Common;
@@ -8,18 +7,18 @@ using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 
-namespace ElectricalProgressive.Content.Block.EDrawing;
+namespace ElectricalProgressive.Content.Block.EExtruder;
 
-public class BEBehaviorEDrawing : BlockEntityBehavior, IElectricConsumer
+public class BEBehaviorEExtruder : BlockEntityBehavior, IElectricConsumer
 {
     /// <summary>
     /// Текущее потребление
     /// </summary>
     public int PowerSetting { get; set; }
 
-    public bool IsBurned => this.Block.Code.GetName().Contains("burned"); // пока так 
-
     public const string PowerSettingKey = "electricalprogressive:powersetting";
+
+    public bool IsBurned => this.Block.Code.GetName().Contains("burned"); // пока так 
 
     public float AvgConsumeCoeff { get; set; }
 
@@ -35,11 +34,10 @@ public class BEBehaviorEDrawing : BlockEntityBehavior, IElectricConsumer
     private bool hasBurnout;
     private bool prepareBurnout;
 
-    public BEBehaviorEDrawing(BlockEntity blockEntity) : base(blockEntity)
+    public BEBehaviorEExtruder(BlockEntity blockEntity) : base(blockEntity)
     {
         _maxConsumption = MyMiniLib.GetAttributeInt(this.Block, "maxConsumption", 100);
     }
-
 
 
 
@@ -47,10 +45,10 @@ public class BEBehaviorEDrawing : BlockEntityBehavior, IElectricConsumer
     {
         get
         {
-            if (Blockentity is BlockEntityEDrawing entity)
+            if (Blockentity is BlockEntityEExtruder entity)
             {
                 // прибор сгорел?
-                if (entity.ElectricalProgressive==null &&
+                if (entity.ElectricalProgressive == null &&
                     entity.ElectricalProgressive.AllEparams == null &&
                     entity.ElectricalProgressive.AllEparams.Any(e => e.burnout))
                     return false;
@@ -75,7 +73,7 @@ public class BEBehaviorEDrawing : BlockEntityBehavior, IElectricConsumer
                     return false;
 
 
-                var hasRecipe = BlockEntityEDrawing.FindMatchingRecipe(ref entity.CurrentRecipe, ref entity.CurrentRecipeName, entity.inventory);
+                var hasRecipe = BlockEntityEExtruder.FindMatchingRecipe(ref entity.CurrentRecipe, ref entity.CurrentRecipeName, entity.inventory);
                 _recipeProgress = entity.RecipeProgress;
                 return hasRecipe;
                     
@@ -89,7 +87,7 @@ public class BEBehaviorEDrawing : BlockEntityBehavior, IElectricConsumer
         base.GetBlockInfo(forPlayer, stringBuilder);
 
         //проверяем не сгорел ли прибор
-        if (this.Blockentity is not BlockEntityEDrawing entity)
+        if (this.Blockentity is not BlockEntityEExtruder entity)
             return;
 
         if (IsBurned)
@@ -125,7 +123,7 @@ public class BEBehaviorEDrawing : BlockEntityBehavior, IElectricConsumer
     public void Update()
     {
         //смотрим надо ли обновить модельку когда сгорает прибор
-        if (Blockentity is not BlockEntityEDrawing entity ||
+        if (Blockentity is not BlockEntityEExtruder entity ||
             entity.ElectricalProgressive == null ||
             entity.ElectricalProgressive.AllEparams is null)
         {
@@ -167,6 +165,7 @@ public class BEBehaviorEDrawing : BlockEntityBehavior, IElectricConsumer
             prepareBurnout = false;
             entity.MarkDirty(true);
         }
+
     }
 
     public float getPowerReceive()

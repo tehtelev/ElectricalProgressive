@@ -1,11 +1,11 @@
 ﻿using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 
-namespace ElectricalProgressive.Content.Block.EDrawing;
+namespace ElectricalProgressive.Content.Block.EExtruder;
 
 public class InventoryDrawing : InventoryGeneric
 {
-    private BlockEntityEDrawing _entity;      // ссылка на блок-сущность пресса
+    private BlockEntityEExtruder _entity;      // ссылка на блок-сущность пресса
     private int lastSlot0Count = -1;        // для отслеживания изменений в слоте 0
     private long lastSlot0UpdateTime = 0;   // время последнего изменения в слоте 0
     private const long DelayMs = 2000;      // задержка 2 секунды
@@ -18,7 +18,7 @@ public class InventoryDrawing : InventoryGeneric
 
     }
 
-    public InventoryDrawing(int slots, string className, string instanceID, ICoreAPI api, NewSlotDelegate onNewSlot, BlockEntityEDrawing entity)
+    public InventoryDrawing(int slots, string className, string instanceID, ICoreAPI api, NewSlotDelegate onNewSlot, BlockEntityEExtruder entity)
         : base(slots, className, instanceID, api)
     {
         _entity = entity;
@@ -56,7 +56,7 @@ public class InventoryDrawing : InventoryGeneric
         }
 
         // есть рецепт?
-        var hasRecipe = !this[0].Empty && BlockEntityEDrawing.FindMatchingRecipe(ref _entity.CurrentRecipe, ref _entity.CurrentRecipeName, this);
+        var hasRecipe = !this[0].Empty && BlockEntityEExtruder.FindMatchingRecipe(ref _entity.CurrentRecipe, ref _entity.CurrentRecipeName, this);
 
         if (!hasRecipe || _entity.CurrentRecipe == null)
         {

@@ -1,7 +1,7 @@
 ﻿{
-  "code": "edrawing",
-  "class": "BlockEDrawing",
-  "entityClass": "BlockEntityEDrawing",
+  "code": "eextruder",
+  "class": "BlockEExtruder",
+  "entityClass": "BlockEntityEExtruder",
   "attributes": {
     "blockEProperties": "all",
     "facesEProperties": [ "north", "east", "south", "west", "up", "down" ],
@@ -12,11 +12,11 @@
     "isolated": true,
     "isolatedEnvironment": true,
     "handbook": {
-      "groupBy": [ "edrawing-*" ],
+      "groupBy": [ "eextruder-*" ],
       "extraSections": [
         {
-          "title": "electricalprogressiveindustry:block-handbooktitle-edrawing",
-          "text": "electricalprogressiveindustry:block-handbooktext-edrawing"
+          "title": "electricalprogressiveindustry:block-handbooktitle-eextruder",
+          "text": "electricalprogressiveindustry:block-handbooktext-eextruder"
         }
       ]
     }
@@ -28,7 +28,7 @@
       "name": "Animatable"
     },
     {
-      "name": "BEBehaviorEDrawing"
+      "name": "BEBehaviorEExtruder"
     },
     {
       "name": "ElectricalProgressive"
@@ -72,19 +72,19 @@
 
   "shapebytype": {
     "*-north": {
-      "base": "block/edrawing/edrawing",
+      "base": "block/eextruder/eextruder",
       "rotateY": 0
     },
     "*-east": {
-      "base": "block/edrawing/edrawing",
+      "base": "block/eextruder/eextruder",
       "rotateY": 270
     },
     "*-south": {
-      "base": "block/edrawing/edrawing",
+      "base": "block/eextruder/eextruder",
       "rotateY": 180
     },
     "*-west": {
-      "base": "block/edrawing/edrawing",
+      "base": "block/eextruder/eextruder",
       "rotateY": 90
     }
   },

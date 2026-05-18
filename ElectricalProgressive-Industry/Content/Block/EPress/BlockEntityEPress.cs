@@ -107,6 +107,8 @@ namespace ElectricalProgressive.Content.Block.EPress
                 _soundPress = new AssetLocation("electricalprogressiveindustry:sounds/epress/press.ogg");
 
                 this.RegisterGameTickListener(new Action<float>(this.CheckAnimationFrame), 50);
+                // Обновляем меши при загрузке
+                UpdateMeshes();
             }
         }
 
@@ -287,6 +289,9 @@ namespace ElectricalProgressive.Content.Block.EPress
 
             var stack = this.inventory[slotId].Itemstack;
             var origin = new Vec3f(0.5f, 0, 0.5f);
+    
+            // Получаем угол поворота блока (как в холодильнике)
+            var orientationRotate = Block.Shape.rotateY;
 
             if (stack.Class == EnumItemClass.Item)
             {
@@ -306,9 +311,12 @@ namespace ElectricalProgressive.Content.Block.EPress
             }
             else
             {
-                meshData.Scale(origin, 0.9f, 0.9f, 0.9f);
-                meshData.Translate(0f, 0.9f, 0f);
+                meshData.Scale(origin, 1.0f, 1.0f, 1.0f);
+                meshData.Translate(0.5f, 0.6f, -0.25f);
             }
+    
+            // Применяем поворот блока (как в холодильнике)
+            meshData.Rotate(origin, 0, orientationRotate * GameMath.DEG2RAD, 0);
         }
 
         /// <summary>
@@ -624,13 +632,13 @@ namespace ElectricalProgressive.Content.Block.EPress
             if (Api?.Side != EnumAppSide.Client || AnimUtil == null || CurrentRecipe == null)
                 return;
 
-            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("craft") == false)
+            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false)
             {
                 AnimUtil.StartAnimation(new AnimationMetaData()
                 {
-                    Animation = "Animation1",
-                    Code = "craft",
-                    AnimationSpeed = 2.0f,
+                    Animation = "work-on",
+                    Code = "work-on",
+                    AnimationSpeed = (float)(GetBehavior<BEBehaviorEPress>().PowerSetting / CurrentRecipe.EnergyOperation)*20,
                     EaseOutSpeed = 2.0f,
                     EaseInSpeed = 1f
                 });
@@ -642,19 +650,23 @@ namespace ElectricalProgressive.Content.Block.EPress
             if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
                 return;
 
-            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("craft") == true)
+            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == true)
             {
-                AnimUtil.StopAnimation("craft");
+                AnimUtil.StopAnimation("work-on");
             }
         }
-
+        
+        /// <summary>
+        /// Новый метод для проверки кадра анимации
+        /// </summary>
+        /// <param name="dt"></param>
         private void CheckAnimationFrame(float dt)
         {
             if (Api?.Side != EnumAppSide.Client || AnimUtil == null!)
                 return;
 
-            const int startFrame = 20;
-            if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("craft"))
+            const int startFrame = 280; // Кадр, на котором нужно воспроизвести звук
+            if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
             {
                 var currentTime = Api.World.ElapsedMilliseconds;
                 _lastAnimationCheckTime = currentTime;
@@ -676,6 +688,9 @@ namespace ElectricalProgressive.Content.Block.EPress
             }
         }
 
+        /// <summary>
+        /// Метод для воспроизведения звука
+        /// </summary>
         private void PlayPressSound()
         {
             if (Api?.Side != EnumAppSide.Client)
@@ -788,7 +803,7 @@ namespace ElectricalProgressive.Content.Block.EPress
             }
 
             // если анимации нет, то рисуем блок базовый
-            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("craft") == false)
+            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false)
             {
                 return false;
             }

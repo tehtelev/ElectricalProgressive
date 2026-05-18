@@ -4,16 +4,16 @@ using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 
-namespace ElectricalProgressive.Content.Block.EDrawing;
+namespace ElectricalProgressive.Content.Block.EExtruder;
 
-public class GuiDialogDrawing : GuiDialogBlockEntity
+public class GuiDialogExtruder : GuiDialogBlockEntity
 {
   private long lastRedrawMs;
   private float _recipeprogress;
 
   protected override double FloatyDialogPosition => 0.75;
 
-  public GuiDialogDrawing(
+  public GuiDialogExtruder(
     string DialogTitle,
     InventoryBase Inventory,
     BlockPos BlockEntityPosition,

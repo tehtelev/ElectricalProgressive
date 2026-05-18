@@ -1,5 +1,5 @@
 ﻿using ElectricalProgressive.Content.Block.ERecycler;
-using ElectricalProgressive.Content.Block.EDrawing;
+using ElectricalProgressive.Content.Block.EExtruder;
 using ElectricalProgressive.Content.Block.EHammer;
 using ElectricalProgressive.Content.Block.EPress;
 using ElectricalProgressive.Content.Block.EWoodcutter;
@@ -52,9 +52,9 @@ public class ElectricalProgressiveIndustry : ModSystem
         api.RegisterBlockEntityClass("BlockEntityEPress", typeof(BlockEntityEPress));
         api.RegisterBlockEntityBehaviorClass("BEBehaviorEPress", typeof(BEBehaviorEPress));
 
-        api.RegisterBlockClass("BlockEDrawing", typeof(BlockEDrawing));
-        api.RegisterBlockEntityClass("BlockEntityEDrawing", typeof(BlockEntityEDrawing));
-        api.RegisterBlockEntityBehaviorClass("BEBehaviorEDrawing", typeof(BEBehaviorEDrawing));
+        api.RegisterBlockClass("BlockEExtruder", typeof(BlockEExtruder));
+        api.RegisterBlockEntityClass("BlockEntityEExtruder", typeof(BlockEntityEExtruder));
+        api.RegisterBlockEntityBehaviorClass("BEBehaviorEExtruder", typeof(BEBehaviorEExtruder));
 
         api.RegisterBlockClass("BlockEWoodcutter", typeof(BlockEWoodcutter));
         api.RegisterBlockEntityClass("BlockEntityEWoodcutter", typeof(BlockEntityEWoodcutter));
