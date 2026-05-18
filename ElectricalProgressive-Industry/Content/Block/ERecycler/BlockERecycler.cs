@@ -5,9 +5,9 @@ using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
 
-namespace ElectricalProgressive.Content.Block.ECentrifuge;
+namespace ElectricalProgressive.Content.Block.ERecycler;
 
-public class BlockECentrifuge : Vintagestory.API.Common.Block
+public class BlockERecycler : Vintagestory.API.Common.Block
 {
 
     public override bool OnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection? blockSel)

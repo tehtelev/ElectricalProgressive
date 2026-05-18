@@ -1,24 +1,24 @@
 ﻿using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 
-namespace ElectricalProgressive.Content.Block.ECentrifuge;
+namespace ElectricalProgressive.Content.Block.ERecycler;
 
-public class InventoryCentrifuge : InventoryGeneric
+public class InventoryRecycler : InventoryGeneric
 {
-    private BlockEntityECentrifuge _entity; // ссылка на блок-сущность центрифуги
+    private BlockEntityERecycler _entity; // ссылка на блок-сущность центрифуги
     private int lastSlot0Count = -1;        // для отслеживания изменений в слоте 0
     private long lastSlot0UpdateTime = 0;   // время последнего изменения в слоте 0
     private const long DelayMs = 2000;      // задержка 2 секунды
 
 
 
-    public InventoryCentrifuge(ICoreAPI api)
+    public InventoryRecycler(ICoreAPI api)
         : base(api)
     {
 
     }
 
-    public InventoryCentrifuge(int slots, string className, string instanceID, ICoreAPI api, NewSlotDelegate onNewSlot, BlockEntityECentrifuge entity)
+    public InventoryRecycler(int slots, string className, string instanceID, ICoreAPI api, NewSlotDelegate onNewSlot, BlockEntityERecycler entity)
         : base(slots, className, instanceID, api)
     {
         _entity = entity;
@@ -57,8 +57,8 @@ public class InventoryCentrifuge : InventoryGeneric
 
         // есть рецепт?
         var hasRecipe = !this[0].Empty
-                        && (BlockEntityECentrifuge.FindMatchingRecipe(ref _entity.CurrentRecipe, ref _entity.CurrentRecipeName, this[0])
-                            || BlockEntityECentrifuge.FindPerishProperties(ref _entity.CurrentRecipe, ref _entity.CurrentRecipeName, this[0]));
+                        && (BlockEntityERecycler.FindMatchingRecipe(ref _entity.CurrentRecipe, ref _entity.CurrentRecipeName, this[0])
+                            || BlockEntityERecycler.FindPerishProperties(ref _entity.CurrentRecipe, ref _entity.CurrentRecipeName, this[0]));
 
         if (!hasRecipe || _entity.CurrentRecipe == null)
         {

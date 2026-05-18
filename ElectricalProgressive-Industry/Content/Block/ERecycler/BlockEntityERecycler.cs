@@ -11,17 +11,17 @@ using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
 
-namespace ElectricalProgressive.Content.Block.ECentrifuge;
+namespace ElectricalProgressive.Content.Block.ERecycler;
 
-public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
+public class BlockEntityERecycler : BlockEntityGenericTypedContainer
 {
 
-    internal InventoryCentrifuge _inventory;
-    private GuiDialogCentrifuge _clientDialog;
+    internal InventoryRecycler _inventory;
+    private GuiDialogRecycler _clientDialog;
     private static MeshData? _mesh; // кеш для меша, который используется в анимации. Кеш нужен, чтобы не загружать меш из ресурсов каждый раз при тесселяции блока, а использовать уже загруженный и обработанный меш.
     private static Shape? _resultingShape; // кеш для формы, которая используется в анимации. Кеш нужен, чтобы не загружать форму из ресурсов каждый раз при тесселяции блока, а использовать уже загруженную и обработанную форму.
-    public override string InventoryClassName => "ecentrifuge";
-    public CentrifugeRecipe CurrentRecipe;
+    public override string InventoryClassName => "erecycler";
+    public RecyclerRecipe CurrentRecipe;
     private readonly int _maxConsumption;
     private ICoreClientAPI _capi;
     private bool _wasCraftingLastTick;
@@ -30,7 +30,7 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
     public float RecipeProgress;
     private ILoadedSound _ambientSound;
 
-    public override string DialogTitle => Lang.Get("ecentrifuge-title-gui");
+    public override string DialogTitle => Lang.Get("erecycler-title-gui");
 
     public override InventoryBase Inventory => this._inventory;
 
@@ -57,12 +57,12 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
 
 
     private Facing _facing = Facing.None;
-    private AssetLocation _centrifugeSound;
+    private AssetLocation _recyclerSound;
 
-    public BlockEntityECentrifuge()
+    public BlockEntityERecycler()
     {
         _maxConsumption = MyMiniLib.GetAttributeInt(this.Block, "maxConsumption", 100);
-        this._inventory = new InventoryCentrifuge(2, InventoryClassName, (string)null, (ICoreAPI)null, null, this);
+        this._inventory = new InventoryRecycler(2, InventoryClassName, (string)null, (ICoreAPI)null, null, this);
         this._inventory.SlotModified += new Action<int>(this.OnSlotModifid);
     }
 
@@ -86,7 +86,7 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
                 AnimUtil.InitializeAnimator(InventoryClassName, _mesh, _resultingShape, new Vec3f(0, GetRotation(), 0f));
             }
 
-            _centrifugeSound = new AssetLocation("electricalprogressiveindustry:sounds/ecentrifuge/centrifuge.ogg");
+            _recyclerSound = new AssetLocation("electricalprogressiveindustry:sounds/erecycler/erecycler.ogg");
         }
     }
 
@@ -140,6 +140,7 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
         if (this.InputSlot.Empty)
         {
             RecipeProgress = 0;
+            StopSound();
             StopAnimation();
         }
         this.MarkDirty();
@@ -151,7 +152,7 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
 
         if (Api?.Side == EnumAppSide.Server)
         {
-            BlockEntityECentrifuge.FindMatchingRecipe(ref CurrentRecipe, ref CurrentRecipeName, Inventory[0]);
+            BlockEntityERecycler.FindMatchingRecipe(ref CurrentRecipe, ref CurrentRecipeName, Inventory[0]);
             MarkDirty(true);
         }
     }
@@ -160,13 +161,13 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
     /// Ищем рецепт для текущего стака
     /// </summary>
     /// <returns></returns>
-    public static bool FindMatchingRecipe(ref CentrifugeRecipe currentRecipe, ref string currentRecipeName, ItemSlot inputSlot)
+    public static bool FindMatchingRecipe(ref RecyclerRecipe currentRecipe, ref string currentRecipeName, ItemSlot inputSlot)
     {
         ItemSlot[] inputSlots = [inputSlot];
         currentRecipe = null;
         currentRecipeName = string.Empty;
 
-        foreach (var recipe in ElectricalProgressiveRecipeManager.CentrifugeRecipes)
+        foreach (var recipe in ElectricalProgressiveRecipeManager.RecyclerRecipes)
         {
             if (recipe.Matches(inputSlots, out _))
             {
@@ -187,7 +188,7 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
     /// Ищем свойства порчи для стака и создаем рецепт на лету
     /// </summary>
     /// <returns></returns>
-    public static bool FindPerishProperties(ref CentrifugeRecipe currentRecipe, ref string currentRecipeName, ItemSlot inputSlot)
+    public static bool FindPerishProperties(ref RecyclerRecipe currentRecipe, ref string currentRecipeName, ItemSlot inputSlot)
     {
         var transProps = inputSlot.Itemstack.Collectible.TransitionableProps;
         if (transProps != null)
@@ -215,7 +216,7 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
                         continue;
                     }
 
-                    foreach (var recipe in ElectricalProgressiveRecipeManager.CentrifugeRecipes)
+                    foreach (var recipe in ElectricalProgressiveRecipeManager.RecyclerRecipes)
                     {
                         if (recipe.Code == "default_perish" && inputSlot.StackSize >= inputSize) // нашли универсальный шаблон для гниения
                         {
@@ -249,9 +250,10 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
     /// <param name="dt"></param>
     private void Every1000Ms(float dt)
     {
-        var beh = GetBehavior<BEBehaviorECentrifuge>();
+        var beh = GetBehavior<BEBehaviorERecycler>();
         if (beh == null)
         {
+            StopSound();
             StopAnimation();
             return;
         }
@@ -278,7 +280,7 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
 
         var hasPower = beh.PowerSetting >= _maxConsumption * 0.1F;
         var hasRecipe = !InputSlot.Empty
-                        && (BlockEntityECentrifuge.FindMatchingRecipe(ref CurrentRecipe, ref CurrentRecipeName, Inventory[0]) || FindPerishProperties(ref CurrentRecipe, ref CurrentRecipeName, Inventory[0]));
+                        && (BlockEntityERecycler.FindMatchingRecipe(ref CurrentRecipe, ref CurrentRecipeName, Inventory[0]) || FindPerishProperties(ref CurrentRecipe, ref CurrentRecipeName, Inventory[0]));
         var isCraftingNow = hasPower && hasRecipe && CurrentRecipe != null;
 
         if (isCraftingNow)
@@ -411,12 +413,12 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
             return;
 
 
-        if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("craft") == false)
+        if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false)
         {
             AnimUtil.StartAnimation(new AnimationMetaData()
             {
-                Animation = "craft",
-                Code = "craft",
+                Animation = "work-on",
+                Code = "work-on",
                 AnimationSpeed = 1f,
                 EaseOutSpeed = 4f,
                 EaseInSpeed = 1f
@@ -433,9 +435,9 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
         if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
             return;
 
-        if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("craft") == true)
+        if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == true)
         {
-            AnimUtil.StopAnimation("craft");
+            AnimUtil.StopAnimation("work-on");
         }
         
     }
@@ -452,7 +454,7 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
             return;
         this._ambientSound = (this.Api as ICoreClientAPI).World.LoadSound(new SoundParams()
         {
-            Location = _centrifugeSound,
+            Location = _recyclerSound,
             ShouldLoop = true,
             Position = this.Pos.ToVec3f().Add(0.5f, 0.25f, 0.5f),
             DisposeOnFinish = false,
@@ -500,7 +502,7 @@ public class BlockEntityECentrifuge : BlockEntityGenericTypedContainer
             this.toggleInventoryDialogClient(byPlayer, (CreateDialogDelegate)(() =>
             {
                 this._clientDialog =
-                  new GuiDialogCentrifuge(this.DialogTitle, this.Inventory, this.Pos, this.Api as ICoreClientAPI);
+                  new GuiDialogRecycler(this.DialogTitle, this.Inventory, this.Pos, this.Api as ICoreClientAPI);
                 this._clientDialog.Update(RecipeProgress);
                 return (GuiDialogBlockEntity)this._clientDialog;
             }));

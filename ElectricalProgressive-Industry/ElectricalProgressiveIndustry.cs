@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Content.Block.ECentrifuge;
+﻿using ElectricalProgressive.Content.Block.ERecycler;
 using ElectricalProgressive.Content.Block.EDrawing;
 using ElectricalProgressive.Content.Block.EHammer;
 using ElectricalProgressive.Content.Block.EPress;
@@ -40,9 +40,9 @@ public class ElectricalProgressiveIndustry : ModSystem
         base.Start(api);
 
         this.api = api;
-        api.RegisterBlockClass("BlockECentrifuge", typeof(BlockECentrifuge));
-        api.RegisterBlockEntityClass("BlockEntityECentrifuge", typeof(BlockEntityECentrifuge));
-        api.RegisterBlockEntityBehaviorClass("BEBehaviorECentrifuge", typeof(BEBehaviorECentrifuge));
+        api.RegisterBlockClass("BlockERecycler", typeof(BlockERecycler));
+        api.RegisterBlockEntityClass("BlockEntityERecycler", typeof(BlockEntityERecycler));
+        api.RegisterBlockEntityBehaviorClass("BEBehaviorERecycler", typeof(BEBehaviorERecycler));
         
         api.RegisterBlockClass("BlockEHammer", typeof(BlockEHammer));
         api.RegisterBlockEntityClass("BlockEntityEHammer", typeof(BlockEntityEHammer));

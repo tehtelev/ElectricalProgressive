@@ -1,7 +1,7 @@
 ﻿{
-  "code": "ecentrifuge",
-  "class": "BlockECentrifuge",
-  "entityClass": "BlockEntityECentrifuge",
+  "code": "erecycler",
+  "class": "BlockERecycler",
+  "entityClass": "BlockEntityERecycler",
   "attributes": {
     "blockEProperties": "all",
     "facesEProperties": [ "north", "east", "south", "west", "up", "down" ],
@@ -12,11 +12,11 @@
     "isolated": true,
     "isolatedEnvironment": true,
     "handbook": {
-      "groupBy": [ "ecentrifuge-*" ],
+      "groupBy": [ "erecycler-*" ],
       "extraSections": [
         {
-          "title": "electricalprogressiveindustry:block-handbooktitle-ecentrifuge",
-          "text": "electricalprogressiveindustry:block-handbooktext-ecentrifuge"
+          "title": "electricalprogressiveindustry:block-handbooktitle-erecycler",
+          "text": "electricalprogressiveindustry:block-handbooktext-erecycler"
         }
       ]
     }
@@ -28,7 +28,7 @@
       "name": "Animatable"
     },
     {
-      "name": "BEBehaviorECentrifuge"
+      "name": "BEBehaviorERecycler"
     },
     {
       "name": "ElectricalProgressive"
@@ -44,16 +44,47 @@
     { "name": "HorizontalOrientable" },
     {
       "name": "Multiblock",
-      "properties": {
-        "sizex": 1,
-        "sizey": 2,
-        "sizez": 1,
-        "cposition": {
-          "x": 0,
-          "y": 0,
-          "z": 0
+      "propertiesByType": {
+        "*-north": {
+          "sizex": 2,
+          "sizey": 2,
+          "sizez": 2,
+          "cposition": {
+            "x": 0,
+            "y": 0,
+            "z": 2
+          }
+        },
+        "*-east": {
+          "sizex": 2,
+          "sizey": 2,
+          "sizez": 2,
+          "cposition": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        },
+        "*-south": {
+          "sizex": 2,
+          "sizey": 2,
+          "sizez": 2,
+          "cposition": {
+            "x": 1,
+            "y": 0,
+            "z": 0
+          }
+        },
+        "*-west": {
+          "sizex": 2,
+          "sizey": 2,
+          "sizez": 2,
+          "cposition": {
+            "x": 2,
+            "y": 0,
+            "z": 1
+          }
         }
-
       }
     }
   ],
@@ -72,19 +103,19 @@
 
   "shapebytype": {
     "*-north": {
-      "base": "block/ecentrifuge/ecentrifuge",
+      "base": "block/erecycler/eRecycler",
       "rotateY": 0
     },
     "*-east": {
-      "base": "block/ecentrifuge/ecentrifuge",
+      "base": "block/erecycler/eRecycler",
       "rotateY": 270
     },
     "*-south": {
-      "base": "block/ecentrifuge/ecentrifuge",
+      "base": "block/erecycler/eRecycler",
       "rotateY": 180
     },
     "*-west": {
-      "base": "block/ecentrifuge/ecentrifuge",
+      "base": "block/erecycler/eRecycler",
       "rotateY": 90
     }
   },
@@ -118,14 +149,6 @@
 
   "sideopaque": {
     "all": "false"
-  },
-  "collisionbox": {
-    "x1": 0,
-    "y1": 0,
-    "z1": 0,
-    "x2": 1,
-    "y2": 1,
-    "z2": 1
   },
   "resistance": 3.5,
   "sounds": {

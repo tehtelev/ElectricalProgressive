@@ -4,16 +4,16 @@ using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 
-namespace ElectricalProgressive.Content.Block.ECentrifuge;
+namespace ElectricalProgressive.Content.Block.ERecycler;
 
-public class GuiDialogCentrifuge : GuiDialogBlockEntity
+public class GuiDialogRecycler : GuiDialogBlockEntity
 {
   private long lastRedrawMs;
   private float _recipeprogress;
 
   protected override double FloatyDialogPosition => 0.75;
 
-  public GuiDialogCentrifuge(
+  public GuiDialogRecycler(
     string DialogTitle,
     InventoryBase Inventory,
     BlockPos BlockEntityPosition,

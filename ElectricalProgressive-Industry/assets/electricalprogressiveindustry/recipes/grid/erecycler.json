@@ -28,7 +28,7 @@
     },
     "output": {
       "type": "block",
-      "code": "electricalprogressiveindustry:ecentrifuge-north",
+      "code": "electricalprogressiveindustry:erecycler-north",
       "quantity": 1
     }
   }

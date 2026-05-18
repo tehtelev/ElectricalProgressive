@@ -66,7 +66,7 @@
       </EmbeddedResource>
     </ItemGroup>
     <ItemGroup>
-      <Folder Include="Content\Block\ECentrifuge\" />
+      <Folder Include="Content\Block\ERecycler\" />
     </ItemGroup>
     <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 </Project>

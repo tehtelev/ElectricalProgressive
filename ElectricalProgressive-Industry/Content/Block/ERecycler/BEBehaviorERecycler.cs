@@ -7,9 +7,9 @@ using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 
-namespace ElectricalProgressive.Content.Block.ECentrifuge;
+namespace ElectricalProgressive.Content.Block.ERecycler;
 
-public class BEBehaviorECentrifuge : BlockEntityBehavior, IElectricConsumer
+public class BEBehaviorERecycler : BlockEntityBehavior, IElectricConsumer
 {
     /// <summary>
     /// Текущее потребление
@@ -34,7 +34,7 @@ public class BEBehaviorECentrifuge : BlockEntityBehavior, IElectricConsumer
     private bool hasBurnout;
     private bool prepareBurnout;
 
-    public BEBehaviorECentrifuge(BlockEntity blockEntity) : base(blockEntity)
+    public BEBehaviorERecycler(BlockEntity blockEntity) : base(blockEntity)
     {
         _maxConsumption = MyMiniLib.GetAttributeInt(this.Block, "maxConsumption", 100);
     }
@@ -47,7 +47,7 @@ public class BEBehaviorECentrifuge : BlockEntityBehavior, IElectricConsumer
     {
         get
         {
-            if (Blockentity is BlockEntityECentrifuge entity)
+            if (Blockentity is BlockEntityERecycler entity)
             {
                 if (entity.ElectricalProgressive == null &&
                     entity.ElectricalProgressive.AllEparams == null &&
@@ -66,8 +66,8 @@ public class BEBehaviorECentrifuge : BlockEntityBehavior, IElectricConsumer
 
 
 
-                var hasRecipe = BlockEntityECentrifuge.FindMatchingRecipe(ref entity.CurrentRecipe, ref entity.CurrentRecipeName, entity.Inventory[0])
-                                || BlockEntityECentrifuge.FindPerishProperties(ref entity.CurrentRecipe, ref entity.CurrentRecipeName, entity.Inventory[0]);
+                var hasRecipe = BlockEntityERecycler.FindMatchingRecipe(ref entity.CurrentRecipe, ref entity.CurrentRecipeName, entity.Inventory[0])
+                                || BlockEntityERecycler.FindPerishProperties(ref entity.CurrentRecipe, ref entity.CurrentRecipeName, entity.Inventory[0]);
                 _recipeProgress = entity.RecipeProgress;
                 return hasRecipe;
                     
@@ -81,7 +81,7 @@ public class BEBehaviorECentrifuge : BlockEntityBehavior, IElectricConsumer
         base.GetBlockInfo(forPlayer, stringBuilder);
 
         //проверяем не сгорел ли прибор
-        if (this.Blockentity is not BlockEntityECentrifuge)
+        if (this.Blockentity is not BlockEntityERecycler)
             return;
 
         if (IsBurned)
@@ -117,7 +117,7 @@ public class BEBehaviorECentrifuge : BlockEntityBehavior, IElectricConsumer
     public void Update()
     {
         //смотрим надо ли обновить модельку когда сгорает прибор
-        if (Blockentity is not BlockEntityECentrifuge entity ||
+        if (Blockentity is not BlockEntityERecycler entity ||
             entity.ElectricalProgressive == null ||
             entity.ElectricalProgressive.AllEparams is null)
         {

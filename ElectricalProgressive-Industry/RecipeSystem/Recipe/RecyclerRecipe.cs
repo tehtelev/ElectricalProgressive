@@ -5,7 +5,7 @@ using Vintagestory.API.Util;
 
 namespace ElectricalProgressive.RecipeSystem.Recipe;
 
-public class CentrifugeRecipe : BaseMultiRecipe<CentrifugeRecipe>
+public class RecyclerRecipe : BaseMultiRecipe<RecyclerRecipe>
 {
-    protected override CentrifugeRecipe CreateInstance() => new();
+    protected override RecyclerRecipe CreateInstance() => new();
 }

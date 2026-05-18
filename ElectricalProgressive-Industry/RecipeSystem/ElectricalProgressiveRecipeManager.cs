@@ -10,7 +10,7 @@ namespace ElectricalProgressive.RecipeSystem;
 
 public class ElectricalProgressiveRecipeManager : ModSystem
 {
-    public static List<CentrifugeRecipe> CentrifugeRecipes;
+    public static List<RecyclerRecipe> RecyclerRecipes;
     public static List<HammerRecipe> HammerRecipes;
     public static List<PressRecipe> PressRecipes;
     public static List<DrawingRecipe> DrawingRecipes;
@@ -24,7 +24,7 @@ public class ElectricalProgressiveRecipeManager : ModSystem
     {
         this.api = api;
 
-        api.Event.SaveGameLoaded += LoadCentrifugeRecipes;
+        api.Event.SaveGameLoaded += LoadRecyclerRecipes;
         api.Event.SaveGameLoaded += LoadHammerRecipes;
         api.Event.SaveGameLoaded += LoadPressRecipes;
         api.Event.SaveGameLoaded += LoadDrawingRecipes;
@@ -32,12 +32,12 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         machines = new Dictionary<string, (string, IEnumerable<IRecipeMultyBase>)>(4);
     }
 
-    private void LoadCentrifugeRecipes()
+    private void LoadRecyclerRecipes()
     {
-        CentrifugeRecipes = [];
-        LoadRecipes<CentrifugeRecipe>("Centrifuge Recipe", "recipes/electric/centrifugerecipe", CentrifugeRecipes.Add);
+        RecyclerRecipes = [];
+        LoadRecipes<RecyclerRecipe>("Recycler Recipe", "recipes/electric/recyclerrecipe", RecyclerRecipes.Add);
         api.World.Logger.Debug(Lang.Get("electricalprogressiveindustry:recipeloading"));
-        machines.Add("ecentrifuge-", ("electricalprogressiveindustry:ecentrifuge-north", CentrifugeRecipes));
+        machines.Add("erecycler-", ("electricalprogressiveindustry:recycler-north", RecyclerRecipes));
     }
 
     private void LoadHammerRecipes()
@@ -195,13 +195,13 @@ public class ElectricalProgressiveRecipeManager : ModSystem
     {
         base.Dispose();
 
-        CentrifugeRecipes?.Clear();
+        RecyclerRecipes?.Clear();
         HammerRecipes?.Clear();
         PressRecipes?.Clear();
         DrawingRecipes?.Clear();
         machines?.Clear();
 
-        CentrifugeRecipes = null;
+        RecyclerRecipes = null;
         HammerRecipes = null;
         PressRecipes = null;
         DrawingRecipes = null;
