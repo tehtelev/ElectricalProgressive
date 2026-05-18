@@ -34,13 +34,772 @@ namespace ElectricalProgressive
     public class ElectricalProgressive : ModSystem
     {
 
+
         private Harmony harmony;
         private Harmony harmony2;
         private Harmony harmony3;
 
-
+        // Список всех активных изолированных энергосетей в мире
         public readonly HashSet<Network> Networks = [];
-        public readonly Dictionary<BlockPos, NetworkPart> Parts = new(new BlockPosComparer()); // Хранит все элементы всех цепей
+        // Быстрый доступ к компонентам сети по их координатам блоков
+        public readonly Dictionary<BlockPos, NetworkPart> Parts = new(new BlockPosComparer());
+
+        // Потокобезопасный кэш топологии сетей, предотвращающий ежетиксовый пересчет графа
+        private readonly Dictionary<Network, CachedTopology> _topologyCache = [];
+        private readonly object _topologyLock = new();
+
+        public ICoreAPI Api = null!;
+        private ICoreServerAPI _sapi = null!;
+        private ElectricityConfig? _config;
+        public static DamageManager? damageManager;
+        public static WeatherSystemServer? WeatherSystemServer;
+
+        // Очередь задач для многопоточного обсчета физики цепей
+        private readonly BlockingCollection<Network> _networkProcessingQueue = new();
+        private readonly List<Thread> _networkProcessingThreads = [];
+        private volatile bool _networkProcessingRunning = true;
+        private readonly CountdownEvent _networkProcessingCompleted = new(0);
+
+        // Конфигурационные параметры мода
+        public static int speedOfElectricity;
+        public static int timeBeforeBurnout;
+        public static int multiThreading;
+        public static int cacheTimeoutCleanupMinutes;
+        public static int maxDistanceForFinding;
+        public static float energyLossFactor;
+        public static bool enableLossCompensation;
+        public static bool enableFlyingArmor;
+
+        public static AssetLocation soundElectricShok;
+        public int TickTimeMs;
+        private float _elapsedMs = 0f;
+        private int _envUpdater = 0;
+        private long _listenerId1;
+
+        public override void Start(ICoreAPI api)
+        {
+            base.Start(api);
+            this.Api = api;
+            soundElectricShok = new AssetLocation("electricalprogressivecore:sounds/electric-shock.ogg");
+
+            harmony = new Harmony("electricalprogressive.mat4fmultiplypatch");
+            Mat4fMultiplyPatch.RegisterPatch(harmony, api);
+
+            harmony2 = new Harmony("electricalprogressive.MechBlockRendererPatch");
+            MechBlockRendererPatch.RegisterPatch(harmony2, api);
+
+            harmony3 = new Harmony("electricalprogressive.ShapeElementPatch");
+            ShapeElementPatch.RegisterPatch(harmony3, api);
+        }
+
+        /// <summary>
+        /// Предстартовая подготовка мода
+        /// </summary>
+        /// <param name="api"></param>
+        public override void StartPre(ICoreAPI api)
+        {
+            _config = api.LoadModConfig<ElectricityConfig>("ElectricityConfig.json") ?? new ElectricityConfig();
+            api.StoreModConfig(_config, "ElectricityConfig.json");
+
+            speedOfElectricity = Math.Clamp(_config.SpeedOfElectricity, 1, 16);
+            timeBeforeBurnout = Math.Clamp(_config.TimeBeforeBurnout, 1, 600);
+            multiThreading = Math.Clamp(_config.MultiThreading, 2, 32);
+            cacheTimeoutCleanupMinutes = Math.Clamp(_config.CacheTimeoutCleanupMinutes, 1, 60);
+            maxDistanceForFinding = Math.Clamp(_config.MaxDistanceForFinding, 8, 1000);
+            energyLossFactor = Math.Clamp(_config.EnergyLossFactor, 0.0f, 2.0f);
+            enableLossCompensation = _config.EnableLossCompensation;
+            enableFlyingArmor = _config.EnableFlyingArmor;
+
+            TickTimeMs = 1000 / speedOfElectricity;
+        }
+
+
+        /// <summary>
+        /// Старт серверной стороны
+        /// </summary>
+        /// <param name="api"></param>
+        public override void StartServerSide(ICoreServerAPI api)
+        {
+            base.StartServerSide(api);
+            this._sapi = api;
+
+            WeatherSystemServer = _sapi.ModLoader.GetModSystem<WeatherSystemServer>();
+            damageManager = new DamageManager(api);
+
+            // Основной игровой цикл симулятора
+            _listenerId1 = _sapi.Event.RegisterGameTickListener(this.OnGameTickServer, TickTimeMs);
+
+            // Инициализация пула рабочих потоков для расчета физики цепей
+            int threadCount = ElectricalProgressive.multiThreading;
+            for (int i = 0; i < threadCount; i++)
+            {
+                var thread = new Thread(() => ProcessNetworksWorker())
+                {
+                    Name = $"NetworkProcessor-Physics-{i}",
+                    IsBackground = true
+                };
+                _networkProcessingThreads.Add(thread);
+                thread.Start();
+            }
+        }
+
+
+        /// <summary>
+        /// Очистка ресурсов при выходе из мира
+        /// </summary>
+        public override void Dispose()
+        {
+            base.Dispose();
+            _networkProcessingRunning = false;
+
+            foreach (var thread in _networkProcessingThreads)
+                _networkProcessingQueue.Add(null!);
+
+            foreach (var thread in _networkProcessingThreads)
+                thread.Join(1000);
+
+            if (_sapi != null)
+                _sapi.Event.UnregisterGameTickListener(_listenerId1);
+
+            _networkProcessingQueue?.Dispose();
+            _networkProcessingCompleted?.Dispose();
+            _topologyCache.Clear();
+
+            Api = null!; _sapi = null!;
+            Networks?.Clear(); Parts?.Clear();
+
+            if (harmony != null)
+                Mat4fMultiplyPatch.UnregisterPatch(harmony);
+            if (harmony2 != null)
+                MechBlockRendererPatch.UnregisterPatch(harmony2);
+            if (harmony3 != null)
+                ShapeElementPatch.UnregisterPatch(harmony3);
+        }
+
+
+        /// <summary>
+        /// Тики сервера
+        /// </summary>
+        /// <param name="deltaTime"></param>
+        private void OnGameTickServer(float deltaTime)
+        {
+            // нечего тут делать пока сервер не инициализирован
+            if (_sapi == null)
+                return;
+
+            // Шаг 1: Сброс накопленных за прошлый тик токов в проводниках
+            Cleaner();
+
+            // Шаг 2: Распараллеливание математического расчета сетей по потокам
+            if (Networks.Count > 0)
+            {
+                _networkProcessingCompleted.Reset(Networks.Count);
+                foreach (var network in Networks)
+                {
+                    _networkProcessingQueue.Add(network);
+                }
+                _networkProcessingCompleted.Wait(); // Ожидаем завершения всех потоков
+            }
+
+            // Шаг 3: Динамическое обновление логики внутренних Entity приборов (раз в секунду)
+            _elapsedMs += deltaTime;
+            if (_elapsedMs > 1.0f)
+            {
+                foreach (var part in Parts.Values)
+                {
+                    if (!part.IsLoaded) continue;
+                    part.Conductor?.Update();
+                    part.Producer?.Update();
+                    part.Consumer?.Update();
+                    part.Accumulator?.Update();
+                    part.Transformator?.Update();
+                }
+                _elapsedMs = 0f;
+            }
+
+            // Шаг 4: Анализ перегорания проводов по закону Джоуля-Ленца на основе токов
+            CheckBurnoutAndEnvironment();
+        }
+
+        /// <summary>
+        /// Потоковый рабочий цикл: принимает сеть из очереди и производит матричный расчет потенциалов
+        /// </summary>
+        private void ProcessNetworksWorker()
+        {
+            while (_networkProcessingRunning)
+            {
+                try
+                {
+                    if (_networkProcessingQueue.TryTake(out var network, Timeout.Infinite) && network != null)
+                    {
+                        try
+                        {
+                            SolveElectricalNetwork(network);
+                        }
+                        finally
+                        {
+                            _networkProcessingCompleted.Signal();
+                        }
+                    }
+                }
+                catch { /* Логирование непредвиденных исключений */ }
+            }
+        }
+
+        /// <summary>
+        /// Физический движок: строит матрицу узловых проводимостей и рассчитывает точную силу тока во всех точках
+        /// </summary>
+        private void SolveElectricalNetwork(Network network)
+        {
+            CachedTopology topology;
+            lock (_topologyLock)
+            {
+                // Если структура сети изменилась (версии не совпадают) — перестраиваем граф
+                if (!_topologyCache.TryGetValue(network, out topology!) || topology.Version != network.version)
+                {
+                    topology = BuildNetworkTopology(network);
+                    _topologyCache[network] = topology;
+                }
+            }
+
+            int nodeCount = topology.Nodes.Count;
+            if (nodeCount < 2) // Для замкнутой цепи нужно минимум 2 узла (включая опорный)
+                return;
+
+            // Определяем номинальное базовое напряжение для сети (например, берем у трансформаторов или дефолт 32V)
+            double nominalVoltage = GetNetworkNominalVoltage(topology);
+
+            // Инициализация матрицы проводимостей G и вектора узловых токов I (Уравнение вида G * V = I)
+            double[,] G = new double[nodeCount, nodeCount];
+            double[] I = new double[nodeCount];
+
+            // 1. Инжекция межвставочных проводимостей (сопротивления соединительных проводов)
+            foreach (var edge in topology.Edges)
+            {
+                int u = edge.NodeA;
+                int v = edge.NodeB;
+                double conductance = 1.0 / edge.Resistance;
+
+                G[u, u] += conductance;
+                G[v, v] += conductance;
+                G[u, v] -= conductance;
+                G[v, u] -= conductance;
+            }
+
+            // 2. Инжекция граничных условий устройств через эквивалентные схемы Нортона (Ток + Внутренняя проводимость)
+            for (int i = 0; i < nodeCount; i++)
+            {
+                var nodePos = topology.Nodes[i];
+                if (!Parts.TryGetValue(nodePos, out var part) || !part.IsLoaded)
+                    continue;
+
+                // Генераторы (IElectricProducer)
+                if (part.Producer != null)
+                {
+                    double maxPower = part.Producer.getPowerGive();
+                    if (maxPower > 0)
+                    {
+                        // Преобразуем источник мощности в эквивалент Нортона
+                        double iNorton = maxPower / nominalVoltage;
+                        double gNorton = maxPower / (nominalVoltage * nominalVoltage);
+
+                        G[i, i] += gNorton;
+                        I[i] += iNorton;
+                    }
+                }
+
+                // Аккумуляторы (IElectricAccumulator)
+                if (part.Accumulator != null)
+                {
+                    double canRelease = part.Accumulator.canRelease();
+                    double canStore = part.Accumulator.canStore();
+
+                    if (canRelease > 0)
+                    {
+                        // Батарея как источник питания
+                        double iNorton = canRelease / nominalVoltage;
+                        double gNorton = canRelease / (nominalVoltage * nominalVoltage);
+                        G[i, i] += gNorton;
+                        I[i] += iNorton;
+                    }
+                    else if (canStore > 0)
+                    {
+                        // Батарея как потребитель (заряжается)
+                        double gLoad = canStore / (nominalVoltage * nominalVoltage);
+                        G[i, i] += gLoad;
+                    }
+                }
+
+                // Потребители (IElectricConsumer)
+                if (part.Consumer != null)
+                {
+                    double pReq = part.Consumer.Consume_request();
+                    if (pReq > 0)
+                    {
+                        double gLoad = pReq / (nominalVoltage * nominalVoltage);
+                        G[i, i] += gLoad;
+                    }
+                }
+
+                // Трансформаторы (IElectricTransformator)
+                if (part.Transformator != null)
+                {
+                    // Определяем, является ли данный узел высоковольтной или низковольтной обмоткой
+                    double tVoltage = part.Transformator.HighVoltage > 0 ? part.Transformator.HighVoltage : nominalVoltage;
+                    double tPower = part.Transformator.getPower();
+
+                    if (tPower > 0)
+                    {
+                        // Моделируем обмотку трансформатора как эквивалентную нагрузку проводимости
+                        G[i, i] += tPower / (tVoltage * tVoltage);
+                    }
+                }
+            }
+
+            // 3. Установка базисного (опорного) узла заземления (Узел 0 = 0 Вольт)
+            for (int j = 0; j < nodeCount; j++)
+            {
+                G[0, j] = 0;
+                G[j, 0] = 0;
+            }
+
+            G[0, 0] = 1;
+            I[0] = 0;
+
+            // Решаем СЛАУ методом исключения Гаусса с выбором ведущего элемента
+            double[] V = GaussianElimination(G, I);
+            if (V == null)
+                return; // Матрица вырождена или сингулярна
+
+            // 4. Обратное распределение токов по графу и запись физических значений в провода
+            foreach (var edge in topology.Edges)
+            {
+                // Закон Ома для участка цепи: I = (V1 - V2) / R
+                double current = (V[edge.NodeA] - V[edge.NodeB]) / edge.Resistance;
+                float fCurrent = (float)Math.Abs(current);
+                int Voltage = (int)Math.Max(V[edge.NodeA], V[edge.NodeB]);
+
+                // Прописываем одинаковый (!) ток во все физические блоки, составляющие данную линию
+                foreach (var pos in edge.PathBlocks)
+                {
+                    if (Parts.TryGetValue(pos, out var p))
+                    {
+                        for (int face = 0; face < 6; face++)
+                        {
+                            p.eparams[face].current = fCurrent;
+                            p.eparams[face].voltage = Voltage;
+                        }
+                    }
+                }
+            }
+
+            // 5. Финализация расчетов: оповещаем интерфейсы устройств о выданной/полученной энергии
+            for (int i = 0; i < nodeCount; i++)
+            {
+                var nodePos = topology.Nodes[i];
+                if (!Parts.TryGetValue(nodePos, out var part)) continue;
+
+                double vNode = V[i];
+
+                if (part.Consumer != null)
+                {
+                    double pReq = part.Consumer.Consume_request();
+                    double gLoad = pReq / (nominalVoltage * nominalVoltage);
+                    double pRec = vNode * vNode * gLoad; // Фактическая мощность P = V^2 * G
+                    part.Consumer.Consume_receive((float)Math.Min(pRec, pReq));
+                }
+
+                if (part.Accumulator != null)
+                {
+                    if (part.Accumulator.canRelease() > 0)
+                    {
+                        double pReleased = vNode * (part.Accumulator.canRelease() / nominalVoltage);
+                        part.Accumulator.Release((float)pReleased);
+                    }
+                    else if (part.Accumulator.canStore() > 0)
+                    {
+                        double gLoad = part.Accumulator.canStore() / (nominalVoltage * nominalVoltage);
+                        double pStored = vNode * vNode * gLoad;
+                        part.Accumulator.Store((float)pStored);
+                    }
+                }
+
+                if (part.Producer != null)
+                {
+                    double maxPower = part.Producer.getPowerGive();
+                    double iNorton = maxPower / nominalVoltage;
+                    double pGiven = vNode * iNorton; // Сколько реально ушло в сеть
+                    part.Producer.Produce_order((float)pGiven);
+                    part.Producer.Produce_give();
+                }
+            }
+
+            UpdateNetworkStats(network, topology, V, nominalVoltage);
+        }
+
+        /// <summary>
+        /// Сканирует блоки сети и строит абстрактную топологию: Критические узлы и соединяющие ребра
+        /// </summary>
+        private CachedTopology BuildNetworkTopology(Network network)
+        {
+            var topology = new CachedTopology { Version = network.version };
+
+            // Шаг 1: Сбор всех узловых точек (приборы или развилки 3+ проводов)
+            foreach (var pos in network.PartPositions)
+            {
+                if (!Parts.TryGetValue(pos, out var part))
+                    continue;
+
+                // Считаем количество соединений через PathFinder
+                int connectionCount = PathFinder.CountConnectedNeighbors(part, network, Parts);
+
+                bool isDevice = part.Consumer != null || part.Producer != null || part.Accumulator != null || part.Transformator != null;
+                bool isJunction = connectionCount > 2; // Перекресток или Т-развилка кабелей
+
+                if (isDevice || isJunction || topology.Nodes.Count == 0)
+                {
+                    topology.Nodes.Add(pos);
+                }
+            }
+
+            // Шаг 2: Трассировка путей между узлами для расчета точного распределенного сопротивления R
+            var pathFinder = new PathFinder();
+
+            var criticalNodes = topology.Nodes; // Список BlockPos критических узлов
+
+            for (int i = 0; i < criticalNodes.Count; i++)
+            {
+                for (int j = i + 1; j < criticalNodes.Count; j++)
+                {
+                    // Пытаемся найти проводную линию между узлом i и узлом j
+                    var edge = TraceLineEdge(i, criticalNodes[i], j, criticalNodes[j], network, Parts, pathFinder);
+
+                    if (edge != null)
+                    {
+                        topology.Edges.Add(edge);
+                    }
+                }
+            }
+            // После этого вызываем метод очистки внутренних коллекций PathFinder для следующего кадра
+            pathFinder.Clear();
+
+            return topology;
+        }
+
+        /// <summary>
+        /// Прокладывает электрическое ребро между двумя узлами, вычисляет путь и суммарное сопротивление линии.
+        /// </summary>
+        /// <param name="nodeAIndex">Индекс стартового узла в кэше топологии</param>
+        /// <param name="startPos">Позиция стартового узла в мире</param>
+        /// <param name="nodeBIndex">Индекс конечного узла в кэше топологии</param>
+        /// <param name="endPos">Позиция конечного узла в мире</param>
+        /// <param name="network">Текущая электрическая сеть</param>
+        /// <param name="parts">Глобальный словарь всех компонентов</param>
+        /// <param name="pathFinder">Экземпляр оптимизированного PathFinder</param>
+        /// <returns>Готовое ребро ElectricalEdge или null, если провода между узлами не соединены</returns>
+        public ElectricalEdge TraceLineEdge(
+            int nodeAIndex, BlockPos startPos,
+            int nodeBIndex, BlockPos endPos,
+            Network network,
+            Dictionary<BlockPos, NetworkPart> parts,
+            PathFinder pathFinder)
+        {
+            // 1. Ищем путь между узлами с помощью оптимизированного A*
+            var (path, facingFromList, nowProcessedFacesList, nowProcessingFaces) =
+                pathFinder.FindShortestPath(startPos, endPos, network, parts);
+
+            // Если пути нет или он некорректен (например, узлы не соединены проводами)
+            if (path == null || path.Length < 2)
+            {
+                return null;
+            }
+
+            double totalResistance = 0.0;
+
+            // 2. Рассчитываем суммарное сопротивление всей линии
+            // Проходим по всем блокам внутри найденного пути
+            for (int i = 0; i < path.Length; i++)
+            {
+                BlockPos currentPos = path[i];
+
+                if (parts.TryGetValue(currentPos, out var part))
+                {
+                    byte currentFacingFrom = facingFromList[i]; // текущая грань, по которой будем считать
+
+                    double resistance = 0;
+
+                    // считаем сопротивление
+                    resistance = ElectricalProgressive.energyLossFactor *
+                                  part.eparams[currentFacingFrom].resistivity /
+                                  (part.eparams[currentFacingFrom].lines *
+                                   part.eparams[currentFacingFrom].crossArea);
+
+                    // Провод в изоляции теряет меньше энергии
+                    if (part.eparams[currentFacingFrom].isolated)
+                        resistance /= 2.0f;
+
+
+                    totalResistance += resistance;
+                    
+                }
+                
+
+            }
+
+            // Физическая защита от короткого замыкания (деления на 0 при построении матрицы проводимостей)
+            if (totalResistance < 0.0001)
+            {
+                totalResistance = 0.0001;
+            }
+
+
+            // 3. Формируем и возвращаем ребро графа
+            return new ElectricalEdge
+            {
+                NodeA = nodeAIndex,
+                NodeB = nodeBIndex,
+                Resistance = totalResistance,
+                PathBlocks = path.ToList() // КРИТИЧЕСКИ ВАЖНО: сохраняем BlockPos[], чтобы потом распределить ток по ВСЕМ проводам ветки!
+            };
+        }
+
+        private double GetNetworkNominalVoltage(CachedTopology topology)
+        {
+            // Сканируем сеть на наличие трансформаторов для выявления рабочего вольтажа цепи
+            foreach (var pos in topology.Nodes)
+            {
+                if (Parts.TryGetValue(pos, out var part) && part.Transformator != null)
+                {
+                    return part.Transformator.LowVoltage > 0 ? part.Transformator.LowVoltage : 32.0;
+                }
+            }
+            return 32.0; // Дефолтный стандарт вольтажа DC
+        }
+
+        /// <summary>
+        /// Решатель СЛАУ методом Гаусса с частичным выбором ведущего элемента (Partial Pivoting)
+        /// </summary>
+        private double[] GaussianElimination(double[,] G, double[] I)
+        {
+            int n = I.Length;
+            for (int i = 0; i < n; i++)
+            {
+                int max = i;
+                for (int row = i + 1; row < n; row++)
+                    if (Math.Abs(G[row, i]) > Math.Abs(G[max, i])) max = row;
+
+                for (int k = 0; k < n; k++)
+                {
+                    double tmp = G[i, k];
+                    G[i, k] = G[max, k];
+                    G[max, k] = tmp;
+                }
+                double t = I[i]; I[i] = I[max]; I[max] = t;
+
+                if (Math.Abs(G[i, i]) < 1e-12)
+                    return null!; // Матрица сингулярна
+
+                for (int row = i + 1; row < n; row++)
+                {
+                    double factor = G[row, i] / G[i, i];
+                    I[row] -= factor * I[i];
+                    for (int col = i; col < n; col++) G[row, col] -= factor * G[i, col];
+                }
+            }
+
+            double[] x = new double[n];
+            for (int i = n - 1; i >= 0; i--)
+            {
+                double sum = 0;
+                for (int j = i + 1; j < n; j++) sum += G[i, j] * x[j];
+                x[i] = (I[i] - sum) / G[i, i];
+            }
+            return x;
+        }
+
+        private void CheckBurnoutAndEnvironment()
+        {
+            var bAccessor = _sapi!.World.BlockAccessor;
+            foreach (var kp in Parts)
+            {
+                var part = kp.Value;
+                if (!part.IsLoaded) continue;
+
+                // Обработка внешних условий повреждения (дождь, гроза)
+                bool destroyed = _envUpdater == kp.Key.GetHashCode() % 20 &&
+                               (damageManager?.DamageByEnvironment(_sapi, ref part, ref bAccessor) ?? false);
+
+                if (destroyed)
+                {
+                    ResetComponents(ref part);
+                    continue;
+                }
+
+                // Проверка превышения максимального тока кабеля (Перегорание)
+                for (int i = 0; i < 6; i++)
+                {
+                    var ep = part.eparams[i];
+                    if (ep.voltage > 0 && Math.Abs(ep.current) > (ep.maxCurrent * ep.lines))
+                    {
+                        part.eparams[i].prepareForBurnout(1);
+                        ResetComponents(ref part);
+                    }
+                }
+            }
+            _envUpdater = (_envUpdater + 1) % 20;
+        }
+
+        private void UpdateNetworkStats(Network network, CachedTopology topology, double[] potentials, double nominalVoltage)
+        {
+            float totalProd = 0;
+            float totalCons = 0;
+
+            // Проходим по всем критическим узлам графа сети
+            for (int i = 0; i < topology.Nodes.Count; i++)
+            {
+                var pos = topology.Nodes[i];
+                if (!Parts.TryGetValue(pos, out var part) || !part.IsLoaded) continue;
+
+                double vNode = potentials[i]; // Напряжение на данном узле
+
+                // 1. Учитываем обычные генераторы (IElectricProducer)
+                if (part.Producer != null)
+                {
+                    double maxPower = part.Producer.getPowerGive();
+                    if (maxPower > 0)
+                    {
+                        double iNorton = maxPower / nominalVoltage;
+                        double pGiven = vNode * iNorton; // Фактическая отданная мощность в этот узел
+                        totalProd += (float)pGiven;
+                    }
+                }
+
+                // 2. Учитываем аккумуляторы (IElectricAccumulator)
+                if (part.Accumulator != null)
+                {
+                    double canRelease = part.Accumulator.canRelease();
+                    double canStore = part.Accumulator.canStore();
+
+                    if (canRelease > 0)
+                    {
+                        // Аккумулятор разряжается -> работает как генератор (выдает энергию в сеть)
+                        double pReleased = vNode * (canRelease / nominalVoltage);
+                        totalProd += (float)pReleased;
+                    }
+                    else if (canStore > 0)
+                    {
+                        // Аккумулятор заряжается -> работает как потребитель (аккумулирует энергию)
+                        double gLoad = canStore / (nominalVoltage * nominalVoltage);
+                        double pStored = vNode * vNode * gLoad; // Фактическая мощность зарядки P = V^2 * G
+                        totalCons += (float)pStored;
+                    }
+                }
+
+                // 3. Учитываем обычных потребителей (IElectricConsumer)
+                if (part.Consumer != null)
+                {
+                    double pReq = part.Consumer.Consume_request();
+                    if (pReq > 0)
+                    {
+                        double gLoad = pReq / (nominalVoltage * nominalVoltage);
+                        double pRec = vNode * vNode * gLoad; // Фактически полученная прибором мощность
+                        totalCons += (float)Math.Min(pRec, pReq);
+                    }
+                }
+            }
+
+            // 4. Учитываем потери в самих проводах (Line Losses)
+            // По закону Джоуля-Ленца: P = I^2 * R. 
+            // Это именно то, чего не хватало KatoTC для правильных показаний счетчиков!
+            foreach (var edge in topology.Edges)
+            {
+                // Находим ток на этом участке провода: I = (V_A - V_B) / R
+                double current = (potentials[edge.NodeA] - potentials[edge.NodeB]) / edge.Resistance;
+                double pLoss = current * current * edge.Resistance;
+                totalCons += (float)pLoss;
+            }
+
+            // Записываем итоговые данные в объект сети для синхронизации с интерфейсом игрока
+            network.Production = totalProd;
+            network.Consumption = totalCons;
+            network.Request = totalCons; // В честной физической сети фактический расход всегда равен генерации
+        }
+
+
+
+        public bool Update(BlockPos position, Facing facing, (EParams, int) setEparams, ref EParams[] eparams, bool isLoaded)
+        {
+            if (!Parts.TryGetValue(position, out var part))
+            {
+                if (facing == Facing.None)
+                    return false;
+                part = Parts[position] = new NetworkPart(position);
+            }
+
+            var addedConnections = ~part.Connection & facing;
+            var removedConnections = part.Connection & ~facing;
+
+            part.IsLoaded = isLoaded;
+            part.eparams = eparams;
+            part.Connection = facing;
+
+            AddConnections(ref part, addedConnections, setEparams);
+            RemoveConnections(ref part, removedConnections);
+
+            if (part.Connection == Facing.None)
+                Parts.Remove(position);
+
+            //Cleaner();
+            eparams = part.eparams;
+            return true;
+        }
+
+
+
+        /// <summary>
+        /// Удаляем соединения
+        /// </summary>
+        /// <param name="position"></param>
+        public void Remove(BlockPos position)
+        {
+            if (Parts.TryGetValue(position, out var part))
+            {
+                Parts.Remove(position);
+                RemoveConnections(ref part, part.Connection);
+            }
+        }
+
+
+
+        // Вынесенный метод сброса компонентов
+        private static void ResetComponents(ref NetworkPart part)
+        {
+            part.Consumer?.Consume_receive(0f);
+            part.Producer?.Produce_order(0f);
+            part.Accumulator?.SetCapacity(0f);
+            part.Transformator?.setPower(0f);
+        }
+
+
+
+        private class CachedTopology
+        {
+            public int Version;
+            public List<BlockPos> Nodes { get; } = [];
+            public List<ElectricalEdge> Edges { get; } = [];
+        }
+
+        public class ElectricalEdge
+        {
+            public int NodeA;
+            public int NodeB;
+            public double Resistance;
+            public List<BlockPos> PathBlocks { get; set; } = [];
+        }
+
+
+
+
 
         private Dictionary<BlockPos, List<EnergyPacket>> _packetsByPosition = new(new BlockPosComparer()); //Словарь для хранения пакетов по позициям
 
@@ -55,154 +814,23 @@ namespace ElectricalProgressive
 
 
 
-        public ICoreAPI Api = null!;
         public ICoreClientAPI _capi = null!;
-        private ICoreServerAPI _sapi = null!;
-        private ElectricityConfig? _config;
-        public static DamageManager? damageManager;
-        public static WeatherSystemServer? WeatherSystemServer;
+
 
 
         private Network _localNetwork = new();
 
-        private readonly BlockingCollection<Network> _networkProcessingQueue = new(); // коллекция для сетей
-        private readonly List<Thread> _networkProcessingThreads = [];                //список потоков работников
-        private volatile bool _networkProcessingRunning = true;                         //сети работают?
-        private readonly CountdownEvent _networkProcessingCompleted = new(0); // ивент для окончания ожидания потоков
+
         private readonly ConcurrentBag<List<EnergyPacket>> _networkResults = [];      // список для пакетов в потоках
 
-        public static int speedOfElectricity; // Скорость электричества в проводах (блоков в тик)
-        public static int timeBeforeBurnout; // Время до сгорания проводника в секундах
-        public static int multiThreading; // сколько потоков использовать
-        public static int cacheTimeoutCleanupMinutes; // Время очистки кэша путей в минутах
-        public static int maxDistanceForFinding; // Максимальное расстояние для поиска пути
-        public static float energyLossFactor; // Коэффициент потерь энергии на проводах
-        public static bool enableLossCompensation; // Включить компенсацию потерь энергии на проводах
-        public static bool enableFlyingArmor; // Включить возможность летать в броне
 
-        public static AssetLocation soundElectricShok;
-
-        public int TickTimeMs;
-        private float _elapsedMs = 0f;
-
-        int _envUpdater = 0;
-
-        private long _listenerId1;
 
 
         private NetworkInformation _result = new();
 
-        /// <summary>
-        /// Запуск общего потока
-        /// </summary>
-        /// <param name="api"></param>
-        public override void Start(ICoreAPI api)
-        {
-            base.Start(api);
-
-            this.Api = api;
-
-            soundElectricShok = new AssetLocation("electricalprogressivecore:sounds/electric-shock.ogg");
-
-
-            harmony = new Harmony("electricalprogressive.mat4fmultiplypatch");
-            Mat4fMultiplyPatch.RegisterPatch(harmony, api);
-
-            harmony2 = new Harmony("electricalprogressive.MechBlockRendererPatch");
-            MechBlockRendererPatch.RegisterPatch(harmony2, api);
-
-            harmony3 = new Harmony("electricalprogressive.ShapeElementPatch");
-            ShapeElementPatch.RegisterPatch(harmony3, api);
-        }
 
 
 
-
-        /// <summary>
-        /// Освобождение ресурсов после выгрузки мода
-        /// </summary>
-        public override void Dispose()
-        {
-            base.Dispose();
-
-            // Останавливаем обработку сетей
-            _networkProcessingRunning = false;
-
-            // Добавляем null-значения в очередь, чтобы разблокировать потоки
-            foreach (var thread in _networkProcessingThreads)
-            {
-                _networkProcessingQueue.Add(null);
-            }
-
-            // Ждем завершения потоков
-            foreach (var thread in _networkProcessingThreads)
-            {
-                thread.Join(1000);
-            }
-
-            // Останавливаем поиск путей
-            if (_sapi != null)
-            {
-                _sapi.Event.UnregisterGameTickListener(_listenerId1);
-                _asyncPathFinder?.Stop();
-                _asyncPathFinder = null;
-            }
-            
-            // Очистка ресурсов
-            _globalEnergyPackets?.Clear();
-            _sumEnergy?.Clear();
-            _packetsByPosition?.Clear();
-            _networkProcessingQueue?.Dispose();
-            _networkProcessingCompleted?.Dispose();
-
-            Api = null!;
-            _capi = null!;
-            _sapi = null!;
-            damageManager = null;
-            WeatherSystemServer = null;
-
-            Networks?.Clear();
-            Parts?.Clear();
-            PathCacheManager.Dispose();
-
-            // Убираем патчи
-            if (harmony != null)
-                Mat4fMultiplyPatch.UnregisterPatch(harmony);
-
-            if (harmony2 != null)
-                MechBlockRendererPatch.UnregisterPatch(harmony2);
-
-            if (harmony3 != null)
-                ShapeElementPatch.UnregisterPatch(harmony3);
-        }
-
-
-
-
-        /// <summary>
-        /// Загрузка конфигурации и начальная инициализация
-        /// </summary>
-        /// <param name="api"></param>
-        public override void StartPre(ICoreAPI api)
-        {
-            // грузим конфиг
-            // если конфиг с ошибкой или не найден, то генерируется стандартный
-            _config = api.LoadModConfig<ElectricityConfig>("ElectricityConfig.json") ?? new ElectricityConfig();
-            api.StoreModConfig(_config, "ElectricityConfig.json");
-
-            // проверяем, что конфиг валиден, и обрезаются значения
-            speedOfElectricity = Math.Clamp(_config.SpeedOfElectricity, 1, 16);
-            timeBeforeBurnout = Math.Clamp(_config.TimeBeforeBurnout, 1, 600);
-            multiThreading = Math.Clamp(_config.MultiThreading, 2, 32);
-            cacheTimeoutCleanupMinutes = Math.Clamp(_config.CacheTimeoutCleanupMinutes, 1, 60);
-            maxDistanceForFinding = Math.Clamp(_config.MaxDistanceForFinding, 8, 1000);
-            energyLossFactor = Math.Clamp(_config.EnergyLossFactor, 0.0f, 2.0f);
-            enableLossCompensation = _config.EnableLossCompensation;
-            enableFlyingArmor = _config.EnableFlyingArmor;
-
-            // устанавливаем время между тиками
-            TickTimeMs = 1000 / speedOfElectricity;
-        }
 
 
 
@@ -232,128 +860,6 @@ namespace ElectricalProgressive
         {
             _capi.Input.RegisterHotKey("AltPressForNetwork", Lang.Get("electricalprogressivecore:AltPressForNetworkName"), GlKeys.LAlt);
         }
-
-
-        /// <summary>
-        /// Серверная сторона
-        /// </summary>
-        /// <param name="api"></param>
-        public override void StartServerSide(ICoreServerAPI api)
-        {
-            base.StartServerSide(api);
-            this._sapi = api;
-
-            WeatherSystemServer = _sapi.ModLoader.GetModSystem<WeatherSystemServer>();
-            damageManager = new DamageManager(api);
-
-            _listenerId1 = _sapi.Event.RegisterGameTickListener(this.OnGameTickServer, TickTimeMs);
-
-            // Инициализация поиска путей
-            _asyncPathFinder = new AsyncPathFinder(Parts, ElectricalProgressive.multiThreading);
-
-            // Инициализация потоков для обработки сетей
-            int threadCount = ElectricalProgressive.multiThreading;
-            for (int i = 0; i < threadCount; i++)
-            {
-                var thread = new Thread(() => ProcessNetworksWorker())
-                {
-                    Name = $"NetworkProcessor-Classic-{i}",
-                    IsBackground = true
-                };
-                _networkProcessingThreads.Add(thread);
-                thread.Start();
-            }
-        }
-
-
-
-        /// <summary>
-        /// Метод-воркер для обработки сетей
-        /// </summary>
-        private void ProcessNetworksWorker()
-        {
-            while (_networkProcessingRunning)
-            {
-                try
-                {
-                    if (_networkProcessingQueue.TryTake(out var network, Timeout.Infinite))
-                    {
-                        var context = GetContext();
-                        try
-                        {
-                            ProcessNetwork(network, context);
-
-                            if (context.LocalPackets.Count > 0)
-                            {
-                                var packetsCopy = new List<EnergyPacket>(context.LocalPackets);
-                                _networkResults.Add(packetsCopy);
-                            }
-                        }
-                        finally
-                        {
-                            ReturnContext(context);
-                            _networkProcessingCompleted.Signal();
-                        }
-                    }
-                }
-                catch
-                {
-                    // Логирование ошибки
-                }
-            }
-        }
-
-
-
-        /// <summary>
-        /// Обновление электрической сети
-        /// </summary>
-        /// <param name="position"></param>
-        /// <param name="facing"></param>
-        /// <param name="setEparams"></param>
-        /// <param name="eparams"></param>
-        /// <returns></returns>
-        public bool Update(BlockPos position, Facing facing, (EParams, int) setEparams, ref EParams[] eparams, bool isLoaded)
-        {
-            if (!Parts.TryGetValue(position, out var part))
-            {
-                if (facing == Facing.None)
-                    return false;
-                part = Parts[position] = new NetworkPart(position);
-            }
-
-            var addedConnections = ~part.Connection & facing;
-            var removedConnections = part.Connection & ~facing;
-
-            part.IsLoaded = isLoaded;
-            part.eparams = eparams;
-            part.Connection = facing;
-
-            AddConnections(ref part, addedConnections, setEparams);
-            RemoveConnections(ref part, removedConnections);
-
-            if (part.Connection == Facing.None)
-                Parts.Remove(position);
-
-            //Cleaner();
-            eparams = part.eparams;
-            return true;
-        }
-
-
-        /// <summary>
-        /// Удаляем соединения
-        /// </summary>
-        /// <param name="position"></param>
-        public void Remove(BlockPos position)
-        {
-            if (Parts.TryGetValue(position, out var part))
-            {
-                Parts.Remove(position);
-                RemoveConnections(ref part, part.Connection);
-            }
-        }
-
 
 
 
@@ -941,212 +1447,6 @@ namespace ElectricalProgressive
 
 
         /// <summary>
-        /// Тикаем сервер
-        /// </summary>
-        /// <param name="deltaTime"></param>
-        private void OnGameTickServer(float deltaTime)
-        {
-            if (_sapi == null)
-                return;
-
-            // Очистка старых путей
-            if (_sapi.World.Rand.NextDouble() < 0.01d)
-            {
-                PathCacheManager.Cleanup();
-            }
-
-            Cleaner();
-
-            // Очищаем результаты предыдущего тика
-            _networkResults?.Clear();
-
-            // Сбрасываем CountdownEvent на количество сетей
-            _networkProcessingCompleted.Reset(Networks.Count);
-
-            // Добавляем все сети в очередь обработки
-            foreach (var network in Networks)
-            {
-                _networkProcessingQueue.Add(network);
-            }
-
-            // Ждем завершения обработки всех сетей
-            _networkProcessingCompleted.Wait();
-
-            // Собираем результаты
-            foreach (var packets in _networkResults)
-            {
-                _globalEnergyPackets.AddRange(packets);
-            }
-
-            // Обновление электрических компонентов
-            _elapsedMs += deltaTime;
-            UpdateNetworkComponents();
-
-
-
-
-            // Этап 11: Потребление энергии пакетами и Этап 12: Перемещение пакетов-----------------------------------------------
-            ConsumeAndMovePackets();
-
-
-
-
-            foreach (var pair in _sumEnergy)
-            {
-                if (Parts.TryGetValue(pair.Key, out var parta))
-                {
-                    if (parta.Consumer != null)
-                        parta.Consumer!.Consume_receive(pair.Value);
-                    else if (parta.Accumulator != null)
-                        parta.Accumulator!.Store(pair.Value);
-                }
-                else
-                {
-                    _sumEnergy.Remove(pair.Key); // Удаляем, если части сети этой уже нет
-                }
-            }
-
-
-
-
-            // Этап 13: Проверка сгорания проводов и трансформаторов ----------------------------------------------------------------------------
-
-            var bAccessor = _sapi!.World.BlockAccessor; // аксессор для блоков
-            BlockPos partPos;                        // Временная переменная для позиции части сети
-            NetworkPart part;                        // Временная переменная для части сети
-            bool updated;                            // Флаг обновления части сети от повреждения
-            EParams faceParams;                      // Параметры грани сети
-            int lastFaceIndex;                       // Индекс последней грани в пакете
-            float totalEnergy;                       // Суммарная энергия в трансформаторе
-            float totalCurrent;                      // Суммарный ток в трансформаторе
-            var kons = 0;
-
-            foreach (var partEntry in Parts)
-            {
-                partPos = partEntry.Key;
-                part = partEntry.Value;
-
-                //обновляем каждый блок сети
-                updated = kons % 20 == _envUpdater &&
-                          part.IsLoaded &&          // блок загружен?
-                          (damageManager?.DamageByEnvironment(this._sapi, ref part, ref bAccessor) ?? false);
-                kons++;
-
-
-                if (updated)
-                {
-                    for (var faceIndex = 0; faceIndex < 6; faceIndex++)
-                    {
-                        faceParams = part.eparams[faceIndex];
-                        if (faceParams.voltage == 0 || !faceParams.burnout)
-                            continue;
-
-                        ResetComponents(ref part); // сброс компонентов сети
-                    }
-
-                }
-
-
-
-                var bufPartTrans = part.Transformator;
-                // Обработка трансформаторов
-                if (bufPartTrans != null)
-                {
-                    totalEnergy = 0f;
-                    totalCurrent = 0f;
-
-                    foreach (var packet2 in part.packets)
-                    {
-
-                        totalEnergy += packet2.energy;
-                        totalCurrent += packet2.energy / packet2.voltage;
-
-
-                        if (packet2.voltage == bufPartTrans.HighVoltage)
-                            packet2.voltage = bufPartTrans.LowVoltage;
-                        else if (packet2.voltage == bufPartTrans.LowVoltage)
-                            packet2.voltage = bufPartTrans.HighVoltage;
-
-                    }
-
-
-                    var transformatorFaceIndex =
-                        FacingHelper.GetFaceIndex(
-                            FacingHelper.FromFace(FacingHelper.Faces(part.Connection)
-                                .First())); // Индекс грани трансформатора!
-
-                    part.eparams[transformatorFaceIndex].current = totalCurrent;
-
-                    bufPartTrans.setPower(totalEnergy);
-
-                }
-
-
-                // Проверка на превышение напряжения
-                foreach (var packet2 in part.packets)
-                {
-                    lastFaceIndex = packet2.facingFrom[packet2.currentIndex];
-
-                    faceParams = part.eparams[lastFaceIndex];
-                    if (faceParams.voltage != 0 && packet2.voltage > faceParams.voltage)
-                    {
-                        part.eparams[lastFaceIndex].prepareForBurnout(2);
-
-                        if (packet2.path[packet2.currentIndex] == partPos)
-                            packet2.shouldBeRemoved = true;
-
-
-                        ResetComponents(ref part);
-                        //break;
-                    }
-                }
-
-
-
-
-
-                // Проверка на превышение тока
-                for (var faceIndex = 0; faceIndex < 6; faceIndex++)
-                {
-
-                    faceParams = part.eparams[faceIndex];
-                    if (faceParams.voltage == 0 ||
-                        Math.Abs(faceParams.current) <= faceParams.maxCurrent * faceParams.lines)
-                        continue;
-
-                    part.eparams[faceIndex].prepareForBurnout(1);
-
-
-                    foreach (var p in _globalEnergyPackets)
-                    {
-                        if (p.path[p.currentIndex] == partPos &&
-                            p.nowProcessedFaces.LastOrDefault()?[faceIndex] == true)
-                        {
-                            p.shouldBeRemoved = true;
-                        }
-                    }
-
-                    ResetComponents(ref part);
-                }
-            }
-
-
-            _envUpdater++;
-            if (_envUpdater > 19)
-                _envUpdater = 0;
-
-
-
-            //Удаление ненужных пакетов
-            _globalEnergyPackets.RemoveAll(p => p.shouldBeRemoved);
-
-
-        }
-
-
-
-
-        /// <summary>
         /// Потребление и перемещение пакетов энергии
         /// </summary>
         private void ConsumeAndMovePackets()
@@ -1174,7 +1474,7 @@ namespace ElectricalProgressive
                 }
                 else // чтобы не застревали в частях сети, которые перестали существовать
                 {
-                    packet.shouldBeRemoved = true; 
+                    packet.shouldBeRemoved = true;
                 }
 
             }
@@ -1395,15 +1695,6 @@ namespace ElectricalProgressive
 
 
 
-
-        // Вынесенный метод сброса компонентов
-        private static void ResetComponents(ref NetworkPart part)
-        {
-            part.Consumer?.Consume_receive(0f);
-            part.Producer?.Produce_order(0f);
-            part.Accumulator?.SetCapacity(0f);
-            part.Transformator?.setPower(0f);
-        }
 
 
 
@@ -1688,7 +1979,7 @@ namespace ElectricalProgressive
                 }
 
                 if (!setEparams.Item1.Equals(new EParams()) && part.eparams[face.Index].maxCurrent == 0)
-                    part.eparams[face.Index] = setEparams.Item1.Clone(); 
+                    part.eparams[face.Index] = setEparams.Item1.Clone();
 
 
             }

@@ -64,12 +64,12 @@ public class PathFinder
     private bool[]? _buf4; // Временный буфер
 
     // lookupPos для поиска в parts без создания новых объектов
-    private BlockPos _lookupPos = new(0, 0, 0, 0);
+    private static BlockPos _lookupPos = new(0, 0, 0, 0);
     // defaultKey для сравнений с default
     private static FastPosKey _defaultKey = new(0, 0, 0, 0);
 
     // Получение NetworkPart по FastPosKey с переиспользованием lookupPos
-    private bool TryGetPart(Dictionary<BlockPos, NetworkPart> parts, FastPosKey key, out NetworkPart part)
+    private static bool TryGetPart(Dictionary<BlockPos, NetworkPart> parts, FastPosKey key, out NetworkPart part)
     {
         _lookupPos.X = key.X;
         _lookupPos.Y = key.Y;
@@ -261,6 +261,149 @@ public class PathFinder
              (lastNpf[5] ? Facing.DownAll : Facing.None));
 
         return (path, facingFromList, nowProcessedFacesList, nowProcessingFaces);
+    }
+
+
+    /// <summary>
+    /// Считает, со сколькими соседями по сети network соединён данный part.
+    /// Учитываются соединения через грани, рёбра и перпендикулярные грани (как в GetNeighbors).
+    /// </summary>
+    /// <param name="part">Часть, для которой считаем соседей.</param>
+    /// <param name="network">Сеть, к которой относится часть.</param>
+    /// <param name="parts">Словарь всех частей (BlockPos -> NetworkPart).</param>
+    /// <returns>Количество уникальных позиций соседей в той же сети.</returns>
+    public static int CountConnectedNeighbors(NetworkPart part, Network network, Dictionary<BlockPos, NetworkPart> parts)
+    {
+        if (part == null || network == null || parts == null)
+            return 0;
+
+        var pos = part.Position;
+        var connections = part.Connection;
+
+        // 1. Вычисляем hereConnections – те направления, которые принадлежат сети network
+        Facing hereConnections = Facing.None;
+        for (byte i = 0; i < 6; i++)
+        {
+            if (part.Networks[i] == network)
+                hereConnections |= connections & faceMasks[i];
+        }
+
+        if (hereConnections == Facing.None)
+            return 0;
+
+        // 2. BFS для определения всех граней, достижимых через внутренние соединения
+        bool[] processFacesBuf = new bool[6];
+        Queue<byte> queue = new Queue<byte>();
+
+        for (byte i = 0; i < 6; i++)
+        {
+            if (part.Networks[i] == network && (connections & faceMasks[i]) != 0)
+            {
+                processFacesBuf[i] = true;
+                queue.Enqueue(i);
+            }
+        }
+
+        List<BlockFacing> _bufForDirections = new(6); // Буфер направлений
+        List<BlockFacing> _bufForFaces = new(6); // Буфер граней
+
+        while (queue.Count > 0)
+        {
+            int faceIndex = queue.Dequeue();
+            var face = FacingHelper.BlockFacingFromIndex(faceIndex);
+            var mask = FacingHelper.FromFace(face);
+            var allowed = hereConnections & mask;
+
+            FacingHelper.FillDirections(allowed, _bufForDirections);
+            foreach (var dir in _bufForDirections)
+            {
+                byte idx = (byte)dir.Index;
+                if (!processFacesBuf[idx] && (hereConnections & FacingHelper.From(dir, face)) != 0)
+                {
+                    processFacesBuf[idx] = true;
+                    queue.Enqueue(idx);
+                }
+            }
+        }
+
+        // 3. Маска действительно активных направлений
+        Facing validMask = Facing.None;
+        for (byte i = 0; i < 6; i++)
+        {
+            if (processFacesBuf[i])
+                validMask |= FacingHelper.FromFace(FacingHelper.BlockFacingFromIndex(i));
+        }
+        hereConnections &= validMask;
+
+        // 4. Поиск всех соседних позиций
+        HashSet<BlockPos> neighborSet = new HashSet<BlockPos>();
+        int px = pos.X, py = pos.Y, pz = pos.Z, dim = pos.dimension;
+
+        FacingHelper.FillDirections(hereConnections, _bufForDirections);
+        foreach (var dir in _bufForDirections)
+        {
+            // --- соседи по граням ---
+            var dv = dir.Normali;
+            int nx = px + dv.X, ny = py + dv.Y, nz = pz + dv.Z;
+            var neighborKey = new FastPosKey(nx, ny, nz, dim);
+            if (TryGetPart(parts, neighborKey, out var neighborPart))
+            {
+                FacingHelper.FillFaces(hereConnections & FacingHelper.FromDirection(dir), _bufForFaces);
+                foreach (var face in _bufForFaces)
+                {
+                    var opp = dir.Opposite;
+                    if ((neighborPart.Connection & FacingHelper.From(face, opp)) != 0 ||
+                        (neighborPart.Connection & FacingHelper.From(opp, face)) != 0)
+                    {
+                        neighborSet.Add(neighborPart.Position);
+                    }
+                }
+            }
+
+            // --- соседи по рёбрам ---
+            FacingHelper.FillFaces(hereConnections & FacingHelper.FromDirection(dir), _bufForFaces);
+            foreach (var face in _bufForFaces)
+            {
+                dv = dir.Normali;
+                var fv = face.Normali;
+                nx = px + dv.X + fv.X;
+                ny = py + dv.Y + fv.Y;
+                nz = pz + dv.Z + fv.Z;
+                neighborKey = new FastPosKey(nx, ny, nz, dim);
+                if (TryGetPart(parts, neighborKey, out neighborPart))
+                {
+                    var oppDir = dir.Opposite;
+                    var oppFace = face.Opposite;
+                    if ((neighborPart.Connection & FacingHelper.From(oppDir, oppFace)) != 0 ||
+                        (neighborPart.Connection & FacingHelper.From(oppFace, oppDir)) != 0)
+                    {
+                        neighborSet.Add(neighborPart.Position);
+                    }
+                }
+            }
+
+            // --- соседи по перпендикулярной грани ---
+            FacingHelper.FillFaces(hereConnections & FacingHelper.FromDirection(dir), _bufForFaces);
+            foreach (var face in _bufForFaces)
+            {
+                var fv = face.Normali;
+                nx = px + fv.X;
+                ny = py + fv.Y;
+                nz = pz + fv.Z;
+                neighborKey = new FastPosKey(nx, ny, nz, dim);
+                if (TryGetPart(parts, neighborKey, out neighborPart))
+                {
+                    var oppFace = face.Opposite;
+                    if ((neighborPart.Connection & FacingHelper.From(dir, oppFace)) != 0 ||
+                        (neighborPart.Connection & FacingHelper.From(oppFace, dir)) != 0)
+                    {
+                        neighborSet.Add(neighborPart.Position);
+                    }
+                }
+            }
+        }
+
+        return neighborSet.Count;
     }
 
 
