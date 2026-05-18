@@ -41,6 +41,9 @@
   "block-gauge-32v": "Калибр для кабелей 32В",
   "block-gauge-128v": "Калибр для кабелей 128В",
 
+  "electricalprogressive:input": "Вход",
+  "electricalprogressive:output": "Выход",
+
   "electricalprogressive:produced-in": "Обрабатывается в:",
   "electricalprogressive:energy-required": "Требуется энергии",
   "electricalprogressive:energy-unit": "Дж",
