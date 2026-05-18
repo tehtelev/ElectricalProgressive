@@ -30,7 +30,8 @@ public class BlockEOven : BlockEBase
                 if (obj.Attributes?["bakingProperties"]?.AsObject<BakingProperties>() == null)
                     continue;
                 var stacks = obj.GetHandBookStacks(capi);
-                if (stacks != null) rackableStacklist.AddRange(stacks);
+                if (stacks != null)
+                    rackableStacklist.AddRange(stacks);
             }
 
             return new[]

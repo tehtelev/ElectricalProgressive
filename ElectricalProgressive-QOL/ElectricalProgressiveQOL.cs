@@ -106,7 +106,6 @@ public class ElectricalProgressiveQOL : ModSystem
         api.RegisterBlockEntityClass("BlockEntityEStove", typeof(BlockEntityEStove));
         api.RegisterBlockEntityBehaviorClass("BEBehaviorEStove", typeof(BEBehaviorEStove));
 
-        //холодильник с анимацией
         api.RegisterBlockClass("BlockEFreezer", typeof(BlockEFreezer));
         api.RegisterBlockEntityClass("BlockEntityEFreezer", typeof(BlockEntityEFreezer));
         api.RegisterBlockEntityBehaviorClass("BEBehaviorEFreezer", typeof(BEBehaviorEFreezer));
@@ -195,24 +194,26 @@ public class ElectricalProgressiveQOL : ModSystem
                 xskillsEnabled = false;
             }
         }
-
-
-
-
+        
 
     }
 
 
-
+    /// <summary>
+    /// Старт клиентской стороны
+    /// </summary>
+    /// <param name="api"></param>
     public override void StartClientSide(ICoreClientAPI api)
     {
         base.StartClientSide(api);
         this.capi = api;
-
-
     }
 
 
+    /// <summary>
+    /// Старт серверной стороны
+    /// </summary>
+    /// <param name="api"></param>
     public override void StartServerSide(ICoreServerAPI api)
     {
         base.StartServerSide(api);
@@ -226,68 +227,105 @@ public class ElectricalProgressiveQOL : ModSystem
 
 
     /// <summary>
-    /// Делаем пометки всем предметам с возможностью стадии готовкности в духовке
+    /// Делаем пометки всем предметам с возможностью стадии готовности в духовке
     /// </summary>
     /// <param name="api"></param>
     public override void AssetsFinalize(ICoreAPI api)
     {
-        foreach (CollectibleObject obj in api.World.Collectibles)
+        bool rotIdentified = false; // флаг найденной гнили
+
+        foreach (var obj in api.World.Collectibles)
         {
+            // уже с тегом?
             if (HasTag(obj))
                 continue;
 
-            if (obj.Code.Path == "rot" && obj.Attributes != null)
+            // гниль? Точно готово
+            if (!rotIdentified && obj.Code.Path == "rot" && obj.Attributes != null)
             {
                 AddTag(obj, "finished");
+                rotIdentified = true;
                 continue;
             }
 
-            if (ResolveBakeables(api, obj))
-                continue;
-            
+            ResolveBakeables(api, obj);
         }
     }
 
+    /// <summary>
+    /// Проверяем свойства 
+    /// </summary>
+    /// <param name="api"></param>
+    /// <param name="obj"></param>
+    /// <returns></returns>
     private static bool ResolveBakeables(ICoreAPI api, CollectibleObject obj)
     {
-        BakingProperties props = obj?.Attributes?["bakingProperties"]?.AsObject<BakingProperties>();
-        if (props == null || props.ResultCode != null || obj.Attributes == null)
-        {
+        var props = obj?.Attributes?["bakingProperties"]?.AsObject<BakingProperties>();
+
+        if (props == null)
             return false;
-        }
+        
+        if (props.ResultCode != null || obj.Attributes == null)
+            return false;
 
         AddTag(obj, "finished"); // charred
 
-        CollectibleObject perfectItem = GetCollectible(api, props.InitialCode);
+        var perfectItem = GetCollectible(api, props.InitialCode);
         if (perfectItem == null || perfectItem.Attributes==null)
             return true;
 
+        
         AddTag(perfectItem, "finished"); // perfect
+
         return true;
     }
 
-    public static CollectibleObject GetCollectible(ICoreAPI api, AssetLocation code)
+    /// <summary>
+    /// Извлекаем коллектайбл
+    /// </summary>
+    /// <param name="api"></param>
+    /// <param name="code"></param>
+    /// <returns></returns>
+    public static CollectibleObject? GetCollectible(ICoreAPI api, AssetLocation code)
     {
         return api.World.GetItem(code) ?? api.World.GetBlock(code) as CollectibleObject;
     }
 
+    /// <summary>
+    /// Добавляем тег
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <param name="tag"></param>
     public static void AddTag(CollectibleObject obj, string tag)
     {
         obj.Attributes.Token["foodtag"] = JToken.FromObject(tag);
     }
 
+    /// <summary>
+    /// Проверяем наличие тега готовности
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <returns></returns>
     public static bool HasTag(CollectibleObject obj)
     {
         return obj?.Attributes?.KeyExists("foodtag") == true;
     }
 
+
+    /// <summary>
+    /// Еда считается готовой?
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <returns></returns>
     public static bool IsFinished(CollectibleObject obj)
     {
         return HasTag(obj) && obj.Attributes["foodtag"].AsString() == "finished";
     }
 
 
-
+    /// <summary>
+    /// Освобождение ресурсов
+    /// </summary>
     public override void Dispose()
     {
         // Отменяем патч при выгрузке мода
