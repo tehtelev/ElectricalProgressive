@@ -1,9 +1,10 @@
-﻿using Vintagestory.API.Common;
+﻿using ElectricalProgressive.Content.Block.EHammer;
+using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 
 namespace ElectricalProgressive.Content.Block.EExtruder;
 
-public class InventoryDrawing : InventoryGeneric
+public class InventoryExtruder : InventoryGeneric
 {
     private BlockEntityEExtruder _entity;      // ссылка на блок-сущность пресса
     private int lastSlot0Count = -1;        // для отслеживания изменений в слоте 0
@@ -12,13 +13,13 @@ public class InventoryDrawing : InventoryGeneric
 
 
 
-    public InventoryDrawing(ICoreAPI api)
+    public InventoryExtruder(ICoreAPI api)
         : base(api)
     {
 
     }
 
-    public InventoryDrawing(int slots, string className, string instanceID, ICoreAPI api, NewSlotDelegate onNewSlot, BlockEntityEExtruder entity)
+    public InventoryExtruder(int slots, string className, string instanceID, ICoreAPI api, NewSlotDelegate onNewSlot, BlockEntityEExtruder entity)
         : base(slots, className, instanceID, api)
     {
         _entity = entity;

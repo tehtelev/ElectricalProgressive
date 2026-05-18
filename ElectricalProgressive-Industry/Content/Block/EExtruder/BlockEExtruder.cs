@@ -1,5 +1,7 @@
 ﻿using ElectricalProgressive.Utils;
+using System.Collections.Generic;
 using System.Text;
+using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
@@ -9,7 +11,8 @@ namespace ElectricalProgressive.Content.Block.EExtruder;
 
 public class BlockEExtruder : Vintagestory.API.Common.Block
 {
-    
+
+
     public override bool OnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection? blockSel)
     {
         if (blockSel is null)
@@ -86,7 +89,5 @@ public class BlockEExtruder : Vintagestory.API.Common.Block
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:Consumption") + ": " + MyMiniLib.GetAttributeFloat(inSlot.Itemstack.Block, "maxConsumption", 0) + " " + Lang.Get("electricalprogressivebasics:W"));
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + ((MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false)) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
     }
-
-
-
+    
 }

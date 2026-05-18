@@ -1,4 +1,4 @@
-﻿﻿using ElectricalProgressive.RecipeSystem;
+﻿using ElectricalProgressive.RecipeSystem;
 using ElectricalProgressive.RecipeSystem.Recipe;
 using ElectricalProgressive.Utils;
 using System;
@@ -13,18 +13,15 @@ using Vintagestory.GameContent;
 
 namespace ElectricalProgressive.Content.Block.EExtruder
 {
-    public class BlockEntityEExtruder : BlockEntityGenericTypedContainer
+    public class BlockEntityEExtruder : BlockEntityGenericTypedContainer, ITexPositionSource
     {
         // Конфигурация
-        internal InventoryDrawing inventory;
+        internal InventoryExtruder inventory;
         private GuiDialogExtruder _clientDialog;
-        public override string InventoryClassName => "edrawing";
+        public override string InventoryClassName => "eextruder";
         private readonly int _maxConsumption;
         private ICoreClientAPI _capi;
         private bool _wasCraftingLastTick;
-
-        private static MeshData? _mesh; // кеш для меша, который используется в анимации. Кеш нужен, чтобы не загружать меш из ресурсов каждый раз при тесселяции блока, а использовать уже загруженный и обработанный меш.
-        private static Shape? _resultingShape; // кеш для формы, которая используется в анимации. Кеш нужен, чтобы не загружать форму из ресурсов каждый раз при тесселяции блока, а использовать уже загруженную и обработанную форму.
 
         // Состояние крафта
         public ExtruderRecipe CurrentRecipe;
@@ -35,14 +32,22 @@ namespace ElectricalProgressive.Content.Block.EExtruder
         public ItemSlot InputSlot1 => inventory[0];
         public ItemSlot InputSlot2 => inventory[1];
         public ItemSlot OutputSlot1 => inventory[2];
-        public override string DialogTitle => Lang.Get("edrawing-title-gui");
+        public ItemSlot OutputSlot2 => inventory[3];
+        public override string DialogTitle => Lang.Get("eextruder-title-gui");
         public override InventoryBase Inventory => inventory;
 
+        private static MeshData? _mesh; // кеш для меша, который используется в анимации. Кеш нужен, чтобы не загружать меш из ресурсов каждый раз при тесселяции блока, а использовать уже загруженный и обработанный меш.
+        private static Shape? _resultingShape; // кеш для формы, которая используется в анимации. Кеш нужен, чтобы не загружать форму из ресурсов каждый раз при тесселяции блока, а использовать уже загруженную и обработанную форму.
         private BlockEntityAnimationUtil AnimUtil => GetBehavior<BEBehaviorAnimatable>()?.animUtil;
         private int _lastSoundFrame = -1;
         private long _lastAnimationCheckTime;
 
+        // Новые поля для системы мешей (как в холодильнике)
+        private MeshData?[] _meshes;
+        private Shape? _nowTesselatingShape;
+        private CollectibleObject _nowTesselatingObj;
 
+        //------------------------------------------------------------------------------------------------------------------
         // Электрические параметры
         private Facing _facing = Facing.None;
         public BEBehaviorElectricalProgressive ElectricalProgressive => GetBehavior<BEBehaviorElectricalProgressive>();
@@ -60,18 +65,16 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             }
         }
 
+        //----------------------------------------------------------------------------------------------------------------------------
 
-        private ILoadedSound _ambientSound;
-        private AssetLocation _centrifugeSound;
+        private AssetLocation _soundPress;
 
         public BlockEntityEExtruder()
         {
             _maxConsumption = MyMiniLib.GetAttributeInt(Block, "maxConsumption", 100);
-            this.inventory = new InventoryDrawing(3, InventoryClassName, (string)null, (ICoreAPI)null, null, this);
+            this.inventory = new InventoryExtruder(4, InventoryClassName, (string)null, (ICoreAPI)null, null, this);
             inventory.SlotModified += OnSlotModified;
         }
-
-
 
         public override void Initialize(ICoreAPI api)
         {
@@ -82,15 +85,30 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             if (api.Side == EnumAppSide.Client)
             {
                 _capi = api as ICoreClientAPI;
+
+                // Инициализируем массив мешей как в холодильнике
+                _meshes = new MeshData[this.inventory.Count];
+
+                // Подписываемся на изменения инвентаря
+                this.inventory.SlotModified += slotId =>
+                {
+                    UpdateMeshes();
+                };
+
+                // Первоначальное создание мешей
+                UpdateMeshes();
+
                 if (AnimUtil != null)
                 {
                     PrepareAnimUtil(api, InventoryClassName);
                     AnimUtil.InitializeAnimator(InventoryClassName, _mesh, _resultingShape, new Vec3f(0, GetRotation(), 0f));
                 }
 
-                _centrifugeSound = new AssetLocation("electricalprogressiveindustry:sounds/ecentrifuge/centrifuge.ogg");
+                _soundPress = new AssetLocation("electricalprogressiveindustry:sounds/eextruder/extruder.ogg");
 
                 this.RegisterGameTickListener(new Action<float>(this.CheckAnimationFrame), 50);
+                // Обновляем меши при загрузке
+                UpdateMeshes();
             }
         }
 
@@ -130,12 +148,239 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 UpdateState(RecipeProgress);
             }
 
+            // Обновляем меш при изменении входного слота
+            if (slotid == 1 && Api.Side == EnumAppSide.Client)
+            {
+                UpdateMesh(1);
+            }
+
             MarkDirty();
+        }
+
+        /// <summary>
+        /// Необходимо для отрисовки текстур
+        /// </summary>
+        public TextureAtlasPosition this[string textureCode]
+        {
+            get
+            {
+                var assetLocation = default(AssetLocation?);
+
+                // Пробуем получить текстуру из item.Textures
+                if (_nowTesselatingObj is Vintagestory.API.Common.Item item)
+                {
+                    if (item.Textures.TryGetValue(textureCode, out var compositeTexture))
+                    {
+                        assetLocation = compositeTexture.Baked.BakedName;
+                    }
+                    else if (item.Textures.TryGetValue("all", out compositeTexture))
+                    {
+                        assetLocation = compositeTexture.Baked.BakedName;
+                    }
+                }
+                else if (_nowTesselatingObj is Vintagestory.API.Common.Block block)
+                {
+                    if (block.Textures.TryGetValue(textureCode, out var compositeTexture))
+                    {
+                        assetLocation = compositeTexture.Baked.BakedName;
+                    }
+                    else if (block.Textures.TryGetValue("all", out compositeTexture))
+                    {
+                        assetLocation = compositeTexture.Baked.BakedName;
+                    }
+                }
+
+                // Если не нашли, пробуем из shape.Textures
+                if (assetLocation == null && _nowTesselatingShape != null)
+                {
+                    _nowTesselatingShape.Textures.TryGetValue(textureCode, out assetLocation);
+                }
+
+                // Если все еще не нашли, используем домен предмета и предполагаемый путь
+                if (assetLocation == null)
+                {
+                    var domain = _nowTesselatingObj.Code.Domain;
+                    assetLocation = new(domain, "textures/item/" + textureCode);
+                    Api.World.Logger.Warning("Текстура {0} не найдена в текстурах предмета или формы, используется путь: {1}", textureCode, assetLocation);
+                }
+
+                return GetOrCreateTexPos(assetLocation);
+            }
+        }
+
+        private TextureAtlasPosition? GetOrCreateTexPos(AssetLocation texturePath)
+        {
+            var textureAtlasPosition = _capi.BlockTextureAtlas[texturePath];
+            if (textureAtlasPosition != null)
+                return textureAtlasPosition;
+
+            // берем только base текстуру (первую из кучи наваленных)
+            var pos = texturePath.Path.IndexOf("++");
+            if (pos >= 0)
+                texturePath.Path = texturePath.Path.Substring(0, pos);
+
+            var asset = _capi.Assets.TryGet(texturePath.Clone().WithPathPrefixOnce("textures/").WithPathAppendixOnce(".png"));
+            if (asset != null)
+            {
+                _capi.BlockTextureAtlas.GetOrInsertTexture(texturePath, out var num, out textureAtlasPosition, null, 0.005f);
+            }
+            else
+            {
+                Api.World.Logger.Warning("Текстура не найдена по пути: {0}", texturePath);
+            }
+
+            return textureAtlasPosition;
+        }
+
+        public Size2i AtlasSize => _capi.BlockTextureAtlas.Size;
+
+        /// <summary>
+        /// Обновляем mesh для конкретного слота
+        /// </summary>
+        public void UpdateMesh(int slotid)
+        {
+            if (Api == null || Api.Side == EnumAppSide.Server || _capi == null)
+                return;
+
+            if (slotid >= this.inventory.Count)
+                return;
+
+            // В прессе отображаем только слот 1 (пресс-форму)
+            if (slotid != 1)
+            {
+                _meshes[slotid] = null;
+                return;
+            }
+
+            if (this.inventory[slotid].Empty)
+            {
+                _meshes[slotid] = null;
+                return;
+            }
+
+            var stack = this.inventory[slotid].Itemstack;
+
+            // Отображаем только пресс-формы
+            if (stack == null || stack.Collectible == null || !stack.Collectible.Code.Path.Contains("gauge"))
+            {
+                _meshes[slotid] = null;
+                return;
+            }
+
+            var meshData = GenMesh(inventory[slotid]);
+            if (meshData != null)
+            {
+                TranslateMesh(meshData, slotid);
+                _meshes[slotid] = meshData;
+            }
+            else
+            {
+                _meshes[slotid] = null;
+            }
+        }
+
+        /// <summary>
+        /// Перемещаем mesh в нужную позицию для пресса
+        /// </summary>
+        public void TranslateMesh(MeshData? meshData, int slotId)
+        {
+            if (meshData == null || slotId != 1)
+                return;
+
+            var stack = this.inventory[slotId].Itemstack;
+            var origin = new Vec3f(0.5f, 0, 0.5f);
+    
+            // Получаем угол поворота блока (как в холодильнике)
+            var orientationRotate = Block.Shape.rotateY;
+
+            if (stack.Class == EnumItemClass.Item)
+            {
+                var scaleX = MyMiniLib.GetAttributeFloat(stack.Item, "scaleX", 0.8F);
+                var scaleY = MyMiniLib.GetAttributeFloat(stack.Item, "scaleY", 0.8F);
+                var scaleZ = MyMiniLib.GetAttributeFloat(stack.Item, "scaleZ", 0.8F);
+                var translateX = MyMiniLib.GetAttributeFloat(stack.Item, "translateX", 0F);
+                var translateY = MyMiniLib.GetAttributeFloat(stack.Item, "translateY", 0F);
+                var translateZ = MyMiniLib.GetAttributeFloat(stack.Item, "translateZ", 0F);
+                var rotateX = MyMiniLib.GetAttributeFloat(stack.Item, "rotateX", 0F);
+                var rotateY = MyMiniLib.GetAttributeFloat(stack.Item, "rotateY", 0F);
+                var rotateZ = MyMiniLib.GetAttributeFloat(stack.Item, "rotateZ", 0F);
+
+                meshData.Scale(origin, scaleX, scaleY, scaleZ);
+                meshData.Translate(translateX, translateY + 0.95f, translateZ);
+                meshData.Rotate(origin, rotateX * GameMath.DEG2RAD, rotateY * GameMath.DEG2RAD, rotateZ * GameMath.DEG2RAD);
+            }
+            else
+            {
+                meshData.Scale(origin, 0.8f, 0.8f, 0.8f);
+                meshData.Translate(0.97f, 0.95f, -0.59f);
+            }
+    
+            // Применяем поворот блока (как в холодильнике)
+            meshData.Rotate(origin, 0, orientationRotate * GameMath.DEG2RAD, 0);
+        }
+
+        /// <summary>
+        /// Генерация меша для предмета (как в холодильнике)
+        /// </summary>
+        public MeshData? GenMesh(ItemSlot slot)
+        {
+            var stack = slot.Itemstack;
+            if (stack == null)
+                return null;
+
+            MeshData meshData;
+            try
+            {
+                var meshSource = stack.Collectible as IContainedMeshSource;
+
+                if (meshSource != null)
+                {
+                    meshData = meshSource.GenMesh(slot, _capi.BlockTextureAtlas, Pos);
+                    meshData.Rotate(new Vec3f(0.5f, 0.5f, 0.5f), 0f, Block.Shape.rotateY * 0.0174532924f, 0f);
+                }
+                else
+                {
+                    if (stack.Class == EnumItemClass.Block)
+                    {
+                        meshData = _capi.TesselatorManager.GetDefaultBlockMesh(stack.Block).Clone();
+                    }
+                    else
+                    {
+                        _nowTesselatingObj = stack.Collectible;
+                        _nowTesselatingShape = null;
+
+                        if (stack.Item.Shape != null)
+                            _nowTesselatingShape = _capi.TesselatorManager.GetCachedShape(stack.Item.Shape.Base);
+
+                        _capi.Tesselator.TesselateItem(stack.Item, out meshData, this);
+                        meshData.RenderPassesAndExtraBits.Fill((short)2);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Api.World.Logger.Error("Не удалось выполнить тесселяцию предмета {0}: {1}", stack.Item.Code, e.Message);
+                meshData = null;
+            }
+
+            return meshData;
+        }
+
+        /// <summary>
+        /// Обновляет все meshы в инвентаре
+        /// </summary>
+        public void UpdateMeshes()
+        {
+            for (var i = 0; i < this.inventory.Count; i++)
+                UpdateMesh(i);
+
+            MarkDirty(true);
         }
 
         #region Логика рецептов
 
-        public static bool FindMatchingRecipe(ref ExtruderRecipe currentRecipe, ref string currentRecipeName, InventoryDrawing inventory)
+
+        public static bool FindMatchingRecipe(ref ExtruderRecipe currentRecipe, ref string currentRecipeName, InventoryExtruder inventory)
         {
             currentRecipe = null;
             currentRecipeName = string.Empty;
@@ -145,10 +390,10 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 if (MatchesRecipe(recipe, inventory))
                 {
                     currentRecipe = recipe;
-                    // Берем название из первого выхода
-                    if (recipe.Outputs != null && recipe.Outputs.Length > 0)
+                    // Берем название из первого выхода рецепта
+                    if (recipe.Outputs.Length > 0 && recipe.Outputs[0].ResolvedItemstack != null)
                     {
-                        currentRecipeName = recipe.Outputs[0].ResolvedItemstack?.GetName() ?? "Unknown";
+                        currentRecipeName = recipe.Outputs[0].ResolvedItemstack.GetName();
                     }
                     return true;
                 }
@@ -157,9 +402,7 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             return false;
         }
 
-
-
-        private static bool MatchesRecipe(ExtruderRecipe recipe, InventoryDrawing inventory)
+        private static bool MatchesRecipe(ExtruderRecipe recipe, InventoryExtruder inventory)
         {
             var usedSlots = new List<int>();
 
@@ -201,8 +444,6 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             return true;
         }
 
-
-
         private bool HasRequiredItems()
         {
             if (CurrentRecipe == null) return false;
@@ -238,27 +479,33 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 var usedSlots = new List<int>();
 
                 // Обработка всех выходов рецепта
-                foreach (var output in CurrentRecipe.Outputs)
+                for (int i = 0; i < CurrentRecipe.Outputs.Length; i++)
                 {
-                    // Проверяем шанс выпадения
-                    if (output.Chance < 1.0f && Api.World.Rand.NextDouble() > output.Chance)
+                    var output = CurrentRecipe.Outputs[i];
+
+                    // Проверяем шанс для каждого выхода
+                    if (Api.World.Rand.NextDouble() > output.Chance)
+                        continue;
+
+                    var outputItem = output.ResolvedItemstack?.Clone();
+                    if (outputItem == null)
+                        continue;
+
+                    // Распределяем выходы по слотам
+                    if (i == 0)
                     {
-                        continue; // Пропускаем этот выход если не выпал
+                        // Первый выход - основной слот
+                        TryMergeOrSpawn(outputItem, OutputSlot1);
                     }
-
-                    // Создаем копию выходного предмета
-                    var outputStack = output.ResolvedItemstack?.Clone();
-                    if (outputStack == null) continue;
-
-                    // Пытаемся разместить в первом выходном слоте
-                    if (!TryMergeToOutputSlot(outputStack, OutputSlot1))
+                    else if (i == 1)
                     {
-                        // Если не поместилось в первый слот, пробуем второй
-                        if (!TryMergeToOutputSlot(outputStack, OutputSlot1))
-                        {
-                            // Если все слоты заняты, выбрасываем в мир
-                            Api.World.SpawnItemEntity(outputStack, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
-                        }
+                        // Второй выход - дополнительный слот
+                        TryMergeOrSpawn(outputItem, OutputSlot2);
+                    }
+                    else
+                    {
+                        // Остальные выходы спавним в мире
+                        Api.World.SpawnItemEntity(outputItem, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
                     }
                 }
 
@@ -284,20 +531,18 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             }
             catch (Exception ex)
             {
-                Api.Logger.Error($"Crafting error in EDrawing at {Pos}: {ex}");
+                Api.Logger.Error($"Crafting error in EPress at {Pos}: {ex}");
             }
         }
 
-        private static bool TryMergeToOutputSlot(ItemStack stack, ItemSlot targetSlot)
+        private void TryMergeOrSpawn(ItemStack stack, ItemSlot targetSlot)
         {
             if (targetSlot.Empty)
             {
                 targetSlot.Itemstack = stack;
-                targetSlot.MarkDirty();
-                return true;
             }
             else if (targetSlot.Itemstack.Collectible == stack.Collectible &&
-                     targetSlot.Itemstack.StackSize < targetSlot.Itemstack.Collectible.MaxStackSize)
+                    targetSlot.Itemstack.StackSize < targetSlot.Itemstack.Collectible.MaxStackSize)
             {
                 var freeSpace = targetSlot.Itemstack.Collectible.MaxStackSize - targetSlot.Itemstack.StackSize;
                 var toAdd = Math.Min(freeSpace, stack.StackSize);
@@ -305,11 +550,16 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 targetSlot.Itemstack.StackSize += toAdd;
                 stack.StackSize -= toAdd;
 
-                targetSlot.MarkDirty();
-                return stack.StackSize == 0; // Возвращаем true если весь стек поместился
+                if (stack.StackSize > 0)
+                {
+                    Api.World.SpawnItemEntity(stack, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
+                }
             }
-
-            return false; // Не удалось поместить
+            else
+            {
+                Api.World.SpawnItemEntity(stack, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
+            }
+            targetSlot.MarkDirty();
         }
 
         private ItemSlot GetInputSlot(int index) => index switch
@@ -318,6 +568,7 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             1 => InputSlot2,
             _ => throw new ArgumentOutOfRangeException()
         };
+
         #endregion
 
         #region Основной цикл работы
@@ -334,14 +585,9 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             var hasRecipe = !InputSlot1.Empty && !InputSlot2.Empty && FindMatchingRecipe(ref CurrentRecipe, ref CurrentRecipeName, inventory);
             var isCraftingNow = hasPower && hasRecipe && CurrentRecipe != null;
 
-            
+
             if (isCraftingNow)
             {
-                if (!_wasCraftingLastTick)
-                {
-                    StartSound();
-                }
-
                 StartAnimation();
 
                 RecipeProgress = Math.Min(RecipeProgress + (float)(beh.PowerSetting / CurrentRecipe.EnergyOperation), 1f);
@@ -351,11 +597,10 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 {
                     ProcessCompletedCraft();
 
-                    
+
                     if (!HasRequiredItems())
                     {
                         StopAnimation();
-                        StopSound();
                     }
 
                     // в любом случае сбрасываем прогресс
@@ -366,11 +611,8 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             else if (_wasCraftingLastTick)
             {
                 StopAnimation();
-                StopSound();
                 MarkDirty(true);
             }
-
-
 
             _wasCraftingLastTick = isCraftingNow;
         }
@@ -384,60 +626,22 @@ namespace ElectricalProgressive.Content.Block.EExtruder
         }
         #endregion
 
-
-
-        /// <summary>
-        /// Запуск звука
-        /// </summary>
-        public void StartSound()
-        {
-            if (this._ambientSound != null)
-                return;
-            if ((Api != null ? (Api.Side == EnumAppSide.Client ? 1 : 0) : 0) == 0)
-                return;
-            this._ambientSound = (this.Api as ICoreClientAPI).World.LoadSound(new SoundParams()
-            {
-                Location = _centrifugeSound,
-                ShouldLoop = true,
-                Position = this.Pos.ToVec3f().Add(0.5f, 0.25f, 0.5f),
-                DisposeOnFinish = false,
-                Volume = 1f,
-            });
-
-            this._ambientSound.Start();
-        }
-
-
-
-        /// <summary>
-        /// Остановка звука
-        /// </summary>
-        public void StopSound()
-        {
-            if (this._ambientSound == null)
-                return;
-            this._ambientSound.Stop();
-            this._ambientSound?.Dispose();
-            this._ambientSound = (ILoadedSound)null;
-        }
-
-
-
-
         #region Визуальные эффекты
         private void StartAnimation()
         {
             if (Api?.Side != EnumAppSide.Client || AnimUtil == null || CurrentRecipe == null)
                 return;
 
-            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("craft") == false)
+            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false)
             {
+                float craftDuration =
+                    (float)(CurrentRecipe.EnergyOperation / GetBehavior<BEBehaviorEExtruder>().PowerSetting);
                 AnimUtil.StartAnimation(new AnimationMetaData()
                 {
-                    Animation = "Animation1",
-                    Code = "craft",
-                    AnimationSpeed = 1.0f,
-                    EaseOutSpeed = 1.0f,
+                    Animation = "work-on",
+                    Code = "work-on",
+                    AnimationSpeed = (float)(GetBehavior<BEBehaviorEExtruder>().PowerSetting / CurrentRecipe.EnergyOperation)*17.706f,
+                    EaseOutSpeed = 2.0f,
                     EaseInSpeed = 1f
                 });
             }
@@ -448,19 +652,23 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
                 return;
 
-            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("craft") == true)
+            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == true)
             {
-                AnimUtil.StopAnimation("craft");
+                AnimUtil.StopAnimation("work-on");
             }
         }
-
+        
+        /// <summary>
+        /// Новый метод для проверки кадра анимации
+        /// </summary>
+        /// <param name="dt"></param>
         private void CheckAnimationFrame(float dt)
         {
-            if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
+            if (Api?.Side != EnumAppSide.Client || AnimUtil == null!)
                 return;
 
-            const int startFrame = 20;
-            if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("craft"))
+            const int startFrame = 280; // Кадр, на котором нужно воспроизвести звук
+            if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
             {
                 var currentTime = Api.World.ElapsedMilliseconds;
                 _lastAnimationCheckTime = currentTime;
@@ -482,6 +690,9 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             }
         }
 
+        /// <summary>
+        /// Метод для воспроизведения звука
+        /// </summary>
         private void PlayPressSound()
         {
             if (Api?.Side != EnumAppSide.Client)
@@ -489,7 +700,7 @@ namespace ElectricalProgressive.Content.Block.EExtruder
 
             var capi = Api as ICoreClientAPI;
             capi.World.PlaySoundAt(
-                _centrifugeSound,
+                _soundPress,
                 Pos.X + 0.5, Pos.Y + 0.5, Pos.Z + 0.5,
                 null,
                 false,
@@ -530,7 +741,7 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             (this.Api.World as IClientWorldAccessor).Player.InventoryManager.CloseInventory((IInventory)this.Inventory);
             this.invDialog?.TryClose();
             this.invDialog?.Dispose();
-            this.invDialog = (GuiDialogBlockEntity)null;
+            this.invDialog = (GuiDialogBlockEntity)null!;
         }
         #endregion
 
@@ -542,15 +753,12 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             RecipeProgress = tree.GetFloat("PowerCurrent");
 
             if (Api != null)
-                try
-                {
-                    Inventory.AfterBlocksLoaded(Api.World);
-                }
-                catch
-                {
+                Inventory.AfterBlocksLoaded(Api.World);
 
-                }
-                
+            if (Api is ICoreClientAPI)
+            {
+                UpdateMeshes(); // обновляем меши при загрузке
+            }
 
             if (Api?.Side == EnumAppSide.Client && _clientDialog != null)
                 _clientDialog.Update(RecipeProgress);
@@ -571,23 +779,50 @@ namespace ElectricalProgressive.Content.Block.EExtruder
         {
             base.OnBlockPlaced(byItemStack);
 
-            if (ElectricalProgressive == null || byItemStack == null)
+            if (ElectricalProgressive == null! || byItemStack == null)
                 return;
 
             //задаем электрические параметры блока/проводника
             LoadEProperties.Load(this.Block, this);
+
+        }
+
+        /// <summary>
+        /// Вызывается при тесселяции блока
+        /// </summary>
+        public override bool OnTesselation(ITerrainMeshPool mesher, ITesselatorAPI tesselator)
+        {
+            base.OnTesselation(mesher, tesselator);
+
+            // Отрисовываем меши предметов (как в холодильнике)
+            if (_meshes != null!)
+            {
+                for (var i = 0; i < _meshes.Length; i++)
+                {
+                    if (_meshes[i] != null)
+                        mesher.AddMeshData(_meshes[i]);
+                }
+            }
+
+            // если анимации нет, то рисуем блок базовый
+            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false)
+            {
+                return false;
+            }
+
+            return true;  // не рисует базовый блок, если есть анимация
         }
 
         public override void OnBlockRemoved()
         {
             base.OnBlockRemoved();
 
-            if (ElectricalProgressive != null)
+            if (ElectricalProgressive != null!)
             {
                 ElectricalProgressive.Connection = Facing.None;
             }
 
-            if (this.Api is ICoreClientAPI && this._clientDialog != null)
+            if (this.Api is ICoreClientAPI && this._clientDialog != null!)
             {
                 this._clientDialog?.TryClose();
                 this._clientDialog = null;
@@ -595,36 +830,34 @@ namespace ElectricalProgressive.Content.Block.EExtruder
 
             StopAnimation();
 
-            if (this.Api.Side == EnumAppSide.Client && this.AnimUtil != null)
+            if (this.Api.Side == EnumAppSide.Client && this.AnimUtil != null!)
             {
                 this.AnimUtil?.Dispose();
             }
 
-            if (this._ambientSound != null)
-            {
-                this._ambientSound.Stop();
-                this._ambientSound?.Dispose();
-            }
-
             _mesh?.Dispose();
             _resultingShape = null;
+
+            // Очистка как в холодильнике
+            _meshes = null!;
+            _nowTesselatingShape = null!;
+            _nowTesselatingObj = null!;
         }
 
         public override void OnBlockUnloaded()
         {
             base.OnBlockUnloaded();
             this._clientDialog?.TryClose();
-            if (this._ambientSound == null)
-                return;
-            this._ambientSound.Stop();
-            this._ambientSound?.Dispose();
-            this._ambientSound = (ILoadedSound)null;
 
+            // Очищаем ссылки как в холодильнике
             _mesh?.Dispose();
             _resultingShape = null;
+
+            _meshes = null!;
+            _nowTesselatingShape = null!;
+            _nowTesselatingObj = null!;
+            _capi = null!;
         }
-
-
         #endregion
     }
 }
