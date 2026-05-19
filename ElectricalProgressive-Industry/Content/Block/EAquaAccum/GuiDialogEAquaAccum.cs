@@ -1,7 +1,8 @@
-﻿﻿using Cairo;
+﻿using Cairo;
 using System;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 
 namespace ElectricalProgressive.Content.EAquaAccum;
@@ -17,11 +18,22 @@ public class GuiDialogEAquaAccum : GuiDialogBlockEntity
     private BlockPos _blockEntityPos;
     private ICoreClientAPI _capi;
     
-    // Новые поля для отображения
+    // Поля для отображения
     private float _condensationRate;
     private float _rainfall;
     private int _powerSetting;
     private int _maxConsumption;
+    
+    // Таймер для ограничения частоты обновлений
+    private long _lastUpdateTime = 0;
+    private const int UPDATE_INTERVAL_MS = 500;
+    
+    // Кэш для отображаемых значений
+    private string _lastStatusText = "";
+    private string _lastPowerText = "";
+    private string _lastRateText = "";
+    private string _lastRainfallText = "";
+    private string _lastTankText = "";
 
     public GuiDialogEAquaAccum(
         string DialogTitle,
@@ -45,7 +57,6 @@ public class GuiDialogEAquaAccum : GuiDialogBlockEntity
             _pumpProgress = _beWaterPump.PumpProgress;
             _status = _beWaterPump.GetCondensationStatus();
             
-            // Получаем данные о конденсации
             UpdateCondensationData();
         }
 
@@ -57,13 +68,11 @@ public class GuiDialogEAquaAccum : GuiDialogBlockEntity
     {
         if (_beWaterPump == null) return;
         
-        // Получаем данные через рефлексию или публичные методы
         var powerBehavior = _beWaterPump.PowerBehavior;
         if (powerBehavior != null)
         {
             _powerSetting = powerBehavior.PowerSetting;
             
-            // Получаем maxConsumption через рефлексию (private поле)
             var field = powerBehavior.GetType().GetField("_maxConsumption", 
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             if (field != null)
@@ -72,7 +81,6 @@ public class GuiDialogEAquaAccum : GuiDialogBlockEntity
             }
         }
         
-        // Получаем rainfall через рефлексию (private поле)
         var rainfallField = _beWaterPump.GetType().GetField("_currentRainfall",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         if (rainfallField != null)
@@ -80,7 +88,6 @@ public class GuiDialogEAquaAccum : GuiDialogBlockEntity
             _rainfall = (float)rainfallField.GetValue(_beWaterPump);
         }
         
-        // Получаем condensation rate через рефлексию (private метод)
         var method = _beWaterPump.GetType().GetMethod("GetCurrentCondensationRate",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         if (method != null)
@@ -100,9 +107,9 @@ public class GuiDialogEAquaAccum : GuiDialogBlockEntity
         if (itemSlot != null && itemSlot.Inventory == this.Inventory)
             this._capi.Input.TriggerOnMouseLeaveSlot(itemSlot);
 
-        var bounds1 = ElementBounds.Fixed(0.0, 0.0, 300.0, 180.0); // Увеличил высоту
-        var waterLevelBounds = ElementBounds.Fixed(250, 40, 40, 130);
-        var statusBounds = ElementBounds.Fixed(10, 40, 200, 135); // Увеличил высоту
+        var bounds1 = ElementBounds.Fixed(0.0, 0.0, 300.0, 200.0); // Увеличил высоту
+        var waterLevelBounds = ElementBounds.Fixed(250, 40, 40, 150);
+        var statusBounds = ElementBounds.Fixed(10, 40, 200, 155); // Панель для динамического текста
 
         var bounds4 = ElementBounds.Fill.WithFixedPadding(GuiStyle.ElementToDialogPadding);
         bounds4.BothSizing = ElementSizing.FitToChildren;
@@ -111,19 +118,88 @@ public class GuiDialogEAquaAccum : GuiDialogBlockEntity
         var bounds5 = ElementStdBounds.AutosizedMainDialog.WithAlignment(EnumDialogArea.RightMiddle)
             .WithFixedAlignmentOffset(-GuiStyle.DialogToScreenPadding, 0.0);
 
+        // Шрифт для динамического текста
+        var outputFont = CairoFont.WhiteDetailText().WithWeight(FontWeight.Normal);
+        
+        // Шрифт для заголовков (жирный, больше)
+        var titleFont = CairoFont.WhiteDetailText().WithWeight(FontWeight.Bold);
+
         this.ClearComposers();
         this.SingleComposer = this._capi.Gui
             .CreateCompo("blockentityaquaaccum" + this.BlockEntityPosition?.ToString(), bounds5)
             .AddShadedDialogBG(bounds4)
             .AddDialogTitleBar(this.DialogTitle, new Action(this.OnTitleBarClose))
             .BeginChildElements(bounds4)
-            .AddDynamicCustomDraw(statusBounds, new DrawDelegateWithBounds(this.OnStatusDraw), "statusDrawer")
+            .AddDynamicCustomDraw(statusBounds, new DrawDelegateWithBounds(this.OnStatusBackgroundDraw), "statusBackground")
+            .AddDynamicText("", outputFont, ElementBounds.Fixed(15, 45, 190, 145), "statusText")
             .AddInset(waterLevelBounds.ForkBoundingParent(2, 2, 2, 2), 2)
             .AddDynamicCustomDraw(waterLevelBounds, new DrawDelegateWithBounds(this.OnWaterDraw), "waterDrawer")
             .EndChildElements()
             .Compose();
 
         this.lastRedrawMs = this._capi.ElapsedMilliseconds;
+        this._lastUpdateTime = 0;
+        
+        // Первоначальное обновление текста
+        UpdateStatusText();
+    }
+    
+    /// <summary>
+    /// Отрисовка темного фона для текстовой панели
+    /// </summary>
+    private void OnStatusBackgroundDraw(Context ctx, ImageSurface surface, ElementBounds currentBounds)
+    {
+        ctx.SetSourceRGB(0.1, 0.1, 0.15);
+        ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
+        ctx.Fill();
+        
+        // Тонкая рамка
+        ctx.SetSourceRGB(0.3, 0.3, 0.4);
+        ctx.LineWidth = 1;
+        ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
+        ctx.Stroke();
+    }
+    
+    /// <summary>
+    /// Формирование текста для отображения
+    /// </summary>
+    private string GetFormattedStatusText()
+    {
+        string statusText = GetStatusText(_status);
+        string powerText = $"Power: {_powerSetting}/{_maxConsumption} W";
+        
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        sb.AppendLine(statusText);
+        sb.AppendLine(powerText);
+        
+        if (_status == BlockEntityEAquaAccum.CondensationStatus.Condensing)
+        {
+            string rateText = $"Rate: {_condensationRate:0.##} L/s";
+            string rainfallText = GetRainfallText(_rainfall);
+            string rainfallValueText = $"Rainfall: {rainfallText} ({_rainfall * 100:0}%)";
+            sb.AppendLine(rateText);
+            sb.AppendLine(rainfallValueText);
+        }
+        
+        string tankText = $"Tank: {_waterAmount:0.##}/{_capacity} L";
+        sb.Append(tankText);
+        
+        return sb.ToString();
+    }
+    
+    /// <summary>
+    /// Обновление текста в GUI
+    /// </summary>
+    private void UpdateStatusText()
+    {
+        if (SingleComposer == null) return;
+        
+        string newText = GetFormattedStatusText();
+        var dynamicText = SingleComposer.GetDynamicText("statusText");
+        if (dynamicText != null)
+        {
+            dynamicText.SetNewText(newText);
+        }
     }
 
     public void Update(float pumpProgress, float waterAmount, float capacity, BlockEntityEAquaAccum.CondensationStatus status)
@@ -133,63 +209,25 @@ public class GuiDialogEAquaAccum : GuiDialogBlockEntity
         _capacity = capacity;
         _status = status;
         
-        // Обновляем данные о конденсации при каждом обновлении
         UpdateCondensationData();
 
-        if (!this.IsOpened() || this._capi.ElapsedMilliseconds - this.lastRedrawMs <= 500L)
-            return;
-
-        if (this.SingleComposer != null)
+        if (!this.IsOpened()) return;
+        
+        long currentTime = _capi.ElapsedMilliseconds;
+        
+        // Ограничиваем обновление текста по времени
+        if (currentTime - _lastUpdateTime >= UPDATE_INTERVAL_MS)
         {
-            this.SingleComposer.GetCustomDraw("statusDrawer").Redraw();
-            this.SingleComposer.GetCustomDraw("waterDrawer").Redraw();
-        }
-        this.lastRedrawMs = this._capi.ElapsedMilliseconds;
-    }
-
-    private void OnStatusDraw(Context ctx, ImageSurface surface, ElementBounds currentBounds)
-    {
-        ctx.SetSourceRGB(0.1, 0.1, 0.15);
-        ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
-        ctx.Fill();
-
-        ctx.SetSourceRGB(1, 1, 1);
-        ctx.SelectFontFace("Arial", FontSlant.Normal, FontWeight.Bold);
-        ctx.SetFontSize(20);
-
-        string statusText = GetStatusText(_status);
-        ctx.MoveTo(5, 20);
-        ctx.ShowText(statusText);
-
-        // Отображаем мощность
-        string powerText = $"Power: {_powerSetting}/{_maxConsumption} W";
-        ctx.SetFontSize(18);
-        ctx.SetSourceRGB(0.9, 0.9, 0.7);
-        ctx.MoveTo(5, 40);
-        ctx.ShowText(powerText);
-
-        // Отображаем скорость конденсации, если устройство работает
-        if (_status == BlockEntityEAquaAccum.CondensationStatus.Condensing)
-        {
-            string rateText = $"Rate: {_condensationRate:0.##} L/s";
-            ctx.SetSourceRGB(0.6, 0.9, 0.6);
-            ctx.MoveTo(5, 60);
-            ctx.ShowText(rateText);
-            
-            // Отображаем влажность
-            string rainfallText = GetRainfallText(_rainfall);
-            string rainfallValueText = $"Rainfall: {rainfallText} ({_rainfall * 100:0}%)";
-            ctx.SetSourceRGB(0.5, 0.7, 0.9);
-            ctx.MoveTo(5, 80);
-            ctx.ShowText(rainfallValueText);
+            UpdateStatusText();
+            _lastUpdateTime = currentTime;
         }
         
-        // Отображаем заполненность бака
-        string progressText = $"Tank: {_waterAmount:0.##}/{_capacity} L";
-        ctx.SetFontSize(18);
-        ctx.SetSourceRGB(0.8, 0.8, 0.8);
-        ctx.MoveTo(5, _status == BlockEntityEAquaAccum.CondensationStatus.Condensing ? 100 : 60);
-        ctx.ShowText(progressText);
+        // Обновляем графику бака (должна обновляться часто)
+        if (this.SingleComposer != null && this._capi.ElapsedMilliseconds - this.lastRedrawMs > 500L)
+        {
+            this.SingleComposer.GetCustomDraw("waterDrawer").Redraw();
+            this.lastRedrawMs = this._capi.ElapsedMilliseconds;
+        }
     }
     
     private string GetRainfallText(float rainfall)
@@ -219,96 +257,94 @@ public class GuiDialogEAquaAccum : GuiDialogBlockEntity
         }
     }
 
-private void OnWaterDraw(Context ctx, ImageSurface surface, ElementBounds currentBounds)
-{
-    RefreshPumpData();
-
-    if (_capacity <= 0)
+    private void OnWaterDraw(Context ctx, ImageSurface surface, ElementBounds currentBounds)
     {
-        DrawEmptyWaterBar(ctx, currentBounds);
-        return;
-    }
+        RefreshPumpData();
 
-    float fullnessRelative = _waterAmount / _capacity;
-    fullnessRelative = Math.Min(Math.Max(fullnessRelative, 0f), 1f);
-
-    double waterTopY = (1.0 - fullnessRelative) * currentBounds.InnerHeight;
-
-    // Рисуем воду
-    if (_waterAmount > 0)
-    {
-        ctx.Rectangle(0, waterTopY, currentBounds.InnerWidth, currentBounds.InnerHeight - waterTopY);
-
-        ItemStack liquidStack = null;
-        if (_beWaterPump != null)
+        if (_capacity <= 0)
         {
-            liquidStack = _beWaterPump.LiquidSlot?.Itemstack;
+            DrawEmptyWaterBar(ctx, currentBounds);
+            return;
         }
 
-        if (liquidStack != null)
+        float fullnessRelative = _waterAmount / _capacity;
+        fullnessRelative = Math.Min(Math.Max(fullnessRelative, 0f), 1f);
+
+        double waterTopY = (1.0 - fullnessRelative) * currentBounds.InnerHeight;
+
+        // Рисуем воду
+        if (_waterAmount > 0)
         {
-            var containableProps = Vintagestory.GameContent.BlockLiquidContainerBase.GetContainableProps(liquidStack);
-            if (containableProps?.Texture != null)
+            ctx.Rectangle(0, waterTopY, currentBounds.InnerWidth, currentBounds.InnerHeight - waterTopY);
+
+            ItemStack liquidStack = null;
+            if (_beWaterPump != null)
             {
-                ctx.Save();
-                Matrix matrix = ctx.Matrix;
-                matrix.Scale(GuiElement.scaled(3.0), GuiElement.scaled(3.0));
-                ctx.Matrix = matrix;
+                liquidStack = _beWaterPump.LiquidSlot?.Itemstack;
+            }
 
-                AssetLocation textureLoc = containableProps.Texture.Base.Clone().WithPathAppendixOnce(".png");
-                GuiElement.fillWithPattern(_capi, ctx, textureLoc, true, false, containableProps.Texture.Alpha);
+            if (liquidStack != null)
+            {
+                var containableProps = Vintagestory.GameContent.BlockLiquidContainerBase.GetContainableProps(liquidStack);
+                if (containableProps?.Texture != null)
+                {
+                    ctx.Save();
+                    Matrix matrix = ctx.Matrix;
+                    matrix.Scale(GuiElement.scaled(3.0), GuiElement.scaled(3.0));
+                    ctx.Matrix = matrix;
 
-                ctx.Restore();
+                    AssetLocation textureLoc = containableProps.Texture.Base.Clone().WithPathAppendixOnce(".png");
+                    GuiElement.fillWithPattern(_capi, ctx, textureLoc, true, false, containableProps.Texture.Alpha);
+
+                    ctx.Restore();
+                }
+            }
+            else
+            {
+                ctx.SetSourceRGB(0.2, 0.4, 0.8);
+                ctx.Fill();
             }
         }
-        else
+
+        // Рисуем рамку резервуара
+        ctx.SetSourceRGB(0, 0, 0);
+        ctx.LineWidth = 2;
+        ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
+        ctx.Stroke();
+
+        // Рисуем деления
+        ctx.SetSourceRGB(0, 0, 0);
+        ctx.LineWidth = 1;
+        
+        double totalHeight = currentBounds.InnerHeight;
+        int divisions = 10;
+        
+        for (int i = 1; i < divisions; i++)
         {
-            ctx.SetSourceRGB(0.2, 0.4, 0.8);
-            ctx.Fill();
+            double y = (totalHeight / divisions) * i;
+            double lineWidth = (i % 2 == 0) ? 8 : 5;
+            
+            ctx.MoveTo(0, y);
+            ctx.LineTo(lineWidth, y);
+            ctx.Stroke();
+            
+            ctx.MoveTo(currentBounds.InnerWidth - lineWidth, y);
+            ctx.LineTo(currentBounds.InnerWidth, y);
+            ctx.Stroke();
         }
+
+        // Текст с количеством литров
+        ctx.SetSourceRGB(0, 0, 0);
+        ctx.SelectFontFace("Arial", FontSlant.Normal, FontWeight.Bold);
+        ctx.SetFontSize(12);
+        string amountText = $"{_waterAmount:0.##}L";
+        var amountExtents = ctx.TextExtents(amountText);
+        ctx.MoveTo(
+            (currentBounds.InnerWidth - amountExtents.Width) / 2,
+            currentBounds.InnerHeight - 3
+        );
+        ctx.ShowText(amountText);
     }
-
-    // Рисуем рамку резервуара
-    ctx.SetSourceRGB(0, 0, 0);
-    ctx.LineWidth = 2;
-    ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
-    ctx.Stroke();
-
-    // Рисуем деления как у линейки (как в прогресс-баре)
-    ctx.SetSourceRGB(0, 0, 0);
-    ctx.LineWidth = 1;
-    
-    double totalHeight = currentBounds.InnerHeight;
-    int divisions = 10; // 10 делений
-    
-    for (int i = 1; i < divisions; i++)
-    {
-        double y = (totalHeight / divisions) * i;
-        double lineWidth = (i % 2 == 0) ? 8 : 5; // четные длиннее, нечетные короче
-        
-        // Черточка слева
-        ctx.MoveTo(0, y);
-        ctx.LineTo(lineWidth, y);
-        ctx.Stroke();
-        
-        // Черточка справа
-        ctx.MoveTo(currentBounds.InnerWidth - lineWidth, y);
-        ctx.LineTo(currentBounds.InnerWidth, y);
-        ctx.Stroke();
-    }
-
-    // Текст с количеством литров (по центру внизу)
-    ctx.SetSourceRGB(0, 0, 0);
-    ctx.SelectFontFace("Arial", FontSlant.Normal, FontWeight.Bold);
-    ctx.SetFontSize(12);
-    string amountText = $"{_waterAmount:0.##}L";
-    var amountExtents = ctx.TextExtents(amountText);
-    ctx.MoveTo(
-        (currentBounds.InnerWidth - amountExtents.Width) / 2,
-        currentBounds.InnerHeight - 3
-    );
-    ctx.ShowText(amountText);
-}
 
     private void DrawEmptyWaterBar(Context ctx, ElementBounds currentBounds)
     {
@@ -363,6 +399,7 @@ private void OnWaterDraw(Context ctx, ImageSurface surface, ElementBounds curren
         base.OnGuiOpened();
         this.Inventory.SlotModified += new Action<int>(this.OnInventorySlotModified);
         RefreshPumpData();
+        UpdateStatusText();
     }
 
     public override void OnGuiClosed()
