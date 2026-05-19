@@ -1,28 +1,28 @@
-﻿using Cairo;
+﻿﻿using Cairo;
 using System;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 
-namespace ElectricalProgressive.Content.EWaterPump;
+namespace ElectricalProgressive.Content.EAquaAccum;
 
-public class GuiDialogEWaterPump : GuiDialogBlockEntity
+public class GuiDialogEAquaAccum : GuiDialogBlockEntity
 {
     private long lastRedrawMs;
     private float _pumpProgress;
     private float _waterAmount;
     private float _capacity;
-    private BlockEntityEWaterPump.PumpStatus _status;
-    private BlockEntityEWaterPump _beWaterPump;
+    private BlockEntityEAquaAccum.CondensationStatus _status;
+    private BlockEntityEAquaAccum _beWaterPump;
     private BlockPos _blockEntityPos;
     private ICoreClientAPI _capi;
 
-    public GuiDialogEWaterPump(
+    public GuiDialogEAquaAccum(
         string DialogTitle,
         InventoryBase Inventory,
         BlockPos BlockEntityPosition,
         ICoreClientAPI capi,
-        BlockEntityEWaterPump beWaterPump)
+        BlockEntityEAquaAccum beWaterPump)
         : base(DialogTitle, Inventory, BlockEntityPosition, capi)
     {
         if (this.IsDuplicate)
@@ -32,13 +32,12 @@ public class GuiDialogEWaterPump : GuiDialogBlockEntity
         _blockEntityPos = BlockEntityPosition;
         _beWaterPump = beWaterPump;
 
-        // Получаем начальные данные
         if (_beWaterPump != null)
         {
             _waterAmount = _beWaterPump.LiquidAmount;
             _capacity = _beWaterPump.LiquidCapacity;
             _pumpProgress = _beWaterPump.PumpProgress;
-            _status = _beWaterPump.GetPumpStatus();
+            _status = _beWaterPump.GetCondensationStatus();
         }
 
         capi.World.Player.InventoryManager.OpenInventory(Inventory);
@@ -56,14 +55,9 @@ public class GuiDialogEWaterPump : GuiDialogBlockEntity
         if (itemSlot != null && itemSlot.Inventory == this.Inventory)
             this._capi.Input.TriggerOnMouseLeaveSlot(itemSlot);
 
-        // Слот для воды
         var bounds1 = ElementBounds.Fixed(0.0, 0.0, 300.0, 150.0);
         var waterBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 30.0, 85.0, 1, 1);
-
-        // Границы для уровня жидкости
         var waterLevelBounds = ElementBounds.Fixed(250, 40, 40, 100);
-
-        // Границы для статуса
         var statusBounds = ElementBounds.Fixed(30, 40, 200, 40);
 
         var bounds4 = ElementBounds.Fill.WithFixedPadding(GuiStyle.ElementToDialogPadding);
@@ -79,27 +73,18 @@ public class GuiDialogEWaterPump : GuiDialogBlockEntity
             .AddShadedDialogBG(bounds4)
             .AddDialogTitleBar(this.DialogTitle, new Action(this.OnTitleBarClose))
             .BeginChildElements(bounds4)
-
-            // Статус помпы
             .AddDynamicCustomDraw(statusBounds, new DrawDelegateWithBounds(this.OnStatusDraw), "statusDrawer")
-
-            // Уровень жидкости
             .AddInset(waterLevelBounds.ForkBoundingParent(2, 2, 2, 2), 2)
             .AddDynamicCustomDraw(waterLevelBounds, new DrawDelegateWithBounds(this.OnWaterDraw), "waterDrawer")
-
-            // Слот для воды
             .AddItemSlotGrid(Inventory, new Action<object>(this.SendInvPacket), 1, [0], waterBounds, "waterSlot")
-
-            // Подпись
             .AddStaticText("Water Tank", CairoFont.WhiteDetailText(), ElementBounds.Fixed(30, 135, 100, 20))
-
             .EndChildElements()
             .Compose();
 
         this.lastRedrawMs = this._capi.ElapsedMilliseconds;
     }
 
-    public void Update(float pumpProgress, float waterAmount, float capacity, BlockEntityEWaterPump.PumpStatus status)
+    public void Update(float pumpProgress, float waterAmount, float capacity, BlockEntityEAquaAccum.CondensationStatus status)
     {
         _pumpProgress = Math.Min(Math.Max(pumpProgress, 0f), 1f);
         _waterAmount = waterAmount;
@@ -119,22 +104,18 @@ public class GuiDialogEWaterPump : GuiDialogBlockEntity
 
     private void OnStatusDraw(Context ctx, ImageSurface surface, ElementBounds currentBounds)
     {
-        // Рисуем фон
         ctx.SetSourceRGB(0.1, 0.1, 0.15);
         ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
         ctx.Fill();
 
-        // Текст статуса
         ctx.SetSourceRGB(1, 1, 1);
         ctx.SelectFontFace("Arial", FontSlant.Normal, FontWeight.Bold);
         ctx.SetFontSize(12);
 
         string statusText = GetStatusText(_status);
-        var extents = ctx.TextExtents(statusText);
         ctx.MoveTo(5, 15);
         ctx.ShowText(statusText);
 
-        // Текст прогресса
         string progressText = $"Tank: {_waterAmount:0.##}/{_capacity} L";
         ctx.SetFontSize(10);
         ctx.SetSourceRGB(0.8, 0.8, 0.8);
@@ -142,17 +123,15 @@ public class GuiDialogEWaterPump : GuiDialogBlockEntity
         ctx.ShowText(progressText);
     }
 
-    private string GetStatusText(BlockEntityEWaterPump.PumpStatus status)
+    private string GetStatusText(BlockEntityEAquaAccum.CondensationStatus status)
     {
         switch (status)
         {
-            case BlockEntityEWaterPump.PumpStatus.Pumping:
-                return "Pumping water...";
-            case BlockEntityEWaterPump.PumpStatus.NoPower:
+            case BlockEntityEAquaAccum.CondensationStatus.Condensing:
+                return "Condensing water...";
+            case BlockEntityEAquaAccum.CondensationStatus.NoPower:
                 return "No power";
-            case BlockEntityEWaterPump.PumpStatus.InsufficientWater:
-                return "Not enough water in area";
-            case BlockEntityEWaterPump.PumpStatus.TankFull:
+            case BlockEntityEAquaAccum.CondensationStatus.TankFull:
                 return "Tank full";
             default:
                 return "Idle";
@@ -161,7 +140,6 @@ public class GuiDialogEWaterPump : GuiDialogBlockEntity
 
     private void OnWaterDraw(Context ctx, ImageSurface surface, ElementBounds currentBounds)
     {
-        // Обновляем данные
         RefreshPumpData();
 
         if (_capacity <= 0)
@@ -177,7 +155,6 @@ public class GuiDialogEWaterPump : GuiDialogBlockEntity
 
         ctx.Rectangle(0, y, currentBounds.InnerWidth, currentBounds.InnerHeight - y);
 
-        // Получаем текстуру жидкости
         ItemStack liquidStack = null;
         if (_beWaterPump != null)
         {
@@ -202,18 +179,15 @@ public class GuiDialogEWaterPump : GuiDialogBlockEntity
         }
         else
         {
-            // Если нет данных о жидкости, используем стандартный цвет
             ctx.SetSourceRGB(0.2, 0.4, 0.8);
             ctx.Fill();
         }
 
-        // Рамка уровня жидкости
         ctx.SetSourceRGB(0.8, 0.8, 0.8);
         ctx.LineWidth = 1;
         ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
         ctx.Stroke();
 
-        // Отображаем количество (опционально)
         ctx.SetSourceRGB(1, 1, 1);
         ctx.SelectFontFace("Arial", FontSlant.Normal, FontWeight.Normal);
         ctx.SetFontSize(10);
@@ -228,18 +202,15 @@ public class GuiDialogEWaterPump : GuiDialogBlockEntity
 
     private void DrawEmptyWaterBar(Context ctx, ElementBounds currentBounds)
     {
-        // Рисуем пустую шкалу
         ctx.SetSourceRGB(0.1, 0.1, 0.1);
         ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
         ctx.Fill();
 
-        // Рамка
         ctx.SetSourceRGB(0.5, 0.5, 0.5);
         ctx.LineWidth = 1;
         ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
         ctx.Stroke();
 
-        // Текст "Empty"
         ctx.SetSourceRGB(0.7, 0.7, 0.7);
         ctx.SelectFontFace("Arial", FontSlant.Normal, FontWeight.Normal);
         ctx.SetFontSize(10);
@@ -264,14 +235,14 @@ public class GuiDialogEWaterPump : GuiDialogBlockEntity
     {
         if (_blockEntityPos != null)
         {
-            var be = _capi?.World?.BlockAccessor?.GetBlockEntity(_blockEntityPos) as BlockEntityEWaterPump;
+            var be = _capi?.World?.BlockAccessor?.GetBlockEntity(_blockEntityPos) as BlockEntityEAquaAccum;
             if (be != null)
             {
                 _beWaterPump = be;
                 _waterAmount = be.LiquidAmount;
                 _capacity = be.LiquidCapacity;
                 _pumpProgress = be.PumpProgress;
-                _status = be.GetPumpStatus();
+                _status = be.GetCondensationStatus();
             }
         }
     }

@@ -43,6 +43,7 @@ namespace ElectricalProgressive.Utils
         private static readonly AdvancedParticleProperties WhiteSmokeTemplateAdvanced;
         private static readonly AdvancedParticleProperties WhiteSmoke2TemplateAdvanced;
         private static readonly AdvancedParticleProperties WhiteSlowSmokeTemplateAdvanced;
+        private static readonly AdvancedParticleProperties WaterTemplateAdvanced;
 
         static ParticleManager()
         {
@@ -53,6 +54,7 @@ namespace ElectricalProgressive.Utils
             WhiteSmokeTemplateAdvanced = CreateWhiteSmokeTemplate();
             WhiteSmoke2TemplateAdvanced = CreateWhiteSmoke2Template();
             WhiteSlowSmokeTemplateAdvanced = CreateWhiteSlowSmokeTemplate();
+            WaterTemplateAdvanced = CreateWaterDripTemplate();
         }
 
         private static AdvancedParticleProperties CreateSparksTemplate()
@@ -297,7 +299,49 @@ namespace ElectricalProgressive.Utils
 
             return template;
         }
+        private static AdvancedParticleProperties CreateWaterDripTemplate()
+        {
+            var template = new AdvancedParticleProperties();
 
+            template.Quantity.avg = 1.5f;
+            template.Quantity.var = 0.5f;
+
+            // Цвет воды (голубой)
+            template.HsvaColor[0].avg = 180;
+            template.HsvaColor[0].var = 20;
+            template.HsvaColor[1].avg = 100;
+            template.HsvaColor[1].var = 50;
+            template.HsvaColor[2].avg = 220;
+            template.HsvaColor[2].var = 35;
+            template.HsvaColor[3].avg = 200;
+            template.HsvaColor[3].var = 55;
+
+            // МАЛЕНЬКАЯ СКОРОСТЬ ПАДЕНИЯ
+            template.Velocity[0].avg = 0f;
+            template.Velocity[1].avg = -1.0f;   // медленно падает
+            template.Velocity[2].avg = 0f;
+            template.Velocity[0].var = 0.1f;
+            template.Velocity[1].var = 0.2f;
+            template.Velocity[2].var = 0.1f;
+
+            template.WindAffectednes = 0f;
+            template.WindAffectednesAtPos = 0f;
+    
+            // МАЛЕНЬКОЕ ВРЕМЯ ЖИЗНИ
+            template.LifeLength.avg = 0.4f;      // живут меньше полсекунды
+            template.LifeLength.var = 0.1f;
+    
+            template.GravityEffect.avg = 0f;
+            template.GravityEffect.var = 0f;
+
+            template.ParticleModel = EnumParticleModel.Quad;
+            template.Size.avg = 0.06f;           // капли помельче
+            template.Size.var = 0.02f;
+    
+            template.OpacityEvolve = new EvolvingNatFloat(EnumTransformFunction.LINEAR, -200f);
+
+            return template;
+        }
        
 
 
@@ -352,6 +396,14 @@ namespace ElectricalProgressive.Utils
             particles.basePos = RandomBlockPos(pos, variationPos);
             manager.Spawn(particles);
         }
+        
+        public static void SpawnWaterSparksAsync(IAsyncParticleManager manager, Vec3d pos, Vec3d variationPos)
+        {
+            var particles = WaterTemplateAdvanced.Clone();
+            particles.WindAffectednesAtPos = 0.1f; // обязательно
+            particles.basePos = RandomBlockPos(pos, variationPos);
+            manager.Spawn(particles);
+        }
 
 
 
@@ -388,6 +440,11 @@ namespace ElectricalProgressive.Utils
         {
             SpawnWhiteSlowSmokeAsync(manager, pos, new Vec3d(0.5, 0.1, 0.5));
         }
+        
+        public static void SpawnWaterSparksAsync(IAsyncParticleManager manager, Vec3d pos)
+        {
+            SpawnWaterSparksAsync(manager, pos, new Vec3d(0.1, 0.0, 0.1));
+        }
 
 
 
@@ -411,6 +468,8 @@ namespace ElectricalProgressive.Utils
                 SpawnElectricSparksAsync(manager, pos);
             else if (type == 5)
                 SpawnWindVerticalAsync(manager, pos);
+            else if (type == 6)
+                SpawnWaterSparksAsync(manager, pos);
 
         }
 

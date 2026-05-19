@@ -1,5 +1,4 @@
 ﻿using ElectricalProgressive.Content;
-using ElectricalProgressive.Content.EWaterPump;
 using ElectricalProgressive.Content.ItemInsertionPipe;
 using ElectricalProgressive.Content.LiquidInsertionPipe;
 using ElectricalProgressive.Content.NetworkPipe;
@@ -47,10 +46,6 @@ public class ElectricalProgressiveTransport : ModSystem
         api.RegisterBlockEntityClass("BEInsertionPipe", typeof(BEItemInsertionPipe));
         api.RegisterBlockEntityClass("BELiquidInsertionPipe", typeof(BELiquidInsertionPipe)); 
         
-        api.RegisterBlockClass("BlockEWaterPump", typeof(BlockEWaterPump));
-        api.RegisterBlockEntityClass("BlockEntityEWaterPump", typeof(BlockEntityEWaterPump));
-        api.RegisterBlockEntityBehaviorClass("BEBehaviorEWaterPump", typeof(BEBehaviorEWaterPump));
-
         // Инициализация менеджера сетей
         networkManager = new PipeNetworkManager();
         networkManager.Initialize(api);

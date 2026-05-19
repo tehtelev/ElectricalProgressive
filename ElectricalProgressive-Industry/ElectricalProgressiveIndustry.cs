@@ -5,6 +5,7 @@ using ElectricalProgressive.Content.Block.EPress;
 using ElectricalProgressive.Content.Block.EWoodcutter;
 using ElectricalProgressive.Content.Block.Gauge;
 using ElectricalProgressive.Content.Block.PressForm;
+using ElectricalProgressive.Content.EAquaAccum;
 using ElectricalProgressive.Patch;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -59,6 +60,10 @@ public class ElectricalProgressiveIndustry : ModSystem
         api.RegisterBlockClass("BlockEWoodcutter", typeof(BlockEWoodcutter));
         api.RegisterBlockEntityClass("BlockEntityEWoodcutter", typeof(BlockEntityEWoodcutter));
         api.RegisterBlockEntityBehaviorClass("BEBehaviorEWoodcutter", typeof(BEBehaviorEWoodcutter));
+        
+        api.RegisterBlockClass("BlockEAquaAccum", typeof(BlockEAquaAccum));
+        api.RegisterBlockEntityClass("BlockEntityEAquaAccum", typeof(BlockEntityEAquaAccum));
+        api.RegisterBlockEntityBehaviorClass("BEBehaviorEAquaAccum", typeof(BEBehaviorEAquaAccum));
 
         api.RegisterBlockClass("BlockPressForm", typeof(BlockPressForm));
 

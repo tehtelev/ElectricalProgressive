@@ -1,0 +1,190 @@
+{
+  "code": "eaquaaccum",
+  "class": "BlockEAquaAccum",
+  "entityClass": "BlockEntityEAquaAccum",
+  "attributes": {
+    "blockEProperties": "all",
+    "facesEProperties": [ "north", "east", "south", "west", "up", "down" ],
+    "particlesType": 6,
+    "particlesFramesAnim": [
+      [ 1, 50 ]
+    ],
+    "maxConsumption": 80,
+    "voltage": 32,
+    "maxCurrent": 80.0,
+    "isolated": true,
+    "isolatedEnvironment": true,
+    "capacityLitres": 100,
+    "handbook": {
+      "groupBy": [
+        "eaquaaccum-*"
+      ],
+      "extraSections": [
+        {
+          "title": "Electric aqua accumulator",
+          "text": "An electric aqua accumulator that extracts water from underground sources. Requires at least 50% water blocks in a 5x5x5 area and must be placed directly above a water source. Maximum pumping depth: 10 blocks. Capacity: 100 liters."
+        }
+      ]
+    }
+  },
+  "attributesbytype": {
+    "*-north": {
+      "particlesOffsetPos": [
+        [ 1.1, 1.8, 0.5 ]
+      ]
+    },
+    "*-east": {
+      "particlesOffsetPos": [
+        [ 1.5, 1.0, 0.25 ]
+      ]
+    },
+    "*-south": {
+      "particlesOffsetPos": [
+        [ 0.75, 1.0, 1.6 ]
+      ]
+    },
+    "*-west": {
+      "particlesOffsetPos": [
+        [ -0.5, 1.0, 0.75 ]
+      ]
+    }
+  },
+  "entityBehaviors": [
+    {
+      "name": "Container"
+    },
+    {
+      "name": "Animatable"
+    },
+    {
+      "name": "BEBehaviorEAquaAccum"
+    },
+    {
+      "name": "ElectricalProgressive"
+    }
+  ],
+  "creativeinventory": {
+    "general": [ "*-north", "*-north" ],
+    "electricity": [ "*-north" ]
+  },
+  "behaviors": [
+    { "name": "HorizontalOrientable" },
+    {
+      "name": "Multiblock",
+      "propertiesByType": {
+        "*-north": {
+          "sizex": 2,
+          "sizey": 2,
+          "sizez": 2,
+          "cposition": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          }
+        },
+        "*-east": {
+          "sizex": 2,
+          "sizey": 2,
+          "sizez": 2,
+          "cposition": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        },
+        "*-south": {
+          "sizex": 2,
+          "sizey": 2,
+          "sizez": 2,
+          "cposition": {
+            "x": 1,
+            "y": 0,
+            "z": 0
+          }
+        },
+        "*-west": {
+          "sizex": 2,
+          "sizey": 2,
+          "sizez": 2,
+          "cposition": {
+            "x": 1,
+            "y": 0,
+            "z": 1
+          }
+        }
+      }
+    }
+  ],
+  "blockmaterial": "Metal",
+  "variantgroups": [
+    {
+      "code": "side",
+      "loadFromProperties": "abstract/horizontalorientation"
+    }
+  ],
+  "shapebytype": {
+    "*-north": {
+      "base": "block/eaquaaccum/eaquaaccum",
+      "rotateY": 0
+    },
+    "*-east": {
+      "base": "block/eaquaaccum/eaquaaccum",
+      "rotateY": 270
+    },
+    "*-south": {
+      "base": "block/eaquaaccum/eaquaaccum",
+      "rotateY": 180
+    },
+    "*-west": {
+      "base": "block/eaquaaccum/eaquaaccum",
+      "rotateY": 90
+    }
+  },
+  "lightAbsorption": 0,
+  "sidesolidByType": {
+    "*-north": {
+      "all": false,
+      "up": true,
+      "down": true
+    }
+  },
+  "sideopaque": {
+    "all": "false"
+  },
+  "resistance": 3.5,
+  "sounds": {
+    "place": "game:block/anvil",
+    "walk": "game:walk/metal",
+    "hit": "game:block/anvil",
+    "break": "game:block/anvil"
+  },
+  "guiTransform": {
+    "rotation": {
+      "x": -22.6,
+      "y": -145,
+      "z": 0
+    },
+    "origin": {
+      "x": 0.5,
+      "y": 0.9,
+      "z": 0.5
+    },
+    "scale": 0.72
+  },
+  "heldTpIdleAnimation": "holdbothhandslarge",
+  "heldRightReadyAnimation": "heldblockready",
+  "heldTpUseAnimation": "twohandplaceblock",
+  "tpHandTransform": {
+    "translation": {
+      "x": -0.6,
+      "y": -0.91,
+      "z": -0.8
+    },
+    "rotation": {
+      "x": -2,
+      "y": 25,
+      "z": -78
+    },
+    "scale": 0.4
+  }
+}

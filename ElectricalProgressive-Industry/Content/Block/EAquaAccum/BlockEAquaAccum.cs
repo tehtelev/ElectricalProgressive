@@ -13,14 +13,14 @@ using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
 
-namespace ElectricalProgressive.Content.EWaterPump;
+namespace ElectricalProgressive.Content.EAquaAccum;
 
 /// <summary>
 /// Блок электрической помпы для воды.
 /// Реализует интерфейсы для работы с жидкостями (ILiquidSink, ILiquidSource).
 /// На основе BlockEFruitPress, но с одним слотом для воды.
 /// </summary>
-public class BlockEWaterPump : BlockEBase, ILiquidSink, ILiquidSource
+public class BlockEAquaAccum : BlockEBase, ILiquidSink, ILiquidSource
 {
     // === Параметры контейнера для жидкости ===
     public float CapacityLitres => 100f;
@@ -124,9 +124,9 @@ public class BlockEWaterPump : BlockEBase, ILiquidSink, ILiquidSource
     /// <summary>
     /// Получить BlockEntity помпы по позиции.
     /// </summary>
-    private BlockEntityEWaterPump GetBlockEntity(BlockPos pos)
+    private BlockEntityEAquaAccum GetBlockEntity(BlockPos pos)
     {
-        return api?.World?.BlockAccessor.GetBlockEntity(pos) as BlockEntityEWaterPump;
+        return api?.World?.BlockAccessor.GetBlockEntity(pos) as BlockEntityEAquaAccum;
     }
 
     public virtual void SetContents(ItemStack containerStack, ItemStack[] stacks)
@@ -361,7 +361,7 @@ public class BlockEWaterPump : BlockEBase, ILiquidSink, ILiquidSource
             return false;
 
         if (!base.DoPlaceBlock(world, byPlayer, blockSel, byItemStack) ||
-            world.BlockAccessor.GetBlockEntity(blockSel.Position) is not BlockEntityEWaterPump entity)
+            world.BlockAccessor.GetBlockEntity(blockSel.Position) is not BlockEntityEAquaAccum entity)
         {
             return false;
         }

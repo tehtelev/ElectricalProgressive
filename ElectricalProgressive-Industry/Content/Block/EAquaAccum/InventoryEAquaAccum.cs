@@ -4,9 +4,9 @@ using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
 
-namespace ElectricalProgressive.Content.EWaterPump;
+namespace ElectricalProgressive.Content.EAquaAccum;
 
-public class InventoryEWaterPump : InventoryBase, ISlotProvider
+public class InventoryEAquaAccum : InventoryBase, ISlotProvider
 {
     private ItemSlot[] slots;
     private BlockPos _pos;
@@ -33,7 +33,7 @@ public class InventoryEWaterPump : InventoryBase, ISlotProvider
         }
     }
 
-    public InventoryEWaterPump(string inventoryID, ICoreAPI api)
+    public InventoryEAquaAccum(string inventoryID, ICoreAPI api)
         : base(inventoryID, api)
     {
         _api = api;
@@ -41,7 +41,7 @@ public class InventoryEWaterPump : InventoryBase, ISlotProvider
         InitializeSlots();
     }
 
-    public InventoryEWaterPump() : base(null, null)
+    public InventoryEAquaAccum() : base(null, null)
     {
         slots = new ItemSlot[1];
         InitializeSlots();
