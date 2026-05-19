@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
@@ -52,6 +52,7 @@ public class InventoryEAquaAccum : InventoryBase, ISlotProvider
         base.LateInitialize(inventoryID, api);
         _api = api;
         InitializeSlots();
+        UpdateLiquidSlotCapacity();
     }
 
     public void SetBlockPos(BlockPos pos)
@@ -71,6 +72,21 @@ public class InventoryEAquaAccum : InventoryBase, ISlotProvider
             if (field != null)
             {
                 field.SetValue(liquidSlot, capacity);
+                
+                // КРИТИЧЕСКИ ВАЖНО: обрезаем стак, если он превышает новую ёмкость
+                if (!liquidSlot.Empty && liquidSlot.Itemstack != null)
+                {
+                    var props = BlockLiquidContainerBase.GetContainableProps(liquidSlot.Itemstack);
+                    if (props != null)
+                    {
+                        float maxStackSize = capacity * props.ItemsPerLitre;
+                        if (liquidSlot.StackSize > maxStackSize)
+                        {
+                            liquidSlot.Itemstack.StackSize = (int)maxStackSize;
+                            liquidSlot.MarkDirty();
+                        }
+                    }
+                }
             }
         }
     }
@@ -120,7 +136,7 @@ public class InventoryEAquaAccum : InventoryBase, ISlotProvider
                 slots[i] = loadedSlots[i];
         }
 
-        UpdateLiquidSlotCapacity();
+        UpdateLiquidSlotCapacity(); // Восстанавливаем ёмкость после загрузки
     }
 
     public override void ToTreeAttributes(ITreeAttribute tree)

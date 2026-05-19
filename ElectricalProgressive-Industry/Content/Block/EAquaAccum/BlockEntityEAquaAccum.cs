@@ -30,7 +30,7 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
     private bool _wasCondensingLastTick;
     public float PumpProgress { get; private set; }
 
-    // НАКОПЛЕНИЕ ДРОБНОЙ ЧАСТИ ВОДЫ (решает проблему остановки)
+    // НАКОПЛЕНИЕ ДРОБНОЙ ЧАСТИ ВОДЫ
     private float _pendingWaterFraction = 0f;
 
     // === КЛИМАТИЧЕСКИЕ ДАННЫЕ ===
@@ -113,6 +113,9 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
 
         this._inventory.LateInitialize("ewaterpump-" + Pos, api);
         (_inventory as InventoryEAquaAccum)?.SetBlockPos(Pos);
+        
+        // ПРИНУДИТЕЛЬНО обновляем ёмкость слота после инициализации
+        (_inventory as InventoryEAquaAccum)?.UpdateLiquidSlotCapacity();
 
         this.RegisterGameTickListener(UpdateCondenser, 50);
         UpdateClimateData();
@@ -204,6 +207,7 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
         if (PowerBehavior == null || ElectricalProgressive == null)
         {
             StopAnimation();
+            StopSound();
             return;
         }
 
@@ -269,20 +273,36 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
             var props = BlockLiquidContainerBase.GetContainableProps(waterStack);
             if (props == null) return;
 
-            // ПРЕОБРАЗУЕМ ЛИТРЫ В ПРЕДМЕТЫ С ОКРУГЛЕНИЕМ
+            // ПРЕОБРАЗУЕМ ЛИТРЫ В ПРЕДМЕТЫ
             float itemsToAddFloat = litres * props.ItemsPerLitre;
             int itemsToAdd = (int)Math.Round(itemsToAddFloat, MidpointRounding.AwayFromZero);
             itemsToAdd = Math.Max(1, itemsToAdd);
             
-            LiquidSlot.Itemstack.StackSize += itemsToAdd;
-            LiquidSlot.Itemstack.StackSize = Math.Min(
-                LiquidSlot.Itemstack.StackSize,
-                LiquidSlot.Itemstack.Collectible.MaxStackSize
-            );
+            int newSize = LiquidSlot.Itemstack.StackSize + itemsToAdd;
+            
+            // Проверяем максимальную ёмкость в литрах, а не MaxStackSize предмета!
+            float maxItems = LiquidCapacity * props.ItemsPerLitre;
+            if (newSize > maxItems)
+            {
+                newSize = (int)maxItems;
+            }
+            
+            LiquidSlot.Itemstack.StackSize = newSize;
         }
         else
         {
             LiquidSlot.Itemstack = waterStack;
+        }
+
+        // Проверяем, не переполнен ли слот относительно ёмкости в литрах
+        var checkProps = BlockLiquidContainerBase.GetContainableProps(LiquidSlot.Itemstack);
+        if (checkProps != null)
+        {
+            float maxItems = LiquidCapacity * checkProps.ItemsPerLitre;
+            if (LiquidSlot.Itemstack.StackSize > maxItems)
+            {
+                LiquidSlot.Itemstack.StackSize = (int)maxItems;
+            }
         }
 
         LiquidSlot.MarkDirty();
@@ -302,8 +322,10 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
         var props = BlockLiquidContainerBase.GetContainableProps(waterStack);
         if (props == null) return null;
 
-        // Округляем, чтобы получить хотя бы 1 предмет
+        // Рассчитываем размер стака, но не больше максимальной ёмкости
         int stackSize = (int)Math.Round(litres * props.ItemsPerLitre, MidpointRounding.AwayFromZero);
+        float maxItems = LiquidCapacity * props.ItemsPerLitre;
+        stackSize = (int)Math.Min(stackSize, maxItems);
         waterStack.StackSize = Math.Max(1, stackSize);
         return waterStack;
     }
@@ -390,9 +412,9 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
         if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
             return;
 
-        if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("pump") == true)
+        if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on") == true)
         {
-            AnimUtil.StopAnimation("pump");
+            AnimUtil.StopAnimation("work-on");
         }
     }
 
@@ -462,6 +484,8 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
         if (this.Api != null)
         {
             this._inventory.AfterBlocksLoaded(this.Api.World);
+            // КРИТИЧЕСКИ ВАЖНО: обновляем ёмкость слота после загрузки
+            (_inventory as InventoryEAquaAccum)?.UpdateLiquidSlotCapacity();
         }
     }
 

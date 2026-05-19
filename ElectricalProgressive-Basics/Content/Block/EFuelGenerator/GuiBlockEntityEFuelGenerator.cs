@@ -134,61 +134,141 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
         ctx.Restore();
     }
     
-    private void OnWaterDraw(Context ctx, ImageSurface surface, ElementBounds currentBounds)
+private void OnWaterDraw(Context ctx, ImageSurface surface, ElementBounds currentBounds)
+{
+    ItemSlot liquidSlot = Inventory[1];
+    if (liquidSlot.Empty)
     {
-        ItemSlot liquidSlot = Inventory[1];
-        if (liquidSlot.Empty)
+        // Если слот пуст, показываем серый фон с черточками
+        ctx.Save();
+        ctx.SetSourceRGBA(0.3, 0.3, 0.3, 0.5);
+        ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
+        ctx.Fill();
+        
+        // Рисуем деления как у линейки даже на пустом баке
+        ctx.SetSourceRGB(0, 0, 0);
+        ctx.LineWidth = 1;
+        
+        double totalHeight = currentBounds.InnerHeight;
+        int divisions = 10;
+        
+        for (int i = 1; i < divisions; i++)
         {
-            // Если слот пуст, показываем серый фон
-            ctx.Save();
-            ctx.SetSourceRGBA(0.3, 0.3, 0.3, 0.5);
-            ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
-            ctx.Fill();
-            ctx.Restore();
-            return;
+            double y = (totalHeight / divisions) * i;
+            double lineWidth = (i % 2 == 0) ? 8 : 5;
+            
+            // Черточка слева
+            ctx.MoveTo(0, y);
+            ctx.LineTo(lineWidth, y);
+            ctx.Stroke();
+            
+            // Черточка справа
+            ctx.MoveTo(currentBounds.InnerWidth - lineWidth, y);
+            ctx.LineTo(currentBounds.InnerWidth, y);
+            ctx.Stroke();
         }
         
-        float itemsPerLitre = 1f;
-        float capacity = _betestgen?.WaterCapacity ?? 100f;
-        
-        WaterTightContainableProps containableProps = BlockLiquidContainerBase.GetContainableProps(liquidSlot.Itemstack);
-        if (containableProps != null)
-        {
-            itemsPerLitre = containableProps.ItemsPerLitre;
-        }
-        
-        float fullnessRelative = (float)liquidSlot.StackSize / itemsPerLitre / capacity;
-        fullnessRelative = Math.Min(Math.Max(fullnessRelative, 0f), 1f);
-        
-        double y = (1.0 - fullnessRelative) * currentBounds.InnerHeight;
-        
-        ctx.Rectangle(0, y, currentBounds.InnerWidth, currentBounds.InnerHeight - y);
+        ctx.Restore();
+        return;
+    }
+    
+    float itemsPerLitre = 1f;
+    float capacity = _betestgen?.WaterCapacity ?? 100f;
+    
+    WaterTightContainableProps containableProps = BlockLiquidContainerBase.GetContainableProps(liquidSlot.Itemstack);
+    if (containableProps != null)
+    {
+        itemsPerLitre = containableProps.ItemsPerLitre;
+    }
+    
+    float fullnessRelative = (float)liquidSlot.StackSize / itemsPerLitre / capacity;
+    fullnessRelative = Math.Min(Math.Max(fullnessRelative, 0f), 1f);
+    
+    double waterTopY = (1.0 - fullnessRelative) * currentBounds.InnerHeight;
+    
+    // Рисуем жидкость
+    if (fullnessRelative > 0)
+    {
+        ctx.Rectangle(0, waterTopY, currentBounds.InnerWidth, currentBounds.InnerHeight - waterTopY);
         
         // Если жидкость не разрешена, рисуем с красным оттенком
         if (!_liquidAllowed)
         {
             ctx.SetSourceRGBA(1, 0.3, 0.3, 0.7);
             ctx.Fill();
-            return;
         }
-        
-        CompositeTexture compositeTexture = containableProps?.Texture ?? 
-            liquidSlot.Itemstack.Collectible.Attributes?["inContainerTexture"]
-                .AsObject<CompositeTexture>(null, liquidSlot.Itemstack.Collectible.Code.Domain);
-        
-        if (compositeTexture != null)
+        else
         {
-            ctx.Save();
-            Matrix matrix = ctx.Matrix;
-            matrix.Scale(GuiElement.scaled(3.0), GuiElement.scaled(3.0));
-            ctx.Matrix = matrix;
+            CompositeTexture compositeTexture = containableProps?.Texture ?? 
+                liquidSlot.Itemstack.Collectible.Attributes?["inContainerTexture"]
+                    .AsObject<CompositeTexture>(null, liquidSlot.Itemstack.Collectible.Code.Domain);
             
-            AssetLocation textureLoc = compositeTexture.Base.Clone().WithPathAppendixOnce(".png");
-            GuiElement.fillWithPattern(capi, ctx, textureLoc, true, false, compositeTexture.Alpha);
-            
-            ctx.Restore();
+            if (compositeTexture != null)
+            {
+                ctx.Save();
+                Matrix matrix = ctx.Matrix;
+                matrix.Scale(GuiElement.scaled(3.0), GuiElement.scaled(3.0));
+                ctx.Matrix = matrix;
+                
+                AssetLocation textureLoc = compositeTexture.Base.Clone().WithPathAppendixOnce(".png");
+                GuiElement.fillWithPattern(capi, ctx, textureLoc, true, false, compositeTexture.Alpha);
+                
+                ctx.Restore();
+            }
+            else
+            {
+                // Если нет текстуры, рисуем синим
+                ctx.SetSourceRGB(0.2, 0.4, 0.8);
+                ctx.Fill();
+            }
         }
     }
+    
+    // Рисуем рамку резервуара
+    ctx.SetSourceRGB(0, 0, 0);
+    ctx.LineWidth = 2;
+    ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
+    ctx.Stroke();
+    
+    // Рисуем деления как у линейки (черточки слева и справа)
+    ctx.SetSourceRGB(0, 0, 0);
+    ctx.LineWidth = 1;
+    
+    double _totalHeight = currentBounds.InnerHeight;
+    int _divisions = 10;
+    
+    for (int i = 1; i < _divisions; i++)
+    {
+        double y = (_totalHeight / _divisions) * i;
+        double lineWidth = (i % 2 == 0) ? 8 : 5; // четные длиннее, нечетные короче
+        
+        // Черточка слева
+        ctx.MoveTo(0, y);
+        ctx.LineTo(lineWidth, y);
+        ctx.Stroke();
+        
+        // Черточка справа
+        ctx.MoveTo(currentBounds.InnerWidth - lineWidth, y);
+        ctx.LineTo(currentBounds.InnerWidth, y);
+        ctx.Stroke();
+    }
+    
+    // Текст с количеством литров
+    ctx.SetSourceRGB(0, 0, 0);
+    ctx.SelectFontFace("Arial", FontSlant.Normal, FontWeight.Bold);
+    ctx.SetFontSize(10);
+    
+    float currentLiters = (float)liquidSlot.StackSize / itemsPerLitre;
+    string amountText = $"{currentLiters:0.##}L";
+    var amountExtents = ctx.TextExtents(amountText);
+    
+    // Центрируем текст по горизонтали, располагаем внизу
+    ctx.MoveTo(
+        (currentBounds.InnerWidth - amountExtents.Width) / 2,
+        currentBounds.InnerHeight - 3
+    );
+    ctx.ShowText(amountText);
+}
     
     /// <summary>
     /// Обновление данных в GUI с ограничением по времени
