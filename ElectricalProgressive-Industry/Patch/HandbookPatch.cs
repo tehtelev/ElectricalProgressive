@@ -22,10 +22,32 @@ public class HandbookPatch
     {
         _capi = clientApi;
         var harmony = new Harmony("electricalprogressive.handbook.patches");
-        harmony.Patch(
-            typeof(CollectibleBehaviorHandbookTextAndExtraInfo).GetMethod("GetHandbookInfo"),
-            postfix: new HarmonyMethod(typeof(HandbookPageComposer).GetMethod("AddRecipeInfoPostfix"))
+
+        // Точный поиск метода по имени и типам параметров
+        var originalMethod = AccessTools.Method(
+            typeof(CollectibleBehaviorHandbookTextAndExtraInfo),
+            "GetHandbookInfo",
+            new[] {
+                typeof(ItemSlot),
+                typeof(ICoreClientAPI),
+                typeof(ItemStack[]),
+                typeof(ActionConsumable<string>)
+            }
         );
+
+        if (originalMethod == null)
+        {
+            _capi.Logger.Error("[ElectricalProgressive] Could not find original GetHandbookInfo method. Skipping patch.");
+            return;
+        }
+
+        var postfixMethod = AccessTools.Method(typeof(HandbookPageComposer), "AddRecipeInfoPostfix");
+
+
+        // Задаём повышенный приоритет, чтобы постфикс выполнялся после аналогичных патчей других модов
+        var postfix = new HarmonyMethod(postfixMethod) { priority = Priority.Last};
+        harmony.Patch(originalMethod, postfix: postfix);
+
     }
 
     public static class HandbookPageComposer
@@ -560,7 +582,7 @@ public class HandbookPatch
         public override void Dispose()
         {
             groups?.Clear();
-            _stackCache?.Clear();
+            _stackCache?.Clear(); // TODO: надо разобраться когда кеши очищать таки
             base.Dispose();
         }
     }
