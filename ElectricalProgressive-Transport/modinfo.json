@@ -10,7 +10,5 @@
   "Version": "1.0.0",
   "dependencies": {
     "game": "1.22.0",
-    "electricalprogressivecore": "3.0.0",
-    "electricalprogressivebasics": "3.0.0"
   }
 }

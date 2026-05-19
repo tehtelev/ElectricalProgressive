@@ -6,8 +6,6 @@ using ElectricalProgressive.Content.NormalPipe;
 using Vintagestory.API.Common;
 
 [assembly: ModDependency("game", "1.22.0")]
-[assembly: ModDependency("electricalprogressivecore", "3.0.0")]
-[assembly: ModDependency("electricalprogressivebasics", "3.0.0")]
 [assembly: ModInfo(
     "Electrical Progressive: Transport",
     "electricalprogressivetransport",
