@@ -14,6 +14,7 @@ public class ElectricalProgressiveRecipeManager : ModSystem
     public static List<HammerRecipe> HammerRecipes;
     public static List<PressRecipe> PressRecipes;
     public static List<ExtruderRecipe> ExtruderRecipes;
+    public static List<CrusherRecipe> CrusherRecipes;
 
 
     public static Dictionary<string, (string code, IEnumerable<IRecipeMultyBase> recipes)> machines;
@@ -28,6 +29,7 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         api.Event.SaveGameLoaded += LoadHammerRecipes;
         api.Event.SaveGameLoaded += LoadPressRecipes;
         api.Event.SaveGameLoaded += LoadExtruderRecipes;
+        api.Event.SaveGameLoaded += LoadCrusherRecipes;
 
         machines = new Dictionary<string, (string, IEnumerable<IRecipeMultyBase>)>(4);
     }
@@ -62,6 +64,14 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         LoadRecipes<ExtruderRecipe>("Extruder Recipe", "recipes/electric/extruderrecipe", ExtruderRecipes.Add);
         api.World.Logger.Debug(Lang.Get("electricalprogressiveindustry:recipeloading"));
         machines.Add("eextruder-", ("electricalprogressiveindustry:eextruder-north", ExtruderRecipes));
+    }
+    
+    private void LoadCrusherRecipes()
+    {
+        CrusherRecipes = [];
+        LoadRecipes<CrusherRecipe>("Crusher Recipe", "recipes/electric/crusherrecipe", CrusherRecipes.Add);
+        api.World.Logger.Debug(Lang.Get("electricalprogressiveindustry:recipeloading"));
+        machines.Add("ecrusher-", ("electricalprogressiveindustry:ecrusher-north", CrusherRecipes));
     }
 
     private void LoadRecipes<T>(string name, string path, Action<T> registerMethod)

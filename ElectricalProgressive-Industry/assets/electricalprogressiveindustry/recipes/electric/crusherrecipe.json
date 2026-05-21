@@ -1,0 +1,1190 @@
+﻿[
+  {
+    "code": "crush_poor_hematite",
+    "energyOperation": 6000,
+    "ingredients": [{ "type": "item", "code": "game:ore-poor-hematite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 6 },
+      { "type": "item", "code": "game:nugget-cassiterite", "stackSize": 1, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_medium_hematite",
+    "energyOperation": 8000,
+    "ingredients": [{ "type": "item", "code": "game:ore-medium-hematite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 7 },
+      { "type": "item", "code": "game:nugget-cassiterite", "stackSize": 1, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_rich_hematite",
+    "energyOperation": 10000,
+    "ingredients": [{ "type": "item", "code": "game:ore-rich-hematite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 8 },
+      { "type": "item", "code": "game:nugget-cassiterite", "stackSize": 2, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_bountiful_hematite",
+    "energyOperation": 12000,
+    "ingredients": [{ "type": "item", "code": "game:ore-bountiful-hematite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 10 },
+      { "type": "item", "code": "game:nugget-cassiterite", "stackSize": 3, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_poor_hematite",
+    "energyOperation": 12000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-poor-hematite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 12 },
+      { "type": "item", "code": "game:nugget-cassiterite", "stackSize": 2, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_medium_hematite",
+    "energyOperation": 14000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-medium-hematite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 14 },
+      { "type": "item", "code": "game:nugget-cassiterite", "stackSize": 3, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_rich_hematite",
+    "energyOperation": 16000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-rich-hematite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 16 },
+      { "type": "item", "code": "game:nugget-cassiterite", "stackSize": 4, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_bountiful_hematite",
+    "energyOperation": 18000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-bountiful-hematite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 20 },
+      { "type": "item", "code": "game:nugget-cassiterite", "stackSize": 6, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_poor_limonite",
+    "energyOperation": 6000,
+    "ingredients": [{ "type": "item", "code": "game:ore-poor-limonite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-limonite", "stackSize": 6 },
+      { "type": "item", "code": "game:nugget-pentlandite", "stackSize": 1, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_medium_limonite",
+    "energyOperation": 8000,
+    "ingredients": [{ "type": "item", "code": "game:ore-medium-limonite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-limonite", "stackSize": 7 },
+      { "type": "item", "code": "game:nugget-pentlandite", "stackSize": 1, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_rich_limonite",
+    "energyOperation": 10000,
+    "ingredients": [{ "type": "item", "code": "game:ore-rich-limonite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-limonite", "stackSize": 8 },
+      { "type": "item", "code": "game:nugget-pentlandite", "stackSize": 2, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_bountiful_limonite",
+    "energyOperation": 12000,
+    "ingredients": [{ "type": "item", "code": "game:ore-bountiful-limonite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-limonite", "stackSize": 10 },
+      { "type": "item", "code": "game:nugget-pentlandite", "stackSize": 3, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_poor_limonite",
+    "energyOperation": 12000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-poor-limonite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-limonite", "stackSize": 12 },
+      { "type": "item", "code": "game:nugget-pentlandite", "stackSize": 2, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_medium_limonite",
+    "energyOperation": 14000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-medium-limonite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-limonite", "stackSize": 14 },
+      { "type": "item", "code": "game:nugget-pentlandite", "stackSize": 3, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_rich_limonite",
+    "energyOperation": 16000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-rich-limonite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-limonite", "stackSize": 16 },
+      { "type": "item", "code": "game:nugget-pentlandite", "stackSize": 4, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_bountiful_limonite",
+    "energyOperation": 18000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-bountiful-limonite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-limonite", "stackSize": 20 },
+      { "type": "item", "code": "game:nugget-pentlandite", "stackSize": 6, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_poor_magnetite",
+    "energyOperation": 6000,
+    "ingredients": [{ "type": "item", "code": "game:ore-poor-magnetite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-magnetite", "stackSize": 6 },
+      { "type": "item", "code": "game:nugget-chromite", "stackSize": 1, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_medium_magnetite",
+    "energyOperation": 8000,
+    "ingredients": [{ "type": "item", "code": "game:ore-medium-magnetite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-magnetite", "stackSize": 7 },
+      { "type": "item", "code": "game:nugget-chromite", "stackSize": 1, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_rich_magnetite",
+    "energyOperation": 10000,
+    "ingredients": [{ "type": "item", "code": "game:ore-rich-magnetite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-magnetite", "stackSize": 8 },
+      { "type": "item", "code": "game:nugget-chromite", "stackSize": 2, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_bountiful_magnetite",
+    "energyOperation": 12000,
+    "ingredients": [{ "type": "item", "code": "game:ore-bountiful-magnetite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-magnetite", "stackSize": 10 },
+      { "type": "item", "code": "game:nugget-chromite", "stackSize": 3, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_poor_magnetite",
+    "energyOperation": 12000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-poor-magnetite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-magnetite", "stackSize": 12 },
+      { "type": "item", "code": "game:nugget-chromite", "stackSize": 2, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_medium_magnetite",
+    "energyOperation": 14000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-medium-magnetite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-magnetite", "stackSize": 14 },
+      { "type": "item", "code": "game:nugget-chromite", "stackSize": 3, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_rich_magnetite",
+    "energyOperation": 16000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-rich-magnetite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-magnetite", "stackSize": 16 },
+      { "type": "item", "code": "game:nugget-chromite", "stackSize": 4, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_bountiful_magnetite",
+    "energyOperation": 18000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-bountiful-magnetite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-magnetite", "stackSize": 20 },
+      { "type": "item", "code": "game:nugget-chromite", "stackSize": 6, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_poor_cassiterite",
+    "energyOperation": 3000,
+    "ingredients": [{ "type": "item", "code": "game:ore-poor-cassiterite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-cassiterite", "stackSize": 3 },
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 1, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_medium_cassiterite",
+    "energyOperation": 4500,
+    "ingredients": [{ "type": "item", "code": "game:ore-medium-cassiterite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-cassiterite", "stackSize": 4 },
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 1, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_rich_cassiterite",
+    "energyOperation": 6000,
+    "ingredients": [{ "type": "item", "code": "game:ore-rich-cassiterite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-cassiterite", "stackSize": 5 },
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 1, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_bountiful_cassiterite",
+    "energyOperation": 7500,
+    "ingredients": [{ "type": "item", "code": "game:ore-bountiful-cassiterite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-cassiterite", "stackSize": 6 },
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 2, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_poor_cassiterite",
+    "energyOperation": 8000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-poor-cassiterite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-cassiterite", "stackSize": 6 },
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 1, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_medium_cassiterite",
+    "energyOperation": 10000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-medium-cassiterite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-cassiterite", "stackSize": 8 },
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 2, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_rich_cassiterite",
+    "energyOperation": 12000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-rich-cassiterite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-cassiterite", "stackSize": 10 },
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 3, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_bountiful_cassiterite",
+    "energyOperation": 14000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-bountiful-cassiterite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-cassiterite", "stackSize": 12 },
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 4, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_poor_quartz_nativegold",
+    "energyOperation": 4000,
+    "ingredients": [{ "type": "item", "code": "game:ore-poor-quartz_nativegold-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativegold", "stackSize": 3 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 1, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_medium_quartz_nativegold",
+    "energyOperation": 5500,
+    "ingredients": [{ "type": "item", "code": "game:ore-medium-quartz_nativegold-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativegold", "stackSize": 4 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 1, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_rich_quartz_nativegold",
+    "energyOperation": 7000,
+    "ingredients": [{ "type": "item", "code": "game:ore-rich-quartz_nativegold-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativegold", "stackSize": 5 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 1, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_bountiful_quartz_nativegold",
+    "energyOperation": 8500,
+    "ingredients": [{ "type": "item", "code": "game:ore-bountiful-quartz_nativegold-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativegold", "stackSize": 6 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 2, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_poor_quartz_nativegold",
+    "energyOperation": 8000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-poor-quartz_nativegold-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativegold", "stackSize": 6 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 1, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_medium_quartz_nativegold",
+    "energyOperation": 10000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-medium-quartz_nativegold-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativegold", "stackSize": 8 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 2, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_rich_quartz_nativegold",
+    "energyOperation": 12000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-rich-quartz_nativegold-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativegold", "stackSize": 10 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 3, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_bountiful_quartz_nativegold",
+    "energyOperation": 14000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-bountiful-quartz_nativegold-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativegold", "stackSize": 12 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 4, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_poor_quartz_nativesilver",
+    "energyOperation": 4000,
+    "ingredients": [{ "type": "item", "code": "game:ore-poor-quartz_nativesilver-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 4 },
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 1, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_medium_quartz_nativesilver",
+    "energyOperation": 5500,
+    "ingredients": [{ "type": "item", "code": "game:ore-medium-quartz_nativesilver-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 5 },
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 1, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_rich_quartz_nativesilver",
+    "energyOperation": 7000,
+    "ingredients": [{ "type": "item", "code": "game:ore-rich-quartz_nativesilver-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 6 },
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 2, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_bountiful_quartz_nativesilver",
+    "energyOperation": 8500,
+    "ingredients": [{ "type": "item", "code": "game:ore-bountiful-quartz_nativesilver-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 7 },
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 2, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_poor_quartz_nativesilver",
+    "energyOperation": 8000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-poor-quartz_nativesilver-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 8 },
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 2, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_medium_quartz_nativesilver",
+    "energyOperation": 10000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-medium-quartz_nativesilver-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 10 },
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 2, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_rich_quartz_nativesilver",
+    "energyOperation": 12000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-rich-quartz_nativesilver-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 12 },
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 3, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_bountiful_quartz_nativesilver",
+    "energyOperation": 14000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-bountiful-quartz_nativesilver-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 14 },
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 4, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_poor_galena",
+    "energyOperation": 4000,
+    "ingredients": [{ "type": "item", "code": "game:ore-poor-galena-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 5 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 1, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_medium_galena",
+    "energyOperation": 5500,
+    "ingredients": [{ "type": "item", "code": "game:ore-medium-galena-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 6 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 1, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_rich_galena",
+    "energyOperation": 7000,
+    "ingredients": [{ "type": "item", "code": "game:ore-rich-galena-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 7 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 2, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_bountiful_galena",
+    "energyOperation": 8500,
+    "ingredients": [{ "type": "item", "code": "game:ore-bountiful-galena-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 9 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 3, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_poor_galena",
+    "energyOperation": 8000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-poor-galena-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 10 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 2, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_medium_galena",
+    "energyOperation": 10000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-medium-galena-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 12 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 3, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_rich_galena",
+    "energyOperation": 12000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-rich-galena-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 14 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 4, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_bountiful_galena",
+    "energyOperation": 14000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-bountiful-galena-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 18 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 5, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_poor_sphalerite",
+    "energyOperation": 4000,
+    "ingredients": [{ "type": "item", "code": "game:ore-poor-sphalerite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-sphalerite", "stackSize": 5 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 1, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_medium_sphalerite",
+    "energyOperation": 5500,
+    "ingredients": [{ "type": "item", "code": "game:ore-medium-sphalerite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-sphalerite", "stackSize": 6 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 1, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_rich_sphalerite",
+    "energyOperation": 7000,
+    "ingredients": [{ "type": "item", "code": "game:ore-rich-sphalerite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-sphalerite", "stackSize": 7 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 2, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_bountiful_sphalerite",
+    "energyOperation": 8500,
+    "ingredients": [{ "type": "item", "code": "game:ore-bountiful-sphalerite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-sphalerite", "stackSize": 9 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 3, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_poor_sphalerite",
+    "energyOperation": 8000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-poor-sphalerite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-sphalerite", "stackSize": 10 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 2, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_medium_sphalerite",
+    "energyOperation": 10000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-medium-sphalerite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-sphalerite", "stackSize": 12 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 3, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_rich_sphalerite",
+    "energyOperation": 12000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-rich-sphalerite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-sphalerite", "stackSize": 14 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 4, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_bountiful_sphalerite",
+    "energyOperation": 14000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-bountiful-sphalerite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-sphalerite", "stackSize": 18 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 5, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_poor_bismuthinite",
+    "energyOperation": 4000,
+    "ingredients": [{ "type": "item", "code": "game:ore-poor-bismuthinite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-bismuthinite", "stackSize": 5 },
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 1, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_medium_bismuthinite",
+    "energyOperation": 5500,
+    "ingredients": [{ "type": "item", "code": "game:ore-medium-bismuthinite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-bismuthinite", "stackSize": 6 },
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 1, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_rich_bismuthinite",
+    "energyOperation": 7000,
+    "ingredients": [{ "type": "item", "code": "game:ore-rich-bismuthinite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-bismuthinite", "stackSize": 7 },
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 2, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_bountiful_bismuthinite",
+    "energyOperation": 8500,
+    "ingredients": [{ "type": "item", "code": "game:ore-bountiful-bismuthinite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-bismuthinite", "stackSize": 9 },
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 3, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_poor_bismuthinite",
+    "energyOperation": 8000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-poor-bismuthinite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-bismuthinite", "stackSize": 10 },
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 2, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_medium_bismuthinite",
+    "energyOperation": 10000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-medium-bismuthinite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-bismuthinite", "stackSize": 12 },
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 3, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_rich_bismuthinite",
+    "energyOperation": 12000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-rich-bismuthinite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-bismuthinite", "stackSize": 14 },
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 4, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_bountiful_bismuthinite",
+    "energyOperation": 14000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-bountiful-bismuthinite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-bismuthinite", "stackSize": 18 },
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 5, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_poor_nativecopper",
+    "energyOperation": 4000,
+    "ingredients": [{ "type": "item", "code": "game:ore-poor-nativecopper-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 5 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 1, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_medium_nativecopper",
+    "energyOperation": 5500,
+    "ingredients": [{ "type": "item", "code": "game:ore-medium-nativecopper-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 6 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 1, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_rich_nativecopper",
+    "energyOperation": 7000,
+    "ingredients": [{ "type": "item", "code": "game:ore-rich-nativecopper-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 7 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 2, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_bountiful_nativecopper",
+    "energyOperation": 8500,
+    "ingredients": [{ "type": "item", "code": "game:ore-bountiful-nativecopper-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 9 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 3, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_poor_nativecopper",
+    "energyOperation": 8000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-poor-nativecopper-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 10 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 2, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_medium_nativecopper",
+    "energyOperation": 10000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-medium-nativecopper-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 12 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 3, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_rich_nativecopper",
+    "energyOperation": 12000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-rich-nativecopper-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 14 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 4, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_bountiful_nativecopper",
+    "energyOperation": 14000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-bountiful-nativecopper-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 18 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 5, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_poor_malachite",
+    "energyOperation": 4000,
+    "ingredients": [{ "type": "item", "code": "game:ore-poor-malachite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-malachite", "stackSize": 5 },
+      { "type": "item", "code": "game:nugget-sphalerite", "stackSize": 1, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_medium_malachite",
+    "energyOperation": 5500,
+    "ingredients": [{ "type": "item", "code": "game:ore-medium-malachite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-malachite", "stackSize": 6 },
+      { "type": "item", "code": "game:nugget-sphalerite", "stackSize": 1, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_rich_malachite",
+    "energyOperation": 7000,
+    "ingredients": [{ "type": "item", "code": "game:ore-rich-malachite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-malachite", "stackSize": 7 },
+      { "type": "item", "code": "game:nugget-sphalerite", "stackSize": 2, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_bountiful_malachite",
+    "energyOperation": 8500,
+    "ingredients": [{ "type": "item", "code": "game:ore-bountiful-malachite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-malachite", "stackSize": 9 },
+      { "type": "item", "code": "game:nugget-sphalerite", "stackSize": 3, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_poor_malachite",
+    "energyOperation": 8000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-poor-malachite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-malachite", "stackSize": 10 },
+      { "type": "item", "code": "game:nugget-sphalerite", "stackSize": 2, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_medium_malachite",
+    "energyOperation": 10000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-medium-malachite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-malachite", "stackSize": 12 },
+      { "type": "item", "code": "game:nugget-sphalerite", "stackSize": 3, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_rich_malachite",
+    "energyOperation": 12000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-rich-malachite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-malachite", "stackSize": 14 },
+      { "type": "item", "code": "game:nugget-sphalerite", "stackSize": 4, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_bountiful_malachite",
+    "energyOperation": 14000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-bountiful-malachite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-malachite", "stackSize": 18 },
+      { "type": "item", "code": "game:nugget-sphalerite", "stackSize": 5, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_poor_chromite",
+    "energyOperation": 7000,
+    "ingredients": [{ "type": "item", "code": "game:ore-poor-chromite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-chromite", "stackSize": 5 },
+      { "type": "item", "code": "game:nugget-magnetite", "stackSize": 1, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_medium_chromite",
+    "energyOperation": 9000,
+    "ingredients": [{ "type": "item", "code": "game:ore-medium-chromite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-chromite", "stackSize": 6 },
+      { "type": "item", "code": "game:nugget-magnetite", "stackSize": 1, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_rich_chromite",
+    "energyOperation": 11000,
+    "ingredients": [{ "type": "item", "code": "game:ore-rich-chromite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-chromite", "stackSize": 7 },
+      { "type": "item", "code": "game:nugget-magnetite", "stackSize": 2, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_bountiful_chromite",
+    "energyOperation": 13000,
+    "ingredients": [{ "type": "item", "code": "game:ore-bountiful-chromite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-chromite", "stackSize": 9 },
+      { "type": "item", "code": "game:nugget-magnetite", "stackSize": 2, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_poor_chromite",
+    "energyOperation": 9000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-poor-chromite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-chromite", "stackSize": 8 },
+      { "type": "item", "code": "game:nugget-magnetite", "stackSize": 2, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_medium_chromite",
+    "energyOperation": 11000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-medium-chromite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-chromite", "stackSize": 10 },
+      { "type": "item", "code": "game:nugget-magnetite", "stackSize": 2, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_rich_chromite",
+    "energyOperation": 13000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-rich-chromite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-chromite", "stackSize": 12 },
+      { "type": "item", "code": "game:nugget-magnetite", "stackSize": 3, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_bountiful_chromite",
+    "energyOperation": 15000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-bountiful-chromite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-chromite", "stackSize": 16 },
+      { "type": "item", "code": "game:nugget-magnetite", "stackSize": 4, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_poor_ilmenite",
+    "energyOperation": 7000,
+    "ingredients": [{ "type": "item", "code": "game:ore-poor-ilmenite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-ilmenite", "stackSize": 5 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 1, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_medium_ilmenite",
+    "energyOperation": 9000,
+    "ingredients": [{ "type": "item", "code": "game:ore-medium-ilmenite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-ilmenite", "stackSize": 6 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 1, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_rich_ilmenite",
+    "energyOperation": 11000,
+    "ingredients": [{ "type": "item", "code": "game:ore-rich-ilmenite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-ilmenite", "stackSize": 7 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 2, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_bountiful_ilmenite",
+    "energyOperation": 13000,
+    "ingredients": [{ "type": "item", "code": "game:ore-bountiful-ilmenite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-ilmenite", "stackSize": 9 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 2, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_poor_ilmenite",
+    "energyOperation": 9000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-poor-ilmenite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-ilmenite", "stackSize": 8 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 2, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_medium_ilmenite",
+    "energyOperation": 11000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-medium-ilmenite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-ilmenite", "stackSize": 10 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 2, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_rich_ilmenite",
+    "energyOperation": 13000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-rich-ilmenite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-ilmenite", "stackSize": 12 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 3, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_bountiful_ilmenite",
+    "energyOperation": 15000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-bountiful-ilmenite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-ilmenite", "stackSize": 16 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 4, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_poor_pentlandite",
+    "energyOperation": 6500,
+    "ingredients": [{ "type": "item", "code": "game:ore-poor-pentlandite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-pentlandite", "stackSize": 5 },
+      { "type": "item", "code": "game:nugget-limonite", "stackSize": 1, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_medium_pentlandite",
+    "energyOperation": 8500,
+    "ingredients": [{ "type": "item", "code": "game:ore-medium-pentlandite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-pentlandite", "stackSize": 6 },
+      { "type": "item", "code": "game:nugget-limonite", "stackSize": 1, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_rich_pentlandite",
+    "energyOperation": 10500,
+    "ingredients": [{ "type": "item", "code": "game:ore-rich-pentlandite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-pentlandite", "stackSize": 7 },
+      { "type": "item", "code": "game:nugget-limonite", "stackSize": 2, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_bountiful_pentlandite",
+    "energyOperation": 12500,
+    "ingredients": [{ "type": "item", "code": "game:ore-bountiful-pentlandite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-pentlandite", "stackSize": 9 },
+      { "type": "item", "code": "game:nugget-limonite", "stackSize": 2, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_poor_pentlandite",
+    "energyOperation": 9000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-poor-pentlandite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-pentlandite", "stackSize": 8 },
+      { "type": "item", "code": "game:nugget-limonite", "stackSize": 2, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_medium_pentlandite",
+    "energyOperation": 11000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-medium-pentlandite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-pentlandite", "stackSize": 10 },
+      { "type": "item", "code": "game:nugget-limonite", "stackSize": 2, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_rich_pentlandite",
+    "energyOperation": 13000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-rich-pentlandite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-pentlandite", "stackSize": 12 },
+      { "type": "item", "code": "game:nugget-limonite", "stackSize": 3, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_bountiful_pentlandite",
+    "energyOperation": 15000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-bountiful-pentlandite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-pentlandite", "stackSize": 16 },
+      { "type": "item", "code": "game:nugget-limonite", "stackSize": 4, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_poor_uranium",
+    "energyOperation": 8000,
+    "ingredients": [{ "type": "item", "code": "game:ore-poor-uranium-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-uranium", "stackSize": 5 },
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 1, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_medium_uranium",
+    "energyOperation": 10000,
+    "ingredients": [{ "type": "item", "code": "game:ore-medium-uranium-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-uranium", "stackSize": 6 },
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 1, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_rich_uranium",
+    "energyOperation": 12000,
+    "ingredients": [{ "type": "item", "code": "game:ore-rich-uranium-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-uranium", "stackSize": 7 },
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 2, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_bountiful_uranium",
+    "energyOperation": 14000,
+    "ingredients": [{ "type": "item", "code": "game:ore-bountiful-uranium-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-uranium", "stackSize": 9 },
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 2, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_poor_uranium",
+    "energyOperation": 10000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-poor-uranium-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-uranium", "stackSize": 8 },
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 2, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_medium_uranium",
+    "energyOperation": 12000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-medium-uranium-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-uranium", "stackSize": 10 },
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 2, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_rich_uranium",
+    "energyOperation": 14000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-rich-uranium-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-uranium", "stackSize": 12 },
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 3, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_bountiful_uranium",
+    "energyOperation": 16000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-bountiful-uranium-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-uranium", "stackSize": 16 },
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 4, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_poor_rhodochrosite",
+    "energyOperation": 5000,
+    "ingredients": [{ "type": "item", "code": "game:ore-poor-rhodochrosite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-rhodochrosite", "stackSize": 5 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 1, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_medium_rhodochrosite",
+    "energyOperation": 6500,
+    "ingredients": [{ "type": "item", "code": "game:ore-medium-rhodochrosite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-rhodochrosite", "stackSize": 6 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 1, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_rich_rhodochrosite",
+    "energyOperation": 8000,
+    "ingredients": [{ "type": "item", "code": "game:ore-rich-rhodochrosite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-rhodochrosite", "stackSize": 7 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 2, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_bountiful_rhodochrosite",
+    "energyOperation": 9500,
+    "ingredients": [{ "type": "item", "code": "game:ore-bountiful-rhodochrosite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-rhodochrosite", "stackSize": 9 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 2, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_poor_rhodochrosite",
+    "energyOperation": 8000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-poor-rhodochrosite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-rhodochrosite", "stackSize": 8 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 2, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_medium_rhodochrosite",
+    "energyOperation": 10000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-medium-rhodochrosite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-rhodochrosite", "stackSize": 10 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 2, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_rich_rhodochrosite",
+    "energyOperation": 12000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-rich-rhodochrosite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-rhodochrosite", "stackSize": 12 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 3, "chance": 0.40 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_bountiful_rhodochrosite",
+    "energyOperation": 14000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-bountiful-rhodochrosite-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-rhodochrosite", "stackSize": 16 },
+      { "type": "item", "code": "game:nugget-hematite", "stackSize": 4, "chance": 0.50 }
+    ]
+  },
+  {
+    "code": "crush_poor_galena_nativesilver",
+    "energyOperation": 4500,
+    "ingredients": [{ "type": "item", "code": "game:ore-poor-galena_nativesilver-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 4 },
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 1, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_medium_galena_nativesilver",
+    "energyOperation": 6000,
+    "ingredients": [{ "type": "item", "code": "game:ore-medium-galena_nativesilver-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 5 },
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 1, "chance": 0.35 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_poor_galena_nativesilver",
+    "energyOperation": 8000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-poor-galena_nativesilver-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 8 },
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 2, "chance": 0.30 }
+    ]
+  },
+  {
+    "code": "crush_crystalized_medium_galena_nativesilver",
+    "energyOperation": 10000,
+    "ingredients": [{ "type": "item", "code": "game:crystalizedore-medium-galena_nativesilver-*", "quantity": 1, "name": "rock" }],
+    "outputs": [
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 10 },
+      { "type": "item", "code": "game:nugget-galena", "stackSize": 3, "chance": 0.35 }
+    ]
+  }
+]
