@@ -39,8 +39,7 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
     private const int CLIMATE_CHECK_INTERVAL_MS = 30000;
 
     // === КОНСТАНТЫ КОНДЕНСАЦИИ ===
-    private const float BASE_CONDENSATION_RATE = 0.5f;
-    private const float MAX_CONDENSATION_RATE = 2f;
+    private const float BASE_EFFICIENCY = 0.00333f; // литров на 1 Дж (150 Вт * 1с = 0.5 л)
 
     // === ЗВУК ===
     private ILoadedSound _pumpSound;
@@ -163,8 +162,11 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
         if (IsFull())
             return CondensationStatus.TankFull;
 
-        var hasPower = PowerBehavior.PowerSetting >= _maxConsumption * 0.1f;
-        return hasPower ? CondensationStatus.Condensing : CondensationStatus.NoPower;
+        // Проверяем есть ли потребление энергии
+        if (PowerBehavior.PowerSetting > 0)
+            return CondensationStatus.Condensing;
+
+        return CondensationStatus.NoPower;
     }
 
     private void UpdateClimateData()
@@ -191,70 +193,65 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
         _lastClimateCheck = now;
     }
 
-    private float GetCurrentCondensationRate()
+    private float GetCurrentRainfallFactor()
     {
-        float rainfallFactor = _currentRainfall;
-        float powerRatio = Math.Min(PowerBehavior.PowerSetting / (float)_maxConsumption, 1f);
-        float powerFactor = 0.2f + (powerRatio * 0.8f);
-        
-        float rate = BASE_CONDENSATION_RATE * rainfallFactor * powerFactor;
-        
-        return Math.Min(rate, MAX_CONDENSATION_RATE);
+        // Возвращает фактор осадков от 0.3 до 1.0
+        return 0.3f + (_currentRainfall * 0.7f);
     }
 
-    private void UpdateCondenser(float dt)
+    private float GetCurrentEfficiencyFactor()
     {
-        if (PowerBehavior == null || ElectricalProgressive == null)
+        float powerRatio = Math.Min(PowerBehavior.PowerSetting / (float)_maxConsumption, 1f);
+        return 0.2f + (powerRatio * 0.8f);
+    }
+
+    /// <summary>
+    /// Добавить энергию для производства воды
+    /// </summary>
+    public void AddEnergy(float energyAmount)
+    {
+        if (energyAmount <= 0) return;
+        if (IsFull()) return;
+    
+        // Эффективность преобразования энергии в воду (литров на 1 Дж)
+        // При 150 Вт за 1 секунду = 150 Дж -> должно давать ~0.5 литра воды
+        // Значит 1 литр = 300 Дж, или 0.00333 литра на 1 Дж
+        const float BASE_EFFICIENCY = 0.00333f;
+    
+        float rainfallFactor = GetCurrentRainfallFactor();
+        float powerRatio = Math.Min(PowerBehavior.PowerSetting / (float)_maxConsumption, 1f);
+        float efficiencyFactor = 0.2f + (powerRatio * 0.8f);
+    
+        float totalEfficiency = BASE_EFFICIENCY * rainfallFactor * efficiencyFactor;
+        float waterToProduce = energyAmount * totalEfficiency;
+    
+        if (waterToProduce <= 0.0001f) return;
+    
+        // Добавляем к дробной части воды
+        _pendingWaterFraction += waterToProduce;
+    
+        // Если накопилось достаточно для добавления хотя бы 1 мл
+        if (_pendingWaterFraction >= 0.001f)
         {
-            StopAnimation();
-            StopSound();
-            return;
-        }
-
-        UpdateClimateData();
-
-        var status = GetCondensationStatus();
-        var isCondensingNow = status == CondensationStatus.Condensing;
-
-        if (isCondensingNow)
-        {
-            if (!_wasCondensingLastTick)
+            float waterToAdd = _pendingWaterFraction;
+            float availableSpace = LiquidCapacity - LiquidAmount;
+            waterToAdd = Math.Min(waterToAdd, availableSpace);
+        
+            if (waterToAdd > 0.001f)
             {
-                StartSound();
-                StartAnimation();
-            }
-
-            float currentRate = GetCurrentCondensationRate();
+                AddWater(waterToAdd);
+                _pendingWaterFraction -= waterToAdd;
+                PumpProgress = LiquidAmount / LiquidCapacity;
             
-            // НАКОПЛЕНИЕ ДРОБНОЙ ЧАСТИ
-            _pendingWaterFraction += currentRate * dt;
-            
-            // Проверяем, накопилось ли хотя бы 0.001 литра (1 мл)
-            if (_pendingWaterFraction >= 0.001f)
-            {
-                float waterToAdd = _pendingWaterFraction;
-                float availableSpace = LiquidCapacity - LiquidAmount;
-                waterToAdd = Math.Min(waterToAdd, availableSpace);
-                
-                if (waterToAdd > 0)
+                // Лог для отладки
+                if (Api.Side == EnumAppSide.Server)
                 {
-                    AddWater(waterToAdd);
-                    _pendingWaterFraction -= waterToAdd;
-                    PumpProgress = LiquidAmount / LiquidCapacity;
+                    Api.Logger.Notification($"[AquaAccum] Produced {waterToAdd:F4} L water, total: {LiquidAmount:F2}/{LiquidCapacity} L");
                 }
             }
-
-            UpdateState();
         }
-        else if (_wasCondensingLastTick)
-        {
-            StopAnimation();
-            StopSound();
-            MarkDirty(true);
-            _pendingWaterFraction = 0f;
-        }
-
-        _wasCondensingLastTick = isCondensingNow;
+    
+        UpdateState();
     }
 
     private void AddWater(float litres)
@@ -455,6 +452,53 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
         MarkDirty(true);
     }
 
+    private void UpdateCondenser(float dt)
+    {
+        if (PowerBehavior == null || ElectricalProgressive == null)
+        {
+            StopAnimation();
+            StopSound();
+            return;
+        }
+
+        UpdateClimateData();
+
+        // Просто обновляем статус для GUI
+        var status = GetCondensationStatus();
+        var isCondensingNow = status == CondensationStatus.Condensing;
+
+        if (isCondensingNow)
+        {
+            if (!_wasCondensingLastTick)
+            {
+                StartSound();
+                StartAnimation();
+            }
+        
+            // Обновляем GUI
+            UpdateState();
+        
+            // Лог для отладки
+            if (Api.Side == EnumAppSide.Server && Api.World.ElapsedMilliseconds % 5000 < 50)
+            {
+                Api.Logger.Notification($"[AquaAccum] Status: Condensing, Power: {PowerBehavior.PowerSetting}/{_maxConsumption} W, Water: {LiquidAmount:F2}/{LiquidCapacity} L");
+            }
+        }
+        else if (_wasCondensingLastTick)
+        {
+            StopAnimation();
+            StopSound();
+            MarkDirty(true);
+        
+            if (Api.Side == EnumAppSide.Server)
+            {
+                Api.Logger.Notification($"[AquaAccum] Stopped: {status}");
+            }
+        }
+
+        _wasCondensingLastTick = isCondensingNow;
+    }
+
     public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
     {
         if (Api.Side == EnumAppSide.Client)
@@ -528,7 +572,9 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
 
             if (status == CondensationStatus.Condensing)
             {
-                float currentRate = GetCurrentCondensationRate();
+                float rainfallFactor = GetCurrentRainfallFactor();
+                float efficiencyFactor = GetCurrentEfficiencyFactor();
+                float currentRate = BASE_EFFICIENCY * rainfallFactor * efficiencyFactor * PowerBehavior.PowerSetting;
                 dsc.AppendLine(Lang.Get("Condensation rate: {0:0.##} L/s", currentRate));
                 
                 string rainfallText = _currentRainfall switch

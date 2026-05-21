@@ -72,27 +72,49 @@ public class BlockEntityERecycler : BlockEntityGenericTypedContainer
     {
         if (CurrentRecipe == null || InputSlot.Empty)
             return;
-            
-        AccumulatedEnergy += amount;
+    
+        if (amount <= 0)
+            return;
         
-        // Проверяем, достаточно ли энергии для завершения
-        while (AccumulatedEnergy >= CurrentRecipe.EnergyOperation && !InputSlot.Empty)
+        // Ограничиваем добавление энергии, чтобы не перескочить через лимит
+        int maxNeeded = (int)CurrentRecipe.EnergyOperation - AccumulatedEnergy;
+        if (maxNeeded <= 0)
         {
-            AccumulatedEnergy -= (int)CurrentRecipe.EnergyOperation;
-            ProcessCompletedCraft();
+            // Если уже накоплено достаточно для крафта - завершаем его
+            while (AccumulatedEnergy >= CurrentRecipe.EnergyOperation && !InputSlot.Empty)
+            {
+                AccumulatedEnergy -= (int)CurrentRecipe.EnergyOperation;
+                ProcessCompletedCraft();
             
-            // После крафта проверяем, можно ли продолжить
-            if (InputSlot.Empty || CurrentRecipe == null)
-                break;
+                if (InputSlot.Empty || CurrentRecipe == null)
+                    break;
+            }
+            return;
         }
-        
+    
+        int energyToAdd = Math.Min(amount, maxNeeded);
+        AccumulatedEnergy += energyToAdd;
+    
         // Обновляем прогресс для UI
         if (CurrentRecipe != null && CurrentRecipe.EnergyOperation > 0)
         {
             RecipeProgress = AccumulatedEnergy / (float)CurrentRecipe.EnergyOperation;
             UpdateState(RecipeProgress);
         }
-        
+    
+        // Проверяем, не накопилось ли достаточно для завершения
+        if (AccumulatedEnergy >= CurrentRecipe.EnergyOperation)
+        {
+            while (AccumulatedEnergy >= CurrentRecipe.EnergyOperation && !InputSlot.Empty)
+            {
+                AccumulatedEnergy -= (int)CurrentRecipe.EnergyOperation;
+                ProcessCompletedCraft();
+            
+                if (InputSlot.Empty || CurrentRecipe == null)
+                    break;
+            }
+        }
+    
         MarkDirty(true);
     }
 

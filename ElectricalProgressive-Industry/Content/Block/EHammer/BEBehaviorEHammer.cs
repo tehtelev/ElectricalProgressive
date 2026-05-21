@@ -22,7 +22,12 @@ public class BEBehaviorEHammer : BlockEntityBehavior, IElectricConsumer
     /// <summary>
     /// Накопленная энергия (дробная часть)
     /// </summary>
-    private float _accumulatedEnergy = 0f;
+    private float _fractionalEnergy = 0f;
+    
+    /// <summary>
+    /// Время последнего получения энергии (для расчёта dt)
+    /// </summary>
+    private float _lastEnergyTime = 0f;
 
     public bool IsBurned => this.Block.Code.GetName().Contains("burned");
 
@@ -33,10 +38,6 @@ public class BEBehaviorEHammer : BlockEntityBehavior, IElectricConsumer
     /// </summary>
     private readonly int _maxConsumption;
     
-    /// <summary>
-    /// Прогресс текущего крафта (0-1)
-    /// </summary>
-    private float _recipeProgress;
     private bool hasBurnout;
     private bool prepareBurnout;
 
@@ -67,8 +68,7 @@ public class BEBehaviorEHammer : BlockEntityBehavior, IElectricConsumer
                     return false;
 
                 var hasRecipe = BlockEntityEHammer.FindMatchingRecipe(ref entity.CurrentRecipe, ref entity.CurrentRecipeName, entity.inventory[0]);
-                _recipeProgress = entity.RecipeProgress;
-                return hasRecipe;
+                return hasRecipe && entity.CurrentRecipe != null;
             }
             return false;
         }
@@ -78,7 +78,7 @@ public class BEBehaviorEHammer : BlockEntityBehavior, IElectricConsumer
     {
         base.GetBlockInfo(forPlayer, stringBuilder);
 
-        if (this.Blockentity is not BlockEntityEHammer)
+        if (this.Blockentity is not BlockEntityEHammer entity)
             return;
 
         if (IsBurned)
@@ -89,6 +89,13 @@ public class BEBehaviorEHammer : BlockEntityBehavior, IElectricConsumer
         stringBuilder.AppendLine(StringHelper.Progressbar(PowerSetting * 100.0f / _maxConsumption));
         stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Consumption") + ": " + PowerSetting + "/" + _maxConsumption + " " + Lang.Get("electricalprogressivebasics:W"));
 
+        // Показываем прогресс крафта
+        if (entity.CurrentRecipe != null && entity.CurrentRecipe.EnergyOperation > 0)
+        {
+            int percent = (int)(entity.RecipeProgress * 100);
+            stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Progress") + ": " + percent + "%");
+        }
+        
         stringBuilder.AppendLine();
     }
 
@@ -107,24 +114,46 @@ public class BEBehaviorEHammer : BlockEntityBehavior, IElectricConsumer
         if (!IsWorking)
         {
             PowerSetting = 0;
-            _accumulatedEnergy = 0;
-            amount = 0;
+            _fractionalEnergy = 0;
+            _lastEnergyTime = 0;
+            return;
         }
 
         if (PowerSetting != (int)amount)
             PowerSetting = (int)amount;
         
-        // Накопление энергии
+        // Накопление энергии с учётом реального времени
         if (IsWorking && amount > 0 && Blockentity is BlockEntityEHammer entity)
         {
-            // Добавляем полученную энергию к накопленной
-            _accumulatedEnergy += amount;
+            // Получаем текущее время в секундах
+            float currentTime = (float)(Api.World.ElapsedMilliseconds / 1000.0);
+            
+            // Инициализация времени при первом вызове
+            if (_lastEnergyTime <= 0.01f)
+            {
+                _lastEnergyTime = currentTime;
+                return;
+            }
+            
+            // Вычисляем прошедшее время
+            float deltaTime = currentTime - _lastEnergyTime;
+            _lastEnergyTime = currentTime;
+            
+            // Ограничиваем максимальный dt (защита от больших скачков)
+            deltaTime = Math.Min(deltaTime, 0.1f);
+            
+            // Энергия за этот период (Вт * секунды = Джоули/единицы энергии)
+            // amount - это текущее потребление в Ваттах
+            float energyThisTick = amount * deltaTime;
+            
+            // Добавляем к дробной части
+            _fractionalEnergy += energyThisTick;
             
             // Если накопилось целое число или больше
-            if (_accumulatedEnergy >= 1.0f)
+            if (_fractionalEnergy >= 1.0f)
             {
-                int wholeUnits = (int)_accumulatedEnergy;
-                _accumulatedEnergy -= wholeUnits;
+                int wholeUnits = (int)_fractionalEnergy;
+                _fractionalEnergy -= wholeUnits;
                 
                 // Передаем целые единицы в рецепт
                 entity.AddEnergy(wholeUnits);
@@ -197,15 +226,15 @@ public class BEBehaviorEHammer : BlockEntityBehavior, IElectricConsumer
     {
         base.ToTreeAttributes(tree);
         tree.SetInt(PowerSettingKey, PowerSetting);
-        tree.SetFloat("recipeProgress", _recipeProgress);
-        tree.SetFloat("accumulatedEnergy", _accumulatedEnergy);
+        tree.SetFloat("fractionalEnergy", _fractionalEnergy);
+        tree.SetFloat("lastEnergyTime", _lastEnergyTime);
     }
 
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
     {
         base.FromTreeAttributes(tree, worldAccessForResolve);
         PowerSetting = tree.GetInt(PowerSettingKey);
-        _recipeProgress = tree.GetFloat("recipeProgress");
-        _accumulatedEnergy = tree.GetFloat("accumulatedEnergy");
+        _fractionalEnergy = tree.GetFloat("fractionalEnergy");
+        _lastEnergyTime = tree.GetFloat("lastEnergyTime");
     }
 }

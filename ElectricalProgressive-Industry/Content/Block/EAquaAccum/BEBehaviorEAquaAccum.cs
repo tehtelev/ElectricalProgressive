@@ -20,6 +20,16 @@ public class BEBehaviorEAquaAccum : BlockEntityBehavior, IElectricConsumer
     // Внутреннее состояние
     private readonly int _maxConsumption;
     private BlockEntityEAquaAccum _cachedEntity;
+    
+    /// <summary>
+    /// Накопленная энергия для производства воды
+    /// </summary>
+    private float _accumulatedEnergy = 0f;
+    
+    /// <summary>
+    /// Время последнего получения энергии (для расчёта dt)
+    /// </summary>
+    private float _lastEnergyTime = 0f;
 
     public BEBehaviorEAquaAccum(BlockEntity blockEntity) : base(blockEntity)
     {
@@ -32,8 +42,8 @@ public class BEBehaviorEAquaAccum : BlockEntityBehavior, IElectricConsumer
         {
             if (this.Blockentity is BlockEntityEAquaAccum entity)
             {
-                var status = entity.GetCondensationStatus();
-                return status == BlockEntityEAquaAccum.CondensationStatus.Condensing;
+                // Работаем если бак не полон
+                return !entity.IsFull();
             }
             return false;
         }
@@ -66,7 +76,7 @@ public class BEBehaviorEAquaAccum : BlockEntityBehavior, IElectricConsumer
         if (_cachedEntity == null)
             return 0;
 
-        // Конденсатор работает всегда, если бак не полон
+        // Потребляем энергию только если бак не полон
         if (_cachedEntity.IsFull())
             return 0;
 
@@ -81,17 +91,54 @@ public class BEBehaviorEAquaAccum : BlockEntityBehavior, IElectricConsumer
         if (_cachedEntity == null)
         {
             PowerSetting = 0;
+            _accumulatedEnergy = 0;
+            _lastEnergyTime = 0;
             return;
         }
 
-        // Только проверка на заполненность бака
-        bool canUsePower = !_cachedEntity.IsFull();
+        // Если бак полон - не потребляем энергию
+        if (_cachedEntity.IsFull())
+        {
+            PowerSetting = 0;
+            _accumulatedEnergy = 0;
+            _lastEnergyTime = 0;
+            return;
+        }
 
-        if (!canUsePower)
-            amount = 0;
-
-        if (PowerSetting != amount)
+        // Устанавливаем текущее потребление
+        if (PowerSetting != (int)amount)
             PowerSetting = (int)amount;
+        
+        // Получаем текущее время в секундах
+        float currentTime = (float)(Api.World.ElapsedMilliseconds / 1000.0);
+        
+        // Инициализация времени при первом вызове
+        if (_lastEnergyTime <= 0.01f)
+        {
+            _lastEnergyTime = currentTime;
+            return;
+        }
+        
+        // Вычисляем прошедшее время
+        float deltaTime = currentTime - _lastEnergyTime;
+        _lastEnergyTime = currentTime;
+        
+        // Ограничиваем максимальный dt
+        if (deltaTime > 0.1f)
+            deltaTime = 0.1f;
+        
+        // Энергия за этот период (Вт * секунды)
+        float energyThisTick = amount * deltaTime;
+        
+        // Добавляем к накопленной энергии
+        _accumulatedEnergy += energyThisTick;
+        
+        // Если накопилась энергия - передаём в блок для производства воды
+        if (_accumulatedEnergy >= 0.01f)
+        {
+            _cachedEntity.AddEnergy(_accumulatedEnergy);
+            _accumulatedEnergy = 0;
+        }
     }
 
     public void Update()
@@ -113,11 +160,15 @@ public class BEBehaviorEAquaAccum : BlockEntityBehavior, IElectricConsumer
     {
         base.ToTreeAttributes(tree);
         tree.SetInt(PowerSettingKey, PowerSetting);
+        tree.SetFloat("accumulatedEnergy", _accumulatedEnergy);
+        tree.SetFloat("lastEnergyTime", _lastEnergyTime);
     }
 
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
     {
         base.FromTreeAttributes(tree, worldAccessForResolve);
         PowerSetting = tree.GetInt(PowerSettingKey);
+        _accumulatedEnergy = tree.GetFloat("accumulatedEnergy");
+        _lastEnergyTime = tree.GetFloat("lastEnergyTime");
     }
 }

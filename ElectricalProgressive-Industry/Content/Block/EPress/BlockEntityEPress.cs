@@ -88,27 +88,49 @@ namespace ElectricalProgressive.Content.Block.EPress
         {
             if (CurrentRecipe == null || InputSlot1.Empty || InputSlot2.Empty)
                 return;
-                
-            AccumulatedEnergy += amount;
-            
-            // Проверяем, достаточно ли энергии для завершения
-            while (AccumulatedEnergy >= CurrentRecipe.EnergyOperation && HasRequiredItems())
+    
+            if (amount <= 0)
+                return;
+        
+            // Ограничиваем добавление энергии, чтобы не перескочить через лимит
+            int maxNeeded = (int)CurrentRecipe.EnergyOperation - AccumulatedEnergy;
+            if (maxNeeded <= 0)
             {
-                AccumulatedEnergy -= (int)CurrentRecipe.EnergyOperation;
-                ProcessCompletedCraft();
-                
-                // После крафта проверяем, можно ли продолжить
-                if (!HasRequiredItems() || CurrentRecipe == null)
-                    break;
-            }
+                // Если уже накоплено достаточно для крафта - завершаем его
+                while (AccumulatedEnergy >= CurrentRecipe.EnergyOperation && HasRequiredItems())
+                {
+                    AccumulatedEnergy -= (int)CurrentRecipe.EnergyOperation;
+                    ProcessCompletedCraft();
             
+                    if (!HasRequiredItems() || CurrentRecipe == null)
+                        break;
+                }
+                return;
+            }
+    
+            int energyToAdd = Math.Min(amount, maxNeeded);
+            AccumulatedEnergy += energyToAdd;
+    
             // Обновляем прогресс для UI
             if (CurrentRecipe != null && CurrentRecipe.EnergyOperation > 0)
             {
                 RecipeProgress = AccumulatedEnergy / (float)CurrentRecipe.EnergyOperation;
                 UpdateState(RecipeProgress);
             }
+    
+            // Проверяем, не накопилось ли достаточно для завершения
+            if (AccumulatedEnergy >= CurrentRecipe.EnergyOperation)
+            {
+                while (AccumulatedEnergy >= CurrentRecipe.EnergyOperation && HasRequiredItems())
+                {
+                    AccumulatedEnergy -= (int)CurrentRecipe.EnergyOperation;
+                    ProcessCompletedCraft();
             
+                    if (!HasRequiredItems() || CurrentRecipe == null)
+                        break;
+                }
+            }
+    
             MarkDirty(true);
         }
 

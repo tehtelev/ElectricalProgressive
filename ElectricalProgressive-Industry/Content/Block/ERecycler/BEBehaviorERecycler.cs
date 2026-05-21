@@ -22,6 +22,11 @@ public class BEBehaviorERecycler : BlockEntityBehavior, IElectricConsumer
     /// Накопленная энергия (дробная часть)
     /// </summary>
     private float _accumulatedEnergy = 0f;
+    
+    /// <summary>
+    /// Время последнего получения энергии (для расчёта dt)
+    /// </summary>
+    private float _lastEnergyTime = 0f;
 
     public bool IsBurned => this.Block.Code.GetName().Contains("burned");
 
@@ -76,7 +81,7 @@ public class BEBehaviorERecycler : BlockEntityBehavior, IElectricConsumer
     {
         base.GetBlockInfo(forPlayer, stringBuilder);
 
-        if (this.Blockentity is not BlockEntityERecycler)
+        if (this.Blockentity is not BlockEntityERecycler entity)
             return;
 
         if (IsBurned)
@@ -86,6 +91,13 @@ public class BEBehaviorERecycler : BlockEntityBehavior, IElectricConsumer
 
         stringBuilder.AppendLine(StringHelper.Progressbar(PowerSetting * 100.0f / _maxConsumption));
         stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Consumption") + ": " + PowerSetting + "/" + _maxConsumption + " " + Lang.Get("electricalprogressivebasics:W"));
+
+        // Показываем прогресс крафта
+        if (entity.CurrentRecipe != null && entity.CurrentRecipe.EnergyOperation > 0)
+        {
+            int percent = (int)(entity.RecipeProgress * 100);
+            stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Progress") + ": " + percent + "%");
+        }
 
         stringBuilder.AppendLine();
     }
@@ -106,17 +118,39 @@ public class BEBehaviorERecycler : BlockEntityBehavior, IElectricConsumer
         {
             PowerSetting = 0;
             _accumulatedEnergy = 0;
-            amount = 0;
+            _lastEnergyTime = 0;
+            return;
         }
 
         if (PowerSetting != (int)amount)
             PowerSetting = (int)amount;
         
-        // Накопление энергии
+        // Накопление энергии с учётом реального времени
         if (IsWorking && amount > 0 && Blockentity is BlockEntityERecycler entity)
         {
-            // Добавляем полученную энергию к накопленной
-            _accumulatedEnergy += amount;
+            // Получаем текущее время в секундах
+            float currentTime = (float)(Api.World.ElapsedMilliseconds / 1000.0);
+            
+            // Инициализация времени при первом вызове
+            if (_lastEnergyTime <= 0.01f)
+            {
+                _lastEnergyTime = currentTime;
+                return;
+            }
+            
+            // Вычисляем прошедшее время
+            float deltaTime = currentTime - _lastEnergyTime;
+            _lastEnergyTime = currentTime;
+            
+            // Ограничиваем максимальный dt (защита от больших скачков)
+            if (deltaTime > 0.1f)
+                deltaTime = 0.1f;
+            
+            // Энергия за этот период (Вт * секунды)
+            float energyThisTick = amount * deltaTime;
+            
+            // Добавляем к накопленной энергии
+            _accumulatedEnergy += energyThisTick;
             
             // Если накопилось целое число или больше
             if (_accumulatedEnergy >= 1.0f)
@@ -197,6 +231,7 @@ public class BEBehaviorERecycler : BlockEntityBehavior, IElectricConsumer
         tree.SetInt(PowerSettingKey, PowerSetting);
         tree.SetFloat("recipeProgress", _recipeProgress);
         tree.SetFloat("accumulatedEnergy", _accumulatedEnergy);
+        tree.SetFloat("lastEnergyTime", _lastEnergyTime);
     }
 
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
@@ -205,5 +240,6 @@ public class BEBehaviorERecycler : BlockEntityBehavior, IElectricConsumer
         PowerSetting = tree.GetInt(PowerSettingKey);
         _recipeProgress = tree.GetFloat("recipeProgress");
         _accumulatedEnergy = tree.GetFloat("accumulatedEnergy");
+        _lastEnergyTime = tree.GetFloat("lastEnergyTime");
     }
 }
