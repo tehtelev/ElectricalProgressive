@@ -54,13 +54,12 @@ public class GuiDialogHammer : GuiDialogBlockEntity
         else
             itemSlot = (ItemSlot)null;
 
-        var bounds1 = ElementBounds.Fixed(0.0, 0.0, 300.0, 110.0);
-        var bounds2 = ElementStdBounds.SlotGrid(EnumDialogArea.None, 10.0, 45.0, 1, 1); // Input slot
-        var bounds3 = ElementStdBounds.SlotGrid(EnumDialogArea.None, 210.0, 45.0, 1, 1); // Main output slot
-        var boundsChance = ElementStdBounds.SlotGrid(EnumDialogArea.None, 260.0, 45.0, 1, 1); // Chance output slot
+        var bounds1 = ElementBounds.Fixed(0.0, 0.0, 250.0, 110.0);
+        var bounds2 = ElementStdBounds.SlotGrid(EnumDialogArea.None, 10.0, 55.0, 1, 1); // Input slot
+        var bounds3 = ElementStdBounds.SlotGrid(EnumDialogArea.None, 210.0, 30.0, 1, 2); // Main output slot
 
         // Прогресс-бар (шире и выше)
-        var progressBounds = ElementBounds.Fixed(65, 57, 140, 25);
+        var progressBounds = ElementBounds.Fixed(65, 67, 140, 25);
 
         var bounds4 = ElementBounds.Fill.WithFixedPadding(GuiStyle.ElementToDialogPadding);
         bounds4.BothSizing = ElementSizing.FitToChildren;
@@ -81,13 +80,11 @@ public class GuiDialogHammer : GuiDialogBlockEntity
 
             // Слоты
             .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 1, new int[1] { 0 }, bounds2, "inputSlot")
-            .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 1, new int[1] { 1 }, bounds3, "outputslot")
-            .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 1, new int[1] { 2 }, boundsChance, "chanceoutputslot")
+            .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 1, new int[2] { 1,2 }, bounds3, "outputslot")
 
             // Подписи
-            .AddStaticText("Вход", CairoFont.WhiteDetailText(), ElementBounds.Fixed(17, 95, 40, 20))
-            .AddStaticText("Выход", CairoFont.WhiteDetailText(), ElementBounds.Fixed(212, 95, 45, 20))
-            .AddStaticText("Шанс", CairoFont.WhiteDetailText(), ElementBounds.Fixed(267, 95, 45, 20))
+            .AddStaticText("Вход", CairoFont.WhiteDetailText(), ElementBounds.Fixed(17, 105, 40, 20))
+            .AddStaticText("Выход", CairoFont.WhiteDetailText(), ElementBounds.Fixed(212, 135, 45, 20))
 
             .EndChildElements()
             .Compose();

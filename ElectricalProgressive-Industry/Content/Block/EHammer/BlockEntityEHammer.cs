@@ -188,7 +188,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             return;
 
         const int startFrame = 27;
-        if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("craft"))
+        if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
         {
             var currentTime = Api.World.ElapsedMilliseconds;
             _lastAnimationCheckTime = currentTime;
@@ -335,27 +335,34 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
 
         var stack = this.inventory[slotId].Itemstack;
         var origin = new Vec3f(0.5f, 0, 0.5f);
+        var orientationRotate = Block.Shape.rotateY;  // ✅ Добавляем поворот блока
 
         if (stack.Class == EnumItemClass.Item)
         {
-            var scaleX = MyMiniLib.GetAttributeFloat(stack.Item, "scaleX", 0.8F);
-            var scaleY = MyMiniLib.GetAttributeFloat(stack.Item, "scaleY", 0.8F);
-            var scaleZ = MyMiniLib.GetAttributeFloat(stack.Item, "scaleZ", 0.8F);
-            var translateX = MyMiniLib.GetAttributeFloat(stack.Item, "translateX", 0F);
-            var translateY = MyMiniLib.GetAttributeFloat(stack.Item, "translateY", 0F);
-            var translateZ = MyMiniLib.GetAttributeFloat(stack.Item, "translateZ", 0F);
+            var scaleX = MyMiniLib.GetAttributeFloat(stack.Item, "scaleX", 1.0F);
+            var scaleY = MyMiniLib.GetAttributeFloat(stack.Item, "scaleY", 1.0F);
+            var scaleZ = MyMiniLib.GetAttributeFloat(stack.Item, "scaleZ", 1.0F);
+            var translateX = MyMiniLib.GetAttributeFloat(stack.Item, "translateX", 0.97F);
+            var translateY = MyMiniLib.GetAttributeFloat(stack.Item, "translateY", 0.95F);
+            var translateZ = MyMiniLib.GetAttributeFloat(stack.Item, "translateZ", -0.59F);
             var rotateX = MyMiniLib.GetAttributeFloat(stack.Item, "rotateX", 0F);
             var rotateY = MyMiniLib.GetAttributeFloat(stack.Item, "rotateY", 0F);
             var rotateZ = MyMiniLib.GetAttributeFloat(stack.Item, "rotateZ", 0F);
 
             meshData.Scale(origin, scaleX, scaleY, scaleZ);
-            meshData.Translate(translateX, translateY + 0.95f, translateZ);
+            meshData.Translate(translateX, translateY, translateZ);
             meshData.Rotate(origin, rotateX * GameMath.DEG2RAD, rotateY * GameMath.DEG2RAD, rotateZ * GameMath.DEG2RAD);
+        
+            // ✅ Добавляем поворот относительно ориентации блока
+            meshData.Rotate(origin, 0, orientationRotate * GameMath.DEG2RAD, 0);
         }
         else
         {
-            meshData.Scale(origin, 0.3f, 0.3f, 0.3f);
-            meshData.Translate(0f, 0.95f, 0f);
+            meshData.Scale(origin, 0.8f, 0.8f, 0.8f);
+            meshData.Translate(0.97f, 0.95f, -0.59f);
+        
+            // ✅ Добавляем поворот для блоков
+            meshData.Rotate(origin, 0, orientationRotate * GameMath.DEG2RAD, 0);
         }
     }
 
@@ -637,16 +644,13 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         var beh = GetBehavior<BEBehaviorEHammer>();
         if (beh == null) return;
 
-        if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("craft") == false)
+        if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false)
         {
-            float powerRatio = Math.Max(0.1f, Math.Min(1f, beh.PowerSetting / (float)CurrentRecipe.EnergyOperation));
-            float animationSpeed = powerRatio * 2.0f;
-            
             AnimUtil.StartAnimation(new AnimationMetaData()
             {
-                Animation = "Animation1",
-                Code = "craft",
-                AnimationSpeed = animationSpeed,
+                Animation = "work-on",
+                Code = "work-on",
+                AnimationSpeed = 2f,
                 EaseOutSpeed = 2.0f,
                 EaseInSpeed = 1f
             });
@@ -658,9 +662,9 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
             return;
 
-        if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("craft") == true)
+        if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == true)
         {
-            AnimUtil.StopAnimation("craft");
+            AnimUtil.StopAnimation("work-on");
         }
     }
 
@@ -718,7 +722,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             }
         }
 
-        if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("craft") == false)
+        if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false)
         {
             return false;
         }

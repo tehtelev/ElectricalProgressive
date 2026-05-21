@@ -9,7 +9,7 @@
 	"textureSizes": {
 	},
 	"textures": {
-		"iron160x160": "block/iron96x96",
+		"iron160x160": "block/iron160x160",
 		"iron96x96": "block/iron96x96",
 		"steel4-96x96": "block/steel4-96x96",
 		"bituminous": "game:block/coal/bituminous",

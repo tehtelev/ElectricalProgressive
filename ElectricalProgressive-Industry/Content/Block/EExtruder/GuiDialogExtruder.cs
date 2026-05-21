@@ -56,9 +56,9 @@ public class GuiDialogExtruder : GuiDialogBlockEntity
             itemSlot = (ItemSlot)null;
             
         // Слоты: 0,1 - вход, 2,3 - выход
-        var bounds1 = ElementBounds.Fixed(0.0, 0.0, 250.0, 160.0);
+        var bounds1 = ElementBounds.Fixed(0.0, 0.0, 300.0, 160.0);
         var inputSlotBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 5.0, 45.0, 1, 2);
-        var outputSlotBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 200.0, 45.0, 1, 2);
+        var outputSlotBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 200.0, 70.0, 1, 1);
         
         // Прогресс-бар (шире и выше)
         var progressBounds = ElementBounds.Fixed(55, 82, 140, 25);
@@ -72,7 +72,7 @@ public class GuiDialogExtruder : GuiDialogBlockEntity
             
         this.ClearComposers();
         this.SingleComposer = this.capi.Gui
-            .CreateCompo("blockentitypress" + this.BlockEntityPosition?.ToString(), bounds5)
+            .CreateCompo("blockentityextruder" + this.BlockEntityPosition?.ToString(), bounds5)
             .AddShadedDialogBG(bounds4)
             .AddDialogTitleBar(this.DialogTitle, new Action(this.OnTitleBarClose))
             .BeginChildElements(bounds4)
@@ -82,11 +82,11 @@ public class GuiDialogExtruder : GuiDialogBlockEntity
             
             // Слоты
             .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 1, new int[2] { 0, 1 }, inputSlotBounds, "inputSlot")
-            .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 1, new int[2] { 2, 3 }, outputSlotBounds, "outputslot")
+            .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 2, new int[2] { 2, 3 }, outputSlotBounds, "outputslot")
             
             // Подписи
             .AddStaticText(Lang.Get("electricalprogressive:input"), CairoFont.WhiteDetailText(), ElementBounds.Fixed(10, 150, 50, 20))
-            .AddStaticText(Lang.Get("electricalprogressive:output"), CairoFont.WhiteDetailText(), ElementBounds.Fixed(205, 150, 50, 20))
+            .AddStaticText(Lang.Get("electricalprogressive:output"), CairoFont.WhiteDetailText(), ElementBounds.Fixed(230, 120, 50, 20))
             
             .EndChildElements()
             .Compose();
@@ -163,21 +163,34 @@ public class GuiDialogExtruder : GuiDialogBlockEntity
             ctx.Stroke();
         }
         
-        // 4. Текст прогресса - сбрасываем масштаб
+        // 4. Текст прогресса с масштабированием
+        int percent = (int)(progress * 100);
+        string percentText = $"{percent}%";
+        
         ctx.Save();
-        ctx.SetSourceRGB(0, 0, 0);
-        ctx.SelectFontFace("Arial", FontSlant.Normal, FontWeight.Bold);
-        ctx.SetFontSize(18);
+        ctx.SelectFontFace("sans-serif", FontSlant.Normal, FontWeight.Bold);
         
-        string progressText = $"{progress:P0}";
-        var extents = ctx.TextExtents(progressText);
+        // Размер шрифта относительно высоты прогресс-бара (60-70% от высоты)
+        double fontSize = currentBounds.InnerHeight * 0.65;
+        ctx.SetFontSize(fontSize);
         
-        // Рассчитываем позицию в исходной системе координат
-        double textX = (currentBounds.InnerWidth - extents.Width) / 2;
-        double textY = (currentBounds.InnerHeight + extents.Height) / 2;
+        var textExtents = ctx.TextExtents(percentText);
         
+        // Если текст слишком широкий - уменьшаем шрифт
+        if (textExtents.Width > currentBounds.InnerWidth * 0.9)
+        {
+            fontSize = fontSize * (currentBounds.InnerWidth * 0.9 / textExtents.Width);
+            ctx.SetFontSize(fontSize);
+            textExtents = ctx.TextExtents(percentText);
+        }
+        
+        double textX = (currentBounds.InnerWidth - textExtents.Width) / 2;
+        double textY = (currentBounds.InnerHeight + textExtents.Height) / 2;
+        
+        // Белый цвет текста
+        ctx.SetSourceRGB(1.0, 1.0, 1.0);
         ctx.MoveTo(textX, textY);
-        ctx.ShowText(progressText);
+        ctx.ShowText(percentText);
         ctx.Restore();
     }
 

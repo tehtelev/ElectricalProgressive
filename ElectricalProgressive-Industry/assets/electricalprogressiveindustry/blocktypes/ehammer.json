@@ -8,7 +8,9 @@
     "particlesOffsetPos": [ [ 0.5, 1.01, 0.5 ] ],
     "particlesType": 4,
     "particlesFramesAnim": [
-      [ 27, 37 ]
+      [ 95, 99 ],
+      [ 125, 129 ],
+      [ 95, 99 ]
     ],
     "maxConsumption": 200,
     "voltage": 128,
@@ -48,16 +50,47 @@
     { "name": "HorizontalOrientable" },
     {
       "name": "Multiblock",
-      "properties": {
-        "sizex": 1,
-        "sizey": 2,
-        "sizez": 1,
-        "cposition": {
-          "x": 0,
-          "y": 0,
-          "z": 0
+      "propertiesByType": {
+        "*-north": {
+          "sizex": 3,
+          "sizey": 4,
+          "sizez": 2,
+          "cposition": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          }
+        },
+        "*-east": {
+          "sizex": 2,
+          "sizey": 4,
+          "sizez": 3,
+          "cposition": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        },
+        "*-south": {
+          "sizex": 3,
+          "sizey": 4,
+          "sizez": 2,
+          "cposition": {
+            "x": 2,
+            "y": 0,
+            "z": 0
+          }
+        },
+        "*-west": {
+          "sizex": 2,
+          "sizey": 4,
+          "sizez": 3,
+          "cposition": {
+            "x": 1,
+            "y": 0,
+            "z": 2
+          }
         }
-
       }
     }
   ],

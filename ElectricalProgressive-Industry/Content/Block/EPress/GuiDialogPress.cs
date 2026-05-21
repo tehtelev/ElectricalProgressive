@@ -56,9 +56,9 @@ public class GuiDialogPress : GuiDialogBlockEntity
             itemSlot = (ItemSlot)null;
             
         // Слоты: 0,1 - вход, 2,3 - выход
-        var bounds1 = ElementBounds.Fixed(0.0, 0.0, 250.0, 160.0);
+        var bounds1 = ElementBounds.Fixed(0.0, 0.0, 300.0, 160.0);
         var inputSlotBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 5.0, 45.0, 1, 2);
-        var outputSlotBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 200.0, 45.0, 1, 2);
+        var outputSlotBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 200.0, 70.0, 1, 1);
         
         // Прогресс-бар (шире и выше)
         var progressBounds = ElementBounds.Fixed(55, 82, 140, 25);
@@ -82,11 +82,11 @@ public class GuiDialogPress : GuiDialogBlockEntity
             
             // Слоты
             .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 1, new int[2] { 0, 1 }, inputSlotBounds, "inputSlot")
-            .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 1, new int[2] { 2, 3 }, outputSlotBounds, "outputslot")
+            .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 2, new int[2] { 2, 3 }, outputSlotBounds, "outputslot")
             
             // Подписи
             .AddStaticText(Lang.Get("electricalprogressive:input"), CairoFont.WhiteDetailText(), ElementBounds.Fixed(10, 150, 50, 20))
-            .AddStaticText(Lang.Get("electricalprogressive:output"), CairoFont.WhiteDetailText(), ElementBounds.Fixed(205, 150, 50, 20))
+            .AddStaticText(Lang.Get("electricalprogressive:output"), CairoFont.WhiteDetailText(), ElementBounds.Fixed(230, 120, 50, 20))
             
             .EndChildElements()
             .Compose();
