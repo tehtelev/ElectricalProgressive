@@ -649,14 +649,11 @@ namespace ElectricalProgressive.Content.Block.ECrusher
 
             if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false)
             {
-                float powerRatio = Math.Max(0.1f, Math.Min(1f, beh.PowerSetting / (float)CurrentRecipe.EnergyOperation));
-                float animationSpeed = powerRatio * 20f;
-                
                 AnimUtil.StartAnimation(new AnimationMetaData()
                 {
                     Animation = "work-on",
                     Code = "work-on",
-                    AnimationSpeed = animationSpeed,
+                    AnimationSpeed = 1F,
                     EaseOutSpeed = 2.0f,
                     EaseInSpeed = 1f
                 });

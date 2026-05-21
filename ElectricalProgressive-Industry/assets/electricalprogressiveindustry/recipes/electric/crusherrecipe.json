@@ -653,7 +653,7 @@
     "ingredients": [{ "type": "item", "code": "game:ore-poor-nativecopper-*", "quantity": 1, "name": "rock" }],
     "outputs": [
       { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 5 },
-      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 1, "chance": 0.30 }
+      { "type": "item", "code": "game:nugget-nativegold", "stackSize": 1, "chance": 0.30 }
     ]
   },
   {
@@ -662,7 +662,7 @@
     "ingredients": [{ "type": "item", "code": "game:ore-medium-nativecopper-*", "quantity": 1, "name": "rock" }],
     "outputs": [
       { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 6 },
-      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 1, "chance": 0.35 }
+      { "type": "item", "code": "game:nugget-nativegold", "stackSize": 1, "chance": 0.35 }
     ]
   },
   {
@@ -671,7 +671,7 @@
     "ingredients": [{ "type": "item", "code": "game:ore-rich-nativecopper-*", "quantity": 1, "name": "rock" }],
     "outputs": [
       { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 7 },
-      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 2, "chance": 0.40 }
+      { "type": "item", "code": "game:nugget-nativegold", "stackSize": 2, "chance": 0.40 }
     ]
   },
   {
@@ -680,7 +680,7 @@
     "ingredients": [{ "type": "item", "code": "game:ore-bountiful-nativecopper-*", "quantity": 1, "name": "rock" }],
     "outputs": [
       { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 9 },
-      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 3, "chance": 0.50 }
+      { "type": "item", "code": "game:nugget-nativegold", "stackSize": 3, "chance": 0.50 }
     ]
   },
   {
@@ -689,7 +689,7 @@
     "ingredients": [{ "type": "item", "code": "game:crystalizedore-poor-nativecopper-*", "quantity": 1, "name": "rock" }],
     "outputs": [
       { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 10 },
-      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 2, "chance": 0.30 }
+      { "type": "item", "code": "game:nugget-nativegold", "stackSize": 2, "chance": 0.30 }
     ]
   },
   {
@@ -698,7 +698,7 @@
     "ingredients": [{ "type": "item", "code": "game:crystalizedore-medium-nativecopper-*", "quantity": 1, "name": "rock" }],
     "outputs": [
       { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 12 },
-      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 3, "chance": 0.35 }
+      { "type": "item", "code": "game:nugget-nativegold", "stackSize": 3, "chance": 0.35 }
     ]
   },
   {
@@ -707,7 +707,7 @@
     "ingredients": [{ "type": "item", "code": "game:crystalizedore-rich-nativecopper-*", "quantity": 1, "name": "rock" }],
     "outputs": [
       { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 14 },
-      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 4, "chance": 0.40 }
+      { "type": "item", "code": "game:nugget-nativegold", "stackSize": 4, "chance": 0.40 }
     ]
   },
   {
@@ -716,7 +716,7 @@
     "ingredients": [{ "type": "item", "code": "game:crystalizedore-bountiful-nativecopper-*", "quantity": 1, "name": "rock" }],
     "outputs": [
       { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 18 },
-      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 5, "chance": 0.50 }
+      { "type": "item", "code": "game:nugget-nativegold", "stackSize": 5, "chance": 0.50 }
     ]
   },
   {
