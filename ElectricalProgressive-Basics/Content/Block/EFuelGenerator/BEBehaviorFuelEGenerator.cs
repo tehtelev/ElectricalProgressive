@@ -9,31 +9,19 @@ using Vintagestory.API.MathTools;
 
 namespace ElectricalProgressive.Content.Block.EFuelGenerator;
 
-/// <summary>
-/// Поведение электрического генератора на топливе для производства электроэнергии.
-/// Реализует интерфейс IElectricProducer для интеграции в электрическую систему.
-/// </summary>
 public class BEBehaviorFuelEGenerator : BlockEntityBehavior, IElectricProducer
 {
-    // === Поля состояния ===
     private float _powerOrder;
     private float _powerGive;
     private bool hasBurnout;
     private bool prepareBurnout;
     
-    // === Константы для сохранения состояния ===
     public const string PowerOrderKey = "electricalprogressive:powerOrder";
     public const string PowerGiveKey = "electricalprogressive:powerGive";
     
-    // === Свойства ===
-    
     public new BlockPos Pos => Blockentity.Pos;
-
-    // === Конструктор ===
     
     public BEBehaviorFuelEGenerator(BlockEntity blockEntity) : base(blockEntity) { }
-
-    // === Основные методы ===
     
     public void Update()
     {
@@ -86,8 +74,6 @@ public class BEBehaviorFuelEGenerator : BlockEntityBehavior, IElectricProducer
             entity.ElectricalProgressive.ParticlesType = 0;
         }
     }
-
-    // === Реализация интерфейса IElectricProducer ===
     
     public float Produce_give()
     {
@@ -105,8 +91,6 @@ public class BEBehaviorFuelEGenerator : BlockEntityBehavior, IElectricProducer
 
     public float getPowerGive() => _powerGive;
     public float getPowerOrder() => _powerOrder;
-
-    // === Методы BlockEntityBehavior ===
     
     public override void GetBlockInfo(IPlayer forPlayer, StringBuilder stringBuilder)
     {
@@ -120,7 +104,7 @@ public class BEBehaviorFuelEGenerator : BlockEntityBehavior, IElectricProducer
         
         if (!entity.WaterSlot.Empty)
         {
-                stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:liquid") + entity.WaterAmount.ToString("0.0") + "/" + entity.WaterCapacity + " L");
+            stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:liquid") + entity.WaterAmount.ToString("0.0") + "/" + entity.WaterCapacity + " L");
         }
     }
 

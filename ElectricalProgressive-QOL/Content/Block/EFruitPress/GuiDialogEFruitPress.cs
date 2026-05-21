@@ -59,11 +59,11 @@ public class GuiDialogEFruitPress : GuiDialogBlockEntity
         var fruitBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 5.0, 70.0, 1, 1);
         var mashBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 180.0, 70.0, 1, 1);
         
-        // Границы для уровня жидкости
-        var waterBounds = ElementBounds.Fixed(250, 40, 40, 100);
+        // Границы для уровня жидкости (шире и выше для лучшей видимости)
+        var waterBounds = ElementBounds.Fixed(245, 35, 45, 110);
         
-        // Границы для прогресс-бара
-        var progressBounds = ElementBounds.Fixed(55, 85, 123, 20);
+        // Границы для прогресс-бара (как в молоте)
+        var progressBounds = ElementBounds.Fixed(55, 85, 123, 25);
         
         var bounds4 = ElementBounds.Fill.WithFixedPadding(GuiStyle.ElementToDialogPadding);
         bounds4.BothSizing = ElementSizing.FitToChildren;
@@ -79,10 +79,10 @@ public class GuiDialogEFruitPress : GuiDialogBlockEntity
             .AddDialogTitleBar(this.DialogTitle, new Action(this.OnTitleBarClose))
             .BeginChildElements(bounds4)
             
-            // Прогресс-бар отжима
+            // Прогресс-бар отжима (улучшенный)
             .AddDynamicCustomDraw(progressBounds, new DrawDelegateWithBounds(this.OnProgressDraw), "progressDrawer")
             
-            // Уровень жидкости
+            // Уровень жидкости (улучшенный)
             .AddInset(waterBounds.ForkBoundingParent(2, 2, 2, 2), 2)
             .AddDynamicCustomDraw(waterBounds, new DrawDelegateWithBounds(this.OnWaterDraw), "waterDrawer")
             
@@ -91,8 +91,8 @@ public class GuiDialogEFruitPress : GuiDialogBlockEntity
             .AddItemSlotGrid(Inventory, new Action<object>(this.SendInvPacket), 1, [2], mashBounds, "mashSlot")
             
             // Подписи
-            .AddStaticText("Fruit", CairoFont.WhiteDetailText(), ElementBounds.Fixed(10, 120, 50, 20))
-            .AddStaticText("Mash", CairoFont.WhiteDetailText(), ElementBounds.Fixed(180, 120, 50, 20))
+            .AddStaticText("Fruit", CairoFont.WhiteDetailText(), ElementBounds.Fixed(15, 120, 50, 20))
+            .AddStaticText("Mash", CairoFont.WhiteDetailText(), ElementBounds.Fixed(190, 120, 50, 20))
             
             .EndChildElements()
             .Compose();
@@ -107,253 +107,302 @@ public class GuiDialogEFruitPress : GuiDialogBlockEntity
         _waterAmount = waterAmount;
         _capacity = capacity;
         
-        if (!this.IsOpened() || this._capi.ElapsedMilliseconds - this.lastRedrawMs <= 500L)
+        if (!this.IsOpened())
+            return;
+            
+        // Обновляем раз в 50 мс для плавности (как в молоте)
+        if (this._capi.ElapsedMilliseconds - this.lastRedrawMs <= 50L)
             return;
             
         if (this.SingleComposer != null)
         {
-            this.SingleComposer.GetCustomDraw("progressDrawer").Redraw();
-            this.SingleComposer.GetCustomDraw("waterDrawer").Redraw();
+            this.SingleComposer.GetCustomDraw("progressDrawer")?.Redraw();
+            this.SingleComposer.GetCustomDraw("waterDrawer")?.Redraw();
         }
         this.lastRedrawMs = this._capi.ElapsedMilliseconds;
     }
     
-private void OnProgressDraw(Context ctx, ImageSurface surface, ElementBounds currentBounds)
-{
-    // Гарантируем корректный диапазон
-    float progress = Math.Min(Math.Max(_recipeprogress, 0f), 1f);
-    double fillWidth = currentBounds.InnerWidth * progress;
-    
-    // 1. Рисуем черную толстую рамку
-    ctx.SetSourceRGB(0, 0, 0);
-    ctx.LineWidth = 3;
-    ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
-    ctx.Stroke();
-    
-    // 2. Рисуем заливку прогресса с градиентом
-    if (progress > 0)
+    // Улучшенный прогресс-бар (как в молоте)
+    private void OnProgressDraw(Context ctx, ImageSurface surface, ElementBounds currentBounds)
     {
-        using (var gradient = new LinearGradient(0, 0, fillWidth, 0))
-        {
-            gradient.AddColorStop(0.0, new Color(0.0, 0.6, 0.0, 1.0));  // Зеленый
-            gradient.AddColorStop(0.5, new Color(0.8, 0.8, 0.0, 1.0));  // Желтый
-            gradient.AddColorStop(1.0, new Color(0.8, 0.0, 0.0, 1.0));  // Красный
-            
-            ctx.SetSource(gradient);
-            ctx.Rectangle(2, 2, fillWidth - 4, currentBounds.InnerHeight - 4);
-            ctx.Fill();
-        }
-    }
-    
-    // 3. Рисуем деления как у линейки (шкала)
-    ctx.SetSourceRGB(0, 0, 0);
-    ctx.LineWidth = 1;
-    
-    double totalWidth = currentBounds.InnerWidth;
-    int divisions = 10;
-    
-    for (int i = 1; i < divisions; i++)
-    {
-        double x = (totalWidth / divisions) * i;
-        double lineHeight = (i % 2 == 0) ? 8 : 5; // четные длиннее, нечетные короче
+        float progress = Math.Min(Math.Max(_recipeprogress, 0f), 1f);
+        double fillWidth = currentBounds.InnerWidth * progress;
         
-        // Черточка снизу
-        ctx.MoveTo(x, currentBounds.InnerHeight - lineHeight);
-        ctx.LineTo(x, currentBounds.InnerHeight);
+        // 1. Рисуем черную толстую рамку
+        ctx.SetSourceRGB(0, 0, 0);
+        ctx.LineWidth = 3;
+        ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
         ctx.Stroke();
         
-        // Черточка сверху
-        ctx.MoveTo(x, 0);
-        ctx.LineTo(x, lineHeight);
-        ctx.Stroke();
-    }
-    
-    // 4. Текст прогресса
-    ctx.Save();
-    ctx.SetSourceRGB(0, 0, 0);
-    ctx.SelectFontFace("Arial", FontSlant.Normal, FontWeight.Bold);
-    ctx.SetFontSize(18);
-    
-    string progressText = $"{progress:P0}";
-    var extents = ctx.TextExtents(progressText);
-    
-    // Рассчитываем позицию по центру
-    double textX = (currentBounds.InnerWidth - extents.Width) / 2;
-    double textY = (currentBounds.InnerHeight + extents.Height) / 2;
-    
-    ctx.MoveTo(textX, textY);
-    ctx.ShowText(progressText);
-    ctx.Restore();
-}
-    
-private void OnWaterDraw(Context ctx, ImageSurface surface, ElementBounds currentBounds)
-{
-    // ВСЕГДА пытаемся получить актуальные данные о жидкости
-    float waterAmount = 0;
-    float capacity = 0;
-    ItemStack liquidStack = null;
-    
-    // Пытаемся получить BlockEntity заново каждый раз
-    var be = _capi?.World?.BlockAccessor?.GetBlockEntity(_blockEntityPos) as BlockEntityEFruitPress;
-    if (be != null)
-    {
-        // Обновляем ссылку
-        _beFruitPress = be;
-        
-        // Получаем актуальные данные
-        waterAmount = be.LiquidAmount;
-        capacity = be.LiquidCapacity;
-        liquidStack = be.LiquidSlot?.Itemstack;
-        
-        // Также обновляем локальные переменные
-        _waterAmount = waterAmount;
-        _capacity = capacity;
-    }
-    else
-    {
-        // Если не получилось, используем сохраненные значения
-        waterAmount = _waterAmount;
-        capacity = _capacity;
-    }
-    
-    if (capacity <= 0) 
-    {
-        // Если емкость нулевая, рисуем пустую шкалу с черточками
-        DrawEmptyWaterBar(ctx, currentBounds);
-        return;
-    }
-    
-    float fullnessRelative = waterAmount / capacity;
-    fullnessRelative = Math.Min(Math.Max(fullnessRelative, 0f), 1f);
-    
-    double waterTopY = (1.0 - fullnessRelative) * currentBounds.InnerHeight;
-    
-    // Рисуем жидкость
-    if (waterAmount > 0)
-    {
-        ctx.Rectangle(0, waterTopY, currentBounds.InnerWidth, currentBounds.InnerHeight - waterTopY);
-        
-        // Получаем текстуру жидкости
-        if (liquidStack != null)
+        // 2. Рисуем заливку прогресса с градиентом
+        if (progress > 0)
         {
-            var containableProps = Vintagestory.GameContent.BlockLiquidContainerBase.GetContainableProps(liquidStack);
-            if (containableProps?.Texture != null)
+            using (var gradient = new LinearGradient(0, 0, fillWidth, 0))
             {
-                ctx.Save();
-                Matrix matrix = ctx.Matrix;
-                matrix.Scale(GuiElement.scaled(3.0), GuiElement.scaled(3.0));
-                ctx.Matrix = matrix;
+                gradient.AddColorStop(0.0, new Color(0.0, 0.6, 0.0, 1.0));  // Зеленый
+                gradient.AddColorStop(0.5, new Color(0.8, 0.8, 0.0, 1.0));  // Желтый
+                gradient.AddColorStop(1.0, new Color(0.8, 0.0, 0.0, 1.0));  // Красный
+                
+                ctx.SetSource(gradient);
+                ctx.Rectangle(2, 2, fillWidth - 4, currentBounds.InnerHeight - 4);
+                ctx.Fill();
+            }
+        }
+        
+        // 3. Рисуем деления как у линейки (шкала)
+        ctx.SetSourceRGB(0, 0, 0);
+        ctx.LineWidth = 1;
+        
+        double totalWidth = currentBounds.InnerWidth;
+        int divisions = 10;
+        
+        for (int i = 1; i < divisions; i++)
+        {
+            double x = (totalWidth / divisions) * i;
+            double lineHeight = (i % 2 == 0) ? 8 : 5;
             
-                AssetLocation textureLoc = containableProps.Texture.Base.Clone().WithPathAppendixOnce(".png");
-                GuiElement.fillWithPattern(_capi, ctx, textureLoc, true, false, containableProps.Texture.Alpha);
+            ctx.MoveTo(x, currentBounds.InnerHeight - lineHeight);
+            ctx.LineTo(x, currentBounds.InnerHeight);
+            ctx.Stroke();
             
-                ctx.Restore();
+            ctx.MoveTo(x, 0);
+            ctx.LineTo(x, lineHeight);
+            ctx.Stroke();
+        }
+        
+        // 4. Текст прогресса с масштабированием (как в молоте)
+        int percent = (int)(progress * 100);
+        string percentText = $"{percent}%";
+        
+        ctx.Save();
+        ctx.SelectFontFace("sans-serif", FontSlant.Normal, FontWeight.Bold);
+        
+        // Размер шрифта относительно высоты прогресс-бара
+        double fontSize = currentBounds.InnerHeight * 0.65;
+        ctx.SetFontSize(fontSize);
+        
+        var textExtents = ctx.TextExtents(percentText);
+        
+        // Если текст слишком широкий - уменьшаем шрифт
+        if (textExtents.Width > currentBounds.InnerWidth * 0.9)
+        {
+            fontSize = fontSize * (currentBounds.InnerWidth * 0.9 / textExtents.Width);
+            ctx.SetFontSize(fontSize);
+            textExtents = ctx.TextExtents(percentText);
+        }
+        
+        double textX = (currentBounds.InnerWidth - textExtents.Width) / 2;
+        double textY = (currentBounds.InnerHeight + textExtents.Height) / 2;
+        
+        // Белый цвет текста
+        ctx.SetSourceRGB(1.0, 1.0, 1.0);
+        ctx.MoveTo(textX, textY);
+        ctx.ShowText(percentText);
+        ctx.Restore();
+    }
+    
+    // Улучшенный индикатор жидкости с нормальным отображением количества
+    private void OnWaterDraw(Context ctx, ImageSurface surface, ElementBounds currentBounds)
+    {
+        // ВСЕГДА пытаемся получить актуальные данные о жидкости
+        float waterAmount = 0;
+        float capacity = 0;
+        ItemStack liquidStack = null;
+        
+        // Пытаемся получить BlockEntity заново каждый раз
+        var be = _capi?.World?.BlockAccessor?.GetBlockEntity(_blockEntityPos) as BlockEntityEFruitPress;
+        if (be != null)
+        {
+            // Обновляем ссылку
+            _beFruitPress = be;
+            
+            // Получаем актуальные данные
+            waterAmount = be.LiquidAmount;
+            capacity = be.LiquidCapacity;
+            liquidStack = be.LiquidSlot?.Itemstack;
+            
+            // Также обновляем локальные переменные
+            _waterAmount = waterAmount;
+            _capacity = capacity;
+        }
+        else
+        {
+            // Если не получилось, используем сохраненные значения
+            waterAmount = _waterAmount;
+            capacity = _capacity;
+        }
+        
+        if (capacity <= 0) 
+        {
+            DrawEmptyWaterBar(ctx, currentBounds);
+            return;
+        }
+        
+        float fullnessRelative = waterAmount / capacity;
+        fullnessRelative = Math.Min(Math.Max(fullnessRelative, 0f), 1f);
+        
+        double waterTopY = (1.0 - fullnessRelative) * currentBounds.InnerHeight;
+        
+        // Рисуем жидкость
+        if (waterAmount > 0)
+        {
+            ctx.Rectangle(0, waterTopY, currentBounds.InnerWidth, currentBounds.InnerHeight - waterTopY);
+            
+            // Получаем текстуру жидкости
+            if (liquidStack != null)
+            {
+                var containableProps = Vintagestory.GameContent.BlockLiquidContainerBase.GetContainableProps(liquidStack);
+                if (containableProps?.Texture != null)
+                {
+                    ctx.Save();
+                    Matrix matrix = ctx.Matrix;
+                    matrix.Scale(GuiElement.scaled(3.0), GuiElement.scaled(3.0));
+                    ctx.Matrix = matrix;
+                
+                    AssetLocation textureLoc = containableProps.Texture.Base.Clone().WithPathAppendixOnce(".png");
+                    GuiElement.fillWithPattern(_capi, ctx, textureLoc, true, false, containableProps.Texture.Alpha);
+                
+                    ctx.Restore();
+                }
+                else
+                {
+                    ctx.SetSourceRGB(0.2, 0.4, 0.8);
+                    ctx.Fill();
+                }
             }
             else
             {
-                // Если нет текстуры, рисуем синим
                 ctx.SetSourceRGB(0.2, 0.4, 0.8);
                 ctx.Fill();
             }
         }
-        else
+        
+        // Рисуем рамку резервуара
+        ctx.SetSourceRGB(0, 0, 0);
+        ctx.LineWidth = 2;
+        ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
+        ctx.Stroke();
+        
+        // Рисуем деления как у линейки (черточки слева и справа)
+        ctx.SetSourceRGB(0, 0, 0);
+        ctx.LineWidth = 1;
+        
+        double tankHeight = currentBounds.InnerHeight;
+        int divisions = 10;
+        
+        for (int i = 1; i < divisions; i++)
         {
-            // Если нет данных о жидкости, используем стандартный цвет
-            ctx.SetSourceRGB(0.2, 0.4, 0.8);
-            ctx.Fill();
+            double y = (tankHeight / divisions) * i;
+            double lineWidth = (i % 2 == 0) ? 8 : 5;
+            
+            ctx.MoveTo(0, y);
+            ctx.LineTo(lineWidth, y);
+            ctx.Stroke();
+            
+            ctx.MoveTo(currentBounds.InnerWidth - lineWidth, y);
+            ctx.LineTo(currentBounds.InnerWidth, y);
+            ctx.Stroke();
         }
+        
+        // Отображаем количество литров с нормальным масштабированием
+        ctx.Save();
+        ctx.SelectFontFace("sans-serif", FontSlant.Normal, FontWeight.Bold);
+        
+        string amountText;
+        if (waterAmount >= 1000)
+            amountText = $"{waterAmount / 1000:F1}L";
+        else if (waterAmount >= 100)
+            amountText = $"{waterAmount:F0}L";
+        else if (waterAmount >= 10)
+            amountText = $"{waterAmount:F1}L";
+        else if (waterAmount > 0)
+            amountText = $"{waterAmount:F1}L";
+        else
+            amountText = "0L";
+        
+        // Автоматический размер шрифта
+        double fontSize = Math.Min(11, currentBounds.InnerWidth / 4.5);
+        fontSize = Math.Max(8, fontSize);
+        ctx.SetFontSize(fontSize);
+        
+        var textExtents = ctx.TextExtents(amountText);
+        
+        // Если текст слишком широкий - уменьшаем шрифт
+        if (textExtents.Width > currentBounds.InnerWidth * 0.9)
+        {
+            fontSize = fontSize * (currentBounds.InnerWidth * 0.9 / textExtents.Width);
+            ctx.SetFontSize(fontSize);
+            textExtents = ctx.TextExtents(amountText);
+        }
+        
+        // Позиционируем текст внизу бака
+        double textX = (currentBounds.InnerWidth - textExtents.Width) / 2;
+        double textY = currentBounds.InnerHeight - 3;
+        
+        // Белый текст с черной обводкой для читаемости
+        ctx.SetSourceRGB(0, 0, 0);
+        ctx.MoveTo(textX - 1, textY - 1);
+        ctx.ShowText(amountText);
+        ctx.MoveTo(textX + 1, textY - 1);
+        ctx.ShowText(amountText);
+        ctx.MoveTo(textX - 1, textY + 1);
+        ctx.ShowText(amountText);
+        ctx.MoveTo(textX + 1, textY + 1);
+        ctx.ShowText(amountText);
+        
+        ctx.SetSourceRGB(1, 1, 1);
+        ctx.MoveTo(textX, textY);
+        ctx.ShowText(amountText);
+        ctx.Restore();
     }
     
-    // Рисуем рамку резервуара
-    ctx.SetSourceRGB(0, 0, 0);
-    ctx.LineWidth = 2;
-    ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
-    ctx.Stroke();
-    
-    // Рисуем деления как у линейки (черточки слева и справа)
-    ctx.SetSourceRGB(0, 0, 0);
-    ctx.LineWidth = 1;
-    
-    double tankHeight = currentBounds.InnerHeight;
-    int divisions = 10;
-    
-    for (int i = 1; i < divisions; i++)
+    private void DrawEmptyWaterBar(Context ctx, ElementBounds currentBounds)
     {
-        double y = (tankHeight / divisions) * i;
-        double lineWidth = (i % 2 == 0) ? 8 : 5; // четные длиннее, нечетные короче
+        // Рисуем пустую шкалу
+        ctx.SetSourceRGB(0.1, 0.1, 0.1);
+        ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
+        ctx.Fill();
         
-        // Черточка слева
-        ctx.MoveTo(0, y);
-        ctx.LineTo(lineWidth, y);
+        // Рамка
+        ctx.SetSourceRGB(0, 0, 0);
+        ctx.LineWidth = 2;
+        ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
         ctx.Stroke();
         
-        // Черточка справа
-        ctx.MoveTo(currentBounds.InnerWidth - lineWidth, y);
-        ctx.LineTo(currentBounds.InnerWidth, y);
-        ctx.Stroke();
+        // Рисуем деления
+        ctx.SetSourceRGB(0, 0, 0);
+        ctx.LineWidth = 1;
+        
+        double tankHeight = currentBounds.InnerHeight;
+        int divisions = 10;
+        
+        for (int i = 1; i < divisions; i++)
+        {
+            double y = (tankHeight / divisions) * i;
+            double lineWidth = (i % 2 == 0) ? 8 : 5;
+            
+            ctx.MoveTo(0, y);
+            ctx.LineTo(lineWidth, y);
+            ctx.Stroke();
+            
+            ctx.MoveTo(currentBounds.InnerWidth - lineWidth, y);
+            ctx.LineTo(currentBounds.InnerWidth, y);
+            ctx.Stroke();
+        }
+        
+        // Текст "Empty"
+        ctx.Save();
+        ctx.SelectFontFace("sans-serif", FontSlant.Normal, FontWeight.Normal);
+        ctx.SetFontSize(9);
+        
+        string emptyText = "Empty";
+        var extents = ctx.TextExtents(emptyText);
+        
+        ctx.SetSourceRGB(0.5, 0.5, 0.5);
+        ctx.MoveTo((currentBounds.InnerWidth - extents.Width) / 2, currentBounds.InnerHeight / 2);
+        ctx.ShowText(emptyText);
+        ctx.Restore();
     }
-    
-    // Отображаем количество литров
-    ctx.SetSourceRGB(0, 0, 0);
-    ctx.SelectFontFace("Arial", FontSlant.Normal, FontWeight.Bold);
-    ctx.SetFontSize(10);
-    string amountText = $"{waterAmount:0.##}L";
-    var amountExtents = ctx.TextExtents(amountText);
-    ctx.MoveTo(
-        (currentBounds.InnerWidth - amountExtents.Width) / 2,
-        currentBounds.InnerHeight - 3
-    );
-    ctx.ShowText(amountText);
-}
-
-private void DrawEmptyWaterBar(Context ctx, ElementBounds currentBounds)
-{
-    // Рисуем пустую шкалу
-    ctx.SetSourceRGB(0.1, 0.1, 0.1);
-    ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
-    ctx.Fill();
-    
-    // Рамка
-    ctx.SetSourceRGB(0, 0, 0);
-    ctx.LineWidth = 2;
-    ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
-    ctx.Stroke();
-    
-    // Рисуем деления как у линейки даже на пустом баке
-    ctx.SetSourceRGB(0, 0, 0);
-    ctx.LineWidth = 1;
-    
-    double tankHeight = currentBounds.InnerHeight;
-    int divisions = 10;
-    
-    for (int i = 1; i < divisions; i++)
-    {
-        double y = (tankHeight / divisions) * i;
-        double lineWidth = (i % 2 == 0) ? 8 : 5;
-        
-        // Черточка слева
-        ctx.MoveTo(0, y);
-        ctx.LineTo(lineWidth, y);
-        ctx.Stroke();
-        
-        // Черточка справа
-        ctx.MoveTo(currentBounds.InnerWidth - lineWidth, y);
-        ctx.LineTo(currentBounds.InnerWidth, y);
-        ctx.Stroke();
-    }
-    
-    // Текст "Empty"
-    ctx.SetSourceRGB(0.5, 0.5, 0.5);
-    ctx.SelectFontFace("Arial", FontSlant.Normal, FontWeight.Normal);
-    ctx.SetFontSize(10);
-    string emptyText = "Empty";
-    var extents = ctx.TextExtents(emptyText);
-    ctx.MoveTo(
-        (currentBounds.InnerWidth - extents.Width) / 2,
-        (currentBounds.InnerHeight + extents.Height) / 2
-    );
-    ctx.ShowText(emptyText);
-}
     
     private void SendInvPacket(object p)
     {
@@ -361,7 +410,7 @@ private void DrawEmptyWaterBar(Context ctx, ElementBounds currentBounds)
             this.BlockEntityPosition.Z, p);
     }
     
-    private void OnTitleBarClose() => this?.TryClose();
+    private void OnTitleBarClose() => this.TryClose();
     
     public override void OnGuiOpened()
     {
@@ -399,8 +448,8 @@ private void DrawEmptyWaterBar(Context ctx, ElementBounds currentBounds)
         this.Inventory.SlotModified -= new Action<int>(this.OnInventorySlotModified);
         if (this.SingleComposer != null)
         {
-            this.SingleComposer.GetSlotGrid("fruitSlot").OnGuiClosed(this._capi);
-            this.SingleComposer.GetSlotGrid("mashSlot").OnGuiClosed(this._capi);
+            this.SingleComposer.GetSlotGrid("fruitSlot")?.OnGuiClosed(this._capi);
+            this.SingleComposer.GetSlotGrid("mashSlot")?.OnGuiClosed(this._capi);
         }
         base.OnGuiClosed();
     }

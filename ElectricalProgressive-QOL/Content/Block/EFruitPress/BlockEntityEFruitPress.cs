@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Utils;
+﻿﻿using ElectricalProgressive.Utils;
 using System;
 using System.Text;
 using Vintagestory.API.Client;
@@ -25,6 +25,11 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
     private double _pressingProgress = 0; // Сколько литров уже отжато
     private ItemStack _currentJuiceStack;
     
+    /// <summary>
+    /// Накопленная энергия (целые единицы) для отжима
+    /// </summary>
+    private float _accumulatedEnergyForPress = 0f;
+    
     private ILoadedSound _pressSound;
     private AssetLocation _pressSoundLocation = new AssetLocation("sounds/player/wetclothsqueeze.ogg");
     
@@ -47,7 +52,7 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
     
     private Facing _facing = Facing.None;
     
-    // === СВОЙСТВА ЖИДКОСТИ (ДОБАВЛЕНО) ===
+    // === СВОЙСТВА ЖИДКОСТИ ===
     
     public float LiquidAmount 
     { 
@@ -64,7 +69,7 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
     
     public float LiquidCapacity 
     { 
-        get => 100f; // Фиксированная емкость бака для сока
+        get => 100f;
     }
     
     public ItemSlot LiquidSlot => _inventory.LiquidSlot;
@@ -81,21 +86,70 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         }
     }
     
-    // === ДОПОЛНИТЕЛЬНЫЕ СВОЙСТВА ДЛЯ ИНТЕРФЕЙСА ===
+    public float WaterAmount => LiquidAmount;
+    public ItemSlot WaterSlot => LiquidSlot;
+    public ItemStack WaterStack => LiquidStack;
     
-    public float WaterAmount => LiquidAmount; // Для совместимости с кодом генератора
-    
-    public ItemSlot WaterSlot => LiquidSlot; // Для совместимости с кодом генератора
-    
-    public ItemStack WaterStack => LiquidStack; // Для совместимости с кодом генератора
+    /// <summary>
+    /// Добавить энергию для отжима
+    /// </summary>
+    public void AddEnergy(int amount)
+    {
+        if (FruitSlot.Empty || _totalJuiceAvailable <= 0)
+            return;
+        
+        // Проверяем совместимость жидкости
+        if (!IsJuiceCompatible())
+            return;
+        
+        // Проверяем, не полон ли бак
+        if (IsFull())
+            return;
+        
+        // Константа: 100 энергии на 1 литр сока
+        const float energyPerLitre = 100f;
+        
+        // Добавляем энергию
+        _accumulatedEnergyForPress += amount;
+        
+        // Сколько литров сока можно отжать с накопленной энергией
+        float litresToPress = _accumulatedEnergyForPress / energyPerLitre;
+        
+        if (litresToPress >= 0.001f)
+        {
+            // Отнимаем использованную энергию
+            _accumulatedEnergyForPress -= litresToPress * energyPerLitre;
+            
+            // Увеличиваем прогресс отжима
+            double newProgress = _pressingProgress + litresToPress;
+            
+            if (newProgress >= _totalJuiceAvailable)
+            {
+                // Завершаем цикл
+                _pressingProgress = _totalJuiceAvailable;
+                CompletePressCycle();
+            }
+            else
+            {
+                _pressingProgress = newProgress;
+            }
+            
+            // Обновляем прогресс для UI
+            if (_totalJuiceAvailable > 0)
+            {
+                SqueezeProgress = (float)(_pressingProgress / _totalJuiceAvailable);
+                SqueezeProgress = Math.Min(Math.Max(SqueezeProgress, 0f), 1f);
+            }
+            
+            UpdateState();
+            MarkDirty(true);
+        }
+    }
     
     public BlockEntityEFruitPress()
     {
         _maxConsumption = MyMiniLib.GetAttributeInt(this.Block, "maxConsumption", 150);
-        
-        // Используем кастомный инвентарь
         this._inventory = new InventoryEFruitPress();
-        
         this._inventory.SlotModified += OnSlotModified;
     }
     
@@ -103,11 +157,11 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
     {
         base.Initialize(api);
         
-        // Правильная инициализация инвентаря
         this._inventory.LateInitialize("efruitpress-" + Pos, api);
-        (_inventory as InventoryEFruitPress)?.SetBlockPos(Pos); // Устанавливаем позицию
+        (_inventory as InventoryEFruitPress)?.SetBlockPos(Pos);
         
-        this.RegisterGameTickListener(UpdatePress, 50); // 20 раз в секунду
+        // Все еще нужен тикер для анимации и проверки состояния
+        this.RegisterGameTickListener(UpdatePress, 50);
         
         if (api.Side == EnumAppSide.Client)
         {
@@ -132,44 +186,30 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         {
             UpdateJuiceableProperties();
         }
-        else if (slotid == 1) // Жидкость изменилась (выкачали или налили)
+        else if (slotid == 1) // Жидкость изменилась
         {
-            // При изменении жидкости в баке нужно перепроверить совместимость
             if (FruitSlot.Empty)
             {
-                // Если фруктов нет, сбрасываем все
                 _totalJuiceAvailable = 0;
                 _currentJuiceStack = null;
                 _pressingProgress = 0;
+                _accumulatedEnergyForPress = 0;
                 SqueezeProgress = 0;
                 StopAnimation();
             }
             else if (_currentJuiceStack != null)
             {
-                // Если есть фрукты, проверяем совместимость
                 if (!IsJuiceCompatible())
                 {
-                    // Жидкости несовместимы - сбрасываем прогресс
                     _totalJuiceAvailable = 0;
                     _pressingProgress = 0;
+                    _accumulatedEnergyForPress = 0;
                     SqueezeProgress = 0;
                     StopAnimation();
                 }
                 else
                 {
-                    // Если жидкости совместимы или бак пустой, пересчитываем доступный сок
                     UpdateTotalJuiceAvailable();
-                    
-                    // Если бак пустой после выкачивания, можно продолжить отжим
-                    if (LiquidSlot.Empty)
-                    {
-                        // Перезапускаем анимацию если есть питание
-                        var hasPower = PowerBehavior?.PowerSetting >= _maxConsumption * 0.1f;
-                        if (hasPower && _totalJuiceAvailable > 0)
-                        {
-                            StartAnimation();
-                        }
-                    }
                 }
             }
         }
@@ -182,7 +222,6 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         }
     }
     
-    // Новый метод для пересчета доступного сока:
     private void UpdateTotalJuiceAvailable()
     {
         if (FruitSlot.Empty)
@@ -195,7 +234,6 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         var props = GetJuiceableProperties(itemStack);
         if (props != null && props.LitresPerItem.HasValue)
         {
-            // Рассчитываем сколько всего литров сока можно получить
             _totalJuiceAvailable = itemStack.StackSize * props.LitresPerItem.Value;
         }
         else
@@ -204,7 +242,6 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         }
     }
     
-    // Новый метод для обновления GUI
     public void UpdateGui()
     {
         if (Api != null && Api.Side == EnumAppSide.Client && _clientDialog != null && _clientDialog.IsOpened())
@@ -218,8 +255,9 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         if (FruitSlot.Empty)
         {
             _totalJuiceAvailable = 0;
-            _currentJuiceStack = null; // Очищаем ссылку на сок
+            _currentJuiceStack = null;
             _pressingProgress = 0;
+            _accumulatedEnergyForPress = 0;
             SqueezeProgress = 0;
             StopAnimation();
             return;
@@ -237,13 +275,11 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
             }
             else
             {
-                _currentJuiceStack = null; // Если нет сока, очищаем
+                _currentJuiceStack = null;
             }
             
-            // Рассчитываем сколько всего литров сока можно получить
             _totalJuiceAvailable = itemStack.StackSize * props.LitresPerItem.Value;
             
-            // Восстанавливаем прогресс если есть сохраненные данные
             if (_pressingProgress > 0 && _totalJuiceAvailable > 0)
             {
                 SqueezeProgress = (float)Math.Min(Math.Max(_pressingProgress / _totalJuiceAvailable, 0), 1);
@@ -251,14 +287,15 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
             else
             {
                 _pressingProgress = 0;
+                _accumulatedEnergyForPress = 0;
                 SqueezeProgress = 0;
             }
             
-            // Проверяем совместимость жидкости
             if (!IsJuiceCompatible())
             {
                 _totalJuiceAvailable = 0;
                 _pressingProgress = 0;
+                _accumulatedEnergyForPress = 0;
                 SqueezeProgress = 0;
                 StopAnimation();
             }
@@ -268,19 +305,19 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
             _totalJuiceAvailable = 0;
             _currentJuiceStack = null;
             _pressingProgress = 0;
+            _accumulatedEnergyForPress = 0;
             SqueezeProgress = 0;
             StopAnimation();
         }
     }
 
-    // Класс JuiceableProperties для совместимости с ванильным прессом
     public class JuiceableProperties
     {
         public JsonItemStack LiquidStack { get; set; }
         public JsonItemStack PressedStack { get; set; }
-        public JsonItemStack ReturnStack { get; set; } // Жмых после отжима
+        public JsonItemStack ReturnStack { get; set; }
         public float? LitresPerItem { get; set; }
-        public float? PressedDryRatio { get; set; } = 0.1f; // Коэффициент для жмыха
+        public float? PressedDryRatio { get; set; } = 0.1f;
     }
     
     private JuiceableProperties GetJuiceableProperties(ItemStack stack)
@@ -302,22 +339,18 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         return props;
     }
     
-    // Новый метод для проверки совместимости жидкости
-    private bool IsJuiceCompatible()
+    public bool IsJuiceCompatible()
     {
         if (_currentJuiceStack == null)
             return false;
         
-        // Если бак пустой - любая жидкость подходит
         if (LiquidSlot.Empty)
             return true;
         
-        // Проверяем, совпадает ли жидкость в баке с жидкостью из фруктов
         var currentLiquid = LiquidSlot.Itemstack;
         if (currentLiquid == null)
             return true;
         
-        // Сравниваем коды предметов (игнорируя количество)
         return currentLiquid.Collectible.Code.Equals(_currentJuiceStack.Collectible.Code);
     }
     
@@ -336,7 +369,6 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
             return;
         }
         
-        // Проверяем совместимость жидкости перед началом отжима
         if (!IsJuiceCompatible())
         {
             StopAnimation();
@@ -356,47 +388,17 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
                 StartAnimation();
             }
             
-            // ПРОСТАЯ ЛОГИКА ОТЖИМА:
-            // 100 энергии на 1 литр сока
-            const float energyPerLitre = 100f;
-            
-            // Сколько энергии получили за этот тик (Вт * сек = Дж)
-            float energyReceived = PowerBehavior.PowerSetting * dt;
-            
-            // Сколько литров сока можно отжать с этой энергией
-            double juiceProgress = energyReceived / energyPerLitre;
-            
-            // Увеличиваем прогресс отжима в литрах
-            _pressingProgress += juiceProgress;
-            
-            // Если достигли максимума - завершаем цикл
-            if (_pressingProgress >= _totalJuiceAvailable)
-            {
-                _pressingProgress = _totalJuiceAvailable;
-                CompletePressCycle();
-            }
-            
-            // Рассчитываем процент прогресса для отображения (0-1)
+            // Обновляем прогресс из накопленной энергии
             if (_totalJuiceAvailable > 0)
             {
-                SqueezeProgress = (float)(_pressingProgress / _totalJuiceAvailable);
+                SqueezeProgress = (float)Math.Min(Math.Max(_pressingProgress / _totalJuiceAvailable, 0), 1);
+                UpdateState();
             }
-            else
-            {
-                SqueezeProgress = 0;
-            }
-            
-            // Гарантируем диапазон 0-1
-            SqueezeProgress = Math.Min(Math.Max(SqueezeProgress, 0f), 1f);
-            
-            UpdateState();
         }
         else if (_wasPressingLastTick)
         {
-            // Отжим прекратился - останавливаем анимацию
             StopAnimation();
             StopSound();
-            
             MarkDirty(true);
         }
         
@@ -410,12 +412,11 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
             if (_currentJuiceStack == null || _totalJuiceAvailable <= 0)
                 return;
             
-            // Проверяем совместимость перед извлечением сока
             if (!IsJuiceCompatible())
             {
-                // Несовместимая жидкость - не добавляем
                 _totalJuiceAvailable = 0;
                 _pressingProgress = 0;
+                _accumulatedEnergyForPress = 0;
                 SqueezeProgress = 0;
                 StopAnimation();
                 StopSound();
@@ -426,7 +427,7 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
             // Добавляем сок в бак
             ExtractJuice(_totalJuiceAvailable);
             
-            // Создаем жмых (с проверкой на соты)
+            // Создаем жмых
             var props = GetJuiceableProperties(FruitSlot.Itemstack);
             CreatePressedMash(props, FruitSlot.Itemstack.StackSize);
             
@@ -437,16 +438,16 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
             // Сбрасываем прогресс
             _totalJuiceAvailable = 0;
             _pressingProgress = 0;
+            _accumulatedEnergyForPress = 0;
             SqueezeProgress = 0;
             
-            // Останавливаем анимацию и звук при завершении цикла
+            // Останавливаем анимацию и звук
             StopAnimation();
             StopSound();
             
             MarkDirty(true);
             UpdateState();
             
-            // Обновляем свойства
             UpdateJuiceableProperties();
         }
         catch (Exception ex)
@@ -483,36 +484,29 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         
         ItemStack mashStack = null;
         
-        // Используем ReturnStack если есть
         if (props?.ReturnStack?.ResolvedItemstack != null)
         {
             mashStack = props.ReturnStack.ResolvedItemstack?.Clone();
         }
-        // Иначе используем PressedStack
         else if (props?.PressedStack?.ResolvedItemstack != null)
         {
             mashStack = props.PressedStack.ResolvedItemstack?.Clone();
         }
         
-        // Добавляем жмых
         if (mashStack != null)
         {
             int mashCount = 0;
             
-            // ПРОВЕРЯЕМ: если это соты (honeycomb), то жмых = количеству сот
             var fruitStack = FruitSlot.Itemstack;
             if (fruitStack != null && IsHoneycomb(fruitStack))
             {
-                // Для сот: жмых = количество сот (1:1)
                 mashCount = fruitsUsed;
             }
             else
             {
-                // Для обычных фруктов: количество жмыха = количество литров сока (округляем вверх)
                 mashCount = (int)Math.Ceiling(_totalJuiceAvailable);
             }
             
-            // Гарантируем минимум 1 предмет
             mashCount = Math.Max(1, mashCount);
             mashStack.StackSize = mashCount;
             
@@ -523,7 +517,6 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
             }
             else if (MashSlot.Itemstack.Collectible.Code == mashStack.Collectible.Code)
             {
-                // Проверяем, сколько можно добавить в слот
                 int maxStackSize = MashSlot.Itemstack.Collectible.MaxStackSize;
                 int currentStackSize = MashSlot.Itemstack.StackSize;
                 int availableSpace = maxStackSize - currentStackSize;
@@ -534,7 +527,6 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
                     MashSlot.Itemstack.StackSize += toAdd;
                     MashSlot.MarkDirty();
                     
-                    // Если остались лишние жмыхи - выбрасываем их в мир
                     int remaining = mashCount - toAdd;
                     if (remaining > 0)
                     {
@@ -545,27 +537,20 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
                 }
                 else
                 {
-                    // Нет места в слоте - выбрасываем все жмыхи в мир
                     Api.World.SpawnItemEntity(mashStack, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
                 }
             }
             else
             {
-                // Слот содержит другой предмет - выбрасываем жмыхи в мир
                 Api.World.SpawnItemEntity(mashStack, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
             }
         }
     }
     
-    // Новый метод для проверки, является ли предмет сотами
     private bool IsHoneycomb(ItemStack stack)
     {
         if (stack == null) return false;
-        
-        // Проверяем по коду предмета
         var code = stack.Collectible.Code;
-        
-        // Проверяем, содержит ли код "honeycomb"
         return code.Path.Contains("honeycomb", StringComparison.OrdinalIgnoreCase);
     }
     
@@ -574,7 +559,6 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
             return;
         
-        // Проверяем, не запущена ли уже анимация (как в центрифуге)
         if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("craft") == false)
         {
             AnimUtil.StartAnimation(new AnimationMetaData()
@@ -593,7 +577,6 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
             return;
         
-        // Проверяем, запущена ли анимация (как в центрифуге)
         if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("craft") == true)
         {
             AnimUtil.StopAnimation("craft");
@@ -636,8 +619,6 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         MarkDirty(true);
     }
     
-    // === МЕТОДЫ РАБОТЫ С ЖИДКОСТЬЮ (ИСПРАВЛЕННЫЕ) ===
-    
     public int TryPutLiquidFromStack(ItemStack liquidStack, float desiredLitres)
     {
         if (liquidStack == null) return 0;
@@ -671,7 +652,6 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
             }
             else
             {
-                // ВАЖНО: Проверяем совместимость жидкостей
                 if (!currentStack.Equals(Api.World, liquidStack, GlobalConstants.IgnoredStackAttributes)) 
                     return 0;
                 
@@ -698,8 +678,6 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         return LiquidAmount >= LiquidCapacity - 0.01f;
     }
     
-    // === ВЗАИМОДЕЙСТВИЕ С ИГРОКОМ ===
-    
     public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
     {
         if (Api.Side == EnumAppSide.Client)
@@ -714,8 +692,6 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         return true;
     }
     
-    // === СЕРИАЛИЗАЦИЯ ===
-    
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldForResolving)
     {
         base.FromTreeAttributes(tree, worldForResolving);
@@ -728,11 +704,10 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         this.SqueezeProgress = tree.GetFloat("squeezeProgress", 0);
         this._totalJuiceAvailable = tree.GetDouble("totalJuiceAvailable", 0);
         this._pressingProgress = tree.GetDouble("pressingProgress", 0);
+        this._accumulatedEnergyForPress = tree.GetFloat("accumulatedEnergyForPress", 0);
         
-        // Восстанавливаем процентный прогресс
         if (_totalJuiceAvailable > 0)
         {
-            // Гарантируем, что SqueezeProgress в диапазоне 0-1
             SqueezeProgress = (float)Math.Min(Math.Max(_pressingProgress / _totalJuiceAvailable, 0), 1);
         }
         else
@@ -759,9 +734,8 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         tree.SetFloat("squeezeProgress", this.SqueezeProgress);
         tree.SetDouble("totalJuiceAvailable", this._totalJuiceAvailable);
         tree.SetDouble("pressingProgress", this._pressingProgress);
+        tree.SetFloat("accumulatedEnergyForPress", this._accumulatedEnergyForPress);
     }
-    
-    // === ИНФОРМАЦИЯ ДЛЯ ИГРОКА ===
     
     public override void GetBlockInfo(IPlayer forPlayer, StringBuilder dsc)
     {
@@ -774,7 +748,6 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
             {
                 string juiceName = props.LiquidStack.ResolvedItemstack.GetName();
                 
-                // Проверяем совместимость
                 if (!IsJuiceCompatible())
                 {
                     dsc.AppendLine(Lang.Get("Cannot press: different liquid in tank"));
@@ -792,9 +765,8 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         {
             dsc.AppendLine(Lang.Get("Power: {0}/{1} W", PowerBehavior.PowerSetting, _maxConsumption));
             
-            if (PowerBehavior.PowerSetting >= _maxConsumption * 0.1f && _totalJuiceAvailable > 0 && IsJuiceCompatible())
+            if (PowerBehavior.PowerSetting >= _maxConsumption * 0.1f && _totalJuiceAvailable > 0 && IsJuiceCompatible() && !IsFull())
             {
-                // Показываем скорость отжима
                 const float energyPerLitre = 100f;
                 double litresPerSecond = PowerBehavior.PowerSetting / energyPerLitre;
                 double timeLeft = (_totalJuiceAvailable - _pressingProgress) / litresPerSecond;
@@ -811,19 +783,14 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         
         dsc.AppendLine(Lang.Get("Liquid: {0:0.##}/{1} L", LiquidAmount, LiquidCapacity));
         
-        // Показываем предупреждение о несовместимости
         if (!FruitSlot.Empty && !IsJuiceCompatible())
         {
             dsc.AppendLine(Lang.Get("Warning: Incompatible liquid in tank"));
         }
     }
     
-    // === СВОЙСТВА ===
-    
     public override InventoryBase Inventory => _inventory;
     public override string DialogTitle => Lang.Get("electricalprogressivebasics:efruitpress");
-    
-    // === ОЧИСТКА РЕСУРСОВ ===
     
     public override void OnBlockRemoved()
     {

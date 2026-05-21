@@ -81,8 +81,8 @@ public class GuiDialogRecycler : GuiDialogBlockEntity
             .AddDynamicCustomDraw(progressBounds, new DrawDelegateWithBounds(this.OnProgressDraw), "progressDrawer")
             
             // Слоты
-            .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 1, new int[1], inputSlotBounds, "inputSlot")
-            .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 1, [1], outputSlotBounds, "outputslot")
+            .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 1, new int[1] { 0 }, inputSlotBounds, "inputSlot")
+            .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 1, new int[1] { 1 }, outputSlotBounds, "outputslot")
             
             // Подписи
             .AddStaticText(Lang.Get("electricalprogressive:input"), CairoFont.WhiteDetailText(), ElementBounds.Fixed(10, 100, 50, 20))
@@ -116,69 +116,83 @@ public class GuiDialogRecycler : GuiDialogBlockEntity
         this.lastRedrawMs = this.capi.ElapsedMilliseconds;
     }
 
-private void OnProgressDraw(Context ctx, ImageSurface surface, ElementBounds currentBounds)
-{
-    float progress = Math.Min(Math.Max(_recipeprogress, 0f), 1f);
-    double fillWidth = currentBounds.InnerWidth * progress;
-    
-    // 1. Рисуем черную толстую рамку
-    ctx.SetSourceRGB(0, 0, 0);
-    ctx.LineWidth = 3;
-    ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
-    ctx.Stroke();
-    
-    // 2. Рисуем заливку прогресса
-    if (progress > 0)
+    private void OnProgressDraw(Context ctx, ImageSurface surface, ElementBounds currentBounds)
     {
-        var gradient = new LinearGradient(0, 0, fillWidth, 0);
-        gradient.AddColorStop(0.0, new Color(0.0, 0.6, 0.0, 1.0));
-        gradient.AddColorStop(0.5, new Color(0.8, 0.8, 0.0, 1.0));
-        gradient.AddColorStop(1.0, new Color(0.8, 0.0, 0.0, 1.0));
+        float progress = Math.Min(Math.Max(_recipeprogress, 0f), 1f);
+        double fillWidth = currentBounds.InnerWidth * progress;
         
-        ctx.SetSource(gradient);
-        ctx.Rectangle(2, 2, fillWidth - 4, currentBounds.InnerHeight - 4);
-        ctx.Fill();
-        gradient?.Dispose();
-    }
-    
-    // 3. Рисуем деления как у линейки (шкала)
-    ctx.SetSourceRGB(0, 0, 0);
-    ctx.LineWidth = 1;
-    
-    double totalWidth = currentBounds.InnerWidth;
-    int divisions = 10;
-    
-    for (int i = 1; i < divisions; i++)
-    {
-        double x = (totalWidth / divisions) * i;
-        double lineHeight = (i % 2 == 0) ? 8 : 5;
-        
-        ctx.MoveTo(x, currentBounds.InnerHeight - lineHeight);
-        ctx.LineTo(x, currentBounds.InnerHeight);
+        // 1. Рисуем черную толстую рамку
+        ctx.SetSourceRGB(0, 0, 0);
+        ctx.LineWidth = 3;
+        ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
         ctx.Stroke();
         
-        ctx.MoveTo(x, 0);
-        ctx.LineTo(x, lineHeight);
-        ctx.Stroke();
+        // 2. Рисуем заливку прогресса
+        if (progress > 0)
+        {
+            using (var gradient = new LinearGradient(0, 0, fillWidth, 0))
+            {
+                gradient.AddColorStop(0.0, new Color(0.0, 0.6, 0.0, 1.0));
+                gradient.AddColorStop(0.5, new Color(0.8, 0.8, 0.0, 1.0));
+                gradient.AddColorStop(1.0, new Color(0.8, 0.0, 0.0, 1.0));
+                
+                ctx.SetSource(gradient);
+                ctx.Rectangle(2, 2, fillWidth - 4, currentBounds.InnerHeight - 4);
+                ctx.Fill();
+            }
+        }
+        
+        // 3. Рисуем деления как у линейки (шкала)
+        ctx.SetSourceRGB(0, 0, 0);
+        ctx.LineWidth = 1;
+        
+        double totalWidth = currentBounds.InnerWidth;
+        int divisions = 10;
+        
+        for (int i = 1; i < divisions; i++)
+        {
+            double x = (totalWidth / divisions) * i;
+            double lineHeight = (i % 2 == 0) ? 8 : 5;
+            
+            ctx.MoveTo(x, currentBounds.InnerHeight - lineHeight);
+            ctx.LineTo(x, currentBounds.InnerHeight);
+            ctx.Stroke();
+            
+            ctx.MoveTo(x, 0);
+            ctx.LineTo(x, lineHeight);
+            ctx.Stroke();
+        }
+        
+        // 4. Текст прогресса с масштабированием
+        int percent = (int)(progress * 100);
+        string percentText = $"{percent}%";
+        
+        ctx.Save();
+        ctx.SelectFontFace("sans-serif", FontSlant.Normal, FontWeight.Bold);
+        
+        // Размер шрифта относительно высоты прогресс-бара (60-70% от высоты)
+        double fontSize = currentBounds.InnerHeight * 0.65;
+        ctx.SetFontSize(fontSize);
+        
+        var textExtents = ctx.TextExtents(percentText);
+        
+        // Если текст слишком широкий - уменьшаем шрифт
+        if (textExtents.Width > currentBounds.InnerWidth * 0.9)
+        {
+            fontSize = fontSize * (currentBounds.InnerWidth * 0.9 / textExtents.Width);
+            ctx.SetFontSize(fontSize);
+            textExtents = ctx.TextExtents(percentText);
+        }
+        
+        double textX = (currentBounds.InnerWidth - textExtents.Width) / 2;
+        double textY = (currentBounds.InnerHeight + textExtents.Height) / 2;
+        
+        // Белый цвет текста
+        ctx.SetSourceRGB(1.0, 1.0, 1.0);
+        ctx.MoveTo(textX, textY);
+        ctx.ShowText(percentText);
+        ctx.Restore();
     }
-    
-    // 4. Текст прогресса - сбрасываем масштаб
-    ctx.Save();
-    ctx.SetSourceRGB(0, 0, 0);
-    ctx.SelectFontFace("Arial", FontSlant.Normal, FontWeight.Bold);
-    ctx.SetFontSize(18);
-    
-    string progressText = $"{progress:P0}";
-    var extents = ctx.TextExtents(progressText);
-    
-    // Рассчитываем позицию в исходной системе координат
-    double textX = (currentBounds.InnerWidth - extents.Width) / 2;
-    double textY = (currentBounds.InnerHeight + extents.Height) / 2;
-    
-    ctx.MoveTo(textX, textY);
-    ctx.ShowText(progressText);
-    ctx.Restore();
-}
 
     private void SendInvPacket(object p)
     {
@@ -205,8 +219,8 @@ private void OnProgressDraw(Context ctx, ImageSurface surface, ElementBounds cur
     public override void OnGuiClosed()
     {
         this.Inventory.SlotModified -= new Action<int>(this.OnInventorySlotModified);
-        this.SingleComposer.GetSlotGrid("inputSlot").OnGuiClosed(this.capi);
-        this.SingleComposer.GetSlotGrid("outputslot").OnGuiClosed(this.capi);
+        this.SingleComposer?.GetSlotGrid("inputSlot")?.OnGuiClosed(this.capi);
+        this.SingleComposer?.GetSlotGrid("outputslot")?.OnGuiClosed(this.capi);
         base.OnGuiClosed();
     }
 }

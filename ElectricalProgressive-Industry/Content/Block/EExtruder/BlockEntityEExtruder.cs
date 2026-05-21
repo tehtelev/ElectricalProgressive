@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.RecipeSystem;
+﻿﻿using ElectricalProgressive.RecipeSystem;
 using ElectricalProgressive.RecipeSystem.Recipe;
 using ElectricalProgressive.Utils;
 using System;
@@ -27,6 +27,11 @@ namespace ElectricalProgressive.Content.Block.EExtruder
         public ExtruderRecipe CurrentRecipe;
         public string CurrentRecipeName;
         public float RecipeProgress;
+        
+        /// <summary>
+        /// Накопленная энергия для текущего рецепта (целые единицы)
+        /// </summary>
+        public int AccumulatedEnergy { get; set; }
 
         // Слоты (2 входа, 2 выхода)
         public ItemSlot InputSlot1 => inventory[0];
@@ -36,8 +41,8 @@ namespace ElectricalProgressive.Content.Block.EExtruder
         public override string DialogTitle => Lang.Get("eextruder-title-gui");
         public override InventoryBase Inventory => inventory;
 
-        private static MeshData? _mesh; // кеш для меша, который используется в анимации. Кеш нужен, чтобы не загружать меш из ресурсов каждый раз при тесселяции блока, а использовать уже загруженный и обработанный меш.
-        private static Shape? _resultingShape; // кеш для формы, которая используется в анимации. Кеш нужен, чтобы не загружать форму из ресурсов каждый раз при тесселяции блока, а использовать уже загруженную и обработанную форму.
+        private static MeshData? _mesh;
+        private static Shape? _resultingShape;
         private BlockEntityAnimationUtil AnimUtil => GetBehavior<BEBehaviorAnimatable>()?.animUtil;
         private int _lastSoundFrame = -1;
         private long _lastAnimationCheckTime;
@@ -76,6 +81,37 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             inventory.SlotModified += OnSlotModified;
         }
 
+        /// <summary>
+        /// Добавить энергию для обработки рецепта
+        /// </summary>
+        public void AddEnergy(int amount)
+        {
+            if (CurrentRecipe == null || InputSlot1.Empty || InputSlot2.Empty)
+                return;
+                
+            AccumulatedEnergy += amount;
+            
+            // Проверяем, достаточно ли энергии для завершения
+            while (AccumulatedEnergy >= CurrentRecipe.EnergyOperation && HasRequiredItems())
+            {
+                AccumulatedEnergy -= (int)CurrentRecipe.EnergyOperation;
+                ProcessCompletedCraft();
+                
+                // После крафта проверяем, можно ли продолжить
+                if (!HasRequiredItems() || CurrentRecipe == null)
+                    break;
+            }
+            
+            // Обновляем прогресс для UI
+            if (CurrentRecipe != null && CurrentRecipe.EnergyOperation > 0)
+            {
+                RecipeProgress = AccumulatedEnergy / (float)CurrentRecipe.EnergyOperation;
+                UpdateState(RecipeProgress);
+            }
+            
+            MarkDirty(true);
+        }
+
         public override void Initialize(ICoreAPI api)
         {
             base.Initialize(api);
@@ -107,15 +143,10 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 _soundPress = new AssetLocation("electricalprogressiveindustry:sounds/eextruder/extruder.ogg");
 
                 this.RegisterGameTickListener(new Action<float>(this.CheckAnimationFrame), 50);
-                // Обновляем меши при загрузке
                 UpdateMeshes();
             }
         }
 
-        /// <summary>
-        /// Подготавливает анимационный утилит для блока, загружая меш и форму из ресурсов
-        /// </summary>
-        /// <param name="api"></param>
         private void PrepareAnimUtil(ICoreAPI api, string cacheDictKey)
         {
             if (_mesh == null || _resultingShape == null)
@@ -126,7 +157,6 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 Shape _shape = Shape.TryGet(api, shapePath);
 
                 _mesh = AnimUtil.CreateMesh(cacheDictKey, _shape, out _resultingShape, null);
-
             }
         }
 
@@ -145,10 +175,10 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             if (slotid < 2)
             {
                 RecipeProgress = 0f;
+                AccumulatedEnergy = 0;
                 UpdateState(RecipeProgress);
             }
 
-            // Обновляем меш при изменении входного слота
             if (slotid == 1 && Api.Side == EnumAppSide.Client)
             {
                 UpdateMesh(1);
@@ -157,16 +187,12 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             MarkDirty();
         }
 
-        /// <summary>
-        /// Необходимо для отрисовки текстур
-        /// </summary>
         public TextureAtlasPosition this[string textureCode]
         {
             get
             {
                 var assetLocation = default(AssetLocation?);
 
-                // Пробуем получить текстуру из item.Textures
                 if (_nowTesselatingObj is Vintagestory.API.Common.Item item)
                 {
                     if (item.Textures.TryGetValue(textureCode, out var compositeTexture))
@@ -190,13 +216,11 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                     }
                 }
 
-                // Если не нашли, пробуем из shape.Textures
                 if (assetLocation == null && _nowTesselatingShape != null)
                 {
                     _nowTesselatingShape.Textures.TryGetValue(textureCode, out assetLocation);
                 }
 
-                // Если все еще не нашли, используем домен предмета и предполагаемый путь
                 if (assetLocation == null)
                 {
                     var domain = _nowTesselatingObj.Code.Domain;
@@ -214,7 +238,6 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             if (textureAtlasPosition != null)
                 return textureAtlasPosition;
 
-            // берем только base текстуру (первую из кучи наваленных)
             var pos = texturePath.Path.IndexOf("++");
             if (pos >= 0)
                 texturePath.Path = texturePath.Path.Substring(0, pos);
@@ -234,9 +257,6 @@ namespace ElectricalProgressive.Content.Block.EExtruder
 
         public Size2i AtlasSize => _capi.BlockTextureAtlas.Size;
 
-        /// <summary>
-        /// Обновляем mesh для конкретного слота
-        /// </summary>
         public void UpdateMesh(int slotid)
         {
             if (Api == null || Api.Side == EnumAppSide.Server || _capi == null)
@@ -245,7 +265,6 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             if (slotid >= this.inventory.Count)
                 return;
 
-            // В прессе отображаем только слот 1 (пресс-форму)
             if (slotid != 1)
             {
                 _meshes[slotid] = null;
@@ -260,7 +279,6 @@ namespace ElectricalProgressive.Content.Block.EExtruder
 
             var stack = this.inventory[slotid].Itemstack;
 
-            // Отображаем только пресс-формы
             if (stack == null || stack.Collectible == null || !stack.Collectible.Code.Path.Contains("gauge"))
             {
                 _meshes[slotid] = null;
@@ -279,9 +297,6 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             }
         }
 
-        /// <summary>
-        /// Перемещаем mesh в нужную позицию для пресса
-        /// </summary>
         public void TranslateMesh(MeshData? meshData, int slotId)
         {
             if (meshData == null || slotId != 1)
@@ -290,7 +305,6 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             var stack = this.inventory[slotId].Itemstack;
             var origin = new Vec3f(0.5f, 0, 0.5f);
     
-            // Получаем угол поворота блока (как в холодильнике)
             var orientationRotate = Block.Shape.rotateY;
 
             if (stack.Class == EnumItemClass.Item)
@@ -315,13 +329,9 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 meshData.Translate(0.97f, 0.95f, -0.59f);
             }
     
-            // Применяем поворот блока (как в холодильнике)
             meshData.Rotate(origin, 0, orientationRotate * GameMath.DEG2RAD, 0);
         }
 
-        /// <summary>
-        /// Генерация меша для предмета (как в холодильнике)
-        /// </summary>
         public MeshData? GenMesh(ItemSlot slot)
         {
             var stack = slot.Itemstack;
@@ -366,9 +376,6 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             return meshData;
         }
 
-        /// <summary>
-        /// Обновляет все meshы в инвентаре
-        /// </summary>
         public void UpdateMeshes()
         {
             for (var i = 0; i < this.inventory.Count; i++)
@@ -378,7 +385,6 @@ namespace ElectricalProgressive.Content.Block.EExtruder
         }
 
         #region Логика рецептов
-
 
         public static bool FindMatchingRecipe(ref ExtruderRecipe currentRecipe, ref string currentRecipeName, InventoryExtruder inventory)
         {
@@ -390,7 +396,6 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 if (MatchesRecipe(recipe, inventory))
                 {
                     currentRecipe = recipe;
-                    // Берем название из первого выхода рецепта
                     if (recipe.Outputs.Length > 0 && recipe.Outputs[0].ResolvedItemstack != null)
                     {
                         currentRecipeName = recipe.Outputs[0].ResolvedItemstack.GetName();
@@ -478,12 +483,10 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             {
                 var usedSlots = new List<int>();
 
-                // Обработка всех выходов рецепта
                 for (int i = 0; i < CurrentRecipe.Outputs.Length; i++)
                 {
                     var output = CurrentRecipe.Outputs[i];
 
-                    // Проверяем шанс для каждого выхода
                     if (Api.World.Rand.NextDouble() > output.Chance)
                         continue;
 
@@ -491,25 +494,20 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                     if (outputItem == null)
                         continue;
 
-                    // Распределяем выходы по слотам
                     if (i == 0)
                     {
-                        // Первый выход - основной слот
                         TryMergeOrSpawn(outputItem, OutputSlot1);
                     }
                     else if (i == 1)
                     {
-                        // Второй выход - дополнительный слот
                         TryMergeOrSpawn(outputItem, OutputSlot2);
                     }
                     else
                     {
-                        // Остальные выходы спавним в мире
                         Api.World.SpawnItemEntity(outputItem, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
                     }
                 }
 
-                // Удаляем расходуемые ингредиенты
                 foreach (var ingred in CurrentRecipe.Ingredients)
                 {
                     if (ingred.Quantity <= 0) continue;
@@ -527,6 +525,22 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                             break;
                         }
                     }
+                }
+
+                // Проверяем, можно ли продолжить с тем же рецептом
+                if (HasRequiredItems() && CurrentRecipe != null)
+                {
+                    if (!FindMatchingRecipe(ref CurrentRecipe, ref CurrentRecipeName, inventory))
+                    {
+                        CurrentRecipe = null;
+                        AccumulatedEnergy = 0;
+                        RecipeProgress = 0;
+                    }
+                }
+                else
+                {
+                    CurrentRecipe = null;
+                    RecipeProgress = 0;
                 }
             }
             catch (Exception ex)
@@ -572,6 +586,7 @@ namespace ElectricalProgressive.Content.Block.EExtruder
         #endregion
 
         #region Основной цикл работы
+
         private void Every1000Ms(float dt)
         {
             var beh = GetBehavior<BEBehaviorEExtruder>();
@@ -585,26 +600,17 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             var hasRecipe = !InputSlot1.Empty && !InputSlot2.Empty && FindMatchingRecipe(ref CurrentRecipe, ref CurrentRecipeName, inventory);
             var isCraftingNow = hasPower && hasRecipe && CurrentRecipe != null;
 
-
             if (isCraftingNow)
             {
-                StartAnimation();
-
-                RecipeProgress = Math.Min(RecipeProgress + (float)(beh.PowerSetting / CurrentRecipe.EnergyOperation), 1f);
-                UpdateState(RecipeProgress);
-
-                if (RecipeProgress >= 1f)
+                if (!_wasCraftingLastTick)
                 {
-                    ProcessCompletedCraft();
+                    StartAnimation();
+                }
 
-
-                    if (!HasRequiredItems())
-                    {
-                        StopAnimation();
-                    }
-
-                    // в любом случае сбрасываем прогресс
-                    RecipeProgress = 0f;
+                // Обновляем прогресс из накопленной энергии
+                if (CurrentRecipe != null && CurrentRecipe.EnergyOperation > 0)
+                {
+                    RecipeProgress = AccumulatedEnergy / (float)CurrentRecipe.EnergyOperation;
                     UpdateState(RecipeProgress);
                 }
             }
@@ -624,23 +630,29 @@ namespace ElectricalProgressive.Content.Block.EExtruder
 
             MarkDirty(true);
         }
+
         #endregion
 
         #region Визуальные эффекты
+
         private void StartAnimation()
         {
             if (Api?.Side != EnumAppSide.Client || AnimUtil == null || CurrentRecipe == null)
                 return;
 
+            var beh = GetBehavior<BEBehaviorEExtruder>();
+            if (beh == null) return;
+
             if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false)
             {
-                float craftDuration =
-                    (float)(CurrentRecipe.EnergyOperation / GetBehavior<BEBehaviorEExtruder>().PowerSetting);
+                float powerRatio = Math.Max(0.1f, Math.Min(1f, beh.PowerSetting / (float)CurrentRecipe.EnergyOperation));
+                float animationSpeed = powerRatio * 17.706f;
+                
                 AnimUtil.StartAnimation(new AnimationMetaData()
                 {
                     Animation = "work-on",
                     Code = "work-on",
-                    AnimationSpeed = (float)(GetBehavior<BEBehaviorEExtruder>().PowerSetting / CurrentRecipe.EnergyOperation)*17.706f,
+                    AnimationSpeed = animationSpeed,
                     EaseOutSpeed = 2.0f,
                     EaseInSpeed = 1f
                 });
@@ -658,16 +670,12 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             }
         }
         
-        /// <summary>
-        /// Новый метод для проверки кадра анимации
-        /// </summary>
-        /// <param name="dt"></param>
         private void CheckAnimationFrame(float dt)
         {
             if (Api?.Side != EnumAppSide.Client || AnimUtil == null!)
                 return;
 
-            const int startFrame = 280; // Кадр, на котором нужно воспроизвести звук
+            const int startFrame = 280;
             if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
             {
                 var currentTime = Api.World.ElapsedMilliseconds;
@@ -690,9 +698,6 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             }
         }
 
-        /// <summary>
-        /// Метод для воспроизведения звука
-        /// </summary>
         private void PlayPressSound()
         {
             if (Api?.Side != EnumAppSide.Client)
@@ -708,9 +713,11 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 1f
             );
         }
+
         #endregion
 
         #region GUI и взаимодействие
+
         public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
         {
             if (Api.Side == EnumAppSide.Client)
@@ -743,21 +750,24 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             this.invDialog?.Dispose();
             this.invDialog = (GuiDialogBlockEntity)null!;
         }
+
         #endregion
 
         #region Сохранение состояния
+
         public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldForResolving)
         {
             base.FromTreeAttributes(tree, worldForResolving);
             Inventory.FromTreeAttributes(tree.GetTreeAttribute("_inventory"));
             RecipeProgress = tree.GetFloat("PowerCurrent");
+            AccumulatedEnergy = tree.GetInt("accumulatedEnergy");
 
             if (Api != null)
                 Inventory.AfterBlocksLoaded(Api.World);
 
             if (Api is ICoreClientAPI)
             {
-                UpdateMeshes(); // обновляем меши при загрузке
+                UpdateMeshes();
             }
 
             if (Api?.Side == EnumAppSide.Client && _clientDialog != null)
@@ -771,10 +781,13 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             Inventory.ToTreeAttributes(invTree);
             tree["_inventory"] = invTree;
             tree.SetFloat("PowerCurrent", RecipeProgress);
+            tree.SetInt("accumulatedEnergy", AccumulatedEnergy);
         }
+
         #endregion
 
         #region Жизненный цикл
+
         public override void OnBlockPlaced(ItemStack? byItemStack = null)
         {
             base.OnBlockPlaced(byItemStack);
@@ -782,19 +795,13 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             if (ElectricalProgressive == null! || byItemStack == null)
                 return;
 
-            //задаем электрические параметры блока/проводника
             LoadEProperties.Load(this.Block, this);
-
         }
 
-        /// <summary>
-        /// Вызывается при тесселяции блока
-        /// </summary>
         public override bool OnTesselation(ITerrainMeshPool mesher, ITesselatorAPI tesselator)
         {
             base.OnTesselation(mesher, tesselator);
 
-            // Отрисовываем меши предметов (как в холодильнике)
             if (_meshes != null!)
             {
                 for (var i = 0; i < _meshes.Length; i++)
@@ -804,13 +811,12 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 }
             }
 
-            // если анимации нет, то рисуем блок базовый
             if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false)
             {
                 return false;
             }
 
-            return true;  // не рисует базовый блок, если есть анимация
+            return true;
         }
 
         public override void OnBlockRemoved()
@@ -838,7 +844,6 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             _mesh?.Dispose();
             _resultingShape = null;
 
-            // Очистка как в холодильнике
             _meshes = null!;
             _nowTesselatingShape = null!;
             _nowTesselatingObj = null!;
@@ -849,7 +854,6 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             base.OnBlockUnloaded();
             this._clientDialog?.TryClose();
 
-            // Очищаем ссылки как в холодильнике
             _mesh?.Dispose();
             _resultingShape = null;
 
@@ -858,6 +862,7 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             _nowTesselatingObj = null!;
             _capi = null!;
         }
+
         #endregion
     }
 }

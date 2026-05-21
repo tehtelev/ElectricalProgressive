@@ -6,20 +6,12 @@ using Vintagestory.GameContent;
 
 namespace ElectricalProgressive.Content.Block.EFuelGenerator;
 
-/// <summary>
-/// Инвентарь генератора на топливе.
-/// Управляет слотами для топлива и воды.
-/// Реализует ISlotProvider для интеграции с системой слотов.
-/// </summary>
 public class InventoryFuelGenerator : InventoryBase, ISlotProvider
 {
-    // === Поля ===
     private ItemSlot[] slots;
     private BlockPos _pos;
     private ICoreAPI _api;
     private LiquidConfig _liquidConfig;
-    
-    // === Свойства ===
     
     public ItemSlot[] Slots => this.slots;
     public ItemSlot FuelSlot => this.slots[0];
@@ -42,7 +34,15 @@ public class InventoryFuelGenerator : InventoryBase, ISlotProvider
         }
     }
     
-    // === Конструкторы ===
+    public BlockPos Pos 
+    { 
+        get => _pos;
+        set 
+        { 
+            _pos = value;
+            UpdateWaterSlotCapacity();
+        }
+    }
     
     public InventoryFuelGenerator(string inventoryID, ICoreAPI api)
         : base(inventoryID, api)
@@ -60,21 +60,35 @@ public class InventoryFuelGenerator : InventoryBase, ISlotProvider
         InitializeSlots();
     }
     
-    // Публичные методы
-    
-    public void SetBlockPos(BlockPos pos)
-    {
-        _pos = pos;
-        UpdateWaterSlotCapacity();
-    }
-    
-    /// <summary>
-    /// Установить конфигурацию жидкости
-    /// </summary>
     public void SetLiquidConfig(LiquidConfig config)
     {
         _liquidConfig = config;
         UpdateWaterSlotCapacity();
+    }
+    
+    private void InitializeSlots()
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            slots[i] = NewSlot(i);
+        }
+    }
+    
+    private float GetWaterCapacityFromConfig()
+    {
+        if (_liquidConfig != null)
+            return _liquidConfig.CapacityLitres;
+            
+        if (_api == null || _pos == null) return 100f;
+        
+        Vintagestory.API.Common.Block block = _api.World.BlockAccessor.GetBlock(_pos);
+        
+        if (block?.Attributes?["liquidConfig"]?["capacityLitres"].Exists == true)
+        {
+            return block.Attributes["liquidConfig"]["capacityLitres"].AsFloat(100f);
+        }
+        
+        return 100f;
     }
     
     public void UpdateWaterSlotCapacity()
@@ -105,35 +119,6 @@ public class InventoryFuelGenerator : InventoryBase, ISlotProvider
             }
         }
     }
-    
-    // === Приватные методы ===
-    
-    private void InitializeSlots()
-    {
-        for (int i = 0; i < 2; i++)
-        {
-            slots[i] = NewSlot(i);
-        }
-    }
-    
-    private float GetWaterCapacityFromConfig()
-    {
-        if (_liquidConfig != null)
-            return _liquidConfig.CapacityLitres;
-            
-        if (_api == null || _pos == null) return 100f;
-        
-        Vintagestory.API.Common.Block block = _api.World.BlockAccessor.GetBlock(_pos);
-        
-        if (block?.Attributes?["liquidConfig"]?["capacityLitres"].Exists == true)
-        {
-            return block.Attributes["liquidConfig"]["capacityLitres"].AsFloat(100f);
-        }
-        
-        return 100f;
-    }
-    
-    // === Публичные методы ===
     
     public override void FromTreeAttributes(ITreeAttribute tree)
     {
@@ -173,7 +158,6 @@ public class InventoryFuelGenerator : InventoryBase, ISlotProvider
             var props = BlockLiquidContainerBase.GetContainableProps(sourceSlot.Itemstack);
             if (props != null && props.Containable)
             {
-                // Проверяем, разрешена ли жидкость
                 if (_liquidConfig != null && !_liquidConfig.IsLiquidAllowed(sourceSlot.Itemstack))
                     return 0f;
                     
@@ -196,7 +180,6 @@ public class InventoryFuelGenerator : InventoryBase, ISlotProvider
         var props = BlockLiquidContainerBase.GetContainableProps(fromSlot.Itemstack);
         if (props != null && props.Containable)
         {
-            // Проверяем, разрешена ли жидкость
             if (_liquidConfig != null && !_liquidConfig.IsLiquidAllowed(fromSlot.Itemstack))
                 return null;
                 

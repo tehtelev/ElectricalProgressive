@@ -163,21 +163,34 @@ public class GuiDialogPress : GuiDialogBlockEntity
             ctx.Stroke();
         }
         
-        // 4. Текст прогресса - сбрасываем масштаб
+        // 4. Текст прогресса с масштабированием
+        int percent = (int)(progress * 100);
+        string percentText = $"{percent}%";
+        
         ctx.Save();
-        ctx.SetSourceRGB(0, 0, 0);
-        ctx.SelectFontFace("Arial", FontSlant.Normal, FontWeight.Bold);
-        ctx.SetFontSize(18);
+        ctx.SelectFontFace("sans-serif", FontSlant.Normal, FontWeight.Bold);
         
-        string progressText = $"{progress:P0}";
-        var extents = ctx.TextExtents(progressText);
+        // Размер шрифта относительно высоты прогресс-бара (60-70% от высоты)
+        double fontSize = currentBounds.InnerHeight * 0.65;
+        ctx.SetFontSize(fontSize);
         
-        // Рассчитываем позицию в исходной системе координат
-        double textX = (currentBounds.InnerWidth - extents.Width) / 2;
-        double textY = (currentBounds.InnerHeight + extents.Height) / 2;
+        var textExtents = ctx.TextExtents(percentText);
         
+        // Если текст слишком широкий - уменьшаем шрифт
+        if (textExtents.Width > currentBounds.InnerWidth * 0.9)
+        {
+            fontSize = fontSize * (currentBounds.InnerWidth * 0.9 / textExtents.Width);
+            ctx.SetFontSize(fontSize);
+            textExtents = ctx.TextExtents(percentText);
+        }
+        
+        double textX = (currentBounds.InnerWidth - textExtents.Width) / 2;
+        double textY = (currentBounds.InnerHeight + textExtents.Height) / 2;
+        
+        // Белый цвет текста
+        ctx.SetSourceRGB(1.0, 1.0, 1.0);
         ctx.MoveTo(textX, textY);
-        ctx.ShowText(progressText);
+        ctx.ShowText(percentText);
         ctx.Restore();
     }
 

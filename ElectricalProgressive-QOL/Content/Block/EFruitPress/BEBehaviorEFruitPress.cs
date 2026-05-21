@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Interface;
+﻿﻿using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
 using System.Linq;
 using System.Text;
@@ -13,6 +13,12 @@ public class BEBehaviorEFruitPress : BlockEntityBehavior, IElectricConsumer
 {
     public int PowerSetting { get; set; }
     public const string PowerSettingKey = "electricalprogressive:powersetting";
+    
+    /// <summary>
+    /// Накопленная энергия (дробная часть)
+    /// </summary>
+    private float _accumulatedEnergy = 0f;
+    
     public bool IsBurned => this.Block.Code.GetName().Contains("burned");
     public float AvgConsumeCoeff { get; set; }
     
@@ -47,12 +53,15 @@ public class BEBehaviorEFruitPress : BlockEntityBehavior, IElectricConsumer
                 if (juiceableProps == null || !juiceableProps.Exists) return false;
                 
                 // Проверяем, есть ли еще сок для отжима
-                double juiceableLitresLeft = GetJuiceableLitresLeft(fruitStack);
+                double juiceableLitresLeft = GetJuiceableLitresLeft(fruitStack, entity);
                 
                 if (juiceableLitresLeft <= 0.01) return false;
                 
                 // Проверяем, не полон ли бак
                 if (entity.IsFull()) return false;
+                
+                // Проверяем совместимость жидкости
+                if (!entity.IsJuiceCompatible()) return false;
                 
                 _recipeProgress = entity.SqueezeProgress;
                 return true;
@@ -61,14 +70,13 @@ public class BEBehaviorEFruitPress : BlockEntityBehavior, IElectricConsumer
         }
     }
 
-    private double GetJuiceableLitresLeft(ItemStack fruitStack)
+    private double GetJuiceableLitresLeft(ItemStack fruitStack, BlockEntityEFruitPress entity)
     {
         var juiceableProps = fruitStack.ItemAttributes?["juiceableProperties"];
         if (juiceableProps == null || !juiceableProps.Exists) return 0;
         
         var props = juiceableProps.AsObject<BlockEntityEFruitPress.JuiceableProperties>(null, fruitStack.Collectible.Code.Domain);
         
-        // Разрешаем JsonItemStack если нужно
         if (props?.LiquidStack != null)
         {
             props.LiquidStack.Resolve(Api.World, "juiceable properties liquidstack", fruitStack.Collectible.Code);
@@ -113,10 +121,31 @@ public class BEBehaviorEFruitPress : BlockEntityBehavior, IElectricConsumer
     public void Consume_receive(float amount)
     {
         if (!IsWorking)
+        {
+            PowerSetting = 0;
+            _accumulatedEnergy = 0;
             amount = 0;
+        }
 
-        if (PowerSetting != amount)
+        if (PowerSetting != (int)amount)
             PowerSetting = (int)amount;
+        
+        // Накопление энергии
+        if (IsWorking && amount > 0 && Blockentity is BlockEntityEFruitPress entity)
+        {
+            // Добавляем полученную энергию к накопленной
+            _accumulatedEnergy += amount;
+            
+            // Если накопилось целое число или больше
+            if (_accumulatedEnergy >= 1.0f)
+            {
+                int wholeUnits = (int)_accumulatedEnergy;
+                _accumulatedEnergy -= wholeUnits;
+                
+                // Передаем целые единицы в рецепт
+                entity.AddEnergy(wholeUnits);
+            }
+        }
     }
 
     public void Update()
@@ -144,6 +173,7 @@ public class BEBehaviorEFruitPress : BlockEntityBehavior, IElectricConsumer
         base.ToTreeAttributes(tree);
         tree.SetInt(PowerSettingKey, PowerSetting);
         tree.SetFloat("recipeProgress", _recipeProgress);
+        tree.SetFloat("accumulatedEnergy", _accumulatedEnergy);
     }
 
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
@@ -151,5 +181,6 @@ public class BEBehaviorEFruitPress : BlockEntityBehavior, IElectricConsumer
         base.FromTreeAttributes(tree, worldAccessForResolve);
         PowerSetting = tree.GetInt(PowerSettingKey);
         _recipeProgress = tree.GetFloat("recipeProgress");
+        _accumulatedEnergy = tree.GetFloat("accumulatedEnergy");
     }
 }

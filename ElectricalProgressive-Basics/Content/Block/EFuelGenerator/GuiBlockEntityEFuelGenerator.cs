@@ -1,5 +1,5 @@
-﻿﻿using System;
-using Cairo;
+﻿using Cairo;
+using System;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -8,30 +8,14 @@ using Vintagestory.GameContent;
 
 namespace ElectricalProgressive.Content.Block.EFuelGenerator;
 
-/// <summary>
-/// GUI для электрического генератора на топливе.
-/// Отображает состояние генератора, температуру, время горения и уровень жидкости.
-/// </summary>
 public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
 {
-    // === Поля ===
     private BlockEntityEFuelGenerator _betestgen;
     private float _gentemp;
     private float _fuelBurntime;
     private float _waterAmount;
     private bool _liquidAllowed;
     private float _currentConsumptionRate;
-    
-    // Таймер для ограничения частоты обновлений
-    private long _lastUpdateTime = 0;
-    private const int UPDATE_INTERVAL_MS = 500;
-    
-    // Кэш для отображаемых значений
-    private int _lastDisplayTemp = -1;
-    private int _lastDisplayBurnTime = -1;
-    private string _lastDisplayWater = "";
-    
-    // === Конструктор ===
     
     public GuiBlockEntityEFuelGenerator(string dialogTitle, InventoryBase inventory, 
         BlockPos blockEntityPos, ICoreClientAPI capi, BlockEntityEFuelGenerator bentity) 
@@ -43,8 +27,6 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
         _betestgen = bentity;
         SetupDialog();
     }
-    
-    // === Основные методы ===
     
     private void OnSlotModified(int slotid)
     {
@@ -59,7 +41,6 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
         ElementBounds stoveBounds = ElementBounds.Fixed(70, 70, 210, 150);
         
         ElementBounds waterBounds = ElementBounds.Fixed(17, 40, 40, 150);
-        // Темная панель для текста
         ElementBounds textPanelBounds = ElementBounds.Fixed(125, 45, 150, 145);
         
         dialog.BothSizing = ElementSizing.FitToChildren;
@@ -89,32 +70,24 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
             .EndChildElements()
             .Compose();
         
-        var config = _betestgen?.GetLiquidConfig();
-        
-        _lastDisplayTemp = -1;
-        _lastDisplayBurnTime = -1;
-        _lastDisplayWater = "";
-        _lastUpdateTime = 0;
-        
         Update(_betestgen.GenTemp, _betestgen.GetFuelBurnTime(), _betestgen.WaterAmount, 
-               config?.IsLiquidAllowed(_betestgen.WaterSlot.Itemstack) ?? true,
-               _betestgen.CurrentConsumptionRate);
+               _betestgen.IsCurrentLiquidAllowed, _betestgen.CurrentConsumptionRate);
     }
     
-    /// <summary>
-    /// Отрисовка темной панели для текста (как в GuiDialogEAquaAccum)
-    /// </summary>
     private void OnTextPanelDraw(Context ctx, ImageSurface surface, ElementBounds currentBounds)
     {
-        // Темный фон
         ctx.SetSourceRGB(0.1, 0.1, 0.15);
         ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
         ctx.Fill();
-        
-        // Тонкая рамка
+    
         ctx.SetSourceRGB(0.3, 0.3, 0.4);
         ctx.LineWidth = 1;
         ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
+        ctx.Stroke();
+    
+        ctx.SetSourceRGB(0.5, 0.5, 0.6);
+        ctx.LineWidth = 1;
+        ctx.Rectangle(2, 2, currentBounds.InnerWidth - 4, currentBounds.InnerHeight - 4);
         ctx.Stroke();
     }
     
@@ -123,8 +96,6 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
         capi.Network.SendBlockEntityPacket(BlockEntityPosition.X, BlockEntityPosition.Y, 
             BlockEntityPosition.Z, packet);
     }
-    
-    // === Методы отрисовки ===
     
     private void OnBgDraw(Context ctx, ImageSurface surface, ElementBounds currentBounds)
     {
@@ -151,59 +122,37 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
         
         ctx.Restore();
     }
-    
+
     private void OnWaterDraw(Context ctx, ImageSurface surface, ElementBounds currentBounds)
     {
         ItemSlot liquidSlot = Inventory[1];
-        if (liquidSlot.Empty)
-        {
-            ctx.Save();
-            ctx.SetSourceRGBA(0.3, 0.3, 0.3, 0.5);
-            ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
-            ctx.Fill();
-            
-            ctx.SetSourceRGB(0, 0, 0);
-            ctx.LineWidth = 1;
-            
-            double totalHeight = currentBounds.InnerHeight;
-            int divisions = 10;
-            
-            for (int i = 1; i < divisions; i++)
-            {
-                double y = (totalHeight / divisions) * i;
-                double lineWidth = (i % 2 == 0) ? 8 : 5;
-                
-                ctx.MoveTo(0, y);
-                ctx.LineTo(lineWidth, y);
-                ctx.Stroke();
-                
-                ctx.MoveTo(currentBounds.InnerWidth - lineWidth, y);
-                ctx.LineTo(currentBounds.InnerWidth, y);
-                ctx.Stroke();
-            }
-            
-            ctx.Restore();
-            return;
-        }
-        
-        float itemsPerLitre = 1f;
         float capacity = _betestgen?.WaterCapacity ?? 100f;
-        
-        WaterTightContainableProps containableProps = BlockLiquidContainerBase.GetContainableProps(liquidSlot.Itemstack);
-        if (containableProps != null)
+
+        float waterAmount = 0;
+        float itemsPerLitre = 1f;
+        bool hasLiquid = !liquidSlot.Empty;
+
+        if (hasLiquid)
         {
-            itemsPerLitre = containableProps.ItemsPerLitre;
+            WaterTightContainableProps containableProps =
+                BlockLiquidContainerBase.GetContainableProps(liquidSlot.Itemstack);
+            if (containableProps != null)
+            {
+                itemsPerLitre = containableProps.ItemsPerLitre;
+            }
+
+            waterAmount = (float)liquidSlot.StackSize / itemsPerLitre;
         }
-        
-        float fullnessRelative = (float)liquidSlot.StackSize / itemsPerLitre / capacity;
+
+        float fullnessRelative = hasLiquid ? waterAmount / capacity : 0;
         fullnessRelative = Math.Min(Math.Max(fullnessRelative, 0f), 1f);
-        
+
         double waterTopY = (1.0 - fullnessRelative) * currentBounds.InnerHeight;
-        
-        if (fullnessRelative > 0)
+
+        if (hasLiquid && waterAmount > 0)
         {
             ctx.Rectangle(0, waterTopY, currentBounds.InnerWidth, currentBounds.InnerHeight - waterTopY);
-            
+
             if (!_liquidAllowed)
             {
                 ctx.SetSourceRGBA(1, 0.3, 0.3, 0.7);
@@ -211,20 +160,21 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
             }
             else
             {
-                CompositeTexture compositeTexture = containableProps?.Texture ?? 
+                CompositeTexture compositeTexture =
+                    BlockLiquidContainerBase.GetContainableProps(liquidSlot.Itemstack)?.Texture ??
                     liquidSlot.Itemstack.Collectible.Attributes?["inContainerTexture"]
                         .AsObject<CompositeTexture>(null, liquidSlot.Itemstack.Collectible.Code.Domain);
-                
+
                 if (compositeTexture != null)
                 {
                     ctx.Save();
                     Matrix matrix = ctx.Matrix;
                     matrix.Scale(GuiElement.scaled(3.0), GuiElement.scaled(3.0));
                     ctx.Matrix = matrix;
-                    
+
                     AssetLocation textureLoc = compositeTexture.Base.Clone().WithPathAppendixOnce(".png");
                     GuiElement.fillWithPattern(capi, ctx, textureLoc, true, false, compositeTexture.Alpha);
-                    
+
                     ctx.Restore();
                 }
                 else
@@ -234,70 +184,107 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
                 }
             }
         }
-        
+
         ctx.SetSourceRGB(0, 0, 0);
         ctx.LineWidth = 2;
         ctx.Rectangle(0, 0, currentBounds.InnerWidth, currentBounds.InnerHeight);
         ctx.Stroke();
-        
+
         ctx.SetSourceRGB(0, 0, 0);
         ctx.LineWidth = 1;
-        
-        double _totalHeight = currentBounds.InnerHeight;
-        int _divisions = 10;
-        
-        for (int i = 1; i < _divisions; i++)
+
+        double tankHeight = currentBounds.InnerHeight;
+        int divisions = 10;
+
+        for (int i = 1; i < divisions; i++)
         {
-            double y = (_totalHeight / _divisions) * i;
+            double y = (tankHeight / divisions) * i;
             double lineWidth = (i % 2 == 0) ? 8 : 5;
-            
+
             ctx.MoveTo(0, y);
             ctx.LineTo(lineWidth, y);
             ctx.Stroke();
-            
+
             ctx.MoveTo(currentBounds.InnerWidth - lineWidth, y);
             ctx.LineTo(currentBounds.InnerWidth, y);
             ctx.Stroke();
         }
-        
-        ctx.SetSourceRGB(0, 0, 0);
-        ctx.SelectFontFace("Arial", FontSlant.Normal, FontWeight.Bold);
-        ctx.SetFontSize(10);
-        
-        float currentLiters = (float)liquidSlot.StackSize / itemsPerLitre;
-        string amountText = $"{currentLiters:0.##}L";
-        var amountExtents = ctx.TextExtents(amountText);
-        
-        ctx.MoveTo(
-            (currentBounds.InnerWidth - amountExtents.Width) / 2,
-            currentBounds.InnerHeight - 3
-        );
-        ctx.ShowText(amountText);
+
+        ctx.Save();
+        ctx.SelectFontFace("sans-serif", FontSlant.Normal, FontWeight.Bold);
+
+        string amountText;
+        if (hasLiquid && waterAmount > 0)
+        {
+            if (waterAmount >= 1000)
+                amountText = $"{waterAmount / 1000:F1}KL";
+            else if (waterAmount >= 100)
+                amountText = $"{waterAmount:F0}L";
+            else
+                amountText = $"{waterAmount:F1}L";
+        }
+        else
+        {
+            amountText = "Empty";
+        }
+
+        double fontSize = Math.Min(11, currentBounds.InnerWidth / 4.5);
+        fontSize = Math.Max(8, fontSize);
+        ctx.SetFontSize(fontSize);
+
+        var textExtents = ctx.TextExtents(amountText);
+
+        if (textExtents.Width > currentBounds.InnerWidth * 0.9)
+        {
+            fontSize = fontSize * (currentBounds.InnerWidth * 0.9 / textExtents.Width);
+            ctx.SetFontSize(fontSize);
+            textExtents = ctx.TextExtents(amountText);
+        }
+
+        double textX = (currentBounds.InnerWidth - textExtents.Width) / 2;
+        double textY = currentBounds.InnerHeight - 3;
+
+        if (hasLiquid && waterAmount > 0)
+        {
+            ctx.SetSourceRGB(0, 0, 0);
+            ctx.MoveTo(textX - 1, textY - 1);
+            ctx.ShowText(amountText);
+            ctx.MoveTo(textX + 1, textY - 1);
+            ctx.ShowText(amountText);
+            ctx.MoveTo(textX - 1, textY + 1);
+            ctx.ShowText(amountText);
+            ctx.MoveTo(textX + 1, textY + 1);
+            ctx.ShowText(amountText);
+
+            ctx.SetSourceRGB(1, 1, 1);
+            ctx.MoveTo(textX, textY);
+            ctx.ShowText(amountText);
+        }
+        else
+        {
+            ctx.SetSourceRGB(0.5, 0.5, 0.5);
+            ctx.MoveTo(textX, textY);
+            ctx.ShowText(amountText);
+        }
+
+        ctx.Restore();
+
+        if (hasLiquid && !_liquidAllowed)
+        {
+            ctx.SetSourceRGB(1, 0.2, 0.2);
+            ctx.LineWidth = 2;
+            ctx.Rectangle(1, 1, currentBounds.InnerWidth - 2, currentBounds.InnerHeight - 2);
+            ctx.Stroke();
+        }
     }
-    
-    /// <summary>
-    /// Обновление данных в GUI с ограничением по времени
-    /// </summary>
+
     public void Update(float gentemp, float burntime, float waterAmount, bool liquidAllowed = true, float currentConsumptionRate = 0.1f)
     {
         if (!IsOpened()) return;
         
-        long currentTime = capi.ElapsedMilliseconds;
-        
         _gentemp = gentemp;
         _waterAmount = waterAmount;
         _liquidAllowed = liquidAllowed;
-        
-        if (currentTime - _lastUpdateTime < UPDATE_INTERVAL_MS)
-        {
-            if (SingleComposer != null)
-            {
-                SingleComposer.GetCustomDraw("symbolDrawer").Redraw();
-                SingleComposer.GetCustomDraw("waterDrawer").Redraw();
-            }
-            return;
-        }
-        
         _fuelBurntime = burntime;
         _currentConsumptionRate = currentConsumptionRate;
         
@@ -311,60 +298,35 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
         float capacity = _betestgen?.WaterCapacity ?? 100f;
         var config = _betestgen?.GetLiquidConfig();
         
-        int displayTemp = (int)Math.Round(gentemp);
-        int displayBurnTime = (int)Math.Round(burntime);
-        string displayWater = waterAmount.ToString("0.0");
+        string newText = $" {_gentemp:F0} °C\n" + 
+                        $" {_fuelBurntime:F0} " + Lang.Get("electricalprogressivebasics:gui-word-seconds") + "\n" +
+                        $" {_waterAmount:F1}/{capacity:F0} L";
         
-        if (displayTemp == _lastDisplayTemp && 
-            displayBurnTime == _lastDisplayBurnTime && 
-            displayWater == _lastDisplayWater)
+        if (!_liquidAllowed && Inventory[1] != null && !Inventory[1].Empty)
         {
-            _lastUpdateTime = currentTime;
-            
-            if (SingleComposer != null)
-            {
-                SingleComposer.GetCustomDraw("symbolDrawer").Redraw();
-                SingleComposer.GetCustomDraw("waterDrawer").Redraw();
-            }
-            return;
+            newText += $"  ({Lang.Get("electricalprogressivebasics:Wrong type")})";
         }
         
-        _lastDisplayTemp = displayTemp;
-        _lastDisplayBurnTime = displayBurnTime;
-        _lastDisplayWater = displayWater;
-        _lastUpdateTime = currentTime;
+        newText += $"\n {liquidName}";
         
-        // Формируем текст без эмодзи
-        string newText = $"{displayTemp} °C\n" + 
-                        $"{displayBurnTime} " + Lang.Get("electricalprogressivebasics:gui-word-seconds") + "\n" +
-                        $"{displayWater}/{capacity.ToString("0.0")} L";
-        
-        if (!liquidAllowed && !Inventory[1].Empty)
+        if (_fuelBurntime > 0.1f && _gentemp > (config?.MinTemperature ?? 200))
         {
-            newText += $" ({Lang.Get("electricalprogressivebasics:Wrong type")})";
+            newText += $"\n {Lang.Get("electricalprogressivebasics:Consumption")}: {_currentConsumptionRate:F2} L/s";
         }
         
-        newText += $"\n{liquidName}";
-        
-        if (burntime > 0.1f && gentemp > (config?.MinTemperature ?? 200))
+        if (config != null && config.RequireSpecificLiquid && !_liquidAllowed && Inventory[1] != null && !Inventory[1].Empty)
         {
-            newText += $"\n{Lang.Get("electricalprogressivebasics:Consumption")}: {currentConsumptionRate:F2} L/s";
-        }
-        
-        if (config != null && config.RequireSpecificLiquid && !liquidAllowed && !Inventory[1].Empty)
-        {
-            newText += $"\n{Lang.Get("electricalprogressivebasics:Requires")}: " + config.GetAllowedLiquidsText();
+            newText += $"\n {Lang.Get("electricalprogressivebasics:Requires")}: " + config.GetAllowedLiquidsText();
         }
         
         if (SingleComposer != null)
         {
             SingleComposer.GetDynamicText("outputText").SetNewText(newText);
-            SingleComposer.GetCustomDraw("symbolDrawer").Redraw();
-            SingleComposer.GetCustomDraw("waterDrawer").Redraw();
+            SingleComposer.GetCustomDraw("symbolDrawer")?.Redraw();
+            SingleComposer.GetCustomDraw("waterDrawer")?.Redraw();
+            SingleComposer.GetCustomDraw("textPanelDrawer")?.Redraw();
         }
     }
-    
-    // === Обработка событий GUI ===
     
     private void OnTitleBarClose()
     {
@@ -375,11 +337,6 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
     {
         base.OnGuiOpened();
         Inventory.SlotModified += OnSlotModified;
-        
-        _lastDisplayTemp = -1;
-        _lastDisplayBurnTime = -1;
-        _lastDisplayWater = "";
-        _lastUpdateTime = 0;
     }
     
     public override void OnGuiClosed()

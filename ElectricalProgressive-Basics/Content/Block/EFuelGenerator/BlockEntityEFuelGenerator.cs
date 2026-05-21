@@ -23,14 +23,10 @@ public class LiquidConfig
     public bool LiquidRequired { get; set; } = true;
     public bool RequireSpecificLiquid { get; set; } = true;
     
-    // Параметры для температурной зависимости расхода
     public bool EnableTemperatureDependentConsumption { get; set; } = true;
     public float MaxExpectedTemperature { get; set; } = 1300f;
     public float MaxConsumptionMultiplier { get; set; } = 3f;
     
-    /// <summary>
-    /// Проверяет, разрешена ли данная жидкость
-    /// </summary>
     public bool IsLiquidAllowed(ItemStack liquidStack)
     {
         if (liquidStack?.Collectible == null) return false;
@@ -38,16 +34,13 @@ public class LiquidConfig
         var props = BlockLiquidContainerBase.GetContainableProps(liquidStack);
         if (props == null || !props.Containable) return false;
     
-        // Если не требуется конкретная жидкость, разрешаем любую
         if (!RequireSpecificLiquid) return true;
     
-        // Берем только то, что после двоеточия (или всю строку, если двоеточия нет)
         string fullCode = liquidStack.Collectible.Code?.ToString() ?? "";
         string liquidName = fullCode.Contains(':') ? fullCode.Split(':')[1] : fullCode;
     
         foreach (var allowed in AllowedLiquids)
         {
-            // Сравниваем только имена (без домена)
             if (string.Equals(liquidName, allowed, StringComparison.OrdinalIgnoreCase))
                 return true;
         }
@@ -55,9 +48,6 @@ public class LiquidConfig
         return false;
     }
     
-    /// <summary>
-    /// Получить локализованное название разрешенных жидкостей
-    /// </summary>
     public string GetAllowedLiquidsText()
     {
         if (!RequireSpecificLiquid) return Lang.Get("electricalprogressivebasics:Any liquid");
@@ -71,16 +61,10 @@ public class LiquidConfig
     }
 }
 
-/// <summary>
-/// Сущность блока электрического генератора на топливе.
-/// Управляет состоянием генератора, обработкой топлива и жидкости.
-/// Реализует IHeatSource для распространения тепла.
-/// </summary>
 public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeatSource
 {
     // === Поля ===
     private ICoreClientAPI _capi;
-    private ICoreServerAPI _sapi;
     private InventoryFuelGenerator _inventory;
     private GuiBlockEntityEFuelGenerator _clientDialog;
     private LiquidConfig _liquidConfig;
@@ -89,155 +73,20 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
     private static Shape? _resultingShape;
 
     private float _genTemp = 20f;
-    private float _waterAmount = 0f;
-    
     private int _maxTemp;
     private float _fuelBurnTime;
-    private float _maxBurnTime;
     
     private long _listenerId;
+    private bool _wasBurningLastTick;
     
-    // === Свойства ===
-    
-    public BEBehaviorElectricalProgressive ElectricalProgressive => GetBehavior<BEBehaviorElectricalProgressive>();
+    // === Свойства для GUI ===
     public float GenTemp => _genTemp;
+    public float FuelBurnTime => _fuelBurnTime;
+    public float WaterAmount => GetWaterAmount();
+    public float WaterCapacity => GetWaterCapacity();
+    public float CurrentConsumptionRate => CalculateCurrentConsumptionRate();
+    public float MinWorkTemperature => GetMinWorkTemperature();
     
-    /// <summary>
-    /// Текущее количество жидкости с учетом конфигурации
-    /// </summary>
-    public float WaterAmount 
-    { 
-        get 
-        {
-            if (WaterSlot.Empty) return 0f;
-            
-            var props = BlockLiquidContainerBase.GetContainableProps(WaterSlot.Itemstack);
-            if (props == null) return 0f;
-            
-            return (float)WaterSlot.Itemstack.StackSize / props.ItemsPerLitre;
-        }
-    }
-    
-    /// <summary>
-    /// Вместимость для жидкости из конфигурации
-    /// </summary>
-    public float WaterCapacity 
-    { 
-        get
-        {
-            if (_liquidConfig != null)
-                return _liquidConfig.CapacityLitres;
-                
-            if (Block?.Attributes?["liquidConfig"]?["capacityLitres"].Exists == true)
-            {
-                return Block.Attributes["liquidConfig"]["capacityLitres"].AsFloat(100f);
-            }
-            
-            return 100f;
-        }
-    }
-    
-    /// <summary>
-    /// Базовая скорость потребления жидкости из конфигурации
-    /// </summary>
-    public float WaterConsumptionRate
-    {
-        get
-        {
-            if (_liquidConfig != null)
-                return _liquidConfig.ConsumptionRate;
-                
-            if (Block?.Attributes?["liquidConfig"]?["consumptionRate"].Exists == true)
-            {
-                return Block.Attributes["liquidConfig"]["consumptionRate"].AsFloat(0.1f);
-            }
-            
-            return 0.1f;
-        }
-    }
-    
-    /// <summary>
-    /// Текущая скорость потребления жидкости с учетом температуры.
-    /// Чем выше температура, тем быстрее расход.
-    /// </summary>
-    public float CurrentConsumptionRate
-    {
-        get
-        {
-            // Базовая скорость из конфига
-            float baseRate = WaterConsumptionRate;
-            
-            // Проверяем, включена ли зависимость от температуры
-            if (_liquidConfig == null || !_liquidConfig.EnableTemperatureDependentConsumption)
-            {
-                return baseRate;
-            }
-            
-            // Если температура ниже минимальной для работы, расход нулевой
-            if (_genTemp <= MinWorkTemperature)
-            {
-                return 0f;
-            }
-            
-            // Рассчитываем коэффициент на основе температуры.
-            float maxExpectedTemp = _liquidConfig.MaxExpectedTemperature;
-            float maxMultiplier = _liquidConfig.MaxConsumptionMultiplier;
-            
-            // Нормализуем температуру от 0 до 1 в диапазоне от MinWorkTemperature до maxExpectedTemp
-            float tempRange = maxExpectedTemp - MinWorkTemperature;
-            if (tempRange <= 0) return baseRate; // Защита от деления на ноль
-            
-            float tempFactor = (_genTemp - MinWorkTemperature) / tempRange;
-            tempFactor = GameMath.Clamp(tempFactor, 0f, 1f);
-            
-            // Итоговый множитель от 1 до maxMultiplier
-            float multiplier = 1f + (tempFactor * (maxMultiplier - 1f));
-            
-            return baseRate * multiplier;
-        }
-    }
-    
-    /// <summary>
-    /// Минимальная температура для работы из конфигурации
-    /// </summary>
-    public float MinWorkTemperature
-    {
-        get
-        {
-            if (_liquidConfig != null)
-                return _liquidConfig.MinTemperature;
-                
-            if (Block?.Attributes?["liquidConfig"]?["minTemperature"].Exists == true)
-            {
-                return Block.Attributes["liquidConfig"]["minTemperature"].AsFloat(200f);
-            }
-            
-            return 200f;
-        }
-    }
-    
-    /// <summary>
-    /// Требуется ли жидкость для работы
-    /// </summary>
-    public bool LiquidRequired
-    {
-        get
-        {
-            if (_liquidConfig != null)
-                return _liquidConfig.LiquidRequired;
-                
-            if (Block?.Attributes?["liquidConfig"]?["liquidRequired"].Exists == true)
-            {
-                return Block.Attributes["liquidConfig"]["liquidRequired"].AsBool(true);
-            }
-            
-            return true;
-        }
-    }
-    
-    /// <summary>
-    /// Проверяет, разрешена ли текущая жидкость
-    /// </summary>
     public bool IsCurrentLiquidAllowed
     {
         get
@@ -253,8 +102,6 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
         get
         {
             var envTemp = EnvironmentTemperature();
-            
-            // Проверяем наличие и тип жидкости
             bool hasValidLiquid = !WaterSlot.Empty && IsCurrentLiquidAllowed;
             
             if (_genTemp <= envTemp || _genTemp < MinWorkTemperature || (LiquidRequired && !hasValidLiquid))
@@ -287,11 +134,25 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
         }
     }
     
+    public bool LiquidRequired
+    {
+        get
+        {
+            if (_liquidConfig != null)
+                return _liquidConfig.LiquidRequired;
+            if (Block?.Attributes?["liquidConfig"]?["liquidRequired"].Exists == true)
+                return Block.Attributes["liquidConfig"]["liquidRequired"].AsBool(true);
+            return true;
+        }
+    }
+    
     private BlockEntityAnimationUtil AnimUtil => GetBehavior<BEBehaviorAnimatable>()?.animUtil;
     
     public override InventoryBase Inventory => _inventory;
     public override string DialogTitle => Lang.Get("electricalprogressivebasics:fuelgen");
     public override string InventoryClassName => "fuelgen";
+    
+    public BEBehaviorElectricalProgressive ElectricalProgressive => GetBehavior<BEBehaviorElectricalProgressive>();
     
     // === Конструктор ===
     
@@ -306,30 +167,10 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
     public override void Initialize(ICoreAPI api)
     {
         base.Initialize(api);
-        
-        // Загружаем конфигурацию жидкости из атрибутов блока
-        if (Block?.Attributes?["liquidConfig"].Exists == true)
-        {
-            try
-            {
-                _liquidConfig = Block.Attributes["liquidConfig"].AsObject<LiquidConfig>();
-            }
-            catch (Exception ex)
-            {
-                api.Logger.Warning("Failed to load liquid config for fuel generator: " + ex.Message);
-                _liquidConfig = new LiquidConfig();
-            }
-        }
-        else
-        {
-            _liquidConfig = new LiquidConfig();
-        }
-        
-        if (api.Side == EnumAppSide.Server)
-        {
-            _sapi = api as ICoreServerAPI;
-        }
-        else
+    
+        LoadLiquidConfig();
+    
+        if (api.Side == EnumAppSide.Client)
         {
             _capi = api as ICoreClientAPI;
             if (AnimUtil != null)
@@ -338,13 +179,45 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
                 AnimUtil.InitializeAnimator(InventoryClassName, _mesh, _resultingShape, new Vec3f(0, GetRotation(), 0f));
             }
         }
-        
+    
         _inventory.Pos = Pos;
         _inventory.LateInitialize(InventoryClassName + "-" + Pos, api);
-        _inventory.SetLiquidConfig(_liquidConfig); // Передаем конфигурацию в инвентарь
-        
+        _inventory.SetLiquidConfig(_liquidConfig);
+    
         _listenerId = RegisterGameTickListener(OnBurnTick, 1000);
-        CanDoBurn();
+        TryStartBurn();
+    
+        // Принудительно обновляем GUI после инициализации на клиенте
+        if (api.Side == EnumAppSide.Client)
+        {
+            // Небольшая задержка для гарантии, что GUI создан
+            api.Event.RegisterCallback((dt) => {
+                if (_clientDialog != null && _clientDialog.IsOpened())
+                {
+                    _clientDialog.Update(GenTemp, GetFuelBurnTime(), WaterAmount, IsCurrentLiquidAllowed, CurrentConsumptionRate);
+                }
+            }, 100);
+        }
+    }
+
+    private void LoadLiquidConfig()
+    {
+        if (Block?.Attributes?["liquidConfig"].Exists == true)
+        {
+            try
+            {
+                _liquidConfig = Block.Attributes["liquidConfig"].AsObject<LiquidConfig>();
+            }
+            catch (Exception ex)
+            {
+                Api.Logger.Warning("Failed to load liquid config for fuel generator: " + ex.Message);
+                _liquidConfig = new LiquidConfig();
+            }
+        }
+        else
+        {
+            _liquidConfig = new LiquidConfig();
+        }
     }
 
     private void PrepareAnimUtil(ICoreAPI api, string cacheDictKey)
@@ -395,11 +268,6 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
     
     // === Обработка событий блока ===
     
-    public override void OnBlockBroken(IPlayer byPlayer = null)
-    {
-        base.OnBlockBroken(byPlayer);
-    }
-    
     public override void OnBlockUnloaded()
     {
         base.OnBlockUnloaded();
@@ -419,7 +287,6 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
         _mesh?.Dispose();
         _resultingShape = null;
         _capi = null;
-        _sapi = null;
     }
     
     public void OnSlotModified(int slotId)
@@ -427,64 +294,129 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
         if (slotId == 0)
         {
             if (!FuelSlot.Empty && FuelStack.Collectible.CombustibleProps != null && _fuelBurnTime == 0)
-                CanDoBurn();
-        }
-        else if (slotId == 1)
-        {
-            CheckAnimationState();
+                TryStartBurn();
         }
         
         Block = Api.World.BlockAccessor.GetBlock(Pos);
-        MarkDirty(Api.Side == EnumAppSide.Server, null);
-        
-        
+        MarkDirty(true);
         Api.World.BlockAccessor.GetChunkAtBlockPos(Pos)?.MarkModified();
+        
+        // Обновляем GUI при изменении слота (как в прессе)
+        if (Api?.Side == EnumAppSide.Client && _clientDialog != null && _clientDialog.IsOpened())
+        {
+            _clientDialog.Update(GenTemp, GetFuelBurnTime(), WaterAmount, IsCurrentLiquidAllowed, CurrentConsumptionRate);
+        }
     }
     
     public void OnBurnTick(float deltatime)
     {
+        bool isBurningNow = false;
+    
         if (_fuelBurnTime > 0f)
         {
-            // Проверяем наличие и тип жидкости
             bool hasValidLiquid = !WaterSlot.Empty && IsCurrentLiquidAllowed;
-            bool canProducePower = _genTemp > MinWorkTemperature && (LiquidRequired ? hasValidLiquid : true);
-            
-            if (canProducePower && hasValidLiquid)
+            bool hasFuel = _fuelBurnTime > 0; 
+    
+            if (hasFuel && hasValidLiquid)
             {
-                StartAnimation();
-                // Используем текущую скорость расхода с учетом температуры
+                isBurningNow = true;
+                StartAnimation();  // анимация только если есть и топливо, и вода
                 ConsumeLiquid(CurrentConsumptionRate * deltatime);
             }
             else
             {
-                StopAnimation();
+                StopAnimation();  // нет воды - останавливаем анимацию
             }
-            
+        
             _genTemp = ChangeTemperature(_genTemp, _maxTemp, deltatime);
             _fuelBurnTime -= deltatime;
-            
+        
             if (_fuelBurnTime <= 0f)
             {
                 _fuelBurnTime = 0f;
-                _maxBurnTime = 0f;
                 _maxTemp = 20;
                 StopAnimation();
-                
+            
                 if (!FuelSlot.Empty)
-                    CanDoBurn();
+                    TryStartBurn();
             }
         }
         else
         {
             StopAnimation();
-            
+        
             if (_genTemp != 20f)
                 _genTemp = ChangeTemperature(_genTemp, 20f, deltatime);
-            
-            CanDoBurn();
-        }
         
+            TryStartBurn();
+        }
+    
+        // Обновляем GUI при изменении состояния
+        if (Api?.Side == EnumAppSide.Client && _clientDialog != null && _clientDialog.IsOpened())
+        {
+            _clientDialog.Update(GenTemp, GetFuelBurnTime(), WaterAmount, IsCurrentLiquidAllowed, CurrentConsumptionRate);
+        }
+    
         MarkDirty();
+    }
+    
+    private float GetWaterAmount()
+    {
+        if (WaterSlot.Empty) return 0f;
+        var props = BlockLiquidContainerBase.GetContainableProps(WaterSlot.Itemstack);
+        if (props == null) return 0f;
+        return (float)WaterSlot.Itemstack.StackSize / props.ItemsPerLitre;
+    }
+    
+    private float GetWaterCapacity()
+    {
+        if (_liquidConfig != null)
+            return _liquidConfig.CapacityLitres;
+        if (Block?.Attributes?["liquidConfig"]?["capacityLitres"].Exists == true)
+            return Block.Attributes["liquidConfig"]["capacityLitres"].AsFloat(100f);
+        return 100f;
+    }
+    
+    private float GetMinWorkTemperature()
+    {
+        if (_liquidConfig != null)
+            return _liquidConfig.MinTemperature;
+        if (Block?.Attributes?["liquidConfig"]?["minTemperature"].Exists == true)
+            return Block.Attributes["liquidConfig"]["minTemperature"].AsFloat(200f);
+        return 200f;
+    }
+    
+    private float GetBaseConsumptionRate()
+    {
+        if (_liquidConfig != null)
+            return _liquidConfig.ConsumptionRate;
+        if (Block?.Attributes?["liquidConfig"]?["consumptionRate"].Exists == true)
+            return Block.Attributes["liquidConfig"]["consumptionRate"].AsFloat(0.1f);
+        return 0.1f;
+    }
+    
+    private float CalculateCurrentConsumptionRate()
+    {
+        float baseRate = GetBaseConsumptionRate();
+        
+        if (_liquidConfig == null || !_liquidConfig.EnableTemperatureDependentConsumption)
+            return baseRate;
+        
+        if (_genTemp <= MinWorkTemperature)
+            return 0f;
+        
+        float maxExpectedTemp = _liquidConfig.MaxExpectedTemperature;
+        float maxMultiplier = _liquidConfig.MaxConsumptionMultiplier;
+        
+        float tempRange = maxExpectedTemp - MinWorkTemperature;
+        if (tempRange <= 0) return baseRate;
+        
+        float tempFactor = (_genTemp - MinWorkTemperature) / tempRange;
+        tempFactor = GameMath.Clamp(tempFactor, 0f, 1f);
+        
+        float multiplier = 1f + (tempFactor * (maxMultiplier - 1f));
+        
+        return baseRate * multiplier;
     }
     
     // === Методы работы с жидкостями ===
@@ -496,7 +428,6 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
         var props = BlockLiquidContainerBase.GetContainableProps(liquidStack);
         if (props == null || !props.Containable) return 0;
         
-        // Проверяем, разрешена ли эта жидкость
         if (_liquidConfig != null && !_liquidConfig.IsLiquidAllowed(liquidStack))
             return 0;
         
@@ -516,7 +447,6 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
             placedstack.StackSize = movedItems;
             WaterStack = placedstack;
             
-            CheckAnimationState();
             MarkDirty();
             
             return movedItems;
@@ -532,67 +462,9 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
             currentStack.StackSize += movedItems;
             WaterSlot.MarkDirty();
             MarkDirty(true);
-            CheckAnimationState();
             
             return movedItems;
         }
-    }
-    
-    public bool AddLiquidFromContainer(ItemStack liquidStack, bool consumeFromSource = true)
-    {
-        if (liquidStack == null) return false;
-        
-        var props = BlockLiquidContainerBase.GetContainableProps(liquidStack);
-        if (props == null || !props.Containable)
-            return false;
-            
-        // Проверяем, разрешена ли эта жидкость
-        if (_liquidConfig != null && !_liquidConfig.IsLiquidAllowed(liquidStack))
-            return false;
-        
-        float slotLitres = (float)liquidStack.StackSize / props.ItemsPerLitre;
-        float tankLitres = WaterAmount;
-        float neededLitres = WaterCapacity - tankLitres;
-        
-        if (neededLitres > 0 && slotLitres > 0)
-        {
-            float takeLitres = Math.Min(neededLitres, slotLitres);
-            int takeItems = (int)(takeLitres * props.ItemsPerLitre);
-            
-            if (takeItems <= 0) return false;
-            
-            ItemStack liquidForTank = liquidStack.Clone();
-            liquidForTank.StackSize = takeItems;
-            
-            if (WaterSlot.Empty)
-            {
-                WaterSlot.Itemstack = liquidForTank;
-            }
-            else
-            {
-                if (WaterStack.Collectible.Code == liquidForTank.Collectible.Code)
-                {
-                    WaterStack.StackSize += takeItems;
-                }
-                else
-                {
-                    return false; // Нельзя смешивать разные жидкости
-                }
-            }
-            WaterSlot.MarkDirty();
-            
-            if (consumeFromSource)
-            {
-                liquidStack.StackSize -= takeItems;
-            }
-            
-            CheckAnimationState();
-            MarkDirty();
-            
-            return true;
-        }
-        
-        return false;
     }
     
     private void ConsumeLiquid(float litres)
@@ -621,41 +493,9 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
         }
         
         WaterSlot.MarkDirty();
-        UpdateWaterAmount(WaterAmount);
-    }
-    
-    public void UpdateWaterAmount(float newAmount)
-    {
-        float capacity = WaterCapacity;
-        
-        if (newAmount > capacity)
-        {
-            newAmount = capacity;
-        }
-        
-        if (Math.Abs(_waterAmount - newAmount) > 0.1f)
-        {
-            _waterAmount = newAmount;
-            MarkDirty();
-        }
     }
     
     // === Методы анимации ===
-    
-    private void CheckAnimationState()
-    {
-        bool hasValidLiquid = !WaterSlot.Empty && IsCurrentLiquidAllowed;
-        bool shouldBeAnimated = _fuelBurnTime > 0 && _genTemp > MinWorkTemperature && (LiquidRequired ? hasValidLiquid : true);
-        
-        if (shouldBeAnimated)
-        {
-            StartAnimation();
-        }
-        else
-        {
-            StopAnimation();
-        }
-    }
     
     private void StartAnimation()
     {
@@ -688,7 +528,7 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
     
     // === Методы работы с топливом ===
     
-    private void CanDoBurn()
+    private void TryStartBurn()
     {
         if (FuelSlot.Empty) return;
         
@@ -697,7 +537,7 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
         
         if (fuelProps.BurnTemperature > 0f && fuelProps.BurnDuration > 0f)
         {
-            _maxBurnTime = _fuelBurnTime = fuelProps.BurnDuration;
+            _fuelBurnTime = fuelProps.BurnDuration;
             _maxTemp = fuelProps.BurnTemperature;
             
             FuelStack.StackSize--;
@@ -726,6 +566,16 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
             toggleInventoryDialogClient(byPlayer, () =>
             {
                 _clientDialog = new GuiBlockEntityEFuelGenerator(DialogTitle, Inventory, Pos, _capi, this);
+            
+                // Добавляем небольшую задержку перед первым обновлением
+                _capi.Event.RegisterCallback((dt) => 
+                {
+                    if (_clientDialog != null && _clientDialog.IsOpened())
+                    {
+                        _clientDialog.Update(GenTemp, GetFuelBurnTime(), WaterAmount, IsCurrentLiquidAllowed, CurrentConsumptionRate);
+                    }
+                }, 50);
+            
                 return _clientDialog;
             });
         }
@@ -737,9 +587,7 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
         base.OnBlockRemoved();
 
         if (ElectricalProgressive != null)
-        {
             ElectricalProgressive.Connection = Facing.None;
-        }
 
         if (_clientDialog != null)
         {
@@ -755,7 +603,6 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
         _mesh?.Dispose();
         _resultingShape = null;
         _capi = null;
-        _sapi = null;
     }
     
     // === Методы сериализации ===
@@ -766,11 +613,10 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
         ITreeAttribute invtree = new TreeAttribute();
         _inventory.ToTreeAttributes(invtree);
         tree["inventory"] = invtree;
-        tree.SetFloat("_genTemp", _genTemp);
+        tree.SetFloat("genTemp", _genTemp);
         tree.SetInt("maxTemp", _maxTemp);
         tree.SetFloat("fuelBurnTime", _fuelBurnTime);
         
-        // Сохраняем конфигурацию жидкости
         if (_liquidConfig != null)
         {
             tree.SetString("liquidConfig", JsonUtil.ToString(_liquidConfig));
@@ -787,11 +633,10 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
         if (Api != null)
             Inventory.AfterBlocksLoaded(Api.World);
         
-        _genTemp = tree.GetFloat("_genTemp", 20);
+        _genTemp = tree.GetFloat("genTemp", 20);
         _maxTemp = tree.GetInt("maxTemp", 20);
         _fuelBurnTime = tree.GetFloat("fuelBurnTime", 0);
         
-        // Загружаем конфигурацию жидкости
         if (tree.HasAttribute("liquidConfig"))
         {
             try
@@ -799,17 +644,6 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
                 _liquidConfig = JsonUtil.FromString<LiquidConfig>(tree.GetString("liquidConfig"));
             }
             catch { }
-        }
-        
-        if (Api != null && Api.Side == EnumAppSide.Client)
-        {
-            CheckAnimationState();
-            
-            // Обновляем GUI при получении данных с сервера
-            if (_clientDialog != null && _clientDialog.IsOpened())
-            {
-                UpdateGuiData(true);
-            }
         }
     }
     
@@ -822,17 +656,11 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
         if (FuelStack != null)
             dsc.AppendLine(Lang.Get("Contents") + ": " + FuelStack.StackSize + "x" + FuelStack.GetName());
         
-        // Информация о жидкости
         if (_liquidConfig != null && _liquidConfig.RequireSpecificLiquid)
-        {
             dsc.AppendLine(Lang.Get("electricalprogressivebasics:requires") + ": " + _liquidConfig.GetAllowedLiquidsText());
-        }
         
-        // Добавляем информацию о текущем расходе воды
         if (_fuelBurnTime > 0 && _genTemp > MinWorkTemperature)
-        {
             dsc.AppendLine(Lang.Get("electricalprogressivebasics:Current consumption") + $": {CurrentConsumptionRate:F2} L/s");
-        }
     }
     
     public float GetFuelBurnTime()
@@ -843,22 +671,5 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
     public LiquidConfig GetLiquidConfig()
     {
         return _liquidConfig;
-    }
-    
-    public void UpdateGuiData(bool force = false)
-    {
-        if (_clientDialog == null || !_clientDialog.IsOpened())
-            return;
-        
-        // На клиенте просто обновляем GUI
-        if (Api?.Side == EnumAppSide.Client)
-        {
-            _clientDialog.Update(_genTemp, _fuelBurnTime, WaterAmount, IsCurrentLiquidAllowed, CurrentConsumptionRate);
-        }
-        // На сервере отправляем пакет с обновлением только если force = true
-        else if (Api?.Side == EnumAppSide.Server && force)
-        {
-            MarkDirty(true);
-        }
     }
 }

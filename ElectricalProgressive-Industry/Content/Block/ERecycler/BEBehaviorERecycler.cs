@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Interface;
+﻿﻿using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
 using System.Linq;
 using System.Text;
@@ -17,8 +17,13 @@ public class BEBehaviorERecycler : BlockEntityBehavior, IElectricConsumer
     public int PowerSetting { get; set; }
 
     public const string PowerSettingKey = "electricalprogressive:powersetting";
+    
+    /// <summary>
+    /// Накопленная энергия (дробная часть)
+    /// </summary>
+    private float _accumulatedEnergy = 0f;
 
-    public bool IsBurned => this.Block.Code.GetName().Contains("burned"); // пока так 
+    public bool IsBurned => this.Block.Code.GetName().Contains("burned");
 
     public float AvgConsumeCoeff { get; set; }
 
@@ -39,10 +44,6 @@ public class BEBehaviorERecycler : BlockEntityBehavior, IElectricConsumer
         _maxConsumption = MyMiniLib.GetAttributeInt(this.Block, "maxConsumption", 100);
     }
 
-
-
-
-
     public bool IsWorking
     {
         get
@@ -54,23 +55,18 @@ public class BEBehaviorERecycler : BlockEntityBehavior, IElectricConsumer
                     entity.ElectricalProgressive.AllEparams.Any(e => e.burnout))
                     return false;
 
-
                 var entityStack = entity.Inventory[0]?.Itemstack;
 
-                // со стаком что - то не так?
                 if (entityStack is null ||
                     entityStack.StackSize == 0 ||
                     entityStack.Collectible == null ||
                     entityStack.Collectible.Attributes == null)
                     return false;
 
-
-
                 var hasRecipe = BlockEntityERecycler.FindMatchingRecipe(ref entity.CurrentRecipe, ref entity.CurrentRecipeName, entity.Inventory[0])
                                 || BlockEntityERecycler.FindPerishProperties(ref entity.CurrentRecipe, ref entity.CurrentRecipeName, entity.Inventory[0]);
                 _recipeProgress = entity.RecipeProgress;
                 return hasRecipe;
-                    
             }
             return false;
         }
@@ -80,7 +76,6 @@ public class BEBehaviorERecycler : BlockEntityBehavior, IElectricConsumer
     {
         base.GetBlockInfo(forPlayer, stringBuilder);
 
-        //проверяем не сгорел ли прибор
         if (this.Blockentity is not BlockEntityERecycler)
             return;
 
@@ -108,15 +103,35 @@ public class BEBehaviorERecycler : BlockEntityBehavior, IElectricConsumer
     public void Consume_receive(float amount)
     {
         if (!IsWorking)
+        {
+            PowerSetting = 0;
+            _accumulatedEnergy = 0;
             amount = 0;
+        }
 
-        if (PowerSetting != amount)
+        if (PowerSetting != (int)amount)
             PowerSetting = (int)amount;
+        
+        // Накопление энергии
+        if (IsWorking && amount > 0 && Blockentity is BlockEntityERecycler entity)
+        {
+            // Добавляем полученную энергию к накопленной
+            _accumulatedEnergy += amount;
+            
+            // Если накопилось целое число или больше
+            if (_accumulatedEnergy >= 1.0f)
+            {
+                int wholeUnits = (int)_accumulatedEnergy;
+                _accumulatedEnergy -= wholeUnits;
+                
+                // Передаем целые единицы в рецепт
+                entity.AddEnergy(wholeUnits);
+            }
+        }
     }
 
     public void Update()
     {
-        //смотрим надо ли обновить модельку когда сгорает прибор
         if (Blockentity is not BlockEntityERecycler entity ||
             entity.ElectricalProgressive == null ||
             entity.ElectricalProgressive.AllEparams is null)
@@ -159,15 +174,12 @@ public class BEBehaviorERecycler : BlockEntityBehavior, IElectricConsumer
             prepareBurnout = false;
             entity.MarkDirty(true);
         }
-
-
     }
 
     public float getPowerReceive()
     {
         return this.PowerSetting;
     }
-
 
     public float getPowerRequest()
     {
@@ -179,14 +191,12 @@ public class BEBehaviorERecycler : BlockEntityBehavior, IElectricConsumer
 
     #endregion
 
-
-
-
     public override void ToTreeAttributes(ITreeAttribute tree)
     {
         base.ToTreeAttributes(tree);
         tree.SetInt(PowerSettingKey, PowerSetting);
         tree.SetFloat("recipeProgress", _recipeProgress);
+        tree.SetFloat("accumulatedEnergy", _accumulatedEnergy);
     }
 
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
@@ -194,5 +204,6 @@ public class BEBehaviorERecycler : BlockEntityBehavior, IElectricConsumer
         base.FromTreeAttributes(tree, worldAccessForResolve);
         PowerSetting = tree.GetInt(PowerSettingKey);
         _recipeProgress = tree.GetFloat("recipeProgress");
+        _accumulatedEnergy = tree.GetFloat("accumulatedEnergy");
     }
 }

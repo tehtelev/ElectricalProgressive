@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.RecipeSystem;
+﻿﻿using ElectricalProgressive.RecipeSystem;
 using ElectricalProgressive.RecipeSystem.Recipe;
 using ElectricalProgressive.Utils;
 using System;
@@ -18,8 +18,8 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
     internal InventoryHammer inventory;
     private GuiDialogHammer _clientDialog;
 
-    private static MeshData? _mesh; // кеш для меша, который используется в анимации. Кеш нужен, чтобы не загружать меш из ресурсов каждый раз при тесселяции блока, а использовать уже загруженный и обработанный меш.
-    private static Shape? _resultingShape; // кеш для формы, которая используется в анимации. Кеш нужен, чтобы не загружать форму из ресурсов каждый раз при тесселяции блока, а использовать уже загруженную и обработанную форму.
+    private static MeshData? _mesh;
+    private static Shape? _resultingShape;
     public override string InventoryClassName => "ehammer";
     public HammerRecipe CurrentRecipe;
     private readonly int _maxConsumption;
@@ -27,12 +27,17 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
     private bool _wasCraftingLastTick;
     public ItemSlot InputSlot => this.inventory[0];
     public ItemSlot OutputSlot => this.inventory[1];
-    public ItemSlot SecondaryOutputSlot => this.inventory[2]; // Новый слот для дополнительного выхода
+    public ItemSlot SecondaryOutputSlot => this.inventory[2];
 
     public string CurrentRecipeName;
     public float RecipeProgress;
+    
+    /// <summary>
+    /// Накопленная энергия для текущего рецепта (целые единицы)
+    /// </summary>
+    public int AccumulatedEnergy { get; set; }
 
-    private static float _maxTargetTemp = 1350f; //максимальная температура для нагрева
+    private static float _maxTargetTemp = 1350f;
 
     public override string DialogTitle => Lang.Get("ehammer-title-gui");
 
@@ -50,7 +55,6 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
     //--------------------------------------------------------------------------------
 
     public BEBehaviorElectricalProgressive? ElectricalProgressive => GetBehavior<BEBehaviorElectricalProgressive>();
-
 
     public Facing Facing
     {
@@ -75,6 +79,52 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         _maxConsumption = MyMiniLib.GetAttributeInt(this.Block, "maxConsumption", 100);
         this.inventory = new InventoryHammer(3, InventoryClassName, (string)null, (ICoreAPI)null, null, this);
         this.inventory.SlotModified += new Action<int>(this.OnSlotModifid);
+    }
+
+    /// <summary>
+    /// Добавить энергию для обработки рецепта
+    /// </summary>
+    public void AddEnergy(int amount)
+    {
+        if (CurrentRecipe == null || InputSlot.Empty)
+            return;
+            
+        AccumulatedEnergy += amount;
+        
+        // Проверяем, достаточно ли энергии для завершения
+        while (AccumulatedEnergy >= CurrentRecipe.EnergyOperation && !InputSlot.Empty)
+        {
+            AccumulatedEnergy -= (int)CurrentRecipe.EnergyOperation;
+            ProcessCompletedCraft();
+            
+            // После крафта проверяем, можно ли продолжить
+            if (InputSlot.Empty || CurrentRecipe == null)
+                break;
+        }
+        
+        // Обновляем прогресс для UI
+        if (CurrentRecipe != null && CurrentRecipe.EnergyOperation > 0)
+        {
+            RecipeProgress = AccumulatedEnergy / (float)CurrentRecipe.EnergyOperation;
+            
+            // Обновляем температуру предмета на основе прогресса
+            if (InputSlot?.Itemstack != null)
+            {
+                var stack = InputSlot.Itemstack;
+                if (RecipeProgress < 0.5f)
+                {
+                    stack.Collectible.SetTemperature(this.Api.World, stack, RecipeProgress * 2 * _maxTargetTemp);
+                }
+                else
+                {
+                    stack.Collectible.SetTemperature(this.Api.World, stack, _maxTargetTemp);
+                }
+            }
+            
+            UpdateState(RecipeProgress);
+        }
+        
+        MarkDirty(true);
     }
 
     public override void Initialize(ICoreAPI api)
@@ -108,16 +158,10 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
 
             _soundHammer = new AssetLocation("electricalprogressiveindustry:sounds/ehammer/hammer.ogg");
 
-            // Регистрируем частый тикер для проверки анимации на клиенте
             this.RegisterGameTickListener(new Action<float>(this.CheckAnimationFrame), 50);
         }
     }
 
-
-    /// <summary>
-    /// Подготавливает анимационный утилит для блока, загружая меш и форму из ресурсов
-    /// </summary>
-    /// <param name="api"></param>
     private void PrepareAnimUtil(ICoreAPI api, string cacheDictKey)
     {
         if (_mesh == null || _resultingShape == null)
@@ -128,10 +172,8 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             Shape _shape = Shape.TryGet(api, shapePath);
 
             _mesh = AnimUtil.CreateMesh(cacheDictKey, _shape, out _resultingShape, null);
-
         }
     }
-
 
     public int GetRotation()
     {
@@ -140,26 +182,18 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         return adjustedIndex * 90;
     }
 
-    /// <summary>
-    /// Новый метод для проверки кадра анимации
-    /// </summary>
-    /// <param name="dt"></param>
     private void CheckAnimationFrame(float dt)
     {
         if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
             return;
 
-        const int startFrame = 27; // Кадр, на котором нужно воспроизвести звук
-        // Проверяем, активна ли анимация
+        const int startFrame = 27;
         if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("craft"))
         {
-            // Получаем текущее время в миллисекундах
             var currentTime = Api.World.ElapsedMilliseconds;
-
             _lastAnimationCheckTime = currentTime;
 
             var currentFrame = AnimUtil.animator.Animations[0].CurrentFrame;
-            // Воспроизводим звук на определенном кадре
             if (currentFrame >= startFrame && _lastSoundFrame != startFrame)
             {
                 PlayHammerSound();
@@ -169,7 +203,6 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             {
                 _lastSoundFrame = -1;
             }
-
         }
         else
         {
@@ -177,9 +210,6 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         }
     }
 
-    /// <summary>
-    /// Метод для воспроизведения звука
-    /// </summary>
     private void PlayHammerSound()
     {
         if (Api?.Side != EnumAppSide.Client)
@@ -196,18 +226,12 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         );
     }
 
-    /// <summary>
-    /// Необходимо для отрисовки текстур
-    /// </summary>
-    /// <param name="textureCode"></param>
-    /// <returns></returns>
     public TextureAtlasPosition this[string textureCode]
     {
         get
         {
             var assetLocation = default(AssetLocation?);
 
-            // Пробуем получить текстуру из item.Textures
             if (_nowTesselatingObj is Vintagestory.API.Common.Item item)
             {
                 if (item.Textures.TryGetValue(textureCode, out var compositeTexture))
@@ -231,13 +255,11 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
                 }
             }
 
-            // Если не нашли, пробуем из shape.Textures
             if (assetLocation == null && _nowTesselatingShape != null)
             {
                 _nowTesselatingShape.Textures.TryGetValue(textureCode, out assetLocation);
             }
 
-            // Если все еще не нашли, используем домен предмета и предполагаемый путь
             if (assetLocation == null)
             {
                 var domain = _nowTesselatingObj.Code.Domain;
@@ -255,7 +277,6 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         if (textureAtlasPosition != null)
             return textureAtlasPosition;
 
-        // берем только base текстуру (первую из кучи наваленных)
         var pos = texturePath.Path.IndexOf("++");
         if (pos >= 0)
             texturePath.Path = texturePath.Path.Substring(0, pos);
@@ -275,9 +296,6 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
 
     public Size2i AtlasSize => _capi.BlockTextureAtlas.Size;
 
-    /// <summary>
-    /// Обновляем mesh для конкретного слота
-    /// </summary>
     public void UpdateMesh(int slotid)
     {
         if (Api == null || Api.Side == EnumAppSide.Server || _capi == null)
@@ -286,7 +304,6 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         if (slotid >= inventory.Count)
             return;
 
-        // В молоте отображаем только слот 0 (инструмент)
         if (slotid != 0)
         {
             _meshes[slotid] = null;
@@ -311,9 +328,6 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         }
     }
 
-    /// <summary>
-    /// Перемещаем mesh в нужную позицию для молота
-    /// </summary>
     public void TranslateMesh(MeshData? meshData, int slotId)
     {
         if (meshData == null || slotId != 0)
@@ -345,9 +359,6 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         }
     }
 
-    /// <summary>
-    /// Генерация меша для предмета (как в холодильнике)
-    /// </summary>
     public MeshData? GenMesh(ItemSlot slot)
     {
         var stack = slot.Itemstack;
@@ -393,9 +404,6 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         return meshData;
     }
 
-    /// <summary>
-    /// Обновляет все meshы в инвентаре
-    /// </summary>
     public void UpdateMeshes()
     {
         for (var i = 0; i < this.inventory.Count; i++)
@@ -404,10 +412,6 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         MarkDirty(true);
     }
 
-    /// <summary>
-    /// Слот модифицирован
-    /// </summary>
-    /// <param name="slotid"></param>
     private void OnSlotModifid(int slotid)
     {
         if (this.Api is ICoreClientAPI && this._clientDialog != null)
@@ -419,12 +423,11 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         // защита от горячей смены стака
         if (slotid == 0 && RecipeProgress < 1f)
         {
-            // в любом случае сбрасываем прогресс
             RecipeProgress = 0f;
+            AccumulatedEnergy = 0;
             UpdateState(RecipeProgress);
         }
 
-        // Обновляем меш при изменении входного слота
         if (slotid == 0 && Api.Side == EnumAppSide.Client)
         {
             UpdateMesh(0);
@@ -433,6 +436,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         if (this.InputSlot.Empty)
         {
             RecipeProgress = 0;
+            AccumulatedEnergy = 0;
             StopAnimation();
         }
 
@@ -448,10 +452,6 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         }
     }
 
-    /// <summary>
-    /// Ищет подходящий рецепт
-    /// </summary>
-    /// <returns></returns>
     public static bool FindMatchingRecipe(ref HammerRecipe currentRecipe, ref string currentRecipeName, ItemSlot inputSlot)
     {
         ItemSlot[] inputSlots = [inputSlot];
@@ -463,7 +463,6 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             if (recipe.Matches(inputSlots, out _))
             {
                 currentRecipe = recipe;
-                // Берем название из первого выхода рецепта
                 if (recipe.Outputs.Length > 0 && recipe.Outputs[0].ResolvedItemstack != null)
                 {
                     currentRecipeName = recipe.Outputs[0].ResolvedItemstack.GetName();
@@ -474,14 +473,9 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         return false;
     }
 
-    /// <summary>
-    /// Тикер
-    /// </summary>
-    /// <param name="dt"></param>
     private void Every1000Ms(float dt)
     {
         var beh = GetBehavior<BEBehaviorEHammer>();
-        // мало ли поведение не загрузилось еще
         if (beh == null)
         {
             StopAnimation();
@@ -490,7 +484,6 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
 
         var stack = InputSlot?.Itemstack;
 
-        // со стаком что-то не так?
         if (stack is null ||
             stack.StackSize == 0 ||
             stack.Collectible == null ||
@@ -498,43 +491,35 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             return;
 
         var hasPower = beh.PowerSetting >= _maxConsumption * 0.1F;
-        var hasRecipe = !InputSlot.Empty && FindMatchingRecipe(ref CurrentRecipe, ref CurrentRecipeName, inventory[0]); ;
+        var hasRecipe = !InputSlot.Empty && FindMatchingRecipe(ref CurrentRecipe, ref CurrentRecipeName, inventory[0]);
         var isCraftingNow = hasPower && hasRecipe && CurrentRecipe != null;
 
-        if (isCraftingNow) // крафтим?
+        if (isCraftingNow)
         {
-            // старт анимации
-            StartAnimation();
-
-            // меняем прогресс текущего крафта
-            RecipeProgress = Math.Min(RecipeProgress + (float)(beh.PowerSetting / CurrentRecipe.EnergyOperation), 1f);
-            UpdateState(RecipeProgress);
-
-
-            if (RecipeProgress < 0.5f)
+            if (!_wasCraftingLastTick)
             {
-                stack.Collectible.SetTemperature(this.Api.World, stack, RecipeProgress * 2 * _maxTargetTemp);
-            }
-            else
-            {
-                stack.Collectible.SetTemperature(this.Api.World, stack, _maxTargetTemp);
+                StartAnimation();
             }
 
-            if (RecipeProgress >= 1f)
+            // Обновляем прогресс из накопленной энергии
+            if (CurrentRecipe != null && CurrentRecipe.EnergyOperation > 0)
             {
-                ProcessCompletedCraft();
-
-                // Проверяем возможность следующего цикла без лишних вызовов
-                var canContinueCrafting = hasPower && !InputSlot.Empty && CurrentRecipe != null &&
-                                          InputSlot.Itemstack.StackSize >= CurrentRecipe.Ingredients[0].Quantity;
-
-                if (!canContinueCrafting)
+                RecipeProgress = AccumulatedEnergy / (float)CurrentRecipe.EnergyOperation;
+                
+                // Обновляем температуру
+                if (InputSlot?.Itemstack != null)
                 {
-                    StopAnimation();
+                    var inputStack = InputSlot.Itemstack;
+                    if (RecipeProgress < 0.5f)
+                    {
+                        inputStack.Collectible.SetTemperature(this.Api.World, inputStack, RecipeProgress * 2 * _maxTargetTemp);
+                    }
+                    else
+                    {
+                        inputStack.Collectible.SetTemperature(this.Api.World, inputStack, _maxTargetTemp);
+                    }
                 }
-
-                // в любом случае сбрасываем прогресс
-                RecipeProgress = 0f;
+                
                 UpdateState(RecipeProgress);
             }
         }
@@ -547,9 +532,6 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         _wasCraftingLastTick = isCraftingNow;
     }
 
-    /// <summary>
-    /// Обработка завершенного крафта
-    /// </summary>
     private void ProcessCompletedCraft()
     {
         if (CurrentRecipe == null || Api == null || CurrentRecipe.Outputs == null || CurrentRecipe.Outputs.Length == 0)
@@ -559,12 +541,10 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
 
         try
         {
-            // Обработка всех выходов рецепта
             for (int i = 0; i < CurrentRecipe.Outputs.Length; i++)
             {
                 var output = CurrentRecipe.Outputs[i];
 
-                // Проверяем шанс для каждого выхода
                 if (Api.World.Rand.NextDouble() > output.Chance)
                     continue;
 
@@ -574,27 +554,38 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
 
                 outputItem.Collectible.SetTemperature(this.Api.World, outputItem, _maxTargetTemp);
 
-                // Распределяем выходы по слотам
                 if (i == 0)
                 {
-                    // Первый выход - основной слот
                     TryMergeOrSpawn(outputItem, OutputSlot);
                 }
                 else if (i == 1)
                 {
-                    // Второй выход - дополнительный слот
                     TryMergeOrSpawn(outputItem, SecondaryOutputSlot);
                 }
                 else
                 {
-                    // Остальные выходы спавним в мире
                     Api.World.SpawnItemEntity(outputItem, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
                 }
             }
 
-            // Извлекаем ингредиенты
             InputSlot.TakeOut(CurrentRecipe.Ingredients[0].Quantity);
             InputSlot.MarkDirty();
+            
+            // Проверяем, можно ли продолжить с тем же рецептом
+            if (!InputSlot.Empty && CurrentRecipe != null)
+            {
+                if (!FindMatchingRecipe(ref CurrentRecipe, ref CurrentRecipeName, inventory[0]))
+                {
+                    CurrentRecipe = null;
+                    AccumulatedEnergy = 0;
+                    RecipeProgress = 0;
+                }
+            }
+            else
+            {
+                CurrentRecipe = null;
+                RecipeProgress = 0;
+            }
         }
         catch (Exception ex)
         {
@@ -602,13 +593,6 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         }
     }
 
-
-
-    /// <summary>
-    /// Попытка сложить в слот или заспавнить в мир
-    /// </summary>
-    /// <param name="stack"></param>
-    /// <param name="targetSlot"></param>
     private void TryMergeOrSpawn(ItemStack stack, ItemSlot targetSlot)
     {
         if (targetSlot.Empty)
@@ -621,7 +605,6 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             var freeSpace = targetSlot.Itemstack.Collectible.MaxStackSize - targetSlot.Itemstack.StackSize;
             var toAdd = Math.Min(freeSpace, stack.StackSize);
 
-            // учитываем температуру при объединении
             var stackTemp = stack.Collectible.GetTemperature(this.Api.World, stack);
             var targetstackTemp = targetSlot.Itemstack.Collectible.GetTemperature(this.Api.World, targetSlot.Itemstack);
 
@@ -646,31 +629,30 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         targetSlot.MarkDirty();
     }
 
-
-    /// <summary>
-    /// Старт анимации
-    /// </summary>
     private void StartAnimation()
     {
         if (Api?.Side != EnumAppSide.Client || AnimUtil == null || CurrentRecipe == null)
             return;
 
+        var beh = GetBehavior<BEBehaviorEHammer>();
+        if (beh == null) return;
+
         if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("craft") == false)
         {
+            float powerRatio = Math.Max(0.1f, Math.Min(1f, beh.PowerSetting / (float)CurrentRecipe.EnergyOperation));
+            float animationSpeed = powerRatio * 2.0f;
+            
             AnimUtil.StartAnimation(new AnimationMetaData()
             {
                 Animation = "Animation1",
                 Code = "craft",
-                AnimationSpeed = 2.0f,
+                AnimationSpeed = animationSpeed,
                 EaseOutSpeed = 2.0f,
                 EaseInSpeed = 1f
             });
         }
     }
 
-    /// <summary>
-    /// Стоп анимации
-    /// </summary>
     private void StopAnimation()
     {
         if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
@@ -682,10 +664,6 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         }
     }
 
-    /// <summary>
-    /// Обновление состояния
-    /// </summary>
-    /// <param name="recipeProgress"></param>
     protected virtual void UpdateState(float recipeProgress)
     {
         if (Api != null && Api.Side == EnumAppSide.Client && _clientDialog != null && _clientDialog.IsOpened())
@@ -695,12 +673,6 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         MarkDirty(true);
     }
 
-    /// <summary>
-    /// Игрок нажал ПКМ по блоку
-    /// </summary>
-    /// <param name="byPlayer"></param>
-    /// <param name="blockSel"></param>
-    /// <returns></returns>
     public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
     {
         if (this.Api.Side == EnumAppSide.Client)
@@ -714,28 +686,15 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         return true;
     }
 
-    /// <summary>
-    /// Получение пакета с клиента
-    /// </summary>
-    /// <param name="player"></param>
-    /// <param name="packetid"></param>
-    /// <param name="data"></param>
     public override void OnReceivedClientPacket(IPlayer player, int packetid, byte[] data)
     {
         base.OnReceivedClientPacket(player, packetid, data);
-
         ElectricalProgressive?.OnReceivedClientPacket(player, packetid, data);
     }
 
-    /// <summary>
-    /// Получение пакета с сервера
-    /// </summary>
-    /// <param name="packetid"></param>
-    /// <param name="data"></param>
     public override void OnReceivedServerPacket(int packetid, byte[] data)
     {
         base.OnReceivedServerPacket(packetid, data);
-
         ElectricalProgressive?.OnReceivedServerPacket(packetid, data);
 
         if (packetid != 1001)
@@ -746,17 +705,10 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         this.invDialog = (GuiDialogBlockEntity)null;
     }
 
-    /// <summary>
-    /// Вызывается при тесселяции блока
-    /// </summary>
-    /// <param name="mesher"></param>
-    /// <param name="tesselator"></param>
-    /// <returns></returns>
     public override bool OnTesselation(ITerrainMeshPool mesher, ITesselatorAPI tesselator)
     {
         base.OnTesselation(mesher, tesselator);
 
-        // Отрисовываем меши предметов (как в холодильнике)
         if (_meshes != null)
         {
             for (var i = 0; i < _meshes.Length; i++)
@@ -766,13 +718,12 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             }
         }
 
-        // если анимации нет, то рисуем блок базовый
         if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("craft") == false)
         {
             return false;
         }
 
-        return true;  // не рисует базовый блок, если есть анимация
+        return true;
     }
 
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldForResolving)
@@ -780,13 +731,14 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         base.FromTreeAttributes(tree, worldForResolving);
         this.Inventory.FromTreeAttributes(tree.GetTreeAttribute("_inventory"));
         this.RecipeProgress = tree.GetFloat("PowerCurrent");
+        this.AccumulatedEnergy = tree.GetInt("accumulatedEnergy");
 
         if (this.Api != null)
             this.Inventory.AfterBlocksLoaded(this.Api.World);
 
         if (Api is ICoreClientAPI)
         {
-            UpdateMeshes(); // обновляем меши при загрузке
+            UpdateMeshes();
         }
 
         var api = this.Api;
@@ -802,12 +754,9 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         this.Inventory.ToTreeAttributes(tree1);
         tree["_inventory"] = (IAttribute)tree1;
         tree.SetFloat("PowerCurrent", this.RecipeProgress);
+        tree.SetInt("accumulatedEnergy", this.AccumulatedEnergy);
     }
 
-    /// <summary>
-    /// Блок установлен
-    /// </summary>
-    /// <param name="byItemStack"></param>
     public override void OnBlockPlaced(ItemStack? byItemStack = null)
     {
         base.OnBlockPlaced(byItemStack);
@@ -815,13 +764,9 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         if (ElectricalProgressive == null || byItemStack == null)
             return;
 
-        //задаем электрические параметры блока/проводника
         LoadEProperties.Load(this.Block, this);
     }
 
-    /// <summary>
-    /// Блок удален
-    /// </summary>
     public override void OnBlockRemoved()
     {
         base.OnBlockRemoved();
@@ -844,7 +789,6 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             this.AnimUtil?.Dispose();
         }
 
-        // Очистка как в холодильнике
         _mesh?.Dispose();
         _resultingShape = null;
         _meshes = null;
@@ -872,14 +816,10 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         }
     }
 
-    /// <summary>
-    /// Выгрузка блока из памяти
-    /// </summary>
     public override void OnBlockUnloaded()
     {
         base.OnBlockUnloaded();
         this._clientDialog?.TryClose();
-
 
         StopAnimation();
 
@@ -888,7 +828,6 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             this.AnimUtil?.Dispose();
         }
 
-        // Очищаем ссылки как в холодильнике
         _mesh?.Dispose();
         _resultingShape = null;
         _meshes = null;
