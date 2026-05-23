@@ -1,4 +1,4 @@
-{
+﻿{
   "code": "switch",
   "class": "BlockESwitch",
   "creativeInventory": {
@@ -19,6 +19,7 @@
     }
   ],
 
+  "doNotRenderAtLod2": true, // не отрисовывать на расстоянии LOD2
 
   "shapeInventory": {
     "base": "block/switch/switch-disabled"

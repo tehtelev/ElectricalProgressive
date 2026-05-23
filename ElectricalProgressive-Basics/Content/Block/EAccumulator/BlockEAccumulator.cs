@@ -137,6 +137,7 @@ public class BlockEAccumulator : BlockEBase, IEnergyStorageItem
     public override void OnBlockPlaced(IWorldAccessor world, BlockPos blockPos, ItemStack byItemStack = null!)
     {
         base.OnBlockPlaced(world, blockPos, byItemStack);
+
         if (byItemStack != null)
         {
             var be = world.BlockAccessor.GetBlockEntity(blockPos) as BlockEntityEAccumulator;

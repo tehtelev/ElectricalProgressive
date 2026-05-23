@@ -73,6 +73,8 @@
     ]
   },
 
+  "doNotRenderAtLod2": true, // не отрисовывать на расстоянии LOD2
+
   "shapeInventoryByType": {
     "*-isolated": {
       "base": "block/ecable/ecable-single/ecable-{voltage}-single-block_isolated"

@@ -21,6 +21,11 @@ namespace ElectricalProgressive.Content.Block.ELamp
             }
         }
 
+        /// <summary>
+        /// Настройки коннекта
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public override Facing GetConnection(Facing value)
         {
             // если лампа маленькая
