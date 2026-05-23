@@ -12,7 +12,6 @@
   ],
 
 
-
   "entityBehaviors": [
     {
       "name": "BEBehaviorSolarEGenerator"
