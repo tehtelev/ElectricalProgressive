@@ -541,7 +541,11 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
             InputStackCookingTime = 0;
         if (CanHeatOutput())
             HeatOutput(dt);
-        if (CanSmeltInput() && InputStackCookingTime > MaxCookingTime())
+        
+        // Проверяем, завершен ли процесс плавки (особенно для топленого жира)
+        bool isCompleted = IsInputSlotCompleted();
+        
+        if (CanSmeltInput() && InputStackCookingTime > MaxCookingTime() && !isCompleted)
             SmeltItems();
 
         if (beh.PowerSetting > 0)
@@ -614,6 +618,14 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
                 nowTemp = newTemp;
             }
         }
+        
+        // Если процесс уже завершен (топленый жир готов), не увеличиваем время готовки
+        if (IsInputSlotCompleted())
+        {
+            InputStackCookingTime = 0;
+            return;
+        }
+        
         if (nowTemp >= meltingPoint)
         {
             var diff = nowTemp / meltingPoint;
@@ -689,6 +701,14 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
 
     public bool CanHeatInput()
     {
+        // Если входной слот пуст - не греем
+        if (InputSlot?.Itemstack == null)
+            return false;
+        
+        // Если процесс плавки уже завершен (топленый жир готов) - не греем
+        if (IsInputSlotCompleted())
+            return false;
+        
         return CanSmeltInput() || (InputStack != null && InputStack?.ItemAttributes?["allowHeating"] != null && InputStack.ItemAttributes["allowHeating"].AsBool());
     }
 
@@ -711,10 +731,48 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
             && (combustibleProps == null || !combustibleProps.RequiresContainer);
     }
 
+    /// <summary>
+    /// Проверяет, завершен ли процесс плавки во входном слоте
+    /// (особенно важно для случаев, когда предмет не перемещается в выходной слот, как с топленым жиром)
+    /// </summary>
+    public bool IsInputSlotCompleted()
+    {
+        if (InputSlot?.Itemstack == null)
+            return true; // Пустой слот считаем завершенным
+        
+        // Проверяем, можно ли переплавить предмет дальше
+        bool canSmelt = InputSlot.Itemstack.Collectible.CanSmelt(Api.World, inventory, InputSlot.Itemstack, null);
+        
+        // Если предмет нельзя переплавить - процесс завершен
+        if (!canSmelt)
+            return true;
+        
+        // Проверяем, достигнута ли температура плавления и прошло ли достаточно времени
+        float meltingPoint = InputSlot.Itemstack.Collectible.GetMeltingPoint(Api.World, inventory, InputSlot);
+        if (InputStackTemp >= meltingPoint && InputStackCookingTime >= MaxCookingTime())
+        {
+            // Дополнительная проверка: изменится ли предмет после плавки?
+            var smeltedStack = InputSlot.Itemstack.Collectible.CombustibleProps?.SmeltedStack?.ResolvedItemstack;
+            if (smeltedStack != null && smeltedStack.Collectible.Code == InputSlot.Itemstack.Collectible.Code)
+            {
+                // Результат плавки - тот же предмет (как с топленым жиром)
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
     public void SmeltItems()
     {
-        // Запоминаем температуру входного стака до плавки
+        if (InputSlot.Empty)
+            return;
+        
+        // Сохраняем информацию до плавки
         float inputTemp = InputStackTemp;
+        ItemStack oldInputStack = InputSlot.Itemstack.Clone();
+        
+        // Запоминаем температуру входного стака до плавки
         ItemSlot outputSlot = OutputSlot;
         ItemStack oldOutputStack = outputSlot.Itemstack;
         float oldOutputTemp = (oldOutputStack != null) ? GetTemp(oldOutputStack) : 0;
@@ -723,48 +781,64 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
         // Вызываем стандартную логику переплавки
         InputStack.Collectible.DoSmelt(Api.World, inventory, InputSlot, outputSlot);
 
-        ItemStack newOutputStack = outputSlot.Itemstack;
-        if (newOutputStack == null) return; // на всякий случай
-
-        // Определяем, сколько предметов добавилось в выходной слот
-        int addedCount;
-        if (oldOutputStack == null)
+        // Проверяем, изменился ли предмет во входном слоте
+        bool stackChanged = (InputSlot.Itemstack == null || 
+                             oldInputStack.Collectible.Code != InputSlot.Itemstack?.Collectible.Code);
+        
+        // Если предмет не изменился (как с топленым жиром) - сбрасываем температуру и время
+        if (!stackChanged && InputSlot.Itemstack != null)
         {
-            // Выходной слот был пуст – теперь в нём новый стак
-            addedCount = newOutputStack.StackSize;
-        }
-        else if (oldOutputStack.Equals(Api.World, newOutputStack, GlobalConstants.IgnoredStackAttributes))
-        {
-            // Тот же тип предмета – произошло объединение
-            addedCount = newOutputStack.StackSize - oldOutputSize;
-            if (addedCount <= 0) addedCount = newOutputStack.StackSize; // подстраховка
+            // Сбрасываем температуру до комнатной
+            InputSlot.Itemstack.Collectible.SetTemperature(Api.World, InputSlot.Itemstack, EnviromentTemperature());
+            // Сбрасываем время готовки
+            InputStackCookingTime = 0;
+            
+            // Помечаем слот как измененный
+            InputSlot.MarkDirty();
         }
         else
         {
-            // Тип предмета изменился – старый стак полностью заменён
-            addedCount = newOutputStack.StackSize;
-        }
-
-        if (addedCount > 0)
-        {
-            float newTemp;
-            if (oldOutputStack != null && oldOutputStack.Equals(Api.World, newOutputStack, GlobalConstants.IgnoredStackAttributes))
+            // Обычная плавка с возможным перемещением в выходной слот
+            ItemStack newOutputStack = outputSlot.Itemstack;
+            if (newOutputStack != null)
             {
-                // Объединение со старым стаком того же типа – усредняем температуру
-                newTemp = (inputTemp * addedCount + oldOutputTemp * oldOutputSize) / newOutputStack.StackSize;
-            }
-            else
-            {
-                // Просто новый стак – берём температуру входного
-                newTemp = inputTemp;
-            }
-            SetTemp(newOutputStack, newTemp);
-        }
+                // Определяем, сколько предметов добавилось в выходной слот
+                int addedCount;
+                if (oldOutputStack == null)
+                {
+                    addedCount = newOutputStack.StackSize;
+                }
+                else if (oldOutputStack.Equals(Api.World, newOutputStack, GlobalConstants.IgnoredStackAttributes))
+                {
+                    addedCount = newOutputStack.StackSize - oldOutputSize;
+                    if (addedCount <= 0) addedCount = newOutputStack.StackSize;
+                }
+                else
+                {
+                    addedCount = newOutputStack.StackSize;
+                }
 
-        // Сбрасываем время готовки и помечаем слоты как изменённые
-        InputStackCookingTime = 0;
+                if (addedCount > 0)
+                {
+                    float newTemp;
+                    if (oldOutputStack != null && oldOutputStack.Equals(Api.World, newOutputStack, GlobalConstants.IgnoredStackAttributes))
+                    {
+                        newTemp = (inputTemp * addedCount + oldOutputTemp * oldOutputSize) / newOutputStack.StackSize;
+                    }
+                    else
+                    {
+                        newTemp = inputTemp;
+                    }
+                    SetTemp(newOutputStack, newTemp);
+                }
+            }
+            
+            InputStackCookingTime = 0;
+        }
+        
         MarkDirty(true);
         InputSlot.MarkDirty();
+        OutputSlot?.MarkDirty();
     }
 
     public void OnBlockInteract(IPlayer byPlayer, bool isOwner, BlockSelection blockSel)

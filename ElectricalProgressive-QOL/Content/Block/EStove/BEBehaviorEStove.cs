@@ -47,6 +47,7 @@ public class BEBehaviorEStove : BlockEntityBehavior, IElectricConsumer
             return working;
         }
     }
+    
     public float AvgConsumeCoeff { get; set; }
     public override void GetBlockInfo(IPlayer forPlayer, StringBuilder stringBuilder)
     {
@@ -73,8 +74,12 @@ public class BEBehaviorEStove : BlockEntityBehavior, IElectricConsumer
 
     public float Consume_request()
     {
-        if (Working)
-            return _maxConsumption;
+        if (Blockentity is BlockEntityEStove entity)
+        {
+            // Проверяем, можно ли нагревать входной слот и не завершен ли процесс плавки
+            if (entity.CanHeatInput() && !entity.IsInputSlotCompleted())
+                return _maxConsumption;
+        }
 
         return PowerSetting = 0;
     }
@@ -166,8 +171,11 @@ public class BEBehaviorEStove : BlockEntityBehavior, IElectricConsumer
 
     public float getPowerRequest()
     {
-        if (Working)
-            return _maxConsumption;
+        if (Blockentity is BlockEntityEStove entity)
+        {
+            if (entity.CanHeatInput() && !entity.IsInputSlotCompleted())
+                return _maxConsumption;
+        }
 
         return PowerSetting = 0;
     }
