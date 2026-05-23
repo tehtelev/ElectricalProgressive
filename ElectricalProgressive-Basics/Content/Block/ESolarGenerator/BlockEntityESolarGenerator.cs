@@ -11,6 +11,8 @@ public class BlockEntityESolarGenerator : BlockEntityEFacingBase
 {
 
 
+
+
     /// <summary>
     /// Maximum power output for solar panel
     /// </summary>
@@ -72,6 +74,12 @@ public class BlockEntityESolarGenerator : BlockEntityEFacingBase
         base.OnBlockBroken(null);
     }
 
+
+    public override Facing GetConnection(Facing value)
+    {
+        // солнечная панель должна занимать полный _facing
+        return FacingHelper.FullFace(value);
+    }
 
     /// <summary>
     /// Вызывается при выгрузке блока

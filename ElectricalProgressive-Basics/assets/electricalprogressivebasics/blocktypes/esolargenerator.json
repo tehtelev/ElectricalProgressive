@@ -23,8 +23,6 @@
   ],
 
   "attributes": {
-    "blockEProperties": "main",
-    "facesEProperties": [ "down" ],
     "voltage": 32,
     "maxCurrent": 1024.0,
     "isolated": true,

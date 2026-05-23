@@ -10,8 +10,21 @@ namespace ElectricalProgressive.Content.Block;
 /// </summary>
 public abstract class BlockEntityEFacingBase : BlockEntityEBase
 {
+    /// <summary>
+    /// Ключ для хранения направления
+    /// </summary>
+    public const string FacingKey = "electricalprogressive:facing";
+
+
+    /// <summary>
+    /// Напраление поворота устройства
+    /// </summary>
     private Facing _facing = Facing.None;
 
+
+    /// <summary>
+    /// Направление поворота устройства для внешнего использования
+    /// </summary>
     public Facing Facing
     {
         get => _facing;
@@ -21,15 +34,15 @@ public abstract class BlockEntityEFacingBase : BlockEntityEBase
                 return;
 
             _facing = value;
-            if (ElectricalProgressive != null)
-                ElectricalProgressive.Connection = GetConnection(value);
+
+            ElectricalProgressive?.Connection = GetConnection(value);
         }
     }
 
-    public const string FacingKey = "electricalprogressive:facing";
+
 
     /// <summary>
-    /// Позволяет переопределить устанавливаемое в <see cref="Facing"/> значение
+    /// Позволяет переопределить устанавливаемое значение _facing
     /// </summary>
     public virtual Facing GetConnection(Facing value)
     {
@@ -38,7 +51,10 @@ public abstract class BlockEntityEFacingBase : BlockEntityEBase
 
 
 
-
+    /// <summary>
+    /// Сохранеяет настройки _facing
+    /// </summary>
+    /// <param name="tree"></param>
     public override void ToTreeAttributes(ITreeAttribute tree)
     {
         base.ToTreeAttributes(tree);
@@ -46,6 +62,12 @@ public abstract class BlockEntityEFacingBase : BlockEntityEBase
         tree.SetBytes(FacingKey, SerializerUtil.Serialize(_facing));
     }
 
+
+    /// <summary>
+    /// Загружает настройки _facing
+    /// </summary>
+    /// <param name="tree"></param>
+    /// <param name="worldAccessForResolve"></param>
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
     {
         base.FromTreeAttributes(tree, worldAccessForResolve);
@@ -56,7 +78,7 @@ public abstract class BlockEntityEFacingBase : BlockEntityEBase
         }
         catch
         {
-            // ignored
+            // ignore
         }
     }
 }
