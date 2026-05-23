@@ -1,4 +1,4 @@
-{
+п»ї{
 	"editor": {
 		"allAngles": false,
 		"entityTextureMode": false
@@ -8,7 +8,30 @@
 	"textureSizes": {
 	},
 	"textures": {
-		"iron96x96": "C:/Users/YobaMegaDrive/Desktop/Сервер винтажа/electr/electricalprogressivebasics_2.6.0/assets/electricalprogressivebasics/textures/block/iron96x96",
+<<<<<<< HEAD:ElectricalProgressive-Industry/assets/electricalprogressiveindustry/shapes/block/eblastfurnace/eblastfurnace.json
+      "iron96x96": "block/iron96x96",
+      "red1": "game:block/clay/brick/irregular/red1",
+      "red2": "game:block/clay/brick/irregular/red2",
+      "red3": "game:block/clay/brick/irregular/red3",
+      "red4": "game:block/clay/brick/irregular/red4",
+      "black": "game:block/cloth/basic/black",
+      "green": "game:block/cloth/basic/green",
+      "red": "game:block/cloth/basic/red",
+      "white": "game:block/cloth/basic/white",
+      "yellow": "game:block/cloth/basic/yellow",
+      "brass": "game:block/metal/plate/brass",
+      "copper": "game:block/metal/plate/copper",
+      "iron": "game:block/metal/plate/iron",
+      "steel": "game:block/metal/plate/steel",
+      "uranium": "game:block/metal/plate/uranium",
+      "zinc": "game:block/metal/plate/zinc",
+      "iron1": "game:block/metal/sheet/iron1",
+      "iron2": "game:block/metal/sheet/iron2",
+      "iron3": "game:block/metal/sheet/iron3",
+      "iron4": "game:block/metal/sheet/iron4",
+      "iron5": "game:block/metal/sheet/iron5"
+=======
+		"iron96x96": "C:/Users/YobaMegaDrive/Desktop/пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ/electr/electricalprogressivebasics_2.6.0/assets/electricalprogressivebasics/textures/block/iron96x96",
 		"red1": "block/clay/brick/irregular/red1",
 		"red2": "block/clay/brick/irregular/red2",
 		"red3": "block/clay/brick/irregular/red3",
@@ -29,6 +52,7 @@
 		"iron3": "block/metal/sheet/iron3",
 		"iron4": "block/metal/sheet/iron4",
 		"iron5": "block/metal/sheet/iron5"
+>>>>>>> 77505b35e636000d3dec21b6fd7c69fb2f5db20b:ElectricalProgressive-Basics/assets/electricalprogressivebasics/shapes/WIP/block/eMech/eIndustrialFurnace/IndustrialFurnace.json
 	},
 	"elements": [
 		{
@@ -3072,7 +3096,7 @@
 			"code": "open",
 			"quantityframes": 31,
 			"onActivityStopped": "Rewind",
-			"onAnimationEnd": "Repeat",
+			"onAnimationEnd": "Hold",
 			"keyframes": [
 				{
 					"frame": 0,

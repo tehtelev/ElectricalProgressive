@@ -121,12 +121,12 @@
 									"to": [ 0.9, 0.4, 0.9 ],
 									"rotationOrigin": [ 0.1, 0.0, 0.1 ],
 									"faces": {
-										"north": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] },
-										"east": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] },
-										"south": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] },
-										"west": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] },
-										"up": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "windMode": [-1,-1,-1,-1] },
-										"down": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] }
+										"north": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  },
+										"east": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  },
+										"south": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  },
+										"west": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  },
+										"up": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ]  },
+										"down": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  }
 									}
 								}
 							]
@@ -165,12 +165,12 @@
 									"to": [ 0.9, 0.4, 0.9 ],
 									"rotationOrigin": [ 0.1, 0.0, 0.1 ],
 									"faces": {
-										"north": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] },
-										"east": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "windMode": [-1,-1,-1,-1] },
-										"south": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] },
-										"west": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] },
-										"up": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "windMode": [-1,-1,-1,-1] },
-										"down": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] }
+										"north": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  },
+										"east": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ]  },
+										"south": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  },
+										"west": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  },
+										"up": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ]  },
+										"down": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  }
 									}
 								},
 								{
@@ -179,12 +179,12 @@
 									"to": [ 0.9, 0.4, -2.2 ],
 									"rotationOrigin": [ 0.1, 0.0, -2.9 ],
 									"faces": {
-										"north": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] },
-										"east": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "windMode": [-1,-1,-1,-1] },
-										"south": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] },
-										"west": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] },
-										"up": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "windMode": [-1,-1,-1,-1] },
-										"down": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] }
+										"north": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  },
+										"east": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ]  },
+										"south": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  },
+										"west": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  },
+										"up": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ]  },
+										"down": { "texture": "#zinc-sgorevshiy", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  }
 									}
 								}
 							]

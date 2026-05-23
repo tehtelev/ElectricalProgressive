@@ -1,0 +1,127 @@
+﻿[
+  {
+    "code": "copper_ingot",
+    "EnergyOperation": 12000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:nugget-nativecopper",
+        "quantity": 20
+      },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0,
+        "name": "variant",
+        "allowedVariants": [ "blue", "fire", "black", "brown", "cream", "earthyorange", "gray", "orange", "red", "tan" ]
+      }
+    ],
+    "outputs": [
+      {
+        "type": "item",
+        "code": "game:ingot-copper",
+        "stackSize": 1
+      }
+    ]
+  },
+  {
+    "code": "iron_ingot",
+    "EnergyOperation": 12000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:nugget-*",
+        "quantity": 20,
+        "name": "ore",
+        "allowedVariants": [ "limonite", "magnetite", "hematite"]
+      },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0,
+        "name": "variant",
+        "allowedVariants": [ "blue", "fire", "black", "brown", "cream", "earthyorange", "gray", "orange", "red", "tan" ]
+      }
+    ],
+    "outputs": [
+      {
+        "type": "item",
+        "code": "game:ingot-iron",
+        "stackSize": 1
+      }
+    ]
+  },
+  {
+    "code": "gold_ingot",
+    "EnergyOperation": 12000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:nugget-nativegold",
+        "quantity": 20
+      },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0,
+        "name": "variant",
+        "allowedVariants": [ "blue", "fire", "black", "brown", "cream", "earthyorange", "gray", "orange", "red", "tan" ]
+      }
+    ],
+    "outputs": [
+      {
+        "type": "item",
+        "code": "game:ingot-gold",
+        "stackSize": 1
+      }
+    ]
+  },
+  {
+    "code": "lead_ingot",
+    "EnergyOperation": 12000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:nugget-galena",
+        "quantity": 20
+      },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0,
+        "name": "variant",
+        "allowedVariants": [ "blue", "fire", "black", "brown", "cream", "earthyorange", "gray", "orange", "red", "tan" ]
+      }
+    ],
+    "outputs": [
+      {
+        "type": "item",
+        "code": "game:ingot-lead",
+        "stackSize": 1
+      }
+    ]
+  },
+  {
+    "code": "steel_ingot",
+    "EnergyOperation": 12000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:ingot-iron",
+        "quantity": 1
+      },
+      {
+        "type": "item",
+        "code": "game:powder-charcoal",
+        "quantity": 2
+      }
+    ],
+    "outputs": [
+      {
+        "type": "item",
+        "code": "game:ingot-steel",
+        "stackSize": 1
+      }
+    ]
+  }
+]

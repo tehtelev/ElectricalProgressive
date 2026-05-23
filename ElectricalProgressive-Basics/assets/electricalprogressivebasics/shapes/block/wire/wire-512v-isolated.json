@@ -1,4 +1,4 @@
-{
+﻿{
 	"editor": {
 		"allAngles": false,
 		"entityTextureMode": false
@@ -16,12 +16,12 @@
 			"to": [ 8.6, 8.6, 11.9 ],
 			"rotationOrigin": [ 7.5, 7.5, 4.0 ],
 			"faces": {
-				"north": { "texture": "#isolation", "uv": [ 0.0, 0.0, 1.0, 1.0 ], "windMode": [-1,-1,-1,-1] },
-				"east": { "texture": "#isolation", "uv": [ 0.0, 0.0, 7.5, 1.0 ], "windMode": [-1,-1,-1,-1] },
-				"south": { "texture": "#isolation", "uv": [ 0.0, 0.0, 1.0, 1.0 ], "windMode": [-1,-1,-1,-1] },
-				"west": { "texture": "#isolation", "uv": [ 0.0, 0.0, 7.5, 1.0 ], "windMode": [-1,-1,-1,-1] },
-				"up": { "texture": "#isolation", "uv": [ 0.0, 0.0, 1.0, 7.5 ], "windMode": [-1,-1,-1,-1] },
-				"down": { "texture": "#isolation", "uv": [ 0.0, 0.0, 1.0, 7.5 ], "windMode": [-1,-1,-1,-1] }
+				"north": { "texture": "#isolation", "uv": [ 0.0, 0.0, 1.0, 1.0 ]  },
+				"east": { "texture": "#isolation", "uv": [ 0.0, 0.0, 7.5, 1.0 ]  },
+				"south": { "texture": "#isolation", "uv": [ 0.0, 0.0, 1.0, 1.0 ]  },
+				"west": { "texture": "#isolation", "uv": [ 0.0, 0.0, 7.5, 1.0 ]  },
+				"up": { "texture": "#isolation", "uv": [ 0.0, 0.0, 1.0, 7.5 ]  },
+				"down": { "texture": "#isolation", "uv": [ 0.0, 0.0, 1.0, 7.5 ]  }
 			}
 		}
 	]}

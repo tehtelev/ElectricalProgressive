@@ -15,6 +15,7 @@ public class ElectricalProgressiveRecipeManager : ModSystem
     public static List<PressRecipe> PressRecipes;
     public static List<ExtruderRecipe> ExtruderRecipes;
     public static List<CrusherRecipe> CrusherRecipes;
+    public static List<BlastFurnaceRecipe> BlastFurnaceRecipes;
 
 
     public static Dictionary<string, (string code, IEnumerable<IRecipeMultyBase> recipes)> machines;
@@ -30,6 +31,7 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         api.Event.SaveGameLoaded += LoadPressRecipes;
         api.Event.SaveGameLoaded += LoadExtruderRecipes;
         api.Event.SaveGameLoaded += LoadCrusherRecipes;
+        api.Event.SaveGameLoaded += LoadBlastFurnaceRecipes;
 
         machines = new Dictionary<string, (string, IEnumerable<IRecipeMultyBase>)>(4);
     }
@@ -72,6 +74,14 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         LoadRecipes<CrusherRecipe>("Crusher Recipe", "recipes/electric/crusherrecipe", CrusherRecipes.Add);
         api.World.Logger.Debug(Lang.Get("electricalprogressiveindustry:recipeloading"));
         machines.Add("ecrusher-", ("electricalprogressiveindustry:ecrusher-north", CrusherRecipes));
+    }
+    
+    private void LoadBlastFurnaceRecipes()
+    {
+        BlastFurnaceRecipes = [];
+        LoadRecipes<BlastFurnaceRecipe>("BlastFurnace Recipe", "recipes/electric/blastfurnacerecipe", BlastFurnaceRecipes.Add);
+        api.World.Logger.Debug(Lang.Get("electricalprogressiveindustry:recipeloading"));
+        machines.Add("eblastfurnace-", ("electricalprogressiveindustry:eblastfurnace-north", BlastFurnaceRecipes));
     }
 
     private void LoadRecipes<T>(string name, string path, Action<T> registerMethod)

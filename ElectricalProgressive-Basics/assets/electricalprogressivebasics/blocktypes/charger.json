@@ -45,6 +45,7 @@
   ],
 
 
+
   "blockMaterial": "Stone",
 
   "creativeinventory": {
@@ -85,6 +86,24 @@
     }
   },
 
+  "lod2shapeByType": {
+    "*-north": {
+      "base": "block/charger/charger-lod2",
+      "rotateY": 0
+    },
+    "*-east": {
+      "base": "block/charger/charger-lod2",
+      "rotateY": 270
+    },
+    "*-south": {
+      "base": "block/charger/charger-lod2",
+      "rotateY": 180
+    },
+    "*-west": {
+      "base": "block/charger/charger-lod2",
+      "rotateY": 90
+    }
+  },
 
   "replaceable": 500,
   "lightAbsorption": 0,

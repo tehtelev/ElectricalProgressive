@@ -478,15 +478,6 @@ public class BlockEntityECharger : BlockEntityContainer, ITexPositionSource
     /// <returns></returns>
     public override bool OnTesselation(ITerrainMeshPool mesher, ITesselatorAPI tesselator)
     {
-        var clientApi = (ICoreClientAPI)Api;
-        var block = Api.World.BlockAccessor.GetBlock(Pos);
-        var mesh = clientApi.TesselatorManager.GetDefaultBlockMesh(block);
-
-        if (mesh == null || mesher == null)
-            return true;
-
-        mesher.AddMeshData(mesh);
-
         // Отрисовываем меши предметов (как в холодильнике)
         if (_meshes != null)
         {
@@ -497,7 +488,7 @@ public class BlockEntityECharger : BlockEntityContainer, ITexPositionSource
             }
         }
 
-        return true;
+        return false; // отрисовать базовый блок
     }
 
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldForResolving)

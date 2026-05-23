@@ -26,6 +26,7 @@ public class BEBehaviorECharger : BlockEntityBehavior, IElectricConsumer
     private bool hasBurnout;
     private bool prepareBurnout;
 
+
     public BEBehaviorECharger(BlockEntity blockEntity) : base(blockEntity)
     {
         _maxConsumption = MyMiniLib.GetAttributeInt(this.Block, "maxConsumption", 200);

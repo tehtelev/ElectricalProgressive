@@ -1,0 +1,23 @@
+{
+  "textures": {
+    "copper1": "game:block/metal/sheet-plain/copper1",
+    "iron": "game:block/metal/plate/iron"
+  },
+  "elements": [
+    {
+      "name": "SolarPannelT1",
+      "from": [ 0.0, 0.0, 0.0 ],
+      "to": [ 16.0, 1.0, 16.0 ],
+      "rotationOrigin": [ 8.0, 0.0, 8.0 ],
+      "rotationY": -90.0,
+      "faces": {
+        "north": { "texture": "#iron", "uv": [ 0.0, 0.0, 16.0, 16.0 ] },
+        "east": { "texture": "#iron", "uv": [ 0.0, 0.0, 16.0, 16.0 ] },
+        "south": { "texture": "#iron", "uv": [ 0.0, 0.0, 16.0, 16.0 ] },
+        "west": { "texture": "#iron", "uv": [ 0.0, 0.0, 16.0, 16.0 ] },
+        "up": { "texture": "#copper1", "uv": [ 0.0, 0.0, 16.0, 16.0 ] },
+        "down": { "texture": "#iron", "uv": [ 0.0, 0.0, 16.0, 16.0 ] }
+      }
+    }
+  ]
+}

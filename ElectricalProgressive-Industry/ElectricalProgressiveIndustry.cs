@@ -1,4 +1,5 @@
-﻿using ElectricalProgressive.Content.Block.ECrusher;
+﻿using ElectricalProgressive.Content.Block.EBlastFurnace;
+using ElectricalProgressive.Content.Block.ECrusher;
 using ElectricalProgressive.Content.Block.ERecycler;
 using ElectricalProgressive.Content.Block.EExtruder;
 using ElectricalProgressive.Content.Block.EHammer;
@@ -69,6 +70,10 @@ public class ElectricalProgressiveIndustry : ModSystem
         api.RegisterBlockClass("BlockECrusher", typeof(BlockECrusher));
         api.RegisterBlockEntityClass("BlockEntityECrusher", typeof(BlockEntityECrusher));
         api.RegisterBlockEntityBehaviorClass("BEBehaviorECrusher", typeof(BEBehaviorECrusher));
+        
+        api.RegisterBlockClass("BlockEBlastFurnace", typeof(BlockEBlastFurnace));
+        api.RegisterBlockEntityClass("BlockEntityEBlastFurnace", typeof(BlockEntityEBlastFurnace));
+        api.RegisterBlockEntityBehaviorClass("BEBehaviorEBlastFurnace", typeof(BEBehaviorEBlastFurnace));
 
         api.RegisterBlockClass("BlockPressForm", typeof(BlockPressForm));
 

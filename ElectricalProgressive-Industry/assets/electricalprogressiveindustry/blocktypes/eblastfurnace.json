@@ -1,0 +1,173 @@
+﻿{
+  "code": "eblastfurnace",
+  "class": "BlockEBlastFurnace",
+  "entityClass": "BlockEntityEBlastFurnace",
+  "attributes": {
+    "blockEProperties": "all",
+    "facesEProperties": [ "north", "east", "south", "west", "up", "down" ],
+    "particlesOffsetPos": [ [ 0.5, 1.01, 0.5 ] ],
+    "particlesType": 4,
+    "particlesFramesAnim": [
+      [ 95, 99 ],
+      [ 125, 129 ],
+      [ 95, 99 ]
+    ],
+    "maxConsumption": 800,
+    "voltage": 128,
+    "maxCurrent": 100.0,
+    "isolated": true,
+    "isolatedEnvironment": true,
+    "handbook": {
+      "groupBy": [ "eblastfurnace" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressiveindustry:block-handbooktitle-eblastfurnace",
+          "text": "electricalprogressiveindustry:block-handbooktext-eblastfurnace"
+        }
+      ]
+    }
+  },
+
+  "entityBehaviors": [
+    {
+      "name": "Animatable"
+    },
+    {
+      "name": "BEBehaviorEBlastFurnace"
+    },
+    {
+      "name": "ElectricalProgressive"
+    }
+  ],
+
+  "creativeinventory": {
+    "general": [ "*-north" ],
+    "electricity": [ "*-north" ]
+  },
+
+  "behaviors": [
+    { "name": "HorizontalOrientable" },
+    {
+      "name": "Multiblock",
+      "propertiesByType": {
+        "*-north": {
+          "sizex": 3,
+          "sizey": 4,
+          "sizez": 2,
+          "cposition": {
+            "x": 0,
+            "y": 0,
+            "z": 1
+          }
+        },
+        "*-east": {
+          "sizex": 2,
+          "sizey": 4,
+          "sizez": 3,
+          "cposition": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        },
+        "*-south": {
+          "sizex": 3,
+          "sizey": 4,
+          "sizez": 2,
+          "cposition": {
+            "x": 2,
+            "y": 0,
+            "z": 0
+          }
+        },
+        "*-west": {
+          "sizex": 2,
+          "sizey": 4,
+          "sizez": 3,
+          "cposition": {
+            "x": 1,
+            "y": 0,
+            "z": 2
+          }
+        }
+      }
+    }
+  ],
+
+  "blockmaterial": "Metal",
+
+  "variantgroups": [
+    {
+      "code": "side",
+      "loadFromProperties": "abstract/horizontalorientation"
+    }
+  ],
+
+  "shapebytype": {
+    "*-north": {
+      "base": "block/eblastfurnace/eblastfurnace",
+      "rotateY": 0
+    },
+    "*-east": {
+      "base": "block/eblastfurnace/eblastfurnace",
+      "rotateY": 270
+    },
+    "*-south": {
+      "base": "block/eblastfurnace/eblastfurnace",
+      "rotateY": 180
+    },
+    "*-west": {
+      "base": "block/eblastfurnace/eblastfurnace",
+      "rotateY": 90
+    }
+  },
+  "lightAbsorption": 0,
+  "sidesolid": {
+    "all": false
+  },
+  "sideopaque": {
+    "all": false
+  },
+  "collisionbox": {
+    "x1": 0,
+    "y1": 0,
+    "z1": 0,
+    "x2": 1,
+    "y2": 1,
+    "z2": 1
+  },
+  "resistance": 3.5,
+  "sounds": {
+    "place": "game:block/anvil",
+    "walk": "game:walk/metal"
+  },
+  "guiTransform": {
+    "rotation": {
+      "x": -22.6,
+      "y": -145,
+      "z": 0
+    },
+    "origin": {
+      "x": 0.5,
+      "y": 0.9,
+      "z": 0.5
+    },
+    "scale": 0.72
+  },
+  "heldTpIdleAnimation": "holdbothhandslarge",
+  "heldRightReadyAnimation": "heldblockready",
+  "heldTpUseAnimation": "twohandplaceblock",
+  "tpHandTransform": {
+    "translation": {
+      "x": -0.6,
+      "y": -0.91,
+      "z": -0.8
+    },
+    "rotation": {
+      "x": -2,
+      "y": 25,
+      "z": -78
+    },
+    "scale": 0.4
+  }
+}

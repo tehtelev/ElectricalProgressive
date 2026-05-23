@@ -71,12 +71,12 @@
 									"renderPass": 3,
 									"rotationOrigin": [ 0.3, 0.4, 0.3 ],
 									"faces": {
-										"north": { "texture": "#quartzglass", "uv": [ 0.0, 8.0, 16.0, 16.0 ], "glow": 80, "autoUv": false, "windMode": [-1,-1,-1,-1] },
-										"east": { "texture": "#quartzglass", "uv": [ 0.0, 8.0, 16.0, 16.0 ], "glow": 80, "autoUv": false, "windMode": [-1,-1,-1,-1] },
-										"south": { "texture": "#quartzglass", "uv": [ 0.0, 8.0, 16.0, 16.0 ], "glow": 80, "autoUv": false, "windMode": [-1,-1,-1,-1] },
-										"west": { "texture": "#quartzglass", "uv": [ 0.0, 8.0, 16.0, 16.0 ], "glow": 80, "autoUv": false, "windMode": [-1,-1,-1,-1] },
-										"up": { "texture": "#quartzglass", "uv": [ 0.0, 0.0, 16.0, 16.0 ], "glow": 80, "autoUv": false, "windMode": [-1,-1,-1,-1] },
-										"down": { "texture": "#quartzglass", "uv": [ 0.0, 0.0, 16.0, 16.0 ], "glow": 80, "autoUv": false, "windMode": [-1,-1,-1,-1] }
+										"north": { "texture": "#quartzglass", "uv": [ 0.0, 8.0, 16.0, 16.0 ], "glow": 80, "autoUv": false  },
+										"east": { "texture": "#quartzglass", "uv": [ 0.0, 8.0, 16.0, 16.0 ], "glow": 80, "autoUv": false  },
+										"south": { "texture": "#quartzglass", "uv": [ 0.0, 8.0, 16.0, 16.0 ], "glow": 80, "autoUv": false  },
+										"west": { "texture": "#quartzglass", "uv": [ 0.0, 8.0, 16.0, 16.0 ], "glow": 80, "autoUv": false  },
+										"up": { "texture": "#quartzglass", "uv": [ 0.0, 0.0, 16.0, 16.0 ], "glow": 80, "autoUv": false  },
+										"down": { "texture": "#quartzglass", "uv": [ 0.0, 0.0, 16.0, 16.0 ], "glow": 80, "autoUv": false  }
 									}
 								},
 								{
@@ -113,12 +113,12 @@
 													"to": [ 0.8, 0.8, 11.4 ],
 													"rotationOrigin": [ -0.6, -0.6, 11.3 ],
 													"faces": {
-														"north": { "texture": "#copper", "uv": [ 0.0, 0.0, 1.0, 1.0 ], "glow": 220, "windMode": [-1,-1,-1,-1] },
-														"east": { "texture": "#copper", "uv": [ 0.0, 0.0, 0.5, 1.0 ], "glow": 220, "windMode": [-1,-1,-1,-1] },
-														"south": { "texture": "#copper", "uv": [ 0.0, 0.0, 1.0, 1.0 ], "glow": 220, "windMode": [-1,-1,-1,-1] },
-														"west": { "texture": "#copper", "uv": [ 0.0, 0.0, 0.5, 1.0 ], "glow": 220, "windMode": [-1,-1,-1,-1] },
-														"up": { "texture": "#copper", "uv": [ 0.0, 0.0, 1.0, 0.5 ], "glow": 220, "windMode": [-1,-1,-1,-1] },
-														"down": { "texture": "#copper", "uv": [ 0.0, 0.0, 1.0, 0.5 ], "glow": 220, "windMode": [-1,-1,-1,-1] }
+														"north": { "texture": "#copper", "uv": [ 0.0, 0.0, 1.0, 1.0 ], "glow": 220  },
+														"east": { "texture": "#copper", "uv": [ 0.0, 0.0, 0.5, 1.0 ], "glow": 220  },
+														"south": { "texture": "#copper", "uv": [ 0.0, 0.0, 1.0, 1.0 ], "glow": 220  },
+														"west": { "texture": "#copper", "uv": [ 0.0, 0.0, 0.5, 1.0 ], "glow": 220  },
+														"up": { "texture": "#copper", "uv": [ 0.0, 0.0, 1.0, 0.5 ], "glow": 220  },
+														"down": { "texture": "#copper", "uv": [ 0.0, 0.0, 1.0, 0.5 ], "glow": 220  }
 													}
 												},
 												{
@@ -2630,11 +2630,11 @@
 									"rotationOrigin": [ 0.1, 0.1, -0.1 ],
 									"faces": {
 										"north": { "texture": "#emeral", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 220 },
-										"east": { "texture": "#emeral", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 170, "windMode": [-1,-1,-1,-1] },
-										"south": { "texture": "#emeral", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 170, "windMode": [-1,-1,-1,-1] },
-										"west": { "texture": "#emeral", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 170, "windMode": [-1,-1,-1,-1] },
-										"up": { "texture": "#emeral", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 170, "windMode": [-1,-1,-1,-1] },
-										"down": { "texture": "#emeral", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 170, "windMode": [-1,-1,-1,-1] }
+										"east": { "texture": "#emeral", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 170  },
+										"south": { "texture": "#emeral", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 170  },
+										"west": { "texture": "#emeral", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 170  },
+										"up": { "texture": "#emeral", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 170  },
+										"down": { "texture": "#emeral", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 170  }
 									}
 								}
 							]

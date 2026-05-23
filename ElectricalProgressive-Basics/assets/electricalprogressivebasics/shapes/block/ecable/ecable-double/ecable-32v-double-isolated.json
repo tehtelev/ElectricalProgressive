@@ -1,4 +1,4 @@
-{
+﻿{
 	"editor": {
 		"collapsedPaths": "",
 		"allAngles": false,
@@ -17,12 +17,12 @@
 			"to": [ 9.2, 0.6, 7.4 ],
 			"rotationOrigin": [ 6.1, -0.5, -0.5 ],
 			"faces": {
-				"north": { "texture": "#isolation", "uv": [ 0.0, 0.0, 2.0, 1.0 ], "windMode": [-1,-1,-1,-1] },
-				"east": { "texture": "#isolation", "uv": [ 0.0, 0.0, 7.5, 1.0 ], "windMode": [-1,-1,-1,-1] },
-				"south": { "texture": "#isolation", "uv": [ 0.0, 0.0, 2.0, 1.0 ], "windMode": [-1,-1,-1,-1] },
-				"west": { "texture": "#isolation", "uv": [ 0.0, 0.0, 7.5, 1.0 ], "windMode": [-1,-1,-1,-1] },
-				"up": { "texture": "#isolation", "uv": [ 0.0, 0.0, 2.0, 7.5 ], "windMode": [-1,-1,-1,-1] },
-				"down": { "texture": "#isolation", "uv": [ 0.0, 0.0, 2.0, 7.5 ], "windMode": [-1,-1,-1,-1] }
+				"north": { "texture": "#isolation", "uv": [ 0.0, 0.0, 2.0, 1.0 ]  },
+				"east": { "texture": "#isolation", "uv": [ 0.0, 0.0, 7.5, 1.0 ]  },
+				"south": { "texture": "#isolation", "uv": [ 0.0, 0.0, 2.0, 1.0 ]  },
+				"west": { "texture": "#isolation", "uv": [ 0.0, 0.0, 7.5, 1.0 ]  },
+				"up": { "texture": "#isolation", "uv": [ 0.0, 0.0, 2.0, 7.5 ]  },
+				"down": { "texture": "#isolation", "uv": [ 0.0, 0.0, 2.0, 7.5 ]  }
 			}
 		}
 	]}

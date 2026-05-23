@@ -121,6 +121,10 @@
     "base": "block/accumulator/accumulator-{tier}-{state}"
   },
 
+  "lod2shape": {
+      "base": "block/accumulator/accumulator-{tier}-lod2"
+  },
+
   "resistance": 1,
 
   "drawType": "JSON",
