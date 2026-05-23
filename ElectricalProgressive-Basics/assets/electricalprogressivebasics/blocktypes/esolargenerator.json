@@ -78,6 +78,11 @@
     }
   },
 
+  "lod2shapeByType": {
+    "*": {
+      "base": "block/solargenerator/solargenerator-lod2"
+    }
+  },
 
 
   "blockmaterial": "Stone",

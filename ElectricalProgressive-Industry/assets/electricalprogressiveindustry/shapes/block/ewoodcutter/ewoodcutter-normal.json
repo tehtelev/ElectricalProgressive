@@ -222,12 +222,12 @@
 			"to": [ 15.1, 7.4, 15.1 ],
 			"rotationOrigin": [ 0.9, 3.5, 0.9 ],
 			"faces": {
-				"north": { "texture": "#copper", "uv": [ 0.0, 0.0, 14.0, 4.0 ], "glow": 170, "windMode": [-1,-1,-1,-1] },
-				"east": { "texture": "#copper", "uv": [ 0.0, 0.0, 14.0, 4.0 ], "glow": 170, "windMode": [-1,-1,-1,-1] },
-				"south": { "texture": "#copper", "uv": [ 0.0, 0.0, 14.0, 4.0 ], "glow": 170, "windMode": [-1,-1,-1,-1] },
-				"west": { "texture": "#copper", "uv": [ 0.0, 0.0, 14.0, 4.0 ], "glow": 170, "windMode": [-1,-1,-1,-1] },
-				"up": { "texture": "#copper", "uv": [ 0.0, 0.0, 14.0, 14.0 ], "glow": 170, "windMode": [-1,-1,-1,-1] },
-				"down": { "texture": "#copper", "uv": [ 0.0, 0.0, 14.0, 14.0 ], "glow": 170, "windMode": [-1,-1,-1,-1] }
+				"north": { "texture": "#copper", "uv": [ 0.0, 0.0, 14.0, 4.0 ], "glow": 170  },
+				"east": { "texture": "#copper", "uv": [ 0.0, 0.0, 14.0, 4.0 ], "glow": 170  },
+				"south": { "texture": "#copper", "uv": [ 0.0, 0.0, 14.0, 4.0 ], "glow": 170  },
+				"west": { "texture": "#copper", "uv": [ 0.0, 0.0, 14.0, 4.0 ], "glow": 170  },
+				"up": { "texture": "#copper", "uv": [ 0.0, 0.0, 14.0, 14.0 ], "glow": 170  },
+				"down": { "texture": "#copper", "uv": [ 0.0, 0.0, 14.0, 14.0 ], "glow": 170  }
 			}
 		},
 		{
@@ -292,11 +292,11 @@
 			"to": [ 16.0, 16.0, 16.0 ],
 			"rotationOrigin": [ 0.0, 13.0, 0.0 ],
 			"faces": {
-				"north": { "texture": "#iron", "uv": [ 0.0, 0.0, 16.0, 3.0 ], "windMode": [-1,-1,-1,-1] },
-				"east": { "texture": "#iron", "uv": [ 0.0, 0.0, 16.0, 3.0 ], "windMode": [-1,-1,-1,-1] },
-				"south": { "texture": "#iron", "uv": [ 0.0, 0.0, 16.0, 3.0 ], "windMode": [-1,-1,-1,-1] },
-				"west": { "texture": "#iron", "uv": [ 0.0, 0.0, 16.0, 3.0 ], "windMode": [-1,-1,-1,-1] },
-				"up": { "texture": "#emeral", "uv": [ 0.0, 0.0, 16.0, 16.0 ], "windMode": [-1,-1,-1,-1] }
+				"north": { "texture": "#iron", "uv": [ 0.0, 0.0, 16.0, 3.0 ]  },
+				"east": { "texture": "#iron", "uv": [ 0.0, 0.0, 16.0, 3.0 ]  },
+				"south": { "texture": "#iron", "uv": [ 0.0, 0.0, 16.0, 3.0 ]  },
+				"west": { "texture": "#iron", "uv": [ 0.0, 0.0, 16.0, 3.0 ]  },
+				"up": { "texture": "#emeral", "uv": [ 0.0, 0.0, 16.0, 16.0 ]  }
 			}
 		}
 	]}

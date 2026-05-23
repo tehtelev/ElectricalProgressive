@@ -826,7 +826,7 @@
 									"faces": {
 										"north": { "texture": "#tin", "uv": [ 0.0, 0.0, 2.0, 2.0 ] },
 										"east": { "texture": "#tin", "uv": [ 0.0, 0.0, 0.5, 2.0 ] },
-										"south": { "texture": "#quartzglass", "uv": [ 0.0, 0.0, 2.0, 2.0 ], "glow": 170, "windMode": [-1,-1,-1,-1] },
+										"south": { "texture": "#quartzglass", "uv": [ 0.0, 0.0, 2.0, 2.0 ], "glow": 170  },
 										"west": { "texture": "#tin", "uv": [ 0.0, 0.0, 0.5, 2.0 ] },
 										"up": { "texture": "#tin", "uv": [ 0.0, 0.0, 2.0, 0.5 ] },
 										"down": { "texture": "#tin", "uv": [ 0.0, 0.0, 2.0, 0.5 ] }
@@ -1337,7 +1337,7 @@
 					"to": [ 5.2, 21.5, 0.6 ],
 					"rotationOrigin": [ -0.2, 21.0, -0.2 ],
 					"faces": {
-						"north": { "texture": "#zinc", "uv": [ 0.0, 0.0, 5.0, 0.5 ], "windMode": [-1,-1,-1,-1] },
+						"north": { "texture": "#zinc", "uv": [ 0.0, 0.0, 5.0, 0.5 ]  },
 						"east": { "texture": "#zinc", "uv": [ 0.0, 0.0, 0.5, 0.5 ] },
 						"south": { "texture": "#zinc", "uv": [ 0.0, 0.0, 5.0, 0.5 ] },
 						"west": { "texture": "#zinc", "uv": [ 0.0, 0.0, 0.5, 0.5 ] },

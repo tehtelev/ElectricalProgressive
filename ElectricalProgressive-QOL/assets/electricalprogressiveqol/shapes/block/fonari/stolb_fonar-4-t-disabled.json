@@ -3119,37 +3119,37 @@
 											"texture": "#frame",
 											"uv": [ 0.0, 0.0, 16.0, 16.0 ],
 											"autoUv": false,
-											"windMode": [ -1, -1, -1, -1 ]
+											
 										},
 										"east": {
 											"texture": "#frame",
 											"uv": [ 0.0, 0.0, 16.0, 16.0 ],
 											"autoUv": false,
-											"windMode": [ -1, -1, -1, -1 ]
+											
 										},
 										"south": {
 											"texture": "#frame",
 											"uv": [ 0.0, 0.0, 16.0, 16.0 ],
 											"autoUv": false,
-											"windMode": [ -1, -1, -1, -1 ]
+											
 										},
 										"west": {
 											"texture": "#frame",
 											"uv": [ 0.0, 0.0, 16.0, 16.0 ],
 											"autoUv": false,
-											"windMode": [ -1, -1, -1, -1 ]
+											
 										},
 										"up": {
 											"texture": "#frame",
 											"uv": [ 0.0, 0.0, 16.0, 16.0 ],
 											"autoUv": false,
-											"windMode": [ -1, -1, -1, -1 ]
+											
 										},
 										"down": {
 											"texture": "#frame",
 											"uv": [ 0.0, 0.0, 16.0, 16.0 ],
 											"autoUv": false,
-											"windMode": [ -1, -1, -1, -1 ]
+											
 										}
 									},
 									"children": [
@@ -6285,37 +6285,37 @@
 											"texture": "#frame",
 											"uv": [ 0.0, 0.0, 16.0, 16.0 ],
 											"autoUv": false,
-											"windMode": [ -1, -1, -1, -1 ]
+											
 										},
 										"east": {
 											"texture": "#frame",
 											"uv": [ 0.0, 0.0, 16.0, 16.0 ],
 											"autoUv": false,
-											"windMode": [ -1, -1, -1, -1 ]
+											
 										},
 										"south": {
 											"texture": "#frame",
 											"uv": [ 0.0, 0.0, 16.0, 16.0 ],
 											"autoUv": false,
-											"windMode": [ -1, -1, -1, -1 ]
+											
 										},
 										"west": {
 											"texture": "#frame",
 											"uv": [ 0.0, 0.0, 16.0, 16.0 ],
 											"autoUv": false,
-											"windMode": [ -1, -1, -1, -1 ]
+											
 										},
 										"up": {
 											"texture": "#frame",
 											"uv": [ 0.0, 0.0, 16.0, 16.0 ],
 											"autoUv": false,
-											"windMode": [ -1, -1, -1, -1 ]
+											
 										},
 										"down": {
 											"texture": "#frame",
 											"uv": [ 0.0, 0.0, 16.0, 16.0 ],
 											"autoUv": false,
-											"windMode": [ -1, -1, -1, -1 ]
+											
 										}
 									},
 									"children": [

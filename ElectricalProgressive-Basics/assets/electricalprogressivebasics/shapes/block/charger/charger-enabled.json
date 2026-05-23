@@ -127,11 +127,11 @@
 									"rotationOrigin": [ 1.5, 0.9, 0.5 ],
 									"faces": {
 										"north": { "texture": "#quartzglass", "uv": [ 0.0, 0.0, 1.0, 2.5 ], "glow": 60 },
-										"east": { "texture": "#quartzglass", "uv": [ 0.0, 0.0, 1.0, 2.5 ], "glow": 60, "windMode": [-1,-1,-1,-1] },
-										"south": { "texture": "#quartzglass", "uv": [ 0.0, 0.0, 1.0, 2.5 ], "glow": 60, "windMode": [-1,-1,-1,-1] },
-										"west": { "texture": "#quartzglass", "uv": [ 0.0, 0.0, 1.0, 2.5 ], "glow": 60, "windMode": [-1,-1,-1,-1] },
-										"up": { "texture": "#quartzglass", "uv": [ 0.0, 0.0, 1.0, 1.0 ], "glow": 60, "windMode": [-1,-1,-1,-1] },
-										"down": { "texture": "#quartzglass", "uv": [ 0.0, 0.0, 1.0, 1.0 ], "glow": 60, "windMode": [-1,-1,-1,-1] }
+										"east": { "texture": "#quartzglass", "uv": [ 0.0, 0.0, 1.0, 2.5 ], "glow": 60  },
+										"south": { "texture": "#quartzglass", "uv": [ 0.0, 0.0, 1.0, 2.5 ], "glow": 60  },
+										"west": { "texture": "#quartzglass", "uv": [ 0.0, 0.0, 1.0, 2.5 ], "glow": 60  },
+										"up": { "texture": "#quartzglass", "uv": [ 0.0, 0.0, 1.0, 1.0 ], "glow": 60  },
+										"down": { "texture": "#quartzglass", "uv": [ 0.0, 0.0, 1.0, 1.0 ], "glow": 60  }
 									}
 								},
 								{
@@ -154,12 +154,12 @@
 											"to": [ 0.05, 1.9, 0.15 ],
 											"rotationOrigin": [ 0.1, 1.8, 0.1 ],
 											"faces": {
-												"north": { "texture": "#copper", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 230, "windMode": [-1,-1,-1,-1] },
-												"east": { "texture": "#copper", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 230, "windMode": [-1,-1,-1,-1] },
-												"south": { "texture": "#copper", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 230, "windMode": [-1,-1,-1,-1] },
-												"west": { "texture": "#copper", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 230, "windMode": [-1,-1,-1,-1] },
-												"up": { "texture": "#copper", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 230, "windMode": [-1,-1,-1,-1] },
-												"down": { "texture": "#copper", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 230, "windMode": [-1,-1,-1,-1] }
+												"north": { "texture": "#copper", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 230  },
+												"east": { "texture": "#copper", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 230  },
+												"south": { "texture": "#copper", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 230  },
+												"west": { "texture": "#copper", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 230  },
+												"up": { "texture": "#copper", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 230  },
+												"down": { "texture": "#copper", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 230  }
 											}
 										}
 									]
@@ -368,12 +368,12 @@
 					"to": [ 15.0, 3.1, 13.0 ],
 					"rotationOrigin": [ 15.0, 0.1, 3.0 ],
 					"faces": {
-						"north": { "texture": "#copper", "uv": [ 0.0, 0.0, 10.0, 3.0 ], "glow": 170, "windMode": [-1,-1,-1,-1] },
-						"east": { "texture": "#copper", "uv": [ 0.0, 0.0, 14.0, 3.0 ], "glow": 170, "windMode": [-1,-1,-1,-1] },
-						"south": { "texture": "#copper", "uv": [ 0.0, 0.0, 10.0, 3.0 ], "glow": 170, "windMode": [-1,-1,-1,-1] },
-						"west": { "texture": "#copper", "uv": [ 0.0, 0.0, 14.0, 3.0 ], "glow": 170, "windMode": [-1,-1,-1,-1] },
-						"up": { "texture": "#copper", "uv": [ 0.0, 0.0, 10.0, 14.0 ], "glow": 170, "windMode": [-1,-1,-1,-1] },
-						"down": { "texture": "#copper", "uv": [ 0.0, 0.0, 10.0, 14.0 ], "glow": 170, "windMode": [-1,-1,-1,-1] }
+						"north": { "texture": "#copper", "uv": [ 0.0, 0.0, 10.0, 3.0 ], "glow": 170  },
+						"east": { "texture": "#copper", "uv": [ 0.0, 0.0, 14.0, 3.0 ], "glow": 170  },
+						"south": { "texture": "#copper", "uv": [ 0.0, 0.0, 10.0, 3.0 ], "glow": 170  },
+						"west": { "texture": "#copper", "uv": [ 0.0, 0.0, 14.0, 3.0 ], "glow": 170  },
+						"up": { "texture": "#copper", "uv": [ 0.0, 0.0, 10.0, 14.0 ], "glow": 170  },
+						"down": { "texture": "#copper", "uv": [ 0.0, 0.0, 10.0, 14.0 ], "glow": 170  }
 					},
 					"children": [
 						{
@@ -1151,12 +1151,12 @@
 									"to": [ 0.9, 0.5, 0.9 ],
 									"rotationOrigin": [ 0.9, 0.1, 0.1 ],
 									"faces": {
-										"north": { "texture": "#emeral", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 170, "windMode": [-1,-1,-1,-1] },
-										"east": { "texture": "#emeral", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 170, "windMode": [-1,-1,-1,-1] },
-										"south": { "texture": "#emeral", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 170, "windMode": [-1,-1,-1,-1] },
-										"west": { "texture": "#emeral", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 170, "windMode": [-1,-1,-1,-1] },
-										"up": { "texture": "#emeral", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 220, "windMode": [-1,-1,-1,-1] },
-										"down": { "texture": "#emeral", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 170, "windMode": [-1,-1,-1,-1] }
+										"north": { "texture": "#emeral", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 170  },
+										"east": { "texture": "#emeral", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 170  },
+										"south": { "texture": "#emeral", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 170  },
+										"west": { "texture": "#emeral", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 170  },
+										"up": { "texture": "#emeral", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 220  },
+										"down": { "texture": "#emeral", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 170  }
 									}
 								}
 							]
@@ -1181,12 +1181,12 @@
 									"to": [ 0.9, 0.5, 0.9 ],
 									"rotationOrigin": [ 0.9, 0.1, 0.1 ],
 									"faces": {
-										"north": { "texture": "#topaz", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] },
-										"east": { "texture": "#topaz", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] },
-										"south": { "texture": "#topaz", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] },
-										"west": { "texture": "#topaz", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] },
-										"up": { "texture": "#topaz", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] },
-										"down": { "texture": "#topaz", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] }
+										"north": { "texture": "#topaz", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  },
+										"east": { "texture": "#topaz", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  },
+										"south": { "texture": "#topaz", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  },
+										"west": { "texture": "#topaz", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  },
+										"up": { "texture": "#topaz", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  },
+										"down": { "texture": "#topaz", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  }
 									}
 								}
 							]
@@ -1211,12 +1211,12 @@
 									"to": [ 0.9, 0.5, 0.9 ],
 									"rotationOrigin": [ 0.9, 0.1, 0.1 ],
 									"faces": {
-										"north": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] },
-										"east": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] },
-										"south": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] },
-										"west": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] },
-										"up": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] },
-										"down": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50, "windMode": [-1,-1,-1,-1] }
+										"north": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  },
+										"east": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  },
+										"south": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  },
+										"west": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  },
+										"up": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  },
+										"down": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 0.5, 0.5 ], "glow": 50  }
 									}
 								}
 							]
