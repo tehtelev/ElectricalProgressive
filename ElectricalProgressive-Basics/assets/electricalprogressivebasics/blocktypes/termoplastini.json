@@ -107,6 +107,12 @@
 
 
   "blockmaterial": "Stone",
+  "emitSideAo": { // Ambient Oclusion
+    "all": true
+  },
+  "sideAo": { // Ambient Oclusion
+    "all": true
+  },
   "sidesolid": {
     "all": true
   },
