@@ -116,12 +116,12 @@
 
 
   "resistance": 1,
-  "lightAbsorption": 0.0,
-  "emitSideAo": {
-    "all": false
+  "lightAbsorption": 50.0,
+  "emitSideAo": { // Ambient Oclusion
+    "all": true
   },
-  "sideAo": {
-    "all": false
+  "sideAo": { // Ambient Oclusion
+    "all": true
   },
   "sideOpaque": {
     "all": false

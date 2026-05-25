@@ -83,7 +83,7 @@
 
   "replaceable": 500,
   "resistance": 3.5,
-  "lightAbsorption": 0,
+  "lightAbsorption": 120,
   "lightHsvByType": {
     "*-disabled-*": [ 0, 0, 0 ],
     "*-enabled-*": [ 7, 7, 11 ]
@@ -128,7 +128,12 @@
       "north": true
     }
   },
-
+  "emitSideAo": { // Ambient Oclusion
+    "all": true
+  },
+  "sideAo": { // Ambient Oclusion
+    "all": true
+  },
   "heldTpIdleAnimation": "holdbothhandslarge",
   "heldRightReadyAnimation": "heldblockready",
   "heldTpUseAnimation": "twohandplaceblock",

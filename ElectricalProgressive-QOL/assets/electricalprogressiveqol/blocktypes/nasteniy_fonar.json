@@ -63,14 +63,14 @@
 
   "resistance": 1,
   "drawType": "JSON",
-  "lightAbsorption": 0.0,
+  "lightAbsorption": 50.0,
   "faceCullMode": "NeverCull",
   "renderPass": "OpaqueNoCull",
-  "emitSideAo": {
-    "all": false
+  "emitSideAo": { // Ambient Oclusion
+    "all": true
   },
-  "sideAo": {
-    "all": false
+  "sideAo": { // Ambient Oclusion
+    "all": true
   },
   "sideOpaque": {
     "all": false

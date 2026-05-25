@@ -117,32 +117,40 @@
     }
   },
 
-    "sideopaque": {
-      "all": false
+  "sideopaque": {
+    "all": false
+  },
+
+  "emitSideAo": { // Ambient Oclusion
+    "all": true
+  },
+  "sideAo": { // Ambient Oclusion
+    "all": true
+  },
+
+  "resistance": 3.5,
+  "lightAbsorption": 120,
+  "lightHsvByType": {
+    "*-disabled-*": [ 0, 0, 0 ],
+    "*-enabled-*": [ 7, 7, 11 ]
+  },
+  "sounds": {
+    "walk": "game:walk/stone"
+  },
+  "heldTpIdleAnimation": "holdbothhandslarge",
+  "heldRightReadyAnimation": "heldblockready",
+  "heldTpUseAnimation": "twohandplaceblock",
+  "tpHandTransform": {
+    "translation": {
+      "x": -1.23,
+      "y": -0.91,
+      "z": -0.8
     },
-    "resistance": 3.5,
-    "lightAbsorption": 0,
-    "lightHsvByType": {
-      "*-disabled-*": [ 0, 0, 0 ],
-      "*-enabled-*": [ 7, 7, 11 ]
+    "rotation": {
+      "x": -2,
+      "y": 25,
+      "z": -78
     },
-    "sounds": {
-      "walk": "game:walk/stone"
-    },
-    "heldTpIdleAnimation": "holdbothhandslarge",
-    "heldRightReadyAnimation": "heldblockready",
-    "heldTpUseAnimation": "twohandplaceblock",
-    "tpHandTransform": {
-      "translation": {
-        "x": -1.23,
-        "y": -0.91,
-        "z": -0.8
-      },
-      "rotation": {
-        "x": -2,
-        "y": 25,
-        "z": -78
-      },
-      "scale": 0.4
-    }
+    "scale": 0.4
   }
+}

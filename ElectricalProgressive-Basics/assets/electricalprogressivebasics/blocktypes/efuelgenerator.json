@@ -86,7 +86,7 @@
 
     // Конфигурация жидкости с температурной зависимостью расхода
     "liquidConfig": {
-      "allowedLiquids": ["waterportion"],
+      "allowedLiquids": [ "waterportion" ],
       "consumptionRate": 0.1,
       "minTemperature": 200,
       "capacityLitres": 100,
@@ -171,6 +171,12 @@
   },
 
   "blockmaterial": "Stone",
+  "emitSideAo": { // Ambient Oclusion
+    "all": true
+  },
+  "sideAo": { // Ambient Oclusion
+    "all": true
+  },
   "sidesolid": {
     "all": false
   },

@@ -102,18 +102,18 @@
   },
 
 
- 
+
 
 
   "resistance": 1,
-  "lightAbsorption": 0.0,
+  "lightAbsorption": 200.0,
   "faceCullMode": "NeverCull",
   "renderPass": "OpaqueNoCull",
-  "emitSideAo": {
-    "all": false
+  "emitSideAo": { // Ambient Oclusion
+    "all": true
   },
-  "sideAo": {
-    "all": false
+  "sideAo": { // Ambient Oclusion
+    "all": true
   },
   "sideOpaque": {
     "all": false

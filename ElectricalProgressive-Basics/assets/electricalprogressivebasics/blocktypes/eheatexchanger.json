@@ -25,6 +25,12 @@
   },
 
   "blockmaterial": "Metal",
+  "emitSideAo": { // Ambient Oclusion
+    "all": true
+  },
+  "sideAo": { // Ambient Oclusion
+    "all": true
+  },
   "sidesolid": {
     "all": false
   },

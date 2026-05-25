@@ -121,7 +121,7 @@
   },
 
 
-  "lightAbsorption": 0,
+  "lightAbsorption": 120,
   "sidesolidByType": {
     "*-north": {
       "all": false,
@@ -151,6 +151,12 @@
 
   "sideopaque": {
     "all": "false"
+  },
+  "emitSideAo": { // Ambient Oclusion
+    "all": true
+  },
+  "sideAo": { // Ambient Oclusion
+    "all": true
   },
   "collisionbox": {
     "x1": 0,

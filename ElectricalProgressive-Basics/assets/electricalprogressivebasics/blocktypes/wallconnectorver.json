@@ -79,12 +79,12 @@
 
 
   "resistance": 1,
-  "lightAbsorption": 0.0,
+  "lightAbsorption": 255.0,
   "emitSideAo": {
-    "all": false
+    "all": true
   },
   "sideAo": {
-    "all": false
+    "all": true
   },
   "sideOpaque": {
     "all": false

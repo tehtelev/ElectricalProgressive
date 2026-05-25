@@ -122,6 +122,12 @@
       }
     }
   },
+  "emitSideAo": { // Ambient Oclusion
+    "all": true
+  },
+  "sideAo": { // Ambient Oclusion
+    "all": true
+  },
   "sideSolid": {
     "all": false
   },

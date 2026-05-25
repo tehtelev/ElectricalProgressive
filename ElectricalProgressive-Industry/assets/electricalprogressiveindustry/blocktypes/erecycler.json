@@ -119,7 +119,7 @@
       "rotateY": 90
     }
   },
-  "lightAbsorption": 0,
+  "lightAbsorption": 120,
   "sidesolidByType": {
     "*-north": {
       "all": false,
@@ -149,6 +149,13 @@
 
   "sideopaque": {
     "all": "false"
+  },
+
+  "emitSideAo": { // Ambient Oclusion
+    "all": true
+  },
+  "sideAo": { // Ambient Oclusion
+    "all": true
   },
   "resistance": 3.5,
   "sounds": {
