@@ -8,8 +8,6 @@
 	"textureSizes": {
 	},
 	"textures": {
-		"brass": "game:block/metal/plate/brass",
-		"copper": "game:block/metal/plate/copper",
 		"iron": "game:block/metal/plate/iron",
 		"steel": "game:block/metal/plate/steel",
 		"zinc": "game:block/metal/plate/zinc"
@@ -62,17 +60,17 @@
 		},
 		{
 			"name": "Cube21",
-			"from": [ 3.0, 11.75, -4.0 ],
-			"to": [ 12.0, 31.75, 4.0 ],
+			"from": [ 3.5, 11.75, -4.5 ],
+			"to": [ 12.5, 31.75, 4.5 ],
 			"rotationOrigin": [ 12.0, 16.0, 4.0 ],
 			"rotationY": 90.0,
 			"faces": {
-				"north": { "texture": "#zinc", "uv": [ 0.0, 0.0, 9.0, 20.0 ] },
-				"east": { "texture": "#zinc", "uv": [ 0.0, 0.0, 8.0, 20.0 ] },
-				"south": { "texture": "#zinc", "uv": [ 0.0, 0.0, 9.0, 20.0 ] },
-				"west": { "texture": "#zinc", "uv": [ 0.0, 0.0, 8.0, 20.0 ] },
-				"up": { "texture": "#zinc", "uv": [ 0.0, 0.0, 9.0, 8.0 ] },
-				"down": { "texture": "#zinc", "uv": [ 0.0, 0.0, 9.0, 8.0 ] }
+				"north": { "texture": "#zinc", "uv": [ 0.0, 0.0, 9.0, 16.0 ], "autoUv": false,  },
+				"east": { "texture": "#zinc", "uv": [ 0.0, 0.0, 8.0, 16.0 ], "autoUv": false,  },
+				"south": { "texture": "#zinc", "uv": [ 0.0, 0.0, 9.0, 16.0 ], "autoUv": false,  },
+				"west": { "texture": "#zinc", "uv": [ 0.0, 0.0, 8.0, 16.0 ], "autoUv": false },
+				"up": { "texture": "#zinc", "uv": [ 0.0, 0.0, 9.0, 9.0 ] },
+				"down": { "texture": "#zinc", "uv": [ 0.0, 0.0, 9.0, 9.0 ] }
 			}
 		}
 	]}

@@ -47,13 +47,13 @@
   },
 
 
-
-
   "shape": {
     "base": "block/blockwire/blockwire"
   },
 
-
+  "lod2shape": {
+    "base": "block/blockwire/blockwire-lod2"
+  },
 
   "resistance": 1,
   "drawType": "JSON",

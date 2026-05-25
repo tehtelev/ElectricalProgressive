@@ -10,26 +10,23 @@ namespace ElectricalProgressive.Content.Block.EConnector;
 
 public class BlockConnector : BlockEBase
 {
+    /// <summary>
+    /// Кеш мешей
+    /// </summary>
+    private static readonly Dictionary<(Facing, string, int), MeshData> MeshCache = new();
+    
 
-    private static readonly Dictionary<(Facing, string), MeshData> MeshData = new();
-
-
-
-    public override void OnUnloaded(ICoreAPI api)
-    {
-        base.OnUnloaded(api);
-        MeshData?.Clear();
-    }
-
-
-
-
-    //ставим блок
+    /// <summary>
+    /// ставим блок
+    /// </summary>
+    /// <param name="world"></param>
+    /// <param name="byPlayer"></param>
+    /// <param name="blockSel"></param>
+    /// <param name="byItemStack"></param>
+    /// <returns></returns>
     public override bool DoPlaceBlock(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel,
         ItemStack byItemStack)
     {
-        
-
         var selection = new Selection(blockSel);
         var facing = Facing.None;
 
@@ -46,12 +43,10 @@ public class BlockConnector : BlockEBase
             world.BlockAccessor.GetBlockEntity(blockSel.Position) is BlockEntityEConnector entity
         )
         {
-            entity.Facing = facing;                             //сообщаем направление
+            entity.Facing = facing;  //сообщаем направление
 
             //задаем электрические параметры блока/проводника
             LoadEProperties.Load(this, entity);
-
-            
 
             return true;
         }
@@ -67,149 +62,28 @@ public class BlockConnector : BlockEBase
     {
         base.OnJsonTesselation(ref sourceMesh, ref lightRgbsByCorner, pos, chunkExtBlocks, extIndex3d);
 
-        if (api is ICoreClientAPI clientApi &&
+        if (api is ICoreClientAPI &&
             api.World.BlockAccessor.GetBlockEntity(pos) is BlockEntityEConnector entity &&
-            entity.Facing != Facing.None
-           )
+            entity.Facing != Facing.None)
         {
+            var facing = entity.Facing;
+            string code = entity.Block.Code.ToString();
 
+            // VerticesCount отличается у LOD0 и LOD2
+            var cacheKey = (facing, code, sourceMesh.VerticesCount);
 
-            var facing = entity.Facing;   //куда смотрит генератор
-            string code = entity.Block.Code; //код блока
-
-            if (!MeshData.TryGetValue((facing, code), out var meshData))
+            if (!MeshCache.TryGetValue(cacheKey, out var meshData))
             {
                 var origin = new Vec3f(0.5f, 0.5f, 0.5f);
-                var block = clientApi.World.BlockAccessor.GetBlockEntity(pos).Block;
 
-                clientApi.Tesselator.TesselateBlock(block, out meshData);
-                clientApi.TesselatorManager.ThreadDispose(); //обязательно?
+                // Клонируем входящий меш (уже правильный — LOD0 или LOD2)
+                meshData = sourceMesh.Clone();
 
-                if ((facing & Facing.NorthEast) != 0)
-                {
-                    meshData.Rotate(origin, 90.0f * GameMath.DEG2RAD, 270.0f * GameMath.DEG2RAD, 0.0f);
-                }
+                // быстро враащем обьект
+                FacingRotations.ApplyRotations(meshData, facing);
 
-                if ((facing & Facing.NorthWest) != 0)
-                {
-                    meshData.Rotate(origin, 90.0f * GameMath.DEG2RAD, 90.0f * GameMath.DEG2RAD, 0.0f);
-                }
 
-                if ((facing & Facing.NorthUp) != 0)
-                {
-                    meshData.Rotate(origin, 90.0f * GameMath.DEG2RAD, 0.0f * GameMath.DEG2RAD, 0.0f);
-                }
-
-                if ((facing & Facing.NorthDown) != 0)
-                {
-                    meshData.Rotate(origin, 90.0f * GameMath.DEG2RAD, 180.0f * GameMath.DEG2RAD, 0.0f);
-                }
-
-                if ((facing & Facing.EastNorth) != 0)
-                {
-                    meshData.Rotate(origin, 0.0f * GameMath.DEG2RAD, 0.0f, 90.0f * GameMath.DEG2RAD);
-                }
-
-                if ((facing & Facing.EastSouth) != 0)
-                {
-                    meshData.Rotate(origin, 180.0f * GameMath.DEG2RAD, 0.0f, 90.0f * GameMath.DEG2RAD);
-                }
-
-                if ((facing & Facing.EastUp) != 0)
-                {
-                    meshData.Rotate(origin, 90.0f * GameMath.DEG2RAD, 0.0f, 90.0f * GameMath.DEG2RAD);
-                }
-
-                if ((facing & Facing.EastDown) != 0)
-                {
-                    meshData.Rotate(origin, 270.0f * GameMath.DEG2RAD, 0.0f, 90.0f * GameMath.DEG2RAD);
-                }
-
-                if ((facing & Facing.SouthEast) != 0)
-                {
-                    meshData.Rotate(origin, 90.0f * GameMath.DEG2RAD, 270.0f * GameMath.DEG2RAD,
-                        180.0f * GameMath.DEG2RAD);
-                }
-
-                if ((facing & Facing.SouthWest) != 0)
-                {
-                    meshData.Rotate(origin, 90.0f * GameMath.DEG2RAD, 90.0f * GameMath.DEG2RAD,
-                        180.0f * GameMath.DEG2RAD);
-                }
-
-                if ((facing & Facing.SouthUp) != 0)
-                {
-                    meshData.Rotate(origin, 90.0f * GameMath.DEG2RAD, 0.0f * GameMath.DEG2RAD,
-                        180.0f * GameMath.DEG2RAD);
-                }
-
-                if ((facing & Facing.SouthDown) != 0)
-                {
-                    meshData.Rotate(origin, 90.0f * GameMath.DEG2RAD, 180.0f * GameMath.DEG2RAD,
-                        180.0f * GameMath.DEG2RAD);
-                }
-
-                if ((facing & Facing.WestNorth) != 0)
-                {
-                    meshData.Rotate(origin, 0.0f * GameMath.DEG2RAD, 0.0f, 270.0f * GameMath.DEG2RAD);
-                }
-
-                if ((facing & Facing.WestSouth) != 0)
-                {
-                    meshData.Rotate(origin, 180.0f * GameMath.DEG2RAD, 0.0f, 270.0f * GameMath.DEG2RAD);
-                }
-
-                if ((facing & Facing.WestUp) != 0)
-                {
-                    meshData.Rotate(origin, 90.0f * GameMath.DEG2RAD, 0.0f, 270.0f * GameMath.DEG2RAD);
-                }
-
-                if ((facing & Facing.WestDown) != 0)
-                {
-                    meshData.Rotate(origin, 270.0f * GameMath.DEG2RAD, 0.0f, 270.0f * GameMath.DEG2RAD);
-                }
-
-                if ((facing & Facing.UpNorth) != 0)
-                {
-                    meshData.Rotate(origin, 0.0f, 0.0f * GameMath.DEG2RAD, 180.0f * GameMath.DEG2RAD);
-                }
-
-                if ((facing & Facing.UpEast) != 0)
-                {
-                    meshData.Rotate(origin, 0.0f, 270.0f * GameMath.DEG2RAD, 180.0f * GameMath.DEG2RAD);
-                }
-
-                if ((facing & Facing.UpSouth) != 0)
-                {
-                    meshData.Rotate(origin, 0.0f, 180.0f * GameMath.DEG2RAD, 180.0f * GameMath.DEG2RAD);
-                }
-
-                if ((facing & Facing.UpWest) != 0)
-                {
-                    meshData.Rotate(origin, 0.0f, 90.0f * GameMath.DEG2RAD, 180.0f * GameMath.DEG2RAD);
-                }
-
-                if ((facing & Facing.DownNorth) != 0)
-                {
-                    meshData.Rotate(origin, 0.0f, 0.0f * GameMath.DEG2RAD, 0.0f);
-                }
-
-                if ((facing & Facing.DownEast) != 0)
-                {
-                    meshData.Rotate(origin, 0.0f, 270.0f * GameMath.DEG2RAD, 0.0f);
-                }
-
-                if ((facing & Facing.DownSouth) != 0)
-                {
-                    meshData.Rotate(origin, 0.0f, 180.0f * GameMath.DEG2RAD, 0.0f);
-                }
-
-                if ((facing & Facing.DownWest) != 0)
-                {
-                    meshData.Rotate(origin, 0.0f, 90.0f * GameMath.DEG2RAD, 0.0f);
-                }
-
-                MeshData.TryAdd((facing, code), meshData);
+                MeshCache.TryAdd(cacheKey, meshData);
             }
 
             sourceMesh = meshData;
@@ -229,6 +103,18 @@ public class BlockConnector : BlockEBase
         base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + ((MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false)) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
+    }
+
+
+
+    /// <summary>
+    /// При выходе из мира
+    /// </summary>
+    /// <param name="api"></param>
+    public override void OnUnloaded(ICoreAPI api)
+    {
+        base.OnUnloaded(api);
+        MeshCache?.Clear();
     }
 
 

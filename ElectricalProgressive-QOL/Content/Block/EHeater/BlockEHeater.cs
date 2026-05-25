@@ -12,6 +12,7 @@ using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
+using XSkills;
 
 namespace ElectricalProgressive.Content.Block.EHeater
 {
@@ -23,8 +24,7 @@ namespace ElectricalProgressive.Content.Block.EHeater
         private static readonly Dictionary<CacheDataKey, Cuboidf[]> SelectionBoxesCache = new();
         private static readonly Dictionary<CacheDataKey, Cuboidf[]> CollisionBoxesCache = new();
 
-        // Кэш преобразований поворотов
-        private static readonly Dictionary<Facing, RotationData> RotationCache = CreateRotationCache();
+
 
         public override void OnUnloaded(ICoreAPI api)
         {
@@ -144,12 +144,13 @@ namespace ElectricalProgressive.Content.Block.EHeater
 
             if (!cache.TryGetValue(key, out var boxes))
             {
-                if (RotationCache.TryGetValue(key.Facing, out var rotation))
-                {
-                    var origin = new Vec3d(0.5, 0.5, 0.5);
-                    boxes = sourceBoxes.Select(box => box.RotatedCopy(rotation.X, rotation.Y, rotation.Z, origin)).ToArray();
-                    cache.TryAdd(key, boxes);
-                }
+                boxes = (Cuboidf[]?)sourceBoxes.Clone();
+                
+                // быстро враащем обьект
+                FacingRotations.ApplyRotations(ref boxes, key.Facing);
+
+                cache.TryAdd(key, boxes);
+
             }
 
             return boxes ?? [];
@@ -171,14 +172,8 @@ namespace ElectricalProgressive.Content.Block.EHeater
                 clientApi.Tesselator.TesselateBlock(this, out meshData);
                 clientApi.TesselatorManager.ThreadDispose();
 
-                if (RotationCache.TryGetValue(key.Facing, out var rotation))
-                {
-                    var origin = new Vec3f(0.5f, 0.5f, 0.5f);
-                    meshData.Rotate(origin,
-                        rotation.X * GameMath.DEG2RAD,
-                        rotation.Y * GameMath.DEG2RAD,
-                        rotation.Z * GameMath.DEG2RAD);
-                }
+                // быстро враащем обьект
+                FacingRotations.ApplyRotations(meshData, key.Facing);
 
                 MeshDataCache.TryAdd(key, meshData);
             }
@@ -197,36 +192,7 @@ namespace ElectricalProgressive.Content.Block.EHeater
                 (MyMiniLib.GetAttributeBool(block, "isolatedEnvironment", false) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
         }
 
-        private static Dictionary<Facing, RotationData> CreateRotationCache()
-        {
-            return new Dictionary<Facing, RotationData>
-            {
-                { Facing.NorthEast, new RotationData(90.0f, 270.0f, 0.0f) },
-                { Facing.NorthWest, new RotationData(90.0f, 90.0f, 0.0f) },
-                { Facing.NorthUp, new RotationData(90.0f, 0.0f, 0.0f) },
-                { Facing.NorthDown, new RotationData(90.0f, 180.0f, 0.0f) },
-                { Facing.EastNorth, new RotationData(0.0f, 0.0f, 90.0f) },
-                { Facing.EastSouth, new RotationData(180.0f, 0.0f, 90.0f) },
-                { Facing.EastUp, new RotationData(90.0f, 0.0f, 90.0f) },
-                { Facing.EastDown, new RotationData(270.0f, 0.0f, 90.0f) },
-                { Facing.SouthEast, new RotationData(90.0f, 270.0f, 180.0f) },
-                { Facing.SouthWest, new RotationData(90.0f, 90.0f, 180.0f) },
-                { Facing.SouthUp, new RotationData(90.0f, 0.0f, 180.0f) },
-                { Facing.SouthDown, new RotationData(90.0f, 180.0f, 180.0f) },
-                { Facing.WestNorth, new RotationData(0.0f, 0.0f, 270.0f) },
-                { Facing.WestSouth, new RotationData(180.0f, 0.0f, 270.0f) },
-                { Facing.WestUp, new RotationData(90.0f, 0.0f, 270.0f) },
-                { Facing.WestDown, new RotationData(270.0f, 0.0f, 270.0f) },
-                { Facing.UpNorth, new RotationData(0.0f, 0.0f, 180.0f) },
-                { Facing.UpEast, new RotationData(0.0f, 270.0f, 180.0f) },
-                { Facing.UpSouth, new RotationData(0.0f, 180.0f, 180.0f) },
-                { Facing.UpWest, new RotationData(0.0f, 90.0f, 180.0f) },
-                { Facing.DownNorth, new RotationData(0.0f, 0.0f, 0.0f) },
-                { Facing.DownEast, new RotationData(0.0f, 270.0f, 0.0f) },
-                { Facing.DownSouth, new RotationData(0.0f, 180.0f, 0.0f) },
-                { Facing.DownWest, new RotationData(0.0f, 90.0f, 0.0f) }
-            };
-        }
+
 
         public override bool OnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel)
         {
@@ -320,18 +286,6 @@ namespace ElectricalProgressive.Content.Block.EHeater
             }
         }
 
-        private readonly struct RotationData
-        {
-            public readonly float X;
-            public readonly float Y;
-            public readonly float Z;
 
-            public RotationData(float x, float y, float z)
-            {
-                X = x;
-                Y = y;
-                Z = z;
-            }
-        }
     }
 }

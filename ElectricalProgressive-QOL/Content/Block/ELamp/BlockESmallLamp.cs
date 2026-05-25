@@ -1,12 +1,13 @@
-﻿using ElectricalProgressive.Utils;
+﻿using Cairo.Freetype;
+using ElectricalProgressive.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
-using Vintagestory.API.MathTools;
 using Vintagestory.API.Config;
+using Vintagestory.API.MathTools;
 
 namespace ElectricalProgressive.Content.Block.ELamp
 {
@@ -119,253 +120,37 @@ namespace ElectricalProgressive.Content.Block.ELamp
             }
 
         }
-
         public override Cuboidf[] GetCollisionBoxes(IBlockAccessor blockAccessor, BlockPos pos)
         {
-            var origin = new Vec3d(0.5, 0.5, 0.5);
-
-            if (this.api.World.BlockAccessor.GetBlockEntity(pos) is not BlockEntityELamp entity ||
-                entity == null ||
-                entity.Facing == Facing.None)
-            {
-                return [];
-            }
-
-
-            var key = CacheDataKey.FromEntity(entity);
-
-            if (!BlockESmallLamp.CollisionBoxesCache.TryGetValue(key, out var boxes))
-            {
-                if ((key.Facing & Facing.NorthEast) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(90.0f, 270.0f, 0.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.NorthWest) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(90.0f, 90.0f, 0.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.NorthUp) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(90.0f, 0.0f, 0.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.NorthDown) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(90.0f, 180.0f, 0.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.EastNorth) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(0.0f, 0.0f, 90.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.EastSouth) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(180.0f, 0.0f, 90.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.EastUp) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(90.0f, 0.0f, 90.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.EastDown) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(270.0f, 0.0f, 90.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.SouthEast) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(90.0f, 270.0f, 180.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.SouthWest) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(90.0f, 90.0f, 180.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.SouthUp) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(90.0f, 0.0f, 180.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.SouthDown) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(90.0f, 180.0f, 180.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.WestNorth) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(0.0f, 0.0f, 270.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.WestSouth) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(180.0f, 0.0f, 270.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.WestUp) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(90.0f, 0.0f, 270.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.WestDown) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(270.0f, 0.0f, 270.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.UpNorth) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(0.0f, 0.0f, 180.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.UpEast) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(0.0f, 270.0f, 180.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.UpSouth) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(0.0f, 180.0f, 180.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.UpWest) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(0.0f, 90.0f, 180.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.DownNorth) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(0.0f, 0.0f, 0.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.DownEast) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(0.0f, 270.0f, 0.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.DownSouth) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(0.0f, 180.0f, 0.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.DownWest) != 0)
-                {
-                    boxes = this.CollisionBoxes.Select(collisionBox => collisionBox.RotatedCopy(0.0f, 90.0f, 0.0f, origin)).ToArray();
-                }
-
-                if (boxes != null)
-                    BlockESmallLamp.CollisionBoxesCache.TryAdd(key, boxes);
-            }
-
-            if (boxes != null)
-            {
-                return boxes;
-            }
-
-            return [];
+            return GetRotatedBoxes(pos, CollisionBoxesCache, CollisionBoxes);
         }
 
         public override Cuboidf[] GetSelectionBoxes(IBlockAccessor blockAccessor, BlockPos pos)
         {
-            var origin = new Vec3d(0.5, 0.5, 0.5);
+            return GetRotatedBoxes(pos, SelectionBoxesCache, SelectionBoxes);
+        }
 
-            if (this.api.World.BlockAccessor.GetBlockEntity(pos) is not BlockEntityELamp entity ||
-                entity == null ||
+        private Cuboidf[] GetRotatedBoxes(BlockPos pos, Dictionary<CacheDataKey, Cuboidf[]> cache, Cuboidf[] sourceBoxes)
+        {
+            if (api?.World?.BlockAccessor.GetBlockEntity(pos) is not BlockEntityELamp entity ||
                 entity.Facing == Facing.None)
             {
                 return [];
             }
 
-
             var key = CacheDataKey.FromEntity(entity);
 
-            if (!BlockESmallLamp.SelectionBoxesCache.TryGetValue(key, out var boxes))
+            if (!cache.TryGetValue(key, out var boxes))
             {
-                if ((key.Facing & Facing.NorthEast) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(90.0f, 270.0f, 0.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.NorthWest) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(90.0f, 90.0f, 0.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.NorthUp) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(90.0f, 0.0f, 0.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.NorthDown) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(90.0f, 180.0f, 0.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.EastNorth) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 0.0f, 90.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.EastSouth) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(180.0f, 0.0f, 90.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.EastUp) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(90.0f, 0.0f, 90.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.EastDown) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(270.0f, 0.0f, 90.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.SouthEast) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(90.0f, 270.0f, 180.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.SouthWest) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(90.0f, 90.0f, 180.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.SouthUp) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(90.0f, 0.0f, 180.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.SouthDown) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(90.0f, 180.0f, 180.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.WestNorth) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 0.0f, 270.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.WestSouth) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(180.0f, 0.0f, 270.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.WestUp) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(90.0f, 0.0f, 270.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.WestDown) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(270.0f, 0.0f, 270.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.UpNorth) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 0.0f, 180.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.UpEast) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 270.0f, 180.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.UpSouth) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 180.0f, 180.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.UpWest) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 90.0f, 180.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.DownNorth) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 0.0f, 0.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.DownEast) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 270.0f, 0.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.DownSouth) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 180.0f, 0.0f, origin)).ToArray();
-                }
-                else if ((key.Facing & Facing.DownWest) != 0)
-                {
-                    boxes = this.SelectionBoxes.Select(selectionBox => selectionBox.RotatedCopy(0.0f, 90.0f, 0.0f, origin)).ToArray();
-                }
+                boxes = (Cuboidf[]?)sourceBoxes.Clone();
 
-                if (boxes != null)
-                    BlockESmallLamp.SelectionBoxesCache.TryAdd(key, boxes);
+                // быстро враащем обьект
+                FacingRotations.ApplyRotations(ref boxes, key.Facing);
+
+                cache.TryAdd(key, boxes);
             }
 
-            if (boxes != null)
-                return boxes;
-
-            return [];
+            return boxes ?? [];
         }
 
 
@@ -382,131 +167,12 @@ namespace ElectricalProgressive.Content.Block.ELamp
 
                 if (!BlockESmallLamp.MeshDataCache.TryGetValue(key, out var meshData))
                 {
-                    var origin = new Vec3f(0.5f, 0.5f, 0.5f);
-
                     clientApi.Tesselator.TesselateBlock(this, out meshData);
 
                     clientApi.TesselatorManager.ThreadDispose(); //обязательно?
 
-                    if ((key.Facing & Facing.NorthEast) != 0)
-                    {
-                        meshData.Rotate(origin, 90.0f * GameMath.DEG2RAD, 270.0f * GameMath.DEG2RAD, 0.0f);
-                    }
-
-                    if ((key.Facing & Facing.NorthWest) != 0)
-                    {
-                        meshData.Rotate(origin, 90.0f * GameMath.DEG2RAD, 90.0f * GameMath.DEG2RAD, 0.0f);
-                    }
-
-                    if ((key.Facing & Facing.NorthUp) != 0)
-                    {
-                        meshData.Rotate(origin, 90.0f * GameMath.DEG2RAD, 0.0f * GameMath.DEG2RAD, 0.0f);
-                    }
-
-                    if ((key.Facing & Facing.NorthDown) != 0)
-                    {
-                        meshData.Rotate(origin, 90.0f * GameMath.DEG2RAD, 180.0f * GameMath.DEG2RAD, 0.0f);
-                    }
-
-                    if ((key.Facing & Facing.EastNorth) != 0)
-                    {
-                        meshData.Rotate(origin, 0.0f * GameMath.DEG2RAD, 0.0f, 90.0f * GameMath.DEG2RAD);
-                    }
-
-                    if ((key.Facing & Facing.EastSouth) != 0)
-                    {
-                        meshData.Rotate(origin, 180.0f * GameMath.DEG2RAD, 0.0f, 90.0f * GameMath.DEG2RAD);
-                    }
-
-                    if ((key.Facing & Facing.EastUp) != 0)
-                    {
-                        meshData.Rotate(origin, 90.0f * GameMath.DEG2RAD, 0.0f, 90.0f * GameMath.DEG2RAD);
-                    }
-
-                    if ((key.Facing & Facing.EastDown) != 0)
-                    {
-                        meshData.Rotate(origin, 270.0f * GameMath.DEG2RAD, 0.0f, 90.0f * GameMath.DEG2RAD);
-                    }
-
-                    if ((key.Facing & Facing.SouthEast) != 0)
-                    {
-                        meshData.Rotate(origin, 90.0f * GameMath.DEG2RAD, 270.0f * GameMath.DEG2RAD, 180.0f * GameMath.DEG2RAD);
-                    }
-
-                    if ((key.Facing & Facing.SouthWest) != 0)
-                    {
-                        meshData.Rotate(origin, 90.0f * GameMath.DEG2RAD, 90.0f * GameMath.DEG2RAD, 180.0f * GameMath.DEG2RAD);
-                    }
-
-                    if ((key.Facing & Facing.SouthUp) != 0)
-                    {
-                        meshData.Rotate(origin, 90.0f * GameMath.DEG2RAD, 0.0f * GameMath.DEG2RAD, 180.0f * GameMath.DEG2RAD);
-                    }
-
-                    if ((key.Facing & Facing.SouthDown) != 0)
-                    {
-                        meshData.Rotate(origin, 90.0f * GameMath.DEG2RAD, 180.0f * GameMath.DEG2RAD, 180.0f * GameMath.DEG2RAD);
-                    }
-
-                    if ((key.Facing & Facing.WestNorth) != 0)
-                    {
-                        meshData.Rotate(origin, 0.0f * GameMath.DEG2RAD, 0.0f, 270.0f * GameMath.DEG2RAD);
-                    }
-
-                    if ((key.Facing & Facing.WestSouth) != 0)
-                    {
-                        meshData.Rotate(origin, 180.0f * GameMath.DEG2RAD, 0.0f, 270.0f * GameMath.DEG2RAD);
-                    }
-
-                    if ((key.Facing & Facing.WestUp) != 0)
-                    {
-                        meshData.Rotate(origin, 90.0f * GameMath.DEG2RAD, 0.0f, 270.0f * GameMath.DEG2RAD);
-                    }
-
-                    if ((key.Facing & Facing.WestDown) != 0)
-                    {
-                        meshData.Rotate(origin, 270.0f * GameMath.DEG2RAD, 0.0f, 270.0f * GameMath.DEG2RAD);
-                    }
-
-                    if ((key.Facing & Facing.UpNorth) != 0)
-                    {
-                        meshData.Rotate(origin, 0.0f, 0.0f * GameMath.DEG2RAD, 180.0f * GameMath.DEG2RAD);
-                    }
-
-                    if ((key.Facing & Facing.UpEast) != 0)
-                    {
-                        meshData.Rotate(origin, 0.0f, 270.0f * GameMath.DEG2RAD, 180.0f * GameMath.DEG2RAD);
-                    }
-
-                    if ((key.Facing & Facing.UpSouth) != 0)
-                    {
-                        meshData.Rotate(origin, 0.0f, 180.0f * GameMath.DEG2RAD, 180.0f * GameMath.DEG2RAD);
-                    }
-
-                    if ((key.Facing & Facing.UpWest) != 0)
-                    {
-                        meshData.Rotate(origin, 0.0f, 90.0f * GameMath.DEG2RAD, 180.0f * GameMath.DEG2RAD);
-                    }
-
-                    if ((key.Facing & Facing.DownNorth) != 0)
-                    {
-                        meshData.Rotate(origin, 0.0f, 0.0f * GameMath.DEG2RAD, 0.0f);
-                    }
-
-                    if ((key.Facing & Facing.DownEast) != 0)
-                    {
-                        meshData.Rotate(origin, 0.0f, 270.0f * GameMath.DEG2RAD, 0.0f);
-                    }
-
-                    if ((key.Facing & Facing.DownSouth) != 0)
-                    {
-                        meshData.Rotate(origin, 0.0f, 180.0f * GameMath.DEG2RAD, 0.0f);
-                    }
-
-                    if ((key.Facing & Facing.DownWest) != 0)
-                    {
-                        meshData.Rotate(origin, 0.0f, 90.0f * GameMath.DEG2RAD, 0.0f);
-                    }
+                    // быстро враащем обьект
+                    FacingRotations.ApplyRotations(meshData, key.Facing);
 
                     BlockESmallLamp.MeshDataCache.TryAdd(key, meshData);
                 }
