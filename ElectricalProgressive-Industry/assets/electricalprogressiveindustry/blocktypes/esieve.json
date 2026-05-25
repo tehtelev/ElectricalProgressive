@@ -1,40 +1,37 @@
 ﻿{
-  "code": "ehammer",
-  "class": "BlockEHammer",
-  "entityClass": "BlockEntityEHammer",
+  "code": "esieve",
+  "class": "BlockESieve",
+  "entityClass": "BlockEntityESieve",
   "attributes": {
     "blockEProperties": "all",
     "facesEProperties": [ "north", "east", "south", "west", "up", "down" ],
-    "particlesOffsetPos": [ [ 0.5, 1.01, 0.5 ] ],
+    "particlesOffsetPos": [ [ 0.8, 0.7, 1.0 ] ],
     "particlesType": 4,
     "particlesFramesAnim": [
-      [ 95, 99 ],
-      [ 125, 129 ],
-      [ 95, 99 ]
+      [ 405, 415 ]
     ],
-    "maxConsumption": 200,
+    "maxConsumption": 250,
     "voltage": 128,
     "maxCurrent": 100.0,
     "isolated": true,
     "isolatedEnvironment": true,
     "handbook": {
-      "groupBy": [ "ehammer" ],
+      "groupBy": [ "ecrusher-*" ],
       "extraSections": [
         {
-          "title": "electricalprogressiveindustry:block-handbooktitle-ehammer",
-          "text": "electricalprogressiveindustry:block-handbooktext-ehammer"
+          "title": "electricalprogressiveindustry:block-handbooktitle-ecrusher",
+          "text": "electricalprogressiveindustry:block-handbooktext-ecrusher"
         }
       ]
     }
   },
-
 
   "entityBehaviors": [
     {
       "name": "Animatable"
     },
     {
-      "name": "BEBehaviorEHammer"
+      "name": "BEBehaviorESieve"
     },
     {
       "name": "ElectricalProgressive"
@@ -52,8 +49,8 @@
       "name": "Multiblock",
       "propertiesByType": {
         "*-north": {
-          "sizex": 3,
-          "sizey": 4,
+          "sizex": 2,
+          "sizey": 2,
           "sizez": 2,
           "cposition": {
             "x": 0,
@@ -63,8 +60,8 @@
         },
         "*-east": {
           "sizex": 2,
-          "sizey": 4,
-          "sizez": 3,
+          "sizey": 2,
+          "sizez": 2,
           "cposition": {
             "x": 0,
             "y": 0,
@@ -72,23 +69,23 @@
           }
         },
         "*-south": {
-          "sizex": 3,
-          "sizey": 4,
+          "sizex": 2,
+          "sizey": 2,
           "sizez": 2,
           "cposition": {
-            "x": 2,
+            "x": 1,
             "y": 0,
             "z": 0
           }
         },
         "*-west": {
           "sizex": 2,
-          "sizey": 4,
-          "sizez": 3,
+          "sizey": 2,
+          "sizez": 2,
           "cposition": {
             "x": 1,
             "y": 0,
-            "z": 2
+            "z": 1
           }
         }
       }
@@ -103,26 +100,28 @@
       "loadFromProperties": "abstract/horizontalorientation"
     }
   ],
-  
+
   "shapebytype": {
     "*-north": {
-      "base": "block/ehammer/ehammer",
+      "base": "block/esieve/esieve",
       "rotateY": 0
     },
     "*-east": {
-      "base": "block/ehammer/ehammer",
+      "base": "block/esieve/esieve",
       "rotateY": 270
     },
     "*-south": {
-      "base": "block/ehammer/ehammer",
+      "base": "block/esieve/esieve",
       "rotateY": 180
     },
     "*-west": {
-      "base": "block/ehammer/ehammer",
+      "base": "block/esieve/esieve",
       "rotateY": 90
     }
   },
+
   "lightAbsorption": 0,
+
   "sidesolidByType": {
     "*-north": {
       "all": false,
@@ -153,12 +152,14 @@
   "sideopaque": {
     "all": "false"
   },
-  
+
   "resistance": 3.5,
+
   "sounds": {
     "place": "game:block/anvil",
     "walk": "game:walk/metal"
   },
+
   "guiTransform": {
     "rotation": {
       "x": -22.6,
@@ -172,9 +173,11 @@
     },
     "scale": 0.72
   },
+
   "heldTpIdleAnimation": "holdbothhandslarge",
   "heldRightReadyAnimation": "heldblockready",
   "heldTpUseAnimation": "twohandplaceblock",
+
   "tpHandTransform": {
     "translation": {
       "x": -0.6,
@@ -188,5 +191,4 @@
     },
     "scale": 0.4
   }
-
 }

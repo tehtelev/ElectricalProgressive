@@ -16,7 +16,7 @@ public class ElectricalProgressiveRecipeManager : ModSystem
     public static List<ExtruderRecipe> ExtruderRecipes;
     public static List<CrusherRecipe> CrusherRecipes;
     public static List<BlastFurnaceRecipe> BlastFurnaceRecipes;
-
+    public static List<SieveRecipe> SieveRecipes;  // НОВОЕ
 
     public static Dictionary<string, (string code, IEnumerable<IRecipeMultyBase> recipes)> machines;
 
@@ -32,6 +32,7 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         api.Event.SaveGameLoaded += LoadExtruderRecipes;
         api.Event.SaveGameLoaded += LoadCrusherRecipes;
         api.Event.SaveGameLoaded += LoadBlastFurnaceRecipes;
+        api.Event.SaveGameLoaded += LoadSieveRecipes;  // НОВОЕ
 
         machines = new Dictionary<string, (string, IEnumerable<IRecipeMultyBase>)>(4);
     }
@@ -82,6 +83,15 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         LoadRecipes<BlastFurnaceRecipe>("BlastFurnace Recipe", "recipes/electric/blastfurnacerecipe", BlastFurnaceRecipes.Add);
         api.World.Logger.Debug(Lang.Get("electricalprogressiveindustry:recipeloading"));
         machines.Add("eblastfurnace-", ("electricalprogressiveindustry:eblastfurnace-north", BlastFurnaceRecipes));
+    }
+
+    // НОВЫЙ МЕТОД
+    private void LoadSieveRecipes()
+    {
+        SieveRecipes = [];
+        LoadRecipes<SieveRecipe>("Sieve Recipe", "recipes/electric/sieverecipe", SieveRecipes.Add);
+        api.World.Logger.Debug(Lang.Get("electricalprogressiveindustry:recipeloading"));
+        machines.Add("esieve-", ("electricalprogressiveindustry:esieve-north", SieveRecipes));
     }
 
     private void LoadRecipes<T>(string name, string path, Action<T> registerMethod)
@@ -219,14 +229,18 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         HammerRecipes?.Clear();
         PressRecipes?.Clear();
         ExtruderRecipes?.Clear();
+        CrusherRecipes?.Clear();
+        BlastFurnaceRecipes?.Clear();
+        SieveRecipes?.Clear();  // НОВОЕ
         machines?.Clear();
 
         RecyclerRecipes = null;
         HammerRecipes = null;
         PressRecipes = null;
         ExtruderRecipes = null;
+        CrusherRecipes = null;
+        BlastFurnaceRecipes = null;
+        SieveRecipes = null;  // НОВОЕ
         machines = null;
-
-
     }
 }

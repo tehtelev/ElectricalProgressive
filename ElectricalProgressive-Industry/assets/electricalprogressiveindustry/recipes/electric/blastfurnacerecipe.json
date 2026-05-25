@@ -5,8 +5,10 @@
     "ingredients": [
       {
         "type": "item",
-        "code": "game:nugget-nativecopper",
-        "quantity": 20
+        "code": "game:*",
+        "quantity": 20,
+        "name": "ore",
+        "allowedVariants": [ "nugget-nativecopper", "nugget-malachite", "metalbit-copper"]
       },
       {
         "type": "block",
@@ -30,10 +32,10 @@
     "ingredients": [
       {
         "type": "item",
-        "code": "game:nugget-*",
+        "code": "game:*",
         "quantity": 20,
         "name": "ore",
-        "allowedVariants": [ "limonite", "magnetite", "hematite"]
+        "allowedVariants": [ "nugget-limonite", "nugget-magnetite", "nugget-hematite", "metalbit-iron"]
       },
       {
         "type": "block",
@@ -57,8 +59,10 @@
     "ingredients": [
       {
         "type": "item",
-        "code": "game:nugget-nativegold",
-        "quantity": 20
+        "code": "game:*",
+        "quantity": 20,
+        "name": "ore",
+        "allowedVariants": [ "nugget-nativegold", "metalbit-gold"]
       },
       {
         "type": "block",
@@ -82,8 +86,10 @@
     "ingredients": [
       {
         "type": "item",
-        "code": "game:nugget-galena",
-        "quantity": 20
+        "code": "game:*",
+        "quantity": 20,
+        "name": "ore",
+        "allowedVariants": [ "nugget-galena", "metalbit-lead"]
       },
       {
         "type": "block",
@@ -97,6 +103,195 @@
       {
         "type": "item",
         "code": "game:ingot-lead",
+        "stackSize": 1
+      }
+    ]
+  },
+  {
+    "code": "tin_ingot",
+    "EnergyOperation": 12000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 20,
+        "name": "ore",
+        "allowedVariants": [ "nugget-cassiterite", "metalbit-tin"]
+      },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0,
+        "name": "variant",
+        "allowedVariants": [ "blue", "fire", "black", "brown", "cream", "earthyorange", "gray", "orange", "red", "tan" ]
+      }
+    ],
+    "outputs": [
+      {
+        "type": "item",
+        "code": "game:ingot-tin",
+        "stackSize": 1
+      }
+    ]
+  },
+  {
+    "code": "chromium_ingot",
+    "EnergyOperation": 12000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 20,
+        "name": "ore",
+        "allowedVariants": [ "nugget-chromite", "metalbit-chromium"]
+      },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0,
+        "name": "variant",
+        "allowedVariants": [ "blue", "fire", "black", "brown", "cream", "earthyorange", "gray", "orange", "red", "tan" ]
+      }
+    ],
+    "outputs": [
+      {
+        "type": "item",
+        "code": "game:ingot-chromium",
+        "stackSize": 1
+      }
+    ]
+  },
+  {
+    "code": "titanium_ingot",
+    "EnergyOperation": 12000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 20,
+        "name": "ore",
+        "allowedVariants": [ "nugget-ilmenite", "metalbit-titanium"]
+      },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0,
+        "name": "variant",
+        "allowedVariants": [ "blue", "fire", "black", "brown", "cream", "earthyorange", "gray", "orange", "red", "tan" ]
+      }
+    ],
+    "outputs": [
+      {
+        "type": "item",
+        "code": "game:ingot-titanium",
+        "stackSize": 1
+      }
+    ]
+  },
+  {
+    "code": "zinc_ingot",
+    "EnergyOperation": 12000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 20,
+        "name": "ore",
+        "allowedVariants": [ "nugget-sphalerite", "metalbit-zinc"]
+      },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0,
+        "name": "variant",
+        "allowedVariants": [ "blue", "fire", "black", "brown", "cream", "earthyorange", "gray", "orange", "red", "tan" ]
+      }
+    ],
+    "outputs": [
+      {
+        "type": "item",
+        "code": "game:ingot-zinc",
+        "stackSize": 1
+      }
+    ]
+  },
+  {
+    "code": "silver_ingot",
+    "EnergyOperation": 12000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 20,
+        "name": "ore",
+        "allowedVariants": [ "nugget-nativesilver", "metalbit-silver"]
+      },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0,
+        "name": "variant",
+        "allowedVariants": [ "blue", "fire", "black", "brown", "cream", "earthyorange", "gray", "orange", "red", "tan" ]
+      }
+    ],
+    "outputs": [
+      {
+        "type": "item",
+        "code": "game:ingot-silver",
+        "stackSize": 1
+      }
+    ]
+  },
+  {
+    "code": "bismuth_ingot",
+    "EnergyOperation": 12000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 20,
+        "name": "ore",
+        "allowedVariants": [ "nugget-bismuthinite", "metalbit-bismuth"]
+      },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0,
+        "name": "variant",
+        "allowedVariants": [ "blue", "fire", "black", "brown", "cream", "earthyorange", "gray", "orange", "red", "tan" ]
+      }
+    ],
+    "outputs": [
+      {
+        "type": "item",
+        "code": "game:ingot-bismuth",
+        "stackSize": 1
+      }
+    ]
+  },
+  {
+    "code": "nickel_ingot",
+    "EnergyOperation": 12000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 20,
+        "name": "ore",
+        "allowedVariants": [ "nugget-pentlandite", "metalbit-nickel"]
+      },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0,
+        "name": "variant",
+        "allowedVariants": [ "blue", "fire", "black", "brown", "cream", "earthyorange", "gray", "orange", "red", "tan" ]
+      }
+    ],
+    "outputs": [
+      {
+        "type": "item",
+        "code": "game:ingot-nickel",
         "stackSize": 1
       }
     ]

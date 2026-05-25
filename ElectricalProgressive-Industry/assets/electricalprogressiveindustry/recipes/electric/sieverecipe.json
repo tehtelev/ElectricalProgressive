@@ -1,0 +1,113 @@
+﻿[
+  {
+    "code": "sieve_bonysoil",
+    "energyOperation": 3000,
+    "ingredients": [
+      {
+        "type": "block",
+        "code": "game:bonysoil",
+        "quantity": 1
+      }
+    ],
+    "outputs": [
+      { "type": "item", "code": "game:bone", "stackSize": 1, "chance": 0.84 },
+      { "type": "item", "code": "game:flaxfibers", "stackSize": 1, "chance": 0.60 },
+      { "type": "item", "code": "game:arrowhead-flint", "stackSize": 1, "chance": 0.40 },
+      { "type": "item", "code": "game:arrowhead-copper", "stackSize": 1, "chance": 0.20 },
+      { "type": "item", "code": "game:gear-rusty", "stackSize": 1, "chance": 0.10 },
+      { "type": "block", "code": "game:bonyremains-ribcage", "stackSize": 1, "chance": 0.08 },
+      { "type": "item", "code": "game:candle", "stackSize": 1, "chance": 0.06 },
+      { "type": "item", "code": "game:gem-emerald-rough", "stackSize": 1, "chance": 0.04 },
+      { "type": "item", "code": "game:gem-olivine_peridot-rough", "stackSize": 1, "chance": 0.04 },
+      { "type": "item", "code": "game:nugget-nativegold", "stackSize": 1, "chance": 0.04 },
+      { "type": "item", "code": "game:nugget-nativesilver", "stackSize": 1, "chance": 0.04 },
+      { "type": "item", "code": "game:spearhead-copper", "stackSize": 1, "chance": 0.04 },
+      { "type": "item", "code": "game:gem-diamond-rough", "stackSize": 1, "chance": 0.03 },
+      { "type": "item", "code": "game:gear-temporal", "stackSize": 1, "chance": 0.01 }
+    ]
+  },
+  {
+    "code": "sieve_sand",
+    "energyOperation": 3000,
+    "ingredients": [
+      {
+        "type": "block",
+        "code": "game:sand-*",
+        "quantity": 1,
+        "name": "rocktype",
+        "allowedVariants": [ "granite", "andesite", "basalt", "peridotite", "sandstone", "shale", "conglomerate", "claystone", "chalk", "limestone", "bauxite" ]
+      }
+    ],
+    "outputs": [
+      { "type": "item", "code": "game:stone-{rocktype}", "stackSize": 1, "chance": 0.80 },
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 1, "chance": 0.60 },
+      { "type": "item", "code": "game:flint", "stackSize": 1, "chance": 0.44 },
+      { "type": "item", "code": "game:clay-blue", "stackSize": 1, "chance": 0.12 },
+      { "type": "item", "code": "game:ore-quartz", "stackSize": 1, "chance": 0.12 },
+      { "type": "item", "code": "game:nugget-sphalerite", "stackSize": 1, "chance": 0.08 },
+      { "type": "item", "code": "game:arrowhead-flint", "stackSize": 1, "chance": 0.08 },
+      { "type": "item", "code": "game:arrowhead-copper", "stackSize": 1, "chance": 0.04 },
+      { "type": "item", "code": "game:spearhead-flint", "stackSize": 1, "chance": 0.04 },
+      { "type": "item", "code": "game:clearquartz", "stackSize": 1, "chance": 0.10 },
+      { "type": "item", "code": "game:spearhead-copper", "stackSize": 1, "chance": 0.02 },
+      { "type": "item", "code": "game:gear-rusty", "stackSize": 1, "chance": 0.03 },
+      { "type": "item", "code": "game:nugget-nativegold", "stackSize": 1, "chance": 0.02 },
+      { "type": "item", "code": "game:nugget-cassiterite", "stackSize": 1, "chance": 0.01 },
+      { "type": "item", "code": "game:ore-lapislazuli", "stackSize": 1, "chance": 0.01 },
+      { "type": "block", "code": "game:metal-parts", "stackSize": 1, "chance": 0.01 },
+      { "type": "block", "code": "game:metal-scraps", "stackSize": 1, "chance": 0.01 },
+      { "type": "item", "code": "game:clothes-arm-bronze-armlet", "stackSize": 1, "chance": 0.01 },
+      { "type": "block", "code": "game:bonyremains-ribcage", "stackSize": 1, "chance": 0.01 },
+      { "type": "item", "code": "game:gear-temporal", "stackSize": 1, "chance": 0.01 },
+      { "type": "item", "code": "game:tuningcylinder-5", "stackSize": 1, "chance": 0.01 },
+      { "type": "item", "code": "game:tuningcylinder-8", "stackSize": 1, "chance": 0.01 },
+      { "type": "item", "code": "game:clothes-neck-golden-necklace", "stackSize": 1, "chance": 0.01 },
+      { "type": "item", "code": "game:clothes-neck-bronze-gem-necklace", "stackSize": 1, "chance": 0.01 },
+      { "type": "item", "code": "game:clothes-arm-silver-chain", "stackSize": 1, "chance": 0.01 },
+      { "type": "item", "code": "game:clothes-head-silver-diadem", "stackSize": 1, "chance": 0.01 },
+      { "type": "item", "code": "game:clothes-head-gold-coronet", "stackSize": 1, "chance": 0.01 }
+    ]
+  },
+  {
+    "code": "sieve_gravel",
+    "energyOperation": 3000,
+    "ingredients": [
+      {
+        "type": "block",
+        "code": "game:gravel-*",
+        "quantity": 1,
+        "name": "rocktype",
+        "allowedVariants": [ "granite", "andesite", "basalt", "peridotite", "sandstone", "shale", "conglomerate", "claystone", "chalk", "limestone", "bauxite" ]
+      }
+    ],
+    "outputs": [
+      { "type": "item", "code": "game:stone-{rocktype}", "stackSize": 1, "chance": 0.82 },
+      { "type": "item", "code": "game:nugget-nativecopper", "stackSize": 1, "chance": 0.48 },
+      { "type": "item", "code": "game:flint", "stackSize": 1, "chance": 0.60 },
+      { "type": "item", "code": "game:clay-blue", "stackSize": 1, "chance": 0.08 },
+      { "type": "item", "code": "game:ore-quartz", "stackSize": 1, "chance": 0.16 },
+      { "type": "item", "code": "game:nugget-sphalerite", "stackSize": 1, "chance": 0.12 },
+      { "type": "item", "code": "game:arrowhead-flint", "stackSize": 1, "chance": 0.12 },
+      { "type": "item", "code": "game:arrowhead-copper", "stackSize": 1, "chance": 0.06 },
+      { "type": "item", "code": "game:spearhead-flint", "stackSize": 1, "chance": 0.06 },
+      { "type": "item", "code": "game:clearquartz", "stackSize": 1, "chance": 0.12 },
+      { "type": "item", "code": "game:spearhead-copper", "stackSize": 1, "chance": 0.03 },
+      { "type": "item", "code": "game:gear-rusty", "stackSize": 1, "chance": 0.04 },
+      { "type": "item", "code": "game:nugget-nativegold", "stackSize": 1, "chance": 0.03 },
+      { "type": "item", "code": "game:nugget-cassiterite", "stackSize": 1, "chance": 0.01 },
+      { "type": "item", "code": "game:ore-lapislazuli", "stackSize": 1, "chance": 0.02 },
+      { "type": "block", "code": "game:metal-parts", "stackSize": 1, "chance": 0.02 },
+      { "type": "block", "code": "game:metal-scraps", "stackSize": 1, "chance": 0.02 },
+      { "type": "item", "code": "game:clothes-arm-bronze-armlet", "stackSize": 1, "chance": 0.01 },
+      { "type": "block", "code": "game:bonyremains-ribcage", "stackSize": 1, "chance": 0.01 },
+      { "type": "item", "code": "game:gear-temporal", "stackSize": 1, "chance": 0.01 },
+      { "type": "item", "code": "game:tuningcylinder-5", "stackSize": 1, "chance": 0.01 },
+      { "type": "item", "code": "game:tuningcylinder-8", "stackSize": 1, "chance": 0.01 },
+      { "type": "item", "code": "game:clothes-neck-golden-necklace", "stackSize": 1, "chance": 0.01 },
+      { "type": "item", "code": "game:clothes-neck-bronze-gem-necklace", "stackSize": 1, "chance": 0.01 },
+      { "type": "item", "code": "game:clothes-arm-silver-chain", "stackSize": 1, "chance": 0.01 },
+      { "type": "item", "code": "game:clothes-head-silver-diadem", "stackSize": 1, "chance": 0.01 },
+      { "type": "item", "code": "game:clothes-head-gold-coronet", "stackSize": 1, "chance": 0.01 }
+    ]
+  }
+]
