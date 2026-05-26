@@ -107,12 +107,12 @@ namespace ElectricalProgressive.Content.Block.CableDot
 
             if (!cache.TryGetValue(key, out var boxes))
             {
-                if (entity.RotationCache.TryGetValue(key.Facing, out var rotation))
-                {
-                    var origin = new Vec3d(0.5, 0.5, 0.5);
-                    boxes = sourceBoxes.Select(box => box.RotatedCopy(rotation.X, rotation.Y, rotation.Z, origin)).ToArray();
-                    cache.TryAdd(key, boxes);
-                }
+                boxes = (Cuboidf[]?)sourceBoxes.Clone();
+
+                // быстро враащем коллизии
+                FacingRotations.ApplyRotations(ref boxes, key.Facing);
+
+                cache.TryAdd(key, boxes);
             }
 
             return boxes ?? [];
@@ -136,13 +136,8 @@ namespace ElectricalProgressive.Content.Block.CableDot
                 clientApi.Tesselator.TesselateBlock(this, out meshData);
                 clientApi.TesselatorManager.ThreadDispose();
 
-                if (entity.RotationCache.TryGetValue(key.Facing, out var rotation))
-                {
-                    meshData.Rotate(origin,
-                        rotation.X * GameMath.DEG2RAD,
-                        rotation.Y * GameMath.DEG2RAD,
-                        rotation.Z * GameMath.DEG2RAD);
-                }
+                // быстро враащем обьект
+                FacingRotations.ApplyRotations(meshData, key.Facing);
 
                 MeshDataCache.TryAdd(key, meshData);
             }

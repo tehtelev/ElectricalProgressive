@@ -4,28 +4,43 @@
     "op": "replace",
     "path": "/attackpower",
     "value": 7.7,
-    "dependsOn": [ { "modid": "combatoverhaul" } ]
+    "dependsOn": [
+      {
+        "modid": "combatoverhaulfork"
+      }
+    ]
   },
   {
     "file": "electricalprogressiveequipment:itemtypes/weapon/static-spear.json",
     "op": "add",
     "path": "/attributes/ProficiencyStat",
     "value": "spearsProficiency",
-    "dependsOn": [ { "modid": "combatoverhaul" } ]
+    "dependsOn": [
+      {
+        "modid": "combatoverhaulfork"
+      }
+    ]
   },
-
   {
     "file": "electricalprogressiveequipment:itemtypes/weapon/static-saber.json",
     "op": "replace",
     "path": "/attackpower",
     "value": 8.8,
-    "dependsOn": [ { "modid": "combatoverhaul" } ]
+    "dependsOn": [
+      {
+        "modid": "combatoverhaulfork"
+      }
+    ]
   },
   {
     "file": "electricalprogressiveequipment:itemtypes/weapon/static-saber.json",
     "op": "add",
     "path": "/attributes/ProficiencyStat",
     "value": "oneHandedSwordsProficiency",
-    "dependsOn": [ { "modid": "combatoverhaul" } ]
+    "dependsOn": [
+      {
+        "modid": "combatoverhaulfork"
+      }
+    ]
   }
 ]
