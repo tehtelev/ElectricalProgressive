@@ -107,7 +107,7 @@ namespace ElectricalProgressive.Content.Block.CableDot
                 boxes = (Cuboidf[]?)sourceBoxes.Clone();
 
                 // быстро враащем коллизии
-                FacingRotations.ApplyRotations(ref boxes, key.Facing);
+                FacingRotations.ApplyRotations(boxes, key.Facing);
 
                 cache.TryAdd(key, boxes);
             }
@@ -129,7 +129,6 @@ namespace ElectricalProgressive.Content.Block.CableDot
 
             if (!MeshDataCache.TryGetValue(key, out var meshData))
             {
-                var origin = new Vec3f(0.5f, 0.5f, 0.5f);
                 clientApi.Tesselator.TesselateBlock(this, out meshData);
                 clientApi.TesselatorManager.ThreadDispose();
 
