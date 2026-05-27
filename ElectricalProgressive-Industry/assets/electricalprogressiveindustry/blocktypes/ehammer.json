@@ -153,9 +153,6 @@
   "sideopaque": {
     "all": "false"
   },
-  <<<<<<< HEAD
-
-  =======
 
   "emitSideAo": { // Ambient Oclusion
     "all": true
@@ -171,7 +168,8 @@
     "y2": 1,
     "z2": 1
   },
-  >>>>>>> 44f5e4868651d6f74e7aa1725273557f0435878a
+
+
   "resistance": 3.5,
   "sounds": {
     "place": "game:block/anvil",

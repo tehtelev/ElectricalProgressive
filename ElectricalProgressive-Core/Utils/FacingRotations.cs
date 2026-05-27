@@ -43,19 +43,27 @@ public static class FacingRotations
         { Facing.DownWest,  new Vec3f(0f, 90f, 0f) }
     };
 
+    // центры вращения 
+    private static readonly Vec3f rotationOriginVec3f = new Vec3f(0.5f, 0.5f, 0.5f);
+
+    private static readonly Vec3d rotationOriginVec3d = new Vec3d(0.5d, 0.5d, 0.5d);
+
+
+
     /// <summary>
     /// Оптимизированное применение вращения мешей. 
     /// Работает только если facing содержит ровно один бит из словаря.
     /// </summary>
     public static void ApplyRotations(MeshData mesh, Facing facing)
     {
+        if (mesh == null || facing == Facing.None)
+            return;
+
         // TryGetValue безопаснее и быстрее, чем прямой доступ по ключу [facing],
         // так как не выбросит исключение, если вдруг придет неизвестный флаг (например, None).
         if (Rotations.TryGetValue(facing, out var rot))
         {
-            var origin = new Vec3f(0.5f, 0.5f, 0.5f);
-
-            mesh.Rotate(origin,
+            mesh.Rotate(rotationOriginVec3f,
                 rot.X * GameMath.DEG2RAD,
                 rot.Y * GameMath.DEG2RAD,
                 rot.Z * GameMath.DEG2RAD);
@@ -67,24 +75,22 @@ public static class FacingRotations
     /// Оптимизированное применение вращения коллизиям/выделениям. 
     /// Работает только если facing содержит ровно один бит из словаря.
     /// </summary>
-    public static void ApplyRotations(ref Cuboidf[] boxes, Facing facing)
+    public static void ApplyRotations(Cuboidf[] boxes, Facing facing)
     {
         // TryGetValue безопаснее и быстрее, чем прямой доступ по ключу [facing],
         // так как не выбросит исключение, если вдруг придет неизвестный флаг (например, None).
+        if (boxes == null || boxes.Length == 0)
+            return;
+
         if (Rotations.TryGetValue(facing, out var rot))
         {
-            var origin = new Vec3d(0.5f, 0.5f, 0.5f);
-
-            var boxes2=new Cuboidf[boxes.Length];
-
             for (int i = 0; i < boxes.Length; i++)
             {
-                boxes2[i] = boxes[i].RotatedCopy(rot.X, rot.Y, rot.Z, origin);
+                // Прямая перезапись элемента. Массив не пересоздаётся.
+                boxes[i] = boxes[i].RotatedCopy(rot.X, rot.Y, rot.Z, rotationOriginVec3d);
             }
-
-            boxes = boxes2;
         }
-        
-        
+
+
     }
 }
