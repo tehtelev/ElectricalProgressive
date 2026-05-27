@@ -145,8 +145,8 @@ namespace ElectricalProgressive.Content.Block.EHeater
             if (!cache.TryGetValue(key, out var boxes))
             {
                 boxes = (Cuboidf[]?)sourceBoxes.Clone();
-                
-                // быстро враащем обьект
+
+                // быстро враащем коллизии
                 FacingRotations.ApplyRotations(ref boxes, key.Facing);
 
                 cache.TryAdd(key, boxes);

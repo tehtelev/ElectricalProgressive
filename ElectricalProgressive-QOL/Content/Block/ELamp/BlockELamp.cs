@@ -139,7 +139,7 @@ namespace ElectricalProgressive.Content.Block.ELamp
             {
                 boxes = (Cuboidf[]?)sourceBoxes.Clone();
 
-                // быстро враащем обьект
+                // быстро враащем коллизии
                 FacingRotations.ApplyRotations(ref boxes, key.Facing);
 
                 cache.TryAdd(key, boxes);

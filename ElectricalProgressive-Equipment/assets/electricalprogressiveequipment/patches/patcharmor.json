@@ -1,13 +1,19 @@
 ﻿[
   {
-    "file": "electricprogressiveequipment:itemtypes/armor/static-helmet.json",
+    "file": "electricalprogressiveequipment:itemtypes/armor/static-helmet.json",
     "op": "add",
-    "path": "behaviors/-",
+    "path": "/behaviors/-",
     "value": {
       "name": "CombatOverhaul:Armor",
       "properties": {
-        "Layers": [ "Outer" ],
-        "Zones": [ "Head", "Face", "Neck" ],
+        "Layers": [
+          "Outer"
+        ],
+        "Zones": [
+          "Head",
+          "Face",
+          "Neck"
+        ],
         "Resists": {
           "PiercingAttack": 10,
           "SlashingAttack": 10,
@@ -21,37 +27,53 @@
         "PlayerStats": {
           "walkspeed": 0,
           "manipulationSpeed": 0,
-          "steadyAim": 0.20,
+          "steadyAim": 0.2,
           "healingeffectivness": -0.03,
           "hungerrate": 0.03
         }
       }
     },
-    "dependsOn": [ { "modid": "combatoverhaul" } ]
+    "dependsOn": [
+      {
+        "modid": "combatoverhaulfork"
+      }
+    ]
   },
   {
-    "file": "electricprogressiveequipment:itemtypes/armor/static-helmet.json",
+    "file": "electricalprogressiveequipment:itemtypes/armor/static-helmet.json",
     "op": "remove",
-    "path": "attributes/protectionModifiersByType",
-    "dependsOn": [ { "modid": "combatoverhaul" } ]
+    "path": "/attributes/protectionModifiersByType",
+    "dependsOn": [
+      {
+        "modid": "combatoverhaulfork"
+      }
+    ]
   },
   {
-    "file": "electricprogressiveequipment:itemtypes/armor/static-helmet.json",
+    "file": "electricalprogressiveequipment:itemtypes/armor/static-helmet.json",
     "op": "remove",
-    "path": "attributes/statModifiersByType",
-    "dependsOn": [ { "modid": "combatoverhaul" } ]
+    "path": "/attributes/statModifiersByType",
+    "dependsOn": [
+      {
+        "modid": "combatoverhaulfork"
+      }
+    ]
   },
-
-
   {
-    "file": "electricprogressiveequipment:itemtypes/armor/static-armor.json",
+    "file": "electricalprogressiveequipment:itemtypes/armor/static-armor.json",
     "op": "add",
-    "path": "behaviors/-",
+    "path": "/behaviors/-",
     "value": {
       "name": "CombatOverhaul:Armor",
       "properties": {
-        "Layers": [ "Outer" ],
-        "Zones": [ "Torso", "Arms", "Hands" ],
+        "Layers": [
+          "Outer"
+        ],
+        "Zones": [
+          "Torso",
+          "Arms",
+          "Hands"
+        ],
         "Resists": {
           "PiercingAttack": 10,
           "SlashingAttack": 10,
@@ -71,31 +93,46 @@
         }
       }
     },
-    "dependsOn": [ { "modid": "combatoverhaul" } ]
+    "dependsOn": [
+      {
+        "modid": "combatoverhaulfork"
+      }
+    ]
   },
   {
-    "file": "electricprogressiveequipment:itemtypes/armor/static-armor.json",
+    "file": "electricalprogressiveequipment:itemtypes/armor/static-armor.json",
     "op": "remove",
-    "path": "attributes/protectionModifiersByType",
-    "dependsOn": [ { "modid": "combatoverhaul" } ]
+    "path": "/attributes/protectionModifiersByType",
+    "dependsOn": [
+      {
+        "modid": "combatoverhaulfork"
+      }
+    ]
   },
   {
-    "file": "electricprogressiveequipment:itemtypes/armor/static-armor.json",
+    "file": "electricalprogressiveequipment:itemtypes/armor/static-armor.json",
     "op": "remove",
-    "path": "attributes/statModifiersByType",
-    "dependsOn": [ { "modid": "combatoverhaul" } ]
+    "path": "/attributes/statModifiersByType",
+    "dependsOn": [
+      {
+        "modid": "combatoverhaulfork"
+      }
+    ]
   },
-
-
   {
-    "file": "electricprogressiveequipment:itemtypes/armor/static-boots.json",
+    "file": "electricalprogressiveequipment:itemtypes/armor/static-boots.json",
     "op": "add",
-    "path": "behaviors/-",
+    "path": "/behaviors/-",
     "value": {
       "name": "CombatOverhaul:Armor",
       "properties": {
-        "Layers": [ "Outer" ],
-        "Zones": [ "Legs", "Feet" ],
+        "Layers": [
+          "Outer"
+        ],
+        "Zones": [
+          "Legs",
+          "Feet"
+        ],
         "Resists": {
           "PiercingAttack": 10,
           "SlashingAttack": 10,
@@ -115,18 +152,30 @@
         }
       }
     },
-    "dependsOn": [ { "modid": "combatoverhaul" } ]
+    "dependsOn": [
+      {
+        "modid": "combatoverhaulfork"
+      }
+    ]
   },
   {
-    "file": "electricprogressiveequipment:itemtypes/armor/static-boots.json",
+    "file": "electricalprogressiveequipment:itemtypes/armor/static-boots.json",
     "op": "remove",
-    "path": "attributes/protectionModifiersByType",
-    "dependsOn": [ { "modid": "combatoverhaul" } ]
+    "path": "/attributes/protectionModifiersByType",
+    "dependsOn": [
+      {
+        "modid": "combatoverhaulfork"
+      }
+    ]
   },
   {
-    "file": "electricprogressiveequipment:itemtypes/armor/static-boots.json",
+    "file": "electricalprogressiveequipment:itemtypes/armor/static-boots.json",
     "op": "remove",
-    "path": "attributes/statModifiersByType",
-    "dependsOn": [ { "modid": "combatoverhaul" } ]
+    "path": "/attributes/statModifiersByType",
+    "dependsOn": [
+      {
+        "modid": "combatoverhaulfork"
+      }
+    ]
   }
 ]
