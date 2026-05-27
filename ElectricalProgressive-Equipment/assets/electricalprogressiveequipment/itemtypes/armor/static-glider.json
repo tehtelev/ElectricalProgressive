@@ -1,0 +1,55 @@
+﻿{
+  "code": "static-glider",
+  "class": "ItemEGlider",
+  "maxstacksize": 1,
+  "heldTpIdleAnimation": "holdunderarm",
+  "behaviors": [
+    { "name": "GroundStorable", "properties": { "layout": "SingleCenter", "collisionBox": { "x1": 0.25, "y1": 0, "z1": 0.25, "x2": 0.75, "y2": 0.375, "z2": 0.75 }}},
+    { "name": "HeldBag" },
+    {
+      "name": "GroundStoredHeldBag",
+      "properties": {
+        "dialogTitleLangCode": "glidercontents"
+      }
+    }
+  ],
+  "attributes": {
+    "groundStorageTransform": {
+      "translation": { "x": -0.1, "y": 0, "z": 0.3 },
+      "rotation": { "x": 0, "y": -18, "z": 86 },
+      "origin": { "x": 0.5, "y": 0.2, "z": 0 }
+    },
+    "wearableAttachment": true,
+    "unfoldShapeStep1": { "base": "game:item/bag/glider-transition1"},
+    "unfoldShapeStep2": { "base": "game:item/bag/glider-transition2"},
+    "attachShape": { "base": "game:item/bag/glider-backpack" },
+    "unfoldedShape": { "base": "game:item/bag/glider-unfolded" },
+    "backpack": {
+      "quantitySlots": 4
+    }
+  },
+  "shape": { "base": "game:item/bag/glider-backpack" },
+  "storageFlags": 2,
+  "creativeinventory": {
+    "general": [ "*" ],
+    "electricity": [ "*" ]
+  },
+  "guiTransform": {
+    "translation": { "x": 0, "y": 0, "z": 0 },
+    "rotation": { "x": -22, "y": -27, "z": -27 },
+    "origin": { "x": 0.5, "y": -0.31, "z": 0.25 },
+    "scale": 1.63
+  },
+  "tpHandTransform": {
+    "translation": { "x": -0.3, "y": 0.2, "z": -0.1 },
+    "rotation": { "x": -101, "y": -37, "z": 83 },
+    "origin": { "x": 0.5, "y": 0, "z": 0.25 },
+    "scale": 1.07
+  },
+  "groundTransform": {
+    "translation": { "x": 0, "y": 0, "z": 0 },
+    "rotation": { "x": 180, "y": 33, "z": 91 },
+    "origin": { "x": 0.3, "y": 0, "z": 0.5 },
+    "scale": 4.5
+  }
+}
