@@ -767,11 +767,12 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
     {
         if (InputSlot.Empty)
             return;
-        
+
         // Сохраняем информацию до плавки
         float inputTemp = InputStackTemp;
         ItemStack oldInputStack = InputSlot.Itemstack.Clone();
-        
+        int oldStackSize = InputSlot.Itemstack.StackSize;
+
         // Запоминаем температуру входного стака до плавки
         ItemSlot outputSlot = OutputSlot;
         ItemStack oldOutputStack = outputSlot.Itemstack;
@@ -781,61 +782,77 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
         // Вызываем стандартную логику переплавки
         InputStack.Collectible.DoSmelt(Api.World, inventory, InputSlot, outputSlot);
 
-        // Проверяем, изменился ли предмет во входном слоте
-        bool stackChanged = (InputSlot.Itemstack == null || 
-                             oldInputStack.Collectible.Code != InputSlot.Itemstack?.Collectible.Code);
-        
-        // Если предмет не изменился (как с топленым жиром) - сбрасываем температуру и время
-        if (!stackChanged && InputSlot.Itemstack != null)
+        // Определяем, что произошло
+        bool itemCodeChanged = InputSlot.Itemstack != null &&
+                               oldInputStack.Collectible.Code != InputSlot.Itemstack?.Collectible.Code;
+
+        bool stackSizeDecreased = InputSlot.Itemstack != null &&
+                                  oldStackSize > InputSlot.Itemstack.StackSize;
+
+        // Если предмет остался во входном слоте
+        if (InputSlot.Itemstack != null)
         {
-            // Сбрасываем температуру до комнатной
-            InputSlot.Itemstack.Collectible.SetTemperature(Api.World, InputSlot.Itemstack, EnviromentTemperature());
-            // Сбрасываем время готовки
+            // Случай 1: Стек уменьшился, но предмет тот же (пережарка) - СОХРАНЯЕМ температуру
+            if (stackSizeDecreased && !itemCodeChanged)
+            {
+                InputSlot.Itemstack.Collectible.SetTemperature(Api.World, InputSlot.Itemstack, inputTemp);
+            }
+            // Случай 2: Предмет изменился (известняк → негашеная известь) - СОХРАНЯЕМ температуру
+            else if (itemCodeChanged)
+            {
+                InputSlot.Itemstack.Collectible.SetTemperature(Api.World, InputSlot.Itemstack, inputTemp);
+            }
+            // Случай 3: Топленый жир и подобное (все осталось то же, стек не изменился) - СБРАСЫВАЕМ
+            else if (!stackSizeDecreased && !itemCodeChanged)
+            {
+                InputSlot.Itemstack.Collectible.SetTemperature(Api.World, InputSlot.Itemstack, EnviromentTemperature());
+            }
+
             InputStackCookingTime = 0;
-            
-            // Помечаем слот как измененный
             InputSlot.MarkDirty();
         }
         else
         {
-            // Обычная плавка с возможным перемещением в выходной слот
-            ItemStack newOutputStack = outputSlot.Itemstack;
-            if (newOutputStack != null)
+            // Входной слот опустел
+            InputStackCookingTime = 0;
+        }
+
+        // Обработка выходного слота (без изменений)
+        ItemStack newOutputStack = outputSlot.Itemstack;
+        if (newOutputStack != null)
+        {
+            int addedCount;
+            if (oldOutputStack == null)
             {
-                // Определяем, сколько предметов добавилось в выходной слот
-                int addedCount;
-                if (oldOutputStack == null)
+                addedCount = newOutputStack.StackSize;
+            }
+            else if (oldOutputStack.Equals(Api.World, newOutputStack, GlobalConstants.IgnoredStackAttributes))
+            {
+                addedCount = newOutputStack.StackSize - oldOutputSize;
+                if (addedCount <= 0) addedCount = newOutputStack.StackSize;
+            }
+            else
+            {
+                addedCount = newOutputStack.StackSize;
+            }
+
+            if (addedCount > 0)
+            {
+                float newTemp;
+                if (oldOutputStack != null &&
+                    oldOutputStack.Equals(Api.World, newOutputStack, GlobalConstants.IgnoredStackAttributes))
                 {
-                    addedCount = newOutputStack.StackSize;
-                }
-                else if (oldOutputStack.Equals(Api.World, newOutputStack, GlobalConstants.IgnoredStackAttributes))
-                {
-                    addedCount = newOutputStack.StackSize - oldOutputSize;
-                    if (addedCount <= 0) addedCount = newOutputStack.StackSize;
+                    newTemp = (inputTemp * addedCount + oldOutputTemp * oldOutputSize) / newOutputStack.StackSize;
                 }
                 else
                 {
-                    addedCount = newOutputStack.StackSize;
+                    newTemp = inputTemp;
                 }
 
-                if (addedCount > 0)
-                {
-                    float newTemp;
-                    if (oldOutputStack != null && oldOutputStack.Equals(Api.World, newOutputStack, GlobalConstants.IgnoredStackAttributes))
-                    {
-                        newTemp = (inputTemp * addedCount + oldOutputTemp * oldOutputSize) / newOutputStack.StackSize;
-                    }
-                    else
-                    {
-                        newTemp = inputTemp;
-                    }
-                    SetTemp(newOutputStack, newTemp);
-                }
+                SetTemp(newOutputStack, newTemp);
             }
-            
-            InputStackCookingTime = 0;
         }
-        
+
         MarkDirty(true);
         InputSlot.MarkDirty();
         OutputSlot?.MarkDirty();
