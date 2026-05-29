@@ -1,1 +1,57 @@
-﻿{}
+﻿{
+  "item-static-saber-*": "Espada eléctrica",
+  "item-static-spear": "Lanza eléctrica",
+  "item-static-shield": "Escudo eléctrico",
+  "item-static-helmet": "Casco eléctrico",
+  "item-static-armor": "Peto eléctrico",
+  "item-static-boots": "Grebas eléctricas",
+  "item-static-glider": "Planeador eléctrico",
+
+  "item-handbooktitle-static-saber": "Uso",
+  "item-handbooktext-static-saber": "Una buena opción para rebanar enemigos eficientemente. La hoja se puede calentar al rojo vivo para prender fuego a los enemigos.<br>Cuando se descargue, dejará de hacer daño. ¡No olvides recargarlo!",
+
+  "item-handbooktitle-static-spear": "Uso",
+  "item-handbooktext-static-spear": "Una buena opción para hacer agujeros en los enemigos. Tiene dos modos de lanzamiento: lanza normal y lanza ionizante. En el segundo modo, al golpear cualquier criatura viva, la lanza causa una fuerte ionización del aire. Esto provoca un rayo y prende fuego a la criatura. Consume el 10% de la capacidad de carga.<br>Jugar con rayos es peligroso - ten cuidado.<br>Cuando se descargue, dejará de hacer daño. ¡No olvides recargarlo!",
+
+  "item-handbooktitle-static-shield": "Uso",
+  "item-handbooktext-static-shield": "Protección excelente con linterna incorporada.<br>Cuando se descargue, dejará de absorber daño. ¡No olvides recargarlo!",
+
+  "item-handbooktitle-static-helmet": "Uso",
+  "item-handbooktext-static-helmet": "Protección y capacidades excelentes.<br>Cuando se descargue, dejará de absorber daño. ¡No olvides recargarlo!",
+
+  "item-handbooktitle-static-armor": "Uso",
+  "item-handbooktext-static-armor": "Protección y capacidades excelentes. Cuando se descargue, dejará de absorber daño. ¡No olvides recargarlo!",
+
+  "item-handbooktitle-static-boots": "Uso",
+  "item-handbooktext-static-boots": "Protección y capacidades excelentes.<br>Cuando se descarguen, dejarán de absorber daño. ¡No olvides recargarlos!",
+
+  "item-handbooktitle-static-glider": "Uso",
+  "item-handbooktext-static-glider": "Capacidades excelentes.<br>Cuando tengas carga durante el vuelo, presiona <hk>shift</hk> — y ganarás velocidad rápidamente. Esto te permitirá viajar largas distancias. Con práctica, puedes incluso despegar desde el suelo, pero consumirá más carga.",
+
+  "spear_common": "Lanza normal",
+  "spear_flash": "Lanza ionizante",
+
+  "saber_right": "Calentar/Enfriar hoja",
+
+  "item-edrill": "Taladro eléctrico",
+  "item-echisel": "Cincel eléctrico",
+  "item-edrilltip": "Punta de taladro",
+  "item-eaxe": "Hacha eléctrica",
+
+  "drill11": "Excava 1X1 bloque",
+  "drill13": "Excava 1X3 bloques",
+  "drill31": "Excava 3X1 bloques",
+  "drill33": "Excava 3X3 bloques",
+
+  "item-handbooktitle-edrill": "Uso",
+  "item-handbooktext-edrill": "La extracción de minerales alcanza un nuevo nivel. Permite trabajar en varios modos: 1x1, 1x3 (vertical), 3x1 (horizontal), 3x3. En el modo 3x3, el consumo es 3 veces mayor.<br>Cuando se descargue, dejará de funcionar. ¡No olvides recargarlo!",
+
+  "item-handbooktitle-echisel": "Uso",
+  "item-handbooktext-echisel": "¡Realiza las funciones de un cincel a baterías! No se necesita un martillo en la mano izquierda. No se usa en recetas.<br>Cuando se descargue, dejará de funcionar. ¡No olvides recargarlo!",
+
+  "item-handbooktitle-edrilltip": "Uso",
+  "item-handbooktext-edrilltip": "La base para el taladro eléctrico.",
+
+  "item-handbooktitle-eaxe": "Uso",
+  "item-handbooktext-eaxe": "Excelente para talar árboles. No se usa en recetas.<br>Cuando se descargue, dejará de funcionar. ¡No olvides recargarlo!"
+}

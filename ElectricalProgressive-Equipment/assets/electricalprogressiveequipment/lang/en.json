@@ -1,30 +1,34 @@
 ﻿{
-  "item-static-saber-*": "Electric Saber",
+  "item-static-saber-*": "Electric Sword",
   "item-static-spear": "Electric Spear",
   "item-static-shield": "Electric Shield",
   "item-static-helmet": "Electric Helmet",
-  "item-static-armor": "Electric Breastplate",
+  "item-static-armor": "Electric Chestplate",
   "item-static-boots": "Electric Leggings",
+  "item-static-glider": "Electric Glider",
 
   "item-handbooktitle-static-saber": "Usage",
-  "item-handbooktext-static-saber": "A good choice for efficiently slicing up opponents. The blade can be heated red-hot to ignite enemies.<br>When discharged, it will stop dealing damage. Don't forget to charge it!",
+  "item-handbooktext-static-saber": "A great choice for efficiently slicing through enemies. The blade can be heated until red-hot to set enemies on fire.<br>When discharged, it will stop dealing damage. Don't forget to recharge!",
 
   "item-handbooktitle-static-spear": "Usage",
-  "item-handbooktext-static-spear": "A good choice for making holes in opponents. Has two modes when thrown: standard and ionizing spear. In the second mode, the spear causes strong air ionization upon hitting any living creature. This provokes a lightning strike and also ignites the creature. Consumes 10% of its charge capacity in this mode.<br>Playing with lightning is dangerous - be careful.<br>When discharged, it will stop dealing damage. Don't forget to charge it!",
+  "item-handbooktext-static-spear": "A great choice for putting holes in enemies. Has two throwing modes: normal and ionizing spear. In the second mode, upon hitting any living creature, the spear causes strong air ionization. This triggers a lightning strike and sets the creature on fire. Consumes 10% of charge capacity.<br>Playing with lightning is dangerous - be careful.<br>When discharged, it will stop dealing damage. Don't forget to recharge!",
 
   "item-handbooktitle-static-shield": "Usage",
-  "item-handbooktext-static-shield": "Excellent protection with a built-in flashlight.<br>When discharged, it will stop absorbing damage. Don't forget to charge it!",
+  "item-handbooktext-static-shield": "Excellent protection with a built-in lantern.<br>When discharged, it will stop absorbing damage. Don't forget to recharge!",
 
   "item-handbooktitle-static-helmet": "Usage",
-  "item-handbooktext-static-helmet": "Excellent protection and capabilities.<br>When discharged, it will stop absorbing damage. Don't forget to charge it!",
+  "item-handbooktext-static-helmet": "Excellent protection and capabilities.<br>When discharged, it will stop absorbing damage. Don't forget to recharge!",
 
   "item-handbooktitle-static-armor": "Usage",
-  "item-handbooktext-static-armor": "Excellent protection and capabilities. Allows flight by pressing the R key.<br>When discharged, it will stop absorbing damage and the flight mode will deactivate. Don't forget to charge it!",
+  "item-handbooktext-static-armor": "Excellent protection and capabilities. When discharged, it will stop absorbing damage. Don't forget to recharge!",
 
   "item-handbooktitle-static-boots": "Usage",
-  "item-handbooktext-static-boots": "Excellent protection and capabilities.<br>When discharged, it will stop absorbing damage. Don't forget to charge it!",
+  "item-handbooktext-static-boots": "Excellent protection and capabilities.<br>When discharged, they will stop absorbing damage. Don't forget to recharge!",
 
-  "spear_common": "Standard Spear",
+  "item-handbooktitle-static-glider": "Usage",
+  "item-handbooktext-static-glider": "Excellent capabilities.<br>When you have charge during flight, press <hk>shift</hk> — and you will quickly gain speed. This allows you to travel long distances. With practice, you can even take off from the ground, but it will consume more charge.",
+
+  "spear_common": "Normal Spear",
   "spear_flash": "Ionizing Spear",
 
   "saber_right": "Heat/Cool Blade",
@@ -34,20 +38,20 @@
   "item-edrilltip": "Drill Tip",
   "item-eaxe": "Electric Axe",
 
-  "drill11": "Digs a 1X1 block",
-  "drill13": "Digs a 1X3 block area",
-  "drill31": "Digs a 3X1 block area",
-  "drill33": "Digs a 3X3 block area",
+  "drill11": "Mines 1X1 block",
+  "drill13": "Mines 1X3 blocks",
+  "drill31": "Mines 3X1 blocks",
+  "drill33": "Mines 3X3 blocks",
 
   "item-handbooktitle-edrill": "Usage",
-  "item-handbooktext-edrill": "Mining reaches a new level. Operates in several modes: 1x1, 1x3 (vertically), 3x1 (horizontally), 3x3. In 3x3 mode, consumption is tripled.<br>When discharged, it will stop working. Don't forget to charge it!",
+  "item-handbooktext-edrill": "Mineral extraction reaches a new level. Allows operation in several modes: 1x1, 1x3 (vertical), 3x1 (horizontal), 3x3. In 3x3 mode, consumption is increased by 3 times.<br>When discharged, it will stop working. Don't forget to recharge!",
 
   "item-handbooktitle-echisel": "Usage",
-  "item-handbooktext-echisel": "Performs the functions of a battery-powered chisel! No need for a hammer in the left hand. Not used in recipes.<br>When discharged, it will stop working. Don't forget to charge it!",
+  "item-handbooktext-echisel": "Performs the functions of a chisel on batteries! A hammer in the left hand is not needed. Not usable in recipes.<br>When discharged, it will stop working. Don't forget to recharge!",
 
   "item-handbooktitle-edrilltip": "Usage",
-  "item-handbooktext-edrilltip": "The base component for the Electric Drill.",
+  "item-handbooktext-edrilltip": "The base for the electric drill.",
 
   "item-handbooktitle-eaxe": "Usage",
-  "item-handbooktext-eaxe": "Excellent at chopping. Not used in recipes.<br>When discharged, it will stop working. Don't forget to charge it!"
+  "item-handbooktext-eaxe": "Excels at chopping wood. Not usable in recipes.<br>When discharged, it will stop working. Don't forget to recharge!"
 }

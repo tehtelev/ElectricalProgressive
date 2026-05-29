@@ -10,8 +10,7 @@ namespace ElectricalProgressive.Content.Item.Armor
     class EArmor : CollectibleBehaviorWearable
     {
         public int consume;
-        public int consumefly;
-        public float flySpeed;
+
         
         public EArmor(CollectibleObject collObj) : base(collObj) { }
 
@@ -20,8 +19,7 @@ namespace ElectricalProgressive.Content.Item.Armor
             base.OnLoaded(api);
 
             consume = MyMiniLib.GetAttributeInt(collObj, "consume", 20);
-            consumefly = MyMiniLib.GetAttributeInt(collObj, "consumeFly", 40);
-            flySpeed = MyMiniLib.GetAttributeFloat(collObj, "speedFly", 2.0F);
+
         }
 
         public override void OnDamageItem(IWorldAccessor world, Entity byEntity, ItemSlot itemslot, ref int amount, ref EnumHandling bhHandling)

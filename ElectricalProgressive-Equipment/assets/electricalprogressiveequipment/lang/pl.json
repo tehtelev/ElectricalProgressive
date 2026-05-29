@@ -1,1 +1,57 @@
-﻿{}
+﻿{
+  "item-static-saber-*": "Elektryczny miecz",
+  "item-static-spear": "Elektryczna włócznia",
+  "item-static-shield": "Elektryczna tarcza",
+  "item-static-helmet": "Elektryczny hełm",
+  "item-static-armor": "Elektryczny napierśnik",
+  "item-static-boots": "Elektryczne nagolenice",
+  "item-static-glider": "Elektryczny szybowiec",
+
+  "item-handbooktitle-static-saber": "Użycie",
+  "item-handbooktext-static-saber": "Dobry wybór do efektywnego siekania wrogów. Ostrze można rozgrzać do czerwoności, by podpalać wrogów.<br>Gdy się rozładuje, przestanie zadawać obrażenia. Nie zapomnij naładować!",
+
+  "item-handbooktitle-static-spear": "Użycie",
+  "item-handbooktext-static-spear": "Dobry wybór do robienia dziur we wrogach. Ma dwa tryby rzucania: normalna włócznia i jonizująca włócznia. W drugim trybie, po trafieniu w jakąkolwiek żywą istotę, włócznia powoduje silną jonizację powietrza. To wywołuje wyładowanie pioruna i podpala istotę. Zużywa przy tym 10% pojemności ładowania.<br>Zabawa z piorunami jest niebezpieczna - bądź ostrożny.<br>Gdy się rozładuje, przestanie zadawać obrażenia. Nie zapomnij naładować!",
+
+  "item-handbooktitle-static-shield": "Użycie",
+  "item-handbooktext-static-shield": "Doskonała ochrona z wbudowaną latarnią.<br>Gdy się rozładuje, przestanie absorbować obrażenia. Nie zapomnij naładować!",
+
+  "item-handbooktitle-static-helmet": "Użycie",
+  "item-handbooktext-static-helmet": "Doskonała ochrona i możliwości.<br>Gdy się rozładuje, przestanie absorbować obrażenia. Nie zapomnij naładować!",
+
+  "item-handbooktitle-static-armor": "Użycie",
+  "item-handbooktext-static-armor": "Doskonała ochrona i możliwości. Gdy się rozładuje, przestanie absorbować obrażenia. Nie zapomnij naładować!",
+
+  "item-handbooktitle-static-boots": "Użycie",
+  "item-handbooktext-static-boots": "Doskonała ochrona i możliwości.<br>Gdy się rozładują, przestaną absorbować obrażenia. Nie zapomnij naładować!",
+
+  "item-handbooktitle-static-glider": "Użycie",
+  "item-handbooktext-static-glider": "Doskonałe możliwości.<br>Gdy masz ładunek podczas lotu, naciśnij <hk>shift</hk> — i szybko zyskasz prędkość. Pozwoli ci to podróżować na duże odległości. Z wprawą możesz nawet wystartować z miejsca, ale zużyjesz więcej ładunku.",
+
+  "spear_common": "Zwykła włócznia",
+  "spear_flash": "Jonizująca włócznia",
+
+  "saber_right": "Rozgrzej/Schłodź ostrze",
+
+  "item-edrill": "Elektryczna wiertarka",
+  "item-echisel": "Elektryczne dłuto",
+  "item-edrilltip": "Końcówka wiertła",
+  "item-eaxe": "Elektryczny topór",
+
+  "drill11": "Kopie 1X1 blok",
+  "drill13": "Kopie 1X3 bloki",
+  "drill31": "Kopie 3X1 bloków",
+  "drill33": "Kopie 3X3 bloki",
+
+  "item-handbooktitle-edrill": "Użycie",
+  "item-handbooktext-edrill": "Wydobycie surowców przechodzi na nowy poziom. Umożliwia pracę w kilku trybach: 1x1, 1x3 (pionowo), 3x1 (poziomo), 3x3. W trybie 3x3 zużycie jest 3 razy wyższe.<br>Gdy się rozładuje, przestanie działać. Nie zapomnij naładować!",
+
+  "item-handbooktitle-echisel": "Użycie",
+  "item-handbooktext-echisel": "Pełni funkcję dłuta na baterie! Młot w lewej ręce nie jest potrzebny. Nieużywane w przepisach.<br>Gdy się rozładuje, przestanie działać. Nie zapomnij naładować!",
+
+  "item-handbooktitle-edrilltip": "Użycie",
+  "item-handbooktext-edrilltip": "Podstawa dla elektrycznej wiertarki.",
+
+  "item-handbooktitle-eaxe": "Użycie",
+  "item-handbooktext-eaxe": "Doskonale radzi sobie z rąbaniem drewna. Nieużywane w przepisach.<br>Gdy się rozładuje, przestanie działać. Nie zapomnij naładować!"
+}

@@ -21,16 +21,25 @@
       "rotation": { "x": 0, "y": -18, "z": 86 },
       "origin": { "x": 0.5, "y": 0.2, "z": 0 }
     },
+    "handbook": {
+      "groupBy": [ "static-glider-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressiveequipment:item-handbooktitle-static-glider",
+          "text": "electricalprogressiveequipment:item-handbooktext-static-glider"
+        }
+      ]
+    },
     "wearableAttachment": true,
-    "unfoldShapeStep1": { "base": "game:item/bag/glider-transition1"},
-    "unfoldShapeStep2": { "base": "game:item/bag/glider-transition2"},
-    "attachShape": { "base": "game:item/bag/glider-backpack" },
-    "unfoldedShape": { "base": "game:item/bag/glider-unfolded" },
+    "unfoldShapeStep1": { "base": "electricalprogressiveequipment:entity/static-glider/glider-transition1"},
+    "unfoldShapeStep2": { "base": "electricalprogressiveequipment:entity/static-glider/glider-transition2"},
+    "attachShape": { "base": "electricalprogressiveequipment:entity/static-glider/glider-backpack" },
+    "unfoldedShape": { "base": "electricalprogressiveequipment:entity/static-glider/glider-unfolded" },
     "backpack": {
       "quantitySlots": 4
     }
   },
-  "shape": { "base": "game:item/bag/glider-backpack" },
+  "shape": { "base": "electricalprogressiveequipment:entity/static-glider/glider-backpack" },
   "storageFlags": 2,
   "creativeinventory": {
     "general": [ "*" ],

@@ -1,1 +1,57 @@
-﻿{}
+﻿{
+  "item-static-saber-*": "Espada elétrica",
+  "item-static-spear": "Lança elétrica",
+  "item-static-shield": "Escudo elétrico",
+  "item-static-helmet": "Capacete elétrico",
+  "item-static-armor": "Peitoral elétrico",
+  "item-static-boots": "Perneiras elétricas",
+  "item-static-glider": "Planador elétrico",
+
+  "item-handbooktitle-static-saber": "Uso",
+  "item-handbooktext-static-saber": "Uma boa escolha para fatiar inimigos eficientemente. A lâmina pode ser aquecida até ficar em brasa para incendiar inimigos.<br>Quando descarregar, parará de causar dano. Não se esqueça de recarregar!",
+
+  "item-handbooktitle-static-spear": "Uso",
+  "item-handbooktext-static-spear": "Uma boa escolha para fazer buracos nos inimigos. Tem dois modos de arremesso: lança normal e lança ionizante. No segundo modo, ao acertar qualquer criatura viva, a lança causa forte ionização do ar. Isso provoca um raio e incendeia a criatura. Consome 10% da capacidade de carga.<br>Brincar com raios é perigoso - tome cuidado.<br>Quando descarregar, parará de causar dano. Não se esqueça de recarregar!",
+
+  "item-handbooktitle-static-shield": "Uso",
+  "item-handbooktext-static-shield": "Proteção excelente com lanterna embutida.<br>Quando descarregar, parará de absorver dano. Não se esqueça de recarregar!",
+
+  "item-handbooktitle-static-helmet": "Uso",
+  "item-handbooktext-static-helmet": "Proteção e capacidades excelentes.<br>Quando descarregar, parará de absorver dano. Não se esqueça de recarregar!",
+
+  "item-handbooktitle-static-armor": "Uso",
+  "item-handbooktext-static-armor": "Proteção e capacidades excelentes. Quando descarregar, parará de absorver dano. Não se esqueça de recarregar!",
+
+  "item-handbooktitle-static-boots": "Uso",
+  "item-handbooktext-static-boots": "Proteção e capacidades excelentes.<br>Quando descarregarem, pararão de absorver dano. Não se esqueça de recarregar!",
+
+  "item-handbooktitle-static-glider": "Uso",
+  "item-handbooktext-static-glider": "Capacidades excelentes.<br>Quando você tiver carga durante o voo, pressione <hk>shift</hk> — e você ganhará velocidade rapidamente. Isso permitirá que você viaje longas distâncias. Com prática, você pode até decolar do chão, mas consumirá mais carga.",
+
+  "spear_common": "Lança normal",
+  "spear_flash": "Lança ionizante",
+
+  "saber_right": "Aquecer/Esfriar lâmina",
+
+  "item-edrill": "Furadeira elétrica",
+  "item-echisel": "Cinzel elétrico",
+  "item-edrilltip": "Ponta da furadeira",
+  "item-eaxe": "Machado elétrico",
+
+  "drill11": "Escava 1X1 bloco",
+  "drill13": "Escava 1X3 blocos",
+  "drill31": "Escava 3X1 blocos",
+  "drill33": "Escava 3X3 blocos",
+
+  "item-handbooktitle-edrill": "Uso",
+  "item-handbooktext-edrill": "A extração de minerais atinge um novo nível. Permite trabalhar em vários modos: 1x1, 1x3 (vertical), 3x1 (horizontal), 3x3. No modo 3x3, o consumo é 3 vezes maior.<br>Quando descarregar, parará de funcionar. Não se esqueça de recarregar!",
+
+  "item-handbooktitle-echisel": "Uso",
+  "item-handbooktext-echisel": "Exerce as funções de um cinzel a bateria! Um martelo na mão esquerda não é necessário. Não utilizável em receitas.<br>Quando descarregar, parará de funcionar. Não se esqueça de recarregar!",
+
+  "item-handbooktitle-edrilltip": "Uso",
+  "item-handbooktext-edrilltip": "A base para a furadeira elétrica.",
+
+  "item-handbooktitle-eaxe": "Uso",
+  "item-handbooktext-eaxe": "Excelente para cortar madeira. Não utilizável em receitas.<br>Quando descarregar, parará de funcionar. Não se esqueça de recarregar!"
+}

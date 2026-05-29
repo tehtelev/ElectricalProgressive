@@ -1,1 +1,57 @@
-﻿{}
+﻿{
+  "item-static-saber-*": "Elektrický meč",
+  "item-static-spear": "Elektrické kopí",
+  "item-static-shield": "Elektrický štít",
+  "item-static-helmet": "Elektrická přilba",
+  "item-static-armor": "Elektrický kyrys",
+  "item-static-boots": "Elektrické nohavice",
+  "item-static-glider": "Elektrický kluzák",
+
+  "item-handbooktitle-static-saber": "Použití",
+  "item-handbooktext-static-saber": "Dobrá volba pro efektivní krájení nepřátel. Čepel lze rozžhavit do ruda a zapalovat nepřátele.<br>Když se vybije, přestane způsobovat poškození. Nezapomeňte dobíjet!",
+
+  "item-handbooktitle-static-spear": "Použití",
+  "item-handbooktext-static-spear": "Dobrá volba pro vytváření děr v nepřátelích. Má dva režimy při hodu: běžné a ionizující kopí. Ve druhém režimu kopí při zásahu jakékoli živé bytosti způsobí silnou ionizaci vzduchu. To vyvolá výboj blesku a také bytost zapálí. Spotřebuje přitom 10% kapacity nabití.<br>Hry s bleskem jsou nebezpečné - buďte opatrní.<br>Když se vybije, přestane způsobovat poškození. Nezapomeňte dobíjet!",
+
+  "item-handbooktitle-static-shield": "Použití",
+  "item-handbooktext-static-shield": "Vynikající ochrana s vestavěnou svítilnou.<br>Když se vybije, přestane pohlcovat poškození. Nezapomeňte dobíjet!",
+
+  "item-handbooktitle-static-helmet": "Použití",
+  "item-handbooktext-static-helmet": "Vynikající ochrana a možnosti.<br>Když se vybije, přestane pohlcovat poškození. Nezapomeňte dobíjet!",
+
+  "item-handbooktitle-static-armor": "Použití",
+  "item-handbooktext-static-armor": "Vynikající ochrana a možnosti. Když se vybije, přestane pohlcovat poškození. Nezapomeňte dobíjet!",
+
+  "item-handbooktitle-static-boots": "Použití",
+  "item-handbooktext-static-boots": "Vynikající ochrana a možnosti.<br>Když se vybije, přestane pohlcovat poškození. Nezapomeňte dobíjet!",
+
+  "item-handbooktitle-static-glider": "Použití",
+  "item-handbooktext-static-glider": "Vynikající možnosti.<br>Když máte během letu nabití, stiskněte tlačítko <hk>shift</hk> — a rychle naberete rychlost. To vám umožní cestovat na velké vzdálenosti. Pokud si zvyknete, můžete vzlétnout i z místa, ale spotřebujete více nabití.",
+
+  "spear_common": "Běžné kopí",
+  "spear_flash": "Ionizující kopí",
+
+  "saber_right": "Rozžhavit/Zhasnout čepel",
+
+  "item-edrill": "Elektrická vrtačka",
+  "item-echisel": "Elektrické dláto",
+  "item-edrilltip": "Hrot vrtačky",
+  "item-eaxe": "Elektrická sekyra",
+
+  "drill11": "Kope 1X1 blok",
+  "drill13": "Kope 1X3 bloky",
+  "drill31": "Kope 3X1 blok",
+  "drill33": "Kope 3X3 bloky",
+
+  "item-handbooktitle-edrill": "Použití",
+  "item-handbooktext-edrill": "Těžba nerostů přechází na novou úroveň. Umožňuje pracovat v několika režimech: 1x1, 1x3 (svisle), 3x1 (vodorovně), 3x3. V režimu 3x3 je spotřeba 3x vyšší.<br>Když se vybije, přestane fungovat. Nezapomeňte dobíjet!",
+
+  "item-handbooktitle-echisel": "Použití",
+  "item-handbooktext-echisel": "Plní funkci dláta na baterky! Kladivo v levé ruce není potřeba. Nepoužívá se v receptech.<br>Když se vybije, přestane fungovat. Nezapomeňte dobíjet!",
+
+  "item-handbooktitle-edrilltip": "Použití",
+  "item-handbooktext-edrilltip": "Základ pro elektrickou vrtačku.",
+
+  "item-handbooktitle-eaxe": "Použití",
+  "item-handbooktext-eaxe": "Skvěle si poradí s kácením. Nepoužívá se v receptech.<br>Když se vybije, přestane fungovat. Nezapomeňte dobíjet!"
+}

@@ -12,8 +12,6 @@
 	"attributes": {
 		"chargable": true,
 		"consume": 20,
-		"consumeFly": 40,
-		"speedFly": 2.0,
 		"wearableAttachment": true,
 		"handbook": {
 			"groupBy": [ "static-armor-*" ],

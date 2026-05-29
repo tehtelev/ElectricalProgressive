@@ -1,1 +1,57 @@
-﻿{}
+﻿{
+  "item-static-saber-*": "Épée électrique",
+  "item-static-spear": "Lance électrique",
+  "item-static-shield": "Bouclier électrique",
+  "item-static-helmet": "Casque électrique",
+  "item-static-armor": "Plastron électrique",
+  "item-static-boots": "Jambières électriques",
+  "item-static-glider": "Planeur électrique",
+
+  "item-handbooktitle-static-saber": "Utilisation",
+  "item-handbooktext-static-saber": "Un bon choix pour découper efficacement les ennemis. La lame peut être chauffée à rouge pour enflammer les ennemis.<br>Lorsqu'il est déchargé, il cessera d'infliger des dégâts. N'oubliez pas de le recharger !",
+
+  "item-handbooktitle-static-spear": "Utilisation",
+  "item-handbooktext-static-spear": "Un bon choix pour faire des trous dans les ennemis. Possède deux modes de lancer : lance normale et lance ionisante. Dans le second mode, en touchant une créature vivante, la lance provoque une forte ionisation de l'air. Cela déclenche un éclair et enflamme la créature. Consomme 10% de la capacité de charge.<br>Jouer avec la foudre est dangereux - soyez prudent.<br>Lorsqu'il est déchargé, il cessera d'infliger des dégâts. N'oubliez pas de le recharger !",
+
+  "item-handbooktitle-static-shield": "Utilisation",
+  "item-handbooktext-static-shield": "Une protection excellente avec une lanterne intégrée.<br>Lorsqu'il est déchargé, il cessera d'absorber les dégâts. N'oubliez pas de le recharger !",
+
+  "item-handbooktitle-static-helmet": "Utilisation",
+  "item-handbooktext-static-helmet": "Une protection et des capacités excellentes.<br>Lorsqu'il est déchargé, il cessera d'absorber les dégâts. N'oubliez pas de le recharger !",
+
+  "item-handbooktitle-static-armor": "Utilisation",
+  "item-handbooktext-static-armor": "Une protection et des capacités excellentes. Lorsqu'il est déchargé, il cessera d'absorber les dégâts. N'oubliez pas de le recharger !",
+
+  "item-handbooktitle-static-boots": "Utilisation",
+  "item-handbooktext-static-boots": "Une protection et des capacités excellentes.<br>Lorsqu'elles sont déchargées, elles cesseront d'absorber les dégâts. N'oubliez pas de les recharger !",
+
+  "item-handbooktitle-static-glider": "Utilisation",
+  "item-handbooktext-static-glider": "Des capacités excellentes.<br>Lorsque vous avez de la charge pendant le vol, appuyez sur <hk>shift</hk> — et vous gagnerez rapidement de la vitesse. Cela vous permettra de parcourir de longues distances. Avec de la pratique, vous pouvez même décoller du sol, mais cela consommera plus de charge.",
+
+  "spear_common": "Lance normale",
+  "spear_flash": "Lance ionisante",
+
+  "saber_right": "Chauffer/Refroidir la lame",
+
+  "item-edrill": "Perceuse électrique",
+  "item-echisel": "Ciseau électrique",
+  "item-edrilltip": "Embout de perceuse",
+  "item-eaxe": "Hache électrique",
+
+  "drill11": "Creuse 1X1 bloc",
+  "drill13": "Creuse 1X3 blocs",
+  "drill31": "Creuse 3X1 blocs",
+  "drill33": "Creuse 3X3 blocs",
+
+  "item-handbooktitle-edrill": "Utilisation",
+  "item-handbooktext-edrill": "L'extraction des minéraux atteint un nouveau niveau. Permet de travailler en plusieurs modes : 1x1, 1x3 (vertical), 3x1 (horizontal), 3x3. En mode 3x3, la consommation est 3 fois plus élevée.<br>Lorsqu'elle est déchargée, elle cessera de fonctionner. N'oubliez pas de la recharger !",
+
+  "item-handbooktitle-echisel": "Utilisation",
+  "item-handbooktext-echisel": "Remplit les fonctions d'un ciseau sur batteries ! Un marteau dans la main gauche n'est pas nécessaire. Non utilisable dans les recettes.<br>Lorsqu'il est déchargé, il cessera de fonctionner. N'oubliez pas de le recharger !",
+
+  "item-handbooktitle-edrilltip": "Utilisation",
+  "item-handbooktext-edrilltip": "La base pour la perceuse électrique.",
+
+  "item-handbooktitle-eaxe": "Utilisation",
+  "item-handbooktext-eaxe": "Excelle pour couper du bois. Non utilisable dans les recettes.<br>Lorsqu'elle est déchargée, elle cessera de fonctionner. N'oubliez pas de la recharger !"
+}

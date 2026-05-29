@@ -1,1 +1,57 @@
-﻿{}
+﻿{
+  "item-static-saber-*": "Elektrisches Schwert",
+  "item-static-spear": "Elektrischer Speer",
+  "item-static-shield": "Elektrischer Schild",
+  "item-static-helmet": "Elektrischer Helm",
+  "item-static-armor": "Elektrischer Brustpanzer",
+  "item-static-boots": "Elektrische Beinschienen",
+  "item-static-glider": "Elektrischer Gleiter",
+
+  "item-handbooktitle-static-saber": "Verwendung",
+  "item-handbooktext-static-saber": "Gute Wahl zum effektiven Zerschneiden von Gegnern. Die Klinge kann zum Glühen gebracht werden, um Gegner in Brand zu setzen.<br>Wenn die Ladung aufgebraucht ist, fügt sie keinen Schaden mehr zu. Nicht vergessen aufzuladen!",
+
+  "item-handbooktitle-static-spear": "Verwendung",
+  "item-handbooktext-static-spear": "Gute Wahl, um Löcher in Gegner zu machen. Hat zwei Wurfmodi: normaler und ionisierender Speer. Im zweiten Modus verursacht der Speer beim Treffen eines Lebewesens eine starke Luftionisation. Dies löst einen Blitzschlag aus und setzt das Wesen in Brand. Verbraucht dabei 10% der Ladungskapazität.<br>Spiele mit Blitzen sind gefährlich - seien Sie vorsichtig.<br>Wenn die Ladung aufgebraucht ist, fügt er keinen Schaden mehr zu. Nicht vergessen aufzuladen!",
+
+  "item-handbooktitle-static-shield": "Verwendung",
+  "item-handbooktext-static-shield": "Hervorragender Schutz mit eingebauter Laterne.<br>Wenn die Ladung aufgebraucht ist, absorbiert er keinen Schaden mehr. Nicht vergessen aufzuladen!",
+
+  "item-handbooktitle-static-helmet": "Verwendung",
+  "item-handbooktext-static-helmet": "Hervorragender Schutz und Fähigkeiten.<br>Wenn die Ladung aufgebraucht ist, absorbiert er keinen Schaden mehr. Nicht vergessen aufzuladen!",
+
+  "item-handbooktitle-static-armor": "Verwendung",
+  "item-handbooktext-static-armor": "Hervorragender Schutz und Fähigkeiten. Wenn die Ladung aufgebraucht ist, absorbiert er keinen Schaden mehr. Nicht vergessen aufzuladen!",
+
+  "item-handbooktitle-static-boots": "Verwendung",
+  "item-handbooktext-static-boots": "Hervorragender Schutz und Fähigkeiten.<br>Wenn die Ladung aufgebraucht ist, absorbieren sie keinen Schaden mehr. Nicht vergessen aufzuladen!",
+
+  "item-handbooktitle-static-glider": "Verwendung",
+  "item-handbooktext-static-glider": "Hervorragende Fähigkeiten.<br>Wenn Sie während des Fluges Ladung haben, drücken Sie <hk>shift</hk> — und Sie gewinnen schnell an Geschwindigkeit. So können Sie große Entfernungen zurücklegen. Mit etwas Übung können Sie sogar vom Boden aus starten, verbrauchen dann aber mehr Ladung.",
+
+  "spear_common": "Normaler Speer",
+  "spear_flash": "Ionisierender Speer",
+
+  "saber_right": "Klinge glühen/löschen",
+
+  "item-edrill": "Elektrischer Bohrer",
+  "item-echisel": "Elektrischer Meißel",
+  "item-edrilltip": "Bohreraufsatz",
+  "item-eaxe": "Elektrische Axt",
+
+  "drill11": "Grub 1X1 Block",
+  "drill13": "Grub 1X3 Blöcke",
+  "drill31": "Grub 3X1 Block",
+  "drill33": "Grub 3X3 Blöcke",
+
+  "item-handbooktitle-edrill": "Verwendung",
+  "item-handbooktext-edrill": "Der Rohstoffabbau erreicht eine neue Ebene. Ermöglicht das Arbeiten in mehreren Modi: 1x1, 1x3 (vertikal), 3x1 (horizontal), 3x3. Im 3x3-Modus ist der Verbrauch 3-mal höher.<br>Wenn die Ladung aufgebraucht ist, funktioniert er nicht mehr. Nicht vergessen aufzuladen!",
+
+  "item-handbooktitle-echisel": "Verwendung",
+  "item-handbooktext-echisel": "Erfüllt die Funktion eines Meißels mit Batterien! Ein Hammer in der linken Hand ist nicht nötig. Nicht in Rezepten verwendbar.<br>Wenn die Ladung aufgebraucht ist, funktioniert er nicht mehr. Nicht vergessen aufzuladen!",
+
+  "item-handbooktitle-edrilltip": "Verwendung",
+  "item-handbooktext-edrilltip": "Grundlage für den elektrischen Bohrer.",
+
+  "item-handbooktitle-eaxe": "Verwendung",
+  "item-handbooktext-eaxe": "Bewältigt das Fällen von Bäumen hervorragend. Nicht in Rezepten verwendbar.<br>Wenn die Ladung aufgebraucht ist, funktioniert sie nicht mehr. Nicht vergessen aufzuladen!"
+}

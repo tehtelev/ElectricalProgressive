@@ -29,9 +29,7 @@ namespace ElectricalProgressive;
 
 public class ElectricalProgressiveEquipment : ModSystem
 {
-    public static bool combatoverhaul = false;
     private ICoreAPI api = null!;
-    public static ICoreClientAPI capi = null!;
     public static WeatherSystemServer? WeatherSystemServer;
     private bool physicsPatched = false;
 
@@ -53,10 +51,7 @@ public class ElectricalProgressiveEquipment : ModSystem
         api.RegisterItemClass("ItemEGlider", typeof(ItemEGlider));
 
         api.RegisterEntity("EntityESpear", typeof(EntityESpear));
-
-        if (api.ModLoader.IsModEnabled("combatoverhaul"))
-            combatoverhaul = true;
-
+        
         Harmony harmony = new Harmony("electricalprogressive.equipment");
         harmony.PatchAll();
     }
