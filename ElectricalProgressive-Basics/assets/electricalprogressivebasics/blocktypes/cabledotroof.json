@@ -53,7 +53,11 @@
 
 
   "shape": {
-    "base": "block/cabledotroof"
+    "base": "block/cabledot/cabledotroof"
+  },
+
+  "lod2shape": {
+    "base": "block/cabledot/cabledotroof-lod2"
   },
 
   "resistance": 1,

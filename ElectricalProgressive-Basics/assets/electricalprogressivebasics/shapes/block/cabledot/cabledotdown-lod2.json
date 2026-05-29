@@ -1,0 +1,64 @@
+﻿{
+	"editor": {
+		"collapsedPaths": ",Root/Cube13/Cube14,Root/Cube2/Cube3,Root/Cube2/Cube13,Root/Cube2/Cube8",
+		"allAngles": false,
+		"entityTextureMode": false
+	},
+	"textureWidth": 16,
+	"textureHeight": 16,
+	"textureSizes": {
+	},
+	"textures": {
+		"ceramic": "game:block/clay/ceramic",
+		"brass": "game:block/metal/plate/brass",
+		"electrum": "game:block/metal/plate/electrum",
+		"iron": "game:block/metal/plate/iron",
+		"steel": "game:block/metal/plate/steel"
+	},
+	"elements": [
+		{
+			"name": "Cube14",
+			"from": [ 5.0, 2.5, 11.0 ],
+			"to": [ 11.0, 5.6, 17.0 ],
+			"rotationOrigin": [ 5.0, 2.7, 11.0 ],
+			"rotationX": 180.0,
+			"faces": {
+				"north": { "texture": "#iron", "uv": [ 0.0, 0.0, 6.0, 3.0 ] },
+				"east": { "texture": "#iron", "uv": [ 0.0, 0.0, 6.0, 3.0 ] },
+				"south": { "texture": "#iron", "uv": [ 0.0, 0.0, 6.0, 3.0 ] },
+				"west": { "texture": "#iron", "uv": [ 0.0, 0.0, 6.0, 3.0 ] },
+				"up": { "texture": "#iron", "uv": [ 0.0, 0.0, 6.0, 6.0 ] },
+				"down": { "texture": "#iron", "uv": [ 0.0, 0.0, 6.0, 6.0 ] }
+			},
+			"children": [
+				{
+					"name": "CableDot",
+					"from": [ 2.0, -10.5, 2.0 ],
+					"to": [ 4.0, -8.5, 4.0 ],
+					"rotationOrigin": [ 2.5, -10.5, 2.5 ],
+					"faces": {
+						"north": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ] },
+						"east": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ] },
+						"south": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ] },
+						"west": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ] },
+						"up": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ] },
+						"down": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ] }
+					}
+				},
+				{
+					"name": "Cube22",
+					"from": [ 0.6, -9.0, 0.6 ],
+					"to": [ 5.4, 0.2, 5.4 ],
+					"rotationOrigin": [ 1.1, -9.0, 1.1 ],
+					"faces": {
+						"north": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 9.0 ] },
+						"east": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 9.0 ] },
+						"south": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 9.0 ] },
+						"west": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 9.0 ] },
+						"up": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 4.5 ] },
+						"down": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 4.5 ] }
+					}
+				}
+			]
+		}
+	]}
