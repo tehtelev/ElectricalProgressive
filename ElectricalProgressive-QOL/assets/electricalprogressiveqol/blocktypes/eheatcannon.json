@@ -157,7 +157,7 @@
 
 
   "resistance": 1,
-  "lightAbsorption": 100.0,
+  "lightAbsorption": 0.0,
   "lightHsvByType": {
     "*-enabled": [ 9, 6, 11 ],
     "*": [ 0, 0, 0 ]

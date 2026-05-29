@@ -121,7 +121,7 @@
   },
 
 
-  "lightAbsorption": 120,
+  "lightAbsorption": 0,
   "sidesolidByType": {
     "*-north": {
       "all": false,
