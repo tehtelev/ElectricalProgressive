@@ -1,0 +1,98 @@
+﻿{
+	"editor": {
+		"collapsedPaths": "",
+		"allAngles": false,
+		"entityTextureMode": false
+	},
+	"textureWidth": 16,
+	"textureHeight": 16,
+	"textureSizes": {
+	},
+	"textures": {
+		"ceramic": "game:block/clay/ceramic",
+		"brass": "game:block/metal/plate/brass",
+		"electrum": "game:block/metal/plate/electrum",
+		"iron": "game:block/metal/plate/iron",
+		"steel": "game:block/metal/plate/steel"
+	},
+	"elements": [
+		{
+			"name": "Cube2",
+			"from": [ 8.0, 1.5, -0.6 ],
+			"to": [ 20.0, 15.5, 0.4 ],
+			"rotationOrigin": [ 11.0, 8.0, 8.0 ],
+			"rotationX": -90.0,
+			"rotationZ": 180.0,
+			"faces": {
+				"north": { "texture": "#iron", "uv": [ 0.0, 0.0, 12.0, 14.0 ] },
+				"east": { "texture": "#iron", "uv": [ 0.0, 0.0, 1.0, 14.0 ] },
+				"south": { "texture": "#iron", "uv": [ 0.0, 0.0, 12.0, 14.0 ] },
+				"west": { "texture": "#iron", "uv": [ 0.0, 0.0, 1.0, 14.0 ] },
+				"up": { "texture": "#iron", "uv": [ 0.0, 0.0, 12.0, 1.0 ] },
+				"down": { "texture": "#iron", "uv": [ 0.0, 0.0, 12.0, 1.0 ] }
+			}
+		},
+		{
+			"name": "Cube13",
+			"from": [ 9.0, -0.6, 11.0 ],
+			"to": [ 11.0, 0.4, 17.0 ],
+			"rotationOrigin": [ 9.0, -0.6, 11.0 ],
+			"rotationX": -90.0,
+			"rotationZ": -180.0,
+			"faces": {
+				"north": { "texture": "#iron", "uv": [ 0.0, 0.0, 2.0, 1.0 ] },
+				"east": { "texture": "#iron", "uv": [ 0.0, 0.0, 6.0, 1.0 ] },
+				"south": { "texture": "#iron", "uv": [ 0.0, 0.0, 2.0, 1.0 ] },
+				"west": { "texture": "#iron", "uv": [ 0.0, 0.0, 6.0, 1.0 ] },
+				"up": { "texture": "#iron", "uv": [ 0.0, 0.0, 2.0, 6.0 ] },
+				"down": { "texture": "#iron", "uv": [ 0.0, 0.0, 2.0, 6.0 ] }
+			},
+			"children": [
+				{
+					"name": "Cube14",
+					"from": [ 1.0, -0.05, 4.0 ],
+					"to": [ 7.0, 1.05, 10.0 ],
+					"rotationOrigin": [ 1.0, -0.1, 4.0 ],
+					"rotationY": -45.0,
+					"faces": {
+						"north": { "texture": "#iron", "uv": [ 0.0, 0.0, 6.0, 1.0 ] },
+						"east": { "texture": "#iron", "uv": [ 0.0, 0.0, 6.0, 1.0 ] },
+						"south": { "texture": "#iron", "uv": [ 0.0, 0.0, 6.0, 1.0 ] },
+						"west": { "texture": "#iron", "uv": [ 0.0, 0.0, 6.0, 1.0 ] },
+						"up": { "texture": "#iron", "uv": [ 0.0, 0.0, 6.0, 6.0 ] },
+						"down": { "texture": "#iron", "uv": [ 0.0, 0.0, 6.0, 6.0 ] }
+					},
+					"children": [
+						{
+							"name": "CableDot",
+							"from": [ 2.0, -10.5, 2.0 ],
+							"to": [ 4.0, -8.5, 4.0 ],
+							"rotationOrigin": [ 2.5, -10.5, 2.5 ],
+							"faces": {
+								"north": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ] },
+								"east": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ] },
+								"south": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ] },
+								"west": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ] },
+								"up": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ] },
+								"down": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ] }
+							}
+						},
+						{
+							"name": "Cube22",
+							"from": [ 0.6, -9.0, 0.6 ],
+							"to": [ 5.4, 0.2, 5.4 ],
+							"rotationOrigin": [ 1.1, -9.0, 1.1 ],
+							"faces": {
+								"north": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 9.0 ] },
+								"east": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 9.0 ] },
+								"south": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 9.0 ] },
+								"west": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 9.0 ] },
+								"up": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 4.5 ] },
+								"down": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 4.5 ] }
+							}
+						}
+					]
+				}
+			]
+		}
+	]}

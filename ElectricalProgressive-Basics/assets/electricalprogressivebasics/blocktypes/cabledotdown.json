@@ -53,8 +53,13 @@
 
 
   "shape": {
-    "base": "block/cabledotdown"
+    "base": "block/cabledot/cabledotdown"
   },
+
+  "lod2shape": {
+    "base": "block/cabledot/cabledotdown-lod2"
+  },
+
 
   "resistance": 1,
   "drawType": "JSON",

@@ -53,7 +53,11 @@
 
 
   "shape": {
-    "base": "block/cabledotwall"
+    "base": "block/cabledot/cabledotwall"
+  },
+
+  "lod2shape": {
+    "base": "block/cabledot/cabledotwall-lod2"
   },
 
   "resistance": 1,

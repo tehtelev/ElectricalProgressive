@@ -74,8 +74,6 @@ public class BlockConnector : BlockEBase
 
             if (!MeshCache.TryGetValue(cacheKey, out var meshData))
             {
-                var origin = new Vec3f(0.5f, 0.5f, 0.5f);
-
                 // Клонируем входящий меш (уже правильный — LOD0 или LOD2)
                 meshData = sourceMesh.Clone();
 
