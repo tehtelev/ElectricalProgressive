@@ -1,5 +1,8 @@
-﻿using Vintagestory.API.Common;
+﻿using ElectricalProgressive.Utils;
+using System.Text;
+using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
+using Vintagestory.API.Config;
 
 #nullable disable
 namespace Vintagestory.GameContent;
@@ -42,5 +45,16 @@ public class ItemEGlider : Item, IWearableShapeSupplier
             default:
                 return (Vintagestory.API.Common.Shape) null;
         }
+    }
+    
+    public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
+    {
+        // Сначала вызываем базовый метод, чтобы добавить стандартную информацию о броне
+        base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
+
+        // Добавляем информацию об энергии
+        var energy = inSlot.Itemstack.Attributes.GetInt("durability") * 20;
+        var maxEnergy = inSlot.Itemstack.Collectible.GetMaxDurability(inSlot.Itemstack) * 20;
+        dsc.AppendLine(energy + "/" + maxEnergy + " " + Lang.Get("electricalprogressivebasics:J"));
     }
 }

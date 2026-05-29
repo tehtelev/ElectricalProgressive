@@ -13,7 +13,9 @@
       }
     }
   ],
+  "durability": 1000,
   "attributes": {
+    "chargable": true,
     "groundStorageTransform": {
       "translation": { "x": -0.1, "y": 0, "z": 0.3 },
       "rotation": { "x": 0, "y": -18, "z": 86 },

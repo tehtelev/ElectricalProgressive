@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using ElectricalProgressive.Content.Item.Armor;
+using HarmonyLib;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.GameContent;
