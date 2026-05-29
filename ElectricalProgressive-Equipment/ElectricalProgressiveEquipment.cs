@@ -17,7 +17,7 @@ using Vintagestory.API.Common.Entities;
     "electricalprogressiveequipment",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Electric weapons, armor and tools",
-    Version = "3.1.0",
+    Version = "3.2.0",
     Authors =
     [
         "Tehtelev",
