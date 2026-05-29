@@ -60,57 +60,7 @@ public class ElectricalProgressiveEquipment : ModSystem
         Harmony harmony = new Harmony("electricalprogressive.equipment");
         harmony.PatchAll();
     }
-
-    public override void StartClientSide(ICoreClientAPI api)
-    {
-        base.StartClientSide(api);
-        capi = api;
-
-        // Ждём появления игрока и применяем патч физики
-        RegisterPhysicsPatch();
-    }
-
-    private void RegisterPhysicsPatch()
-    {
-        if (capi == null) return;
-
-        // Патчим при входе игрока
-        capi.Event.PlayerJoin += OnPlayerJoin;
-
-        // Если игрок уже существует
-        if (capi.World.Player?.Entity != null)
-        {
-            ApplyPhysicsPatch(capi.World.Player.Entity);
-        }
-
-        // Дополнительная проверка через тики (на случай задержки инициализации)
-        capi.Event.RegisterGameTickListener(dt =>
-        {
-            if (!physicsPatched && capi.World.Player?.Entity != null)
-            {
-                ApplyPhysicsPatch(capi.World.Player.Entity);
-            }
-        }, 100, 10); // 10 попыток с интервалом 100мс
-    }
-
-    private void OnPlayerJoin(IClientPlayer player)
-    {
-        if (player?.Entity != null)
-        {
-            ApplyPhysicsPatch(player.Entity);
-        }
-    }
-
-    private void ApplyPhysicsPatch(Entity entity)
-    {
-        if (physicsPatched) return;
-        if (entity == null) return;
-
-        capi.Logger.Notification("[ElectricalProgressive] Applying EGlider physics patch...");
-        EGliderPhysicsPatcher.PatchPlayerPhysics(entity);
-        physicsPatched = true;
-    }
-
+    
     public override void StartServerSide(ICoreServerAPI api)
     {
         base.StartServerSide(api);

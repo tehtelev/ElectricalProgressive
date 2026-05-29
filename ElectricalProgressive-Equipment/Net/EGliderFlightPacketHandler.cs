@@ -40,6 +40,7 @@ public class EGliderFlightPacketHandler : ModSystem
     private bool wasAfterburnerActive = false;
     private bool isAfterburnerCooldown = false;
     private float cooldownTimer = 0f;
+    private bool physicsPatched = false;
     
     #endregion
     
@@ -55,6 +56,9 @@ public class EGliderFlightPacketHandler : ModSystem
         // Регистрируем канал для отправки команд на сервер
         clientChannel = api.Network.RegisterChannel("EP")
             .RegisterMessageType<EGliderAfterburnerPacket>();
+        
+        // Ждём появления игрока и применяем патч физики
+        RegisterPhysicsPatch();
         
         api.Logger.Notification("[ElectricalProgressive] EGliderFlightPacketHandler client started");
     }
@@ -77,11 +81,68 @@ public class EGliderFlightPacketHandler : ModSystem
     
     #endregion
     
-    #region Клиентские методы (отправка команд)
+    #region Клиентские методы (отправка команд и патч физики)
+    
+    /// <summary>
+    /// Регистрирует патч физики для элитра.
+    /// Вызывается при старте клиентской стороны.
+    /// Подписывается на событие подключения игрока и применяет патч к существующему игроку.
+    /// Также создает повторяющийся таймер на случай задержки инициализации сущности игрока.
+    /// </summary>
+    private void RegisterPhysicsPatch()
+    {
+        if (capi == null) return;
+
+        // Патчим при входе игрока
+        capi.Event.PlayerJoin += OnPlayerJoin;
+
+        // Если игрок уже существует
+        if (capi.World.Player?.Entity != null)
+        {
+            ApplyPhysicsPatch(capi.World.Player.Entity);
+        }
+
+        // Дополнительная проверка через тики (на случай задержки инициализации)
+        capi.Event.RegisterGameTickListener(dt =>
+        {
+            if (!physicsPatched && capi.World.Player?.Entity != null)
+            {
+                ApplyPhysicsPatch(capi.World.Player.Entity);
+            }
+        }, 100, 10); // 10 попыток с интервалом 100мс
+    }
+    /// <summary>
+    /// Обработчик события подключения игрока к серверу.
+    /// Применяет патч физики к сущности подключившегося игрока.
+    /// </summary>
+    /// <param name="player">Подключившийся клиентский игрок</param>
+    private void OnPlayerJoin(IClientPlayer player)
+    {
+        if (player?.Entity != null)
+        {
+            ApplyPhysicsPatch(player.Entity);
+        }
+    }
+    /// <summary>
+    /// Применяет патч физики к указанной сущности игрока.
+    /// Патч позволяет модифицировать стандартную физику полёта для поддержки форсажа элитра.
+    /// </summary>
+    /// <param name="entity">Сущность игрока, к которой применяется патч</param>
+    private void ApplyPhysicsPatch(Entity entity)
+    {
+        if (physicsPatched) return;
+        if (entity == null) return;
+
+        capi?.Logger.Notification("[ElectricalProgressive] Applying EGlider physics patch...");
+        EGliderPhysicsPatcher.PatchPlayerPhysics(entity);
+        physicsPatched = true;
+    }
     
     /// <summary>
     /// Проверяет, экипирован ли глайдер у игрока
     /// </summary>
+    /// <param name="entity">Сущность игрока для проверки</param>
+    /// <returns>true, если у игрока в слоте рюкзака экипирован ItemEGlider</returns>
     private bool HasEGliderEquipped(Entity entity)
     {
         if (entity is not EntityPlayer player) return false;
@@ -104,6 +165,8 @@ public class EGliderFlightPacketHandler : ModSystem
     /// <summary>
     /// Получает текущую прочность элитра (клиентская версия)
     /// </summary>
+    /// <param name="entity">Сущность игрока, у которого проверяется прочность</param>
+    /// <returns>Текущее значение прочности элитра или 0, если элитр не найден</returns>
     private int GetEGliderDurability(Entity entity)
     {
         if (entity is not EntityPlayer player) return 0;
@@ -128,6 +191,7 @@ public class EGliderFlightPacketHandler : ModSystem
     /// <summary>
     /// Отправляет команду форсажа на сервер
     /// </summary>
+    /// <param name="isActive">true - включить форсаж, false - выключить</param>
     private void SendAfterburnerCommand(bool isActive)
     {
         if (clientChannel == null || capi?.World?.Player == null) return;
@@ -143,6 +207,10 @@ public class EGliderFlightPacketHandler : ModSystem
     /// <summary>
     /// Применяет физику полёта с форсажем (вызывается из патча)
     /// </summary>
+    /// <param name="dt">Дельта времени в секундах</param>
+    /// <param name="entity">Сущность игрока</param>
+    /// <param name="pos">Позиция игрока</param>
+    /// <param name="controls">Управление игроком</param>
     public void ApplyFlyingPhysics(float dt, Entity entity, EntityPos pos, EntityControls controls)
     {
         if (controls.Gliding && HasEGliderEquipped(entity))
