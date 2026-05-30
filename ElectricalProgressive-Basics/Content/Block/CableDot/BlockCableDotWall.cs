@@ -1,17 +1,16 @@
 ﻿using ElectricalProgressive.Utils;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
-using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 
 namespace ElectricalProgressive.Content.Block.CableDot
 {
     internal class BlockCableDotWall : ImmersiveWireBlock
     {
+        // кеши для мешей и коллизий
         private static readonly Dictionary<(Facing, string, int), MeshData> MeshDataCache = [];
         private static readonly Dictionary<(Facing, string), Cuboidf[]> SelectionBoxesCache = [];
         private static readonly Dictionary<(Facing, string), Cuboidf[]> CollisionBoxesCache = [];
@@ -86,12 +85,16 @@ namespace ElectricalProgressive.Content.Block.CableDot
             return GetRotatedBoxes(pos, CollisionBoxesCache, CollisionBoxes);
         }
 
+
+
         public override Cuboidf[] GetSelectionBoxes(IBlockAccessor blockAccessor, BlockPos pos)
         {
             // передаем выделения ниже, чтобы ими управлял ImmersiveWireBlock
             _CustomSelBoxes = GetRotatedBoxes(pos, SelectionBoxesCache, SelectionBoxes);
             return base.GetSelectionBoxes(blockAccessor, pos);
         }
+
+
 
         private Cuboidf[] GetRotatedBoxes(BlockPos pos, Dictionary<(Facing, string), Cuboidf[]> cache, Cuboidf[] sourceBoxes)
         {
@@ -104,7 +107,6 @@ namespace ElectricalProgressive.Content.Block.CableDot
             var facing = entity.Facing;
             string code = entity.Block.Code.ToString();
 
-            // VerticesCount отличается у LOD0 и LOD2
             var cacheKey = (facing, code);
 
             if (!cache.TryGetValue(cacheKey, out var boxes))
@@ -119,6 +121,7 @@ namespace ElectricalProgressive.Content.Block.CableDot
 
             return boxes ?? [];
         }
+
 
         public override void OnJsonTesselation(ref MeshData sourceMesh, ref int[] lightRgbsByCorner, BlockPos pos, Vintagestory.API.Common.Block[] chunkExtBlocks, int extIndex3d)
         {
@@ -157,7 +160,10 @@ namespace ElectricalProgressive.Content.Block.CableDot
         public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
         {
             base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
-            var block = inSlot.Itemstack.Block;
+            var block = inSlot.Itemstack?.Block;
+
+            if (block == null)
+                return;
 
             dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
             dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " +

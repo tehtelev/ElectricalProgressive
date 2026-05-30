@@ -65,7 +65,11 @@
 
 
   "shape": {
-    "base": "block/cableswitchwall"
+    "base": "block/cableswitch/cableswitchwall"
+  },
+
+  "lod2shape": {
+    "base": "block/cableswitch/cableswitchwall-lod2"
   },
 
   "resistance": 1,

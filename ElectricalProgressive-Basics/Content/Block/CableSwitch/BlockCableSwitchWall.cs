@@ -12,11 +12,14 @@ namespace ElectricalProgressive.Content.Block.CableSwitch
 {
     internal class BlockCableSwitchWall : ImmersiveWireBlock
     {
-        private static readonly Dictionary<CacheDataKey, MeshData> MeshDataCache = [];
-        private static readonly Dictionary<CacheDataKey, Cuboidf[]> SelectionBoxesCache = [];
-        private static readonly Dictionary<CacheDataKey, Cuboidf[]> CollisionBoxesCache = [];
+        // кеши для мешей и коллизий
+        private static readonly Dictionary<(Facing, string, int), MeshData> MeshDataCache = [];
+        private static readonly Dictionary<(Facing, string), Cuboidf[]> SelectionBoxesCache = [];
+        private static readonly Dictionary<(Facing, string), Cuboidf[]> CollisionBoxesCache = [];
 
         private WorldInteraction[] _interactions = [];
+
+
 
         public override void OnLoaded(ICoreAPI api)
         {
@@ -37,6 +40,8 @@ namespace ElectricalProgressive.Content.Block.CableSwitch
 
         }
 
+
+
         public override void OnUnloaded(ICoreAPI api)
         {
             base.OnUnloaded(api);
@@ -44,6 +49,7 @@ namespace ElectricalProgressive.Content.Block.CableSwitch
             SelectionBoxesCache?.Clear();
             CollisionBoxesCache?.Clear();
         }
+
 
         public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack, BlockSelection blockSel, ref string failureCode)
         {
@@ -75,8 +81,6 @@ namespace ElectricalProgressive.Content.Block.CableSwitch
             }
 
             entity.Facing = facing;
-
-
 
             LoadImmersiveEProperties.Load(this, entity);
 
@@ -114,28 +118,35 @@ namespace ElectricalProgressive.Content.Block.CableSwitch
             return base.GetSelectionBoxes(blockAccessor, pos);
         }
 
-        private Cuboidf[] GetRotatedBoxes(BlockPos pos, Dictionary<CacheDataKey, Cuboidf[]> cache, Cuboidf[] sourceBoxes)
+        private Cuboidf[] GetRotatedBoxes(BlockPos pos, Dictionary<(Facing, string), Cuboidf[]> cache, Cuboidf[] sourceBoxes)
         {
             if (api?.World?.BlockAccessor.GetBlockEntity(pos) is not BlockEntityCableSwitch entity ||
                 entity.Facing == Facing.None)
             {
                 return [];
             }
+            
 
-            var key = CacheDataKey.FromEntity(entity);
+            var facing = entity.Facing;
+            string code = entity.Block.Code.ToString();
 
-            if (!cache.TryGetValue(key, out var boxes))
+            var cacheKey = (facing, code);
+
+            if (!cache.TryGetValue(cacheKey, out var boxes))
             {
-                if (entity.RotationCache.TryGetValue(key.Facing, out var rotation))
+                if (entity.RotationCache.TryGetValue(cacheKey.facing, out var rotation))
                 {
                     var origin = new Vec3d(0.5, 0.5, 0.5);
                     boxes = sourceBoxes.Select(box => box.RotatedCopy(rotation.X, rotation.Y, rotation.Z, origin)).ToArray();
-                    cache.TryAdd(key, boxes);
+                    cache.TryAdd(cacheKey, boxes);
                 }
             }
 
             return boxes ?? [];
         }
+
+
+
 
         public override void OnJsonTesselation(ref MeshData sourceMesh, ref int[] lightRgbsByCorner, BlockPos pos, Vintagestory.API.Common.Block[] chunkExtBlocks, int extIndex3d)
         {
@@ -147,23 +158,28 @@ namespace ElectricalProgressive.Content.Block.CableSwitch
                 return;
             }
 
-            var key = CacheDataKey.FromEntity(entity);
+            var facing = entity.Facing;
+            string code = entity.Block.Code.ToString();
 
-            if (!MeshDataCache.TryGetValue(key, out var meshData))
+            // VerticesCount отличается у LOD0 и LOD2
+            var cacheKey = (facing, code, sourceMesh.VerticesCount);
+
+            if (!MeshDataCache.TryGetValue(cacheKey, out var meshData))
             {
-                var origin = new Vec3f(0.5f, 0.5f, 0.5f);
-                clientApi.Tesselator.TesselateBlock(this, out meshData);
-                clientApi.TesselatorManager.ThreadDispose();
+                // Клонируем входящий меш (уже правильный — LOD0 или LOD2)
+                meshData = sourceMesh.Clone();
 
-                if (entity.RotationCache.TryGetValue(key.Facing, out var rotation))
+                if (entity.RotationCache.TryGetValue(cacheKey.facing, out var rotation))
                 {
+                    var origin = new Vec3f(0.5f, 0.5f, 0.5f);
+
                     meshData.Rotate(origin,
                         rotation.X * GameMath.DEG2RAD,
                         rotation.Y * GameMath.DEG2RAD,
                         rotation.Z * GameMath.DEG2RAD);
                 }
 
-                MeshDataCache.TryAdd(key, meshData);
+                MeshDataCache.TryAdd(cacheKey, meshData);
             }
 
             // передаем мэш, чтобы им управлял ImmersiveWireBlock
@@ -177,7 +193,10 @@ namespace ElectricalProgressive.Content.Block.CableSwitch
         public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
         {
             base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
-            var block = inSlot.Itemstack.Block;
+            var block = inSlot.Itemstack?.Block;
+
+            if (block==null)
+                return;
 
             dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
             dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " +
@@ -222,40 +241,16 @@ namespace ElectricalProgressive.Content.Block.CableSwitch
                 {
                     if (beh.IsOpen)
                     {
-                        (entity as BlockEntityCableSwitch).Open();
+                        (entity as BlockEntityCableSwitch)?.Open();
                     }
                     else
                     {
-                        (entity as BlockEntityCableSwitch).Close();
+                        (entity as BlockEntityCableSwitch)?.Close();
                     }
                 }
             }
 
         }
-
-
-
-
-
-        internal struct CacheDataKey
-        {
-            public readonly Facing Facing;
-            public readonly string Code;
-
-            public CacheDataKey(Facing facing, string code)
-            {
-                Facing = facing;
-                Code = code;
-            }
-
-            public static CacheDataKey FromEntity(BlockEntityCableSwitch entity)
-            {
-                return new CacheDataKey(entity.Facing, entity.Block.Code);
-            }
-        }
-
-
-
 
 
         
