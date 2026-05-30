@@ -11,7 +11,9 @@ using Vintagestory.GameContent.Mechanics;
 namespace ElectricalProgressive.Content.Block.EMotor;
 public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
 {
+    // кеш мешей
     private static readonly Dictionary<(Facing, string), MeshData> MeshData = new();
+
     private static readonly float[] DefParams = [10.0F, 100.0F, 0.5F, 0.75F, 0.5F, 0.1F, 0.05F];   //заглушка
 
 
@@ -21,6 +23,8 @@ public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
         base.OnUnloaded(api);
         BlockEMotor.MeshData?.Clear();
     }
+
+
 
     public MechanicalNetwork? GetNetwork(IWorldAccessor world, BlockPos pos)
     {
@@ -145,6 +149,8 @@ public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
         }
     }
 
+
+
     public override void OnJsonTesselation(ref MeshData sourceMesh, ref int[] lightRgbsByCorner, BlockPos pos,
         Vintagestory.API.Common.Block[] chunkExtBlocks, int extIndex3d)
     {
@@ -161,7 +167,6 @@ public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
 
             if (!BlockEMotor.MeshData.TryGetValue((facing, code), out var meshData))
             {
-                var origin = new Vec3f(0.5f, 0.5f, 0.5f);
                 var block = clientApi.World.BlockAccessor.GetBlockEntity(pos).Block;
 
                 clientApi.Tesselator.TesselateBlock(block, out meshData);
@@ -178,29 +183,6 @@ public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
     }
 
 
-    /// <summary>
-    /// Получение информации о предмете в инвентаре
-    /// </summary>
-    /// <param name="inSlot"></param>
-    /// <param name="dsc"></param>
-    /// <param name="world"></param>
-    /// <param name="withDebugInfo"></param>
-    public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
-    {
-        base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
-
-        var @params = MyMiniLib.GetAttributeArrayFloat(inSlot.Itemstack.Block, "params", DefParams);
-
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Consumption") + ": " + @params[1] + " " + Lang.Get("electricalprogressivebasics:W"));
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:max_speed") + ": " + @params[4] + " " + Lang.Get("electricalprogressivebasics:rps"));
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:res_speed") + ": " + @params[5]);
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:max_torque") + ": " + @params[2]);
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:kpd") + ": " + @params[3] * 100 + " %");
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + ((MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false)) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
-    }
-
-
     public bool HasMechPowerConnectorAt(IWorldAccessor world, BlockPos pos, BlockFacing face, BlockMPBase forBlock)
     {
         var entity = world.BlockAccessor.GetBlockEntity(pos) as BlockEntityEMotor;
@@ -212,4 +194,35 @@ public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
         var powerOutFacing = FacingHelper.Directions(entity.Facing).First();
         return face == powerOutFacing;
     }
+
+
+    /// <summary>
+    /// Получение информации о предмете в инвентаре
+    /// </summary>
+    /// <param name="inSlot"></param>
+    /// <param name="dsc"></param>
+    /// <param name="world"></param>
+    /// <param name="withDebugInfo"></param>
+    public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
+    {
+        base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
+
+        var block = inSlot.Itemstack?.Block;
+        if (block == null)
+            return;
+
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
+
+        var paramss = MyMiniLib.GetAttributeArrayFloat(block, "params", DefParams);
+
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Consumption") + ": " + paramss[1] + " " + Lang.Get("electricalprogressivebasics:W"));
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:max_speed") + ": " + paramss[4] + " " + Lang.Get("electricalprogressivebasics:rps"));
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:res_speed") + ": " + paramss[5]);
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:max_torque") + ": " + paramss[2]);
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:kpd") + ": " + paramss[3] * 100 + " %");
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + ((MyMiniLib.GetAttributeBool(block, "isolatedEnvironment", false)) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
+    }
+
+
+
 }

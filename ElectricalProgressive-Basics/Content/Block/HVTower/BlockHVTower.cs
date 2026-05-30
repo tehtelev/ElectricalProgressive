@@ -18,8 +18,6 @@ namespace ElectricalProgressive.Content.Block.HVTower
             _skipNonCenterCollisions = true;
         }
         
-        
-
      
         
         public override ItemStack OnPickBlock(IWorldAccessor world, BlockPos pos)
@@ -44,7 +42,7 @@ namespace ElectricalProgressive.Content.Block.HVTower
         public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack,
             BlockSelection blockSel, ref string failureCode)
         {
-            //неваляжка - только вертикально
+            // неваляжка - только вертикально
             // целая ли грань, на которую ставим
             if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSel.Position, Facing.DownAll))
             {
@@ -80,8 +78,13 @@ namespace ElectricalProgressive.Content.Block.HVTower
         public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
         {
             base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
-            dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
-            dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + (MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
+
+            var block = inSlot.Itemstack?.Block;
+            if (block == null)
+                return;
+
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + (MyMiniLib.GetAttributeBool(block, "isolatedEnvironment", false) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
         }
 
       

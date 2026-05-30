@@ -13,7 +13,9 @@ namespace ElectricalProgressive.Content.Block.EGenerator;
 
 public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
 {
+    // кеш мешей статора
     private static readonly Dictionary<(Facing, string), MeshData> MeshData = new();
+
     private static readonly float[] def_Params = [100.0F, 0.5F, 0.1F, 0.25F, 0.05F, 1F];          //заглушка
 
 
@@ -100,8 +102,7 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
             return false;
         }
 
-        if (
-            base.DoPlaceBlock(world, byPlayer, blockSel, byItemStack) &&
+        if (base.DoPlaceBlock(world, byPlayer, blockSel, byItemStack) &&
             world.BlockAccessor.GetBlockEntity(blockSel.Position) is BlockEntityEGenerator entity
         )
         {
@@ -117,8 +118,7 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
 
             var beh = entity.GetBehavior<BEBehaviorMPBase>();
         
-            if (
-                world.BlockAccessor.GetBlock(blockPos1) is BlockMPBase block &&
+            if (world.BlockAccessor.GetBlock(blockPos1) is BlockMPBase block &&
                 this.HasMechPowerConnectorAt(world, blockPos, blockFacing.Opposite, block)
             )
             {
@@ -165,14 +165,11 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
             entity.Facing != Facing.None
            )
         {
-
-
             var facing = entity.Facing;   //куда смотрит генератор
             string code = entity.Block.Code; //код блока
 
             if (!MeshData.TryGetValue((facing, code), out var meshData))
             {
-                var origin = new Vec3f(0.5f, 0.5f, 0.5f);
                 var block = clientApi.World.BlockAccessor.GetBlockEntity(pos).Block;
 
                 clientApi.Tesselator.TesselateBlock(block, out meshData);
@@ -189,6 +186,22 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
     }
 
 
+    public bool HasMechPowerConnectorAt(IWorldAccessor world, BlockPos pos, BlockFacing face, BlockMPBase forBlock)
+    {
+        var entity = world.BlockAccessor.GetBlockEntity(pos) as BlockEntityEGenerator;
+        // блокэнтити не готов или не существует
+        if (entity == null || entity.Facing == Facing.None)
+        {
+            return false;
+        }
+
+        var powerOutFacing = FacingHelper.Directions(entity.Facing).First();
+        return face == powerOutFacing;
+    }
+
+
+
+
     /// <summary>
     /// Получение информации о предмете в инвентаре
     /// </summary>
@@ -199,28 +212,24 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
     public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
     {
         base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
 
-        var Params = MyMiniLib.GetAttributeArrayFloat(inSlot.Itemstack.Block, "params", def_Params);
+        var block = inSlot.Itemstack?.Block;
+        if (block == null)
+            return;
 
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Generation") + ": " + Params[0] + " " + Lang.Get("electricalprogressivebasics:W"));
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:max_speed") + ": " + Params[1] + " " + Lang.Get("electricalprogressivebasics:rps"));
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:res_speed") + ": " + Params[2]);
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:res_load") + ": " + Params[3]);
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:kpd") + ": " + Params[5] * 100 + " %");
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + ((MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false)) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
+
+        var paramss = MyMiniLib.GetAttributeArrayFloat(block, "params", def_Params);
+
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Generation") + ": " + paramss[0] + " " + Lang.Get("electricalprogressivebasics:W"));
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:max_speed") + ": " + paramss[1] + " " + Lang.Get("electricalprogressivebasics:rps"));
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:res_speed") + ": " + paramss[2]);
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:res_load") + ": " + paramss[3]);
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:kpd") + ": " + paramss[5] * 100 + " %");
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + ((MyMiniLib.GetAttributeBool(block, "isolatedEnvironment", false)) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
     }
 
-    public bool HasMechPowerConnectorAt(IWorldAccessor world, BlockPos pos, BlockFacing face, BlockMPBase forBlock)
-    {
-        var entity = world.BlockAccessor.GetBlockEntity(pos) as BlockEntityEGenerator;
-        // блокэнтити не готов или не существует
-        if (entity==null || entity.Facing == Facing.None)
-        {
-            return false;
-        }
 
-        var powerOutFacing = FacingHelper.Directions(entity.Facing).First();
-        return face == powerOutFacing;
-    }
+
+
 }

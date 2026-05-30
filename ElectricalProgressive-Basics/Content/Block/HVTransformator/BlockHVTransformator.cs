@@ -81,12 +81,16 @@ namespace ElectricalProgressive.Content.Block.HVTransformator
         {
             base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
 
-            var imvoltage = MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "imvoltage", 0);
-            var voltage = MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "voltage", 0);
+            var block = inSlot.Itemstack?.Block;
+            if (block == null)
+                return;
+
+            var imvoltage = MyMiniLib.GetAttributeInt(block, "imvoltage", 0);
+            var voltage = MyMiniLib.GetAttributeInt(block, "voltage", 0);
 
             dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage_immersive") + ": " + imvoltage + " " + Lang.Get("electricalprogressivebasics:V"));
             dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + voltage + " " + Lang.Get("electricalprogressivebasics:V"));
-            dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + (MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + (MyMiniLib.GetAttributeBool(block, "isolatedEnvironment", false) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
         }
 
       

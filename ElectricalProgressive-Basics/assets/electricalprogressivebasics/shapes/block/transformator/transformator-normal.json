@@ -24,7 +24,7 @@
 			"faces": {
 				"north": { "texture": "#copper", "uv": [ 0.0, 0.0, 0.5, 0.5 ] },
 				"east": { "texture": "#copper", "uv": [ 0.0, 0.0, 0.5, 0.5 ] },
-				"south": { "texture": "#copperl", "uv": [ 0.0, 0.0, 0.5, 0.5 ] },
+				"south": { "texture": "#copper", "uv": [ 0.0, 0.0, 0.5, 0.5 ] },
 				"west": { "texture": "#copper", "uv": [ 0.0, 0.0, 0.5, 0.5 ] },
 				"up": { "texture": "#copper", "uv": [ 0.0, 0.0, 0.5, 0.5 ] },
 				"down": { "texture": "#copper", "uv": [ 0.0, 0.0, 0.5, 0.5 ] }

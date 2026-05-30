@@ -87,6 +87,12 @@
     }
   },
 
+  "lod2shapebytype": {
+    "*": {
+      "base": "block/transformator/transformator-lod2"
+    }
+  },
+
 
 
   "resistance": 1,
