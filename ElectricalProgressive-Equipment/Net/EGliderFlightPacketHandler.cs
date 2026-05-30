@@ -27,7 +27,7 @@ public class EGliderFlightPacketHandler : ModSystem
     /// <summary>Максимальный угол крена (в радианах). ~34°</summary>
     private const float MAX_BANK_ANGLE = 1.5f;
     /// <summary>Коэффициент: угловая скорость рысканья (рад/с) → целевой крен (рад)</summary>
-    private const float BANK_SENSITIVITY = 0.7f;
+    private const float BANK_SENSITIVITY = 0.3f;
     /// <summary>Скорость нарастания крена (lerp-множитель). Выше = резче</summary>
     private const float BANK_SMOOTHING = 4.0f;
     /// <summary>Скорость сброса крена при приземлении</summary>
@@ -288,11 +288,11 @@ public class EGliderFlightPacketHandler : ModSystem
             }
 
             UpdateGliderBank(dt, pos);
-            ApplyHeadingRelativeBank(pos, true);
+            ApplyHeadingRelativeBank(entity, pos, true);   // ← добавили entity
         }
         else
         {
-            ApplyHeadingRelativeBank(pos, false);
+            ApplyHeadingRelativeBank(entity, pos, false);  // ← добавили entity
 
             if (wasAfterburnerActive)
             {
@@ -305,29 +305,31 @@ public class EGliderFlightPacketHandler : ModSystem
     }
 
 
-    private void ApplyHeadingRelativeBank(EntityPos pos, bool gliding)
+    private void ApplyHeadingRelativeBank(Entity entity, EntityPos pos, bool gliding)
     {
+        // Получаем рендерер игрока (теперь это EntityPlayerShapeRenderer)
+        var renderer = entity.Properties.Client.Renderer as EntityPlayerShapeRenderer;
+        if (renderer == null) return;
+
         if (gliding)
         {
-            float yaw = (float)pos.Yaw;
-
-            // Крен сохраняем, но без вмешательства в Pitch
-            // На востоке/западе знак будет корректным
-            pos.Roll = _bankAngle * MathF.Sin(yaw);
+            // Крен через zangle (теперь патч его применяет в матрицу)
+            renderer.xangle = _bankAngle;
+            // Обнуляем Roll, чтобы ванильный glider не вмешивался
+            pos.Roll = 0;
         }
         else
         {
-            // Плавный сброс крена
-            _bankAngle += -_bankAngle * 0.15f;
-
+            // Плавный сброс крена к нулю
+            _bankAngle += -_bankAngle * Math.Min(BANK_RESET_SPEED * 0.016f, 1f);
             if (Math.Abs(_bankAngle) < 0.001f)
             {
                 _bankAngle = 0f;
                 _smoothedYawRate = 0f;
                 _prevGlideYaw = float.NaN;
             }
-
-            pos.Roll = _bankAngle;
+            renderer.xangle = _bankAngle;
+            pos.Roll = 0;
         }
     }
 
@@ -352,7 +354,7 @@ public class EGliderFlightPacketHandler : ModSystem
         _prevGlideYaw = curYaw;
 
         float targetBank = GameMath.Clamp(
-            -_smoothedYawRate * BANK_SENSITIVITY,
+            _smoothedYawRate * BANK_SENSITIVITY,
             -MAX_BANK_ANGLE,
             MAX_BANK_ANGLE
         );
