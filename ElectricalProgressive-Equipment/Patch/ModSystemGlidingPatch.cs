@@ -1,5 +1,4 @@
-﻿using ElectricalProgressive.Content.Item.Armor;
-using HarmonyLib;
+﻿using HarmonyLib;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.GameContent;
@@ -7,7 +6,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace ElectricalProgressive.Patches
+namespace ElectricalProgressive.Patch
 {
     [HarmonyPatch(typeof(ModSystemGliding))]
     public static class ModSystemGlidingPatch

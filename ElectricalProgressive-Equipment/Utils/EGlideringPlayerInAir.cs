@@ -1,7 +1,6 @@
-﻿using ElectricalProgressive.Systems;
-using Vintagestory.API.Common.Entities;
+﻿using ElectricalProgressive.Net;
 using Vintagestory.API.Datastructures;
-using Vintagestory.API.MathTools;
+using Vintagestory.API.Util;
 
 namespace Vintagestory.API.Common.Entities;
 
