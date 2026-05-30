@@ -20,10 +20,11 @@ namespace ElectricalProgressive.Content.Block.ESFonar
             base.OnLoaded(coreApi);
 
         }
+
         public override void OnUnloaded(ICoreAPI api)
         {
             base.OnUnloaded(api);
-            BlockESFonar.MeshDataCache?.Clear();
+            MeshDataCache?.Clear();
         }
 
 
@@ -124,7 +125,7 @@ namespace ElectricalProgressive.Content.Block.ESFonar
 
             var key = CacheDataKey.FromEntity(entity);
 
-            if (!BlockESFonar.MeshDataCache.TryGetValue(key, out var meshData))
+            if (!MeshDataCache.TryGetValue(key, out var meshData))
             {
 
                 var origin = new Vec3f(0.5f, 0.5f, 0.5f);
@@ -254,7 +255,7 @@ namespace ElectricalProgressive.Content.Block.ESFonar
                     meshData.Rotate(origin, 0.0f, 90.0f * GameMath.DEG2RAD, 0.0f);
                 }
 
-                BlockESFonar.MeshDataCache.TryAdd(key, meshData);
+                MeshDataCache.TryAdd(key, meshData);
 
 
             }
@@ -272,11 +273,17 @@ namespace ElectricalProgressive.Content.Block.ESFonar
         public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
         {
             base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
-            dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
-            dsc.AppendLine(Lang.Get("electricalprogressivebasics:Consumption") + ": " + MyMiniLib.GetAttributeFloat(inSlot.Itemstack.Block, "maxConsumption", 0) + " " + Lang.Get("electricalprogressivebasics:W"));
-            dsc.AppendLine(Lang.Get("electricalprogressiveqol:max-light") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "HSV", 0));
+
+            var block = inSlot.Itemstack?.Block;
+
+            if (block == null)
+                return;
+
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:Consumption") + ": " + MyMiniLib.GetAttributeFloat(block, "maxConsumption", 0) + " " + Lang.Get("electricalprogressivebasics:W"));
+            dsc.AppendLine(Lang.Get("electricalprogressiveqol:max-light") + ": " + MyMiniLib.GetAttributeInt(block, "HSV", 0));
             dsc.AppendLine(Lang.Get("electricalprogressiveqol:height") + ": " + this.Variant["height"]);
-            dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + ((MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false)) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + ((MyMiniLib.GetAttributeBool(block, "isolatedEnvironment", false)) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
         }
 
         /// <summary>

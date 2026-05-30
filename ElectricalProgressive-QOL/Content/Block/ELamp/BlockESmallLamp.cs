@@ -2,7 +2,6 @@
 using ElectricalProgressive.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -22,9 +21,9 @@ namespace ElectricalProgressive.Content.Block.ELamp
         public override void OnUnloaded(ICoreAPI api)
         {
             base.OnUnloaded(api);
-            BlockESmallLamp.MeshDataCache?.Clear();
-            BlockESmallLamp.SelectionBoxesCache?.Clear();
-            BlockESmallLamp.CollisionBoxesCache?.Clear();
+            MeshDataCache?.Clear();
+            SelectionBoxesCache?.Clear();
+            CollisionBoxesCache?.Clear();
         }
 
 
@@ -165,7 +164,7 @@ namespace ElectricalProgressive.Content.Block.ELamp
             {
                 var key = CacheDataKey.FromEntity(entity);
 
-                if (!BlockESmallLamp.MeshDataCache.TryGetValue(key, out var meshData))
+                if (!MeshDataCache.TryGetValue(key, out var meshData))
                 {
                     clientApi.Tesselator.TesselateBlock(this, out meshData);
 
@@ -174,7 +173,7 @@ namespace ElectricalProgressive.Content.Block.ELamp
                     // быстро враащем обьект
                     FacingRotations.ApplyRotations(meshData, key.Facing);
 
-                    BlockESmallLamp.MeshDataCache.TryAdd(key, meshData);
+                    MeshDataCache.TryAdd(key, meshData);
                 }
 
                 sourceMesh = meshData;
@@ -193,10 +192,16 @@ namespace ElectricalProgressive.Content.Block.ELamp
         public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
         {
             base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
-            dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
-            dsc.AppendLine(Lang.Get("electricalprogressivebasics:Consumption") + ": " + MyMiniLib.GetAttributeFloat(inSlot.Itemstack.Block, "maxConsumption", 0) + " " + Lang.Get("electricalprogressivebasics:W"));
-            dsc.AppendLine(Lang.Get("electricalprogressiveqol:max-light") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "HSv", 0));
-            dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + ((MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false)) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
+
+            var block = inSlot.Itemstack?.Block;
+
+            if (block == null)
+                return;
+
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:Consumption") + ": " + MyMiniLib.GetAttributeFloat(block, "maxConsumption", 0) + " " + Lang.Get("electricalprogressivebasics:W"));
+            dsc.AppendLine(Lang.Get("electricalprogressiveqol:max-light") + ": " + MyMiniLib.GetAttributeInt(block, "HSv", 0));
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + ((MyMiniLib.GetAttributeBool(block, "isolatedEnvironment", false)) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
         }
 
 

@@ -16,9 +16,36 @@ namespace ElectricalProgressive.Content.Block.EHeatCannon
     public class BlockEHeatCannon : BlockEBase
     {
 
-        private WorldInteraction[] _interactions = [];
+        private static WorldInteraction[] _interactions = [];
 
 
+        public override void OnLoaded(ICoreAPI api)
+        {
+            if (api.Side != EnumAppSide.Client)
+                return;
+
+            var capi = api as ICoreClientAPI;
+
+
+            _interactions = ObjectCacheUtil.GetOrCreate(api, "heaterBlockInteractions", () =>
+            {
+                var wrenchItems = new List<ItemStack>();
+
+                Vintagestory.API.Common.Item[] wrenches = capi.World.SearchItems(new AssetLocation("wrench-*"));
+                foreach (Vintagestory.API.Common.Item item in wrenches)
+                    wrenchItems.Add(new ItemStack(item));
+
+                return new[] {
+                    new WorldInteraction
+                    {
+                        ActionLangCode = "electricalprogressiveqol:update_heater_info",
+                        HotKeyCode = null,
+                        MouseButton = EnumMouseButton.Right,
+                        Itemstacks = wrenchItems.ToArray()
+                    }
+                };
+            });
+        }
 
 
         public override bool DoPlaceBlock(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel, ItemStack byItemStack)
@@ -37,6 +64,8 @@ namespace ElectricalProgressive.Content.Block.EHeatCannon
             return true;
         }
         
+
+
         public override ItemStack OnPickBlock(IWorldAccessor world, BlockPos pos)
         {
             var newState = Variant["state"] switch
@@ -55,6 +84,7 @@ namespace ElectricalProgressive.Content.Block.EHeatCannon
             return new ItemStack(block);
         }
 
+
         public override ItemStack[] GetDrops(IWorldAccessor world, BlockPos pos, IPlayer byPlayer, float dropQuantityMultiplier = 1)
         {
             return [OnPickBlock(world, pos)];
@@ -65,7 +95,7 @@ namespace ElectricalProgressive.Content.Block.EHeatCannon
         public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack,
             BlockSelection blockSel, ref string failureCode)
         {
-            //неваляжка - только вертикально
+            // неваляжка - только вертикально
             // целая ли грань, на которую ставим
             if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSel.Position, Facing.DownAll))
             {
@@ -74,6 +104,8 @@ namespace ElectricalProgressive.Content.Block.EHeatCannon
 
             return base.TryPlaceBlock(world, byPlayer, itemstack, blockSel, ref failureCode);
         }
+
+
 
         public override void OnNeighbourBlockChange(IWorldAccessor world, BlockPos pos, BlockPos neibpos)
         {
@@ -128,33 +160,7 @@ namespace ElectricalProgressive.Content.Block.EHeatCannon
 
         }
 
-        public override void OnLoaded(ICoreAPI api)
-        {
-            if (api.Side != EnumAppSide.Client)
-                return;
-
-            var capi = api as ICoreClientAPI;
-
-
-            _interactions = ObjectCacheUtil.GetOrCreate(api, "heaterBlockInteractions", () =>
-            {
-                var wrenchItems = new List<ItemStack>();
-
-                Vintagestory.API.Common.Item[] wrenches = capi.World.SearchItems(new AssetLocation("wrench-*"));
-                foreach (Vintagestory.API.Common.Item item in wrenches)
-                    wrenchItems.Add(new ItemStack(item));
-
-                return new[] {
-                    new WorldInteraction
-                    {
-                        ActionLangCode = "electricalprogressiveqol:update_heater_info",
-                        HotKeyCode = null,
-                        MouseButton = EnumMouseButton.Right,
-                        Itemstacks = wrenchItems.ToArray()
-                    }
-                };
-            });
-        }
+        
 
 
         public override WorldInteraction[] GetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection selection, IPlayer forPlayer)
@@ -168,7 +174,11 @@ namespace ElectricalProgressive.Content.Block.EHeatCannon
         public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
         {
             base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
-            var block = inSlot.Itemstack.Block;
+
+            var block = inSlot.Itemstack?.Block;
+
+            if (block == null)
+                return;
 
             dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
             dsc.AppendLine(Lang.Get("electricalprogressivebasics:Consumption") + ": " + MyMiniLib.GetAttributeFloat(block, "maxConsumption", 0) + " " + Lang.Get("electricalprogressivebasics:W"));

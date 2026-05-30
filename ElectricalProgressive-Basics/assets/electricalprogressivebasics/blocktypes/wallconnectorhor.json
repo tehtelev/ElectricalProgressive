@@ -118,23 +118,42 @@
 
   "shapebytype": {
     "*-north": {
-      "base": "block/wallconnectorhor",
+      "base": "block/wallconnector/wallconnectorhor",
       "rotateY": 0
     },
     "*-east": {
-      "base": "block/wallconnectorhor",
+      "base": "block/wallconnector/wallconnectorhor",
       "rotateY": 270
     },
     "*-south": {
-      "base": "block/wallconnectorhor",
+      "base": "block/wallconnector/wallconnectorhor",
       "rotateY": 180
     },
     "*-west": {
-      "base": "block/wallconnectorhor",
+      "base": "block/wallconnector/wallconnectorhor",
       "rotateY": 90
     }
   },
 
+
+  "lod2shapebytype": {
+    "*-north": {
+      "base": "block/wallconnector/wallconnectorhor-lod2",
+      "rotateY": 0
+    },
+    "*-east": {
+      "base": "block/wallconnector/wallconnectorhor-lod2",
+      "rotateY": 270
+    },
+    "*-south": {
+      "base": "block/wallconnector/wallconnectorhor-lod2",
+      "rotateY": 180
+    },
+    "*-west": {
+      "base": "block/wallconnector/wallconnectorhor-lod2",
+      "rotateY": 90
+    }
+  },
 
 
   "resistance": 1,

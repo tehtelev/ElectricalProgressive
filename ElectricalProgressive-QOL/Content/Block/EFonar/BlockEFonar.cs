@@ -166,10 +166,16 @@ namespace ElectricalProgressive.Content.Block.EFonar
             sourceMesh = meshData;
         }
 
+
+
         public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
         {
             base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
-            var block = inSlot.Itemstack.Block;
+
+            var block = inSlot.Itemstack?.Block;
+
+            if (block == null)
+                return;
 
             dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
             dsc.AppendLine(Lang.Get("electricalprogressivebasics:Consumption") + ": " + MyMiniLib.GetAttributeFloat(block, "maxConsumption", 0) + " " + Lang.Get("electricalprogressivebasics:W"));
@@ -177,6 +183,7 @@ namespace ElectricalProgressive.Content.Block.EFonar
             dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " +
                 (MyMiniLib.GetAttributeBool(block, "isolatedEnvironment", false) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
         }
+
 
         private static Dictionary<Facing, RotationData> CreateRotationCache()
         {

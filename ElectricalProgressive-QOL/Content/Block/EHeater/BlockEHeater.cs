@@ -18,11 +18,40 @@ namespace ElectricalProgressive.Content.Block.EHeater
 {
     public class BlockEHeater : BlockEBase
     {
-        private WorldInteraction[] _interactions = [];
+        private static WorldInteraction[] _interactions = [];
 
         private static readonly Dictionary<CacheDataKey, MeshData> MeshDataCache = new();
         private static readonly Dictionary<CacheDataKey, Cuboidf[]> SelectionBoxesCache = new();
         private static readonly Dictionary<CacheDataKey, Cuboidf[]> CollisionBoxesCache = new();
+
+
+        public override void OnLoaded(ICoreAPI api)
+        {
+            if (api.Side != EnumAppSide.Client)
+                return;
+
+            var capi = api as ICoreClientAPI;
+
+
+            _interactions = ObjectCacheUtil.GetOrCreate(api, "heaterBlockInteractions", () =>
+            {
+                var wrenchItems = new List<ItemStack>();
+
+                Vintagestory.API.Common.Item[] wrenches = capi.World.SearchItems(new AssetLocation("wrench-*"));
+                foreach (var item in wrenches)
+                    wrenchItems.Add(new ItemStack(item));
+
+                return new[] {
+                    new WorldInteraction
+                    {
+                        ActionLangCode = "electricalprogressiveqol:update_heater_info",
+                        HotKeyCode = null,
+                        MouseButton = EnumMouseButton.Right,
+                        Itemstacks = wrenchItems.ToArray()
+                    }
+                };
+            });
+        }
 
 
 
@@ -156,6 +185,8 @@ namespace ElectricalProgressive.Content.Block.EHeater
             return boxes ?? [];
         }
 
+
+
         public override void OnJsonTesselation(ref MeshData sourceMesh, ref int[] lightRgbsByCorner, BlockPos pos, Vintagestory.API.Common.Block[] chunkExtBlocks, int extIndex3d)
         {
             if (api is not ICoreClientAPI clientApi ||
@@ -181,16 +212,8 @@ namespace ElectricalProgressive.Content.Block.EHeater
             sourceMesh = meshData;
         }
 
-        public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
-        {
-            base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
-            var block = inSlot.Itemstack.Block;
 
-            dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
-            dsc.AppendLine(Lang.Get("electricalprogressivebasics:Consumption") + ": " + MyMiniLib.GetAttributeFloat(block, "maxConsumption", 0) + " " + Lang.Get("electricalprogressivebasics:W"));
-            dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " +
-                (MyMiniLib.GetAttributeBool(block, "isolatedEnvironment", false) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
-        }
+
 
 
 
@@ -229,33 +252,7 @@ namespace ElectricalProgressive.Content.Block.EHeater
 
         }
 
-        public override void OnLoaded(ICoreAPI api)
-        {
-            if (api.Side != EnumAppSide.Client)
-                return;
 
-            var capi = api as ICoreClientAPI;
-
-
-            _interactions = ObjectCacheUtil.GetOrCreate(api, "heaterBlockInteractions", () =>
-            {
-                var wrenchItems = new List<ItemStack>();
-
-                Vintagestory.API.Common.Item[] wrenches = capi.World.SearchItems(new AssetLocation("wrench-*"));
-                foreach (Vintagestory.API.Common.Item item in wrenches)
-                    wrenchItems.Add(new ItemStack(item));
-
-                return new[] {
-                    new WorldInteraction
-                    {
-                        ActionLangCode = "electricalprogressiveqol:update_heater_info",
-                        HotKeyCode = null,
-                        MouseButton = EnumMouseButton.Right,
-                        Itemstacks = wrenchItems.ToArray()
-                    }
-                };
-            });
-        }
 
 
         public override WorldInteraction[] GetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection selection, IPlayer forPlayer)
@@ -264,7 +261,20 @@ namespace ElectricalProgressive.Content.Block.EHeater
         }
 
 
+        public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
+        {
+            base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
 
+            var block = inSlot.Itemstack?.Block;
+
+            if (block == null)
+                return;
+
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:Consumption") + ": " + MyMiniLib.GetAttributeFloat(block, "maxConsumption", 0) + " " + Lang.Get("electricalprogressivebasics:W"));
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " +
+                           (MyMiniLib.GetAttributeBool(block, "isolatedEnvironment", false) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
+        }
 
 
         internal struct CacheDataKey

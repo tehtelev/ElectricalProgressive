@@ -73,10 +73,12 @@
 
 
   "shape": {
-    "base": "block/wallconnectorver"
+    "base": "block/wallconnector/wallconnectorver"
   },
 
-
+  "lod2shape": {
+    "base": "block/wallconnector/wallconnectorver-lod2"
+  },
 
   "resistance": 1,
   "lightAbsorption": 255.0,

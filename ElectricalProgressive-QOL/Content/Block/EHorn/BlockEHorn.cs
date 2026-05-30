@@ -13,7 +13,7 @@ namespace ElectricalProgressive.Content.Block.EHorn;
 
 public class BlockEHorn : BlockEBase
 {
-    private WorldInteraction[] _interactions = [];
+    private static WorldInteraction[] _interactions = [];
 
     public override void OnLoaded(ICoreAPI api)
     {
@@ -22,7 +22,7 @@ public class BlockEHorn : BlockEBase
         if (api is not ICoreClientAPI clientApi)
             return;
 
-        this._interactions = ObjectCacheUtil.GetOrCreate(
+        _interactions = ObjectCacheUtil.GetOrCreate(
             api,
             "forgeBlockInteractions",
             () =>
@@ -173,8 +173,14 @@ public class BlockEHorn : BlockEBase
     public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
     {
         base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Consumption") + ": " + MyMiniLib.GetAttributeFloat(inSlot.Itemstack.Block, "maxConsumption", 0) + " " + Lang.Get("electricalprogressivebasics:W"));
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + ((MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false)) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
+
+        var block = inSlot.Itemstack?.Block;
+
+        if (block == null)
+            return;
+
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Consumption") + ": " + MyMiniLib.GetAttributeFloat(block, "maxConsumption", 0) + " " + Lang.Get("electricalprogressivebasics:W"));
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + ((MyMiniLib.GetAttributeBool(block, "isolatedEnvironment", false)) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
     }
 }
