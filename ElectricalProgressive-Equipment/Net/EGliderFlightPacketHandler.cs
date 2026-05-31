@@ -38,7 +38,7 @@ public class EGliderFlightPacketHandler : ModSystem
     /// <summary>Скорость сброса крена при приземлении.</summary>
     private const float BANK_RESET_SPEED = 5.0f;
     /// <summary>Сглаживание угловой скорости рысканья (EMA).</summary>
-    private const float YAW_RATE_EMA = 0.82f;
+    private const float YAW_RATE_EMA = 0.9f;
 
     #endregion
 
@@ -63,9 +63,14 @@ public class EGliderFlightPacketHandler : ModSystem
     // Состояние крена модели
     private float _prevGlideYaw = float.NaN;
     private float _smoothedYawRate = 0f;
-    private float _bankAngle = 0f;
+    // Было: private float _bankAngle = 0f;
+    internal float BankAngle { get; private set; } = 0f;
 
     private bool physicsPatched = false;
+    // --- ЗВУК ФОРСАЖА ---
+    private ILoadedSound? _afterburnerSound;
+
+    private static readonly AssetLocation AfterburnerSoundLocation = new AssetLocation("electricalprogressiveequipment:sounds/afterburner.ogg");
 
     #endregion
 
@@ -85,14 +90,20 @@ public class EGliderFlightPacketHandler : ModSystem
         // Таймер для сброса крена, когда игрок не парит
         api.Event.RegisterGameTickListener(OnClientBankReset, 20);
 
-        api.Logger.Notification("[ElectricalProgressive] EGliderFlightPacketHandler client started");
+        // Регистрируем рендерер крена камеры — работает каждый кадр
+        api.Event.RegisterRenderer(
+            new GliderCameraRollRenderer(api, this),
+            EnumRenderStage.Before   // до отрисовки сцены
+        );
+
+        //api.Logger.Notification("[ElectricalProgressive] EGliderFlightPacketHandler client started");
     }
 
     public override void StartServerSide(ICoreServerAPI api)
     {
         base.StartServerSide(api);
         sapi = api;
-
+        
         // Регистрация сети и обработчика команд
         var channel = api.Network.RegisterChannel("EP")
             .RegisterMessageType<EGliderAfterburnerPacket>();
@@ -102,105 +113,113 @@ public class EGliderFlightPacketHandler : ModSystem
         // Тик для списания прочности
         sapi.Event.RegisterGameTickListener(OnDurabilityTick, 1000);
 
-        api.Logger.Notification("[ElectricalProgressive] EGliderFlightPacketHandler server started");
+        //api.Logger.Notification("[ElectricalProgressive] EGliderFlightPacketHandler server started");
     }
 
     #region Частицы форсажа
 
+    // Статические свойства частиц создаются один раз. Позиции обновляются динамически перед спавном.
+    private static readonly SimpleParticleProperties LeftWingProps = new(
+        minQuantity: 2, maxQuantity: 10,
+        color: ColorUtil.ToRgba(220, 255, 255, 255),
+        minPos: Vec3d.Zero, maxPos: Vec3d.Zero,
+        minVelocity: new Vec3f(-0.2f, -0.2f, -0.2f),
+        maxVelocity: new Vec3f(0.2f, 0.2f, 0.2f),
+        lifeLength: 1.0f, gravityEffect: 0f,
+        minSize: 0.2f, maxSize: 1.0f,
+        model: EnumParticleModel.Quad
+    );
+
+    private static readonly SimpleParticleProperties RightWingProps = new(
+        minQuantity: 2, maxQuantity: 10,
+        color: ColorUtil.ToRgba(220, 255, 255, 255),
+        minPos: Vec3d.Zero, maxPos: Vec3d.Zero,
+        minVelocity: new Vec3f(-0.2f, -0.2f, -0.2f),
+        maxVelocity: new Vec3f(0.2f, 0.2f, 0.2f),
+        lifeLength: 1.0f, gravityEffect: 0f,
+        minSize: 0.2f, maxSize: 1.0f,
+        model: EnumParticleModel.Quad
+    );
+
     /// <summary>
-    /// Спавнит частицы пламени на краях крыльев.
-    /// </summary>
-    /// <summary>
-    /// Спавнит частицы пламени на краях крыльев с учётом крена.
+    /// Спавнит частицы на краях крыльев с учётом крена.
     /// </summary>
     private void SpawnAfterburnerParticles(Entity entity)
     {
-        if (capi == null || entity == null) return;
+        if (capi == null || entity == null)
+            return;
 
         Vec3d pos = entity.Pos.XYZ;
         Vec3f viewVec = entity.Pos.GetViewVector();
 
         // 1. Нормализуем вектор направления
-        Vec3d forward = (new Vec3d(viewVec.X, viewVec.Y, viewVec.Z)).Normalize();
+        Vec3d forward = new Vec3d(viewVec.X, viewVec.Y, viewVec.Z).Normalize();
 
         // 2. Вычисляем базовые локальные оси (до учёта крена)
-        Vec3d right = (forward.Cross(new Vec3d(0, 1, 0))).Normalize();
+        // Защита от деления на ноль при полёте строго вверх/вниз
+        Vec3d right = forward.Cross(new Vec3d(0, 1, 0)).Normalize();
+        if (right.LengthSq() < 0.0001f)
+        {
+            // Фоллбэк: берём вектор вперёд-вправо, если forward параллелен Y
+            right = forward.Cross(new Vec3d(1, 0, 0)).Normalize();
+        }
         Vec3d up = right.Cross(forward).Normalize();
 
-        // 3. Поворачиваем оси 'right' и 'up' вокруг 'forward' на угол крена (_bankAngle)
-        if (Math.Abs(_bankAngle) > 0.0001f)
+        // 3. Поворачиваем оси 'right' и 'up' вокруг 'forward' на угол крена
+        if (Math.Abs(BankAngle) > 0.0001f)
         {
             Vec3d forwardCrossRight = forward.Cross(right);
-            // Формула вращения вектора вокруг оси
-            right = right * MathF.Cos(-_bankAngle) + forwardCrossRight * MathF.Sin(-_bankAngle);
-            up = (right.Cross(forward)).Normalize(); // Пересчитываем up для сохранения ортогональности
+            right = right * MathF.Cos(-BankAngle) + forwardCrossRight * MathF.Sin(-BankAngle);
+            up = right.Cross(forward).Normalize();
         }
 
-        // 4. Координаты крыльев (относительно центра игрока)
-        float wingOffsetX = 2.0f; // Половина размаха
-        float wingOffsetY = 0.5f; // Высота крыла
-        float wingOffsetZ = 1.5f; // Смещение назад
+        // 4. Координаты крыльев и размеры бокса частиц
+        float wingOffsetX = 2.0f;
+        float wingOffsetY = 0.7f;
+        float wingOffsetZ = -0.2f;
+        float boxHalfSize = 0.4f;
 
-        // Вычисляем абсолютные позиции левого и правого крыла с учётом крена
-        Vec3d leftWingPos = pos + right * -wingOffsetX + up * wingOffsetY + forward * wingOffsetZ;
-        Vec3d rightWingPos = pos + right * wingOffsetX + up * wingOffsetY + forward * wingOffsetZ;
+        // Обновляем статические свойства частиц динамическими координатами
+        // Левое крыло
+        LeftWingProps.MinPos = pos + right * (-wingOffsetX - boxHalfSize) + up * (wingOffsetY - boxHalfSize) + forward * (wingOffsetZ - boxHalfSize);
+        LeftWingProps.AddPos = pos + right * (-wingOffsetX + boxHalfSize) + up * (wingOffsetY + boxHalfSize) + forward * (wingOffsetZ + boxHalfSize) - LeftWingProps.MinPos;
 
-        Vec3d leftWingPos2 = new Vec3d();
-        Vec3d rightWingPos2 = new Vec3d();
+        // Правое крыло
+        RightWingProps.MinPos = pos + right * (wingOffsetX - boxHalfSize) + up * (wingOffsetY - boxHalfSize) + forward * (wingOffsetZ - boxHalfSize);
+        RightWingProps.AddPos = pos + right * (wingOffsetX + boxHalfSize) + up * (wingOffsetY + boxHalfSize) + forward * (wingOffsetZ + boxHalfSize) - RightWingProps.MinPos;
 
-        leftWingPos.X = leftWingPos.X - 0.4d;
-        leftWingPos.Y = leftWingPos.Y - 0.4d;
-        leftWingPos.Z = leftWingPos.Z - 0.4d;
-
-        rightWingPos.X = rightWingPos.X - 0.4d;
-        rightWingPos.Y = rightWingPos.Y - 0.4d;
-        rightWingPos.Z = rightWingPos.Z - 0.4d;
-
-        leftWingPos2.X = leftWingPos.X + 0.8d;
-        leftWingPos2.Y = leftWingPos.Y + 0.8d;
-        leftWingPos2.Z = leftWingPos.Z + 0.8d;
-
-        rightWingPos2.X = rightWingPos.X + 0.8d;
-        rightWingPos2.Y = rightWingPos.Y + 0.8d;
-        rightWingPos2.Z = rightWingPos.Z + 0.8d;
-
-
-        // 5. Создаем свойства частиц
-        var props1 = new SimpleParticleProperties(
-            minQuantity: 2,
-            maxQuantity: 10,
-            color: ColorUtil.ToRgba(220, 255, 255, 255),
-            minPos: leftWingPos,
-            maxPos: leftWingPos2,
-            minVelocity: new Vec3f(-0.2f, -0.2f, -0.2f),
-            maxVelocity: new Vec3f(0.2f, 0.2f, 0.2f),
-            lifeLength: 1.0f,
-            gravityEffect: 0f,
-            minSize: 0.2f,
-            maxSize: 1.0f,
-            model: EnumParticleModel.Quad
-        );
-
-        var props2 = new SimpleParticleProperties(
-            minQuantity: 2,
-            maxQuantity: 10,
-            color: ColorUtil.ToRgba(220, 255, 255, 255),
-            minPos: rightWingPos,
-            maxPos: rightWingPos2,
-            minVelocity: new Vec3f(-0.2f, -0.2f, -0.2f),
-            maxVelocity: new Vec3f(0.2f, 0.2f, 0.2f),
-            lifeLength: 1.0f,
-            gravityEffect: 0f,
-            minSize: 0.2f,
-            maxSize: 1.0f,
-            model: EnumParticleModel.Quad
-        );
-
-        capi.World.SpawnParticles(props1);
-        capi.World.SpawnParticles(props2);
+        // 5. Спавним частицы (API клонирует свойства внутри, но создание объекта класса экономит GC)
+        capi.World.SpawnParticles(LeftWingProps);
+        capi.World.SpawnParticles(RightWingProps);
+        
     }
 
     #endregion
+
+
+    private void StartAfterburnerSound(Entity entity)
+    {
+        if (_afterburnerSound != null || capi == null)
+            return;
+        _afterburnerSound = capi.World.LoadSound(new SoundParams()
+        {
+            Location = AfterburnerSoundLocation,
+            ShouldLoop = true,
+            Position = new Vec3f([(float)entity.Pos.X, (float)entity.Pos.Y, (float)entity.Pos.Z]),
+            DisposeOnFinish = false,
+            Volume = 0.25f,
+        });
+        _afterburnerSound.Start();
+    }
+
+    private void StopAfterburnerSound()
+    {
+        if (_afterburnerSound == null)
+            return;
+        _afterburnerSound.Stop();
+        _afterburnerSound.Dispose();
+        _afterburnerSound = null;
+    }
 
 
     #region Методы инициализации патча
@@ -248,7 +267,8 @@ public class EGliderFlightPacketHandler : ModSystem
     /// </summary>
     public void ApplyFlyingPhysics(float dt, Entity entity, EntityPos pos, EntityControls controls)
     {
-        if (!controls.Gliding || !TryFindGlider(entity, out _)) return;
+        if (!controls.Gliding || !TryFindGlider(entity, out _))
+            return;
 
         double num1 = Math.Cos(pos.Pitch);
         double num2 = Math.Sin(pos.Pitch);
@@ -268,7 +288,7 @@ public class EGliderFlightPacketHandler : ModSystem
                 cooldownTimer = 0f;
             }
         }
-
+        
         // Переключение форсажа
         if (wantsAfterburner != wasAfterburnerActive && !isAfterburnerCooldown)
         {
@@ -276,19 +296,23 @@ public class EGliderFlightPacketHandler : ModSystem
             SendAfterburnerCommand(wasAfterburnerActive);
             isAfterburnerCooldown = true;
             cooldownTimer = 0f;
+
+            if (wasAfterburnerActive) StartAfterburnerSound(entity);
+            else StopAfterburnerSound();
         }
 
         // Применение скорости форсажа
         if (wasAfterburnerActive && hasValidGlider)
         {
             controls.GlideSpeed = Math.Min(MAX_GLIDE_SPEED, controls.GlideSpeed + GLIDE_SPEED_BOOST);
-
+           
             SpawnAfterburnerParticles(entity);
         }
         else if (wasAfterburnerActive && !hasValidGlider)
         {
             // Сломался - выключаем
             wasAfterburnerActive = false;
+            StopAfterburnerSound();
             SendAfterburnerCommand(false);
             isAfterburnerCooldown = false;
             cooldownTimer = 0f;
@@ -313,7 +337,8 @@ public class EGliderFlightPacketHandler : ModSystem
     private void OnClientBankReset(float dt)
     {
         EntityPlayer? entity = capi?.World?.Player?.Entity;
-        if (entity == null || capi == null) return;
+        if (entity == null || capi == null)
+            return;
 
         bool isGlidingWithEGlider = entity.Controls.Gliding && TryFindGlider(entity, out _);
 
@@ -325,6 +350,7 @@ public class EGliderFlightPacketHandler : ModSystem
             if (wasAfterburnerActive)
             {
                 wasAfterburnerActive = false;
+                StopAfterburnerSound();
                 SendAfterburnerCommand(false);
                 isAfterburnerCooldown = false;
                 cooldownTimer = 0f;
@@ -337,7 +363,8 @@ public class EGliderFlightPacketHandler : ModSystem
     /// </summary>
     private void SendAfterburnerCommand(bool isActive)
     {
-        if (clientChannel == null || capi?.World?.Player == null) return;
+        if (clientChannel == null || capi?.World?.Player == null)
+            return;
 
         clientChannel.SendPacket(new EGliderAfterburnerPacket
         {
@@ -353,27 +380,28 @@ public class EGliderFlightPacketHandler : ModSystem
     private void ApplyHeadingRelativeBank(Entity entity, EntityPos pos, bool gliding)
     {
         var renderer = entity.Properties.Client.Renderer as EntityPlayerShapeRenderer;
-        if (renderer == null) return;
+        if (renderer == null)
+            return;
 
         if (gliding)
         {
             // Применяем крен через xangle и обнуляем ванильный Roll
-            renderer.xangle = _bankAngle;
+            renderer.xangle = BankAngle;
             pos.Roll = 0;
         }
         else
         {
             // Плавный сброс угла крена к нулю
-            _bankAngle += -_bankAngle * Math.Min(BANK_RESET_SPEED * 0.016f, 1f);
+            BankAngle += -BankAngle * Math.Min(BANK_RESET_SPEED * 0.016f, 1f);
 
-            if (Math.Abs(_bankAngle) < 0.001f)
+            if (Math.Abs(BankAngle) < 0.001f)
             {
-                _bankAngle = 0f;
+                BankAngle = 0f;
                 _smoothedYawRate = 0f;
                 _prevGlideYaw = float.NaN;
             }
 
-            renderer.xangle = _bankAngle;
+            renderer.xangle = BankAngle;
             pos.Roll = 0;
         }
     }
@@ -411,7 +439,7 @@ public class EGliderFlightPacketHandler : ModSystem
 
         // Расчет целевого крена и интерполяция текущего угла
         float targetBank = GameMath.Clamp(_smoothedYawRate * BANK_SENSITIVITY, -MAX_BANK_ANGLE, MAX_BANK_ANGLE);
-        _bankAngle += (targetBank - _bankAngle) * Math.Min(BANK_SMOOTHING * dt, 1f);
+        BankAngle += (targetBank - BankAngle) * Math.Min(BANK_SMOOTHING * dt, 1f);
     }
 
     #endregion
@@ -420,7 +448,8 @@ public class EGliderFlightPacketHandler : ModSystem
 
     private void OnAfterburnerCommand(IServerPlayer fromPlayer, EGliderAfterburnerPacket packet)
     {
-        if (fromPlayer?.PlayerUID != packet.PlayerUID) return;
+        if (fromPlayer?.PlayerUID != packet.PlayerUID)
+            return;
 
         if (packet.IsActive)
         {
@@ -445,12 +474,14 @@ public class EGliderFlightPacketHandler : ModSystem
 
     private void OnDurabilityTick(float dt)
     {
-        if (sapi == null) return;
+        if (sapi == null)
+            return;
 
         foreach (var player in sapi.World.AllOnlinePlayers)
         {
             var entity = player.Entity;
-            if (entity == null || !activeAfterburners.GetValueOrDefault(player.PlayerUID)) continue;
+            if (entity == null || !activeAfterburners.GetValueOrDefault(player.PlayerUID))
+                continue;
 
             // Проверяем, активен ли форсаж в данный момент (Sneak + Gliding)
             if (!entity.Controls.Sneak || !entity.Controls.Gliding)
@@ -531,7 +562,8 @@ public class EGliderFlightPacketHandler : ModSystem
     /// <summary>Серверная версия поиска слота (возвращает кортеж для удобства).</summary>
     private static (bool hasGlider, ItemSlot? gliderSlot) TryFindGliderServer(Entity entity)
     {
-        if (TryFindGlider(entity, out var slot)) return (true, slot);
+        if (TryFindGlider(entity, out var slot))
+            return (true, slot);
         return (false, null);
     }
 
