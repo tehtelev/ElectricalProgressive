@@ -70,7 +70,7 @@ public class EGliderFlightPacketHandler : ModSystem
     // --- ЗВУК ФОРСАЖА ---
     private ILoadedSound? _afterburnerSound;
 
-    private static readonly AssetLocation AfterburnerSoundLocation = new AssetLocation("electricalprogressiveequipment:sounds/afterburner.ogg");
+    private static readonly AssetLocation AfterburnerSoundLocation = new AssetLocation("electricalprogressiveequipment:sounds/airplane.ogg");
 
     #endregion
 
