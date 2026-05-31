@@ -24,7 +24,7 @@ public class EGliderFlightPacketHandler : ModSystem
     private const float DURABILITY_LOSS_INTERVAL = 1.0f;
 
     // ── Параметры крена при повороте ───────────────────────────────────────
-    /// <summary>Максимальный угол крена (в радианах). ~34°</summary>
+    /// <summary>Максимальный угол крена (в радианах). </summary>
     private const float MAX_BANK_ANGLE = 1.5f;
     /// <summary>Коэффициент: угловая скорость рысканья (рад/с) → целевой крен (рад)</summary>
     private const float BANK_SENSITIVITY = 0.3f;
@@ -68,17 +68,17 @@ public class EGliderFlightPacketHandler : ModSystem
 
     public override bool ShouldLoad(EnumAppSide forSide) => true;
 
+
+
     public override void StartClientSide(ICoreClientAPI api)
     {
         base.StartClientSide(api);
         capi = api;
-
-        // Регистрируем канал для отправки команд на сервер
         clientChannel = api.Network.RegisterChannel("EP")
             .RegisterMessageType<EGliderAfterburnerPacket>();
-
-        // Ждём появления игрока и применяем патч физики
         RegisterPhysicsPatch();
+
+        api.Event.RegisterGameTickListener(OnClientBankReset, 20);
 
         api.Logger.Notification("[ElectricalProgressive] EGliderFlightPacketHandler client started");
     }
@@ -224,6 +224,33 @@ public class EGliderFlightPacketHandler : ModSystem
         clientChannel.SendPacket(packet);
     }
 
+
+    private void OnClientBankReset(float dt)
+    {
+        EntityPlayer? entity = capi?.World?.Player?.Entity;
+        if (entity == null || capi == null) return;
+
+        bool isGlidingWithEGlider = entity.Controls.Gliding && HasEGliderEquipped(entity);
+
+        if (!isGlidingWithEGlider)
+        {
+            // Сбрасываем крен модели в ноль (или плавно, как раньше)
+            ApplyHeadingRelativeBank(entity, entity.Pos, false);
+
+            // Если форсаж был активен, а глайдер выключился – отключаем принудительно
+            if (wasAfterburnerActive)
+            {
+                wasAfterburnerActive = false;
+                SendAfterburnerCommand(false);
+                isAfterburnerCooldown = false;
+                cooldownTimer = 0f;
+            }
+        }
+        // Если игрок парит с электрическим глайдером – сбросом занимается ApplyFlyingPhysics
+    }
+
+
+
     /// <summary>
     /// Применяет физику полёта с форсажем (вызывается из патча)
     /// </summary>
@@ -237,6 +264,7 @@ public class EGliderFlightPacketHandler : ModSystem
 
         if (isGlidingWithEGlider)
         {
+            // скорость, подъёмная сила ...
             double num1 = Math.Cos(pos.Pitch);
             double num2 = Math.Sin(pos.Pitch);
             double num3 = Math.Cos(pos.Yaw);
@@ -279,29 +307,18 @@ public class EGliderFlightPacketHandler : ModSystem
             {
                 double max = entity.Stats.GetBlended("gliderSpeedMax") - 0.8;
                 double num6 = GameMath.Clamp(controls.GlideSpeed, 0.005f, max);
-
                 float blended = entity.Stats.GetBlended("gliderLiftMax");
                 double y = Math.Min(num2 * num6, blended);
-
                 pos.Motion.Add(-num1 * num4 * num6, y, -num1 * num3 * num6);
                 pos.Motion.Mul(GameMath.Clamp(1.0 - pos.Motion.Length() * 0.13, 0.0, 1.0));
             }
 
-            UpdateGliderBank(dt, pos);
-            ApplyHeadingRelativeBank(entity, pos, true);   // ← добавили entity
+            // Обновление угла крена из скорости рысканья
+            UpdateGliderBank(entity, dt, pos);
+            // Применяем крен к рендереру
+            ApplyHeadingRelativeBank(entity, pos, true);
         }
-        else
-        {
-            ApplyHeadingRelativeBank(entity, pos, false);  // ← добавили entity
 
-            if (wasAfterburnerActive)
-            {
-                wasAfterburnerActive = false;
-                SendAfterburnerCommand(false);
-                isAfterburnerCooldown = false;
-                cooldownTimer = 0f;
-            }
-        }
     }
 
 
@@ -309,7 +326,8 @@ public class EGliderFlightPacketHandler : ModSystem
     {
         // Получаем рендерер игрока (теперь это EntityPlayerShapeRenderer)
         var renderer = entity.Properties.Client.Renderer as EntityPlayerShapeRenderer;
-        if (renderer == null) return;
+        if (renderer == null)
+            return;
 
         if (gliding)
         {
@@ -335,7 +353,7 @@ public class EGliderFlightPacketHandler : ModSystem
 
     private float _bankPitchOffset = 0f;
 
-    private void UpdateGliderBank(float dt, EntityPos pos)
+    private void UpdateGliderBank(Entity entity, float dt, EntityPos pos)
     {
         float curYaw = (float)pos.Yaw;
 
@@ -343,8 +361,18 @@ public class EGliderFlightPacketHandler : ModSystem
         {
             float yawDelta = curYaw - _prevGlideYaw;
 
-            if (yawDelta > MathF.PI) yawDelta -= 2f * MathF.PI;
-            if (yawDelta < -MathF.PI) yawDelta += 2f * MathF.PI;
+            // проверяем кнопку включающую курсор
+            var mouseContolHotKeyPressed = (entity.Api as ICoreClientAPI).Input.IsHotKeyPressed("togglemousecontrol");
+
+            // если кнопка активна, то скорее всего yaw резко изменился и вызовет огромный скачек крена
+            if (mouseContolHotKeyPressed)
+                yawDelta = 0;
+
+            // если рыскание за пределами угла ПИ
+            if (yawDelta > MathF.PI)
+                yawDelta -= 2f * MathF.PI;
+            if (yawDelta < -MathF.PI)
+                yawDelta += 2f * MathF.PI;
 
             float instantRate = dt > 0.0001f ? yawDelta / dt : 0f;
             _smoothedYawRate = _smoothedYawRate * YAW_RATE_EMA
@@ -404,7 +432,8 @@ public class EGliderFlightPacketHandler : ModSystem
     /// </summary>
     private void OnDurabilityTick(float dt)
     {
-        if (sapi == null) return;
+        if (sapi == null)
+            return;
 
         foreach (var player in sapi.World.AllOnlinePlayers)
         {
