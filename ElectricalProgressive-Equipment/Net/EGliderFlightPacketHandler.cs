@@ -105,6 +105,104 @@ public class EGliderFlightPacketHandler : ModSystem
         api.Logger.Notification("[ElectricalProgressive] EGliderFlightPacketHandler server started");
     }
 
+    #region Частицы форсажа
+
+    /// <summary>
+    /// Спавнит частицы пламени на краях крыльев.
+    /// </summary>
+    /// <summary>
+    /// Спавнит частицы пламени на краях крыльев с учётом крена.
+    /// </summary>
+    private void SpawnAfterburnerParticles(Entity entity)
+    {
+        if (capi == null || entity == null) return;
+
+        Vec3d pos = entity.Pos.XYZ;
+        Vec3f viewVec = entity.Pos.GetViewVector();
+
+        // 1. Нормализуем вектор направления
+        Vec3d forward = (new Vec3d(viewVec.X, viewVec.Y, viewVec.Z)).Normalize();
+
+        // 2. Вычисляем базовые локальные оси (до учёта крена)
+        Vec3d right = (forward.Cross(new Vec3d(0, 1, 0))).Normalize();
+        Vec3d up = right.Cross(forward).Normalize();
+
+        // 3. Поворачиваем оси 'right' и 'up' вокруг 'forward' на угол крена (_bankAngle)
+        if (Math.Abs(_bankAngle) > 0.0001f)
+        {
+            Vec3d forwardCrossRight = forward.Cross(right);
+            // Формула вращения вектора вокруг оси
+            right = right * MathF.Cos(-_bankAngle) + forwardCrossRight * MathF.Sin(-_bankAngle);
+            up = (right.Cross(forward)).Normalize(); // Пересчитываем up для сохранения ортогональности
+        }
+
+        // 4. Координаты крыльев (относительно центра игрока)
+        float wingOffsetX = 2.0f; // Половина размаха
+        float wingOffsetY = 0.5f; // Высота крыла
+        float wingOffsetZ = 1.5f; // Смещение назад
+
+        // Вычисляем абсолютные позиции левого и правого крыла с учётом крена
+        Vec3d leftWingPos = pos + right * -wingOffsetX + up * wingOffsetY + forward * wingOffsetZ;
+        Vec3d rightWingPos = pos + right * wingOffsetX + up * wingOffsetY + forward * wingOffsetZ;
+
+        Vec3d leftWingPos2 = new Vec3d();
+        Vec3d rightWingPos2 = new Vec3d();
+
+        leftWingPos.X = leftWingPos.X - 0.4d;
+        leftWingPos.Y = leftWingPos.Y - 0.4d;
+        leftWingPos.Z = leftWingPos.Z - 0.4d;
+
+        rightWingPos.X = rightWingPos.X - 0.4d;
+        rightWingPos.Y = rightWingPos.Y - 0.4d;
+        rightWingPos.Z = rightWingPos.Z - 0.4d;
+
+        leftWingPos2.X = leftWingPos.X + 0.8d;
+        leftWingPos2.Y = leftWingPos.Y + 0.8d;
+        leftWingPos2.Z = leftWingPos.Z + 0.8d;
+
+        rightWingPos2.X = rightWingPos.X + 0.8d;
+        rightWingPos2.Y = rightWingPos.Y + 0.8d;
+        rightWingPos2.Z = rightWingPos.Z + 0.8d;
+
+
+        // 5. Создаем свойства частиц
+        var props1 = new SimpleParticleProperties(
+            minQuantity: 2,
+            maxQuantity: 10,
+            color: ColorUtil.ToRgba(220, 255, 255, 255),
+            minPos: leftWingPos,
+            maxPos: leftWingPos2,
+            minVelocity: new Vec3f(-0.2f, -0.2f, -0.2f),
+            maxVelocity: new Vec3f(0.2f, 0.2f, 0.2f),
+            lifeLength: 1.0f,
+            gravityEffect: 0f,
+            minSize: 0.2f,
+            maxSize: 1.0f,
+            model: EnumParticleModel.Quad
+        );
+
+        var props2 = new SimpleParticleProperties(
+            minQuantity: 2,
+            maxQuantity: 10,
+            color: ColorUtil.ToRgba(220, 255, 255, 255),
+            minPos: rightWingPos,
+            maxPos: rightWingPos2,
+            minVelocity: new Vec3f(-0.2f, -0.2f, -0.2f),
+            maxVelocity: new Vec3f(0.2f, 0.2f, 0.2f),
+            lifeLength: 1.0f,
+            gravityEffect: 0f,
+            minSize: 0.2f,
+            maxSize: 1.0f,
+            model: EnumParticleModel.Quad
+        );
+
+        capi.World.SpawnParticles(props1);
+        capi.World.SpawnParticles(props2);
+    }
+
+    #endregion
+
+
     #region Методы инициализации патча
 
     private void RegisterPhysicsPatch()
@@ -184,6 +282,8 @@ public class EGliderFlightPacketHandler : ModSystem
         if (wasAfterburnerActive && hasValidGlider)
         {
             controls.GlideSpeed = Math.Min(MAX_GLIDE_SPEED, controls.GlideSpeed + GLIDE_SPEED_BOOST);
+
+            SpawnAfterburnerParticles(entity);
         }
         else if (wasAfterburnerActive && !hasValidGlider)
         {
