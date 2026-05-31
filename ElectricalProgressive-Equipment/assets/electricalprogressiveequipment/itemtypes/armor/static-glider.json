@@ -17,9 +17,21 @@
   "attributes": {
     "chargable": true,
     "groundStorageTransform": {
-      "translation": { "x": -0.1, "y": 0, "z": 0.3 },
-      "rotation": { "x": 0, "y": -18, "z": 86 },
-      "origin": { "x": 0.5, "y": 0.2, "z": 0 }
+      "translation": {
+        "x": -0.1,
+        "y": 0,
+        "z": 0.3
+      },
+      "rotation": {
+        "x": 0,
+        "y": -18,
+        "z": 86
+      },
+      "origin": {
+        "x": 0.5,
+        "y": 0.2,
+        "z": 0
+      }
     },
     "handbook": {
       "groupBy": [ "static-glider-*" ],
@@ -31,13 +43,23 @@
       ]
     },
     "wearableAttachment": true,
-    "unfoldShapeStep1": { "base": "electricalprogressiveequipment:entity/static-glider/glider-transition1"},
-    "unfoldShapeStep2": { "base": "electricalprogressiveequipment:entity/static-glider/glider-transition2"},
+    "unfoldShapeStep1": { "base": "electricalprogressiveequipment:entity/static-glider/glider-transition1" },
+    "unfoldShapeStep2": { "base": "electricalprogressiveequipment:entity/static-glider/glider-transition2" },
     "attachShape": { "base": "electricalprogressiveequipment:entity/static-glider/glider-backpack" },
     "unfoldedShape": { "base": "electricalprogressiveequipment:entity/static-glider/glider-unfolded" },
     "backpack": {
       "quantitySlots": 4
-    }
+    },
+
+    "scaleX": 0.5,
+    "scaleY": 0.5,
+    "scaleZ": 0.5,
+    "translateX": 0.35,
+    "translateY": 0.0,
+    "translateZ": 0.15,
+    "rotateX": 87,
+    "rotateY": 90,
+    "rotateZ": 0
   },
   "shape": { "base": "electricalprogressiveequipment:entity/static-glider/glider-backpack" },
   "storageFlags": 2,
