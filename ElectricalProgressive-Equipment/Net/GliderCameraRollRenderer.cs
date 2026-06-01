@@ -1,6 +1,7 @@
-﻿using ElectricalProgressive.Net;
-using System;
+﻿using System;
 using Vintagestory.API.Client;
+
+namespace ElectricalProgressive.Net;
 
 internal class GliderCameraRollRenderer : IRenderer
 {
@@ -21,8 +22,12 @@ internal class GliderCameraRollRenderer : IRenderer
     public void OnRenderFrame(float deltaTime, EnumRenderStage stage)
     {
         float roll = - handler.BankAngle;
-        if (Math.Abs(roll) < 0.0001f) return;
 
+        // не обрабатываем, если roll 0
+        if (Math.Abs(roll) < 0.0001f)
+            return;
+
+        // если игрок вышел в меню
         if (capi.IsGamePaused)
         {
             return;

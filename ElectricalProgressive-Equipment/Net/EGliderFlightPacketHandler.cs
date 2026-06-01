@@ -103,7 +103,7 @@ public class EGliderFlightPacketHandler : ModSystem
     {
         base.StartServerSide(api);
         sapi = api;
-        
+
         // Регистрация сети и обработчика команд
         var channel = api.Network.RegisterChannel("EP")
             .RegisterMessageType<EGliderAfterburnerPacket>();
@@ -191,7 +191,7 @@ public class EGliderFlightPacketHandler : ModSystem
         // 5. Спавним частицы (API клонирует свойства внутри, но создание объекта класса экономит GC)
         capi.World.SpawnParticles(LeftWingProps);
         capi.World.SpawnParticles(RightWingProps);
-        
+
     }
 
     #endregion
@@ -288,7 +288,7 @@ public class EGliderFlightPacketHandler : ModSystem
                 cooldownTimer = 0f;
             }
         }
-        
+
         // Переключение форсажа
         if (wantsAfterburner != wasAfterburnerActive && !isAfterburnerCooldown)
         {
@@ -305,7 +305,7 @@ public class EGliderFlightPacketHandler : ModSystem
         if (wasAfterburnerActive && hasValidGlider)
         {
             controls.GlideSpeed = Math.Min(MAX_GLIDE_SPEED, controls.GlideSpeed + GLIDE_SPEED_BOOST);
-           
+
             SpawnAfterburnerParticles(entity);
         }
         else if (wasAfterburnerActive && !hasValidGlider)
@@ -331,7 +331,7 @@ public class EGliderFlightPacketHandler : ModSystem
 
         // Обновление и применение крена
         UpdateGliderBank(entity, dt, pos);
-        ApplyHeadingRelativeBank(entity, pos, true);
+        ApplyHeadingRelativeBank(entity, pos, true, dt);
     }
 
     private void OnClientBankReset(float dt)
@@ -345,7 +345,7 @@ public class EGliderFlightPacketHandler : ModSystem
         if (!isGlidingWithEGlider)
         {
             // Сброс крена и форсажа при выключении глайдера
-            ApplyHeadingRelativeBank(entity, entity.Pos, false);
+            ApplyHeadingRelativeBank(entity, entity.Pos, false, dt);
 
             if (wasAfterburnerActive)
             {
@@ -377,7 +377,7 @@ public class EGliderFlightPacketHandler : ModSystem
 
     #region Клиентская логика: Крен (Banking)
 
-    private void ApplyHeadingRelativeBank(Entity entity, EntityPos pos, bool gliding)
+    private void ApplyHeadingRelativeBank(Entity entity, EntityPos pos, bool gliding, float dt)
     {
         var renderer = entity.Properties.Client.Renderer as EntityPlayerShapeRenderer;
         if (renderer == null)
@@ -392,7 +392,7 @@ public class EGliderFlightPacketHandler : ModSystem
         else
         {
             // Плавный сброс угла крена к нулю
-            BankAngle += -BankAngle * Math.Min(BANK_RESET_SPEED * 0.016f, 1f);
+            BankAngle += -BankAngle * Math.Min(BANK_RESET_SPEED * dt, 1f);
 
             if (Math.Abs(BankAngle) < 0.001f)
             {
@@ -431,14 +431,21 @@ public class EGliderFlightPacketHandler : ModSystem
             float instantRate = dt > 0.0001f ? yawDelta / dt : 0f;
 
             // Сглаживание скорости рысканья (Exponential Moving Average)
-            _smoothedYawRate = _smoothedYawRate * YAW_RATE_EMA + instantRate * (1f - YAW_RATE_EMA);
-            
+            float ema = MathF.Pow(YAW_RATE_EMA, dt * 60f);
+
+            _smoothedYawRate = _smoothedYawRate * ema + instantRate * (1f - ema);
+
         }
 
         _prevGlideYaw = curYaw;
 
         // Расчет целевого крена и интерполяция текущего угла
-        float targetBank = GameMath.Clamp(_smoothedYawRate * BANK_SENSITIVITY, -MAX_BANK_ANGLE, MAX_BANK_ANGLE);
+        // для серверов умножаем на два
+        float BS = (capi?.IsSinglePlayer == true)
+            ? BANK_SENSITIVITY
+            : BANK_SENSITIVITY*2.0f;
+
+        float targetBank = GameMath.Clamp(_smoothedYawRate * BS, -MAX_BANK_ANGLE, MAX_BANK_ANGLE);
         BankAngle += (targetBank - BankAngle) * Math.Min(BANK_SMOOTHING * dt, 1f);
     }
 
