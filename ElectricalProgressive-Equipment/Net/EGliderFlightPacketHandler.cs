@@ -91,10 +91,7 @@ public class EGliderFlightPacketHandler : ModSystem
         api.Event.RegisterGameTickListener(OnClientBankReset, 20);
 
         // Регистрируем рендерер крена камеры — работает каждый кадр
-        api.Event.RegisterRenderer(
-            new GliderCameraRollRenderer(api, this),
-            EnumRenderStage.Before   // до отрисовки сцены
-        );
+        capi.Event.RegisterRenderer(new GliderCameraRollRenderer(capi, this), EnumRenderStage.Before);
 
         //api.Logger.Notification("[ElectricalProgressive] EGliderFlightPacketHandler client started");
     }
@@ -605,3 +602,4 @@ public class EGliderFlightPacketHandler : ModSystem
 
     #endregion
 }
+

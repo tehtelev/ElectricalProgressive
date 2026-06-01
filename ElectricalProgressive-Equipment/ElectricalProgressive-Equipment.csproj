@@ -27,6 +27,10 @@
             <HintPath>$(VINTAGE_STORY)/Mods/VSSurvivalMod.dll</HintPath>
             <Private>False</Private>
         </Reference>
+      <Reference Include="VSSurvivalLib">
+        <HintPath>$(VINTAGE_STORY)/VintagestoryLib.dll</HintPath>
+        <Private>False</Private>
+      </Reference>
       <Reference Include="ElectricalProgressive-Core">
         <HintPath>..\Releases\electricalprogressivecore\ElectricalProgressive-Core.dll</HintPath>
         <Private>False</Private>
