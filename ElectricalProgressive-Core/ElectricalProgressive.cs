@@ -5,6 +5,7 @@ using HarmonyLib;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,7 +24,7 @@ using static ElectricalProgressive.ElectricalProgressive;
     "electricalprogressivecore",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Electrical logic library.",
-    Version = "3.2.0",
+    Version = "3.2.1",
     Authors = ["Tehtelev", "Kotl"]
 )]
 
@@ -48,7 +49,6 @@ namespace ElectricalProgressive
         private readonly List<EnergyPacket> _globalEnergyPackets = []; // Глобальный список пакетов энергии
 
         private AsyncPathFinder _asyncPathFinder = null!;
-
 
 
         private Dictionary<BlockPos, float> _sumEnergy = new();
@@ -78,7 +78,9 @@ namespace ElectricalProgressive
         public static int maxDistanceForFinding; // Максимальное расстояние для поиска пути
         public static float energyLossFactor; // Коэффициент потерь энергии на проводах
         public static bool enableLossCompensation; // Включить компенсацию потерь энергии на проводах
-        public static bool enableFlyingArmor; // Включить возможность летать в броне
+        public static bool enableCameraRotateForGlider; // Включить поворот камеры при полете на глайдере
+        public static float maxGliderSpeed; //максимальная скорость глайдера
+        public static int gliderDurabilityLossAmount; // затраты прочности глайдера на каждое использование ускорения 
 
         public static AssetLocation soundElectricShok;
 
@@ -180,7 +182,7 @@ namespace ElectricalProgressive
 
 
         /// <summary>
-        /// Загрузка конфигурации и начальная инициализация
+        /// Загрузка конфигурации и начальная инициализация (на сервере и клиенте)
         /// </summary>
         /// <param name="api"></param>
         public override void StartPre(ICoreAPI api)
@@ -198,7 +200,15 @@ namespace ElectricalProgressive
             maxDistanceForFinding = Math.Clamp(_config.MaxDistanceForFinding, 8, 1000);
             energyLossFactor = Math.Clamp(_config.EnergyLossFactor, 0.0f, 2.0f);
             enableLossCompensation = _config.EnableLossCompensation;
-            enableFlyingArmor = _config.EnableFlyingArmor;
+            maxGliderSpeed = Math.Clamp(_config.MaxGliderSpeed, 0.05f, 1.0f);
+            gliderDurabilityLossAmount = Math.Clamp(_config.GliderDurabilityLossAmount, 0, 200);
+
+
+            // клиентские настройки -
+            enableCameraRotateForGlider = _config.EnableCameraRotateForGlider;
+            // клиентские настройки -
+
+
 
             // устанавливаем время между тиками
             TickTimeMs = 1000 / speedOfElectricity;
@@ -2030,7 +2040,9 @@ namespace ElectricalProgressive
         public int MaxDistanceForFinding = 200;
         public float EnergyLossFactor = 1.0f;
         public bool EnableLossCompensation = false;
-        public bool EnableFlyingArmor = true;
+        public bool EnableCameraRotateForGlider = true;
+        public float MaxGliderSpeed= 0.2f;           
+        public int GliderDurabilityLossAmount= 10; 
     }
 
     /// <summary>

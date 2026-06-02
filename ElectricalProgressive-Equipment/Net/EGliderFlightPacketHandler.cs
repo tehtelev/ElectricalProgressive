@@ -1,4 +1,5 @@
-﻿using ElectricalProgressive.Patch;
+﻿using ElectricalProgressive.Content.Item.Armor;
+using ElectricalProgressive.Patch;
 using System;
 using System.Collections.Generic;
 using Vintagestory.GameContent;
@@ -18,11 +19,12 @@ public class EGliderFlightPacketHandler : ModSystem
     #region Константы: Форсаж и Полет
 
     private const float GLIDE_SPEED_BOOST = 0.002f;
-    private const float MAX_GLIDE_SPEED = 0.75f;
+    private static float MAX_GLIDE_SPEED => ElectricalProgressive.maxGliderSpeed;
+
     private const float COOLDOWN_DURATION = 0.5f;
 
     // Параметры прочности: минимальная прочность для работы, интервал и сумма списания.
-    private const int DURABILITY_LOSS_AMOUNT = 10;
+    private static int DURABILITY_LOSS_AMOUNT => ElectricalProgressive.gliderDurabilityLossAmount;
     private const float DURABILITY_LOSS_INTERVAL = 1.0f;
 
     #endregion
@@ -76,6 +78,9 @@ public class EGliderFlightPacketHandler : ModSystem
 
     public override bool ShouldLoad(EnumAppSide forSide) => true;
 
+
+
+
     public override void StartClientSide(ICoreClientAPI api)
     {
         base.StartClientSide(api);
@@ -90,8 +95,12 @@ public class EGliderFlightPacketHandler : ModSystem
         // Таймер для сброса крена, когда игрок не парит
         api.Event.RegisterGameTickListener(OnClientBankReset, 20);
 
-        // Регистрируем рендерер крена камеры — работает каждый кадр
-        capi.Event.RegisterRenderer(new GliderCameraRollRenderer(capi, this), EnumRenderStage.Before);
+        // если игрок реально хочет
+        if (ElectricalProgressive.enableCameraRotateForGlider)
+        {
+            // Регистрируем рендерер крена камеры — работает каждый кадр
+            capi.Event.RegisterRenderer(new GliderCameraRollRenderer(capi, this), EnumRenderStage.Before);
+        }
 
         //api.Logger.Notification("[ElectricalProgressive] EGliderFlightPacketHandler client started");
     }
@@ -314,12 +323,11 @@ public class EGliderFlightPacketHandler : ModSystem
             isAfterburnerCooldown = false;
             cooldownTimer = 0f;
         }
-
+        
         // Базовая физика глайдера (если прочность позволяет)
         if (hasValidGlider)
         {
-            double maxSpeed = entity.Stats.GetBlended("gliderSpeedMax") - 0.8;
-            double speed = GameMath.Clamp(controls.GlideSpeed, 0.005f, maxSpeed);
+            double speed = Math.Max(controls.GlideSpeed, 0.005f);
             float lift = entity.Stats.GetBlended("gliderLiftMax");
 
             pos.Motion.Add(-num1 * num4 * speed, Math.Min(num2 * speed, lift), -num1 * num3 * speed);

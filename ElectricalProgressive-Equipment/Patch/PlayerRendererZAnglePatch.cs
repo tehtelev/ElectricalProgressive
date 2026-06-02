@@ -1,7 +1,6 @@
 ﻿using HarmonyLib;
 using System.Collections.Generic;
 using System.Reflection.Emit;
-using Vintagestory.API.Client;
 using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
 
@@ -11,6 +10,7 @@ namespace ElectricalProgressive.Patch;
 
 public static class PlayerRendererZAnglePatch
 {
+    // дополнительно вращает модель игрока
     public static void ApplyCustomAngles(EntityPlayerShapeRenderer renderer, float[] modelMat)
     {
         Mat4f.RotateX(modelMat, modelMat, renderer.xangle);
@@ -18,6 +18,7 @@ public static class PlayerRendererZAnglePatch
         Mat4f.RotateZ(modelMat, modelMat, renderer.zangle);
     }
 
+    // транспайлер для внедрения метода выше
     static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator gen)
     {
         var code = new List<CodeInstruction>(instructions);

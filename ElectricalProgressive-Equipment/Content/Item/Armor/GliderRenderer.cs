@@ -1,11 +1,12 @@
-﻿using System;
+﻿using ElectricalProgressive.Net;
+using System;
 using System.Runtime.CompilerServices;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
 using Vintagestory.Client.NoObf;
 
-namespace ElectricalProgressive.Net;
+namespace ElectricalProgressive.Content.Item.Armor;
 
 public class GliderCameraRollRenderer : IRenderer
 {
@@ -37,7 +38,7 @@ public class GliderCameraRollRenderer : IRenderer
     public void OnRenderFrame(float deltaTime, EnumRenderStage stage)
     {
         // === Ранний выход: 99% кадров пропустят остальной код ===
-        float roll = -_handler.BankAngle;
+        var roll = -_handler.BankAngle;
         if (roll == 0f || _clientMain.IsPaused)
             return;
 
@@ -46,8 +47,8 @@ public class GliderCameraRollRenderer : IRenderer
             return;
 
         // === Кэшируем тригонометрию (один вызов на кадр) ===
-        double cos = Math.Cos(roll);
-        double sin = Math.Sin(roll);
+        var cos = Math.Cos(roll);
+        var sin = Math.Sin(roll);
 
         // === 1. Модифицируем матрицы камеры (для рендера) ===
         ApplyRoll(_camera.CameraMatrix, cos, sin);
@@ -56,7 +57,7 @@ public class GliderCameraRollRenderer : IRenderer
 
         // === 2. Модифицируем MvMatrix.Top (для frustum) ===
         // .Top возвращает reference на внутренний массив — копирования нет
-        double[] mvTop = _mvMatrix.Top;
+        var mvTop = _mvMatrix.Top;
         ApplyRoll(mvTop, cos, sin);
 
         // === 3. Пересчитываем frustum ===
@@ -103,8 +104,8 @@ public class GliderCameraRollRenderer : IRenderer
     private static void ApplyRollFloat(float[] mat, float roll)
     {
         if (mat == null || mat.Length < 16) return;
-        float cos = (float)Math.Cos(roll);
-        float sin = (float)Math.Sin(roll);
+        var cos = (float)Math.Cos(roll);
+        var sin = (float)Math.Sin(roll);
 
         int i0 = 0, i1 = 4, i2 = 8, i3 = 12;
 
