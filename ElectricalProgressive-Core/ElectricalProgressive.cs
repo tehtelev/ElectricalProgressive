@@ -2041,8 +2041,8 @@ namespace ElectricalProgressive
         public float EnergyLossFactor = 1.0f;
         public bool EnableLossCompensation = false;
         public bool EnableCameraRotateForGlider = true;
-        public float MaxGliderSpeed= 0.2f;           
-        public int GliderDurabilityLossAmount= 10; 
+        public float MaxGliderSpeed= 1.0f;           
+        public int GliderDurabilityLossAmount= 15; 
     }
 
     /// <summary>

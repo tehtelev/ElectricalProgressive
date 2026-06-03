@@ -323,15 +323,49 @@ public class EGliderFlightPacketHandler : ModSystem
             isAfterburnerCooldown = false;
             cooldownTimer = 0f;
         }
-        
+
         // Базовая физика глайдера (если прочность позволяет)
+
         if (hasValidGlider)
         {
+            float dtSec = dt;
+
             double speed = Math.Max(controls.GlideSpeed, 0.005f);
             float lift = entity.Stats.GetBlended("gliderLiftMax");
 
-            pos.Motion.Add(-num1 * num4 * speed, Math.Min(num2 * speed, lift), -num1 * num3 * speed);
-            pos.Motion.Mul(GameMath.Clamp(1.0 - pos.Motion.Length() * 0.13, 0.0, 1.0));
+            // Коэффициент для перехода от тиков к секундам (компенсируем малое значение dt)
+            float timeFactor = dtSec * 60.0f;
+
+            // Добавляем вектор тяги вдоль взгляда (с ограниченной вертикальной составляющей)
+            pos.Motion.Add(-num1 * num4 * speed * timeFactor,
+                           Math.Min(num2 * speed * timeFactor, lift * timeFactor),
+                           -num1 * num3 * speed * timeFactor);
+
+            // 1. Гравитация. 
+            // В ванили VS гравитация игрока ~0.08 блоков/тик^2. 
+            // Умножаем на 60, чтобы перевести в блоки/с^2 для нашей формулы.
+            float gravity = 0.02f * 60.0f; // ~1.2 блоков/с^2
+            pos.Motion.Y -= gravity * dtSec;
+
+            // 2. Подъемная сила. 
+            // Компенсирует часть гравитации, если есть горизонтальная скорость.
+            // Это позволяет глайдеру планировать, а не камнем падать вниз.
+            float horizSpeed = (float)Math.Sqrt(pos.Motion.X * pos.Motion.X + pos.Motion.Z * pos.Motion.Z);
+            float liftForce = Math.Min(horizSpeed * lift, gravity); // Не можем компенсировать больше, чем сама гравитация
+            pos.Motion.Y += liftForce * dtSec;
+
+            // 3. Сопротивление воздуха (экспоненциальное, независимое от dt).
+            // Дает плавное и предсказуемое снижение скорости. 
+            // Формула: v_new = v_old * exp(-k * dt)
+            float dragCoeff = 0.13f * 60.0f; // Базовый коэффициент сопротивления * 60
+            pos.Motion.Mul(MathF.Exp(-dragCoeff * dtSec));
+
+            // 4. Жесткое ограничение максимальной скорости
+            if (pos.Motion.Length() > MAX_GLIDE_SPEED)
+            {
+                pos.Motion.Normalize();
+                pos.Motion.Mul(MAX_GLIDE_SPEED);
+            }
         }
 
         // Обновление и применение крена
