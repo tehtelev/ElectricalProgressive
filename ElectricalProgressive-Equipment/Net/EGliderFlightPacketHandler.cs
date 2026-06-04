@@ -351,7 +351,8 @@ public class EGliderFlightPacketHandler : ModSystem
             // Компенсирует часть гравитации, если есть горизонтальная скорость.
             // Это позволяет глайдеру планировать, а не камнем падать вниз.
             float horizSpeed = (float)Math.Sqrt(pos.Motion.X * pos.Motion.X + pos.Motion.Z * pos.Motion.Z);
-            float liftForce = Math.Min(horizSpeed * lift, gravity); // Не можем компенсировать больше, чем сама гравитация
+
+            float liftForce = horizSpeed * lift; 
             pos.Motion.Y += liftForce * dtSec;
 
             // 3. Сопротивление воздуха (экспоненциальное, независимое от dt).

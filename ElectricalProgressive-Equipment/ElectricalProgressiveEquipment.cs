@@ -9,7 +9,7 @@ using HarmonyLib;
 using Vintagestory.API.Common.Entities;
 
 [assembly: ModDependency("game", "1.22.0")]
-[assembly: ModDependency("electricalprogressivecore", "3.2.1")]
+[assembly: ModDependency("electricalprogressivecore", "3.2.2")]
 [assembly: ModDependency("electricalprogressivebasics", "3.0.0")]
 [assembly: ModDependency("electricalprogressiveqol", "3.0.0")]
 [assembly: ModInfo(
