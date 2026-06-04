@@ -1,10 +1,6 @@
 ﻿using ElectricalProgressive.Patch;
 using ElectricalProgressive.Utils;
-using Microsoft.VisualBasic;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
 using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -12,7 +8,7 @@ using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
-using XSkills;
+
 
 namespace ElectricalProgressive.Content.Block.EHeater
 {
@@ -20,9 +16,9 @@ namespace ElectricalProgressive.Content.Block.EHeater
     {
         private static WorldInteraction[] _interactions = [];
 
-        private static readonly Dictionary<CacheDataKey, MeshData> MeshDataCache = new();
-        private static readonly Dictionary<CacheDataKey, Cuboidf[]> SelectionBoxesCache = new();
-        private static readonly Dictionary<CacheDataKey, Cuboidf[]> CollisionBoxesCache = new();
+        private static readonly Dictionary<(Facing, string, int), MeshData> MeshCache = [];
+        private static readonly Dictionary<(Facing, string), Cuboidf[]> SelectionBoxesCache = [];
+        private static readonly Dictionary<(Facing, string), Cuboidf[]> CollisionBoxesCache = [];
 
 
         public override void OnLoaded(ICoreAPI api)
@@ -55,15 +51,6 @@ namespace ElectricalProgressive.Content.Block.EHeater
 
 
 
-        public override void OnUnloaded(ICoreAPI api)
-        {
-            base.OnUnloaded(api);
-            MeshDataCache?.Clear();
-            SelectionBoxesCache?.Clear();
-            CollisionBoxesCache?.Clear();
-        }
-
-        
 
         public override bool DoPlaceBlock(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel, ItemStack byItemStack)
         {
@@ -161,7 +148,7 @@ namespace ElectricalProgressive.Content.Block.EHeater
             return GetRotatedBoxes(pos, SelectionBoxesCache, SelectionBoxes);
         }
 
-        private Cuboidf[] GetRotatedBoxes(BlockPos pos, Dictionary<CacheDataKey, Cuboidf[]> cache, Cuboidf[] sourceBoxes)
+        private Cuboidf[] GetRotatedBoxes(BlockPos pos, Dictionary<(Facing, string), Cuboidf[]> cache, Cuboidf[] sourceBoxes)
         {
             if (api?.World?.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEHeater entity ||
                 entity.Facing == Facing.None)
@@ -169,17 +156,17 @@ namespace ElectricalProgressive.Content.Block.EHeater
                 return [];
             }
 
-            var key = CacheDataKey.FromEntity(entity);
+            var facing = entity.Facing;
+            string code = entity.Block.Code.ToString();
 
-            if (!cache.TryGetValue(key, out var boxes))
+            if (!cache.TryGetValue((facing, code), out var boxes))
             {
                 boxes = (Cuboidf[]?)sourceBoxes.Clone();
 
                 // быстро враащем коллизии
-                FacingRotations.ApplyRotations(boxes, key.Facing);
+                FacingRotations.ApplyRotations(boxes, facing);
 
-                cache.TryAdd(key, boxes);
-
+                cache.TryAdd((facing, code), boxes);
             }
 
             return boxes ?? [];
@@ -189,32 +176,35 @@ namespace ElectricalProgressive.Content.Block.EHeater
 
         public override void OnJsonTesselation(ref MeshData sourceMesh, ref int[] lightRgbsByCorner, BlockPos pos, Vintagestory.API.Common.Block[] chunkExtBlocks, int extIndex3d)
         {
-            if (api is not ICoreClientAPI clientApi ||
-                api.World.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEHeater entity ||
-                entity.Facing == Facing.None)
+            base.OnJsonTesselation(ref sourceMesh, ref lightRgbsByCorner, pos, chunkExtBlocks, extIndex3d);
+
+            if (api is ICoreClientAPI &&
+                api.World.BlockAccessor.GetBlockEntity(pos) is BlockEntityEHeater entity &&
+                entity.Facing != Facing.None)
             {
-                return;
+                var facing = entity.Facing;
+                string code = entity.Block.Code.ToString();
+
+                // VerticesCount отличается у LOD0 и LOD2
+                var cacheKey = (facing, code, sourceMesh.VerticesCount);
+
+                if (!MeshCache.TryGetValue(cacheKey, out var meshData))
+                {
+                    // Клонируем входящий меш (уже правильный — LOD0 или LOD2)
+                    meshData = sourceMesh.Clone();
+
+                    // быстро враащем обьект
+                    FacingRotations.ApplyRotations(meshData, facing);
+
+
+                    MeshCache.TryAdd(cacheKey, meshData);
+                }
+
+                sourceMesh = meshData;
             }
-
-            var key = CacheDataKey.FromEntity(entity);
-
-            if (!MeshDataCache.TryGetValue(key, out var meshData))
-            {
-                clientApi.Tesselator.TesselateBlock(this, out meshData);
-                clientApi.TesselatorManager.ThreadDispose();
-
-                // быстро враащем обьект
-                FacingRotations.ApplyRotations(meshData, key.Facing);
-
-                MeshDataCache.TryAdd(key, meshData);
-            }
-
-            sourceMesh = meshData;
         }
 
-
-
-
+        
 
 
         public override bool OnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel)
@@ -277,23 +267,14 @@ namespace ElectricalProgressive.Content.Block.EHeater
         }
 
 
-        internal struct CacheDataKey
+
+        public override void OnUnloaded(ICoreAPI api)
         {
-            public readonly Facing Facing;
-            public readonly bool IsEnabled;
-            public readonly string Code;
+            base.OnUnloaded(api);
 
-            public CacheDataKey(Facing facing, bool isEnabled, string code)
-            {
-                Facing = facing;
-                IsEnabled = isEnabled;
-                Code = code;
-            }
-
-            public static CacheDataKey FromEntity(BlockEntityEHeater entity)
-            {
-                return new CacheDataKey(entity.Facing, entity.IsEnabled, entity.Block.Code);
-            }
+            MeshCache?.Clear();
+            SelectionBoxesCache?.Clear();
+            CollisionBoxesCache?.Clear();
         }
 
 

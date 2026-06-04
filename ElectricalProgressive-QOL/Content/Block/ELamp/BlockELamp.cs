@@ -16,11 +16,7 @@ namespace ElectricalProgressive.Content.Block.ELamp
         private static readonly Dictionary<(Facing, string, int), MeshData> MeshCache = [];
         private static readonly Dictionary<(Facing, string), Cuboidf[]> SelectionBoxesCache = [];
         private static readonly Dictionary<(Facing, string), Cuboidf[]> CollisionBoxesCache = [];
-
-
-
-
-      
+        
 
         public override bool DoPlaceBlock(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel, ItemStack byItemStack)
         {
