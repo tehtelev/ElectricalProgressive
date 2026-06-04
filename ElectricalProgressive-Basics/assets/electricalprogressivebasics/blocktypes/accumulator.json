@@ -132,7 +132,7 @@
   "faceCullMode": "NeverCull",
   "renderPass": "OpaqueNoCull",
   "emitSideAo": { // Ambient Oclusion
-    "all": true
+    "all": false
   },
   "sideAo": { // Ambient Oclusion
     "all": true

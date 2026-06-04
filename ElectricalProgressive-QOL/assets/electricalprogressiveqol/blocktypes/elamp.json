@@ -73,13 +73,17 @@
     "base": "block/elamp/elamp-{state}"
   },
 
+  "lod2shape": {
+    "base": "block/elamp/elamp-lod2"
+  },
+
   "resistance": 1,
   "drawType": "JSON",
   "lightAbsorption": 0.0,
   "faceCullMode": "NeverCull",
   "renderPass": "OpaqueNoCull",
   "emitSideAo": { // Ambient Oclusion
-    "all": true
+    "all": false
   },
   "sideAo": { // Ambient Oclusion
     "all": true

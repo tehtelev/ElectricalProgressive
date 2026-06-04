@@ -1,0 +1,79 @@
+﻿{
+	"editor": {
+		"allAngles": false,
+		"entityTextureMode": false
+	},
+	"textureWidth": 16,
+	"textureHeight": 16,
+	"textureSizes": {
+	},
+	"textures": {
+		"bismuthbronze": "game:block/metal/plate/bismuthbronze",
+		"brass": "game:block/metal/plate/brass",
+		"copper": "game:block/metal/plate/copper",
+		"iron": "game:block/metal/plate/iron",
+		"quartzglass": "electricalprogressivebasics:block/quartzglass",
+		"stainlesssteel": "electricalprogressivebasics:block/stainlesssteel",
+		"steel": "game:block/metal/plate/steel"
+	},
+	"elements": [
+		{
+			"name": "Lamp-Base",
+			"from": [ 4.5, -1.0, 3.5 ],
+			"to": [ 11.5, 0.3, 12.5 ],
+			"rotationOrigin": [ 4.5, -1.0, 3.5 ],
+			"faces": {
+				"north": { "texture": "#iron", "uv": [ 0.0, 15.0, 16.0, 16.0 ], "autoUv": false },
+				"east": { "texture": "#iron", "uv": [ 0.0, 15.0, 16.0, 16.0 ], "autoUv": false },
+				"south": { "texture": "#iron", "uv": [ 0.0, 15.0, 16.0, 16.0 ], "autoUv": false },
+				"west": { "texture": "#iron", "uv": [ 0.0, 15.0, 16.0, 16.0 ], "autoUv": false },
+				"up": { "texture": "#iron", "uv": [ 0.0, 0.0, 16.0, 16.0 ], "autoUv": false },
+				"down": { "texture": "#iron", "uv": [ 0.0, 0.0, 16.0, 16.0 ], "autoUv": false }
+			},
+			"children": [
+				{
+					"name": "Cube6",
+					"from": [ 1.7, 2.0, 1.7 ],
+					"to": [ 5.3, 6.0, 7.3 ],
+					"renderPass": 3,
+					"rotationOrigin": [ 1.7, 2.0, 1.7 ],
+					"faces": {
+						"north": { "texture": "#quartzglass", "uv": [ 0.0, 0.0, 16.0, 16.0 ], "glow": 80, "autoUv": false },
+						"east": { "texture": "#quartzglass", "uv": [ 0.0, 0.0, 16.0, 16.0 ], "glow": 80, "autoUv": false },
+						"south": { "texture": "#quartzglass", "uv": [ 0.0, 0.0, 16.0, 16.0 ], "glow": 80, "autoUv": false },
+						"west": { "texture": "#quartzglass", "uv": [ 0.0, 0.0, 16.0, 16.0 ], "glow": 80, "autoUv": false },
+						"up": { "texture": "#quartzglass", "uv": [ 0.0, 0.0, 16.0, 16.0 ], "glow": 80, "autoUv": false },
+						"down": { "texture": "#quartzglass", "uv": [ 0.0, 0.0, 16.0, 16.0 ], "glow": 80, "autoUv": false }
+					}
+				},
+				{
+					"name": "Cube",
+					"from": [ 3.0, 0.5, -4.0 ],
+					"to": [ 4.0, 1.5, 4.0 ],
+					"rotationOrigin": [ 3.5, 9.0, 4.5 ],
+					"faces": {
+						"north": { "texture": "#copper", "uv": [ 0.0, 0.0, 1.0, 1.0 ] },
+						"east": { "texture": "#copper", "uv": [ 0.0, 0.0, 8.0, 1.0 ] },
+						"south": { "texture": "#copper", "uv": [ 0.0, 0.0, 1.0, 1.0 ] },
+						"west": { "texture": "#copper", "uv": [ 0.0, 0.0, 8.0, 1.0 ] },
+						"up": { "texture": "#copper", "uv": [ 0.0, 0.0, 1.0, 8.0 ] },
+						"down": { "texture": "#copper", "uv": [ 0.0, 0.0, 1.0, 8.0 ] }
+					}
+				},
+				{
+					"name": "Cube2",
+					"from": [ 0.5, 0.1, 0.5 ],
+					"to": [ 6.5, 2.0, 8.5 ],
+					"rotationOrigin": [ 0.5, 0.1, 0.5 ],
+					"faces": {
+						"north": { "texture": "#steel", "uv": [ 0.0, 15.0, 16.0, 16.0 ], "autoUv": false },
+						"east": { "texture": "#steel", "uv": [ 0.0, 15.0, 16.0, 16.0 ], "autoUv": false },
+						"south": { "texture": "#steel", "uv": [ 0.0, 15.0, 16.0, 16.0 ], "autoUv": false },
+						"west": { "texture": "#steel", "uv": [ 0.0, 15.0, 16.0, 16.0 ], "autoUv": false },
+						"up": { "texture": "#steel", "uv": [ 0.0, 0.0, 16.0, 16.0 ], "autoUv": false },
+						"down": { "texture": "#steel", "uv": [ 0.0, 0.0, 16.0, 16.0 ], "autoUv": false }
+					}
+				}
+			]
+		}
+	]}

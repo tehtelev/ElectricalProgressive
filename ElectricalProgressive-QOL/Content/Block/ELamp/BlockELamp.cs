@@ -13,18 +13,12 @@ namespace ElectricalProgressive.Content.Block.ELamp
 {
     internal class BlockELamp : BlockEBase
     {
-        private static readonly Dictionary<CacheDataKey, MeshData> MeshDataCache = [];
-        private static readonly Dictionary<CacheDataKey, Cuboidf[]> SelectionBoxesCache = [];
-        private static readonly Dictionary<CacheDataKey, Cuboidf[]> CollisionBoxesCache = [];
+        private static readonly Dictionary<(Facing, string, int), MeshData> MeshCache = [];
+        private static readonly Dictionary<(Facing, string), Cuboidf[]> SelectionBoxesCache = [];
+        private static readonly Dictionary<(Facing, string), Cuboidf[]> CollisionBoxesCache = [];
 
 
-        public override void OnUnloaded(ICoreAPI api)
-        {
-            base.OnUnloaded(api);
-            MeshDataCache?.Clear();
-            SelectionBoxesCache?.Clear();
-            CollisionBoxesCache?.Clear();
-        }
+
 
       
 
@@ -125,7 +119,7 @@ namespace ElectricalProgressive.Content.Block.ELamp
             return GetRotatedBoxes(pos, SelectionBoxesCache, SelectionBoxes);
         }
 
-        private Cuboidf[] GetRotatedBoxes(BlockPos pos, Dictionary<CacheDataKey, Cuboidf[]> cache, Cuboidf[] sourceBoxes)
+        private Cuboidf[] GetRotatedBoxes(BlockPos pos, Dictionary<(Facing, string), Cuboidf[]> cache, Cuboidf[] sourceBoxes)
         {
             if (api?.World?.BlockAccessor.GetBlockEntity(pos) is not BlockEntityELamp entity ||
                 entity.Facing == Facing.None)
@@ -133,16 +127,17 @@ namespace ElectricalProgressive.Content.Block.ELamp
                 return [];
             }
 
-            var key = CacheDataKey.FromEntity(entity);
+            var facing = entity.Facing;
+            string code = entity.Block.Code.ToString();
 
-            if (!cache.TryGetValue(key, out var boxes))
+            if (!cache.TryGetValue((facing, code), out var boxes))
             {
                 boxes = (Cuboidf[]?)sourceBoxes.Clone();
 
                 // быстро враащем коллизии
-                FacingRotations.ApplyRotations(boxes, key.Facing);
+                FacingRotations.ApplyRotations(boxes, facing);
 
-                cache.TryAdd(key, boxes);
+                cache.TryAdd((facing, code), boxes);
             }
 
             return boxes ?? [];
@@ -152,27 +147,32 @@ namespace ElectricalProgressive.Content.Block.ELamp
 
         public override void OnJsonTesselation(ref MeshData sourceMesh, ref int[] lightRgbsByCorner, BlockPos pos, Vintagestory.API.Common.Block[] chunkExtBlocks, int extIndex3d)
         {
-            if (api is not ICoreClientAPI clientApi ||
-                api.World.BlockAccessor.GetBlockEntity(pos) is not BlockEntityELamp entity ||
-                entity.Facing == Facing.None)
+            base.OnJsonTesselation(ref sourceMesh, ref lightRgbsByCorner, pos, chunkExtBlocks, extIndex3d);
+
+            if (api is ICoreClientAPI &&
+                api.World.BlockAccessor.GetBlockEntity(pos) is BlockEntityELamp entity &&
+                entity.Facing != Facing.None)
             {
-                return;
+                var facing = entity.Facing;
+                string code = entity.Block.Code.ToString();
+
+                // VerticesCount отличается у LOD0 и LOD2
+                var cacheKey = (facing, code, sourceMesh.VerticesCount);
+
+                if (!MeshCache.TryGetValue(cacheKey, out var meshData))
+                {
+                    // Клонируем входящий меш (уже правильный — LOD0 или LOD2)
+                    meshData = sourceMesh.Clone();
+
+                    // быстро враащем обьект
+                    FacingRotations.ApplyRotations(meshData, facing);
+
+
+                    MeshCache.TryAdd(cacheKey, meshData);
+                }
+
+                sourceMesh = meshData;
             }
-
-            var key = CacheDataKey.FromEntity(entity);
-
-            if (!MeshDataCache.TryGetValue(key, out var meshData))
-            {
-                clientApi.Tesselator.TesselateBlock(this, out meshData);
-                clientApi.TesselatorManager.ThreadDispose();
-
-                // быстро враащем обьект
-                FacingRotations.ApplyRotations(meshData, key.Facing);
-
-                MeshDataCache.TryAdd(key, meshData);
-            }
-
-            sourceMesh = meshData;
         }
 
 
@@ -195,26 +195,15 @@ namespace ElectricalProgressive.Content.Block.ELamp
         }
 
 
-
-
-        internal struct CacheDataKey
+        public override void OnUnloaded(ICoreAPI api)
         {
-            public readonly Facing Facing;
-            public readonly bool IsEnabled;
-            public readonly string Code;
-
-            public CacheDataKey(Facing facing, bool isEnabled, string code)
-            {
-                Facing = facing;
-                IsEnabled = isEnabled;
-                Code = code;
-            }
-
-            public static CacheDataKey FromEntity(BlockEntityELamp entity)
-            {
-                return new CacheDataKey(entity.Facing, entity.IsEnabled, entity.Block.Code);
-            }
+            base.OnUnloaded(api);
+            MeshCache?.Clear();
+            SelectionBoxesCache?.Clear();
+            CollisionBoxesCache?.Clear();
         }
+
+
 
     }
 }

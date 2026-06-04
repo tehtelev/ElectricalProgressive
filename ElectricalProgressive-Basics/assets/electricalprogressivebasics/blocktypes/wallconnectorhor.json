@@ -159,7 +159,7 @@
   "resistance": 1,
   "lightAbsorption": 255.0,
   "emitSideAo": {
-    "all": true
+    "all": false
   },
   "sideAo": {
     "all": true
