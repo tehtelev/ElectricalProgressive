@@ -93,6 +93,26 @@
     }
   },
 
+
+  "lod2shapebytype": {
+    "*-north": {
+      "base": "block/ehorn/ehorn-lod2",
+      "rotateY": 0
+    },
+    "*-east": {
+      "base": "block/ehorn/ehorn-lod2",
+      "rotateY": 270
+    },
+    "*-south": {
+      "base": "block/ehorn/ehorn-lod2",
+      "rotateY": 180
+    },
+    "*-west": {
+      "base": "block/ehorn/ehorn-lod2",
+      "rotateY": 90
+    }
+  },
+
   "blockMaterial": "Stone",
 
   "replaceable": 500,
