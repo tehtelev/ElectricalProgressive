@@ -30,7 +30,7 @@ using Vintagestory.API.Server;
     "electricalprogressiveqol",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Additional electrical devices.",
-    Version = "3.2.1",
+    Version = "3.2.2",
     Authors =
     [
         "Tehtelev",

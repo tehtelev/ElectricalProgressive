@@ -61,6 +61,10 @@
     "base": "block/fonari/nasteniy_fonar-{state}"
   },
 
+  "lod2shape": {
+    "base": "block/fonari/nasteniy_fonar-lod2"
+  },
+
   "resistance": 1,
   "drawType": "JSON",
   "lightAbsorption": 0.0,

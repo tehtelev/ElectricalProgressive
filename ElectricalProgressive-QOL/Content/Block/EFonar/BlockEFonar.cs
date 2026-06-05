@@ -5,27 +5,17 @@ using System.Linq;
 using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
-using Vintagestory.API.MathTools;
 using Vintagestory.API.Config;
+using Vintagestory.API.MathTools;
 
 namespace ElectricalProgressive.Content.Block.EFonar
 {
     internal class BlockEFonar : BlockEBase
     {
-        private static readonly Dictionary<CacheDataKey, MeshData> MeshDataCache = [];
-        private static readonly Dictionary<CacheDataKey, Cuboidf[]> SelectionBoxesCache = [];
-        private static readonly Dictionary<CacheDataKey, Cuboidf[]> CollisionBoxesCache = [];
-
-        // Кэш для преобразований поворотов
-        private static readonly Dictionary<Facing, RotationData> RotationCache = CreateRotationCache();
-
-        public override void OnUnloaded(ICoreAPI api)
-        {
-            base.OnUnloaded(api);
-            MeshDataCache?.Clear();
-            SelectionBoxesCache?.Clear();
-            CollisionBoxesCache?.Clear();
-        }
+        private static readonly Dictionary<(Facing, string, int), MeshData> MeshCache = [];
+        private static readonly Dictionary<(Facing, string), Cuboidf[]> SelectionBoxesCache = [];
+        private static readonly Dictionary<(Facing, string), Cuboidf[]> CollisionBoxesCache = [];
+        
 
         public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack, BlockSelection blockSel, ref string failureCode)
         {
@@ -112,7 +102,7 @@ namespace ElectricalProgressive.Content.Block.EFonar
             return GetRotatedBoxes(pos, SelectionBoxesCache, SelectionBoxes);
         }
 
-        private Cuboidf[] GetRotatedBoxes(BlockPos pos, Dictionary<CacheDataKey, Cuboidf[]> cache, Cuboidf[] sourceBoxes)
+        private Cuboidf[] GetRotatedBoxes(BlockPos pos, Dictionary<(Facing, string), Cuboidf[]> cache, Cuboidf[] sourceBoxes)
         {
             if (api?.World?.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEFonar entity ||
                 entity.Facing == Facing.None)
@@ -120,16 +110,17 @@ namespace ElectricalProgressive.Content.Block.EFonar
                 return [];
             }
 
-            var key = CacheDataKey.FromEntity(entity);
+            var facing = entity.Facing;
+            string code = entity.Block.Code.ToString();
 
-            if (!cache.TryGetValue(key, out var boxes))
+            if (!cache.TryGetValue((facing, code), out var boxes))
             {
-                if (RotationCache.TryGetValue(key.Facing, out var rotation))
-                {
-                    var origin = new Vec3d(0.5, 0.5, 0.5);
-                    boxes = sourceBoxes.Select(box => box.RotatedCopy(rotation.X, rotation.Y, rotation.Z, origin)).ToArray();
-                    cache.TryAdd(key, boxes);
-                }
+                boxes = (Cuboidf[]?)sourceBoxes.Clone();
+
+                // быстро враащем коллизии
+                FacingRotations.ApplyRotations(boxes, facing);
+
+                cache.TryAdd((facing, code), boxes);
             }
 
             return boxes ?? [];
@@ -137,33 +128,32 @@ namespace ElectricalProgressive.Content.Block.EFonar
 
         public override void OnJsonTesselation(ref MeshData sourceMesh, ref int[] lightRgbsByCorner, BlockPos pos, Vintagestory.API.Common.Block[] chunkExtBlocks, int extIndex3d)
         {
-            if (api is not ICoreClientAPI clientApi ||
-                api.World.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEFonar entity ||
-                entity.Facing == Facing.None)
+            base.OnJsonTesselation(ref sourceMesh, ref lightRgbsByCorner, pos, chunkExtBlocks, extIndex3d);
+
+            if (api is ICoreClientAPI &&
+                api.World.BlockAccessor.GetBlockEntity(pos) is BlockEntityEFonar entity &&
+                entity.Facing != Facing.None)
             {
-                return;
-            }
+                var facing = entity.Facing;
+                string code = entity.Block.Code.ToString();
 
-            var key = CacheDataKey.FromEntity(entity);
+                // VerticesCount отличается у LOD0 и LOD2
+                var cacheKey = (facing, code, sourceMesh.VerticesCount);
 
-            if (!MeshDataCache.TryGetValue(key, out var meshData))
-            {
-                var origin = new Vec3f(0.5f, 0.5f, 0.5f);
-                clientApi.Tesselator.TesselateBlock(this, out meshData);
-                clientApi.TesselatorManager.ThreadDispose();
-
-                if (RotationCache.TryGetValue(key.Facing, out var rotation))
+                if (!MeshCache.TryGetValue(cacheKey, out var meshData))
                 {
-                    meshData.Rotate(origin,
-                        rotation.X * GameMath.DEG2RAD,
-                        rotation.Y * GameMath.DEG2RAD,
-                        rotation.Z * GameMath.DEG2RAD);
+                    // Клонируем входящий меш (уже правильный — LOD0 или LOD2)
+                    meshData = sourceMesh.Clone();
+
+                    // быстро враащем обьект
+                    FacingRotations.ApplyRotations(meshData, facing);
+
+
+                    MeshCache.TryAdd(cacheKey, meshData);
                 }
 
-                MeshDataCache.TryAdd(key, meshData);
+                sourceMesh = meshData;
             }
-
-            sourceMesh = meshData;
         }
 
 
@@ -185,68 +175,14 @@ namespace ElectricalProgressive.Content.Block.EFonar
         }
 
 
-        private static Dictionary<Facing, RotationData> CreateRotationCache()
+
+        public override void OnUnloaded(ICoreAPI api)
         {
-            return new Dictionary<Facing, RotationData>
-            {
-                { Facing.NorthEast, new RotationData(90.0f, 270.0f, 0.0f) },
-                { Facing.NorthWest, new RotationData(90.0f, 90.0f, 0.0f) },
-                { Facing.NorthUp, new RotationData(90.0f, 0.0f, 0.0f) },
-                { Facing.NorthDown, new RotationData(90.0f, 180.0f, 0.0f) },
-                { Facing.EastNorth, new RotationData(0.0f, 0.0f, 90.0f) },
-                { Facing.EastSouth, new RotationData(180.0f, 0.0f, 90.0f) },
-                { Facing.EastUp, new RotationData(90.0f, 0.0f, 90.0f) },
-                { Facing.EastDown, new RotationData(270.0f, 0.0f, 90.0f) },
-                { Facing.SouthEast, new RotationData(90.0f, 270.0f, 180.0f) },
-                { Facing.SouthWest, new RotationData(90.0f, 90.0f, 180.0f) },
-                { Facing.SouthUp, new RotationData(90.0f, 0.0f, 180.0f) },
-                { Facing.SouthDown, new RotationData(90.0f, 180.0f, 180.0f) },
-                { Facing.WestNorth, new RotationData(0.0f, 0.0f, 270.0f) },
-                { Facing.WestSouth, new RotationData(180.0f, 0.0f, 270.0f) },
-                { Facing.WestUp, new RotationData(90.0f, 0.0f, 270.0f) },
-                { Facing.WestDown, new RotationData(270.0f, 0.0f, 270.0f) },
-                { Facing.UpNorth, new RotationData(0.0f, 0.0f, 180.0f) },
-                { Facing.UpEast, new RotationData(0.0f, 270.0f, 180.0f) },
-                { Facing.UpSouth, new RotationData(0.0f, 180.0f, 180.0f) },
-                { Facing.UpWest, new RotationData(0.0f, 90.0f, 180.0f) },
-                { Facing.DownNorth, new RotationData(0.0f, 0.0f, 0.0f) },
-                { Facing.DownEast, new RotationData(0.0f, 270.0f, 0.0f) },
-                { Facing.DownSouth, new RotationData(0.0f, 180.0f, 0.0f) },
-                { Facing.DownWest, new RotationData(0.0f, 90.0f, 0.0f) }
-            };
+            base.OnUnloaded(api);
+            MeshCache?.Clear();
+            SelectionBoxesCache?.Clear();
+            CollisionBoxesCache?.Clear();
         }
 
-        internal struct CacheDataKey
-        {
-            public readonly Facing Facing;
-            public readonly bool IsEnabled;
-            public readonly string Code;
-
-            public CacheDataKey(Facing facing, bool isEnabled, string code)
-            {
-                Facing = facing;
-                IsEnabled = isEnabled;
-                Code = code;
-            }
-
-            public static CacheDataKey FromEntity(BlockEntityEFonar entity)
-            {
-                return new CacheDataKey(entity.Facing, entity.IsEnabled, entity.Block.Code);
-            }
-        }
-
-        private readonly struct RotationData
-        {
-            public readonly float X;
-            public readonly float Y;
-            public readonly float Z;
-
-            public RotationData(float x, float y, float z)
-            {
-                X = x;
-                Y = y;
-                Z = z;
-            }
-        }
     }
 }
