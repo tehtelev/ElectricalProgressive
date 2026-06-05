@@ -52,6 +52,27 @@
 
   },
 
+  "lod2shapebytype": {
+    "*-north": {
+      "base": "block/eoven/eoven-lod2",
+      "rotateY": 0
+    },
+    "*-east": {
+      "base": "block/eoven/eoven-lod2",
+      "rotateY": 270
+    },
+    "*-south": {
+      "base": "block/eoven/eoven-lod2",
+      "rotateY": 180
+    },
+    "*-west": {
+      "base": "block/eoven/eoven-lod2",
+      "rotateY": 90
+    }
+
+  },
+
+
   "attributes": {
     "blockEProperties": "main",
     "facesEProperties": [ "north", "east", "south", "west", "up", "down" ],

@@ -89,6 +89,26 @@
     }
   },
 
+  "lod2shapebytype": {
+    "*-north": {
+      "base": "block/estove/estove-lod2",
+      "rotateY": 0
+    },
+    "*-east": {
+      "base": "block/estove/estove-lod2",
+      "rotateY": 270
+    },
+    "*-south": {
+      "base": "block/estove/estove-lod2",
+      "rotateY": 180
+    },
+    "*-west": {
+      "base": "block/estove/estove-lod2",
+      "rotateY": 90
+    }
+  },
+
+
   "blockmaterial": "Stone",
   "sidesolidByType": {
     "*-north": {

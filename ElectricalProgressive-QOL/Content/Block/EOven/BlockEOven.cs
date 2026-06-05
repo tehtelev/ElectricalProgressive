@@ -1,5 +1,4 @@
 ﻿using ElectricalProgressive.Utils;
-using System;
 using System.Collections.Generic;
 using System.Text;
 using Vintagestory.API.Client;
@@ -17,6 +16,7 @@ public class BlockEOven : BlockEBase
     public override void OnLoaded(ICoreAPI api)
     {
         base.OnLoaded(api);
+
         if (api.Side != EnumAppSide.Client)
             return;
 
@@ -57,7 +57,7 @@ public class BlockEOven : BlockEBase
     public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack,
         BlockSelection blockSel, ref string failureCode)
     {
-        //неваляжка - только вертикально
+        // неваляжка - только вертикально
         // целая ли грань, на которую ставим
         if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSel.Position, Facing.DownAll))
         {
