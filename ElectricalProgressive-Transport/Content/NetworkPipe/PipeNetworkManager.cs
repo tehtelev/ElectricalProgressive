@@ -10,8 +10,8 @@ namespace ElectricalProgressive.Content.NetworkPipe;
 public class PipeNetworkManager
 {
     private ICoreAPI api;
-    private Dictionary<long, PipeNetwork> networks = new();
-    private Dictionary<BlockPos, long> pipeToNetwork = new();
+    private Dictionary<long, PipeNetwork> networks = [];
+    private Dictionary<BlockPos, long> pipeToNetwork = [];
     private long nextNetworkId = 1;
 
     public void Initialize(ICoreAPI api)

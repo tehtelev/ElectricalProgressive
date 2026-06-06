@@ -44,9 +44,9 @@ public static class FacingRotations
     };
 
     // центры вращения 
-    private static readonly Vec3f rotationOriginVec3f = new Vec3f(0.5f, 0.5f, 0.5f);
+    private static readonly Vec3f rotationOriginVec3f = new(0.5f, 0.5f, 0.5f);
 
-    private static readonly Vec3d rotationOriginVec3d = new Vec3d(0.5d, 0.5d, 0.5d);
+    private static readonly Vec3d rotationOriginVec3d = new(0.5d, 0.5d, 0.5d);
 
 
 

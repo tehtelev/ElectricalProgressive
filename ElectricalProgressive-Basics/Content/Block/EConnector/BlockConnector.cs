@@ -13,7 +13,7 @@ public class BlockConnector : BlockEBase
     /// <summary>
     /// Кеш мешей
     /// </summary>
-    private static readonly Dictionary<(Facing, string, int), MeshData> MeshCache = new();
+    private static readonly Dictionary<(Facing, string, int), MeshData> MeshCache = [];
     
 
     /// <summary>

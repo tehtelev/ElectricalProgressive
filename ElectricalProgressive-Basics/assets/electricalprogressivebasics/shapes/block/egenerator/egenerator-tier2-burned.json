@@ -12,7 +12,9 @@
 		"brass-sgorevshiy": "block/brass-sgorevshiy",
 		"copper-okalina-polosa": "block/copper-okalina-polosa",
 		"steel-okalina-polosa": "block/steel-okalina-polosa",
-		"zinc-sgorevshiy": "block/zinc-sgorevshiy"
+		"zinc-sgorevshiy": "block/zinc-sgorevshiy",
+		"copper": "game:block/metal/plate/copper",
+		"zinc": "game:block/metal/plate/zinc"
 	},
 	"elements": [
 		{

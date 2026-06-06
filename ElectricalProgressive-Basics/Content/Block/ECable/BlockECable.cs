@@ -597,9 +597,16 @@ namespace ElectricalProgressive.Content.Block.ECable
                 var key = CacheDataKey.FromEntity(entity);
 
                 var boxes = CalculateBoxes(key, BlockECable.SelectionBoxesCache, entity);
-                return boxes.Values.ToArray() // копируем значения
-                    .SelectMany(x => x)
-                    .Distinct()
+                var list = new List<Cuboidf>();
+                var set = new HashSet<Cuboidf>();
+                foreach (Cuboidf[] x in boxes.Values.ToArray())
+                    foreach (Cuboidf cuboidf in x)
+                    {
+                        if (set.Add(cuboidf))
+                            list.Add(cuboidf);
+                    }
+
+                return list
                     .ToArray();
 
             }
@@ -623,9 +630,16 @@ namespace ElectricalProgressive.Content.Block.ECable
                 var key = CacheDataKey.FromEntity(entity);
 
                 var boxes = CalculateBoxes(key, BlockECable.CollisionBoxesCache, entity);
-                return boxes.Values.ToArray() // копируем значения
-                    .SelectMany(x => x)
-                    .Distinct()
+                var list = new List<Cuboidf>();
+                var set = new HashSet<Cuboidf>();
+                foreach (Cuboidf[] x in boxes.Values.ToArray())
+                    foreach (Cuboidf cuboidf in x)
+                    {
+                        if (set.Add(cuboidf))
+                            list.Add(cuboidf);
+                    }
+
+                return list
                     .ToArray();
 
             }

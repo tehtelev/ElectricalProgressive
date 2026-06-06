@@ -15,7 +15,9 @@
 		"copper-okalina-polosa": "electricalprogressivebasics:block/copper-okalina-polosa",
 		"frame-sgorevshiy": "electricalprogressivebasics:block/frame-sgorevshiy",
 		"steel-okalina-polosa": "electricalprogressivebasics:block/steel-okalina-polosa",
-		"zinc-sgorevshiy": "electricalprogressivebasics:block/zinc-sgorevshiy"
+		"zinc-sgorevshiy": "electricalprogressivebasics:block/zinc-sgorevshiy",
+		"copper": "game:block/metal/plate/copper",
+		"quartzglass": "electricalprogressivebasics:block/quartzglass"
 	},
 	"elements": [
 		{

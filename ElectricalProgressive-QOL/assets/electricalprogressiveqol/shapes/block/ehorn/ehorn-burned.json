@@ -13,7 +13,8 @@
 		"brass-sgorevshiy": "electricalprogressivebasics:block/brass-sgorevshiy",
 		"iron": "game:block/metal/plate/iron",
 		"steel": "game:block/metal/plate/steel",
-		"zinc": "game:block/metal/plate/zinc"
+		"zinc": "game:block/metal/plate/zinc",
+		"copper": "game:block/metal/plate/copper"
 	},
 	"elements": [
 		{

@@ -92,10 +92,8 @@ public class BlockItemInsertionPipe : BlockPipeBase
     {
         var sb = new StringBuilder();
         var pipe = world.BlockAccessor.GetBlockEntity(pos) as BEItemInsertionPipe;
-        if (pipe != null)
-        {
-            pipe.GetBlockInfo(forPlayer, sb);
-        }
+
+        pipe?.GetBlockInfo(forPlayer, sb);
 
         return sb.ToString();
     }

@@ -11,7 +11,10 @@
 		"iron-okalina-krug": "block/iron-okalina-krug",
 		"steel": "game:block/metal/plate/steel",
 		"steel-okalina-polosa": "block/steel-okalina-polosa",
-		"zinc-sgorevshiy": "block/zinc-sgorevshiy"
+		"zinc-sgorevshiy": "block/zinc-sgorevshiy",
+		"copper": "game:block/metal/plate/copper",
+		"zinc": "game:block/metal/plate/zinc",
+		"brass": "game:block/metal/plate/brass"
 	},
 	"elements": [
 		{

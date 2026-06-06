@@ -15,7 +15,9 @@
 		"iron": "game:block/metal/plate/iron",
 		"stainlesssteel": "electricalprogressivebasics:block/stainlesssteel",
 		"steel": "game:block/metal/plate/steel",
-		"steel1-sgorevshiy": "electricalprogressivebasics:block/steel1-sgorevshiy"
+		"steel1-sgorevshiy": "electricalprogressivebasics:block/steel1-sgorevshiy",
+		"copper": "game:block/metal/plate/copper",
+		"zinc": "game:block/metal/plate/zinc"
 	},
 	"elements": [
 		{

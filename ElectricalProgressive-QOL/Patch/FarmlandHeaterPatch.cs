@@ -311,7 +311,7 @@ public class FarmlandHeaterPatch
     /// </summary>
     static List<CodeInstruction> TranspilerFarmland(IEnumerable<CodeInstruction> instructions)
     {
-        codes = new List<CodeInstruction>(instructions);
+        codes = [..instructions];
         var found = false;
         for (int i = 0; i < codes.Count - 2; i++)
         {
@@ -337,31 +337,26 @@ public class FarmlandHeaterPatch
                         codes[j + 5].opcode == OpCodes.Stfld)
                     {
                         // Вставляем вызов HeaterBonus после baseClimate.Temperature += 5f
-                        var newCodes = new List<CodeInstruction>(9);
-
-                        // Загружаем baseClimate в стек
-                        newCodes.Add(new CodeInstruction(OpCodes.Ldloc_S, codes[j].operand));
-
-                        // Дублируем для последующего использования
-                        newCodes.Add(new CodeInstruction(OpCodes.Dup));
-
-                        // Загружаем текущее значение Temperature
-                        newCodes.Add(new CodeInstruction(OpCodes.Ldfld,
-                            typeof(ClimateCondition).GetField("Temperature")));
-
-                        // Вызываем HeaterBonus
-                        newCodes.Add(new CodeInstruction(OpCodes.Ldarg_0)); // this
-                        newCodes.Add(new CodeInstruction(OpCodes.Ldarg_0)); // this для upPos
-                        newCodes.Add(new CodeInstruction(OpCodes.Ldfld,
-                            typeof(BlockEntityFarmland).GetField("upPos", BindingFlags.NonPublic | BindingFlags.Instance)));
-                        newCodes.Add(new CodeInstruction(OpCodes.Call, heaterBonusMethod));
-
-                        // Складываем результат
-                        newCodes.Add(new CodeInstruction(OpCodes.Add));
-
-                        // Сохраняем обратно в Temperature
-                        newCodes.Add(new CodeInstruction(OpCodes.Stfld,
-                            typeof(ClimateCondition).GetField("Temperature")));
+                        var newCodes = new List<CodeInstruction>(9)
+                        {
+                            // Загружаем baseClimate в стек
+                            new (OpCodes.Ldloc_S, codes[j].operand), // Дублируем для последующего использования
+                            new (OpCodes.Dup),
+                            // Загружаем текущее значение Temperature
+                            new (OpCodes.Ldfld,
+                                typeof(ClimateCondition).GetField("Temperature")),
+                            // Вызываем HeaterBonus
+                            new (OpCodes.Ldarg_0), // this
+                            new (OpCodes.Ldarg_0), // this для upPos
+                            new (OpCodes.Ldfld,
+                                typeof(BlockEntityFarmland).GetField("upPos", BindingFlags.NonPublic | BindingFlags.Instance)),
+                            new (OpCodes.Call, heaterBonusMethod),
+                            // Складываем результат
+                            new (OpCodes.Add),
+                            // Сохраняем обратно в Temperature
+                            new (OpCodes.Stfld,
+                                typeof(ClimateCondition).GetField("Temperature"))
+                        };
 
                         // Вставляем новые инструкции
                         codes.InsertRange(j + 6, newCodes);
@@ -378,7 +373,7 @@ public class FarmlandHeaterPatch
         if (!found)
         {
             Api.Logger.Error("FarmlandHeaterPatch: Could not find injection point for farmland!");
-            return new List<CodeInstruction>(instructions);
+            return [..instructions];
         }
 
         return codes;
@@ -389,7 +384,7 @@ public class FarmlandHeaterPatch
     /// </summary>
     static List<CodeInstruction> TranspilerBerryBush(IEnumerable<CodeInstruction> instructions)
     {
-        codes = new List<CodeInstruction>(instructions);
+        codes = [..instructions];
         var found = false;
 
         for (int i = 0; i < codes.Count - 2; i++)
@@ -413,20 +408,18 @@ public class FarmlandHeaterPatch
                         codes[j + 3].opcode == OpCodes.Stloc_S)
                     {
                         // Вставляем вызов HeaterBonusBerryBush после temperature += 5
-                        var newCodes = new List<CodeInstruction>(5);
-
-                        // Загружаем temperature в стек
-                        newCodes.Add(new CodeInstruction(OpCodes.Ldloc_S, codes[j].operand));
-
-                        // Вызываем HeaterBonusBerryBush
-                        newCodes.Add(new CodeInstruction(OpCodes.Ldarg_0)); // this
-                        newCodes.Add(new CodeInstruction(OpCodes.Call, heaterBonusBerryBushMethod));
-
-                        // Складываем результат
-                        newCodes.Add(new CodeInstruction(OpCodes.Add));
-
-                        // Сохраняем обратно в temperature
-                        newCodes.Add(new CodeInstruction(OpCodes.Stloc_S, codes[j + 3].operand));
+                        var newCodes = new List<CodeInstruction>(5)
+                        {
+                            // Загружаем temperature в стек
+                            new (OpCodes.Ldloc_S, codes[j].operand),
+                            // Вызываем HeaterBonusBerryBush
+                            new (OpCodes.Ldarg_0), // this
+                            new (OpCodes.Call, heaterBonusBerryBushMethod),
+                            // Складываем результат
+                            new (OpCodes.Add),
+                            // Сохраняем обратно в temperature
+                            new (OpCodes.Stloc_S, codes[j + 3].operand)
+                        };
 
                         // Вставляем новые инструкции
                         codes.InsertRange(j + 4, newCodes);
@@ -443,7 +436,7 @@ public class FarmlandHeaterPatch
         if (!found)
         {
             Api.Logger.Error("FarmlandHeaterPatch: Could not find injection point for berry bush!");
-            return new List<CodeInstruction>(instructions);
+            return [..instructions];
         }
 
         return codes;
@@ -453,7 +446,7 @@ public class FarmlandHeaterPatch
 
     static List<CodeInstruction> TranspilerBeehive(IEnumerable<CodeInstruction> instructions)
     {
-        codes = new List<CodeInstruction>(instructions);
+        codes = [.. instructions];
         var found = false;
 
         for (int i = 0; i < codes.Count - 2; i++)
@@ -478,20 +471,18 @@ public class FarmlandHeaterPatch
                         codes[j + 3].opcode == OpCodes.Stloc_1)
                     {
                         // Вставляем вызов HeaterBonusBeehive после temp += 5
-                        var newCodes = new List<CodeInstruction>(5);
-
-                        // Загружаем temp в стек
-                        newCodes.Add(new CodeInstruction(OpCodes.Ldloc_1, codes[j].operand));
-
-                        // Вызываем HeaterBonusBeehive
-                        newCodes.Add(new CodeInstruction(OpCodes.Ldarg_0)); // this
-                        newCodes.Add(new CodeInstruction(OpCodes.Call, heaterBonusBeehiveMethod));
-
-                        // Складываем результат
-                        newCodes.Add(new CodeInstruction(OpCodes.Add));
-
-                        // Сохраняем обратно в temp
-                        newCodes.Add(new CodeInstruction(OpCodes.Stloc_1, codes[j + 3].operand));
+                        var newCodes = new List<CodeInstruction>(5)
+                        {
+                            // Загружаем temp в стек
+                            new (OpCodes.Ldloc_1, codes[j].operand),
+                            // Вызываем HeaterBonusBeehive
+                            new (OpCodes.Ldarg_0), // this
+                            new (OpCodes.Call, heaterBonusBeehiveMethod),
+                            // Складываем результат
+                            new (OpCodes.Add),
+                            // Сохраняем обратно в temp
+                            new (OpCodes.Stloc_1, codes[j + 3].operand)
+                        };
 
                         // Вставляем новые инструкции
                         codes.InsertRange(j + 4, newCodes);
@@ -508,7 +499,7 @@ public class FarmlandHeaterPatch
         if (!found)
         {
             Api.Logger.Error("FarmlandHeaterPatch: Could not find injection point for beehive!");
-            return new List<CodeInstruction>(instructions);
+            return [..instructions];
         }
 
         return codes;
@@ -517,7 +508,7 @@ public class FarmlandHeaterPatch
     // Добавить новый транспайлер для FruitTreeRootBH с проверкой roomness
     static List<CodeInstruction> TranspilerFruitTree(IEnumerable<CodeInstruction> instructions)
     {
-        codes = new List<CodeInstruction>(instructions);
+        codes = [.. instructions];
         var found = false;
 
         for (int i = 0; i < codes.Count - 4; i++)
@@ -534,20 +525,17 @@ public class FarmlandHeaterPatch
                 codes[i + 3].opcode == OpCodes.Ret)
             {
                 // Вставляем вызов HeaterBonusFruitTree перед возвратом
-                var newCodes = new List<CodeInstruction>(5);
-
-                // Загружаем текущее значение 5
-                newCodes.Add(new CodeInstruction(OpCodes.Ldc_R4, codes[i + 2].operand));
-
-                // Вызываем HeaterBonusFruitTree
-                newCodes.Add(new CodeInstruction(OpCodes.Ldarg_0)); // this
-                newCodes.Add(new CodeInstruction(OpCodes.Call, heaterBonusFruitTreeMethod));
-
-                // Складываем результат (5 + бонус от обогревателей)
-                newCodes.Add(new CodeInstruction(OpCodes.Add));
-
-                // Возвращаем результат
-                newCodes.Add(new CodeInstruction(OpCodes.Ret));
+                var newCodes = new List<CodeInstruction>(5)
+                {
+                    // Загружаем текущее значение 5
+                    new (OpCodes.Ldc_R4, codes[i + 2].operand), // Вызываем HeaterBonusFruitTree
+                    new (OpCodes.Ldarg_0), // this
+                    new (OpCodes.Call, heaterBonusFruitTreeMethod),
+                    // Складываем результат (5 + бонус от обогревателей)
+                    new (OpCodes.Add),
+                    // Возвращаем результат
+                    new (OpCodes.Ret)
+                };
 
                 // Заменяем старый return 5 на новую последовательность
                 codes.RemoveRange(i + 2, 2); // Удаляем ldc.r4 5 и ret
@@ -560,7 +548,7 @@ public class FarmlandHeaterPatch
         if (!found)
         {
             Api.Logger.Error("FarmlandHeaterPatch: Could not find injection point for fruit tree!");
-            return new List<CodeInstruction>(instructions);
+            return [..instructions];
         }
 
         return codes;
@@ -571,7 +559,7 @@ public class FarmlandHeaterPatch
     // Добавить новый транспайлер для FruitTreeGrowingBranchBH.OnTick
     static List<CodeInstruction> TranspilerFruitTreeGrowing(IEnumerable<CodeInstruction> instructions)
     {
-        codes = new List<CodeInstruction>(instructions);
+        codes = [..instructions];
         var found = false;
 
         for (int i = 0; i < codes.Count - 2; i++)
@@ -587,14 +575,14 @@ public class FarmlandHeaterPatch
                 // Вставляем вызов HeaterBonusFruitTreeGrowing перед сравнением
 
                 // Создаем новые инструкции для вставки перед сравнением
-                var newCodes = new List<CodeInstruction>(3);
-
-                // Вызываем HeaterBonusFruitTreeGrowing (результат будет в стеке)
-                newCodes.Add(new CodeInstruction(OpCodes.Ldarg_0)); // this
-                newCodes.Add(new CodeInstruction(OpCodes.Call, heaterBonusFruitTreeGrowingMethod));
-
-                // Складываем температуру (уже в стеке) с бонусом
-                newCodes.Add(new CodeInstruction(OpCodes.Add));
+                var newCodes = new List<CodeInstruction>(3)
+                {
+                    // Вызываем HeaterBonusFruitTreeGrowing (результат будет в стеке)
+                    new (OpCodes.Ldarg_0), // this
+                    new (OpCodes.Call, heaterBonusFruitTreeGrowingMethod),
+                    // Складываем температуру (уже в стеке) с бонусом
+                    new (OpCodes.Add)
+                };
 
                 // Вставляем новые инструкции перед сравнением
                 codes.InsertRange(i, newCodes);
@@ -606,7 +594,7 @@ public class FarmlandHeaterPatch
         if (!found)
         {
             Api.Logger.Error("FarmlandHeaterPatch: Could not find injection point for fruit tree growing!");
-            return new List<CodeInstruction>(instructions);
+            return [..instructions];
         }
 
         return codes;
@@ -615,7 +603,7 @@ public class FarmlandHeaterPatch
 
     static List<CodeInstruction> TranspilerSapling(IEnumerable<CodeInstruction> instructions)
     {
-        codes = new List<CodeInstruction>(instructions);
+        codes = [..instructions];
         var found = false;
 
         for (int i = 0; i < codes.Count - 1; i++)
@@ -631,14 +619,14 @@ public class FarmlandHeaterPatch
                 // Вставляем вызов HeaterBonusSapling перед сравнением
 
                 // Создаем новые инструкции для вставки перед сравнением
-                var newCodes = new List<CodeInstruction>(3);
-
-                // Вызываем HeaterBonusSapling (результат будет в стеке)
-                newCodes.Add(new CodeInstruction(OpCodes.Ldarg_0)); // this
-                newCodes.Add(new CodeInstruction(OpCodes.Call, heaterBonusSaplingMethod));
-
-                // Складываем температуру (уже в стеке) с бонусом
-                newCodes.Add(new CodeInstruction(OpCodes.Add));
+                var newCodes = new List<CodeInstruction>(3)
+                {
+                    // Вызываем HeaterBonusSapling (результат будет в стеке)
+                    new (OpCodes.Ldarg_0), // this
+                    new (OpCodes.Call, heaterBonusSaplingMethod),
+                    // Складываем температуру (уже в стеке) с бонусом
+                    new (OpCodes.Add)
+                };
 
                 // Вставляем новые инструкции перед сравнением
                 codes.InsertRange(i, newCodes);
@@ -650,7 +638,7 @@ public class FarmlandHeaterPatch
         if (!found)
         {
             Api.Logger.Error("FarmlandHeaterPatch: Could not find injection point for sapling!");
-            return new List<CodeInstruction>(instructions);
+            return [..instructions];
         }
 
         return codes;

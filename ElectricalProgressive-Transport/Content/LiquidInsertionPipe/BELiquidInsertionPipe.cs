@@ -67,7 +67,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     #region Тайминги передачи
 
     /// <summary>Время последней передачи для каждой позиции источника</summary>
-    private Dictionary<BlockPos, long> lastTransferTime = new Dictionary<BlockPos, long>();
+    private Dictionary<BlockPos, long> lastTransferTime = [];
     /// <summary>Минимальный интервал между передачами в миллисекундах</summary>
     private const long MinTransferInterval = 100;
 
@@ -392,9 +392,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         }
 
         // Собираем позиции для исключения (текущая труба и цель)
-        var excludePositions = new HashSet<BlockPos>();
-        excludePositions.Add(Pos);
-        excludePositions.Add(targetPos);
+        var excludePositions = new HashSet<BlockPos> { Pos, targetPos };
 
         int sourcesChecked = 0;
 

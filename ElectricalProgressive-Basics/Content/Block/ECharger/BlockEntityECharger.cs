@@ -371,7 +371,7 @@ public class BlockEntityECharger : BlockEntityContainer, ITexPositionSource
         MarkDirty(true);
     }
 
-    internal bool OnPlayerInteract(IPlayer byPlayer, Vec3d hit)
+    internal bool OnPlayerInteract(IPlayer byPlayer, Vec3d _)
     {
         if (Inventory[0].Itemstack != null)
         {

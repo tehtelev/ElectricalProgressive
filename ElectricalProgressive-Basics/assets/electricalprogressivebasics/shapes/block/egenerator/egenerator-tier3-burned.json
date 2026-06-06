@@ -13,7 +13,9 @@
 		"copper-okalina-polosa": "block/copper-okalina-polosa",
 		"gold1-okalina-polosa": "block/gold1-okalina-polosa",
 		"steel1-okalina-polosa": "block/steel1-okalina-polosa",
-		"zinc-sgorevshiy": "block/zinc-sgorevshiy"
+		"zinc-sgorevshiy": "block/zinc-sgorevshiy",
+		"copper": "game:block/metal/plate/copper",
+		"zinc": "game:block/metal/plate/zinc"
 	},
 	"elements": [
 		{

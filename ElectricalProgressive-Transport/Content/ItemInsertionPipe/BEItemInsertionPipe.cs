@@ -49,7 +49,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
     private long lastTemperatureUpdate = 0;
 
     // === Тайминги для предотвращения спама ===
-    private Dictionary<BlockPos, long> lastTransferTime = new();
+    private Dictionary<BlockPos, long> lastTransferTime = [];
     private const long MinTransferInterval = 500; // Минимум 500 мс между переносами одного предмета
 
     // === Переопределение свойства Inventory ===

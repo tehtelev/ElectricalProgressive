@@ -68,7 +68,7 @@ namespace ElectricalProgressive.Content.Block.CableDot
         {
             base.OnNeighbourBlockChange(world, pos, neibpos);
 
-            if (world.BlockAccessor.GetBlockEntity(pos) is BlockEntityCableDotDown entity)
+            if (world.BlockAccessor.GetBlockEntity(pos) is BlockEntityCableDotDown)
             {
                 
                 var block = world.BlockAccessor.GetBlock(neibpos);
@@ -125,7 +125,7 @@ namespace ElectricalProgressive.Content.Block.CableDot
 
         public override void OnJsonTesselation(ref MeshData sourceMesh, ref int[] lightRgbsByCorner, BlockPos pos, Vintagestory.API.Common.Block[] chunkExtBlocks, int extIndex3d)
         {
-            if (api is not ICoreClientAPI clientApi ||
+            if (api is not ICoreClientAPI ||
                 api.World.BlockAccessor.GetBlockEntity(pos) is not BlockEntityCableDotDown entity ||
                 entity.Facing == Facing.None)
             {

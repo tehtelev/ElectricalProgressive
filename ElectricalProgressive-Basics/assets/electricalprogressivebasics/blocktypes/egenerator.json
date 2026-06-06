@@ -101,7 +101,9 @@
     "base": "block/egenerator/egenerator-{tier}-{type}"
   },
 
-
+  "lod2shape": {
+    "base": "block/egenerator/egenerator-{tier}-stator-lod2"
+  },
 
 
 

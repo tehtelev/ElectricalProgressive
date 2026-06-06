@@ -1,4 +1,5 @@
-﻿using ElectricalProgressive.Utils;
+﻿// запаска пример использования с иммерсивными проводами
+using ElectricalProgressive.Utils;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -51,7 +52,7 @@ public class BlockEMotor1 : ImmersiveWireBlock, IMechanicalPowerBlock
     {
         var selection = new Selection(blockSel);
 
-        var facing = Facing.None;
+        Facing facing;
 
 
 
@@ -89,7 +90,7 @@ public class BlockEMotor1 : ImmersiveWireBlock, IMechanicalPowerBlock
         }
 
         var selection = new Selection(blockSel);
-        var facing = Facing.None;
+        Facing facing;
 
         try
         {

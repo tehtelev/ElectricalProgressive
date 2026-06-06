@@ -29,10 +29,10 @@ namespace ElectricalProgressive.Content.Block.CableSwitch
             {
 
                 // инициализируем аниматор
-                if (animUtil != null)
+                if (AnimUtil != null)
                 {
                     PrepareAnimUtil(api, "cableswitchwall");
-                    animUtil.InitializeAnimator("cableswitchwall", _mesh, _resultingShape, new Vec3f(0, GetRotation(), 0f));
+                    AnimUtil.InitializeAnimator("cableswitchwall", _mesh, _resultingShape, new Vec3f(0, GetRotation(), 0f));
 
                     var beh = GetBehavior<BEBehaviorCableSwitch>();
 
@@ -66,7 +66,7 @@ namespace ElectricalProgressive.Content.Block.CableSwitch
 
                 Shape _shape = Shape.TryGet(api, shapePath);
 
-                _mesh = animUtil.CreateMesh(cacheDictKey, _shape, out _resultingShape, null);
+                _mesh = AnimUtil.CreateMesh(cacheDictKey, _shape, out _resultingShape, null);
 
             }
         }
@@ -95,7 +95,7 @@ namespace ElectricalProgressive.Content.Block.CableSwitch
         /// <summary>
         /// Аниматор блока, используется для анимации открывания дверцы генератора
         /// </summary>
-        public BlockEntityAnimationUtil animUtil
+        public BlockEntityAnimationUtil AnimUtil
         {
             get { return GetBehavior<BEBehaviorAnimatable>()?.animUtil!; }
         }
@@ -108,11 +108,11 @@ namespace ElectricalProgressive.Content.Block.CableSwitch
         public void Open()
         {
             //animUtil?.Dispose();
-            animUtil.InitializeAnimator("cableswitchwall", null, null, new Vec3f(0, GetRotation(), 0f));
+            AnimUtil.InitializeAnimator("cableswitchwall", null, null, new Vec3f(0, GetRotation(), 0f));
 
-            if (animUtil?.activeAnimationsByAnimCode.ContainsKey("open") == false)
+            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("open") == false)
             {
-                animUtil?.StartAnimation(new AnimationMetaData()
+                AnimUtil?.StartAnimation(new AnimationMetaData()
                 {
                     Animation = "open",
                     Code = "open",
@@ -137,9 +137,9 @@ namespace ElectricalProgressive.Content.Block.CableSwitch
         /// </summary>
         public void Close()
         {
-            if (animUtil?.activeAnimationsByAnimCode.ContainsKey("open") == true)
+            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("open") == true)
             {
-                animUtil?.StopAnimation("open");
+                AnimUtil?.StopAnimation("open");
 
                 //применяем цвет и яркость
                 //Block.LightHsv = new byte[] { 7, 7, 0 };
@@ -162,7 +162,7 @@ namespace ElectricalProgressive.Content.Block.CableSwitch
 
 
             // если анимации нет, то рисуем блок базовый
-            if (animUtil?.activeAnimationsByAnimCode.ContainsKey("open") == false)
+            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("open") == false)
             {
                 (this.Block as ImmersiveWireBlock)._drawBaseMesh = true;
                 return false;
@@ -182,7 +182,7 @@ namespace ElectricalProgressive.Content.Block.CableSwitch
         {
             base.OnBlockUnloaded();
             
-            animUtil?.Dispose();
+            AnimUtil?.Dispose();
 
             _mesh?.Dispose();
             _resultingShape = null;
@@ -195,7 +195,7 @@ namespace ElectricalProgressive.Content.Block.CableSwitch
         {
             base.OnBlockRemoved();
 
-            animUtil?.Dispose();
+            AnimUtil?.Dispose();
 
             _mesh?.Dispose();
             _resultingShape = null;

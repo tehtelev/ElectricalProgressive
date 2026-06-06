@@ -100,6 +100,9 @@
     "base": "block/emotor/emotor-{tier}-{type}"
   },
 
+  "lod2shape": {
+    "base": "block/emotor/emotor-{tier}-stator-lod2"
+  },
 
   "resistance": 1,
   "drawType": "JSON",

@@ -81,7 +81,7 @@ public class BEPipe : BlockEntity
     public override void OnBlockRemoved()
     {
         // Сохраняем позиции соседей, которые могут нуждаться в обновлении
-        List<BlockPos> neighborsToUpdate = new List<BlockPos>();
+        List<BlockPos> neighborsToUpdate = [];
 
         if (_pipeConnection != null)
         {

@@ -14,116 +14,115 @@ namespace ElectricalProgressive.Content.Block.EMotor;
 
 public class BEBehaviorEMotor : BEBehaviorMPBase, IElectricConsumer
 {
+    // --- Константы и Ключи ---
+    private const string PowerRequestKey = "electricalprogressive:powerRequest";
+    private const string PowerReceiveKey = "electricalprogressive:powerReceive";
 
-    /// <summary>
-    /// Нужно энергии (сохраняется)
-    /// </summary>
-    private float powerRequest;
-    public const string PowerRequestKey = "electricalprogressive:powerRequest";
-
-    /// <summary>
-    /// Дали энергии  (сохраняется)
-    /// </summary>
-    private float powerReceive;
-    public const string PowerReceiveKey = "electricalprogressive:powerReceive";
-
-    /// <summary>
-    /// Минимальный ток
-    /// </summary>
+    // --- Параметры двигателя (из ассетов) ---
     private float I_min;
-    /// <summary>
-    /// Максимальный ток
-    /// </summary>
     private float I_max;
-    /// <summary>
-    /// Максимальный крутящий момент
-    /// </summary>
     private float torque_max;
-    /// <summary>
-    /// Пиковый КПД
-    /// </summary>
     private float kpd_max;
-    /// <summary>
-    /// Максимальная скорость вращения
-    /// </summary>
     private float speed_max;
-    /// <summary>
-    /// Множитель сопротивления
-    /// </summary>
-    private static float resistance_factor;
-    /// <summary>
-    /// Базовое сопротивление
-    /// </summary>
+    private float resistanceFactor;   // Исправлено: не static, параметры индивидуальны для каждого блока
     private float base_resistance;
-    /// <summary>
-    /// Текущий крутящий момент
-    /// </summary>
+
+    /// <summary>Заглушка параметров: I_min, I_max, torque_max, kpd_max, speed_max, resistance_factor, base_resistance</summary>
+    private static readonly float[] DefaultParams = [10.0F, 100.0F, 0.5F, 0.75F, 0.5F, 0.1F, 0.05F];
+
+    // --- Состояние (State) ---
+    private float powerRequest;
+    public float powerReceive;
     private float torque;
-    /// <summary>
-    /// Ток потребления
-    /// </summary>
     private float I_value;
-    /// <summary>
-    /// КПД
-    /// </summary>
-    //private float kpd;
+    private bool hasBurnout = false;
+    private bool prepareBurnout = false;
 
-    /// <summary>
-    /// Заглушка. I_min , I_max, torque_max, kpd_max, speed_max, resistance_factor, base_resistance 
-    /// </summary>
-    private static float[] def_Params => [10.0F, 100.0F, 0.5F, 0.75F, 0.5F, 0.1F, 0.05F];
-    /// <summary>
-    /// Сюда берем параметры из ассетов
-    /// </summary>
-    private float[] Params = [0, 0, 0, 0, 0, 0, 0];
+    /// <summary>Коэффициент текущего потребления</summary>
+    public float AvgConsumeCoeff { get; set; }
 
+    // --- Рендеринг и Визуал ---
+    protected CompositeShape? CompositeShape;       // Высокодетализированная модель
+    protected CompositeShape? CompositeShapeLOD2;   // Упрощённая модель (дальний план)
+    private bool playerSoFar; // Ближе ли игрок, чем LOD2 bias
 
-    private static readonly int[][] _axisSigns = new int[][]
-    {
-        [+0, +0, -1], // index 0
-        [-1, +0, +0], // index 1
-        [+0, +0, -1], // index 2
-        [-1, +0, +0], // index 3
-        [+0, -1, +0], // index 4
-        [+0, +1, +0] // index 5
-    };
+    // --- Внутренние переменные и Служебное ---
+    private ICoreClientAPI? capi;
+    private BlockFacing? _outFacingForNetworkDiscovery;
+    private int[]? _axisSign;
 
+    /// <summary>Массив направлений для вычисления векторов осей</summary>
+    private static readonly int[][] AxisVectorsMap =
+    [
+        [+0, +0, -1], // 0: South/Forward
+        [-1, +0, +0], // 1: West?
+        [+0, +0, -1], // 2: North
+        [-1, +0, +0], // 3: East
+        [+0, -1, +0], // 4: Down
+        [+0, +1, +0]  // 5: Up
+    ];
 
+    /// <summary>Индикатор "сгорел" двигатель</summary>
     private bool IsBurned => Block.Variant["type"] == "burned";
 
 
-
-    protected CompositeShape? CompositeShape;  //не трогать уровни доступа
-
-
-
-    private BlockFacing _outFacingForNetworkDiscovery = null!;
-    private int[] _axisSign = null!;
-
-    /// <summary>
-    /// Возвращает направление выхода для обнаружения сети валом
-    /// </summary>
-    public override BlockFacing OutFacingForNetworkDiscovery
+    public BEBehaviorEMotor(BlockEntity blockentity) : base(blockentity)
     {
-        get
-        {
-            if (_outFacingForNetworkDiscovery == null)
-            {
-                if (Blockentity is BlockEntityEMotor entity && entity.Facing != Facing.None)
-                    _outFacingForNetworkDiscovery = FacingHelper.Directions(entity.Facing).First();
-                else
-                    return null!; // fallback to default direction if not set
-            }
+        GetParams();
+        powerReceive = 0;
+        powerRequest = I_max; // Запрашиваем максимум при инициализации
+    }
 
-            return _outFacingForNetworkDiscovery;
+    /// <summary>Получает ссылку на сущность двигателя, чтобы избежать многократного приведения типов</summary>
+    private BlockEntityEMotor? Motor => Blockentity as BlockEntityEMotor;
+
+
+    public override void Initialize(ICoreAPI api, JsonObject properties)
+    {
+        base.Initialize(api, properties);
+
+        if (api.Side == EnumAppSide.Client)
+        {
+            capi = api as ICoreClientAPI;
+            // Слушаем тик реже для оптимизации проверки дистанции и рендера
+            api.Event.RegisterGameTickListener(OnTick, 2000);
+        }
+    }
+
+    /// <summary>Отслеживает расстояние до игрока и переключает детализацию модели</summary>
+    private void OnTick(float dt)
+    {
+        if (Motor == null || capi == null) return;
+
+        float distSq = capi.World.Player.Entity.Pos.AsBlockPos.HorDistanceSqTo(Pos.X, Pos.Z);
+        bool LOD2 = distSq > capi.Render.DefaultFrustumCuller.lod2BiasSq;
+
+        if (LOD2 != playerSoFar)
+        {
+            playerSoFar = LOD2;
+            updateShape(capi.World); // Обновляем модель только при смене уровня детализации
         }
     }
 
 
+    public override void OnBlockUnloaded()
+    {
+        base.OnBlockUnloaded();
+        CompositeShape = null;
+        CompositeShapeLOD2 = null;
+    }
 
-    /// <summary>
-    /// Возвращает направление оси, в которой находится генератор
-    /// </summary>
+
+    public override BlockFacing? OutFacingForNetworkDiscovery
+    {
+        get
+        {
+            if (_outFacingForNetworkDiscovery == null && Motor?.Facing != Facing.None)
+                _outFacingForNetworkDiscovery = FacingHelper.Directions(Motor.Facing).FirstOrDefault();
+            return _outFacingForNetworkDiscovery;
+        }
+    }
+
     public override int[] AxisSign
     {
         get
@@ -131,253 +130,155 @@ public class BEBehaviorEMotor : BEBehaviorMPBase, IElectricConsumer
             if (_axisSign == null && OutFacingForNetworkDiscovery != null)
             {
                 var index = OutFacingForNetworkDiscovery.Index;
-                _axisSign = (index >= 0 && index < _axisSigns.Length)
-                    ? _axisSigns[index]
-                    : _axisSigns[0]; // fallback to default
+                _axisSign = (index >= 0 && index < AxisVectorsMap.Length) ? AxisVectorsMap[index] : new int[] { 0, 0, -1 };
             }
-
-            return _axisSign;
+            return _axisSign ?? new int[] { 0, 0, -1 };
         }
     }
-
-
 
     public new BlockPos Pos => Position;
 
-    public float AvgConsumeCoeff { get; set; }
 
-    /// <inheritdoc />
-    public BEBehaviorEMotor(BlockEntity blockentity) : base(blockentity)
-    {
-
-        this.GetParams();
-        powerReceive = 0;
-        powerRequest = I_max;
-    }
-
-    /// <summary>
-    /// Извлекаем параметры из ассетов
-    /// </summary>
     private void GetParams()
     {
-        Params = MyMiniLib.GetAttributeArrayFloat(Block, "params", def_Params);
-        I_min = Params[0];
-        I_max = Params[1];
-        torque_max = Params[2];
-        kpd_max = Params[3];
-        speed_max = Params[4];
-        resistance_factor = Params[5];
-        base_resistance = Params[6];
+        var paramsArray = MyMiniLib.GetAttributeArrayFloat(Block, "params", DefaultParams);
+        I_min = paramsArray[0];
+        I_max = paramsArray[1];
+        torque_max = paramsArray[2];
+        kpd_max = paramsArray[3];
+        speed_max = paramsArray[4];
+        resistanceFactor = paramsArray[5];
+        base_resistance = paramsArray[6];
     }
 
 
-    bool hasBurnout = false;
-    bool prepareBurnout = false;
+    public float Consume_request() => powerRequest;
+
+    public void Consume_receive(float amount) => powerReceive = amount;
 
 
-
-
-    /// <inheritdoc />
-    public float Consume_request()
-    {
-        return powerRequest;
-    }
-
-    /// <inheritdoc />
-    public void Consume_receive(float amount)
-    {
-        powerReceive = amount;
-    }
-
-    /// <inheritdoc />
+    /// <summary>Основной цикл обновления логики</summary>
     public void Update()
     {
-        // Если нет сети, пытаемся создать/подключиться
+        if (Motor == null || Motor.ElectricalProgressive?.AllEparams is null) return;
+
+        // Инициализация сети валом, если её нет
         if (network == null && OutFacingForNetworkDiscovery != null)
-        {
             CreateJoinAndDiscoverNetwork(OutFacingForNetworkDiscovery);
-        }
-
-        if (Blockentity is not BlockEntityEMotor entity ||
-            entity.ElectricalProgressive == null ||
-            entity.ElectricalProgressive.AllEparams is null)
-        {
-            return;
-        }
-
-
 
         bool anyBurnout = false;
         bool anyPrepareBurnout = false;
 
-        foreach (var eParam in entity.ElectricalProgressive.AllEparams)
+        foreach (var eParam in Motor.ElectricalProgressive.AllEparams)
         {
-            if (!hasBurnout && eParam.burnout)
-            {
-                hasBurnout = true;
-                entity.MarkDirty(true);
-            }
+            if (!hasBurnout && eParam.burnout) hasBurnout = true;
+            if (!prepareBurnout && eParam.ticksBeforeBurnout > 0) prepareBurnout = true;
 
-            if (!prepareBurnout && eParam.ticksBeforeBurnout > 0)
-            {
-                prepareBurnout = true;
-                entity.MarkDirty(true);
-            }
-
-            if (eParam.burnout)
-                anyBurnout = true;
-
-            if (eParam.ticksBeforeBurnout > 0)
-                anyPrepareBurnout = true;
+            if (eParam.burnout) anyBurnout = true;
+            if (eParam.ticksBeforeBurnout > 0) anyPrepareBurnout = true;
         }
 
-        if (!anyBurnout && hasBurnout)
-        {
-            hasBurnout = false;
-            entity.MarkDirty(true);
-        }
+        // Вычисляем, изменилось ли состояние, чтобы вызвать MarkDirty ровно один раз
+        bool stateChanged = false;
+        if (hasBurnout != anyBurnout) { hasBurnout = anyBurnout; stateChanged = true; }
+        if (prepareBurnout != anyPrepareBurnout) { prepareBurnout = anyPrepareBurnout; stateChanged = true; }
 
-        if (!anyPrepareBurnout && prepareBurnout)
-        {
-            prepareBurnout = false;
-            entity.MarkDirty(true);
-        }
+        if (stateChanged) Motor.MarkDirty(true);
 
-        // Обработка burnout
-        if (hasBurnout)
+        // Физическое изменение блока при сгорании
+        if (hasBurnout && Block.Variant["type"] != "burned")
         {
-            // Проверяем и обновляем состояние блока если нужно
-            if (entity.Block.Variant["type"] != "burned")
+            var burnedBlock = Api.World.GetBlock(Block.CodeWithVariant("type", "burned"));
+            if (burnedBlock != null)
             {
-                // Используем константы вместо создания новых строк
-                const string type = "type";
-                const string variant = "burned";
-
-                // Кэшируем блок для обмена
-                var burnedBlock = Api.World.GetBlock(Block.CodeWithVariant(type, variant));
                 Api.World.BlockAccessor.ExchangeBlock(burnedBlock.BlockId, Pos);
+                Motor.MarkDirty(true); // Блок физически изменился, сохраняем состояние
             }
         }
-
-
     }
 
 
-
-    /// <inheritdoc />
     public float getPowerReceive() => powerReceive;
-
-    /// <inheritdoc />
     public float getPowerRequest() => powerRequest;
 
-    // не удалять
     public override float GetResistance()
     {
         if (IsBurned)
             return 9999.0F;
 
         var spd = Math.Abs(Network?.Speed * GearedRatio ?? 0.0f);
+        var ratio = spd / speed_max;
 
+        // Нелинейный рост сопротивления при высоких скоростях (квадратичная зависимость)
+        float resistanceFactorMultiplier = (spd > speed_max) ? (float)Math.Pow(ratio, 2f) : ratio;
 
-        return base_resistance +
-               ((Math.Abs(spd) > speed_max)
-                   ? resistance_factor * (float)Math.Pow((spd / speed_max), 2f)
-                   : resistance_factor * spd / speed_max);
-
-
+        return base_resistance + (resistanceFactor * resistanceFactorMultiplier);
     }
 
-    /// <summary>
-    /// Основной метод поведения двигателя возвращающий момент и сопротивление
-    /// </summary>
+
     public override float GetTorque(long tick, float speed, out float resistance)
     {
-        torque = 0f;                            // Текущий крутящий момент
-        resistance = GetResistance();         // Вычисляем текущее сопротивление двигателя
+        torque = 0f;
+        resistance = GetResistance();
+        I_value = 0f;
 
+        var availablePower = powerReceive; // Доступно тока/энергии
 
-        I_value = 0;                        // Ток потребления
-
-        var I_amount = powerReceive;     // Доступно тока/энергии 
-
-        if (I_amount <= I_min)                   // Если ток меньше минимального, двигатель не работает
+        if (availablePower <= I_min)
             return torque;
 
-        I_value = I_amount;    // Берем, что дают
+        I_value = Math.Min(availablePower, I_max); // Ограничиваем максимальным током
 
-        // I_value = Math.Min(I_amount, I_max);    // Берем, что дают
-
-        if (I_value < I_min)                                        // Если ток меньше минимального, двигатель не работает
+        if (I_value < I_min)
             torque = 0.0F;
         else
-            torque = I_value / I_max * torque_max;      // линейная
+            torque = (I_value / I_max) * torque_max * kpd_max;
 
+        powerRequest = I_max; // Запрашиваем максимум для стабильной работы двигателя
 
-        torque *= kpd_max; // учитываем КПД
+        // Учитываем направление передачи крутящего момента относительно оси сети
+        float directionMultiplier = propagationDir == OutFacingForNetworkDiscovery ? 1f : -1f;
 
-
-        powerRequest = I_max;                                        // Запрашиваем энергии столько, сколько нужно  для работы (работает как положено)
-
-
-        return propagationDir == OutFacingForNetworkDiscovery     // Возвращаем все значения
-            ? 1f * torque
-            : -1f * torque;
+        return directionMultiplier * torque;
     }
 
 
-
-    /// <summary>
-    /// Выдается игре шейп для отрисовки ротора
-    /// </summary>
-    /// <returns></returns>
     protected override CompositeShape? GetShape()
     {
-        if (Api is not { } api || Blockentity is not BlockEntityEMotor entity || entity.Facing == Facing.None ||
-            entity.Block.Variant["type"] == "burned")
+        if (capi == null || Motor == null || Motor.Facing == Facing.None || IsBurned)
             return null;
 
-        var direction = OutFacingForNetworkDiscovery;
-
+        // Инициализация моделей один раз при первом запросе
         if (CompositeShape == null)
         {
-            var tier = entity.Block.Variant["tier"];             // какой тир
+            var tier = Motor.Block.Variant["tier"];
 
             CompositeShape = Block.Shape.Clone();
+            CompositeShapeLOD2 = Block.Shape.Clone();
 
-            CompositeShape.Base = new AssetLocation("electricalprogressivebasics:shapes/block/emotor/emotor-" + tier + "-rotor.json");
+            CompositeShape.Base = new AssetLocation($"electricalprogressivebasics:shapes/block/emotor/emotor-{tier}-rotor.json");
+            CompositeShapeLOD2.Base = new AssetLocation($"electricalprogressivebasics:shapes/block/emotor/emotor-{tier}-rotor-lod2.json");
         }
 
-        var shape = CompositeShape.Clone();
+        // Выбор модели в зависимости от дистанции до игрока
+        var shape = playerSoFar ? CompositeShapeLOD2.Clone() : CompositeShape.Clone();
 
-        if (direction == BlockFacing.NORTH)
-            shape.rotateY = 0;
-
-        if (direction == BlockFacing.EAST)
-            shape.rotateY = 270;
-
-        if (direction == BlockFacing.SOUTH)
-            shape.rotateY = 180;
-
-        if (direction == BlockFacing.WEST)
-            shape.rotateY = 90;
-
-        if (direction == BlockFacing.UP)
-            shape.rotateX = 90;
-
-        if (direction == BlockFacing.DOWN)
-            shape.rotateX = 270;
-
-
-
+        // Вращение модели по оси выхода сети (используем .Index для совместимости с switch)
+        switch (OutFacingForNetworkDiscovery.Index)
+        {
+            case BlockFacing.indexNORTH: shape.rotateY = 0; break;
+            case BlockFacing.indexEAST: shape.rotateY = 270; break;
+            case BlockFacing.indexSOUTH: shape.rotateY = 180; break;
+            case BlockFacing.indexWEST: shape.rotateY = 90; break;
+            case BlockFacing.indexUP: shape.rotateX = 90; break;
+            case BlockFacing.indexDOWN: shape.rotateX = 270; break;
+        }
 
         return shape;
-
     }
 
-    protected override void updateShape(IWorldAccessor worldForResolve)
-    {
-        Shape = GetShape();
-    }
+    protected override void updateShape(IWorldAccessor worldForResolve) => Shape = GetShape();
+
 
     public override bool OnTesselation(ITerrainMeshPool mesher, ITesselatorAPI tesselator)
     {
@@ -391,11 +292,8 @@ public class BEBehaviorEMotor : BEBehaviorMPBase, IElectricConsumer
         tree.SetFloat(PowerRequestKey, powerRequest);
         tree.SetFloat(PowerReceiveKey, powerReceive);
 
-        // Сохраняем текущее направление
         if (_outFacingForNetworkDiscovery != null)
-        {
             tree.SetInt("savedOutFacing", _outFacingForNetworkDiscovery.Index);
-        }
     }
 
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
@@ -404,42 +302,32 @@ public class BEBehaviorEMotor : BEBehaviorMPBase, IElectricConsumer
         powerRequest = tree.GetFloat(PowerRequestKey);
         powerReceive = tree.GetFloat(PowerReceiveKey);
 
-        // Восстанавливаем направление из сохраненных данных
-        var savedFacingIndex = tree.GetInt("savedOutFacing", -1);
-        if (savedFacingIndex >= 0 && savedFacingIndex < BlockFacing.ALLFACES.Length)
-        {
-            _outFacingForNetworkDiscovery = BlockFacing.ALLFACES[savedFacingIndex];
-        }
+        var savedIndex = tree.GetInt("savedOutFacing", -1);
+        if (savedIndex >= 0 && savedIndex < BlockFacing.ALLFACES.Length)
+            _outFacingForNetworkDiscovery = BlockFacing.ALLFACES[savedIndex];
     }
 
 
-    /// <summary>
-    /// Подсказка при наведении на блок
-    /// </summary>
     public override void GetBlockInfo(IPlayer forPlayer, StringBuilder stringBuilder)
     {
         base.GetBlockInfo(forPlayer, stringBuilder);
 
-        //проверяем не сгорел ли прибор
-        if (Blockentity is not BlockEntityEMotor)
-            return;
-
-        if (IsBurned)
-            return;
+        if (Motor == null || IsBurned) return;
 
         stringBuilder.AppendLine(StringHelper.Progressbar(powerReceive / I_max * 100));
-        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Consumption") + ": " + ((int)powerReceive).ToString() + "/" + I_max + " " + Lang.Get("electricalprogressivebasics:W"));
+        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Consumption") + ": " + ((int)powerReceive).ToString() + "/" + (int)I_max + " " + Lang.Get("electricalprogressivebasics:W"));
 
         var speed = network?.Speed * GearedRatio ?? 0.0F;
         stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Speed") + ": " + speed.ToString("F3") + " " + Lang.Get("electricalprogressivebasics:rps"));
 
         stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:resistance_moment", (int)(GetResistance() * 100)));
-        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:torque_moment", (int)(GetTorque(0, 0, out _) * 100)));
 
+        // Вычисляем момент для отображения в подсказке. 
+        // Вызов GetTorque здесь безопасен, так как метод вызывается редко (при наведении мыши)
+        float dummyRes = 0;
+        var currentTorque = GetTorque(0, speed, out dummyRes);
+        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:torque_moment", (int)(currentTorque * 100)));
     }
 
-    public override void WasPlaced(BlockFacing connectedOnFacing)
-    {
-
-    }
+    public override void WasPlaced(BlockFacing connectedOnFacing) { /* Логика при установке блока */ }
 }

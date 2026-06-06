@@ -310,7 +310,7 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
     
     public void OnBurnTick(float deltatime)
     {
-        bool isBurningNow = false;
+
     
         if (_fuelBurnTime > 0f)
         {
@@ -319,7 +319,7 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
     
             if (hasFuel && hasValidLiquid)
             {
-                isBurningNow = true;
+                
                 StartAnimation();  // анимация только если есть и топливо, и вода
                 ConsumeLiquid(CurrentConsumptionRate * deltatime);
             }

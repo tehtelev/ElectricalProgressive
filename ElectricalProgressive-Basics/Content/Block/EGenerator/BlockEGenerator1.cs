@@ -1,4 +1,5 @@
-﻿using ElectricalProgressive.Utils;
+﻿// запаска пример использования с иммерсивными проводами
+using ElectricalProgressive.Utils;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,15 +13,10 @@ namespace ElectricalProgressive.Content.Block.EGenerator;
 
 public class BlockEGenerator1 : ImmersiveWireBlock, IMechanicalPowerBlock
 {
-    private static readonly Dictionary<(Facing, string), MeshData> MeshData = new();
+    private static readonly Dictionary<(Facing, string), MeshData> MeshData = [];
     private static readonly float[] DefParams = [100.0F, 0.5F, 0.1F, 0.25F, 0.05F, 1F];          //заглушка
 
-    public override void OnUnloaded(ICoreAPI api)
-    {
-        base.OnUnloaded(api);
-        MeshData?.Clear();
 
-    }
 
     public MechanicalNetwork? GetNetwork(IWorldAccessor world, BlockPos pos)
     {
@@ -338,5 +334,13 @@ public class BlockEGenerator1 : ImmersiveWireBlock, IMechanicalPowerBlock
         }
         var powerOutFacing = FacingHelper.Directions(entity.Facing).First();
         return face == powerOutFacing;
+    }
+
+
+    public override void OnUnloaded(ICoreAPI api)
+    {
+        base.OnUnloaded(api);
+        MeshData?.Clear();
+
     }
 }

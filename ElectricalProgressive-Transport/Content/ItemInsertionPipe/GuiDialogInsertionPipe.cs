@@ -174,13 +174,13 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
     private void ApplyInitialSwitchValues()
     {
         var swMatchMod = SingleComposer.GetSwitch("swMatchMod");
-        if (swMatchMod != null) swMatchMod.SetValue(matchMod);
+        swMatchMod?.SetValue(matchMod);
 
         var swMatchType = SingleComposer.GetSwitch("swMatchType");
-        if (swMatchType != null) swMatchType.SetValue(matchType);
+        swMatchType?.SetValue(matchType);
 
         var swMatchAttrs = SingleComposer.GetSwitch("swMatchAttrs");
-        if (swMatchAttrs != null) swMatchAttrs.SetValue(matchAttributes);
+        swMatchAttrs?.SetValue(matchAttributes);
     }
 
     /// <summary>
@@ -374,10 +374,8 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
         SendTransferRateUpdate();
 
         var slotGrid = SingleComposer?.GetSlotGrid("filterSlots");
-        if (slotGrid != null)
-        {
-            slotGrid.OnGuiClosed(capi);
-        }
+
+        slotGrid?.OnGuiClosed(capi);
 
         capi.World.Player.InventoryManager.CloseInventory((IInventory)Inventory);
     }

@@ -12,7 +12,7 @@ namespace ElectricalProgressive.Content.Block.EMotor;
 public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
 {
     // кеш мешей
-    private static readonly Dictionary<(Facing, string), MeshData> MeshData = new();
+    private static readonly Dictionary<(Facing, string, int), MeshData> MeshCache = [];
 
     private static readonly float[] DefParams = [10.0F, 100.0F, 0.5F, 0.75F, 0.5F, 0.1F, 0.05F];   //заглушка
 
@@ -21,7 +21,7 @@ public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
     public override void OnUnloaded(ICoreAPI api)
     {
         base.OnUnloaded(api);
-        BlockEMotor.MeshData?.Clear();
+        MeshCache?.Clear();
     }
 
 
@@ -54,8 +54,7 @@ public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
     {
         var selection = new Selection(blockSel);
 
-        var facing = Facing.None;
-
+        Facing facing;
 
 
         try
@@ -88,7 +87,7 @@ public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
         }
 
         var selection = new Selection(blockSel);
-        var facing = Facing.None;
+        Facing facing;
 
         try
         {
@@ -161,21 +160,22 @@ public class BlockEMotor : BlockEBase, IMechanicalPowerBlock
             entity.Facing != Facing.None
            )
         {
+            var facing = entity.Facing;
+            string code = entity.Block.Code.ToString();
 
-            var facing = entity.Facing;   //куда смотрит генератор
-            string code = entity.Block.Code; //код блока
+            // VerticesCount отличается у LOD0 и LOD2
+            var cacheKey = (facing, code, sourceMesh.VerticesCount);
 
-            if (!BlockEMotor.MeshData.TryGetValue((facing, code), out var meshData))
+            if (!MeshCache.TryGetValue(cacheKey, out var meshData))
             {
-                var block = clientApi.World.BlockAccessor.GetBlockEntity(pos).Block;
-
-                clientApi.Tesselator.TesselateBlock(block, out meshData);
-                clientApi.TesselatorManager.ThreadDispose(); //обязательно?
+                // Клонируем входящий меш (уже правильный — LOD0 или LOD2)
+                meshData = sourceMesh.Clone();
 
                 // быстро враащем обьект
                 FacingRotations.ApplyRotations(meshData, facing);
 
-                BlockEMotor.MeshData.TryAdd((facing, code), meshData);
+
+                MeshCache.TryAdd(cacheKey, meshData);
             }
 
             sourceMesh = meshData;

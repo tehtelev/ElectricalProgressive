@@ -50,7 +50,7 @@ public class BEBehaviorECharger : BlockEntityBehavior, IElectricConsumer
                 entityStack.StackSize == 0 ||
                 entityStack.Collectible==null ||
                 entityStack.Collectible.Attributes == null)
-                return working = false;
+                return false;
 
             if (entityStack.Item != null &&
                 entityStack.Collectible.Attributes["chargable"].AsBool(false)) //предмет?

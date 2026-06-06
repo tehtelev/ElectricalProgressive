@@ -3,6 +3,7 @@ using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
 using System;
 using System.Linq;
+using System.Net;
 using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -15,110 +16,138 @@ namespace ElectricalProgressive.Content.Block.EGenerator;
 
 public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
 {
-    private float PowerOrder;           // Просят столько энергии (сохраняется)
-    public const string PowerOrderKey = "electricalprogressive:powerOrder";
+    // --- Константы и Ключи ---
 
-    private float PowerGive;           // Отдаем столько энергии (сохраняется)
-    public const string PowerGiveKey = "electricalprogressive:powerGive";
+    private const string PowerOrderKey = "electricalprogressive:powerOrder";
+    private const string PowerGiveKey = "electricalprogressive:powerGive";
 
+    /// <summary>Значения по умолчанию: I_max, speed_max, resistance_factor, resistance_load, base_resistance, kpd_max</summary>
+    private static readonly float[] DefaultParams = [100.0F, 0.5F, 0.1F, 0.25F, 0.05F, 1F];
 
-    /// <summary>
-    /// Максимальный ток
-    /// </summary>
-    private float I_max;
-    /// <summary>
-    /// Максимальная скорость вращения
-    /// </summary>
-    private float speed_max;
-    /// <summary>
-    /// Множитель сопротивления
-    /// </summary>
+    // --- Параметры генератора (из ассетов) ---
+
+    private float I_max;           // Максимальный ток
+    private float speed_max;       // Максимальная скорость вращения
     private float resistance_factor;
-    /// <summary>
-    /// Сопротивление нагрузки генератора
-    /// </summary>
     private float resistance_load;
-    /// <summary>
-    /// Базовое сопротивление
-    /// </summary>
     private float base_resistance;
-    /// <summary>
-    /// КПД
-    /// </summary>
-    private float kpd_max;
+    private float kpd_max;         // КПД
 
-    /// <summary>
-    /// Заглушка. I_max, speed_max , resistance_factor, resistance_load, base_resistance, kpd_max
-    /// </summary>
-    private static float[] def_Params => [100.0F, 0.5F, 0.1F, 0.25F, 0.05F, 1F];
-    /// <summary>
-    /// Сюда берем параметры из ассетов
-    /// </summary>
-    private float[] Params = [0, 0, 0, 0, 0, 0];
+    // --- Состояние (State) ---
 
-    // задает коэффициент сглаживания фильтра
-    public ExponentialMovingAverage EmaFilter;
+    /// <summary>Запрашиваемая мощность/ток от сети</summary>
+    private float PowerOrder;
 
-    private float AvgPowerOrder;
+    /// <summary>Фактическая отдаваемая мощность/ток</summary>
+    public float PowerGive;
 
-    private bool IsBurned => Block.Variant["type"] == "burned";
+    /// <summary>Фильтр для сглаживания (EMA)</summary>
+    public ExponentialMovingAverage EmaFilter = new(0.05f);
+
+    private float AvgPowerOrder; // Сглаженное значение порядка
+
+    // --- Рендеринг и Визуал ---
+
+    protected CompositeShape? CompositeShape;       // Высокодетализированная модель
+    protected CompositeShape? CompositeShapeLOD2;   // Упрощенная модель (дальний план)
 
 
-    protected CompositeShape? CompositeShape;  //не трогать уровни доступа
+    /// <summary>Локальное состояние "сгорел" генератор</summary>
+    private bool hasBurnout = false;
 
-    private static readonly int[][] _axisSigns =
+    /// <summary>Локальное состояние "готовится к сгоранию"</summary>
+    private bool prepareBurnout = false;
+
+
+    // --- Внутренние переменные и Служебное ---
+
+    private ICoreClientAPI? capi;
+    private bool playerSoFar; // Ближе ли игрок, чем LOD2 bias
+
+    /// <summary>Кэш направления выхода для сети (вал)</summary>
+    private BlockFacing? _outFacingForNetworkDiscovery;
+
+    /// <summary>Кэш вектора оси вращения [x, y, z]</summary>
+    private int[]? _axisSign;
+
+    // Массив направлений для вычисления векторов осей. Индексы соответствуют BlockFacing.Index
+    private static readonly int[][] AxisVectorsMap =
     [
-        [+0, +0, -1], // index 0
-        [-1, +0, +0], // index 1
-        [+0, +0, -1], // index 2
-        [-1, +0, +0], // index 3
-        [+0, -1, +0], // index 4
-        [+0, +1, +0] // index 5
+        [+0, +0, -1], // 0: South (обычно) или Forward
+        [-1, +0, +0], // 1: West? Зависит от реализации API
+        [+0, +0, -1], // 2: North
+        [-1, +0, +0], // 3: East
+        [+0, -1, +0], // 4: Down
+        [+0, +1, +0]  // 5: Up
     ];
 
 
-
-    /// <summary>
-    /// Вызывается при выгрузке блока из мира
-    /// </summary>
-    public override void OnBlockUnloaded()
+    public BEBehaviorEGenerator(BlockEntity blockEntity) : base(blockEntity)
     {
-        base.OnBlockUnloaded();
-        CompositeShape = null;
+        GetParams(); // Загружаем параметры при создании инстанса
     }
 
+    /// <summary>Получает ссылку на сущность генератора, чтобы не приводить тип каждый раз</summary>
+    private BlockEntityEGenerator? Generator => Blockentity as BlockEntityEGenerator;
 
 
-    public new BlockPos Pos => Position;
-
-    private BlockFacing _outFacingForNetworkDiscovery = null!;
-    private int[] _axisSign = null!;
-
-
-    /// <summary>
-    /// Возвращает направление выхода для обнаружения сети валом
-    /// </summary>
-    public override BlockFacing OutFacingForNetworkDiscovery
+    public override void Initialize(ICoreAPI api, JsonObject properties)
     {
-        get
-        {
-            if (_outFacingForNetworkDiscovery == null)
-            {
-                if (Blockentity is BlockEntityEGenerator entity && entity.Facing != Facing.None)
-                    _outFacingForNetworkDiscovery = FacingHelper.Directions(entity.Facing).First();
-                else
-                    return null!; // fallback to default direction if not set
-            }
+        base.Initialize(api, properties);
 
-            return _outFacingForNetworkDiscovery;
+        if (api.Side == EnumAppSide.Client)
+        {
+            capi = api as ICoreClientAPI;
+            // Слушаем тик реже для оптимизации рендера
+            api.Event.RegisterGameTickListener(OnTick, 2000);
+        }
+    }
+
+    /// <summary>Отслеживает расстояние до игрока и переключает детализацию модели</summary>
+    private void OnTick(float dt)
+    {
+        // Если генератор выгружен или не загружена система ElectricalProgressive - выходим
+        if (Generator?.ElectricalProgressive?.IsLoaded != true || capi == null)
+            return;
+
+        // Вычисляем квадрат дистанции до игрока
+        float distSq = capi.World.Player.Entity.Pos.AsBlockPos.HorDistanceSqTo(Pos.X, Pos.Z);
+
+        bool lod2 = distSq > capi.Render.DefaultFrustumCuller.lod2BiasSq;
+
+        if (lod2 != playerSoFar)
+        {
+            playerSoFar = lod2;
+            updateShape(capi.World); // Обновляем модель при смене уровня детализации
+            
         }
     }
 
 
+    /// <summary>Вызывается при выгрузке блока из мира. Очищаем кэш шейпов.</summary>
+    public override void OnBlockUnloaded()
+    {
+        base.OnBlockUnloaded();
+        CompositeShape = null;
+        CompositeShapeLOD2 = null;
+    }
 
-    /// <summary>
-    /// Возвращает направление оси, в которой находится генератор
-    /// </summary>
+
+    /// <summary>Направление выхода для обнаружения сети (вал)</summary>
+    public override BlockFacing? OutFacingForNetworkDiscovery
+    {
+        get
+        {
+            if (_outFacingForNetworkDiscovery == null && Generator?.Facing != Facing.None)
+            {
+                // Берем первое направление из массива направлений вращения
+                _outFacingForNetworkDiscovery = FacingHelper.Directions(Generator.Facing).FirstOrDefault();
+            }
+            return _outFacingForNetworkDiscovery;
+        }
+    }
+
+    /// <summary>Вектор оси генератора</summary>
     public override int[] AxisSign
     {
         get
@@ -126,162 +155,162 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
             if (_axisSign == null && OutFacingForNetworkDiscovery != null)
             {
                 var index = OutFacingForNetworkDiscovery.Index;
-                _axisSign = (index >= 0 && index < _axisSigns.Length)
-                    ? _axisSigns[index]
-                    : _axisSigns[0]; // fallback to default
+                // Возвращаем вектор из мапы или дефолтный [0,0,-1] если индекс некорректен
+                _axisSign = (index >= 0 && index < AxisVectorsMap.Length)
+                    ? AxisVectorsMap[index]
+                    : new int[] { 0, 0, -1 };
             }
-
-            return _axisSign;
+            return _axisSign ?? new int[] { 0, 0, -1 };
         }
     }
 
-    bool hasBurnout = false;
-    bool prepareBurnout = false;
-
-
-
-    /// <inheritdoc />
-    public BEBehaviorEGenerator(BlockEntity blockEntity) : base(blockEntity)
-    {
-        EmaFilter = new(0.05f);
-        this.GetParams();
-    }
-
-    /// <summary>
-    /// Извлекаем параметры из ассетов
-    /// </summary>  
+    /// <summary>Извлекаем параметры из ассетов блока</summary>  
     private void GetParams()
     {
-        Params = MyMiniLib.GetAttributeArrayFloat(Block, "params", def_Params);
+        // Получаем массив параметров или используем дефолтный
+        var paramsArray = MyMiniLib.GetAttributeArrayFloat(Block, "params", DefaultParams);
 
-        I_max = Params[0];
-        speed_max = Params[1];
-        resistance_factor = Params[2];
-        resistance_load = Params[3];
-        base_resistance = Params[4];
-        kpd_max = Params[5];
+        I_max = paramsArray[0];
+        speed_max = paramsArray[1];
+        resistance_factor = paramsArray[2];
+        resistance_load = paramsArray[3];
+        base_resistance = paramsArray[4];
+        kpd_max = paramsArray[5];
 
         AvgPowerOrder = 0;
     }
 
-    /// <inheritdoc />
+
+    /// <summary>Рассчитывает отдаваемую мощность в зависимости от скорости вращения</summary>
     public float Produce_give()
     {
+        // Скорость с учетом передаточного отношения
         var speed = network?.Speed * GearedRatio ?? 0.0F;
 
-        var power = (Math.Abs(speed) <= speed_max) // Задаем форму кривых тока(мощности)
+        // Формула: Линейный рост до max speed, затем горизонтальная линия
+        var power = (Math.Abs(speed) <= speed_max)
             ? Math.Abs(speed) / speed_max * I_max
-            : I_max; // Линейная горизонтальная
+            : I_max;
 
         PowerGive = power;
         return power;
     }
 
-    /// <inheritdoc />
+
+    /// <summary>Устанавливает запрашиваемую мощность и обновляет сглаженный фильтр</summary>
     public void Produce_order(float amount)
     {
         PowerOrder = amount;
+
+        // Сглаживаем фактическую передачу (минимум из того, что просят и того что есть)
         AvgPowerOrder = (float)EmaFilter.Update(Math.Min(PowerGive, PowerOrder));
     }
 
-    /// <inheritdoc />
-    public float getPowerGive() => PowerGive;
 
-    /// <inheritdoc />
+    public float getPowerGive() => PowerGive;
     public float getPowerOrder() => PowerOrder;
 
-    /// <summary>
-    /// Механическая сеть берет отсюда сопротивление этого генератора
-    /// </summary>
-    /// <returns></returns>
+
+    /// <summary>Механическая сеть берет отсюда сопротивление этого генератора</summary>
     public override float GetResistance()
     {
-        if (IsBurned)
-            return 9999.0F;
+        // Проверяем, сгорел ли блок (через вариант)
+        bool isBurnedBlock = Block.Variant["type"] == "burned";
+
+        if (isBurnedBlock) return 9999.0F;
 
         var spd = Math.Abs(network?.Speed * GearedRatio ?? 0.0F);
 
-        var res = base_resistance +
-                  ((spd > speed_max)
-                      ? resistance_load * (Math.Min(AvgPowerOrder, I_max) / I_max) + (resistance_factor * (float)Math.Pow((spd / speed_max), 2f))
-                      : resistance_load * (Math.Min(AvgPowerOrder, I_max) / I_max) + (resistance_factor * spd / speed_max));
+        // Расчет сопротивления нагрузки
+        float loadRes = resistance_load * (Math.Min(AvgPowerOrder, I_max) / I_max);
 
-        res /= kpd_max; // Учитываем КПД
+        // Нелинейный фактор сопротивления при высоких скоростях
+        float speedFactor;
+        if (spd > speed_max)
+        {
+            // При превышении скорости сопротивление растет по квадрату
+            speedFactor = resistance_factor * (float)Math.Pow((spd / speed_max), 2f);
+        }
+        else
+        {
+            // Линейный рост в нормальном режиме
+            speedFactor = resistance_factor * spd / speed_max;
+        }
 
-        return res;
+        float res = base_resistance + loadRes + speedFactor;
+
+        return res / kpd_max; // Делим на КПД (учитываем потери)
     }
 
 
-
-
-    /// <inheritdoc />
+    /// <summary>Основной цикл обновления логики</summary>
     public void Update()
     {
+        if (Generator == null || Generator.ElectricalProgressive?.AllEparams is null)
+            return;
 
-        // Если нет сети, пытаемся создать/подключиться
+        // Если нет сети, пытаемся подключиться к соседям через вал
         if (network == null && OutFacingForNetworkDiscovery != null)
         {
             CreateJoinAndDiscoverNetwork(OutFacingForNetworkDiscovery);
         }
 
-        if (Blockentity is not BlockEntityEGenerator entity ||
-            entity.ElectricalProgressive == null ||
-            entity.ElectricalProgressive.AllEparams is null)
-        {
-            return;
-        }
-
         bool anyBurnout = false;
         bool anyPrepareBurnout = false;
 
-        foreach (var eParam in entity.ElectricalProgressive.AllEparams)
+        // Проходим по параметрам всех связанных элементов для проверки пробоя
+        foreach (var eParam in Generator.ElectricalProgressive.AllEparams)
         {
-            if (!hasBurnout && eParam.burnout)
-            {
-                hasBurnout = true;
-                entity.MarkDirty(true);
-            }
+            if (!hasBurnout && eParam.burnout) hasBurnout = true;
+            if (!prepareBurnout && eParam.ticksBeforeBurnout > 0) prepareBurnout = true;
 
-            if (!prepareBurnout && eParam.ticksBeforeBurnout > 0)
-            {
-                prepareBurnout = true;
-                entity.MarkDirty(true);
-            }
-
-            if (eParam.burnout)
-                anyBurnout = true;
-
-            if (eParam.ticksBeforeBurnout > 0)
-                anyPrepareBurnout = true;
+            if (eParam.burnout) anyBurnout = true;
+            if (eParam.ticksBeforeBurnout > 0) anyPrepareBurnout = true;
         }
+
+        // Если состояние глобальной переменной отличается от того, что мы насчитали - обновляем
+        bool stateChanged = false;
 
         if (!anyBurnout && hasBurnout)
         {
             hasBurnout = false;
-            entity.MarkDirty(true);
+            stateChanged = true;
+        }
+        else if (anyBurnout && !hasBurnout)
+        {
+            hasBurnout = true;
+            stateChanged = true;
         }
 
         if (!anyPrepareBurnout && prepareBurnout)
         {
             prepareBurnout = false;
-            entity.MarkDirty(true);
+            stateChanged = true;
+        }
+        else if (anyPrepareBurnout && !prepareBurnout)
+        {
+            prepareBurnout = true;
+            stateChanged = true;
         }
 
-        // Обработка burnout
-        if (hasBurnout)
+        // Если состояние изменилось, помечаем блок как грязный для сохранения
+        if (stateChanged)
         {
-            // Проверяем и обновляем состояние блока если нужно
-            if (entity.Block.Variant["type"] != "burned")
+            Generator.MarkDirty(true);
+        }
+
+        // Обработка сгорания блока (визуальное изменение физического блока)
+        if (hasBurnout && Block.Variant["type"] != "burned")
+        {
+            var burnedBlock = Api.World.GetBlock(Block.CodeWithVariant("type", "burned"));
+            if (burnedBlock != null)
             {
-                // Кэшируем блок для обмена
-                var burnedBlock = Api.World.GetBlock(Block.CodeWithVariant("type", "burned"));
                 Api.World.BlockAccessor.ExchangeBlock(burnedBlock.BlockId, Pos);
+                // Блок физически изменился, нужно сохранить состояние
+                Generator.MarkDirty(true);
             }
         }
-
-
     }
-
 
 
     public override void ToTreeAttributes(ITreeAttribute tree)
@@ -290,7 +319,6 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
         tree.SetFloat(PowerOrderKey, PowerOrder);
         tree.SetFloat(PowerGiveKey, PowerGive);
 
-        // Сохраняем текущее направление
         if (_outFacingForNetworkDiscovery != null)
         {
             tree.SetInt("savedOutFacing", _outFacingForNetworkDiscovery.Index);
@@ -303,79 +331,72 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
         PowerOrder = tree.GetFloat(PowerOrderKey);
         PowerGive = tree.GetFloat(PowerGiveKey);
 
-        // Восстанавливаем направление из сохраненных данных
-        var savedFacingIndex = tree.GetInt("savedOutFacing", -1);
-        if (savedFacingIndex >= 0 && savedFacingIndex < BlockFacing.ALLFACES.Length)
+        var savedIndex = tree.GetInt("savedOutFacing", -1);
+        if (savedIndex >= 0 && savedIndex < BlockFacing.ALLFACES.Length)
         {
-            _outFacingForNetworkDiscovery = BlockFacing.ALLFACES[savedFacingIndex];
+            _outFacingForNetworkDiscovery = BlockFacing.ALLFACES[savedIndex];
         }
     }
 
-    /// <summary>
-    /// Подсказка при наведении на блок
-    /// </summary>
+
+    /// <summary>Информация о блоке в подсказке</summary>
     public override void GetBlockInfo(IPlayer forPlayer, StringBuilder stringBuilder)
     {
         base.GetBlockInfo(forPlayer, stringBuilder);
 
-        if (Blockentity is not BlockEntityEGenerator)
-            return;
-
-        
-        if (IsBurned)
-            return;
+        if (Generator == null || Block.Variant["type"] == "burned") return;
 
         var speed = network?.Speed * GearedRatio ?? 0.0F;
-        stringBuilder.AppendLine(StringHelper.Progressbar(Math.Min(PowerGive, PowerOrder) / I_max * 100));
-        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Production") + ": " + ((int)Math.Min(PowerGive, PowerOrder)).ToString() + "/" + I_max + " " + Lang.Get("electricalprogressivebasics:W"));
-        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Prod_potential") + ": " + ((int)PowerGive).ToString() + " " + Lang.Get("electricalprogressivebasics:W"));
-        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Speed") + ": " + speed.ToString("F3") + " " + Lang.Get("electricalprogressivebasics:rps"));
 
-        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:resistance_moment", (int)(GetResistance()*100)));
-        
+        // Прогрессбар заполнения
+        var percent = Math.Min(PowerGive, PowerOrder) / I_max * 100;
+        stringBuilder.AppendLine(StringHelper.Progressbar(percent));
+
+        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Production") + ": " +
+            ((int)Math.Min(PowerGive, PowerOrder)).ToString() + "/" + (int)I_max + " " + Lang.Get("electricalprogressivebasics:W"));
+
+        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Prod_potential") + ": " +
+            ((int)PowerGive).ToString() + " " + Lang.Get("electricalprogressivebasics:W"));
+
+        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Speed") + ": " +
+            speed.ToString("F3") + " " + Lang.Get("electricalprogressivebasics:rps"));
+
+        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:resistance_moment", (int)(GetResistance() * 100)));
     }
 
 
-
-    /// <summary>
-    /// Выдается игре шейп для отрисовки ротора
-    /// </summary>
-    /// <returns></returns>
+    /// <summary>Подготовка модели ротора для отрисовки</summary>
     protected override CompositeShape? GetShape()
     {
-        if (Api is not { } api || Blockentity is not BlockEntityEGenerator entity || entity.Facing == Facing.None ||
-            entity.Block.Variant["type"] == "burned")
+        if (capi == null || Generator == null || Generator.Facing == Facing.None || Block.Variant["type"] == "burned")
             return null;
 
-        var direction = OutFacingForNetworkDiscovery;
+        // Инициализируем шейпы один раз
         if (CompositeShape == null)
         {
-            var tier = entity.Block.Variant["tier"];             // какой тир
+            var tier = Generator.Block.Variant["tier"];
 
             CompositeShape = Block.Shape.Clone();
+            CompositeShapeLOD2 = Block.Shape.Clone();
 
-            CompositeShape.Base = new AssetLocation("electricalprogressivebasics:shapes/block/egenerator/egenerator-" + tier + "-rotor.json");
+            CompositeShape.Base = new AssetLocation($"electricalprogressivebasics:shapes/block/egenerator/egenerator-{tier}-rotor.json");
+            CompositeShapeLOD2.Base = new AssetLocation($"electricalprogressivebasics:shapes/block/egenerator/egenerator-{tier}-rotor-lod2.json");
         }
 
-        var shape = CompositeShape.Clone();
+        // Выбираем нужную модель (High/Low Poly)
+        var shape = playerSoFar ? CompositeShapeLOD2.Clone() : CompositeShape.Clone();
 
-        if (direction == BlockFacing.NORTH)
-            shape.rotateY = 0;
 
-        if (direction == BlockFacing.EAST)
-            shape.rotateY = 270;
-
-        if (direction == BlockFacing.SOUTH)
-            shape.rotateY = 180;
-
-        if (direction == BlockFacing.WEST)
-            shape.rotateY = 90;
-
-        if (direction == BlockFacing.UP)
-            shape.rotateX = 90;
-
-        if (direction == BlockFacing.DOWN)
-            shape.rotateX = 270;
+        // Вращение модели в зависимости от направления выхода
+        switch (OutFacingForNetworkDiscovery.Index)
+        {
+            case BlockFacing.indexNORTH: shape.rotateY = 0; break;
+            case BlockFacing.indexEAST: shape.rotateY = 270; break;
+            case BlockFacing.indexSOUTH: shape.rotateY = 180; break;
+            case BlockFacing.indexWEST: shape.rotateY = 90; break;
+            case BlockFacing.indexUP: shape.rotateX = 90; break;
+            case BlockFacing.indexDOWN: shape.rotateX = 270; break;
+        }
 
         return shape;
     }
@@ -385,13 +406,16 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
         Shape = GetShape();
     }
 
+
     public override bool OnTesselation(ITerrainMeshPool mesher, ITesselatorAPI tesselator)
     {
+        // Кэшируем освещение для оптимизации рендера
         this.lightRbs = this.Api.World.BlockAccessor.GetLightRGBs(this.Blockentity.Pos);
         return false;
     }
 
     public override void WasPlaced(BlockFacing connectedOnFacing)
     {
+        // Логика при установке блока (если нужна)
     }
 }

@@ -119,11 +119,8 @@ public class BlockLiquidInsertionPipe : BlockPipeBase
         // Получаем блок-сущность трубы
         var pipe = world.BlockAccessor.GetBlockEntity(pos) as BELiquidInsertionPipe;
 
-        if (pipe != null)
-        {
-            // Запрашиваем информацию у самой сущности
-            pipe.GetBlockInfo(forPlayer, sb);
-        }
+        // Запрашиваем информацию у самой сущности
+        pipe?.GetBlockInfo(forPlayer, sb);
 
         return sb.ToString();
     }

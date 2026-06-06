@@ -1,4 +1,6 @@
-﻿using ElectricalProgressive.Interface;
+﻿// запаска пример использования с иммерсивными проводами
+
+using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
 using System;
 using System.Linq;

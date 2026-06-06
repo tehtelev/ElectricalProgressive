@@ -1,4 +1,5 @@
-﻿using ElectricalProgressive.Utils;
+﻿// запаска пример использования с иммерсивными проводами
+using ElectricalProgressive.Utils;
 using System;
 using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;

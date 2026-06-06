@@ -37,13 +37,14 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
     private Facing connection;
     private Facing interruption;
     private bool isLoaded;
+    public bool IsLoaded => isLoaded;
 
     private bool dirty = true;
     private bool paramsSet = false;
 
     // настройка частиц
-    public List<Vec3d> ParticlesOffsetPos = new List<Vec3d>(1);
-    public List<int[]> ParticlesFramesAnim = new List<int[]>(1);
+    public List<Vec3d> ParticlesOffsetPos = new(1);
+    public List<int[]> ParticlesFramesAnim = new(1);
     public int ParticlesType = 0;
     private BlockEntityAnimationUtil AnimUtil;
 

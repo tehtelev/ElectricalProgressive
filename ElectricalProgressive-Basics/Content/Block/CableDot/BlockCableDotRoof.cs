@@ -123,7 +123,7 @@ namespace ElectricalProgressive.Content.Block.CableDot
 
         public override void OnJsonTesselation(ref MeshData sourceMesh, ref int[] lightRgbsByCorner, BlockPos pos, Vintagestory.API.Common.Block[] chunkExtBlocks, int extIndex3d)
         {
-            if (api is not ICoreClientAPI clientApi ||
+            if (api is not ICoreClientAPI ||
                 api.World.BlockAccessor.GetBlockEntity(pos) is not BlockEntityCableDotRoof entity ||
                 entity.Facing == Facing.None)
             {

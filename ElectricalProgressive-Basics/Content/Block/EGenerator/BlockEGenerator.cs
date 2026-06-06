@@ -6,7 +6,6 @@ using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
-using Vintagestory.GameContent;
 using Vintagestory.GameContent.Mechanics;
 
 namespace ElectricalProgressive.Content.Block.EGenerator;
@@ -14,7 +13,7 @@ namespace ElectricalProgressive.Content.Block.EGenerator;
 public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
 {
     // кеш мешей статора
-    private static readonly Dictionary<(Facing, string), MeshData> MeshData = new();
+    private static readonly Dictionary<(Facing, string, int), MeshData> MeshCache = [];
 
     private static readonly float[] def_Params = [100.0F, 0.5F, 0.1F, 0.25F, 0.05F, 1F];          //заглушка
 
@@ -23,7 +22,7 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
     public override void OnUnloaded(ICoreAPI api)
     {
         base.OnUnloaded(api);
-        MeshData?.Clear();
+        MeshCache?.Clear();
     }
 
 
@@ -106,7 +105,7 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
             world.BlockAccessor.GetBlockEntity(blockSel.Position) is BlockEntityEGenerator entity
         )
         {
-            entity.Facing = facing;                             //сообщаем направление
+            entity.Facing = facing;    //сообщаем направление
 
             //задаем электрические параметры блока/проводника
             LoadEProperties.Load(this, entity, selection.Face.Index);
@@ -160,25 +159,27 @@ public class BlockEGenerator : BlockEBase, IMechanicalPowerBlock
     {
         base.OnJsonTesselation(ref sourceMesh, ref lightRgbsByCorner, pos, chunkExtBlocks, extIndex3d);
 
-        if (api is ICoreClientAPI clientApi &&
+        if (api is ICoreClientAPI &&
             api.World.BlockAccessor.GetBlockEntity(pos) is BlockEntityEGenerator entity &&
             entity.Facing != Facing.None
            )
         {
-            var facing = entity.Facing;   //куда смотрит генератор
-            string code = entity.Block.Code; //код блока
+            var facing = entity.Facing;
+            string code = entity.Block.Code.ToString();
 
-            if (!MeshData.TryGetValue((facing, code), out var meshData))
+            // VerticesCount отличается у LOD0 и LOD2
+            var cacheKey = (facing, code, sourceMesh.VerticesCount);
+
+            if (!MeshCache.TryGetValue(cacheKey, out var meshData))
             {
-                var block = clientApi.World.BlockAccessor.GetBlockEntity(pos).Block;
-
-                clientApi.Tesselator.TesselateBlock(block, out meshData);
-                clientApi.TesselatorManager.ThreadDispose(); //обязательно?
+                // Клонируем входящий меш (уже правильный — LOD0 или LOD2)
+                meshData = sourceMesh.Clone();
 
                 // быстро враащем обьект
                 FacingRotations.ApplyRotations(meshData, facing);
 
-                MeshData.TryAdd((facing, code), meshData);
+
+                MeshCache.TryAdd(cacheKey, meshData);
             }
 
             sourceMesh = meshData;

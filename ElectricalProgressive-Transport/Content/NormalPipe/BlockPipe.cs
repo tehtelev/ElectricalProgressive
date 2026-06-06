@@ -45,7 +45,7 @@ public class BlockPipe : BlockPipeBase
     public override ItemStack[] GetDrops(IWorldAccessor world, BlockPos pos, IPlayer byPlayer, float dropQuantityMultiplier = 1)
     {
         // Возвращаем результат добычи (кроссовая труба)
-        return new[] { OnPickBlock(world, pos) };
+        return [OnPickBlock(world, pos)];
     }
 
     /// <summary>
@@ -64,10 +64,7 @@ public class BlockPipe : BlockPipeBase
         var pipe = world.BlockAccessor.GetBlockEntity(pos) as BEPipe;
 
         // Если сущность существует, получаем информацию о трубе
-        if (pipe != null)
-        {
-            pipe.GetBlockInfo(forPlayer, sb);
-        }
+        pipe?.GetBlockInfo(forPlayer, sb);
 
         return sb.ToString();
     }

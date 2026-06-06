@@ -221,7 +221,14 @@ public class BEBehaviorEPImmersive : BlockEntityBehavior
     /// </summary>
     public List<ConnectionData> FindConnection(byte localIndex)
     {
-        return _connections.Where(c => c.LocalNodeIndex == localIndex).ToList();
+        var list = new List<ConnectionData>();
+        foreach (var c in _connections)
+        {
+            if (c.LocalNodeIndex == localIndex)
+                list.Add(c);
+        }
+
+        return list;
     }
 
     /// <summary>
@@ -229,7 +236,13 @@ public class BEBehaviorEPImmersive : BlockEntityBehavior
     /// </summary>
     public List<ConnectionData> FindConnection(BlockPos neighborPos, byte neighborIndex)
     {
-        return _connections.Where(c => c.NeighborPos.Equals(neighborPos) && c.NeighborNodeIndex == neighborIndex).ToList();
+        var list = new List<ConnectionData>();
+        foreach (var c in _connections)
+        {
+            if (c.NeighborPos.Equals(neighborPos) && c.NeighborNodeIndex == neighborIndex) list.Add(c);
+        }
+
+        return list;
     }
 
     /// <summary>
@@ -237,7 +250,13 @@ public class BEBehaviorEPImmersive : BlockEntityBehavior
     /// </summary>
     public List<ConnectionData> GetConnectionsToNeighbor(BlockPos neighborPos)
     {
-        return _connections.Where(c => c.NeighborPos.Equals(neighborPos)).ToList();
+        var list = new List<ConnectionData>();
+        foreach (var c in _connections)
+        {
+            if (c.NeighborPos.Equals(neighborPos)) list.Add(c);
+        }
+
+        return list;
     }
 
     /// <summary>
@@ -647,7 +666,7 @@ public class BEBehaviorEPImmersive : BlockEntityBehavior
                     int cableLength = (int)Math.Ceiling(connection.WireLength);
 
                     // Создаем и выбрасываем кабель
-                    ItemStack cableStack = null;
+                    ItemStack cableStack;
 
                     // если не сгорел
                     if (!connection.Parameters.burnout)
@@ -706,7 +725,7 @@ public class BEBehaviorEPImmersive : BlockEntityBehavior
         }
 
         // Обновляем меши проводоа
-        if (Api.Side == EnumAppSide.Client && Block is ImmersiveWireBlock wireBlock)
+        if (Api.Side == EnumAppSide.Client && Block is ImmersiveWireBlock)
         {
             ImmersiveWireBlock.InvalidateBlockMeshCache(Pos);
         }

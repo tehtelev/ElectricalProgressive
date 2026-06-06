@@ -13,7 +13,9 @@
 		"copper-okalina-polosa": "electricalprogressivebasics:block/copper-okalina-polosa",
 		"iron": "game:block/metal/plate/iron",
 		"steel": "game:block/metal/plate/steel",
-		"zinc-sgorevshiy": "electricalprogressivebasics:block/zinc-sgorevshiy"
+		"zinc-sgorevshiy": "electricalprogressivebasics:block/zinc-sgorevshiy",
+		"copper": "game:block/metal/plate/copper",
+		"zinc": "game:block/metal/plate/zinc"
 	},
 	"elements": [
 		{

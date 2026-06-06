@@ -46,7 +46,7 @@ public class ElectricalProgressiveBasics : ModSystem
     private ICoreAPI api = null!;
     private ICoreClientAPI capi = null!;
 
-    public static AssetLocation soundElectricShok;
+
 
     /// <summary>
     /// Причины сгорания электрических блоков

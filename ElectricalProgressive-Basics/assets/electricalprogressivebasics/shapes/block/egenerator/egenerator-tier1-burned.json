@@ -18,6 +18,7 @@
 		"zinc": "game:block/metal/plate/zinc",
 		"brass": "game:block/metal/plate/brass",
 		"gold": "game:block/metal/plate/gold"
+
 	},
 	"elements": [
 		{
