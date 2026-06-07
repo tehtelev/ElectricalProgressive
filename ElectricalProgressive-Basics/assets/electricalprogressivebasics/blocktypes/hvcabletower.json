@@ -146,19 +146,39 @@
 
   "shapebytype": {
     "*-north": {
-      "base": "block/hvcabletower",
+      "base": "block/hvcabletower/hvcabletower",
       "rotateY": 0
     },
     "*-east": {
-      "base": "block/hvcabletower",
+      "base": "block/hvcabletower/hvcabletower",
       "rotateY": 270
     },
     "*-south": {
-      "base": "block/hvcabletower",
+      "base": "block/hvcabletower/hvcabletower",
       "rotateY": 180
     },
     "*-west": {
-      "base": "block/hvcabletower",
+      "base": "block/hvcabletower/hvcabletower",
+      "rotateY": 90
+    }
+  },
+
+
+  "lod2shapebytype": {
+    "*-north": {
+      "base": "block/hvcabletower/hvcabletower-lod2",
+      "rotateY": 0
+    },
+    "*-east": {
+      "base": "block/hvcabletower/hvcabletower-lod2",
+      "rotateY": 270
+    },
+    "*-south": {
+      "base": "block/hvcabletower/hvcabletower-lod2",
+      "rotateY": 180
+    },
+    "*-west": {
+      "base": "block/hvcabletower/hvcabletower-lod2",
       "rotateY": 90
     }
   },

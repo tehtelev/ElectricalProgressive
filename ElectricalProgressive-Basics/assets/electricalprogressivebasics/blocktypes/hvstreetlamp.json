@@ -114,6 +114,25 @@
   },
 
 
+  "lod2shapebytype": {
+    "*-north": {
+      "base": "block/hvstreetlamp/hvstreetlamp-lod2",
+      "rotateY": 0
+    },
+    "*-east": {
+      "base": "block/hvstreetlamp/hvstreetlamp-lod2",
+      "rotateY": 270
+    },
+    "*-south": {
+      "base": "block/hvstreetlamp/hvstreetlamp-lod2",
+      "rotateY": 180
+    },
+    "*-west": {
+      "base": "block/hvstreetlamp/hvstreetlamp-lod2",
+      "rotateY": 90
+    }
+  },
+
 
   "resistance": 1,
   "lightAbsorption": 0.0,
