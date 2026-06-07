@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
@@ -198,10 +199,7 @@ public static class MyMiniLib
         // генератор готов к проверке?
         if (faces == null ||
             faces.Count == 0 ||
-            faces.First() is not
-            {
-            }
-                blockFacing)
+            faces.First() is not { }  blockFacing)
         {
             return false;
         }
@@ -221,6 +219,26 @@ public static class MyMiniLib
         }
 
         return false;
+        
+    }
+
+
+
+    /// <summary>
+    /// Определеяем LOD2 ли дистанция до игрока
+    /// </summary>
+    /// <param name="capi"></param>
+    /// <param name="entityBlockPos"></param>
+    /// <returns></returns>
+    public static bool CheckLOD2Distance(ICoreClientAPI? capi, BlockPos entityBlockPos)
+    {
+        if (capi == null)
+            return false;
+
+        // Вычисляем квадрат дистанции до игрока
+        var distSq = capi.World.Player.Entity.Pos.AsBlockPos.HorDistanceSqTo(entityBlockPos.X, entityBlockPos.Z);
+
+        return distSq > capi.Render.DefaultFrustumCuller.lod2BiasSq;
 
     }
 }

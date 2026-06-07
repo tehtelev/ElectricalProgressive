@@ -27,7 +27,6 @@ namespace ElectricalProgressive.Content.Block.CableSwitch
 
             if (api.Side == EnumAppSide.Client)
             {
-
                 // инициализируем аниматор
                 if (AnimUtil != null)
                 {

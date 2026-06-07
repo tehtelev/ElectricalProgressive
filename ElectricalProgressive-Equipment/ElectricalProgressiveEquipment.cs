@@ -1,5 +1,4 @@
 ﻿using Vintagestory.API.Common;
-using Vintagestory.API.Client;
 using ElectricalProgressive.Content.Item.Armor;
 using ElectricalProgressive.Content.Item.Weapon;
 using Vintagestory.API.Server;
@@ -9,7 +8,7 @@ using HarmonyLib;
 using Vintagestory.API.Common.Entities;
 
 [assembly: ModDependency("game", "1.22.0")]
-[assembly: ModDependency("electricalprogressivecore", "3.2.2")]
+[assembly: ModDependency("electricalprogressivecore", "3.2.3")]
 [assembly: ModDependency("electricalprogressivebasics", "3.0.0")]
 [assembly: ModDependency("electricalprogressiveqol", "3.0.0")]
 [assembly: ModInfo(
@@ -17,13 +16,15 @@ using Vintagestory.API.Common.Entities;
     "electricalprogressiveequipment",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Electric weapons, armor and tools",
-    Version = "3.2.2",
+    Version = "3.2.3",
     Authors =
     [
         "Tehtelev",
         "Kotl"
     ]
 )]
+
+
 
 namespace ElectricalProgressive;
 

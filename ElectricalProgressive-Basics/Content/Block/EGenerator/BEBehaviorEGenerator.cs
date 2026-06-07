@@ -62,7 +62,7 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
     // --- Внутренние переменные и Служебное ---
 
     private ICoreClientAPI? capi;
-    private bool playerSoFar; // Ближе ли игрок, чем LOD2 bias
+    private bool playerSoFar; // Дальше ли игрок, чем LOD2 bias
 
     /// <summary>Кэш направления выхода для сети (вал)</summary>
     private BlockFacing? _outFacingForNetworkDiscovery;
@@ -107,21 +107,20 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
     private void OnTick(float dt)
     {
         // Если генератор выгружен или не загружена система ElectricalProgressive - выходим
-        if (Generator?.ElectricalProgressive?.IsLoaded != true || capi == null)
+        if (Generator?.ElectricalProgressive?.IsLoaded != true)
             return;
 
-        // Вычисляем квадрат дистанции до игрока
-        float distSq = capi.World.Player.Entity.Pos.AsBlockPos.HorDistanceSqTo(Pos.X, Pos.Z);
-
-        bool lod2 = distSq > capi.Render.DefaultFrustumCuller.lod2BiasSq;
+        var lod2 = MyMiniLib.CheckLOD2Distance(capi, Pos);
 
         if (lod2 != playerSoFar)
         {
             playerSoFar = lod2;
             updateShape(capi.World); // Обновляем модель при смене уровня детализации
-            
+
         }
     }
+
+
 
 
     /// <summary>Вызывается при выгрузке блока из мира. Очищаем кэш шейпов.</summary>

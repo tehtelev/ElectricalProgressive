@@ -2,6 +2,7 @@
 using ElectricalProgressive.Utils;
 using System;
 using System.Text;
+using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
@@ -16,7 +17,8 @@ namespace ElectricalProgressive.Content.Block.HVTransformator
         private float _lastImmersiveRequested = 0f;
         private float _electricOrder = 0f;
         private float _electricGiven = 0f;
-        private float _speedOfElectricity = 0f; 
+        private float _speedOfElectricity = 0f;
+        private ICoreClientAPI _capi;
 
         private bool hasBurnout;
         private bool prepareBurnout;
@@ -51,6 +53,7 @@ namespace ElectricalProgressive.Content.Block.HVTransformator
             // Регистрируем слушатель для обновления анимации, если мы на клиенте
             if (api.Side == EnumAppSide.Client)
             {
+                _capi = api as ICoreClientAPI;
                 Blockentity.RegisterGameTickListener(animUpdate, 2000);
             }
         }
@@ -67,14 +70,26 @@ namespace ElectricalProgressive.Content.Block.HVTransformator
             if (entity == null)
                 return;
 
+
+            var lod2 = MyMiniLib.CheckLOD2Distance(_capi, Pos);
+
+
             if (_storedEnergy == 0)
             {
                 entity.StopAnim();
             }
             else
             {
-                entity.StartAnim();
+                if (lod2)
+                {
+                    entity.StopAnim();
+                }
+                else
+                {
+                    entity.StartAnim();
+                }
             }
+
 
         }
 

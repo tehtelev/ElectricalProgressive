@@ -2,6 +2,7 @@
 using ElectricalProgressive.Utils;
 using System;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -44,7 +45,7 @@ public class BEBehaviorEMotor : BEBehaviorMPBase, IElectricConsumer
     // --- Рендеринг и Визуал ---
     protected CompositeShape? CompositeShape;       // Высокодетализированная модель
     protected CompositeShape? CompositeShapeLOD2;   // Упрощённая модель (дальний план)
-    private bool playerSoFar; // Ближе ли игрок, чем LOD2 bias
+    private bool playerSoFar; // Дальше ли игрок, чем LOD2 bias
 
     // --- Внутренние переменные и Служебное ---
     private ICoreClientAPI? capi;
@@ -92,15 +93,17 @@ public class BEBehaviorEMotor : BEBehaviorMPBase, IElectricConsumer
     /// <summary>Отслеживает расстояние до игрока и переключает детализацию модели</summary>
     private void OnTick(float dt)
     {
-        if (Motor == null || capi == null) return;
+        // Если генератор выгружен или не загружена система ElectricalProgressive - выходим
+        if (Motor?.ElectricalProgressive?.IsLoaded != true)
+            return;
 
-        float distSq = capi.World.Player.Entity.Pos.AsBlockPos.HorDistanceSqTo(Pos.X, Pos.Z);
-        bool LOD2 = distSq > capi.Render.DefaultFrustumCuller.lod2BiasSq;
+        var lod2 = MyMiniLib.CheckLOD2Distance(capi, Pos);
 
-        if (LOD2 != playerSoFar)
+        if (lod2 != playerSoFar)
         {
-            playerSoFar = LOD2;
-            updateShape(capi.World); // Обновляем модель только при смене уровня детализации
+            playerSoFar = lod2;
+            updateShape(capi.World); // Обновляем модель при смене уровня детализации
+
         }
     }
 

@@ -7,10 +7,10 @@
     "Kotl"
   ],
   "description": "Electric weapons, armor and tools",
-  "Version": "3.2.2",
+  "Version": "3.2.3",
   "dependencies": {
     "game": "1.22.0",
-    "electricalprogressivecore": "3.2.2",
+    "electricalprogressivecore": "3.2.3",
     "electricalprogressivebasics": "3.0.0",
     "electricalprogressiveqol": "3.0.0"
   }

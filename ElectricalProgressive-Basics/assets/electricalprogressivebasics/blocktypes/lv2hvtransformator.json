@@ -131,23 +131,42 @@
 
   "shapebytype": {
     "*-north": {
-      "base": "block/lv2hvtransformator",
+      "base": "block/transformator/lv2hvtransformator",
       "rotateY": 0
     },
     "*-east": {
-      "base": "block/lv2hvtransformator",
+      "base": "block/transformator/lv2hvtransformator",
       "rotateY": 270
     },
     "*-south": {
-      "base": "block/lv2hvtransformator",
+      "base": "block/transformator/lv2hvtransformator",
       "rotateY": 180
     },
     "*-west": {
-      "base": "block/lv2hvtransformator",
+      "base": "block/transformator/lv2hvtransformator",
       "rotateY": 90
     }
   },
 
+
+  "lod2shapebytype": {
+    "*-north": {
+      "base": "block/transformator/hv2lvtransformator-lod2",
+      "rotateY": 0
+    },
+    "*-east": {
+      "base": "block/transformator/hv2lvtransformator-lod2",
+      "rotateY": 270
+    },
+    "*-south": {
+      "base": "block/transformator/hv2lvtransformator-lod2",
+      "rotateY": 180
+    },
+    "*-west": {
+      "base": "block/transformator/hv2lvtransformator-lod2",
+      "rotateY": 90
+    }
+  },
 
 
   "resistance": 1,
