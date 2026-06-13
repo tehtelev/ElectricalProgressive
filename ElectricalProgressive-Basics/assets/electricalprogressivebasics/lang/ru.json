@@ -58,7 +58,7 @@
   // ----- Сквозной разъём -----
   "block-blockwire": "Сквозной разъём (обычный)",
   "block-handbooktitle-blockwire": "Использование",
-  "block-handbooktext-blockwire": "Позволяет передавать энергию скозь стены не нарушая целостность комнат.",
+  "block-handbooktext-blockwire": "Позволяет передавать энергию сквозь стены не нарушая целостность комнат.",
 
   // ==================== Кабели (обычные) ====================
 
@@ -200,7 +200,7 @@
 
   "block-cableswitchwall": "Рубильник (стена)",
   "block-handbooktitle-cableswitchwall": "Использование",
-  "block-handbooktext-cableswitchwall": "Рубильник с креплением на стене. Может разрывать/или соединять цепь между двумя изоляторами рубильника.",
+  "block-handbooktext-cableswitchwall": "Рубильник с креплением на стене. Может разрывать или соединять цепь между двумя изоляторами рубильника.",
 
   "block-insulatorraw-*": "Изолятор (необож.)",
   "block-handbooktitle-insulatorraw": "Использование",
@@ -226,22 +226,22 @@
 
   "block-hvstreetlamp-*": "Уличное освещение",
   "block-handbooktitle-hvstreetlamp": "Использование",
-  "block-handbooktext-hvstreetlamp": "Уличный вариант освещения с использлванием иммерсивных проводов.",
+  "block-handbooktext-hvstreetlamp": "Уличный вариант освещения с использованием иммерсивных проводов.",
 
   // ----- Сквозные соединители -----
   "block-wallconnectorhor-*": "Сквозной соединитель (горизонтальный)",
   "block-handbooktitle-wallconnectorhor": "Использование",
-  "block-handbooktext-wallconnectorhor": "Позволяет передавать энергию скозь стены не нарушая целостность комнат.",
+  "block-handbooktext-wallconnectorhor": "Позволяет передавать энергию сквозь стены не нарушая целостность комнат.",
 
   "block-wallconnectorver": "Сквозной соединитель (вертикальный)",
   "block-handbooktitle-wallconnectorver": "Использование",
-  "block-handbooktext-wallconnectorver": "Позволяет передавать энергию скозь потолок/пол не нарушая целостность комнат.",
+  "block-handbooktext-wallconnectorver": "Позволяет передавать энергию сквозь потолок или пол не нарушая целостность комнат.",
 
   // ==================== Генератор на горячих источниках (в разработке) ====================
   "block-ehotspringsgenerator-*": "(в разработке) Генератор на горячих источниках",
-  "block-ehotspringsgenerator-burned-south": "(в разработке) Генератор на горячих источниках (Сгоревший)",
+  "block-ehotspringsgenerator-burned-south": "(в разработке) Генератор на горячих источниках (сгоревший)",
   "block-handbooktitle-ehotspringsgenerator": "Использование",
-  "block-handbooktext-ehotspringsgenerator": "Генератор, использующий энергию горячих источников для выработки электричества. Должен быть со всех сторон окружён горячими источниками. Эффективность можно повысить, разместив <a href=\"handbook:\/\/block-electricalprogressiveqol:eheatexchanger\">теплообменники</a> рядом с генератором. Наличие нескольких генераторов поблизости значительно снижает эффективность.",
+  "block-handbooktext-ehotspringsgenerator": "Генератор, использующий энергию горячих источников для выработки электричества. Должен быть со всех сторон окружён горячими источниками. Эффективность можно повысить, разместив <a href=\"handbook:\/\/block-electricalprogressiveqol:eheatexchanger\">теплообменники<\/a> рядом с генератором. Наличие нескольких генераторов поблизости значительно снижает эффективность.",
   "hotsprings-nearby-penalty": "Поблизости несколько генераторов, эффективность снижена",
   "hotsprings-not-surrounded": "Должен быть окружён горячими источниками",
 
@@ -358,7 +358,7 @@
   "CauseVoltage": "Превышено напряжение",
   "CauseEnvironment": "Воздействие жидкости",
   "switch": "Переключить",
-  "buffer": "Буффер",
+  "buffer": "Буфер",
   "Prod_potential": "Потенциал выраб.",
 
   // ==================== Сообщения ====================

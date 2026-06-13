@@ -241,7 +241,7 @@
   "block-ehotspringsgenerator-*": "(WIP) Hot Springs Generator",
   "block-ehotspringsgenerator-burned-south": "(WIP) Hot Springs Generator (Burned)",
   "block-handbooktitle-ehotspringsgenerator": "Usage",
-  "block-handbooktext-ehotspringsgenerator": "A generator that uses the energy of hot springs to produce electricity. It must be surrounded on all sides by hot springs. Efficiency can be increased by placing <a href=\"handbook:\/\/block-electricalprogressiveqol:eheatexchanger\">heat exchangers</a> near the generator. The presence of several generators nearby significantly reduces efficiency.",
+  "block-handbooktext-ehotspringsgenerator": "A generator that uses the energy of hot springs to produce electricity. It must be surrounded on all sides by hot springs. Efficiency can be increased by placing <a href=\"handbook:\/\/block-electricalprogressiveqol:eheatexchanger\">heat exchangers<\/a> near the generator. The presence of several generators nearby significantly reduces efficiency.",
   "hotsprings-nearby-penalty": "Several generators nearby, efficiency reduced",
   "hotsprings-not-surrounded": "Must be surrounded by hot springs",
 

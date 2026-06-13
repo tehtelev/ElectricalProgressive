@@ -3,6 +3,7 @@ using Cake.Common.Diagnostics;
 using Cake.Common.IO;
 using Cake.Common.Tools.DotNet;
 using Cake.Common.Tools.DotNet.Clean;
+using Cake.Common.Tools.DotNet.MSBuild;
 using Cake.Common.Tools.DotNet.Publish;
 using Cake.Core;
 using Cake.Frosting;
@@ -100,7 +101,10 @@ namespace CakeBuild
                     context.Information("Publishing project {0}", projectName);
                     context.DotNetPublish(csprojPath, new DotNetPublishSettings
                     {
-                        Configuration = context.BuildConfiguration
+                        Configuration = context.BuildConfiguration,
+                        MSBuildSettings = new DotNetMSBuildSettings()
+                            .WithProperty("WarningLevel", "0")
+                            .WithProperty("TreatWarningsAsErrors", "false")
                     });
 
                     // 3) Package this project into Releases/{ModID}_{version}.zip

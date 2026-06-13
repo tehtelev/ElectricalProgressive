@@ -240,7 +240,7 @@
   "block-ehotspringsgenerator-*": "(в розробці) Генератор на гарячих джерелах",
   "block-ehotspringsgenerator-burned-south": "(в розробці) Генератор на гарячих джерелах (згорілий)",
   "block-handbooktitle-ehotspringsgenerator": "Використання",
-  "block-handbooktext-ehotspringsgenerator": "Генератор, що використовує енергію гарячих джерел для вироблення електрики. Повинен бути з усіх боків оточений гарячими джерелами. Ефективність можна підвищити, розмістивши <a href=\"handbook:\/\/block-electricalprogressiveqol:eheatexchanger\">теплообмінники</a> поруч з генератором. Наявність кількох генераторів поблизу значно знижує ефективність.",
+  "block-handbooktext-ehotspringsgenerator": "Генератор, що використовує енергію гарячих джерел для вироблення електрики. Повинен бути з усіх боків оточений гарячими джерелами. Ефективність можна підвищити, розмістивши <a href=\"handbook:\/\/block-electricalprogressiveqol:eheatexchanger\">теплообмінники<\/a> поруч з генератором. Наявність кількох генераторів поблизу значно знижує ефективність.",
   "hotsprings-nearby-penalty": "Поблизу кілька генераторів, ефективність знижена",
   "hotsprings-not-surrounded": "Повинен бути оточений гарячими джерелами",
 

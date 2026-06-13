@@ -5,72 +5,6 @@
 		"op": "addmerge",
 		"path": "/crushingPropsByType",
 		"value": {
-			"ore-poor-ilmenite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-ilmenite",
-					"stacksize": 5
-				},
-				"hardnessTier": 4
-			},
-			"ore-medium-ilmenite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-ilmenite",
-					"stacksize": 6
-				},
-				"hardnessTier": 4
-			},
-			"ore-rich-ilmenite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-ilmenite",
-					"stacksize": 7
-				},
-				"hardnessTier": 4
-			},
-			"ore-bountiful-ilmenite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-ilmenite",
-					"stacksize": 9
-				},
-				"hardnessTier": 4
-			},
-
-			"ore-poor-chromite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-chromite",
-					"stacksize": 5
-				},
-				"hardnessTier": 4
-			},
-			"ore-medium-chromite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-chromite",
-					"stacksize": 6
-				},
-				"hardnessTier": 4
-			},
-			"ore-rich-chromite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-chromite",
-					"stacksize": 7
-				},
-				"hardnessTier": 4
-			},
-			"ore-bountiful-chromite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-chromite",
-					"stacksize": 9
-				},
-				"hardnessTier": 4
-			},
-
 			"ore-poor-pentlandite-*": {
 				"crushedStack": {
 					"type": "item",
@@ -170,39 +104,6 @@
 				"hardnessTier": 3
 			},
 
-			"ore-poor-cassiterite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-cassiterite",
-					"stacksize": 3
-				},
-				"hardnessTier": 2
-			},
-			"ore-medium-cassiterite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-cassiterite",
-					"stacksize": 4
-				},
-				"hardnessTier": 2
-			},
-			"ore-rich-cassiterite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-cassiterite",
-					"stacksize": 5
-				},
-				"hardnessTier": 2
-			},
-			"ore-bountiful-cassiterite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-cassiterite",
-					"stacksize": 6
-				},
-				"hardnessTier": 2
-			},
-
 			"ore-poor-quartz_nativegold-*": {
 				"crushedStack": {
 					"type": "item",
@@ -268,6 +169,7 @@
 				},
 				"hardnessTier": 2
 			},
+
 			"ore-poor-galena_nativesilver-*": {
 				"crushedStack": {
 					"type": "item",
@@ -283,39 +185,6 @@
 					"stacksize": 5
 				},
 				"hardnessTier": 2
-			},
-
-			"ore-poor-hematite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-hematite",
-					"stacksize": 6
-				},
-				"hardnessTier": 3
-			},
-			"ore-medium-hematite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-hematite",
-					"stacksize": 7
-				},
-				"hardnessTier": 3
-			},
-			"ore-rich-hematite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-hematite",
-					"stacksize": 8
-				},
-				"hardnessTier": 3
-			},
-			"ore-bountiful-hematite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-hematite",
-					"stacksize": 10
-				},
-				"hardnessTier": 3
 			},
 
 			"ore-poor-bismuthinite-*": {
@@ -346,39 +215,6 @@
 				"crushedStack": {
 					"type": "item",
 					"code": "nugget-bismuthinite",
-					"stacksize": 9
-				},
-				"hardnessTier": 2
-			},
-
-			"ore-poor-sphalerite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-sphalerite",
-					"stacksize": 5
-				},
-				"hardnessTier": 2
-			},
-			"ore-medium-sphalerite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-sphalerite",
-					"stacksize": 6
-				},
-				"hardnessTier": 2
-			},
-			"ore-rich-sphalerite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-sphalerite",
-					"stacksize": 7
-				},
-				"hardnessTier": 2
-			},
-			"ore-bountiful-sphalerite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-sphalerite",
 					"stacksize": 9
 				},
 				"hardnessTier": 2
@@ -448,105 +284,6 @@
 					"stacksize": 9
 				},
 				"hardnessTier": 2
-			},
-
-			"ore-poor-galena-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-galena",
-					"stacksize": 5
-				},
-				"hardnessTier": 2
-			},
-			"ore-medium-galena-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-galena",
-					"stacksize": 6
-				},
-				"hardnessTier": 2
-			},
-			"ore-rich-galena-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-galena",
-					"stacksize": 7
-				},
-				"hardnessTier": 2
-			},
-			"ore-bountiful-galena-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-galena",
-					"stacksize": 9
-				},
-				"hardnessTier": 2
-			},
-
-			"ore-poor-limonite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-limonite",
-					"stacksize": 6
-				},
-				"hardnessTier": 3
-			},
-			"ore-medium-limonite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-limonite",
-					"stacksize": 7
-				},
-				"hardnessTier": 3
-			},
-			"ore-rich-limonite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-limonite",
-					"stacksize": 8
-				},
-				"hardnessTier": 3
-			},
-			"ore-bountiful-limonite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-limonite",
-					"stacksize": 10
-				},
-				"hardnessTier": 3
-			},
-
-			"ore-poor-magnetite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-magnetite",
-					"stacksize": 6
-				},
-				"hardnessTier": 3
-			},
-			"ore-medium-magnetite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-magnetite",
-					"stacksize": 7
-				},
-				"hardnessTier": 3
-			},
-			"ore-rich-magnetite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-magnetite",
-					"stacksize": 8
-				},
-				"hardnessTier": 3
-			},
-			"ore-bountiful-magnetite-*": {
-				"crushedStack": {
-					"type": "item",
-					"code": "nugget-magnetite",
-					"stacksize": 10
-				},
-				"hardnessTier": 3
 			}
 		}
 	}
