@@ -15,6 +15,7 @@ namespace ElectricalProgressive.Content
     /// </summary>
     public class BlockPipeBase : Vintagestory.API.Common.Block
     {
+        private static readonly Dictionary<int, MeshData> PipeMeshCache = [];
 
         /// <summary>
         /// Вызывается при начале взаимодействия с блоком (правый клик)
@@ -164,16 +165,7 @@ namespace ElectricalProgressive.Content
                     }
                 }
 
-                // Затем меняем блок
-                var currentBlock = world.BlockAccessor.GetBlock(pos);
-                if (currentBlock?.CodeWithoutParts(0) == newBlock.CodeWithoutParts(0))
-                {
-                    return;
-                }
-
-
-
-                // Обновляем соединения с соседями и перерисовываем модель блока
+                UpdatePipeConnections(world, pos, false);
                 UpdateNeighborConnections(world, pos);
 
                 // Проигрываем звук успешного действия
@@ -271,23 +263,19 @@ namespace ElectricalProgressive.Content
 
                 if (neighborBlock is BlockPipeBase)
                 {
-                    var neighborEntity = world.BlockAccessor.GetBlockEntity(neighborPos);
-
-                    // Обновляем соединения для всех типов труб-соседей
-                    if (neighborEntity is BEPipe normalPipe)
-                    {
-                        normalPipe.UpdateConnections();
-                    }
-                    else if (neighborEntity is BEItemInsertionPipe itemPipe)
-                    {
-                        itemPipe.UpdateConnections();
-                    }
-                    else if (neighborEntity is BELiquidInsertionPipe liquidPipe)
-                    {
-                        liquidPipe.UpdateConnections();
-                    }
+                    UpdatePipeConnections(world, neighborPos, true);
                 }
             }
+        }
+
+        private static void UpdatePipeConnections(IWorldAccessor world, BlockPos pos, bool updateNeighbors)
+        {
+            var entity = world.BlockAccessor.GetBlockEntity(pos);
+
+            if (entity is BEPipe normalPipe)
+                normalPipe.UpdateConnections(updateNeighbors);
+            else if (entity is BlockEntityPipeBase pipe)
+                pipe.UpdateConnections(updateNeighbors);
         }
 
 
@@ -356,6 +344,53 @@ namespace ElectricalProgressive.Content
                 pipe2.UpdateConnections(false);
         }
 
- 
+        public override void OnJsonTesselation(
+            ref MeshData sourceMesh,
+            ref int[] lightRgbsByCorner,
+            BlockPos pos,
+            Vintagestory.API.Common.Block[] chunkExtBlocks,
+            int extIndex3d)
+        {
+            base.OnJsonTesselation(ref sourceMesh, ref lightRgbsByCorner, pos, chunkExtBlocks, extIndex3d);
+
+            if (api is not ICoreClientAPI capi)
+                return;
+
+            var blockEntity = capi.World.BlockAccessor.GetBlockEntity(pos);
+            if (blockEntity is not IPipeRenderState renderState)
+            {
+                return;
+            }
+
+            string pipeType = renderState.CurrentPipeType;
+            string baseBlockCode = renderState.GetBaseBlockCode();
+
+            if (string.IsNullOrEmpty(pipeType) || string.IsNullOrEmpty(baseBlockCode))
+                return;
+
+            var renderBlockCode = baseBlockCode.Contains(':')
+                ? new AssetLocation($"{baseBlockCode}-{pipeType}")
+                : new AssetLocation(Code.Domain, $"{baseBlockCode}-{pipeType}");
+
+            var renderBlock = capi.World.GetBlock(renderBlockCode);
+            if (renderBlock == null)
+                return;
+
+            if (!PipeMeshCache.TryGetValue(renderBlock.Id, out var meshData))
+            {
+                meshData = capi.TesselatorManager.GetDefaultBlockMesh(renderBlock);
+                if (meshData == null)
+                {
+                    var cachedShape = capi.TesselatorManager.GetCachedShape(renderBlock.Shape.Base);
+                    capi.Tesselator.TesselateShape(renderBlock, cachedShape, out meshData);
+                    capi.TesselatorManager.ThreadDispose();
+                }
+
+                PipeMeshCache[renderBlock.Id] = meshData;
+            }
+
+            sourceMesh = meshData;
+        }
+
     }
 }

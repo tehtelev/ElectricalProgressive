@@ -10,13 +10,13 @@ public class InventoryECharger : InventoryGeneric
     public InventoryECharger(ICoreAPI api)
       : base(api)
     {
-      
+        ConfigureSlots();
     }
 
     public InventoryECharger(int slots, string className, string instanceID, ICoreAPI api, NewSlotDelegate onNewSlot)
       : base(slots, className, instanceID, api)
     {
-       
+        ConfigureSlots();
     }
 
 
@@ -29,7 +29,31 @@ public class InventoryECharger : InventoryGeneric
     /// <returns></returns>
     public override ItemSlot GetAutoPushIntoSlot(BlockFacing atBlockFace, ItemSlot fromSlot)
     {
+        ConfigureSlots();
+
+        if (!this[0].Empty || !IsValidChargeable(fromSlot?.Itemstack))
+            return null;
+
         return this[0];
+    }
+
+    private void ConfigureSlots()
+    {
+        if (Count > 0 && this[0] != null)
+            this[0].MaxSlotStackSize = 1;
+    }
+
+    private static bool IsValidChargeable(ItemStack stack)
+    {
+        if (stack is null ||
+            stack.StackSize == 0 ||
+            stack.Collectible == null ||
+            stack.Collectible.Attributes == null)
+            return false;
+
+        return stack.Class == EnumItemClass.Block
+            ? stack.Block is IEnergyStorageItem
+            : stack.Item != null && stack.Collectible.Attributes["chargable"].AsBool(false);
     }
 
 

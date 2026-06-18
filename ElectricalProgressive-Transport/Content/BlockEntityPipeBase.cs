@@ -11,7 +11,7 @@ using Vintagestory.GameContent;
 /// Базовый класс для сущностей труб в моде Electrical Progressive Transport
 /// Обеспечивает подключение к соседним блокам и управление сетью труб
 /// </summary>
-public class BlockEntityPipeBase : BlockEntityGenericTypedContainer
+public class BlockEntityPipeBase : BlockEntityGenericTypedContainer, IPipeRenderState
 {
     /// <summary>
     /// Компонент управления соединениями труб
@@ -34,6 +34,8 @@ public class BlockEntityPipeBase : BlockEntityGenericTypedContainer
     /// Позиции подключённых труб (null если не подключено)
     /// </summary>
     public BlockPos?[] ConnectedPipes => _pipeConnection?.ConnectedPipes;
+
+    public string CurrentPipeType => _pipeConnection?.CurrentPipeType ?? "cross";
 
     #endregion
 

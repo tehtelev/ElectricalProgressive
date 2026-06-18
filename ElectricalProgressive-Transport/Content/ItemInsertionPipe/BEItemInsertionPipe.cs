@@ -431,10 +431,10 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         }
 
         // Ищем и переносим предметы
-        FindAndTransferItems(targetContainer, containerPos);
+        FindAndTransferItems(targetContainer, containerPos, block);
     }
 
-    private void FindAndTransferItems(BlockEntityContainer targetContainer, BlockPos targetPos)
+    private void FindAndTransferItems(BlockEntityContainer targetContainer, BlockPos targetPos, Vintagestory.API.Common.Block targetBlock)
     {
         IInventory targetInventory = targetContainer?.Inventory;
 
@@ -480,7 +480,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
                 if (!sourceEndpoint.EndpointPos.Equals(preferredSourcePos))
                     continue;
 
-                if (TryTransferFromSource(preferredSourcePos, sourceEndpoint.FacingFromPipe.Opposite, targetInventory, targetContainer, targetPos))
+                if (TryTransferFromSource(preferredSourcePos, sourceEndpoint.FacingFromPipe.Opposite, targetInventory, targetContainer, targetPos, targetBlock))
                 {
                     sourceCursor = (i + 1) % sourceCount;
                     return;
@@ -501,7 +501,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
             BlockPos checkPos = sourceEndpoint.EndpointPos;
             if (excludePositions.Contains(checkPos)) continue;
 
-            if (TryTransferFromSource(checkPos, sourceEndpoint.FacingFromPipe.Opposite, targetInventory, targetContainer, targetPos))
+            if (TryTransferFromSource(checkPos, sourceEndpoint.FacingFromPipe.Opposite, targetInventory, targetContainer, targetPos, targetBlock))
             {
                 preferredSourcePos = checkPos.Copy();
                 sourceCursor = (index + 1) % sourceCount;
@@ -513,7 +513,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
     }
 
     private bool TryTransferFromSource(BlockPos sourcePos, BlockFacing directionFromSource, IInventory targetInventory,
-        BlockEntityContainer targetContainer, BlockPos targetPos)
+        BlockEntityContainer targetContainer, BlockPos targetPos, Vintagestory.API.Common.Block targetBlock)
     {
         // Проверяем тайминг (чтобы не спамить сетевые пакеты)
         if (!CanTransferFrom(sourcePos))
@@ -531,91 +531,94 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         if (sourceInventory == null)
             return false;
 
-        // Ищем подходящий слот в источнике
-        ItemSlot sourceSlot = FindFirstSuitableSlot(sourceInventory, directionFromSource);
-
-        if (sourceSlot == null || sourceSlot.Empty)
-            return false;
-
-        // Не переносим жидкости
-        if (sourceSlot.Itemstack.Collectible.IsLiquid())
-            return false;
-
         // Определяем направление к цели
         BlockFacing directionToTarget = GetFacingFromTo(Pos, targetPos);
         if (directionToTarget == null)
             return false;
 
-        // Запрашиваем у цели разрешение на вставку
-        ItemSlot targetSlot = null;
-        if (targetInventory is InventoryBase targetInventoryBase)
+        for (int i = 0; i < sourceInventory.Count; i++)
         {
-            targetSlot = targetInventoryBase.GetAutoPushIntoSlot(directionToTarget.Opposite, sourceSlot);
+            ItemSlot sourceSlot = sourceInventory[i];
+            if (sourceSlot == null || sourceSlot.Empty || !CheckItemAgainstFilter(sourceSlot.Itemstack))
+                continue;
+
+            // Не переносим жидкости
+            if (sourceSlot.Itemstack.Collectible.IsLiquid())
+                continue;
+
+            ItemSlot targetSlot = FindTargetSlotForAutoPush(
+                targetInventory,
+                targetContainer,
+                targetBlock,
+                directionToTarget.Opposite,
+                sourceSlot);
 
             if (targetSlot == null)
-            {
-                // Если не получили целевой слот через GetAutoPushIntoSlot, ищем подходящий вручную
-                targetSlot = FindSuitableTargetSlot(targetInventory, sourceSlot);
+                continue;
 
-                if (targetSlot == null)
-                    return false;
-            }
+            if (ExecuteTransfer(sourceSlot, targetSlot, sourceContainer, targetContainer, sourcePos))
+                return true;
         }
 
-        // Проверяем, может ли целевой слот принять предмет
-        if (!targetSlot.CanHold(sourceSlot))
+        return false;
+    }
+
+    private ItemSlot FindTargetSlotForAutoPush(IInventory targetInventory, BlockEntityContainer targetContainer,
+        Vintagestory.API.Common.Block targetBlock, BlockFacing pushFromFace, ItemSlot sourceSlot)
+    {
+        if (!CanInsertIntoSingleTypeContainer(targetContainer, targetInventory, targetBlock, sourceSlot))
+            return null;
+
+        ItemSlot autoSlot = null;
+        if (targetInventory is InventoryBase targetInventoryBase)
+            autoSlot = targetInventoryBase.GetAutoPushIntoSlot(pushFromFace, sourceSlot);
+
+        if (CanUseTargetSlot(autoSlot, sourceSlot))
+            return autoSlot;
+
+        return null;
+    }
+
+    private bool CanUseTargetSlot(ItemSlot targetSlot, ItemSlot sourceSlot)
+    {
+        if (targetSlot == null || !targetSlot.CanHold(sourceSlot))
             return false;
 
-        // Выполняем перенос
-        return ExecuteTransfer(sourceSlot, targetSlot, sourceContainer, targetContainer, sourcePos);
+        if (targetSlot.Empty)
+            return true;
+
+        if (!targetSlot.Itemstack.Equals(Api.World, sourceSlot.Itemstack, GlobalConstants.IgnoredStackAttributes))
+            return false;
+
+        int maxStackSize = Math.Min(targetSlot.MaxSlotStackSize, targetSlot.Itemstack.Collectible.MaxStackSize);
+        return targetSlot.StackSize < maxStackSize;
     }
 
-    // Ищет первый подходящий слот в источнике
-    private ItemSlot FindFirstSuitableSlot(IInventory inventory, BlockFacing pullDirection)
+    private bool CanInsertIntoSingleTypeContainer(BlockEntityContainer targetContainer, IInventory targetInventory,
+        Vintagestory.API.Common.Block targetBlock, ItemSlot sourceSlot)
     {
-        for (int i = 0; i < inventory.Count; i++)
-        {
-            ItemSlot slot = inventory[i];
-            if (slot != null && !slot.Empty && CheckItemAgainstFilter(slot.Itemstack))
-            {
-                return slot;
-            }
-        }
+        if (!IsSingleTypeContainer(targetContainer, targetBlock))
+            return true;
 
-        return null;
-    }
-
-    private ItemSlot FindSuitableTargetSlot(IInventory targetInventory, ItemSlot sourceSlot)
-    {
-        // 1. Сначала ищем слот с таким же предметом (для сохранения количества)
         for (int i = 0; i < targetInventory.Count; i++)
         {
             ItemSlot targetSlot = targetInventory[i];
-            if (targetSlot != null &&
-                !targetSlot.Empty &&
-                targetSlot.CanHold(sourceSlot) &&
-                targetSlot.Itemstack.Equals(Api.World, sourceSlot.Itemstack, GlobalConstants.IgnoredStackAttributes))
-            {
-                // Проверяем, есть ли свободное место
-                int freeSpace = targetSlot.Itemstack.Collectible.MaxStackSize - targetSlot.StackSize;
-                if (freeSpace > 0)
-                {
-                    return targetSlot;
-                }
-            }
+            if (targetSlot == null || targetSlot.Empty)
+                continue;
+
+            return targetSlot.Itemstack.Equals(Api.World, sourceSlot.Itemstack, GlobalConstants.IgnoredStackAttributes);
         }
 
-        // 2. Ищем пустой слот, который может принять предмет
-        for (int i = 0; i < targetInventory.Count; i++)
-        {
-            ItemSlot targetSlot = targetInventory[i];
-            if (targetSlot != null && targetSlot.Empty && targetSlot.CanHold(sourceSlot))
-            {
-                return targetSlot;
-            }
-        }
+        return true;
+    }
 
-        return null;
+    private static bool IsSingleTypeContainer(BlockEntityContainer targetContainer, Vintagestory.API.Common.Block targetBlock)
+    {
+        string blockPath = targetBlock?.Code?.Path ?? "";
+        string entityType = targetContainer?.GetType().Name ?? "";
+
+        return blockPath.Equals("crate", StringComparison.OrdinalIgnoreCase)
+            || entityType.Contains("Crate", StringComparison.OrdinalIgnoreCase);
     }
 
     private bool ExecuteTransfer(ItemSlot sourceSlot, ItemSlot targetSlot, BlockEntity sourceBe,

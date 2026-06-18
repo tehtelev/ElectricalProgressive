@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -23,7 +25,12 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     private BlockFacing outputFacing = null;
     private int debugCounter = 0;
     private int sourceCursor = 0;
-    private BlockPos preferredSourcePos = null;
+    private BlockPos? preferredSourcePos = null;
+    private ILiquidSource? preferredSource = null;
+    private BlockPos? preferredRealSourcePos = null;
+    private ILiquidSink? cachedSink = null;
+    private BlockPos? cachedTargetPos = null;
+    private BlockPos? cachedRealTargetPos = null;
 
     #endregion
 
@@ -72,9 +79,34 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     private Dictionary<BlockPos, long> lastTransferTime = [];
     /// <summary>Минимальный интервал между передачами в миллисекундах</summary>
     private const long MinTransferInterval = 100;
+    private const int BaseTransferTickIntervalMs = 200;
+    private const int TransferTickIntervalMs = 1000;
+    private const long VisualUpdateInterval = 1000;
     private const int MaxSourceChecksPerTick = 24;
+    private const long FailedTransferBackoffInitialMs = 1000;
+    private const long FailedTransferBackoffMaxMs = 8000;
+    private const bool EnableTransferProfiler = true;
+    private const long TransferProfilerLogIntervalMs = 15000;
     private long lastTransferCleanupTime = 0;
+    private long lastVisualUpdateTime = 0;
+    private long nextTransferAttemptTime = 0;
+    private long currentTransferBackoffMs = 0;
+    private int consecutiveFailedTransferTicks = 0;
     private readonly List<BlockPos> expiredTransferKeys = [];
+
+    private static long profilerNextLogTime = 0;
+    private static long profilerTickCount = 0;
+    private static long profilerAttemptCount = 0;
+    private static long profilerSuccessCount = 0;
+    private static long profilerBackoffSkipCount = 0;
+    private static long profilerSourceChecks = 0;
+    private static long profilerSinkCacheHits = 0;
+    private static long profilerSinkCacheMisses = 0;
+    private static long profilerPreferredSourceHits = 0;
+    private static long profilerVisualUpdates = 0;
+    private static long profilerVisualSkips = 0;
+    private static double profilerTotalTickMs = 0;
+    private static double profilerMaxTickMs = 0;
 
     #endregion
 
@@ -109,7 +141,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
 
         if (api.Side == EnumAppSide.Server)
         {
-            transferTimer = api.World.RegisterGameTickListener(OnTransferTick, 200);
+            transferTimer = api.World.RegisterGameTickListener(OnTransferTick, TransferTickIntervalMs);
             // Тик для обработки порчи предметов в инвентаре
             perishTimer = api.World.RegisterGameTickListener(OnPerishTick, 2000);
         }
@@ -121,6 +153,16 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     public override string GetBaseBlockCode()
     {
         return "electricalprogressivetransport:pipe-liquid-insertion";
+    }
+
+    public override void UpdateConnections(bool updateNeighbors = true)
+    {
+        base.UpdateConnections(updateNeighbors);
+        ResetTransferBackoff();
+        outputFacing = null;
+        cachedSink = null;
+        cachedTargetPos = null;
+        cachedRealTargetPos = null;
     }
 
     #region Методы обработки порчи предметов
@@ -262,7 +304,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     /// <summary>
     /// Получает ILiquidSink из позиции с учётом мультиблоков.
     /// </summary>
-    private ILiquidSink GetLiquidSinkAtPosition(BlockPos pos)
+    private ILiquidSink? GetLiquidSinkAtPosition(BlockPos pos)
     {
         var block = Api.World.BlockAccessor.GetBlock(pos);
 
@@ -287,10 +329,51 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         return null;
     }
 
+    private bool TryGetCachedSink(
+        [NotNullWhen(true)] out ILiquidSink? sink,
+        [NotNullWhen(true)] out BlockPos? targetPos,
+        [NotNullWhen(true)] out BlockPos? realTargetPos)
+    {
+        if (outputFacing == null)
+        {
+            sink = null;
+            targetPos = null;
+            realTargetPos = null;
+            return false;
+        }
+
+        targetPos = Pos.AddCopy(outputFacing);
+        if (cachedSink != null && cachedTargetPos != null && cachedRealTargetPos != null && cachedTargetPos.Equals(targetPos))
+        {
+            RecordSinkCacheHit();
+            sink = cachedSink;
+            realTargetPos = cachedRealTargetPos;
+            return true;
+        }
+
+        sink = GetLiquidSinkAtPosition(targetPos);
+        if (sink == null)
+        {
+            RecordSinkCacheMiss();
+            cachedSink = null;
+            cachedTargetPos = null;
+            cachedRealTargetPos = null;
+            realTargetPos = null;
+            return false;
+        }
+
+        cachedSink = sink;
+        cachedTargetPos = targetPos.Copy();
+        cachedRealTargetPos = GetRealPosition(targetPos);
+        realTargetPos = cachedRealTargetPos;
+        RecordSinkCacheMiss();
+        return true;
+    }
+
     /// <summary>
     /// Получает ILiquidSource из позиции с учётом мультиблоков.
     /// </summary>
-    private ILiquidSource GetLiquidSourceAtPosition(BlockPos pos)
+    private ILiquidSource? GetLiquidSourceAtPosition(BlockPos pos)
     {
         var block = Api.World.BlockAccessor.GetBlock(pos);
 
@@ -321,6 +404,10 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         if (Api == null)
             return;
 
+        cachedSink = null;
+        cachedTargetPos = null;
+        cachedRealTargetPos = null;
+
         for (int i = 0; i < 6; i++)
         {
             BlockFacing facing = BlockFacing.ALLFACES[i];
@@ -334,7 +421,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
             }
 
             // Ищем ILiquidSink с учётом мультиблоков
-            ILiquidSink liquidSink = GetLiquidSinkAtPosition(checkPos);
+            ILiquidSink? liquidSink = GetLiquidSinkAtPosition(checkPos);
 
             if (liquidSink != null)
             {
@@ -344,90 +431,111 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         }
 
         outputFacing = null;
+        preferredSourcePos = null;
+        preferredSource = null;
+        preferredRealSourcePos = null;
     }
 
     /// <summary>Основной тик передачи жидкости</summary>
     private void OnTransferTick(float dt)
     {
         debugCounter++;
+        long profileStart = StartTransferProfile();
+        bool attemptedTransfer = false;
+        bool transferred = false;
+        bool skippedByBackoff = false;
 
-        if (Api == null || NetworkManager == null)
-            return;
-
-        // Обновляем направление вывода периодически или если оно не установлено
-        if (outputFacing == null || debugCounter % 20 == 0)
+        try
         {
-            DetermineOutputDirection();
+            if (Api == null || NetworkManager == null)
+                return;
+
+            long now = Api.World.ElapsedMilliseconds;
+            if (nextTransferAttemptTime > now)
+            {
+                skippedByBackoff = true;
+                return;
+            }
+
+            // Обновляем направление вывода периодически или если оно не установлено
+            if (outputFacing == null || debugCounter % 20 == 0)
+            {
+                DetermineOutputDirection();
+            }
+
+            if (outputFacing == null)
+            {
+                attemptedTransfer = true;
+                ApplyTransferBackoff(now);
+                return;
+            }
+
+            attemptedTransfer = true;
+            if (TryGetCachedSink(out var sink, out var targetPos, out var realTargetPos))
+            {
+                transferred = TryTransferLiquidToSinkDirect(sink, targetPos, realTargetPos);
+            }
+            else
+            {
+                outputFacing = null; // Сбрасываем направление если цель не найдена
+                preferredSourcePos = null;
+                preferredSource = null;
+                preferredRealSourcePos = null;
+            }
+
+            if (transferred)
+                ResetTransferBackoff();
+            else
+                ApplyTransferBackoff(now);
         }
-
-        if (outputFacing == null)
+        finally
         {
-            return;
-        }
-
-        // Получаем целевую позицию
-        BlockPos targetPos = Pos.AddCopy(outputFacing);
-
-        // Ищем ILiquidSink с учётом мультиблоков
-        ILiquidSink sink = GetLiquidSinkAtPosition(targetPos);
-
-        if (sink != null)
-        {
-            TryTransferLiquidToSinkDirect(sink, targetPos);
-        }
-        else
-        {
-            outputFacing = null; // Сбрасываем направление если цель не найдена
+            FinishTransferProfile(profileStart, attemptedTransfer, transferred, skippedByBackoff);
         }
     }
 
     /// <summary>
     /// Попытка передачи жидкости в sink через поиск источников в сети труб.
     /// </summary>
-    private void TryTransferLiquidToSinkDirect(ILiquidSink sink, BlockPos targetPos)
+    private bool TryTransferLiquidToSinkDirect(ILiquidSink sink, BlockPos targetPos, BlockPos realTargetPos)
     {
         if (sink == null)
-            return;
+            return false;
+
+        if (preferredSource != null && preferredSourcePos != null && preferredRealSourcePos != null &&
+            !preferredSourcePos.Equals(Pos) && !preferredSourcePos.Equals(targetPos))
+        {
+            if (TryTransferFromBlockSourceToSink(preferredSourcePos, preferredRealSourcePos, preferredSource, sink, targetPos, realTargetPos))
+            {
+                RecordPreferredSourceHit();
+                return true;
+            }
+
+            preferredSourcePos = null;
+            preferredSource = null;
+            preferredRealSourcePos = null;
+        }
 
         // Используем сеть для поиска источников жидкости
         var network = NetworkManager.GetNetwork(Pos);
         if (network == null)
         {
-            return;
+            return false;
         }
 
         int sourceCount = network.LiquidSources.Count;
         if (sourceCount == 0)
-            return;
+            return false;
 
         if (sourceCursor >= sourceCount)
             sourceCursor = 0;
-
-        if (preferredSourcePos != null && !preferredSourcePos.Equals(Pos) && !preferredSourcePos.Equals(targetPos))
-        {
-            for (int i = 0; i < sourceCount; i++)
-            {
-                var sourceEndpoint = network.LiquidSources[i];
-                if (!sourceEndpoint.EndpointPos.Equals(preferredSourcePos))
-                    continue;
-
-                ILiquidSource liquidSource = GetLiquidSourceAtPosition(preferredSourcePos);
-                if (liquidSource != null && TryTransferFromBlockSourceToSink(preferredSourcePos, liquidSource, sink, targetPos))
-                {
-                    sourceCursor = (i + 1) % sourceCount;
-                    return;
-                }
-
-                preferredSourcePos = null;
-                break;
-            }
-        }
 
         int checks = Math.Min(MaxSourceChecksPerTick, sourceCount);
 
         // Ищем источник жидкости по кэшу сети, распределяя большой поиск по нескольким тикам.
         for (int checkedCount = 0; checkedCount < checks; checkedCount++)
         {
+            RecordSourceCheck();
             int index = (sourceCursor + checkedCount) % sourceCount;
             var sourceEndpoint = network.LiquidSources[index];
             BlockPos sourcePos = sourceEndpoint.EndpointPos;
@@ -438,32 +546,32 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
 
             if (liquidSource != null)
             {
-                if (TryTransferFromBlockSourceToSink(sourcePos, liquidSource, sink, targetPos))
+                BlockPos realSourcePos = GetRealPosition(sourcePos);
+                if (TryTransferFromBlockSourceToSink(sourcePos, realSourcePos, liquidSource, sink, targetPos, realTargetPos))
                 {
                     preferredSourcePos = sourcePos.Copy();
+                    preferredSource = liquidSource;
+                    preferredRealSourcePos = realSourcePos.Copy();
                     sourceCursor = (index + 1) % sourceCount;
-                    return; // Успешная передача, выходим
+                    return true; // Успешная передача, выходим
                 }
             }
         }
 
         sourceCursor = (sourceCursor + checks) % sourceCount;
+        return false;
     }
 
     /// <summary>
     /// Попытка передачи жидкости от источника к sink.
     /// </summary>
-    private bool TryTransferFromBlockSourceToSink(BlockPos sourcePos, ILiquidSource source, ILiquidSink sink, BlockPos targetPos)
+    private bool TryTransferFromBlockSourceToSink(BlockPos sourcePos, BlockPos realSourcePos, ILiquidSource source, ILiquidSink sink, BlockPos targetPos, BlockPos realTargetPos)
     {
         // Проверяем тайминг (не передаём слишком часто из одного источника)
         if (!CanTransferFrom(sourcePos))
         {
             return false;
         }
-
-        // Определяем РЕАЛЬНЫЕ позиции для обоих блоков (с учётом мультиблоков)
-        BlockPos realSourcePos = GetRealPosition(sourcePos);
-        BlockPos realTargetPos = GetRealPosition(targetPos);
 
         // Получаем содержимое из реальной позиции источника
         var contentStack = source.GetContent(realSourcePos);
@@ -480,7 +588,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
 
         // Вычисляем количество для передачи в литрах
         float currentLitres = source.GetCurrentLitres(realSourcePos);
-        float litresToTransfer = Math.Min(transferRate / 1000f, currentLitres);
+        float litresToTransfer = Math.Min(GetBatchedTransferLitres(), currentLitres);
 
         if (litresToTransfer <= 0)
         {
@@ -498,14 +606,8 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
             lastTransferTime[sourcePos] = Api.World.ElapsedMilliseconds;
             CleanupTransferTimers();
 
-            // Обновляем позиции для отрисовки (реальные и визуальные)
-            Api.World.BlockAccessor.MarkBlockDirty(realSourcePos);
-            Api.World.BlockAccessor.MarkBlockDirty(realTargetPos);
-
-            if (!realSourcePos.Equals(sourcePos))
-                Api.World.BlockAccessor.MarkBlockDirty(sourcePos);
-            if (!realTargetPos.Equals(targetPos))
-                Api.World.BlockAccessor.MarkBlockDirty(targetPos);
+            bool sourceEmptied = currentLitres <= litresToTransfer + 0.0001f;
+            MarkLiquidEndpointsDirty(realSourcePos, realTargetPos, sourcePos, targetPos, sourceEmptied);
 
             return true;
         }
@@ -513,6 +615,146 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
 
 
         return false;
+    }
+
+    private void ResetTransferBackoff()
+    {
+        nextTransferAttemptTime = 0;
+        currentTransferBackoffMs = 0;
+        consecutiveFailedTransferTicks = 0;
+    }
+
+    private void ApplyTransferBackoff(long now)
+    {
+        consecutiveFailedTransferTicks++;
+        currentTransferBackoffMs = currentTransferBackoffMs <= 0
+            ? FailedTransferBackoffInitialMs
+            : Math.Min(currentTransferBackoffMs * 2, FailedTransferBackoffMaxMs);
+        nextTransferAttemptTime = now + currentTransferBackoffMs;
+    }
+
+    private static long StartTransferProfile()
+    {
+        return EnableTransferProfiler ? Stopwatch.GetTimestamp() : 0;
+    }
+
+    private void FinishTransferProfile(long startTimestamp, bool attemptedTransfer, bool transferred, bool skippedByBackoff)
+    {
+        if (!EnableTransferProfiler || Api == null)
+            return;
+
+        double elapsedMs = (Stopwatch.GetTimestamp() - startTimestamp) * 1000d / Stopwatch.Frequency;
+
+        profilerTickCount++;
+        if (attemptedTransfer)
+            profilerAttemptCount++;
+        if (transferred)
+            profilerSuccessCount++;
+        if (skippedByBackoff)
+            profilerBackoffSkipCount++;
+
+        profilerTotalTickMs += elapsedMs;
+        if (elapsedMs > profilerMaxTickMs)
+            profilerMaxTickMs = elapsedMs;
+
+        long now = Api.World.ElapsedMilliseconds;
+        if (profilerNextLogTime == 0)
+            profilerNextLogTime = now + TransferProfilerLogIntervalMs;
+
+        if (now < profilerNextLogTime)
+            return;
+
+        if (profilerAttemptCount > 0 || profilerBackoffSkipCount > 0)
+        {
+            double avgMs = profilerTickCount > 0 ? profilerTotalTickMs / profilerTickCount : 0;
+            Api.Logger.Notification(
+                $"[EP Transport] Liquid pipes profile: ticks={profilerTickCount}, attempts={profilerAttemptCount}, success={profilerSuccessCount}, " +
+                $"backoffSkips={profilerBackoffSkipCount}, sourceChecks={profilerSourceChecks}, sinkCache={profilerSinkCacheHits}/{profilerSinkCacheMisses}, " +
+                $"preferredHits={profilerPreferredSourceHits}, visual={profilerVisualUpdates}/{profilerVisualSkips}, avgMs={avgMs:F3}, maxMs={profilerMaxTickMs:F3}");
+        }
+
+        profilerNextLogTime = now + TransferProfilerLogIntervalMs;
+        profilerTickCount = 0;
+        profilerAttemptCount = 0;
+        profilerSuccessCount = 0;
+        profilerBackoffSkipCount = 0;
+        profilerSourceChecks = 0;
+        profilerSinkCacheHits = 0;
+        profilerSinkCacheMisses = 0;
+        profilerPreferredSourceHits = 0;
+        profilerVisualUpdates = 0;
+        profilerVisualSkips = 0;
+        profilerTotalTickMs = 0;
+        profilerMaxTickMs = 0;
+    }
+
+    private static void RecordSourceCheck()
+    {
+        if (EnableTransferProfiler)
+            profilerSourceChecks++;
+    }
+
+    private static void RecordSinkCacheHit()
+    {
+        if (EnableTransferProfiler)
+            profilerSinkCacheHits++;
+    }
+
+    private static void RecordSinkCacheMiss()
+    {
+        if (EnableTransferProfiler)
+            profilerSinkCacheMisses++;
+    }
+
+    private static void RecordPreferredSourceHit()
+    {
+        if (EnableTransferProfiler)
+            profilerPreferredSourceHits++;
+    }
+
+    private static void RecordVisualUpdate()
+    {
+        if (EnableTransferProfiler)
+            profilerVisualUpdates++;
+    }
+
+    private static void RecordVisualSkip()
+    {
+        if (EnableTransferProfiler)
+            profilerVisualSkips++;
+    }
+
+    private float GetBatchedTransferLitres()
+    {
+        return transferRate * (TransferTickIntervalMs / (float)BaseTransferTickIntervalMs) / 1000f;
+    }
+
+    private void MarkLiquidEndpointsDirty(BlockPos realSourcePos, BlockPos realTargetPos, BlockPos sourcePos, BlockPos targetPos, bool forceVisualUpdate)
+    {
+        var blockAccessor = Api.World.BlockAccessor;
+
+        blockAccessor.GetBlockEntity(realSourcePos)?.MarkDirty();
+        if (!realTargetPos.Equals(realSourcePos))
+            blockAccessor.GetBlockEntity(realTargetPos)?.MarkDirty();
+
+        long now = Api.World.ElapsedMilliseconds;
+        if (!forceVisualUpdate && now - lastVisualUpdateTime < VisualUpdateInterval)
+        {
+            RecordVisualSkip();
+            return;
+        }
+
+        lastVisualUpdateTime = now;
+        RecordVisualUpdate();
+
+        blockAccessor.MarkBlockDirty(realSourcePos);
+        if (!realTargetPos.Equals(realSourcePos))
+            blockAccessor.MarkBlockDirty(realTargetPos);
+
+        if (!realSourcePos.Equals(sourcePos))
+            blockAccessor.MarkBlockDirty(sourcePos);
+        if (!realTargetPos.Equals(targetPos))
+            blockAccessor.MarkBlockDirty(targetPos);
     }
 
     /// <summary>Проверяет, можно ли передать жидкость из источника (по таймингу)</summary>

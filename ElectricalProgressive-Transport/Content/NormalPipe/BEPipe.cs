@@ -5,7 +5,7 @@ using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 
-public class BEPipe : BlockEntity
+public class BEPipe : BlockEntity, IPipeRenderState
 {
     private PipeConnectionComponent _pipeConnection;
 
@@ -13,6 +13,8 @@ public class BEPipe : BlockEntity
     /// Статус подключений по сторонам блока.
     /// </summary>
     public bool[] ConnectedSides => _pipeConnection?.ConnectedSides;
+
+    public string CurrentPipeType => _pipeConnection?.CurrentPipeType ?? "cross";
 
 
     /// <summary>

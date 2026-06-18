@@ -30,6 +30,7 @@ namespace ElectricalProgressive.Content
         public bool[] ConnectedSides => _connectedSides;
         public bool[] ConnectedToInventory => _connectedToInventory;
         public BlockPos?[] ConnectedPipes => _connectedPipes;
+        public string CurrentPipeType => _currentPipeType;
 
         // Ключевые слова для определения блоков с инвентарём по коду блока
         private static string[] inventoryKeywords =
@@ -116,7 +117,7 @@ namespace ElectricalProgressive.Content
                 bool modelChanged = UpdateBlockModel();
                 if (connectionsChanged || modelChanged)
                 {
-                    _owner.MarkDirty();
+                    _owner.MarkDirty(true);
                     _networkManager?.RefreshNetworkCache(_pos);
                 }
                 else if (!updateNeighbors)
@@ -257,7 +258,7 @@ namespace ElectricalProgressive.Content
             bool modelChanged = UpdateBlockModel();
             if (changed || modelChanged)
             {
-                _owner.MarkDirty();
+                _owner.MarkDirty(true);
                 _networkManager?.RefreshNetworkCache(_pos);
             }
         }
@@ -277,7 +278,7 @@ namespace ElectricalProgressive.Content
             bool modelChanged = UpdateBlockModel();
             if (changed || modelChanged)
             {
-                _owner.MarkDirty();
+                _owner.MarkDirty(true);
                 _networkManager?.RefreshNetworkCache(_pos);
             }
         }
@@ -295,7 +296,7 @@ namespace ElectricalProgressive.Content
         /// </summary>
         public virtual bool UpdateBlockModel()
         {
-            if (_api == null || _api.Side != EnumAppSide.Server)
+            if (_api == null)
                 return false;
 
             var connectedFacings = new List<BlockFacing>();
@@ -310,50 +311,10 @@ namespace ElectricalProgressive.Content
             {
                 _currentPipeType = newPipeType;
                 OnPipeTypeChanged?.Invoke(newPipeType);
-                return UpdateVisualBlockType(newPipeType);
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Обновляет визуальный тип блока на основе типа трубы
-        /// </summary>
-        protected virtual bool UpdateVisualBlockType(string pipeType)
-        {
-            if (_api == null || _api.Side != EnumAppSide.Server)
-                return false;
-
-            var currentBlock = _api.World.BlockAccessor.GetBlock(_pos);
-            if (currentBlock == null)
-                return false;
-
-            string baseBlockCode = GetBaseBlockCode();
-            if (string.IsNullOrEmpty(baseBlockCode))
-                return false;
-
-            string newBlockCodeString = $"electricalprogressivetransport:{baseBlockCode}-{pipeType}";
-            var newBlock = _api.World.GetBlock(new AssetLocation(newBlockCodeString));
-            if (newBlock == null)
-            {
-                //Api.Logger.Error($"Блок не найден: {newBlockCodeString}");
-                return false;
-            }
-
-            if (newBlock.Id != currentBlock.Id)
-            {
-                var tree = new TreeAttribute();
-                _owner.ToTreeAttributes(tree);
-
-                _api.World.BlockAccessor.ExchangeBlock(newBlock.BlockId, _pos);
-                var newEntity = _api.World.BlockAccessor.GetBlockEntity(_pos);
-                if (newEntity is BlockEntity newBe)
+                if (_api.Side == EnumAppSide.Server)
                 {
-                    newBe.FromTreeAttributes(tree, _api.World);
-                    newBe.MarkDirty();
+                    _api.World.BlockAccessor.MarkBlockDirty(_pos);
                 }
-
-                _api.World.BlockAccessor.MarkBlockDirty(_pos);
                 return true;
             }
 
