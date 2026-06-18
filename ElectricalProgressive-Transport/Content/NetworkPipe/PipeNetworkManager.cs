@@ -49,6 +49,7 @@ public class PipeNetworkManager
             network.AddPipe(pos, pipe);
             networks[newId] = network;
             pipeToNetwork[pos.Copy()] = newId;
+            RefreshLocalEndpointCache(newId, pos);
         }
         else if (adjacentNetworks.Count == 1)
         {
@@ -56,6 +57,7 @@ public class PipeNetworkManager
             long networkId = adjacentNetworks[0];
             networks[networkId].AddPipe(pos, pipe);
             pipeToNetwork[pos.Copy()] = networkId;
+            RefreshLocalEndpointCache(networkId, pos);
         }
         else
         {
@@ -82,6 +84,7 @@ public class PipeNetworkManager
             }
 
             pipeToNetwork[pos.Copy()] = mainNetworkId;
+            mainNetwork.RebuildEndpointCache(api);
         }
     }
 
@@ -93,11 +96,12 @@ public class PipeNetworkManager
         if (!pipeToNetwork.TryGetValue(pos, out long networkId))
             return;
 
-        pipeToNetwork.Remove(pos);
-
         if (!networks.TryGetValue(networkId, out PipeNetwork network))
             return;
 
+        var adjacentPipes = GetAdjacentPipesInNetwork(pos, network);
+
+        pipeToNetwork.Remove(pos);
         network.RemovePipe(pos);
 
         if (network.Pipes.Count == 0)
@@ -106,50 +110,33 @@ public class PipeNetworkManager
             return;
         }
 
-        // BFS для поиска компонент связности среди оставшихся труб
+        if (adjacentPipes.Count <= 1)
+        {
+            RefreshEndpointCacheForPositions(network, adjacentPipes);
+            return;
+        }
+
         var remaining = new HashSet<BlockPos>(network.Pipes);
-        var components = new List<HashSet<BlockPos>>();
+        var firstComponent = FindComponent(adjacentPipes[0], remaining);
+
+        // Сеть не распалась: один обход достиг всех оставшихся труб.
+        if (firstComponent.Count == network.Pipes.Count)
+        {
+            RefreshEndpointCacheForPositions(network, adjacentPipes);
+            return;
+        }
+
+        var components = new List<HashSet<BlockPos>> { firstComponent };
+        remaining.ExceptWith(firstComponent);
 
         while (remaining.Count > 0)
         {
             BlockPos start = null;
-            foreach (var p in remaining) { start = p; break; }
-
-            var component = new HashSet<BlockPos>();
-            var queue = new Queue<BlockPos>();
-
-            component.Add(start);
-            remaining.Remove(start);
-            queue.Enqueue(start);
-
-            while (queue.Count > 0)
-            {
-                BlockPos current = queue.Dequeue();
-                bool[] connectedSides = GetConnectedSides(current);
-                if (connectedSides == null) continue;
-
-                for (int i = 0; i < 6; i++)
-                {
-                    if (!connectedSides[i]) continue;
-
-                    BlockPos neighborPos = current.AddCopy(BlockFacing.ALLFACES[i]);
-
-                    // Проходим только по трубам, которые ещё в сети
-                    if (remaining.Contains(neighborPos))
-                    {
-                        component.Add(neighborPos);
-                        remaining.Remove(neighborPos);
-                        queue.Enqueue(neighborPos);
-                    }
-                }
-            }
-
+            foreach (var pipePos in remaining) { start = pipePos; break; }
+            var component = FindComponent(start, remaining);
             components.Add(component);
+            remaining.ExceptWith(component);
         }
-
-        // Сеть не распалась — ничего не делаем
-        if (components.Count == 1)
-            return;
 
         // Перестраиваем оригинальную сеть под первый компонент
         network.Pipes.Clear();
@@ -161,6 +148,7 @@ public class PipeNetworkManager
                 network.AddPipe(pipePos, pipe);
             pipeToNetwork[pipePos] = networkId;
         }
+        network.RebuildEndpointCache(api);
 
         // Создаём новые сети для остальных компонентов
         for (int c = 1; c < components.Count; c++)
@@ -176,7 +164,83 @@ public class PipeNetworkManager
                     newNetwork.AddPipe(pipePos, pipe);
                 pipeToNetwork[pipePos] = newId;
             }
+
+            newNetwork.RebuildEndpointCache(api);
         }
+    }
+
+    public void RefreshNetworkCache(BlockPos pipePos)
+    {
+        if (pipeToNetwork.TryGetValue(pipePos, out long networkId))
+            RefreshLocalEndpointCache(networkId, pipePos);
+    }
+
+    private void RefreshLocalEndpointCache(long networkId, BlockPos pipePos)
+    {
+        if (!networks.TryGetValue(networkId, out PipeNetwork network))
+            return;
+
+        network.RefreshEndpointsForPipe(api, pipePos);
+
+        for (int i = 0; i < 6; i++)
+        {
+            BlockPos neighborPos = pipePos.AddCopy(BlockFacing.ALLFACES[i]);
+            if (pipeToNetwork.TryGetValue(neighborPos, out long neighborNetworkId) && neighborNetworkId == networkId)
+                network.RefreshEndpointsForPipe(api, neighborPos);
+        }
+    }
+
+    private void RefreshEndpointCacheForPositions(PipeNetwork network, List<BlockPos> pipePositions)
+    {
+        foreach (var pipePos in pipePositions)
+        {
+            network.RefreshEndpointsForPipe(api, pipePos);
+        }
+    }
+
+    private List<BlockPos> GetAdjacentPipesInNetwork(BlockPos pos, PipeNetwork network)
+    {
+        var result = new List<BlockPos>();
+        var pipes = new HashSet<BlockPos>(network.Pipes);
+
+        for (int i = 0; i < 6; i++)
+        {
+            BlockPos neighborPos = pos.AddCopy(BlockFacing.ALLFACES[i]);
+            if (pipes.Contains(neighborPos))
+                result.Add(neighborPos);
+        }
+
+        return result;
+    }
+
+    private HashSet<BlockPos> FindComponent(BlockPos start, HashSet<BlockPos> validPipes)
+    {
+        var component = new HashSet<BlockPos>();
+        var queue = new Queue<BlockPos>();
+
+        if (start == null || !validPipes.Contains(start))
+            return component;
+
+        component.Add(start);
+        queue.Enqueue(start);
+
+        while (queue.Count > 0)
+        {
+            BlockPos current = queue.Dequeue();
+            bool[] connectedSides = GetConnectedSides(current);
+            if (connectedSides == null) continue;
+
+            for (int i = 0; i < 6; i++)
+            {
+                if (!connectedSides[i]) continue;
+
+                BlockPos neighborPos = current.AddCopy(BlockFacing.ALLFACES[i]);
+                if (validPipes.Contains(neighborPos) && component.Add(neighborPos))
+                    queue.Enqueue(neighborPos);
+            }
+        }
+
+        return component;
     }
 
     /// <summary>

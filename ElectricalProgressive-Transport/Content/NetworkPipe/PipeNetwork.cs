@@ -4,6 +4,7 @@ using ElectricalProgressive.Content.NormalPipe;
 using System.Collections.Generic;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
+using Vintagestory.GameContent;
 
 namespace ElectricalProgressive.Content.NetworkPipe;
 
@@ -15,12 +16,18 @@ public class PipeNetwork
     public long NetworkId { get; private set; }
     public List<BlockPos> Pipes { get; private set; }
     public List<BlockPos> Inserters { get; private set; }
+    public List<PipeEndpoint> ItemSources { get; private set; }
+    public List<PipeEndpoint> LiquidSources { get; private set; }
+    public List<PipeEndpoint> LiquidSinks { get; private set; }
 
     public PipeNetwork(long id)
     {
         NetworkId = id;
         Pipes = [];
         Inserters = [];
+        ItemSources = [];
+        LiquidSources = [];
+        LiquidSinks = [];
     }
 
     /// <summary>
@@ -48,6 +55,7 @@ public class PipeNetwork
     {
         Pipes.Remove(pos);
         Inserters.Remove(pos);
+        RemoveEndpointsForPipe(pos);
     }
 
     /// <summary>
@@ -70,6 +78,95 @@ public class PipeNetwork
                 Inserters.Add(inserterPos.Copy());
             }
         }
+    }
+
+    public void RebuildEndpointCache(ICoreAPI api)
+    {
+        ItemSources.Clear();
+        LiquidSources.Clear();
+        LiquidSinks.Clear();
+
+        if (api == null)
+            return;
+
+        foreach (var pipePos in Pipes)
+        {
+            AddEndpointsForPipe(api, pipePos);
+        }
+    }
+
+    public void RefreshEndpointsForPipe(ICoreAPI api, BlockPos pipePos)
+    {
+        RemoveEndpointsForPipe(pipePos);
+
+        if (Pipes.Contains(pipePos))
+            AddEndpointsForPipe(api, pipePos);
+    }
+
+    private void RemoveEndpointsForPipe(BlockPos pipePos)
+    {
+        ItemSources.RemoveAll(endpoint => endpoint.PipePos.Equals(pipePos));
+        LiquidSources.RemoveAll(endpoint => endpoint.PipePos.Equals(pipePos));
+        LiquidSinks.RemoveAll(endpoint => endpoint.PipePos.Equals(pipePos));
+    }
+
+    private void AddEndpointsForPipe(ICoreAPI api, BlockPos pipePos)
+    {
+        for (int i = 0; i < 6; i++)
+        {
+            BlockFacing facing = BlockFacing.ALLFACES[i];
+            BlockPos endpointPos = pipePos.AddCopy(facing);
+            var block = api.World.BlockAccessor.GetBlock(endpointPos);
+
+            if (block is BlockPipeBase)
+                continue;
+
+            if (IsItemContainer(api, block, endpointPos))
+                ItemSources.Add(new PipeEndpoint(pipePos, endpointPos, facing));
+
+            if (IsLiquidSource(api, block, endpointPos))
+                LiquidSources.Add(new PipeEndpoint(pipePos, endpointPos, facing));
+
+            if (IsLiquidSink(api, block, endpointPos))
+                LiquidSinks.Add(new PipeEndpoint(pipePos, endpointPos, facing));
+        }
+    }
+
+    private static bool IsItemContainer(ICoreAPI api, Vintagestory.API.Common.Block block, BlockPos pos)
+    {
+        if (block?.GetBlockEntity<BlockEntityContainer>(pos)?.Inventory != null)
+            return true;
+
+        var blockEntity = api.World.BlockAccessor.GetBlockEntity(pos);
+        return blockEntity is BlockEntityContainer container && container.Inventory != null;
+    }
+
+    private static bool IsLiquidSource(ICoreAPI api, Vintagestory.API.Common.Block block, BlockPos pos)
+    {
+        if (block is ILiquidSource)
+            return true;
+
+        if (block is BlockMultiblock multiblock)
+        {
+            BlockPos controlPos = multiblock.GetControlBlockPos(pos);
+            return api.World.BlockAccessor.GetBlock(controlPos) is ILiquidSource;
+        }
+
+        return false;
+    }
+
+    private static bool IsLiquidSink(ICoreAPI api, Vintagestory.API.Common.Block block, BlockPos pos)
+    {
+        if (block is ILiquidSink)
+            return true;
+
+        if (block is BlockMultiblock multiblock)
+        {
+            BlockPos controlPos = multiblock.GetControlBlockPos(pos);
+            return api.World.BlockAccessor.GetBlock(controlPos) is ILiquidSink;
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -117,5 +214,19 @@ public class PipeNetwork
         }
 
         return connected;
+    }
+}
+
+public readonly struct PipeEndpoint
+{
+    public readonly BlockPos PipePos;
+    public readonly BlockPos EndpointPos;
+    public readonly BlockFacing FacingFromPipe;
+
+    public PipeEndpoint(BlockPos pipePos, BlockPos endpointPos, BlockFacing facingFromPipe)
+    {
+        PipePos = pipePos.Copy();
+        EndpointPos = endpointPos.Copy();
+        FacingFromPipe = facingFromPipe;
     }
 }

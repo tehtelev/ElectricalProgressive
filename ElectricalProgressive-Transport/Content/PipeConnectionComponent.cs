@@ -80,6 +80,9 @@ namespace ElectricalProgressive.Content
 
             try
             {
+                bool[] oldConnectedSides = (bool[])_connectedSides.Clone();
+                bool[] oldConnectedToInventory = (bool[])_connectedToInventory.Clone();
+
                 // 1. Сброс и поиск соединений
                 for (int i = 0; i < 6; i++)
                 {
@@ -107,9 +110,19 @@ namespace ElectricalProgressive.Content
                     }
                 }
 
+                bool connectionsChanged = !SameConnections(oldConnectedSides, oldConnectedToInventory);
+
                 // 2. Обновление визуальной модели самой трубы
-                UpdateBlockModel();
-                _owner.MarkDirty();
+                bool modelChanged = UpdateBlockModel();
+                if (connectionsChanged || modelChanged)
+                {
+                    _owner.MarkDirty();
+                    _networkManager?.RefreshNetworkCache(_pos);
+                }
+                else if (!updateNeighbors)
+                {
+                    _networkManager?.RefreshNetworkCache(_pos);
+                }
 
                 // 3. Уведомление соседей после собственного обновления
                 if (updateNeighbors)
@@ -232,12 +245,21 @@ namespace ElectricalProgressive.Content
         public void UpdateSingleConnection(BlockFacing side, BlockPos fromPos, bool fromInventory = false)
         {
             int index = side.Index;
+            bool changed = !_connectedSides[index]
+                || _connectedToInventory[index] != fromInventory
+                || _connectedPipes[index] == null
+                || !_connectedPipes[index].Equals(fromPos);
+
             _connectedSides[index] = true;
             _connectedPipes[index] = fromPos.Copy();
             _connectedToInventory[index] = fromInventory;
 
-            UpdateBlockModel();
-            _owner.MarkDirty();
+            bool modelChanged = UpdateBlockModel();
+            if (changed || modelChanged)
+            {
+                _owner.MarkDirty();
+                _networkManager?.RefreshNetworkCache(_pos);
+            }
         }
 
         /// <summary>
@@ -246,12 +268,18 @@ namespace ElectricalProgressive.Content
         public void BreakConnection(BlockFacing side)
         {
             int index = side.Index;
+            bool changed = _connectedSides[index] || _connectedPipes[index] != null || _connectedToInventory[index];
+
             _connectedSides[index] = false;
             _connectedPipes[index] = null;
             _connectedToInventory[index] = false;
 
-            UpdateBlockModel();
-            _owner.MarkDirty();
+            bool modelChanged = UpdateBlockModel();
+            if (changed || modelChanged)
+            {
+                _owner.MarkDirty();
+                _networkManager?.RefreshNetworkCache(_pos);
+            }
         }
 
         /// <summary>
@@ -265,10 +293,10 @@ namespace ElectricalProgressive.Content
         /// <summary>
         /// Определяет текущий тип визуальной модели трубы на основе соединений
         /// </summary>
-        public virtual void UpdateBlockModel()
+        public virtual bool UpdateBlockModel()
         {
             if (_api == null || _api.Side != EnumAppSide.Server)
-                return;
+                return false;
 
             var connectedFacings = new List<BlockFacing>();
             for (int i = 0; i < 6; i++)
@@ -282,32 +310,34 @@ namespace ElectricalProgressive.Content
             {
                 _currentPipeType = newPipeType;
                 OnPipeTypeChanged?.Invoke(newPipeType);
-                UpdateVisualBlockType(newPipeType);
+                return UpdateVisualBlockType(newPipeType);
             }
+
+            return false;
         }
 
         /// <summary>
         /// Обновляет визуальный тип блока на основе типа трубы
         /// </summary>
-        protected virtual void UpdateVisualBlockType(string pipeType)
+        protected virtual bool UpdateVisualBlockType(string pipeType)
         {
             if (_api == null || _api.Side != EnumAppSide.Server)
-                return;
+                return false;
 
             var currentBlock = _api.World.BlockAccessor.GetBlock(_pos);
             if (currentBlock == null)
-                return;
+                return false;
 
             string baseBlockCode = GetBaseBlockCode();
             if (string.IsNullOrEmpty(baseBlockCode))
-                return;
+                return false;
 
             string newBlockCodeString = $"electricalprogressivetransport:{baseBlockCode}-{pipeType}";
             var newBlock = _api.World.GetBlock(new AssetLocation(newBlockCodeString));
             if (newBlock == null)
             {
                 //Api.Logger.Error($"Блок не найден: {newBlockCodeString}");
-                return;
+                return false;
             }
 
             if (newBlock.Id != currentBlock.Id)
@@ -324,7 +354,24 @@ namespace ElectricalProgressive.Content
                 }
 
                 _api.World.BlockAccessor.MarkBlockDirty(_pos);
+                return true;
             }
+
+            return false;
+        }
+
+        private bool SameConnections(bool[] oldConnectedSides, bool[] oldConnectedToInventory)
+        {
+            for (int i = 0; i < 6; i++)
+            {
+                if (oldConnectedSides[i] != _connectedSides[i] ||
+                    oldConnectedToInventory[i] != _connectedToInventory[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>

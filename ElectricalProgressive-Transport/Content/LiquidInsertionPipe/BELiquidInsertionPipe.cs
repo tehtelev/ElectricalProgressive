@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -19,9 +18,12 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     #region Поля таймингов и состояния
 
     private long transferTimer;
+    private long perishTimer;
     private int transferRate = 100; // Скорость передачи в миллилитрах за тик
     private BlockFacing outputFacing = null;
     private int debugCounter = 0;
+    private int sourceCursor = 0;
+    private BlockPos preferredSourcePos = null;
 
     #endregion
 
@@ -70,6 +72,9 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     private Dictionary<BlockPos, long> lastTransferTime = [];
     /// <summary>Минимальный интервал между передачами в миллисекундах</summary>
     private const long MinTransferInterval = 100;
+    private const int MaxSourceChecksPerTick = 24;
+    private long lastTransferCleanupTime = 0;
+    private readonly List<BlockPos> expiredTransferKeys = [];
 
     #endregion
 
@@ -106,7 +111,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         {
             transferTimer = api.World.RegisterGameTickListener(OnTransferTick, 200);
             // Тик для обработки порчи предметов в инвентаре
-            api.World.RegisterGameTickListener(OnPerishTick, 2000);
+            perishTimer = api.World.RegisterGameTickListener(OnPerishTick, 2000);
         }
 
         _inventory.OnAcquireTransitionSpeed += OnAcquireTransitionSpeed;
@@ -391,45 +396,58 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
             return;
         }
 
-        // Собираем позиции для исключения (текущая труба и цель)
-        var excludePositions = new HashSet<BlockPos> { Pos, targetPos };
+        int sourceCount = network.LiquidSources.Count;
+        if (sourceCount == 0)
+            return;
 
-        int sourcesChecked = 0;
+        if (sourceCursor >= sourceCount)
+            sourceCursor = 0;
 
-        // Ищем источник жидкости в сети труб
-        foreach (var pipePos in network.Pipes)
+        if (preferredSourcePos != null && !preferredSourcePos.Equals(Pos) && !preferredSourcePos.Equals(targetPos))
         {
-            if (excludePositions.Contains(pipePos))
+            for (int i = 0; i < sourceCount; i++)
+            {
+                var sourceEndpoint = network.LiquidSources[i];
+                if (!sourceEndpoint.EndpointPos.Equals(preferredSourcePos))
+                    continue;
+
+                ILiquidSource liquidSource = GetLiquidSourceAtPosition(preferredSourcePos);
+                if (liquidSource != null && TryTransferFromBlockSourceToSink(preferredSourcePos, liquidSource, sink, targetPos))
+                {
+                    sourceCursor = (i + 1) % sourceCount;
+                    return;
+                }
+
+                preferredSourcePos = null;
+                break;
+            }
+        }
+
+        int checks = Math.Min(MaxSourceChecksPerTick, sourceCount);
+
+        // Ищем источник жидкости по кэшу сети, распределяя большой поиск по нескольким тикам.
+        for (int checkedCount = 0; checkedCount < checks; checkedCount++)
+        {
+            int index = (sourceCursor + checkedCount) % sourceCount;
+            var sourceEndpoint = network.LiquidSources[index];
+            BlockPos sourcePos = sourceEndpoint.EndpointPos;
+            if (sourcePos.Equals(Pos) || sourcePos.Equals(targetPos))
                 continue;
 
-            // Проверяем все стороны трубы-источника
-            for (int i = 0; i < 6; i++)
+            ILiquidSource liquidSource = GetLiquidSourceAtPosition(sourcePos);
+
+            if (liquidSource != null)
             {
-                BlockFacing facing = BlockFacing.ALLFACES[i];
-                BlockPos sourcePos = pipePos.AddCopy(facing);
-
-                if (excludePositions.Contains(sourcePos))
-                    continue;
-
-                // Пропускаем другие трубы
-                var sourceBlock = Api.World.BlockAccessor.GetBlock(sourcePos);
-                if (sourceBlock is BlockPipeBase)
-                    continue;
-
-                sourcesChecked++;
-
-                // Ищем ILiquidSource с учётом мультиблоков
-                ILiquidSource liquidSource = GetLiquidSourceAtPosition(sourcePos);
-
-                if (liquidSource != null)
+                if (TryTransferFromBlockSourceToSink(sourcePos, liquidSource, sink, targetPos))
                 {
-                    if (TryTransferFromBlockSourceToSink(sourcePos, liquidSource, sink, targetPos))
-                    {
-                        return; // Успешная передача, выходим
-                    }
+                    preferredSourcePos = sourcePos.Copy();
+                    sourceCursor = (index + 1) % sourceCount;
+                    return; // Успешная передача, выходим
                 }
             }
         }
+
+        sourceCursor = (sourceCursor + checks) % sourceCount;
     }
 
     /// <summary>
@@ -478,6 +496,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
             ItemStack takenStack = source.TryTakeContent(realSourcePos, movedItems);
 
             lastTransferTime[sourcePos] = Api.World.ElapsedMilliseconds;
+            CleanupTransferTimers();
 
             // Обновляем позиции для отрисовки (реальные и визуальные)
             Api.World.BlockAccessor.MarkBlockDirty(realSourcePos);
@@ -487,21 +506,6 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
                 Api.World.BlockAccessor.MarkBlockDirty(sourcePos);
             if (!realTargetPos.Equals(targetPos))
                 Api.World.BlockAccessor.MarkBlockDirty(targetPos);
-
-
-            lastTransferTime[sourcePos] = Api.World.ElapsedMilliseconds;
-
-            // Очистка старых записей
-            var expiredKeys = lastTransferTime.Keys
-                .Where(k => Api.World.ElapsedMilliseconds - lastTransferTime[k] > MinTransferInterval * 10)
-                .ToList();
-
-            foreach (var key in expiredKeys)
-            {
-                lastTransferTime.Remove(key);
-            }
-
-
 
             return true;
         }
@@ -519,6 +523,27 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
 
         long elapsed = Api.World.ElapsedMilliseconds - lastTransferTime[sourcePos];
         return elapsed > MinTransferInterval;
+    }
+
+    private void CleanupTransferTimers()
+    {
+        long now = Api.World.ElapsedMilliseconds;
+        if (now - lastTransferCleanupTime < 10000)
+            return;
+
+        lastTransferCleanupTime = now;
+        expiredTransferKeys.Clear();
+
+        foreach (var entry in lastTransferTime)
+        {
+            if (now - entry.Value > MinTransferInterval * 100)
+                expiredTransferKeys.Add(entry.Key);
+        }
+
+        foreach (var key in expiredTransferKeys)
+        {
+            lastTransferTime.Remove(key);
+        }
     }
 
     /// <summary>
@@ -667,6 +692,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         if (Api?.Side == EnumAppSide.Server)
         {
             Api.World.UnregisterGameTickListener(transferTimer);
+            Api.World.UnregisterGameTickListener(perishTimer);
         }
 
         if (_clientDialog != null && _clientDialog.IsOpened())

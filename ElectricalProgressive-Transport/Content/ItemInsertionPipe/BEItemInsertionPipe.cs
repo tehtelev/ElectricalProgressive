@@ -19,9 +19,12 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
     // === Поля состояния ===
 
     private long transferTimer;       // Таймер передачи (для сервера)
+    private long perishTimer;         // Таймер обработки порчи (для сервера)
     private int transferRate = 1;     // Скорость передачи предметов в секунду
     private BlockFacing outputFacing = null; // Направление вывода предметов
     private int debugCounter = 0;     // Счетчик отладки
+    private int sourceCursor = 0;     // Round-robin позиция поиска источников
+    private BlockPos preferredSourcePos = null; // Последний источник, из которого успешно забрали предмет
 
     // === Собственный инвентарь (фильтры) ===
     internal InventoryInsertionPipe _inventory;   // Инвентарь для хранения фильтровых слотов
@@ -51,6 +54,9 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
     // === Тайминги для предотвращения спама ===
     private Dictionary<BlockPos, long> lastTransferTime = [];
     private const long MinTransferInterval = 500; // Минимум 500 мс между переносами одного предмета
+    private const int MaxSourceChecksPerTick = 16;
+    private long lastTransferCleanupTime = 0;
+    private readonly List<BlockPos> expiredTransferKeys = [];
 
     // === Переопределение свойства Inventory ===
     public override InventoryBase Inventory => _inventory;
@@ -88,7 +94,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
             transferTimer = api.World.RegisterGameTickListener(OnTransferTick, 1000);
 
             // Также регистрируем тик для обработки порчи (каждые 2 секунды)
-            api.World.RegisterGameTickListener(OnPerishTick, 2000);
+            perishTimer = api.World.RegisterGameTickListener(OnPerishTick, 2000);
         }
 
         // Подписываемся на события инвентаря для контроля скорости переходных состояний (порчи)
@@ -392,6 +398,8 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
 
     private void OnTransferTick(float dt)
     {
+        debugCounter++;
+
         if (debugCounter % 10 == 0)
         {
             //Api.Logger.Notification($"=== OnTransferTick #{debugCounter} на {Pos} ===");
@@ -457,36 +465,54 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
             }
         }
 
-        // Ищем источник предметов в сети
-        bool foundSource = false;
-        foreach (var pipePos in network.Pipes)
+        int sourceCount = network.ItemSources.Count;
+        if (sourceCount == 0)
+            return;
+
+        if (sourceCursor >= sourceCount)
+            sourceCursor = 0;
+
+        if (preferredSourcePos != null && !excludePositions.Contains(preferredSourcePos))
         {
-            if (excludePositions.Contains(pipePos)) continue;
-
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < sourceCount; i++)
             {
-                BlockFacing facing = BlockFacing.ALLFACES[i];
-                BlockPos checkPos = pipePos.AddCopy(facing);
+                var sourceEndpoint = network.ItemSources[i];
+                if (!sourceEndpoint.EndpointPos.Equals(preferredSourcePos))
+                    continue;
 
-                if (excludePositions.Contains(checkPos)) continue;
+                if (TryTransferFromSource(preferredSourcePos, sourceEndpoint.FacingFromPipe.Opposite, targetInventory, targetContainer, targetPos))
+                {
+                    sourceCursor = (i + 1) % sourceCount;
+                    return;
+                }
 
-                // Проверяем, можно ли взять предмет из этого источника
-                if (TryTransferFromSource(checkPos, targetInventory, targetContainer, targetPos))
-                {
-                    return; // Успешно перенесли предмет
-                }
-                else
-                {
-                    foundSource = true; // Нашли источник, но не смогли взять предмет
-                }
+                preferredSourcePos = null;
+                break;
             }
         }
 
-        if (!foundSource)
-            Api.Logger.Notification($"=== Не найдено подходящих источников в сети ===");
+        int checks = Math.Min(MaxSourceChecksPerTick, sourceCount);
+
+        // Ищем источник предметов по кэшу сети, распределяя большой поиск по нескольким тикам.
+        for (int checkedCount = 0; checkedCount < checks; checkedCount++)
+        {
+            int index = (sourceCursor + checkedCount) % sourceCount;
+            var sourceEndpoint = network.ItemSources[index];
+            BlockPos checkPos = sourceEndpoint.EndpointPos;
+            if (excludePositions.Contains(checkPos)) continue;
+
+            if (TryTransferFromSource(checkPos, sourceEndpoint.FacingFromPipe.Opposite, targetInventory, targetContainer, targetPos))
+            {
+                preferredSourcePos = checkPos.Copy();
+                sourceCursor = (index + 1) % sourceCount;
+                return; // Успешно перенесли предмет
+            }
+        }
+
+        sourceCursor = (sourceCursor + checks) % sourceCount;
     }
 
-    private bool TryTransferFromSource(BlockPos sourcePos, IInventory targetInventory,
+    private bool TryTransferFromSource(BlockPos sourcePos, BlockFacing directionFromSource, IInventory targetInventory,
         BlockEntityContainer targetContainer, BlockPos targetPos)
     {
         // Проверяем тайминг (чтобы не спамить сетевые пакеты)
@@ -505,13 +531,8 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         if (sourceInventory == null)
             return false;
 
-        // Определяем направление от источника к трубе
-        BlockFacing directionFromSource = GetFacingFromTo(sourcePos, Pos);
-        if (directionFromSource == null)
-            return false;
-
         // Ищем подходящий слот в источнике
-        ItemSlot sourceSlot = FindFirstSuitableSlot(sourceInventory, directionFromSource.Opposite);
+        ItemSlot sourceSlot = FindFirstSuitableSlot(sourceInventory, directionFromSource);
 
         if (sourceSlot == null || sourceSlot.Empty)
             return false;
@@ -617,6 +638,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
             {
                 // Успешно перенесли
                 lastTransferTime[sourcePos] = Api.World.ElapsedMilliseconds;
+                CleanupTransferTimers();
 
                 // Помечаем слоты как измененные
                 sourceSlot.MarkDirty();
@@ -644,6 +666,27 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
 
         long elapsed = Api.World.ElapsedMilliseconds - value;
         return elapsed > MinTransferInterval;
+    }
+
+    private void CleanupTransferTimers()
+    {
+        long now = Api.World.ElapsedMilliseconds;
+        if (now - lastTransferCleanupTime < 10000)
+            return;
+
+        lastTransferCleanupTime = now;
+        expiredTransferKeys.Clear();
+
+        foreach (var entry in lastTransferTime)
+        {
+            if (now - entry.Value > MinTransferInterval * 20)
+                expiredTransferKeys.Add(entry.Key);
+        }
+
+        foreach (var key in expiredTransferKeys)
+        {
+            lastTransferTime.Remove(key);
+        }
     }
 
     private BlockFacing GetFacingFromTo(BlockPos from, BlockPos to)
@@ -750,6 +793,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         if (Api?.Side == EnumAppSide.Server)
         {
             Api.World.UnregisterGameTickListener(transferTimer);
+            Api.World.UnregisterGameTickListener(perishTimer);
         }
 
         if (_clientDialog != null && _clientDialog.IsOpened())
