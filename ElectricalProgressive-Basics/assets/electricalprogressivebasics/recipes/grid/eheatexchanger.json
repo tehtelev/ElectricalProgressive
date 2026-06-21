@@ -1,5 +1,6 @@
 ﻿[
   {
+    "enabled": false,
     "ingredientPattern": "SCH,GG_",
     "width": 3,
     "height": 2,
