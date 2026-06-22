@@ -391,6 +391,67 @@
       "code": "game:metalbit-{metal}",
       "quantity": 20
     }
+  },
+
+
+  {
+    "ingredientPattern": "H",
+    "width": 1,
+    "height": 1,
+    "ingredients": {
+      "H": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-32v-*-single-part",
+        "quantity": 2,
+        "name": "metal",
+        "allowedVariants": [
+          "copper",
+          "silver",
+          "lead",
+          "gold",
+          "steel",
+          "iron",
+          "tinbronze",
+          "brass",
+          "electrum"
+        ]
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:ecable-128v-{metal}-single-part",
+      "quantity": 1
+    }
+  },
+
+  {
+    "ingredientPattern": "H",
+    "width": 1,
+    "height": 1,
+    "ingredients": {
+      "H": {
+        "type": "block",
+        "code": "electricalprogressivebasics:ecable-32v-*-single-isolated",
+        "quantity": 2,
+        "name": "metal",
+        "allowedVariants": [
+          "copper",
+          "silver",
+          "lead",
+          "gold",
+          "steel",
+          "iron",
+          "tinbronze",
+          "brass",
+          "electrum"
+        ]
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivebasics:ecable-128v-{metal}-single-isolated",
+      "quantity": 1
+    }
   }
 
 ]

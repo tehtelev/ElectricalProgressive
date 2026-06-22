@@ -574,6 +574,7 @@ namespace ElectricalProgressive.Content.Block.ECable
                 if (selectedSwitches != 0)
                 {
                     entity.SwitchesState ^= selectedSwitches;
+                    entity.MarkDirty(true); // обновляем блокэнтити, чтобы переключатель обновился
                     return true;
                 }
             }
