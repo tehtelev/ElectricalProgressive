@@ -2,7 +2,9 @@ namespace ElectricalProgressive.Content;
 
 public interface IPipeRenderState
 {
-    string CurrentPipeType { get; }
+    bool[] ConnectedSides { get; }
 
-    string GetBaseBlockCode();
+    bool[] ConnectedToInventory { get; }
+
+    bool UseInserterHead { get; }
 }

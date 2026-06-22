@@ -1,6 +1,9 @@
 ﻿{
   "game:tabname-electricalprogressivetransport": "Транспортные трубы",
+  "block-pipe-normal": "Транспортная труба",
   "block-pipe-normal-*": "Транспортная труба",
+  "block-pipe-item-insertion": "Фильтрующая труба",
+  "block-pipe-liquid-insertion": "Жидкостная труба",
   "block-pipe-item-*": "Предметная помещающая труба",
   "pipe-normal-info": "Обычная транспортная труба",
   "pipe-insertion-info": "Труба с фильтром для помещения предметов",

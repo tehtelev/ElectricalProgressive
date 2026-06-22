@@ -29,7 +29,7 @@
     },
     "output": {
       "type": "block",
-      "code": "electricalprogressivetransport:pipe-normal-cross",
+      "code": "electricalprogressivetransport:pipe-normal",
       "quantity": 4
     }
   },
@@ -40,13 +40,13 @@
     "ingredients": {
       "C": {
         "type": "block",
-        "code": "electricalprogressivetransport:pipe-liquid-insertion-cross",
+        "code": "electricalprogressivetransport:pipe-liquid-insertion",
         "quantity": 1
       }
     },
     "output": {
       "type": "block",
-      "code": "electricalprogressivetransport:pipe-normal-cross",
+      "code": "electricalprogressivetransport:pipe-normal",
       "quantity": 1
     }
   },
@@ -57,15 +57,14 @@
     "ingredients": {
       "C": {
         "type": "block",
-        "code": "electricalprogressivetransport:pipe-item-insertion-cross",
+        "code": "electricalprogressivetransport:pipe-item-insertion",
         "quantity": 1
       }
     },
     "output": {
       "type": "block",
-      "code": "electricalprogressivetransport:pipe-normal-cross",
+      "code": "electricalprogressivetransport:pipe-normal",
       "quantity": 1
     }
   }
-
 ]

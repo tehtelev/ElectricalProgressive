@@ -14,7 +14,9 @@ public class BEPipe : BlockEntity, IPipeRenderState
     /// </summary>
     public bool[] ConnectedSides => _pipeConnection?.ConnectedSides;
 
-    public string CurrentPipeType => _pipeConnection?.CurrentPipeType ?? "cross";
+    public bool[] ConnectedToInventory => _pipeConnection?.ConnectedToInventory;
+
+    public bool UseInserterHead => false;
 
 
     /// <summary>
@@ -118,7 +120,7 @@ public class BEPipe : BlockEntity, IPipeRenderState
     /// <summary>
     /// Возвращает код базового блока для логики соединения.
     /// </summary>
-    public virtual string GetBaseBlockCode() => _pipeConnection?.GetBaseBlockCode();
+    public virtual string GetBaseBlockCode() => Block?.Code?.ToString();
 
     /// <summary>
     /// Отображает информацию о блоке в интерфейсе (при наведении курсора).

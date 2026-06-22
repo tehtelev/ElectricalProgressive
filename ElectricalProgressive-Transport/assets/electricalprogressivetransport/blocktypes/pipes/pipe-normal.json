@@ -2,109 +2,39 @@
   "code": "pipe-normal",
   "class": "BlockPipe",
   "entityClass": "BEPipe",
-  "variantgroups": [
-    {
-      "code": "type",
-      "states": [
-        "straight-ns",
-        "straight-ew",
-        "straight-ud",
-        "corner-ne",
-        "corner-se",
-        "corner-sw",
-        "corner-nw",
-        "corner-nu",
-        "corner-su",
-        "corner-eu",
-        "corner-wu",
-        "corner-nd",
-        "corner-sd",
-        "corner-ed",
-        "corner-wd",
-        "tee-n",
-        "tee-e",
-        "tee-s",
-        "tee-w",
-        "tee-un",
-        "tee-uw",
-        "tee-dn",
-        "tee-dw",
-        "tee-eh",
-        "tee-nh",
-        "tee-sh",
-        "tee-wh",
-        "triple-neu",
-        "triple-seu",
-        "triple-swu",
-        "triple-nwu",
-        "triple-ned",
-        "triple-sed",
-        "triple-swd",
-        "triple-nwd",
-        "four-n",
-        "four-e",
-        "four-s",
-        "four-w",
-        "four-u",
-        "four-v",
-        "four-d",
-        "four-nw",
-        "four-ne",
-        "four-sw",
-        "four-se",
-        "four-nu",
-        "four-su",
-        "four-eu",
-        "four-wu",
-        "four-nd",
-        "four-sd",
-        "four-ed",
-        "four-wd",
-        "five-n",
-        "five-e",
-        "five-s",
-        "five-w",
-        "five-u",
-        "five-d",
-        "cross"
-      ]
-    }
-  ],
-  "shapeInventoryByType": {
-    "*": {
-      "base": "block/pipe/straight"
-    }
+  "shape": {
+    "base": "block/itempipe/center"
   },
-  "creativeinventory": { "electricalprogressivetransport": [ "*-cross" ] },
-  "texturesByType": {
-    "*-normal-*": {
-      "bismuthbronze": {
-        "base": "game:block/metal/plate/bismuthbronze"
-      },
-      "quartzglass": {
-        "base": "game:block/glass/quartzglass"
-      },
-      "brass": {
-        "base": "game:block/metal/plate/brass"
-      },
-      "copper": {
-        "base": "game:block/metal/plate/copper"
-      },
-      "iron": {
-        "base": "game:block/metal/plate/iron"
-      },
-      "steel": {
-        "base": "game:block/metal/plate/steel"
-      },
-      "steel1": {
-        "base": "game:block/metal/sheet/steel1"
-      },
-      "RoundBlack": {
-        "base": "roundblack"
-      },
-      "itempipe": {
-        "base": "game:block/metal/plate/steel"
-      }
+  "shapeInventory": {
+    "base": "block/itempipe/center"
+  },
+  "creativeinventory": {
+    "electricalprogressivetransport": [ "*" ]
+  },
+  "textures": {
+    "bismuthbronze": {
+      "base": "game:block/metal/plate/bismuthbronze"
+    },
+    "glasspipe": {
+      "base": "glasspipe"
+    },
+    "brass": {
+      "base": "game:block/metal/plate/brass"
+    },
+    "copper": {
+      "base": "game:block/metal/plate/copper"
+    },
+    "iron": {
+      "base": "game:block/metal/plate/iron"
+    },
+    "steel": {
+      "base": "game:block/metal/plate/steel"
+    },
+    "steel1": {
+      "base": "game:block/metal/sheet/steel1"
+    },
+    "itempipe": {
+      "base": "pipe"
     }
   },
   "lightAbsorption": 0.0,
@@ -121,10 +51,9 @@
   "sideSolid": {
     "all": false
   },
-
   "attributes": {
     "handbook": {
-      "groupBy": [ "pipe-normal-*" ],
+      "groupBy": [ "pipe-normal" ],
       "extraSections": [
         {
           "title": "electricalprogressivetransport:block-handbooktitle-pipe-normal",
@@ -132,322 +61,5 @@
         }
       ]
     }
-  },
-
-  "shapeByType": {
-    // === ПРЯМЫЕ ТРУБЫ ===
-    "*-straight-ns": {
-      "base": "block/pipe/straight",
-      "rotateY": 90
-    },
-    "*-straight-ew": {
-      "base": "block/pipe/straight",
-      "rotateY": 0
-    },
-    "*-straight-ud": {
-      "base": "block/pipe/vertical",
-      "rotateY": 0
-    },
-
-    // === ГОРИЗОНТАЛЬНЫЕ УГЛЫ ===
-    "*-corner-ne": {
-      "base": "block/pipe/corner",
-      "rotateY": 0
-    },
-    "*-corner-se": {
-      "base": "block/pipe/corner",
-      "rotateY": -90
-    },
-    "*-corner-sw": {
-      "base": "block/pipe/corner",
-      "rotateY": 180
-    },
-    "*-corner-nw": {
-      "base": "block/pipe/corner",
-      "rotateY": 90
-    },
-
-    // === ВЕРТИКАЛЬНЫЕ УГЛЫ ===
-    "*-corner-nu": {
-      "base": "block/pipe/corner",
-      "rotateX": 90,
-      "rotateZ": -90,
-      "rotateY": 0
-    },
-    "*-corner-su": {
-      "base": "block/pipe/corner",
-      "rotateX": -90,
-      "rotateZ": -90,
-      "rotateY": 180
-    },
-    "*-corner-eu": {
-      "base": "block/pipe/corner",
-      "rotateX": -90,
-      "rotateY": -90
-    },
-    "*-corner-wu": {
-      "base": "block/pipe/corner",
-      "rotateZ": 90,
-      "rotateY": 90
-    },
-    "*-corner-nd": {
-      "base": "block/pipe/corner",
-      "rotateX": -90,
-      "rotateZ": 90,
-      "rotateY": 0
-    },
-    "*-corner-sd": {
-      "base": "block/pipe/corner",
-      "rotateX": -90,
-      "rotateZ": 270,
-      "rotateY": 0
-    },
-    "*-corner-ed": {
-      "base": "block/pipe/corner",
-      "rotateX": 90,
-      "rotateY": 270
-    },
-    "*-corner-wd": {
-      "base": "block/pipe/corner",
-      "rotateX": 180,
-      "rotateZ": 90,
-      "rotateY": 90
-    },
-
-    // === Т-ОБРАЗНЫЕ СОЕДИНЕНИЯ ===
-    "*-tee-n": {
-      "base": "block/pipe/tee",
-      "rotateY": 180,
-      "rotateX": 180
-    },
-    "*-tee-e": {
-      "base": "block/pipe/tee",
-      "rotateY": 90
-    },
-    "*-tee-s": {
-      "base": "block/pipe/tee",
-      "rotateX": 180
-    },
-    "*-tee-w": {
-      "base": "block/pipe/tee",
-      "rotateY": 270
-    },
-    // ВЕРТИКАЛЬНЫЕ Т с горизонтальной линией (4 типа) - ножка вертикальная, линия горизонтальная
-    "*-tee-un": {
-      "base": "block/pipe/tee",
-      "rotateX": 90,
-      "rotateY": 0,
-      "rotateZ": 90
-    },
-    "*-tee-uw": {
-      "base": "block/pipe/tee",
-      "rotateY": 0,
-      "rotateX": 90,
-      "rotateZ": 0
-    },
-    "*-tee-dn": {
-      "base": "block/pipe/tee",
-      "rotateY": 0,
-      "rotateX": 270,
-      "rotateZ": 90
-    },
-    "*-tee-dw": {
-      "base": "block/pipe/tee",
-      "rotateY": 0,
-      "rotateX": 270
-    },
-    //ГОРИЗОНТАЛЬНЫЕ Т с вертикальной линией (4 типа) - ножка горизонтальная, линия вертикальная
-    "*-tee-nh": {
-      "base": "block/pipe/tee",
-      "rotateY": 0,
-      "rotateZ": 90
-    },
-    "*-tee-eh": {
-      "base": "block/pipe/tee",
-      "rotateY": 270,
-      "rotateZ": 90
-    },
-    "*-tee-sh": {
-      "base": "block/pipe/tee",
-      "rotateX": 180,
-      "rotateZ": 90
-    },
-    "*-tee-wh": {
-      "base": "block/pipe/tee",
-      "rotateY": 90,
-      "rotateZ": 90
-    },
-
-    // === ТРОЙНЫЕ УГЛЫ ===
-    "*-triple-neu": {
-      "base": "block/pipe/triple",
-      "rotateY": 0
-    },
-    "*-triple-seu": {
-      "base": "block/pipe/triple",
-      "rotateY": -90
-    },
-    "*-triple-swu": {
-      "base": "block/pipe/triple",
-      "rotateY": 180
-    },
-    "*-triple-nwu": {
-      "base": "block/pipe/triple",
-      "rotateY": 90
-    },
-    "*-triple-ned": {
-      "base": "block/pipe/triple",
-      "rotateX": -90,
-      "rotateY": 0
-    },
-    "*-triple-sed": {
-      "base": "block/pipe/triple",
-      "rotateX": 90,
-      "rotateY": -90
-    },
-    "*-triple-swd": {
-      "base": "block/pipe/triple",
-      "rotateX": 90,
-      "rotateY": 180
-    },
-    "*-triple-nwd": {
-      "base": "block/pipe/triple",
-      "rotateX": -90,
-      "rotateY": 90
-    },
-
-    // === 4 СОЕДИНЕНИЯ (ОТСУТСТВУЕТ 1 СТОРОНА) ===
-    // Отсутствует одна горизонтальная сторона
-    "*-four-n": {
-      "base": "block/pipe/four",
-      "rotateY": 0
-    }, // Отсутствует север
-    "*-four-e": {
-      "base": "block/pipe/four",
-      "rotateY": 90
-    }, // Отсутствует восток
-    "*-four-s": {
-      "base": "block/pipe/four",
-      "rotateY": 180
-    }, // Отсутствует юг
-    "*-four-w": {
-      "base": "block/pipe/four",
-      "rotateY": 270
-    }, // Отсутствует запад
-
-    // Отсутствует вертикальная сторона (все 4 горизонтальных)
-    "*-four-u": {
-      "base": "block/pipe/four",
-      "rotateZ": 90
-    }, // Отсутствует верх
-    "*-four-v": {
-      "base": "block/pipe/four",
-      "rotateX": 90
-    }, // Отсутствует верх
-    "*-four-d": {
-      "base": "block/pipe/four",
-      "rotateY": 0
-    }, // Отсутствует низ
-
-    // === 4 СОЕДИНЕНИЯ (ОТСУТСТВУЮТ 2 СМЕЖНЫЕ СТОРОНЫ) ===
-    // Отсутствуют две смежные горизонтальные стороны
-    "*-four-nw": {
-      "base": "block/pipe/diagonal",
-      "rotateY": 270
-    }, // Отсутствуют север и запад
-    "*-four-ne": {
-      "base": "block/pipe/diagonal",
-      "rotateY": 180
-    }, // Отсутствуют север и восток
-    "*-four-sw": {
-      "base": "block/pipe/diagonal",
-      "rotateY": 0
-    }, // Отсутствуют юг и запад
-    "*-four-se": {
-      "base": "block/pipe/diagonal",
-      "rotateY": 90
-    }, // Отсутствуют юг и восток
-
-    // Отсутствует горизонтальная + вертикальная сверху
-    "*-four-nu": {
-      "base": "block/pipe/diagonal",
-      "rotateY": 180,
-      "rotateZ": -90
-    }, // Отсутствуют север и верх
-    "*-four-su": {
-      "base": "block/pipe/diagonal",
-      "rotateY": 0,
-      "rotateZ": -90
-    }, // Отсутствуют юг и верх
-    "*-four-eu": {
-      "base": "block/pipe/diagonal",
-      "rotateY": 90,
-      "rotateX": -90,
-      "rotateZ": 0
-    }, // Отсутствуют восток и верх
-    "*-four-wu": {
-      "base": "block/pipe/diagonal",
-      "rotateY": 0,
-      "rotateX": -90
-    }, // Отсутствуют запад и верх
-
-    // Отсутствует горизонтальная + вертикальная снизу
-    "*-four-nd": {
-      "base": "block/pipe/diagonal",
-      "rotateY": 0,
-      "rotateX": 90,
-      "rotateZ": 90
-    }, // Отсутствуют север и низ
-    "*-four-sd": {
-      "base": "block/pipe/diagonal",
-      "rotateY": 0,
-      "rotateZ": 90
-    }, // Отсутствуют юг и низ
-    "*-four-ed": {
-      "base": "block/pipe/diagonal",
-      "rotateY": -180,
-      "rotateX": -90
-    }, // Отсутствуют восток и низ
-    "*-four-wd": {
-      "base": "block/pipe/diagonal",
-      "rotateY": 270,
-      "rotateX": -90
-    }, // Отсутствуют запад и низ
-
-    // === 5 СОЕДИНЕНИЙ ===
-    "*-five-n": {
-      "base": "block/pipe/five",
-      "rotateY": 270
-    }, // Отсутствует север
-    "*-five-e": {
-      "base": "block/pipe/five",
-      "rotateY": 180
-    }, // Отсутствует восток
-    "*-five-s": {
-      "base": "block/pipe/five",
-      "rotateY": 90
-    }, // Отсутствует юг
-    "*-five-w": {
-      "base": "block/pipe/five",
-      "rotateY": 0
-    }, // Отсутствует запад
-    "*-five-u": {
-      "base": "block/pipe/five",
-      "rotateZ": -90,
-      "rotateY": 0
-    }, // Отсутствует верх
-    "*-five-d": {
-      "base": "block/pipe/five",
-      "rotateZ": 90,
-      "rotateY": 0
-    }, // Отсутствует низ
-
-    // === КРЕСТОВИНА ===
-    "*-cross": {
-      "base": "block/pipe/cross",
-      "rotateY": 0
-    }
   }
-
-
 }
