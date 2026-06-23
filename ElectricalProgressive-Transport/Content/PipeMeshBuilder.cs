@@ -10,9 +10,12 @@ internal static class PipeMeshBuilder
 {
     private const string ShapeDomain = "electricalprogressivetransport";
     private const string ShapePath = "shapes/block/itempipe";
-    private const int MeshCacheVersion = 15;
+    private const int MeshCacheVersion = 18;
 
     private const float PipeCenter = 0.5f;
+
+    // pipe_part.json (TubeBaseWest): от центра блока до внешнего конца ~1.005.
+    private const float PipeArmFullReach = 1.0051f;
 
     private static readonly Dictionary<string, Shape> ShapeCache = [];
     private static readonly Dictionary<long, MeshData> MeshCache = [];
@@ -53,7 +56,7 @@ internal static class PipeMeshBuilder
 
         connectedToInventory ??= new bool[6];
 
-        long cacheKey = BuildCacheKey(block.Id, pos, connectedSides, connectedToInventory, useInserterHead);
+        long cacheKey = BuildCacheKey(api, block.Id, pos, connectedSides, connectedToInventory, useInserterHead);
         if (MeshCache.TryGetValue(cacheKey, out MeshData cached))
             return cached;
 
@@ -75,8 +78,16 @@ internal static class PipeMeshBuilder
                 if (!ShouldRenderArm(pos, i, connectedSides, connectedToInventory))
                     continue;
 
+                MeshData armMesh = pipePartMesh.Clone();
+                if (connectedToInventory[i])
+                {
+                    BlockPos neighborPos = pos.AddCopy(BlockFacing.ALLFACES[i]);
+                    float reach = PipeNeighborMeshClipper.GetReachAlongFacing(api, pos, i, neighborPos, PipeArmFullReach);
+                    ShortenArmToReach(armMesh, reach);
+                }
+
                 var (rx, ry, rz) = SideRotationsDeg[i];
-                AddMesh(ref finalMesh, RotateMesh(pipePartMesh.Clone(), rx, ry, rz, origin));
+                AddMesh(ref finalMesh, RotateMesh(armMesh, rx, ry, rz, origin));
             }
         }
 
@@ -122,6 +133,12 @@ internal static class PipeMeshBuilder
         return pos.Z < neighborPos.Z;
     }
 
+    private static void ShortenArmToReach(MeshData mesh, float targetReach)
+    {
+        float scale = targetReach / PipeArmFullReach;
+        mesh.Scale(new Vec3f(PipeCenter, PipeCenter, PipeCenter), scale, 1f, 1f);
+    }
+
     private static MeshData RotateMesh(MeshData mesh, float rxDeg, float ryDeg, float rzDeg, Vec3f origin)
     {
         if (rxDeg == 0f && ryDeg == 0f && rzDeg == 0f)
@@ -143,6 +160,7 @@ internal static class PipeMeshBuilder
     }
 
     private static long BuildCacheKey(
+        ICoreClientAPI api,
         int blockId,
         BlockPos pos,
         bool[] connectedSides,
@@ -150,14 +168,23 @@ internal static class PipeMeshBuilder
         bool useInserterHead)
     {
         long key = ((long)MeshCacheVersion << 32) | (uint)blockId;
+        long reachHash = 0;
 
         for (int i = 0; i < 6; i++)
         {
             if (ShouldRenderArm(pos, i, connectedSides, connectedToInventory))
                 key ^= 1L << (i + 1);
             if (connectedToInventory[i])
+            {
                 key ^= 1L << (i + 7);
+
+                BlockPos neighborPos = pos.AddCopy(BlockFacing.ALLFACES[i]);
+                float reach = PipeNeighborMeshClipper.GetReachAlongFacing(api, pos, i, neighborPos, PipeArmFullReach);
+                reachHash ^= (long)(reach * 512) * (i + 1);
+            }
         }
+
+        key ^= reachHash;
 
         if (useInserterHead)
             key ^= 1L << 13;
