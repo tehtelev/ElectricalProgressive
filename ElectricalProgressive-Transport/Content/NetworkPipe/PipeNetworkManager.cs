@@ -25,7 +25,7 @@ public class PipeNetworkManager
     public void AddPipe(BlockPos pos, BlockEntity pipe)
     {
         // Ищем соседние сети по 6 направлениям
-        List<long> adjacentNetworks = [];
+        HashSet<long> adjacentNetworks = [];
 
         for (int i = 0; i < 6; i++)
         {
@@ -33,12 +33,7 @@ public class PipeNetworkManager
             BlockPos neighborPos = pos.AddCopy(facing);
 
             if (pipeToNetwork.TryGetValue(neighborPos, out long networkId))
-            {
-                if (!adjacentNetworks.Contains(networkId))
-                {
-                    adjacentNetworks.Add(networkId);
-                }
-            }
+                adjacentNetworks.Add(networkId);
         }
 
         if (adjacentNetworks.Count == 0)
@@ -54,7 +49,7 @@ public class PipeNetworkManager
         else if (adjacentNetworks.Count == 1)
         {
             // Добавляем в существующую сеть
-            long networkId = adjacentNetworks[0];
+            long networkId = First(adjacentNetworks);
             networks[networkId].AddPipe(pos, pipe);
             pipeToNetwork[pos.Copy()] = networkId;
             RefreshLocalEndpointCache(networkId, pos);
@@ -62,13 +57,15 @@ public class PipeNetworkManager
         else
         {
             // Объединяем сети через главную
-            long mainNetworkId = adjacentNetworks[0];
+            long mainNetworkId = First(adjacentNetworks);
             PipeNetwork mainNetwork = networks[mainNetworkId];
             mainNetwork.AddPipe(pos, pipe);
 
-            for (int i = 1; i < adjacentNetworks.Count; i++)
+            foreach (long otherId in adjacentNetworks)
             {
-                long otherId = adjacentNetworks[i];
+                if (otherId == mainNetworkId)
+                    continue;
+
                 if (networks.TryGetValue(otherId, out PipeNetwork otherNetwork))
                 {
                     mainNetwork.Merge(otherNetwork);
@@ -201,12 +198,11 @@ public class PipeNetworkManager
     private List<BlockPos> GetAdjacentPipesInNetwork(BlockPos pos, PipeNetwork network)
     {
         var result = new List<BlockPos>();
-        var pipes = new HashSet<BlockPos>(network.Pipes);
 
         for (int i = 0; i < 6; i++)
         {
             BlockPos neighborPos = pos.AddCopy(BlockFacing.ALLFACES[i]);
-            if (pipes.Contains(neighborPos))
+            if (network.Pipes.Contains(neighborPos))
                 result.Add(neighborPos);
         }
 
@@ -278,7 +274,7 @@ public class PipeNetworkManager
     public List<BlockPos> GetInsertersInNetwork(BlockPos pipePos)
     {
         var network = GetNetwork(pipePos);
-        return network?.Inserters ?? [];
+        return network != null ? new List<BlockPos>(network.Inserters) : [];
     }
 
     /// <summary
@@ -287,5 +283,13 @@ public class PipeNetworkManager
     public int GetNetworkCount()
     {
         return networks.Count;
+    }
+
+    private static long First(HashSet<long> values)
+    {
+        foreach (long value in values)
+            return value;
+
+        return 0;
     }
 }

@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
+using ElectricalProgressive.Content.NetworkPipe;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
+using Vintagestory.API.Server;
 using Vintagestory.GameContent;
 
 namespace ElectricalProgressive.Content.ItemInsertionPipe;
@@ -55,6 +58,8 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
     private Dictionary<BlockPos, long> lastTransferTime = [];
     private const long MinTransferInterval = 500; // Минимум 500 мс между переносами одного предмета
     private const int MaxSourceChecksPerTick = 16;
+    private const int ItemTransitPacketId = 1005;
+    private const int MaxTransitPathPipes = 96;
     private long lastTransferCleanupTime = 0;
     private readonly List<BlockPos> expiredTransferKeys = [];
 
@@ -480,7 +485,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
                 if (!sourceEndpoint.EndpointPos.Equals(preferredSourcePos))
                     continue;
 
-                if (TryTransferFromSource(preferredSourcePos, sourceEndpoint.FacingFromPipe.Opposite, targetInventory, targetContainer, targetPos, targetBlock))
+                if (TryTransferFromSource(preferredSourcePos, sourceEndpoint.PipePos, sourceEndpoint.FacingFromPipe.Opposite, targetInventory, targetContainer, targetPos, targetBlock))
                 {
                     sourceCursor = (i + 1) % sourceCount;
                     return;
@@ -501,7 +506,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
             BlockPos checkPos = sourceEndpoint.EndpointPos;
             if (excludePositions.Contains(checkPos)) continue;
 
-            if (TryTransferFromSource(checkPos, sourceEndpoint.FacingFromPipe.Opposite, targetInventory, targetContainer, targetPos, targetBlock))
+            if (TryTransferFromSource(checkPos, sourceEndpoint.PipePos, sourceEndpoint.FacingFromPipe.Opposite, targetInventory, targetContainer, targetPos, targetBlock))
             {
                 preferredSourcePos = checkPos.Copy();
                 sourceCursor = (index + 1) % sourceCount;
@@ -512,7 +517,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         sourceCursor = (sourceCursor + checks) % sourceCount;
     }
 
-    private bool TryTransferFromSource(BlockPos sourcePos, BlockFacing directionFromSource, IInventory targetInventory,
+    private bool TryTransferFromSource(BlockPos sourcePos, BlockPos sourcePipePos, BlockFacing directionFromSource, IInventory targetInventory,
         BlockEntityContainer targetContainer, BlockPos targetPos, Vintagestory.API.Common.Block targetBlock)
     {
         // Проверяем тайминг (чтобы не спамить сетевые пакеты)
@@ -556,7 +561,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
             if (targetSlot == null)
                 continue;
 
-            if (ExecuteTransfer(sourceSlot, targetSlot, sourceContainer, targetContainer, sourcePos))
+            if (ExecuteTransfer(sourceSlot, targetSlot, sourceContainer, targetContainer, sourcePos, sourcePipePos, targetPos))
                 return true;
         }
 
@@ -622,10 +627,14 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
     }
 
     private bool ExecuteTransfer(ItemSlot sourceSlot, ItemSlot targetSlot, BlockEntity sourceBe,
-        BlockEntityContainer targetContainer, BlockPos sourcePos)
+        BlockEntityContainer targetContainer, BlockPos sourcePos, BlockPos sourcePipePos, BlockPos targetPos)
     {
         try
         {
+            ItemStack renderStack = sourceSlot.Itemstack?.Clone();
+            if (renderStack != null)
+                renderStack.StackSize = 1;
+
             // Создаем операцию переноса
             ItemStackMoveOperation op = new ItemStackMoveOperation(
                 Api.World,
@@ -651,6 +660,9 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
                 sourceBe.MarkDirty();
                 targetContainer.MarkDirty();
 
+                if (renderStack != null)
+                    BroadcastItemTransit(renderStack, sourcePos, sourcePipePos, targetPos);
+
                 return true;
             }
         }
@@ -660,6 +672,136 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         }
 
         return false;
+    }
+
+    private void BroadcastItemTransit(ItemStack renderStack, BlockPos sourcePos, BlockPos sourcePipePos, BlockPos targetPos)
+    {
+        if (Api is not ICoreServerAPI sapi)
+            return;
+
+        try
+        {
+            List<BlockPos> pipePath = FindPipePath(sourcePipePos, Pos);
+            byte[] data = SerializeTransitPacket(renderStack, sourcePos, pipePath, targetPos);
+            sapi.Network.BroadcastBlockEntityPacket(Pos, ItemTransitPacketId, data);
+        }
+        catch (Exception ex)
+        {
+            Api.Logger.Error($"Ошибка при отправке визуализации предмета в трубе: {ex.Message}");
+        }
+    }
+
+    private List<BlockPos> FindPipePath(BlockPos startPipePos, BlockPos endPipePos)
+    {
+        var network = NetworkManager?.GetNetwork(Pos);
+        if (network == null || startPipePos == null || endPipePos == null)
+            return [Pos.Copy()];
+
+        if (startPipePos.Equals(endPipePos))
+            return [endPipePos.Copy()];
+
+        var queue = new Queue<BlockPos>();
+        var visited = new HashSet<BlockPos>();
+        var previous = new Dictionary<BlockPos, BlockPos>();
+
+        BlockPos start = startPipePos.Copy();
+        queue.Enqueue(start);
+        visited.Add(start);
+
+        while (queue.Count > 0 && visited.Count <= MaxTransitPathPipes)
+        {
+            BlockPos current = queue.Dequeue();
+            foreach (BlockPos neighbor in GetConnectedPipeNeighbors(current, network))
+            {
+                if (!visited.Add(neighbor))
+                    continue;
+
+                previous[neighbor] = current;
+                if (neighbor.Equals(endPipePos))
+                    return ReconstructPath(start, neighbor, previous);
+
+                queue.Enqueue(neighbor);
+            }
+        }
+
+        return [startPipePos.Copy(), endPipePos.Copy()];
+    }
+
+    private IEnumerable<BlockPos> GetConnectedPipeNeighbors(BlockPos pipePos, PipeNetwork network)
+    {
+        bool[] connectedSides = null;
+        bool[] connectedToInventory = null;
+        var entity = Api.World.BlockAccessor.GetBlockEntity(pipePos);
+
+        if (entity is BEPipe pipe)
+        {
+            connectedSides = pipe.ConnectedSides;
+            connectedToInventory = pipe.ConnectedToInventory;
+        }
+        else if (entity is BlockEntityPipeBase pipeBase)
+        {
+            connectedSides = pipeBase.ConnectedSides;
+            connectedToInventory = pipeBase.ConnectedToInventory;
+        }
+
+        if (connectedSides == null)
+            yield break;
+
+        for (int i = 0; i < 6; i++)
+        {
+            if (!connectedSides[i] || connectedToInventory?[i] == true)
+                continue;
+
+            BlockPos neighborPos = pipePos.AddCopy(BlockFacing.ALLFACES[i]);
+            if (network.Pipes.Contains(neighborPos))
+                yield return neighborPos;
+        }
+    }
+
+    private static List<BlockPos> ReconstructPath(BlockPos start, BlockPos end, Dictionary<BlockPos, BlockPos> previous)
+    {
+        var path = new List<BlockPos>();
+        BlockPos current = end;
+
+        while (current != null)
+        {
+            path.Add(current.Copy());
+            if (current.Equals(start))
+                break;
+
+            current = previous.TryGetValue(current, out BlockPos prev) ? prev : null;
+        }
+
+        path.Reverse();
+        return path;
+    }
+
+    private static byte[] SerializeTransitPacket(ItemStack stack, BlockPos sourcePos, List<BlockPos> pipePath, BlockPos targetPos)
+    {
+        using var ms = new MemoryStream();
+        using var writer = new BinaryWriter(ms);
+
+        stack.ToBytes(writer);
+
+        int pointCount = 2 + (pipePath?.Count ?? 0);
+        writer.Write(pointCount);
+        WriteBlockPos(writer, sourcePos);
+
+        if (pipePath != null)
+        {
+            foreach (BlockPos pipePos in pipePath)
+                WriteBlockPos(writer, pipePos);
+        }
+
+        WriteBlockPos(writer, targetPos);
+        return ms.ToArray();
+    }
+
+    private static void WriteBlockPos(BinaryWriter writer, BlockPos pos)
+    {
+        writer.Write(pos.X);
+        writer.Write(pos.Y);
+        writer.Write(pos.Z);
     }
 
     private bool CanTransferFrom(BlockPos sourcePos)
@@ -840,6 +982,40 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         tree.SetBool("stopPerishEnabled", stopPerishEnabled);
         tree.SetFloat("perishRateMultiplier", perishRateMultiplier);
         tree.SetBool("stopAllTransitions", stopAllTransitions);
+    }
+
+    public override void OnReceivedServerPacket(int packetid, byte[] data)
+    {
+        base.OnReceivedServerPacket(packetid, data);
+
+        if (packetid != ItemTransitPacketId || Api?.Side != EnumAppSide.Client || data == null)
+            return;
+
+        try
+        {
+            using var ms = new MemoryStream(data);
+            using var reader = new BinaryReader(ms);
+
+            var stack = new ItemStack();
+            stack.FromBytes(reader);
+            stack.ResolveBlockOrItem(Api.World);
+
+            int pointCount = reader.ReadInt32();
+            var points = new List<Vec3d>(pointCount);
+            for (int i = 0; i < pointCount; i++)
+            {
+                int x = reader.ReadInt32();
+                int y = reader.ReadInt32();
+                int z = reader.ReadInt32();
+                points.Add(new Vec3d(x + 0.5, y + 0.5, z + 0.5));
+            }
+
+            PipeItemTransitRenderer.Instance?.AddTransit(stack, points);
+        }
+        catch (Exception ex)
+        {
+            Api?.Logger?.Error($"Ошибка при получении визуализации предмета в трубе: {ex.Message}");
+        }
     }
 
     public override void OnReceivedClientPacket(IPlayer player, int packetid, byte[] data)

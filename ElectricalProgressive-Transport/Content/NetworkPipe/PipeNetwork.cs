@@ -14,8 +14,8 @@ namespace ElectricalProgressive.Content.NetworkPipe;
 public class PipeNetwork
 {
     public long NetworkId { get; private set; }
-    public List<BlockPos> Pipes { get; private set; }
-    public List<BlockPos> Inserters { get; private set; }
+    public HashSet<BlockPos> Pipes { get; private set; }
+    public HashSet<BlockPos> Inserters { get; private set; }
     public List<PipeEndpoint> ItemSources { get; private set; }
     public List<PipeEndpoint> LiquidSources { get; private set; }
     public List<PipeEndpoint> LiquidSinks { get; private set; }
@@ -35,16 +35,12 @@ public class PipeNetwork
     /// </summary>
     public void AddPipe(BlockPos pos, BlockEntity pipe)
     {
-        if (!Pipes.Contains(pos))
+        if (Pipes.Add(pos.Copy()))
         {
-            Pipes.Add(pos.Copy());
-
             if (pipe is BEItemInsertionPipe || pipe is BELiquidInsertionPipe)
             {
                 Inserters.Add(pos.Copy());
             }
-
-
         }
     }
 
@@ -65,18 +61,12 @@ public class PipeNetwork
     {
         foreach (var pipePos in otherNetwork.Pipes)
         {
-            if (!Pipes.Contains(pipePos))
-            {
-                Pipes.Add(pipePos.Copy());
-            }
+            Pipes.Add(pipePos.Copy());
         }
 
         foreach (var inserterPos in otherNetwork.Inserters)
         {
-            if (!Inserters.Contains(inserterPos))
-            {
-                Inserters.Add(inserterPos.Copy());
-            }
+            Inserters.Add(inserterPos.Copy());
         }
     }
 
@@ -134,11 +124,14 @@ public class PipeNetwork
 
     private static bool IsItemContainer(ICoreAPI api, Vintagestory.API.Common.Block block, BlockPos pos)
     {
-        if (block?.GetBlockEntity<BlockEntityContainer>(pos)?.Inventory != null)
-            return true;
-
         var blockEntity = api.World.BlockAccessor.GetBlockEntity(pos);
-        return blockEntity is BlockEntityContainer container && container.Inventory != null;
+        if (blockEntity is BlockEntityContainer container)
+            return container.Inventory != null;
+
+        if (blockEntity is IBlockEntityContainer blockEntityContainer)
+            return blockEntityContainer.Inventory != null;
+
+        return false;
     }
 
     private static bool IsLiquidSource(ICoreAPI api, Vintagestory.API.Common.Block block, BlockPos pos)

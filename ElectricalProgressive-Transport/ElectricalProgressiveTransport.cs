@@ -3,6 +3,7 @@ using ElectricalProgressive.Content.ItemInsertionPipe;
 using ElectricalProgressive.Content.LiquidInsertionPipe;
 using ElectricalProgressive.Content.NetworkPipe;
 using ElectricalProgressive.Content.NormalPipe;
+using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 
 [assembly: ModDependency("game", "1.22.0")]
@@ -26,6 +27,7 @@ public class ElectricalProgressiveTransport : ModSystem
 {
     private PipeNetworkManager networkManager;
     private static ElectricalProgressiveTransport instance;
+    private PipeItemTransitRenderer itemTransitRenderer;
 
     public static ElectricalProgressiveTransport Instance => instance;
 
@@ -47,6 +49,22 @@ public class ElectricalProgressiveTransport : ModSystem
         // Инициализация менеджера сетей
         networkManager = new PipeNetworkManager();
         networkManager.Initialize(api);
+    }
+
+    public override void StartClientSide(ICoreClientAPI api)
+    {
+        base.StartClientSide(api);
+
+        itemTransitRenderer = new PipeItemTransitRenderer(api);
+        PipeItemTransitRenderer.Instance = itemTransitRenderer;
+        api.Event.RegisterRenderer(itemTransitRenderer, EnumRenderStage.Opaque, "ep-pipe-item-transit");
+    }
+
+    public override void Dispose()
+    {
+        PipeItemTransitRenderer.Instance = null;
+        itemTransitRenderer = null;
+        base.Dispose();
     }
 
     public PipeNetworkManager GetNetworkManager()

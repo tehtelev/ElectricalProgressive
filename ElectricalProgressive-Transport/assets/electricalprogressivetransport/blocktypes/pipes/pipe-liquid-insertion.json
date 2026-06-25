@@ -21,8 +21,8 @@
     "brass": {
       "base": "game:block/metal/plate/brass"
     },
-    "copper": {
-      "base": "game:block/metal/plate/copper"
+    "tinbronze": {
+      "base": "game:item/resource/plate/tinbronze"
     },
     "iron": {
       "base": "game:block/metal/plate/iron"

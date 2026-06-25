@@ -17,7 +17,7 @@
       "base": "glasspipe"
     },
     "brass": { "base": "game:block/metal/plate/brass" },
-    "copper": { "base": "game:block/metal/plate/copper" },
+    "tinbronze": { "base": "game:item/resource/plate/tinbronze" },
     "iron": { "base": "game:block/metal/plate/iron" },
     "steel": { "base": "game:block/metal/plate/steel" },
     "steel1": { "base": "game:block/metal/sheet/steel1" },

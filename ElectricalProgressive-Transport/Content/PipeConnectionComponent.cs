@@ -1,6 +1,7 @@
 ﻿using ElectricalProgressive.Content.NetworkPipe;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -27,7 +28,7 @@ namespace ElectricalProgressive.Content
         public bool[] ConnectedToInventory => _connectedToInventory;
         public BlockPos?[] ConnectedPipes => _connectedPipes;
 
-        private static string[] inventoryKeywords =
+        private static readonly string[] inventoryKeywords =
         [
             "chest", "crate", "box", "barrel", "shelf",
             "hopper", "funnel", "container", "storage",
@@ -36,6 +37,8 @@ namespace ElectricalProgressive.Content
             "mill", "quern", "press", "forge", "crucible",
             "machine", "machinebase", "generator", "machinerack"
         ];
+        private static readonly Dictionary<Type, PropertyInfo?> inventoryPropertyCache = [];
+        private static readonly object inventoryPropertyCacheLock = new();
 
         public PipeConnectionComponent(BlockEntity owner, ICoreAPI api, BlockPos pos)
         {
@@ -147,27 +150,12 @@ namespace ElectricalProgressive.Content
                 if (block == null)
                     return false;
 
-                var container = block.GetBlockEntity<BlockEntityContainer>(pos);
-                if (container?.Inventory?.Count > 0)
-                    return true;
-
                 var blockEntity = _api.World.BlockAccessor.GetBlockEntity(pos);
                 if (blockEntity != null)
                 {
-                    if (blockEntity is BlockEntityContainer bec && bec.Inventory?.Count > 0)
+                    IInventory inventory = GetInventoryFromBlockEntity(blockEntity);
+                    if (inventory?.Count > 0)
                         return true;
-                    if (blockEntity is IBlockEntityContainer ibec && ibec.Inventory?.Count > 0)
-                        return true;
-                    if (blockEntity is IInventory inv && inv.Count > 0)
-                        return true;
-
-                    try
-                    {
-                        var prop = blockEntity.GetType().GetProperty("Inventory");
-                        if (prop?.GetValue(blockEntity) is IInventory invProp && invProp.Count > 0)
-                            return true;
-                    }
-                    catch { }
                 }
 
                 string code = block.Code?.ToString() ?? "";
@@ -290,10 +278,26 @@ namespace ElectricalProgressive.Content
 
             try
             {
-                var prop = be.GetType().GetProperty("Inventory");
+                var prop = GetInventoryProperty(be.GetType());
                 return prop?.GetValue(be) as IInventory;
             }
             catch { return null; }
+        }
+
+        private static PropertyInfo? GetInventoryProperty(Type blockEntityType)
+        {
+            lock (inventoryPropertyCacheLock)
+            {
+                if (inventoryPropertyCache.TryGetValue(blockEntityType, out PropertyInfo? cached))
+                    return cached;
+
+                PropertyInfo? property = blockEntityType.GetProperty("Inventory");
+                if (property != null && !typeof(IInventory).IsAssignableFrom(property.PropertyType))
+                    property = null;
+
+                inventoryPropertyCache[blockEntityType] = property;
+                return property;
+            }
         }
 
         public void FromTreeAttributes(ITreeAttribute tree)
