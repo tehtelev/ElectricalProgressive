@@ -20,7 +20,7 @@ public class PipeItemTransitRenderer : IRenderer, ITexPositionSource
 
     private readonly ICoreClientAPI capi;
     private readonly List<TransitItem> items = [];
-    private readonly Dictionary<string, float> modelFitDimensionCache = [];
+    private readonly Dictionary<string, ModelMetrics> modelMetricsCache = [];
     private readonly float[] modelMatrix = Mat4f.Create();
     private CollectibleObject? nowTesselatingObj;
     private Shape? nowTesselatingShape;
@@ -48,13 +48,14 @@ public class PipeItemTransitRenderer : IRenderer, ITexPositionSource
         renderStack.StackSize = 1;
 
         var slot = new DummySlot(renderStack);
+        ModelMetrics metrics = GetModelMetrics(renderStack, slot);
 
         items.Add(new TransitItem
         {
             Slot = slot,
             Points = points,
             StartedMs = capi.ElapsedMilliseconds,
-            ModelFitDimension = GetModelFitDimension(renderStack, slot)
+            ModelMetrics = metrics
         });
     }
 
@@ -103,11 +104,15 @@ public class PipeItemTransitRenderer : IRenderer, ITexPositionSource
         float yaw = (float)Math.Atan2(direction.X, direction.Z);
         Mat4f.RotateY(modelMatrix, modelMatrix, yaw);
         Mat4f.RotateX(modelMatrix, modelMatrix, GameMath.PIHALF);
-        float scale = GetRenderScale(item.Slot.Itemstack, item.ModelFitDimension, renderInfo.Transform);
+        float scale = GetRenderScale(item.Slot.Itemstack, item.ModelMetrics.FitDimension, renderInfo.Transform);
         Mat4f.Scale(modelMatrix, modelMatrix, scale, scale, scale);
 
-        if (renderInfo.Transform != null)
-            Mat4f.Mul(modelMatrix, modelMatrix, renderInfo.Transform.AsMatrix);
+        float[]? transformMatrix = renderInfo.Transform?.AsMatrix;
+        Vec3f renderCenter = GetRenderCenter(item.ModelMetrics.ModelCenter, transformMatrix);
+        Mat4f.Translate(modelMatrix, modelMatrix, -renderCenter.X, -renderCenter.Y, -renderCenter.Z);
+
+        if (transformMatrix != null)
+            Mat4f.Mul(modelMatrix, modelMatrix, transformMatrix);
 
         IStandardShaderProgram shader = capi.Render.PreparedStandardShader(
             (int)Math.Floor(pos.X),
@@ -192,19 +197,24 @@ public class PipeItemTransitRenderer : IRenderer, ITexPositionSource
         return GameMath.Clamp(Math.Min(naturalScale, fitScale), MinRenderScale, naturalScale);
     }
 
-    private float GetModelFitDimension(ItemStack stack, ItemSlot slot)
+    private ModelMetrics GetModelMetrics(ItemStack stack, ItemSlot slot)
     {
         string cacheKey = GetModelFitDimensionCacheKey(stack);
-        if (modelFitDimensionCache.TryGetValue(cacheKey, out float cached))
+        if (modelMetricsCache.TryGetValue(cacheKey, out ModelMetrics cached))
             return cached;
 
         float fitDimension = GetFallbackFitDimension(stack);
+        Vec3f modelCenter = new(0.5f, 0.5f, 0.5f);
 
         try
         {
             MeshData mesh = GenModelMesh(stack, slot);
             if (mesh?.xyz != null && mesh.VerticesCount > 0)
-                fitDimension = GetMeshFitDimension(mesh);
+            {
+                MeshBounds bounds = GetMeshBounds(mesh);
+                fitDimension = bounds.FitDimension;
+                modelCenter = bounds.Center;
+            }
         }
         catch (Exception e)
         {
@@ -220,8 +230,9 @@ public class PipeItemTransitRenderer : IRenderer, ITexPositionSource
             capi.TesselatorManager.ThreadDispose();
         }
 
-        modelFitDimensionCache[cacheKey] = fitDimension;
-        return fitDimension;
+        ModelMetrics metrics = new(fitDimension, modelCenter);
+        modelMetricsCache[cacheKey] = metrics;
+        return metrics;
     }
 
     private MeshData GenModelMesh(ItemStack stack, ItemSlot slot)
@@ -246,7 +257,7 @@ public class PipeItemTransitRenderer : IRenderer, ITexPositionSource
         return $"{stack.Class}:{stack.Collectible?.Id}:{stack.Collectible?.Code}";
     }
 
-    private static float GetMeshFitDimension(MeshData mesh)
+    private static MeshBounds GetMeshBounds(MeshData mesh)
     {
         float minX = float.MaxValue;
         float minY = float.MaxValue;
@@ -275,8 +286,12 @@ public class PipeItemTransitRenderer : IRenderer, ITexPositionSource
         float height = Math.Max(maxY - minY, 0f);
         float length = Math.Max(maxZ - minZ, 0f);
         float max = Math.Max(width, Math.Max(height, length));
+        Vec3f center = new(
+            (minX + maxX) * 0.5f,
+            (minY + maxY) * 0.5f,
+            (minZ + maxZ) * 0.5f);
 
-        return max > 0 ? max : 1f;
+        return new MeshBounds(max > 0 ? max : 1f, center);
     }
 
     private static float GetFallbackFitDimension(ItemStack stack)
@@ -302,6 +317,17 @@ public class PipeItemTransitRenderer : IRenderer, ITexPositionSource
         scale = Math.Max(scale, Math.Abs(transform.ScaleXYZ.Z));
 
         return scale > 0 ? scale : 1f;
+    }
+
+    private static Vec3f GetRenderCenter(Vec3f modelCenter, float[]? transformMatrix)
+    {
+        if (transformMatrix == null)
+            return modelCenter;
+
+        return new Vec3f(
+            transformMatrix[0] * modelCenter.X + transformMatrix[4] * modelCenter.Y + transformMatrix[8] * modelCenter.Z + transformMatrix[12],
+            transformMatrix[1] * modelCenter.X + transformMatrix[5] * modelCenter.Y + transformMatrix[9] * modelCenter.Z + transformMatrix[13],
+            transformMatrix[2] * modelCenter.X + transformMatrix[6] * modelCenter.Y + transformMatrix[10] * modelCenter.Z + transformMatrix[14]);
     }
 
     private static Vec3d Interpolate(List<Vec3d> points, double progress, out Vec3d direction)
@@ -335,6 +361,18 @@ public class PipeItemTransitRenderer : IRenderer, ITexPositionSource
         public DummySlot Slot = null!;
         public List<Vec3d> Points = null!;
         public long StartedMs;
-        public float ModelFitDimension;
+        public ModelMetrics ModelMetrics;
+    }
+
+    private readonly struct ModelMetrics(float fitDimension, Vec3f modelCenter)
+    {
+        public float FitDimension { get; } = fitDimension;
+        public Vec3f ModelCenter { get; } = modelCenter;
+    }
+
+    private readonly struct MeshBounds(float fitDimension, Vec3f center)
+    {
+        public float FitDimension { get; } = fitDimension;
+        public Vec3f Center { get; } = center;
     }
 }

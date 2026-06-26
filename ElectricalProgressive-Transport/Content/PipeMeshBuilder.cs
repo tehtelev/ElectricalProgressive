@@ -10,16 +10,24 @@ internal static class PipeMeshBuilder
 {
     private const string ShapeDomain = "electricalprogressivetransport";
     private const string ShapePath = "shapes/block/itempipe";
-    private const int MeshCacheVersion = 18;
+    private const int MeshCacheVersion = 24;
 
     private const float PipeCenter = 0.5f;
 
     // pipe_part.json (TubeBaseWest): от центра блока до внешнего конца ~1.005.
     private const float PipeArmFullReach = 1.0051f;
+    private const float PipeArmInventoryMaxReach = 1.5f;
 
     private static readonly Dictionary<string, Shape> ShapeCache = [];
     private static readonly Dictionary<long, MeshData> MeshCache = [];
     private static readonly Dictionary<int, MeshData> CenterCubeCache = [];
+
+    private static readonly (float rx, float ry, float rz)[] StraightRotationsDeg =
+    [
+        (0f, 90f, 0f),  // north-south
+        (0f, 0f, 0f),   // east-west
+        (0f, 0f, 90f),  // up-down
+    ];
 
     // pipe_part.json = TubeBaseWest (0,0,0). Углы из cross.json TubeBase*.
     private static readonly (float rx, float ry, float rz)[] SideRotationsDeg =
@@ -62,6 +70,20 @@ internal static class PipeMeshBuilder
 
         MeshData finalMesh = null;
         var origin = new Vec3f(PipeCenter, PipeCenter, PipeCenter);
+        int straightAxis = GetStraightAxis(connectedSides, connectedToInventory, useInserterHead);
+
+        if (straightAxis >= 0)
+        {
+            MeshData straightMesh = TesselateShape(api, block, $"{ShapePath}/straight.json");
+            if (straightMesh != null)
+            {
+                var (rx, ry, rz) = StraightRotationsDeg[straightAxis];
+                AddMesh(ref finalMesh, RotateMesh(straightMesh, rx, ry, rz, origin));
+            }
+
+            MeshCache[cacheKey] = finalMesh;
+            return finalMesh;
+        }
 
         if (ShouldRenderCenterCube(connectedSides, connectedToInventory, useInserterHead))
         {
@@ -75,15 +97,20 @@ internal static class PipeMeshBuilder
         {
             for (int i = 0; i < 6; i++)
             {
-                if (!ShouldRenderArm(pos, i, connectedSides, connectedToInventory))
+                if (!ShouldRenderArm(i, connectedSides))
                     continue;
 
                 MeshData armMesh = pipePartMesh.Clone();
                 if (connectedToInventory[i])
                 {
                     BlockPos neighborPos = pos.AddCopy(BlockFacing.ALLFACES[i]);
-                    float reach = PipeNeighborMeshClipper.GetReachAlongFacing(api, pos, i, neighborPos, PipeArmFullReach);
-                    ShortenArmToReach(armMesh, reach);
+                    float reach = PipeNeighborMeshClipper.GetReachAlongFacing(
+                        api,
+                        pos,
+                        i,
+                        neighborPos,
+                        PipeArmInventoryMaxReach);
+                    ScaleArmToReach(armMesh, reach);
                 }
 
                 var (rx, ry, rz) = SideRotationsDeg[i];
@@ -111,32 +138,31 @@ internal static class PipeMeshBuilder
         return finalMesh;
     }
 
-    private static bool ShouldRenderArm(BlockPos pos, int sideIndex, bool[] connectedSides, bool[] connectedToInventory)
+    private static bool ShouldRenderArm(int sideIndex, bool[] connectedSides)
+        => connectedSides[sideIndex];
+
+    private static void ScaleArmToReach(MeshData mesh, float targetReach)
     {
-        if (!connectedSides[sideIndex])
-            return false;
+        float currentReach = GetArmReachAlongScaleAxis(mesh);
+        if (currentReach <= 0f)
+            currentReach = PipeArmFullReach;
 
-        if (connectedToInventory[sideIndex])
-            return true;
-
-        BlockFacing facing = BlockFacing.ALLFACES[sideIndex];
-        BlockPos neighborPos = pos.AddCopy(facing);
-        return OwnsPipeConnection(pos, neighborPos);
-    }
-
-    private static bool OwnsPipeConnection(BlockPos pos, BlockPos neighborPos)
-    {
-        if (pos.X != neighborPos.X)
-            return pos.X < neighborPos.X;
-        if (pos.Y != neighborPos.Y)
-            return pos.Y < neighborPos.Y;
-        return pos.Z < neighborPos.Z;
-    }
-
-    private static void ShortenArmToReach(MeshData mesh, float targetReach)
-    {
-        float scale = targetReach / PipeArmFullReach;
+        float scale = targetReach / currentReach;
         mesh.Scale(new Vec3f(PipeCenter, PipeCenter, PipeCenter), scale, 1f, 1f);
+    }
+
+    private static float GetArmReachAlongScaleAxis(MeshData mesh)
+    {
+        if (mesh?.xyz == null || mesh.VerticesCount <= 0)
+            return 0f;
+
+        float reach = 0f;
+        int vertexValues = Math.Min(mesh.xyz.Length, mesh.VerticesCount * 3);
+
+        for (int i = 0; i < vertexValues; i += 3)
+            reach = Math.Max(reach, Math.Abs(mesh.xyz[i] - PipeCenter));
+
+        return reach;
     }
 
     private static MeshData RotateMesh(MeshData mesh, float rxDeg, float ryDeg, float rzDeg, Vec3f origin)
@@ -172,14 +198,14 @@ internal static class PipeMeshBuilder
 
         for (int i = 0; i < 6; i++)
         {
-            if (ShouldRenderArm(pos, i, connectedSides, connectedToInventory))
+            if (ShouldRenderArm(i, connectedSides))
                 key ^= 1L << (i + 1);
             if (connectedToInventory[i])
             {
                 key ^= 1L << (i + 7);
 
                 BlockPos neighborPos = pos.AddCopy(BlockFacing.ALLFACES[i]);
-                float reach = PipeNeighborMeshClipper.GetReachAlongFacing(api, pos, i, neighborPos, PipeArmFullReach);
+                float reach = PipeNeighborMeshClipper.GetReachAlongFacing(api, pos, i, neighborPos, PipeArmInventoryMaxReach);
                 reachHash ^= (long)(reach * 512) * (i + 1);
             }
         }
@@ -192,11 +218,15 @@ internal static class PipeMeshBuilder
         if (ShouldRenderCenterCube(connectedSides, connectedToInventory, useInserterHead))
             key ^= 1L << 14;
 
+        int straightAxis = GetStraightAxis(connectedSides, connectedToInventory, useInserterHead);
+        if (straightAxis >= 0)
+            key ^= 1L << (15 + straightAxis);
+
         return key;
     }
 
     /// <summary>
-    /// Предметные и жидкостные трубы всегда с кубом. Обычные — только на концах, углах и развилках.
+    /// Предметные и жидкостные трубы всегда с кубом. Обычные — на углах без противоположных пар.
     /// </summary>
     private static bool ShouldRenderCenterCube(bool[] connectedSides, bool[] connectedToInventory, bool useInserterHead)
     {
@@ -226,6 +256,12 @@ internal static class PipeMeshBuilder
             pipeCount++;
         }
 
+        if (!hasInventoryConnection && pipeCount == 1)
+            return false;
+
+        if (!hasInventoryConnection && pipeCount >= 3 && HasOppositePair(connectedSides))
+            return false;
+
         if (pipeCount == 2 && !hasInventoryConnection && AreOppositeSides(pipeSideA, pipeSideB))
             return false;
 
@@ -246,6 +282,57 @@ internal static class PipeMeshBuilder
             1 => sideB == 3,
             4 => sideB == 5,
             _ => false
+        };
+    }
+
+    private static bool HasOppositePair(bool[] connectedSides)
+    {
+        return connectedSides[0] && connectedSides[2]
+            || connectedSides[1] && connectedSides[3]
+            || connectedSides[4] && connectedSides[5];
+    }
+
+    private static int GetStraightAxis(bool[] connectedSides, bool[] connectedToInventory, bool useInserterHead)
+    {
+        if (useInserterHead)
+            return -1;
+
+        int sideA = -1;
+        int sideB = -1;
+        int pipeCount = 0;
+
+        for (int i = 0; i < 6; i++)
+        {
+            if (!connectedSides[i])
+                continue;
+
+            if (connectedToInventory[i])
+                return -1;
+
+            if (pipeCount == 0)
+                sideA = i;
+            else
+                sideB = i;
+            pipeCount++;
+        }
+
+        if (pipeCount == 1)
+            return GetAxisForSide(sideA);
+
+        if (pipeCount != 2 || !AreOppositeSides(sideA, sideB))
+            return -1;
+
+        return GetAxisForSide(sideA);
+    }
+
+    private static int GetAxisForSide(int side)
+    {
+        return side switch
+        {
+            0 or 2 => 0,
+            1 or 3 => 1,
+            4 or 5 => 2,
+            _ => -1
         };
     }
 
