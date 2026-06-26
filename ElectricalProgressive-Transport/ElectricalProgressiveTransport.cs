@@ -27,7 +27,9 @@ public class ElectricalProgressiveTransport : ModSystem
 {
     private PipeNetworkManager networkManager;
     private static ElectricalProgressiveTransport instance;
-    private PipeItemTransitRenderer itemTransitRenderer;
+    private ICoreClientAPI? clientApi;
+    private PipeItemTransitRenderer? itemTransitRenderer;
+    private PipeLiquidTransitRenderer? liquidTransitRenderer;
 
     public static ElectricalProgressiveTransport Instance => instance;
 
@@ -54,16 +56,36 @@ public class ElectricalProgressiveTransport : ModSystem
     public override void StartClientSide(ICoreClientAPI api)
     {
         base.StartClientSide(api);
+        clientApi = api;
 
         itemTransitRenderer = new PipeItemTransitRenderer(api);
         PipeItemTransitRenderer.Instance = itemTransitRenderer;
         api.Event.RegisterRenderer(itemTransitRenderer, EnumRenderStage.Opaque, "ep-pipe-item-transit");
+
+        liquidTransitRenderer = new PipeLiquidTransitRenderer(api);
+        PipeLiquidTransitRenderer.Instance = liquidTransitRenderer;
+        api.Event.RegisterRenderer(liquidTransitRenderer, EnumRenderStage.Opaque, "ep-pipe-liquid-transit");
     }
 
     public override void Dispose()
     {
+        if (clientApi != null)
+        {
+            if (itemTransitRenderer != null)
+                clientApi.Event.UnregisterRenderer(itemTransitRenderer, EnumRenderStage.Opaque);
+
+            if (liquidTransitRenderer != null)
+                clientApi.Event.UnregisterRenderer(liquidTransitRenderer, EnumRenderStage.Opaque);
+        }
+
+        itemTransitRenderer?.Dispose();
+        liquidTransitRenderer?.Dispose();
+
         PipeItemTransitRenderer.Instance = null;
+        PipeLiquidTransitRenderer.Instance = null;
         itemTransitRenderer = null;
+        liquidTransitRenderer = null;
+        clientApi = null;
         base.Dispose();
     }
 

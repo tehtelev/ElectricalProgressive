@@ -2,12 +2,16 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Text;
+using ElectricalProgressive.Content.NetworkPipe;
+using ElectricalProgressive.Content.NormalPipe;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
+using Vintagestory.API.Server;
 using Vintagestory.GameContent;
 
 namespace ElectricalProgressive.Content.LiquidInsertionPipe;
@@ -28,6 +32,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     private BlockPos? preferredSourcePos = null;
     private ILiquidSource? preferredSource = null;
     private BlockPos? preferredRealSourcePos = null;
+    private BlockPos? preferredSourcePipePos = null;
     private ILiquidSink? cachedSink = null;
     private BlockPos? cachedTargetPos = null;
     private BlockPos? cachedRealTargetPos = null;
@@ -81,6 +86,8 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     private const long MinTransferInterval = 100;
     private const int BaseTransferTickIntervalMs = 200;
     private const int TransferTickIntervalMs = 1000;
+    private const int LiquidTransitPacketId = 1006;
+    private const int MaxTransitPathPipes = 96;
     private const long VisualUpdateInterval = 1000;
     private const int MaxSourceChecksPerTick = 24;
     private const long FailedTransferBackoffInitialMs = 1000;
@@ -434,6 +441,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         preferredSourcePos = null;
         preferredSource = null;
         preferredRealSourcePos = null;
+        preferredSourcePipePos = null;
     }
 
     /// <summary>Основной тик передачи жидкости</summary>
@@ -481,6 +489,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
                 preferredSourcePos = null;
                 preferredSource = null;
                 preferredRealSourcePos = null;
+                preferredSourcePipePos = null;
             }
 
             if (transferred)
@@ -505,7 +514,14 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         if (preferredSource != null && preferredSourcePos != null && preferredRealSourcePos != null &&
             !preferredSourcePos.Equals(Pos) && !preferredSourcePos.Equals(targetPos))
         {
-            if (TryTransferFromBlockSourceToSink(preferredSourcePos, preferredRealSourcePos, preferredSource, sink, targetPos, realTargetPos))
+            if (TryTransferFromBlockSourceToSink(
+                    preferredSourcePos,
+                    preferredSourcePipePos ?? Pos,
+                    preferredRealSourcePos,
+                    preferredSource,
+                    sink,
+                    targetPos,
+                    realTargetPos))
             {
                 RecordPreferredSourceHit();
                 return true;
@@ -514,6 +530,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
             preferredSourcePos = null;
             preferredSource = null;
             preferredRealSourcePos = null;
+            preferredSourcePipePos = null;
         }
 
         // Используем сеть для поиска источников жидкости
@@ -547,11 +564,12 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
             if (liquidSource != null)
             {
                 BlockPos realSourcePos = GetRealPosition(sourcePos);
-                if (TryTransferFromBlockSourceToSink(sourcePos, realSourcePos, liquidSource, sink, targetPos, realTargetPos))
+                if (TryTransferFromBlockSourceToSink(sourcePos, sourceEndpoint.PipePos, realSourcePos, liquidSource, sink, targetPos, realTargetPos))
                 {
                     preferredSourcePos = sourcePos.Copy();
                     preferredSource = liquidSource;
                     preferredRealSourcePos = realSourcePos.Copy();
+                    preferredSourcePipePos = sourceEndpoint.PipePos.Copy();
                     sourceCursor = (index + 1) % sourceCount;
                     return true; // Успешная передача, выходим
                 }
@@ -565,8 +583,18 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     /// <summary>
     /// Попытка передачи жидкости от источника к sink.
     /// </summary>
-    private bool TryTransferFromBlockSourceToSink(BlockPos sourcePos, BlockPos realSourcePos, ILiquidSource source, ILiquidSink sink, BlockPos targetPos, BlockPos realTargetPos)
+    private bool TryTransferFromBlockSourceToSink(
+        BlockPos sourcePos,
+        BlockPos sourcePipePos,
+        BlockPos realSourcePos,
+        ILiquidSource source,
+        ILiquidSink sink,
+        BlockPos targetPos,
+        BlockPos realTargetPos)
     {
+        if (!IsLivePipePathConnected(sourcePipePos, Pos))
+            return false;
+
         // Проверяем тайминг (не передаём слишком часто из одного источника)
         if (!CanTransferFrom(sourcePos))
         {
@@ -600,6 +628,9 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
 
         if (movedItems > 0)
         {
+            ItemStack renderStack = contentStack.Clone();
+            renderStack.StackSize = 1;
+
             // Забираем переданное количество из реальной позиции источника
             ItemStack takenStack = source.TryTakeContent(realSourcePos, movedItems);
 
@@ -608,6 +639,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
 
             bool sourceEmptied = currentLitres <= litresToTransfer + 0.0001f;
             MarkLiquidEndpointsDirty(realSourcePos, realTargetPos, sourcePos, targetPos, sourceEmptied);
+            BroadcastLiquidTransit(renderStack, sourcePos, sourcePipePos, targetPos, litresToTransfer);
 
             return true;
         }
@@ -615,6 +647,233 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
 
 
         return false;
+    }
+
+    private void BroadcastLiquidTransit(ItemStack renderStack, BlockPos sourcePos, BlockPos sourcePipePos, BlockPos targetPos, float litres)
+    {
+        if (Api is not ICoreServerAPI sapi)
+            return;
+
+        try
+        {
+            List<BlockPos> pipePath = FindPipePath(sourcePipePos, Pos);
+            byte[] data = SerializeLiquidTransitPacket(renderStack, litres, sourcePos, pipePath, targetPos);
+            sapi.Network.BroadcastBlockEntityPacket(Pos, LiquidTransitPacketId, data);
+        }
+        catch (Exception ex)
+        {
+            Api.Logger.Error($"Ошибка при отправке визуализации жидкости в трубе: {ex.Message}");
+        }
+    }
+
+    private List<BlockPos> FindPipePath(BlockPos startPipePos, BlockPos endPipePos)
+    {
+        var network = NetworkManager?.GetNetwork(Pos);
+        if (network == null || startPipePos == null || endPipePos == null)
+            return [Pos.Copy()];
+
+        if (startPipePos.Equals(endPipePos))
+            return [endPipePos.Copy()];
+
+        var queue = new Queue<BlockPos>();
+        var visited = new HashSet<BlockPos>();
+        var previous = new Dictionary<BlockPos, BlockPos>();
+
+        BlockPos start = startPipePos.Copy();
+        queue.Enqueue(start);
+        visited.Add(start);
+
+        while (queue.Count > 0 && visited.Count <= MaxTransitPathPipes)
+        {
+            BlockPos current = queue.Dequeue();
+            foreach (BlockPos neighbor in GetConnectedPipeNeighbors(current, network))
+            {
+                if (!visited.Add(neighbor))
+                    continue;
+
+                previous[neighbor] = current;
+                if (neighbor.Equals(endPipePos))
+                    return ReconstructPath(start, neighbor, previous);
+
+                queue.Enqueue(neighbor);
+            }
+        }
+
+        return [startPipePos.Copy(), endPipePos.Copy()];
+    }
+
+    private IEnumerable<BlockPos> GetConnectedPipeNeighbors(BlockPos pipePos, PipeNetwork network)
+    {
+        bool[] connectedSides = null;
+        bool[] connectedToInventory = null;
+        var entity = Api.World.BlockAccessor.GetBlockEntity(pipePos);
+
+        if (entity is BEPipe pipe)
+        {
+            connectedSides = pipe.ConnectedSides;
+            connectedToInventory = pipe.ConnectedToInventory;
+        }
+        else if (entity is BlockEntityPipeBase pipeBase)
+        {
+            connectedSides = pipeBase.ConnectedSides;
+            connectedToInventory = pipeBase.ConnectedToInventory;
+        }
+
+        if (connectedSides == null)
+            yield break;
+
+        for (int i = 0; i < 6; i++)
+        {
+            if (!connectedSides[i] || connectedToInventory?[i] == true)
+                continue;
+
+            BlockPos neighborPos = pipePos.AddCopy(BlockFacing.ALLFACES[i]);
+            if (network.Pipes.Contains(neighborPos))
+                yield return neighborPos;
+        }
+    }
+
+    private bool IsLivePipePathConnected(BlockPos startPipePos, BlockPos endPipePos)
+    {
+        if (startPipePos == null || endPipePos == null)
+            return false;
+
+        if (!IsLivePipeAt(startPipePos) || !IsLivePipeAt(endPipePos))
+            return false;
+
+        if (startPipePos.Equals(endPipePos))
+            return true;
+
+        var queue = new Queue<BlockPos>();
+        var visited = new HashSet<BlockPos>();
+
+        BlockPos start = startPipePos.Copy();
+        queue.Enqueue(start);
+        visited.Add(start);
+
+        while (queue.Count > 0 && visited.Count <= MaxTransitPathPipes)
+        {
+            BlockPos current = queue.Dequeue();
+            foreach (BlockPos neighbor in GetLiveConnectedPipeNeighbors(current))
+            {
+                if (!visited.Add(neighbor))
+                    continue;
+
+                if (neighbor.Equals(endPipePos))
+                    return true;
+
+                queue.Enqueue(neighbor);
+            }
+        }
+
+        return false;
+    }
+
+    private IEnumerable<BlockPos> GetLiveConnectedPipeNeighbors(BlockPos pipePos)
+    {
+        bool[] connectedSides = null;
+        bool[] connectedToInventory = null;
+        var entity = Api.World.BlockAccessor.GetBlockEntity(pipePos);
+
+        if (entity is BEPipe pipe)
+        {
+            connectedSides = pipe.ConnectedSides;
+            connectedToInventory = pipe.ConnectedToInventory;
+        }
+        else if (entity is BlockEntityPipeBase pipeBase)
+        {
+            connectedSides = pipeBase.ConnectedSides;
+            connectedToInventory = pipeBase.ConnectedToInventory;
+        }
+
+        if (connectedSides == null)
+            yield break;
+
+        for (int i = 0; i < 6; i++)
+        {
+            if (!connectedSides[i] || connectedToInventory?[i] == true)
+                continue;
+
+            BlockFacing facing = BlockFacing.ALLFACES[i];
+            BlockPos neighborPos = pipePos.AddCopy(facing);
+            if (!IsLivePipeAt(neighborPos) || !IsLivePipeConnectedBack(neighborPos, facing.Opposite))
+                continue;
+
+            yield return neighborPos;
+        }
+    }
+
+    private bool IsLivePipeAt(BlockPos pipePos)
+    {
+        return Api.World.BlockAccessor.GetBlock(pipePos) is BlockPipeBase
+            && Api.World.BlockAccessor.GetBlockEntity(pipePos) is BEPipe or BlockEntityPipeBase;
+    }
+
+    private bool IsLivePipeConnectedBack(BlockPos pipePos, BlockFacing side)
+    {
+        bool[] connectedSides = null;
+        bool[] connectedToInventory = null;
+        var entity = Api.World.BlockAccessor.GetBlockEntity(pipePos);
+
+        if (entity is BEPipe pipe)
+        {
+            connectedSides = pipe.ConnectedSides;
+            connectedToInventory = pipe.ConnectedToInventory;
+        }
+        else if (entity is BlockEntityPipeBase pipeBase)
+        {
+            connectedSides = pipeBase.ConnectedSides;
+            connectedToInventory = pipeBase.ConnectedToInventory;
+        }
+
+        return connectedSides?[side.Index] == true && connectedToInventory?[side.Index] != true;
+    }
+
+    private static List<BlockPos> ReconstructPath(BlockPos start, BlockPos end, Dictionary<BlockPos, BlockPos> previous)
+    {
+        var path = new List<BlockPos>();
+        BlockPos current = end;
+
+        while (current != null)
+        {
+            path.Add(current.Copy());
+            if (current.Equals(start))
+                break;
+
+            current = previous.TryGetValue(current, out BlockPos prev) ? prev : null;
+        }
+
+        path.Reverse();
+        return path;
+    }
+
+    private static byte[] SerializeLiquidTransitPacket(ItemStack stack, float litres, BlockPos sourcePos, List<BlockPos> pipePath, BlockPos targetPos)
+    {
+        using var ms = new MemoryStream();
+        using var writer = new BinaryWriter(ms);
+
+        stack.ToBytes(writer);
+        writer.Write(litres);
+
+        int pointCount = 2 + (pipePath?.Count ?? 0);
+        writer.Write(pointCount);
+        WriteBlockPos(writer, sourcePos);
+
+        if (pipePath != null)
+        {
+            foreach (BlockPos pipePos in pipePath)
+                WriteBlockPos(writer, pipePos);
+        }
+
+        WriteBlockPos(writer, targetPos);
+        return ms.ToArray();
+    }
+
+    private static void WriteBlockPos(BinaryWriter writer, BlockPos pos)
+    {
+        writer.Write(pos.X);
+        writer.Write(pos.Y);
+        writer.Write(pos.Z);
     }
 
     private void ResetTransferBackoff()
@@ -970,6 +1229,41 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         tree.SetBool("stopPerishEnabled", stopPerishEnabled);
         tree.SetFloat("perishRateMultiplier", perishRateMultiplier);
         tree.SetBool("stopAllTransitions", stopAllTransitions);
+    }
+
+    public override void OnReceivedServerPacket(int packetid, byte[] data)
+    {
+        base.OnReceivedServerPacket(packetid, data);
+
+        if (packetid != LiquidTransitPacketId || Api?.Side != EnumAppSide.Client || data == null)
+            return;
+
+        try
+        {
+            using var ms = new MemoryStream(data);
+            using var reader = new BinaryReader(ms);
+
+            var stack = new ItemStack();
+            stack.FromBytes(reader);
+            stack.ResolveBlockOrItem(Api.World);
+
+            float litres = reader.ReadSingle();
+            int pointCount = reader.ReadInt32();
+            var points = new List<Vec3d>(pointCount);
+            for (int i = 0; i < pointCount; i++)
+            {
+                int x = reader.ReadInt32();
+                int y = reader.ReadInt32();
+                int z = reader.ReadInt32();
+                points.Add(new Vec3d(x + 0.5, y + 0.5, z + 0.5));
+            }
+
+            PipeLiquidTransitRenderer.Instance?.AddTransit(stack, points, litres);
+        }
+        catch (Exception ex)
+        {
+            Api?.Logger?.Error($"Ошибка при получении визуализации жидкости в трубе: {ex.Message}");
+        }
     }
 
     /// <summary>Обработка клиентских пакетов</summary>

@@ -34,7 +34,7 @@
       "base": "game:block/metal/sheet/steel1"
     },
     "itempipe": {
-      "base": "pipe"
+      "base": "game:block/metal/sheet/steel1"
     }
   },
   "lightAbsorption": 0.0,
