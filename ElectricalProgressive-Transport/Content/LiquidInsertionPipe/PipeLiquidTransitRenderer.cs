@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ElectricalProgressive.Content;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
@@ -11,17 +12,23 @@ namespace ElectricalProgressive.Content.LiquidInsertionPipe;
 public class PipeLiquidTransitRenderer : IRenderer
 {
     private const double MaxRenderDistanceSq = 96 * 96;
-    private const double TravelDurationSeconds = 2.2;
-    private const float PipeInnerDiameter = 0.34f;
-    private const float LiquidRadius = PipeInnerDiameter * 0.43f;
-    private const float LiquidSegmentLength = 0.72f;
-    private const float MinSegmentLength = 0.18f;
-    private const float Alpha = 0.82f;
+    private const long ActiveFlowDurationMs = 1400;
+    private const double MaxPipeSegmentLengthSq = 1.05 * 1.05;
+    private const float PipeArmFullReach = 1.0051f;
+    private const float PipeInnerDiameter = 0.49f;
+    private const float LiquidRadius = PipeInnerDiameter * 0.5f;
+    private const float FlowUvTilesPerBlock = 1.35f;
+    private const float FlowUvSpeed = 1.25f;
+    private const float EndpointSlopeLength = 0.2f;
+    private const int FlowAnimationFrames = 24;
+    private const int CylinderSides = 24;
+    private const int CylinderRings = 6;
+    private const float Alpha = 0.9f;
 
     private readonly ICoreClientAPI capi;
-    private readonly List<TransitLiquid> liquids = [];
+    private readonly List<ActivePipeFlow> activeFlows = [];
     private readonly Dictionary<string, Vec4f> colorCache = [];
-    private readonly Dictionary<string, MeshRef> meshCache = [];
+    private readonly Dictionary<string, MeshRef?[]> meshCache = [];
     private readonly float[] modelMatrix = Mat4f.Create();
     private int whiteTextureId;
 
@@ -48,24 +55,45 @@ public class PipeLiquidTransitRenderer : IRenderer
 
         ItemStack renderStack = liquidStack.Clone();
         renderStack.StackSize = 1;
+
+        List<FilledPipeSegment> segments = BuildFilledPipeSegments(points);
+        if (segments.Count == 0)
+            return;
+
         string liquidKey = GetLiquidColorKey(renderStack);
         LiquidTexture texture = GetLiquidTexture(renderStack, liquidKey);
+        Vec4f color = GetLiquidColor(renderStack);
 
-        liquids.Add(new TransitLiquid
+        long now = capi.ElapsedMilliseconds;
+        string flowKey = BuildFlowKey(liquidKey, points);
+        ActivePipeFlow? existing = FindActiveFlow(flowKey);
+        if (existing != null)
         {
-            Points = points,
-            StartedMs = capi.ElapsedMilliseconds,
+            existing.ExpiresMs = now + ActiveFlowDurationMs;
+            existing.Segments = segments;
+            existing.MeshKey = texture.MeshKey;
+            existing.TextureId = texture.TextureId;
+            existing.TexturePosition = texture.TexturePosition;
+            existing.Color = color;
+            return;
+        }
+
+        activeFlows.Add(new ActivePipeFlow
+        {
+            FlowKey = flowKey,
+            ExpiresMs = now + ActiveFlowDurationMs,
+            FlowStartedMs = now,
+            Segments = segments,
             MeshKey = texture.MeshKey,
             TextureId = texture.TextureId,
-            Color = GetLiquidColor(renderStack),
             TexturePosition = texture.TexturePosition,
-            Length = GameMath.Clamp(LiquidSegmentLength * (0.65f + litres), MinSegmentLength, LiquidSegmentLength)
+            Color = color
         });
     }
 
     public void OnRenderFrame(float deltaTime, EnumRenderStage stage)
     {
-        if (liquids.Count == 0 || capi.IsGamePaused)
+        if (activeFlows.Count == 0 || capi.IsGamePaused)
             return;
 
         if (capi.World.Player?.Entity?.CameraPos is not Vec3d cameraPos)
@@ -73,50 +101,52 @@ public class PipeLiquidTransitRenderer : IRenderer
 
         long now = capi.ElapsedMilliseconds;
 
-        for (int i = liquids.Count - 1; i >= 0; i--)
+        for (int i = activeFlows.Count - 1; i >= 0; i--)
         {
-            TransitLiquid liquid = liquids[i];
-            double progress = (now - liquid.StartedMs) / (TravelDurationSeconds * 1000.0);
-            if (progress >= 1)
+            ActivePipeFlow flow = activeFlows[i];
+            if (now >= flow.ExpiresMs)
             {
-                liquids.RemoveAt(i);
+                activeFlows.RemoveAt(i);
                 continue;
             }
 
-            Vec3d pos = Interpolate(liquid.Points, GameMath.Clamp(progress, 0, 1), out Vec3d direction);
-            if (pos.SquareDistanceTo(cameraPos) > MaxRenderDistanceSq)
-                continue;
+            foreach (FilledPipeSegment segment in flow.Segments)
+            {
+                if (segment.Center.SquareDistanceTo(cameraPos) > MaxRenderDistanceSq)
+                    continue;
 
-            MeshRef mesh = GetMeshRef(liquid);
-            if (mesh.Disposed)
-                continue;
+                int frame = GetFlowFrame(flow, segment, now);
+                MeshRef mesh = GetMeshRef(flow, frame, segment.MeshKind);
+                if (mesh.Disposed)
+                    continue;
 
-            RenderLiquid(mesh, liquid, pos, direction, cameraPos);
+                RenderLiquidSegment(mesh, flow, segment, cameraPos);
+            }
         }
     }
 
-    private void RenderLiquid(MeshRef mesh, TransitLiquid liquid, Vec3d pos, Vec3d direction, Vec3d cameraPos)
+    private void RenderLiquidSegment(MeshRef mesh, ActivePipeFlow flow, FilledPipeSegment segment, Vec3d cameraPos)
     {
         Mat4f.Identity(modelMatrix);
         Mat4f.Translate(
             modelMatrix,
             modelMatrix,
-            (float)(pos.X - cameraPos.X),
-            (float)(pos.Y - cameraPos.Y),
-            (float)(pos.Z - cameraPos.Z));
+            (float)(segment.Center.X - cameraPos.X),
+            (float)(segment.Center.Y - cameraPos.Y),
+            (float)(segment.Center.Z - cameraPos.Z));
 
-        ApplyDirectionRotation(direction);
-        Mat4f.Scale(modelMatrix, modelMatrix, LiquidRadius, LiquidRadius, liquid.Length);
+        ApplyDirectionRotation(segment.Direction);
+        Mat4f.Scale(modelMatrix, modelMatrix, LiquidRadius, LiquidRadius, segment.Length);
 
         IStandardShaderProgram shader = capi.Render.PreparedStandardShader(
-            (int)Math.Floor(pos.X),
-            (int)Math.Floor(pos.Y),
-            (int)Math.Floor(pos.Z),
-            liquid.Color);
+            (int)Math.Floor(segment.Center.X),
+            (int)Math.Floor(segment.Center.Y),
+            (int)Math.Floor(segment.Center.Z),
+            flow.Color);
 
         shader.ModelMatrix = modelMatrix;
-        shader.RgbaTint = liquid.Color;
-        shader.Tex2D = liquid.TextureId;
+        shader.RgbaTint = flow.Color;
+        shader.Tex2D = flow.TextureId;
         shader.AlphaTest = 0.01f;
         shader.NormalShaded = 0;
 
@@ -134,42 +164,95 @@ public class PipeLiquidTransitRenderer : IRenderer
         Mat4f.RotateX(modelMatrix, modelMatrix, pitch);
     }
 
-    private MeshRef GetMeshRef(TransitLiquid liquid)
+    private MeshRef GetMeshRef(ActivePipeFlow flow, int frame, FlowMeshKind meshKind)
     {
-        if (!meshCache.TryGetValue(liquid.MeshKey, out MeshRef mesh) || mesh.Disposed)
+        string cacheKey = $"{flow.MeshKey}:{meshKind}";
+        if (!meshCache.TryGetValue(cacheKey, out MeshRef?[]? frames))
         {
-            mesh = capi.Render.UploadMesh(CreateLiquidSegmentMesh(liquid.TexturePosition, liquid.Color));
-            meshCache[liquid.MeshKey] = mesh;
+            frames = new MeshRef?[FlowAnimationFrames];
+            meshCache[cacheKey] = frames;
+        }
+
+        MeshRef? mesh = frames[frame];
+        if (mesh == null || mesh.Disposed)
+        {
+            float uvOffset = frame / (float)FlowAnimationFrames;
+            mesh = capi.Render.UploadMesh(CreateFlowingLiquidMesh(flow.TexturePosition, uvOffset, meshKind));
+            frames[frame] = mesh;
         }
 
         return mesh;
     }
 
+    private int GetFlowFrame(ActivePipeFlow flow, FilledPipeSegment segment, long now)
+    {
+        float elapsedSeconds = (now - flow.FlowStartedMs) / 1000f;
+        float offset = segment.PathDistance * FlowUvTilesPerBlock - elapsedSeconds * FlowUvSpeed;
+        return (int)Math.Floor(Fract(offset) * FlowAnimationFrames) % FlowAnimationFrames;
+    }
+
     private int GetWhiteTextureId()
     {
         if (whiteTextureId == 0)
+#pragma warning disable CS0618
             whiteTextureId = capi.Render.LoadTextureFromRgba([unchecked((int)0xffffffff)], 1, 1, false, 0);
+#pragma warning restore CS0618
 
         return whiteTextureId;
     }
 
     private LiquidTexture GetLiquidTexture(ItemStack liquidStack, string liquidKey)
     {
-        TextureAtlasPosition? texPos = null;
+        if (TryGetKnownWorldLiquidTexture(liquidStack, out TextureAtlasPosition texPos))
+            return CreateLiquidTexture($"flow:{liquidKey}:world", texPos);
+
+        CompositeTexture? containableTexture = BlockLiquidContainerBase.GetContainableProps(liquidStack)?.Texture
+            ?? liquidStack.Collectible.Attributes?["inContainerTexture"]?.AsObject<CompositeTexture>(null, liquidStack.Collectible.Code.Domain);
+
+        if (containableTexture != null && TryGetTextureAtlasPosition(containableTexture, out texPos))
+            return CreateLiquidTexture($"flow:{liquidKey}:container", texPos);
 
         if (liquidStack.Block != null)
-            texPos = GetTextureFromCompositeTextures(liquidStack.Block.Textures);
-
-        if (texPos == null && liquidStack.Item != null)
-            texPos = GetTextureFromCompositeTextures(liquidStack.Item.Textures);
-
-        if (texPos != null)
         {
-            string meshKey = $"{liquidKey}:{texPos.atlasTextureId}:{texPos.x1}:{texPos.y1}:{texPos.x2}:{texPos.y2}";
-            return new LiquidTexture(meshKey, texPos.atlasTextureId, texPos);
+            TextureAtlasPosition? blockTexPos = GetTextureFromCompositeTextures(liquidStack.Block.Textures);
+            if (blockTexPos != null)
+                return CreateLiquidTexture($"flow:{liquidKey}:block", blockTexPos);
         }
 
-        return new LiquidTexture($"{liquidKey}:white", GetWhiteTextureId(), null);
+        if (liquidStack.Item != null)
+        {
+            TextureAtlasPosition? itemTexPos = GetTextureFromCompositeTextures(liquidStack.Item.Textures);
+            if (itemTexPos != null)
+                return CreateLiquidTexture($"flow:{liquidKey}:item", itemTexPos);
+        }
+
+        return new LiquidTexture($"flow:{liquidKey}:white", GetWhiteTextureId(), null);
+    }
+
+    private LiquidTexture CreateLiquidTexture(string meshKey, TextureAtlasPosition texPos)
+    {
+        return new LiquidTexture(
+            $"{meshKey}:{texPos.atlasTextureId}:{texPos.x1}:{texPos.y1}:{texPos.x2}:{texPos.y2}",
+            texPos.atlasTextureId,
+            texPos);
+    }
+
+    private bool TryGetKnownWorldLiquidTexture(ItemStack liquidStack, out TextureAtlasPosition texPos)
+    {
+        texPos = null!;
+        string code = liquidStack.Collectible?.Code?.ToString() ?? "";
+        string? path = null;
+
+        if (code.Contains("rapidwater", StringComparison.OrdinalIgnoreCase))
+            path = "block/liquid/rapidwater";
+        else if (code.Contains("saltwater", StringComparison.OrdinalIgnoreCase))
+            path = "block/liquid/saltwater";
+        else if (code.Contains("water", StringComparison.OrdinalIgnoreCase))
+            path = "block/liquid/water";
+        else if (code.Contains("lava", StringComparison.OrdinalIgnoreCase))
+            path = "block/liquid/lava";
+
+        return path != null && TryGetTextureAtlasPosition(new AssetLocation("survival", path), out texPos);
     }
 
     private TextureAtlasPosition? GetTextureFromCompositeTextures(IDictionary<string, CompositeTexture>? textures)
@@ -179,13 +262,13 @@ public class PipeLiquidTransitRenderer : IRenderer
 
         string[] preferredTextureCodes =
         [
-            "liquid", "contents", "content", "all", "still", "water", "lava", "oil",
-            "top", "up", "side", "north", "east", "south", "west"
+            "flow", "flowing", "all", "liquid", "contents", "content", "still",
+            "water", "lava", "oil", "top", "up", "side", "north", "east", "south", "west"
         ];
 
         foreach (string textureCode in preferredTextureCodes)
         {
-            if (textures.TryGetValue(textureCode, out CompositeTexture texture)
+            if (textures.TryGetValue(textureCode, out CompositeTexture? texture)
                 && TryGetTextureAtlasPosition(texture, out TextureAtlasPosition texPos))
             {
                 return texPos;
@@ -221,9 +304,11 @@ public class PipeLiquidTransitRenderer : IRenderer
         }
 
         AssetLocation? texturePath = texture.Baked?.BakedName ?? texture.Base;
-        if (texturePath == null)
-            return false;
+        return texturePath != null && TryGetTextureAtlasPosition(texturePath, out texPos);
+    }
 
+    private bool TryGetTextureAtlasPosition(AssetLocation texturePath, out TextureAtlasPosition texPos)
+    {
         texPos = capi.BlockTextureAtlas[texturePath];
         if (texPos != null)
             return true;
@@ -244,7 +329,7 @@ public class PipeLiquidTransitRenderer : IRenderer
     private Vec4f GetLiquidColor(ItemStack liquidStack)
     {
         string key = GetLiquidColorKey(liquidStack);
-        if (colorCache.TryGetValue(key, out Vec4f cached))
+        if (colorCache.TryGetValue(key, out Vec4f? cached))
             return cached;
 
         string code = liquidStack.Collectible?.Code?.ToString() ?? "";
@@ -267,7 +352,7 @@ public class PipeLiquidTransitRenderer : IRenderer
         return liquidStack.Collectible?.Code?.ToString() ?? "unknown";
     }
 
-    private bool TryGetKnownLiquidColor(string code, out Vec4f color)
+    private static bool TryGetKnownLiquidColor(string code, out Vec4f color)
     {
         if (code.Contains("water", StringComparison.OrdinalIgnoreCase))
         {
@@ -281,7 +366,7 @@ public class PipeLiquidTransitRenderer : IRenderer
             return true;
         }
 
-        if (code.Contains("oil", StringComparison.OrdinalIgnoreCase))
+        if (code.Contains("oil", StringComparison.OrdinalIgnoreCase) || code.Contains("tar", StringComparison.OrdinalIgnoreCase))
         {
             color = new Vec4f(40 / 255f, 38 / 255f, 34 / 255f, Alpha);
             return true;
@@ -319,103 +404,219 @@ public class PipeLiquidTransitRenderer : IRenderer
         return false;
     }
 
-    private static MeshData CreateLiquidSegmentMesh(TextureAtlasPosition? texPos, Vec4f color)
+    private ActivePipeFlow? FindActiveFlow(string flowKey)
     {
-        const int sides = 16;
-        const int rings = 13;
-        int vertexCount = sides * rings + 2;
-        int indexCount = sides * rings * 6;
+        foreach (ActivePipeFlow flow in activeFlows)
+        {
+            if (flow.FlowKey == flowKey)
+                return flow;
+        }
+
+        return null;
+    }
+
+    private List<FilledPipeSegment> BuildFilledPipeSegments(List<Vec3d> points)
+    {
+        var segments = new List<FilledPipeSegment>();
+        float pathDistance = 0f;
+
+        for (int i = 0; i < points.Count - 1; i++)
+        {
+            Vec3d start = points[i];
+            Vec3d end = points[i + 1];
+            Vec3d delta = end.SubCopy(start);
+            double lengthSq = delta.LengthSq();
+            if (lengthSq < 0.0001 || lengthSq > MaxPipeSegmentLengthSq)
+                continue;
+
+            FlowMeshKind meshKind = ClipPipeInventorySegment(ref start, ref end);
+            delta = end.SubCopy(start);
+            lengthSq = delta.LengthSq();
+            if (lengthSq < 0.0001 || lengthSq > MaxPipeSegmentLengthSq)
+                continue;
+
+            double length = Math.Sqrt(lengthSq);
+            Vec3d direction = delta.Mul(1 / length);
+            segments.Add(new FilledPipeSegment
+            {
+                Center = new Vec3d(
+                    (start.X + end.X) * 0.5,
+                    (start.Y + end.Y) * 0.5,
+                    (start.Z + end.Z) * 0.5),
+                Direction = direction,
+                Length = (float)length,
+                PathDistance = pathDistance,
+                MeshKind = meshKind
+            });
+
+            pathDistance += (float)length;
+        }
+
+        return segments;
+    }
+
+    private FlowMeshKind ClipPipeInventorySegment(ref Vec3d start, ref Vec3d end)
+    {
+        BlockPos startPos = ToBlockPos(start);
+        BlockPos endPos = ToBlockPos(end);
+        bool startIsPipe = IsPipeAt(startPos);
+        bool endIsPipe = IsPipeAt(endPos);
+
+        if (startIsPipe == endIsPipe)
+            return FlowMeshKind.Normal;
+
+        if (startIsPipe)
+        {
+            if (!TryGetFacingIndex(startPos, endPos, out int sideIndex))
+                return FlowMeshKind.Normal;
+
+            float reach = PipeNeighborMeshClipper.GetReachAlongFacing(capi, startPos, sideIndex, endPos, PipeArmFullReach);
+            end = OffsetFromBlockCenter(startPos, BlockFacing.ALLFACES[sideIndex], reach);
+            return FlowMeshKind.Outlet;
+        }
+
+        if (!TryGetFacingIndex(endPos, startPos, out int reverseSideIndex))
+            return FlowMeshKind.Normal;
+
+        float reverseReach = PipeNeighborMeshClipper.GetReachAlongFacing(capi, endPos, reverseSideIndex, startPos, PipeArmFullReach);
+        start = OffsetFromBlockCenter(endPos, BlockFacing.ALLFACES[reverseSideIndex], reverseReach);
+        return FlowMeshKind.Inlet;
+    }
+
+    private bool IsPipeAt(BlockPos pos)
+    {
+        return capi.World.BlockAccessor.GetBlock(pos) is BlockPipeBase
+            || capi.World.BlockAccessor.GetBlockEntity(pos) is BEPipe or BlockEntityPipeBase;
+    }
+
+    private static bool TryGetFacingIndex(BlockPos from, BlockPos to, out int sideIndex)
+    {
+        int dx = to.X - from.X;
+        int dy = to.Y - from.Y;
+        int dz = to.Z - from.Z;
+
+        for (int i = 0; i < BlockFacing.ALLFACES.Length; i++)
+        {
+            Vec3i normal = BlockFacing.ALLFACES[i].Normali;
+            if (normal.X == dx && normal.Y == dy && normal.Z == dz)
+            {
+                sideIndex = i;
+                return true;
+            }
+        }
+
+        sideIndex = -1;
+        return false;
+    }
+
+    private static Vec3d OffsetFromBlockCenter(BlockPos pos, BlockFacing facing, float reach)
+    {
+        return new Vec3d(
+            pos.X + 0.5 + facing.Normali.X * reach,
+            pos.Y + 0.5 + facing.Normali.Y * reach,
+            pos.Z + 0.5 + facing.Normali.Z * reach);
+    }
+
+    private static BlockPos ToBlockPos(Vec3d point)
+    {
+        return new BlockPos((int)Math.Floor(point.X), (int)Math.Floor(point.Y), (int)Math.Floor(point.Z));
+    }
+
+    private static string BuildFlowKey(string liquidKey, List<Vec3d> points)
+    {
+        string key = liquidKey;
+        foreach (Vec3d point in points)
+        {
+            key += $":{(int)Math.Floor(point.X)},{(int)Math.Floor(point.Y)},{(int)Math.Floor(point.Z)}";
+        }
+
+        return key;
+    }
+
+    private static MeshData CreateFlowingLiquidMesh(TextureAtlasPosition? texPos, float uvOffset, FlowMeshKind meshKind)
+    {
+        List<(float Start, float End)> strips = GetFlowUvStrips(uvOffset);
+        int totalRings = 0;
+        foreach ((float start, float end) in strips)
+            totalRings += GetStripRingCount(start, end);
+
+        int vertexCount = CylinderSides * totalRings;
+        int indexCount = CylinderSides * (totalRings - strips.Count) * 6;
         var mesh = new MeshData(vertexCount, indexCount, withNormals: false, withUv: true, withRgba: true, withFlags: false);
 
         mesh.xyz = new float[vertexCount * 3];
         mesh.Uv = new float[vertexCount * 2];
         mesh.Indices = new int[indexCount];
-
-        for (int ring = 0; ring < rings; ring++)
-        {
-            float t = (ring + 1f) / (rings + 1f);
-            float z = GameMath.Lerp(-0.5f, 0.5f, t);
-            float radius = GetSlugRadius(t);
-
-            for (int side = 0; side < sides; side++)
-            {
-                float angle = GameMath.TWOPI * side / sides;
-                int vertex = ring * sides + side;
-                int xyzIndex = vertex * 3;
-                int uvIndex = vertex * 2;
-
-                mesh.xyz[xyzIndex] = GameMath.Cos(angle) * radius;
-                mesh.xyz[xyzIndex + 1] = GameMath.Sin(angle) * radius;
-                mesh.xyz[xyzIndex + 2] = z;
-
-                float u = texPos == null ? side / (float)sides : GameMath.Lerp(texPos.x1, texPos.x2, side / (float)sides);
-                mesh.Uv[uvIndex] = u;
-                mesh.Uv[uvIndex + 1] = texPos == null ? t : GameMath.Lerp(texPos.y1, texPos.y2, t);
-            }
-        }
-
-        int bottomCenter = sides * rings;
-        int topCenter = bottomCenter + 1;
-        mesh.xyz[bottomCenter * 3 + 2] = -0.5f;
-        mesh.xyz[topCenter * 3 + 2] = 0.5f;
-        mesh.Uv[bottomCenter * 2] = texPos == null ? 0.5f : (texPos.x1 + texPos.x2) * 0.5f;
-        mesh.Uv[bottomCenter * 2 + 1] = texPos == null ? 0.5f : (texPos.y1 + texPos.y2) * 0.5f;
-        mesh.Uv[topCenter * 2] = mesh.Uv[bottomCenter * 2];
-        mesh.Uv[topCenter * 2 + 1] = mesh.Uv[bottomCenter * 2 + 1];
-
-        int index = 0;
-        for (int side = 0; side < sides; side++)
-        {
-            int next = (side + 1) % sides;
-
-            mesh.Indices[index++] = bottomCenter;
-            mesh.Indices[index++] = next;
-            mesh.Indices[index++] = side;
-
-            mesh.Indices[index++] = topCenter;
-            mesh.Indices[index++] = (rings - 1) * sides + side;
-            mesh.Indices[index++] = (rings - 1) * sides + next;
-        }
-
-        for (int ring = 0; ring < rings - 1; ring++)
-        {
-            int ringStart = ring * sides;
-            int nextRingStart = (ring + 1) * sides;
-
-            for (int side = 0; side < sides; side++)
-            {
-                int next = (side + 1) % sides;
-                int bottom0 = ringStart + side;
-                int bottom1 = ringStart + next;
-                int top0 = nextRingStart + side;
-                int top1 = nextRingStart + next;
-
-                mesh.Indices[index++] = bottom0;
-                mesh.Indices[index++] = bottom1;
-                mesh.Indices[index++] = top1;
-                mesh.Indices[index++] = bottom0;
-                mesh.Indices[index++] = top1;
-                mesh.Indices[index++] = top0;
-            }
-        }
-
         mesh.Rgba = new byte[vertexCount * 4];
-        byte a = FloatColorToByte(color.A);
-        for (int vertex = 0; vertex < vertexCount; vertex++)
+
+        int ringOffset = 0;
+        int index = 0;
+
+        for (int stripIndex = 0; stripIndex < strips.Count; stripIndex++)
         {
-            float shade = 1f;
-            if (vertex < sides * rings)
+            (float start, float end) = strips[stripIndex];
+            int stripRings = GetStripRingCount(start, end);
+            for (int ring = 0; ring < stripRings; ring++)
             {
-                int side = vertex % sides;
-                float angle = GameMath.TWOPI * side / sides;
-                shade = 0.78f + 0.22f * Math.Max(0f, GameMath.Sin(angle) * 0.75f + GameMath.Cos(angle) * 0.25f);
+                float localT = ring / (stripRings - 1f);
+                float t = GameMath.Lerp(start, end, localT);
+                float z = GameMath.Lerp(-0.5f, 0.5f, t);
+                float v = Fract(t * FlowUvTilesPerBlock + uvOffset);
+                if (stripIndex < strips.Count - 1 && ring == stripRings - 1)
+                    v = 1f;
+                else if (stripIndex > 0 && ring == 0)
+                    v = 0f;
+
+                for (int side = 0; side < CylinderSides; side++)
+                {
+                    float u = side / (float)CylinderSides;
+                    float angle = GameMath.TWOPI * u;
+                    int vertex = (ringOffset + ring) * CylinderSides + side;
+                    int xyzIndex = vertex * 3;
+                    int uvIndex = vertex * 2;
+                    int rgbaIndex = vertex * 4;
+
+                    float x = GameMath.Cos(angle);
+                    float y = GameMath.Sin(angle);
+                    mesh.xyz[xyzIndex] = x;
+                    mesh.xyz[xyzIndex + 1] = y;
+                    mesh.xyz[xyzIndex + 2] = GetSlopedEndpointZ(z, t, y, meshKind);
+
+                    mesh.Uv[uvIndex] = texPos == null ? u : GameMath.Lerp(texPos.x1, texPos.x2, u);
+                    mesh.Uv[uvIndex + 1] = texPos == null ? v : GameMath.Lerp(texPos.y1, texPos.y2, v);
+
+                    float sideLight = Math.Max(0f, GameMath.Sin(angle) * 0.7f + GameMath.Cos(angle) * 0.3f);
+                    float shade = 0.82f + 0.18f * sideLight;
+                    mesh.Rgba[rgbaIndex] = FloatColorToByte(shade);
+                    mesh.Rgba[rgbaIndex + 1] = FloatColorToByte(shade);
+                    mesh.Rgba[rgbaIndex + 2] = FloatColorToByte(shade);
+                    mesh.Rgba[rgbaIndex + 3] = 255;
+                }
             }
 
-            int i = vertex * 4;
-            mesh.Rgba[i] = FloatColorToByte(color.R * shade);
-            mesh.Rgba[i + 1] = FloatColorToByte(color.G * shade);
-            mesh.Rgba[i + 2] = FloatColorToByte(color.B * shade);
-            mesh.Rgba[i + 3] = a;
+            for (int ring = 0; ring < stripRings - 1; ring++)
+            {
+                int ringStart = (ringOffset + ring) * CylinderSides;
+                int nextRingStart = (ringOffset + ring + 1) * CylinderSides;
+
+                for (int side = 0; side < CylinderSides; side++)
+                {
+                    int next = (side + 1) % CylinderSides;
+                    int bottom0 = ringStart + side;
+                    int bottom1 = ringStart + next;
+                    int top0 = nextRingStart + side;
+                    int top1 = nextRingStart + next;
+
+                    mesh.Indices[index++] = bottom0;
+                    mesh.Indices[index++] = bottom1;
+                    mesh.Indices[index++] = top1;
+                    mesh.Indices[index++] = bottom0;
+                    mesh.Indices[index++] = top1;
+                    mesh.Indices[index++] = top0;
+                }
+            }
+
+            ringOffset += stripRings;
         }
 
         mesh.VerticesCount = vertexCount;
@@ -423,23 +624,53 @@ public class PipeLiquidTransitRenderer : IRenderer
         return mesh;
     }
 
-    private static float GetSlugRadius(float t)
+    private static List<(float Start, float End)> GetFlowUvStrips(float uvOffset)
     {
-        const float capLength = 0.24f;
-        float radius = 1f;
+        var strips = new List<(float Start, float End)>();
+        float start = 0f;
 
-        if (t < capLength)
+        for (int wrap = 1; wrap <= (int)Math.Ceiling(FlowUvTilesPerBlock + 1f); wrap++)
         {
-            float n = GameMath.Clamp(t / capLength, 0f, 1f);
-            radius = GameMath.Sqrt(Math.Max(0f, 1f - (1f - n) * (1f - n)));
-        }
-        else if (t > 1f - capLength)
-        {
-            float n = GameMath.Clamp((1f - t) / capLength, 0f, 1f);
-            radius = GameMath.Sqrt(Math.Max(0f, 1f - (1f - n) * (1f - n)));
+            float boundary = (wrap - uvOffset) / FlowUvTilesPerBlock;
+            if (boundary <= 0f)
+                continue;
+
+            if (boundary >= 1f)
+                break;
+
+            strips.Add((start, boundary));
+            start = boundary;
         }
 
-        return radius * (0.96f + 0.04f * GameMath.Sin(GameMath.PI * t));
+        strips.Add((start, 1f));
+        return strips;
+    }
+
+    private static int GetStripRingCount(float start, float end)
+    {
+        return Math.Max(2, (int)Math.Ceiling((end - start) * (CylinderRings - 1)) + 1);
+    }
+
+    private static float GetSlopedEndpointZ(float z, float t, float y, FlowMeshKind meshKind)
+    {
+        float topFactor = (y + 1f) * 0.5f;
+
+        return meshKind switch
+        {
+            FlowMeshKind.Inlet => z + EndpointSlopeLength * topFactor * SmoothStep(GameMath.Clamp(1f - t / EndpointSlopeLength, 0f, 1f)),
+            FlowMeshKind.Outlet => z - EndpointSlopeLength * topFactor * SmoothStep(GameMath.Clamp((t - (1f - EndpointSlopeLength)) / EndpointSlopeLength, 0f, 1f)),
+            _ => z
+        };
+    }
+
+    private static float SmoothStep(float value)
+    {
+        return value * value * (3f - 2f * value);
+    }
+
+    private static float Fract(float value)
+    {
+        return value - (float)Math.Floor(value);
     }
 
     private static byte FloatColorToByte(float value)
@@ -447,32 +678,15 @@ public class PipeLiquidTransitRenderer : IRenderer
         return (byte)Math.Max(0, Math.Min(255, (int)Math.Round(value * 255f)));
     }
 
-    private static Vec3d Interpolate(List<Vec3d> points, double progress, out Vec3d direction)
-    {
-        double segmentProgress = progress * (points.Count - 1);
-        int index = Math.Min((int)segmentProgress, points.Count - 2);
-        double local = segmentProgress - index;
-
-        Vec3d a = points[index];
-        Vec3d b = points[index + 1];
-
-        direction = b.SubCopy(a);
-        if (direction.LengthSq() < 0.0001)
-            direction.Set(0, 0, 1);
-        else
-            direction.Normalize();
-
-        return new Vec3d(
-            GameMath.Lerp(a.X, b.X, local),
-            GameMath.Lerp(a.Y, b.Y, local),
-            GameMath.Lerp(a.Z, b.Z, local));
-    }
-
     public void Dispose()
     {
-        liquids.Clear();
-        foreach (MeshRef mesh in meshCache.Values)
-            mesh.Dispose();
+        activeFlows.Clear();
+
+        foreach (MeshRef?[] frames in meshCache.Values)
+        {
+            foreach (MeshRef? mesh in frames)
+                mesh?.Dispose();
+        }
         meshCache.Clear();
 
         if (whiteTextureId != 0)
@@ -482,15 +696,32 @@ public class PipeLiquidTransitRenderer : IRenderer
         }
     }
 
-    private sealed class TransitLiquid
+    private sealed class ActivePipeFlow
     {
-        public List<Vec3d> Points = null!;
-        public long StartedMs;
+        public string FlowKey = "unknown";
+        public long ExpiresMs;
+        public long FlowStartedMs;
+        public List<FilledPipeSegment> Segments = null!;
         public string MeshKey = "unknown";
         public int TextureId;
         public TextureAtlasPosition? TexturePosition;
         public Vec4f Color = null!;
+    }
+
+    private sealed class FilledPipeSegment
+    {
+        public Vec3d Center = null!;
+        public Vec3d Direction = null!;
         public float Length;
+        public float PathDistance;
+        public FlowMeshKind MeshKind;
+    }
+
+    private enum FlowMeshKind
+    {
+        Normal,
+        Inlet,
+        Outlet
     }
 
     private readonly struct LiquidTexture
