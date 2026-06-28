@@ -394,6 +394,21 @@
   // ==================== Іншае ====================
   "game:tabname-electricity": "Электрычнасць",
 
+  "efuelgenerator": "Паравы паліўны генератар",
+  "block-efuelgenerator-*": "Паравы паліўны генератар",
+  "block-handbooktitle-efuelgenerator": "Выкарыстанне",
+  "block-handbooktext-efuelgenerator": "Дазваляе выпрацоўваць электраэнергію, выкарыстоўваючы цеплыню ад гарэння паліва. Для працы патрабуецца вадкасць. Можа быць запаўнены ўручную або праз трубы.",
+
+  "electricalprogressivebasics:empty": "Пуста",
+  "electricalprogressivebasics:liquid": "Вадкасць: ",
+  "electricalprogressivebasics:requires": "Для працы патрабуецца вадкасць",
+  "electricalprogressivebasics:current_liquid_consumption": "Бягучае спажыванне вадкасці: {0} л/с",
+  "electricalprogressivebasics:litres": "л",
+  "electricalprogressivebasics:Liquid_capacity": "Ёмістасць: {0} л",
+  "electricalprogressivebasics:Accepts_any_liquid": "Падтрымлівае любую вадкасць",
+  "electricalprogressivebasics:wrong_type": "Няправільны тып",
+  "electricalprogressivebasics:blockhelp-watergen-fillliquid": "Адкрыць інтэрфейс генератара",
+
   "resistance_moment": "Супраціўленне вала: {0} кН",
   "torque_moment": "Круцільны момант: {0} кН"
 }

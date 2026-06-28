@@ -7,9 +7,9 @@
     "Kotl"
   ],
   "description": "Basic electrical devices.",
-  "Version": "3.2.5",
+  "Version": "3.3.0",
   "dependencies": {
     "game": "1.22.0",
-    "electricalprogressivecore": "3.2.3"
+    "electricalprogressivecore": "3.3.0"
   }
 } 
