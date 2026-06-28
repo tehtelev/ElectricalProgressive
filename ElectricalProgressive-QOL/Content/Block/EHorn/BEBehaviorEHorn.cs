@@ -15,6 +15,7 @@ public class BEBehaviorEHorn : BlockEntityBehavior, IElectricConsumer
     private float _powerReceive = 0;
     
     public const string PowerReceiveKey = "electricalprogressive:powerReceive";
+    public const string MaxTempKey = "electricalprogressive:maxTemp";
 
     public bool IsBurned => this.Block.Code.GetName().Contains("burned"); // пока так 
 
@@ -52,26 +53,7 @@ public class BEBehaviorEHorn : BlockEntityBehavior, IElectricConsumer
         _maxTargetTemp = MyMiniLib.GetAttributeFloat(this.Block, "maxTargetTemp", 1100.0F);
     }
 
-    public override void GetBlockInfo(IPlayer forPlayer, StringBuilder stringBuilder)
-    {
-        base.GetBlockInfo(forPlayer, stringBuilder);
 
-        //проверяем не сгорел ли прибор
-        if (Blockentity is not BlockEntityEHorn entity)
-            return;
-
-        if (IsBurned)
-        {
-            entity.IsBurning = false;
-            return;
-        }
-
-        stringBuilder.AppendLine(StringHelper.Progressbar(_powerReceive / _maxConsumption * 100));
-        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Consumption") + ": " + ((int)_powerReceive).ToString() + "/" + _maxConsumption + " " + Lang.Get("electricalprogressivebasics:W"));
-        stringBuilder.AppendLine("└ " + Lang.Get("Temperature") + ": " + ((int)_maxTemp).ToString() + "° (" + Lang.Get("max") + ")");
-
-        stringBuilder.AppendLine();
-    }
 
 
 
@@ -94,7 +76,7 @@ public class BEBehaviorEHorn : BlockEntityBehavior, IElectricConsumer
         if (this._powerReceive != amount)
         {
             this._powerReceive = amount;
-            _maxTemp = amount * _maxTargetTemp / _maxConsumption;
+            _maxTemp = amount * _maxTargetTemp / _maxConsumption; // обновляем показатель максимальной температуры 
         }
     }
 
@@ -185,6 +167,7 @@ public class BEBehaviorEHorn : BlockEntityBehavior, IElectricConsumer
     {
         base.ToTreeAttributes(tree);
         tree.SetFloat(PowerReceiveKey, _powerReceive);
+        tree.SetFloat(MaxTempKey, _maxTemp);
 
     }
 
@@ -192,6 +175,29 @@ public class BEBehaviorEHorn : BlockEntityBehavior, IElectricConsumer
     {
         base.FromTreeAttributes(tree, worldAccessForResolve);
         _powerReceive = tree.GetFloat(PowerReceiveKey);
+        _maxTemp = tree.GetFloat(MaxTempKey);
+    }
 
+
+    public override void GetBlockInfo(IPlayer forPlayer, StringBuilder stringBuilder)
+    {
+        base.GetBlockInfo(forPlayer, stringBuilder);
+
+        //проверяем не сгорел ли прибор
+        if (Blockentity is not BlockEntityEHorn entity)
+            return;
+
+        // если сгорел - тушим горн
+        if (IsBurned)
+        {
+            entity.IsBurning = false;
+            return;
+        }
+
+        stringBuilder.AppendLine(StringHelper.Progressbar(_powerReceive / _maxConsumption * 100));
+        stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Consumption") + ": " + ((int)_powerReceive).ToString() + "/" + _maxConsumption + " " + Lang.Get("electricalprogressivebasics:W"));
+        stringBuilder.AppendLine("└ " + Lang.Get("Temperature") + ": " + ((int)_maxTemp).ToString() + "° (" + Lang.Get("max") + ")");
+
+        stringBuilder.AppendLine();
     }
 }
