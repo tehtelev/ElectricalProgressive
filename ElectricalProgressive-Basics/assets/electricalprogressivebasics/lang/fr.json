@@ -394,6 +394,23 @@
   // ==================== Divers ====================
   "game:tabname-electricity": "Électricité",
 
+
+  "efuelgenerator": "Générateur de carburant à vapeur",
+  "block-efuelgenerator-*": "Générateur de carburant à vapeur",
+  "block-handbooktitle-efuelgenerator": "Utilisation",
+  "block-handbooktext-efuelgenerator": "Permet de produire de l'électricité en utilisant la chaleur de la combustion de matériaux combustibles. Nécessite un liquide pour fonctionner. Peut être rempli manuellement ou par des tuyaux.",
+
+  "electricalprogressivebasics:empty": "Vide",
+  "electricalprogressivebasics:liquid": "Liquide : ",
+  "electricalprogressivebasics:requires": "Nécessite un liquide pour fonctionner",
+  "electricalprogressivebasics:current_liquid_consumption": "Consommation actuelle de liquide : {0} l/s",
+  "electricalprogressivebasics:litres": "l",
+  "electricalprogressivebasics:Liquid_capacity": "Capacité : {0} l",
+  "electricalprogressivebasics:Accepts_any_liquid": "Accepte tout liquide",
+  "electricalprogressivebasics:wrong_type": "Mauvais type",
+  "electricalprogressivebasics:blockhelp-watergen-fillliquid": "Ouvrir l'interface du générateur",
+
+
   "resistance_moment": "Résistance de l'arbre : {0} kN",
   "torque_moment": "Couple : {0} kN"
 }

@@ -393,6 +393,23 @@
   // ==================== Інше ====================
   "game:tabname-electricity": "Електрика",
 
+
+  "efuelgenerator": "Паровий паливний генератор",
+  "block-efuelgenerator-*": "Паровий паливний генератор",
+  "block-handbooktitle-efuelgenerator": "Використання",
+  "block-handbooktext-efuelgenerator": "Дозволяє виробляти електроенергію, використовуючи тепло від згоряння горючих матеріалів. Для роботи потрібна рідина. Можна заливати вручну або рідкісними трубами.",
+
+  "electricalprogressivebasics:empty": "Порожньо",
+  "electricalprogressivebasics:liquid": "Рідина: ",
+  "electricalprogressivebasics:requires": "Для роботи потрібна рідина",
+  "electricalprogressivebasics:current_liquid_consumption": "Поточне споживання рідини: {0} л/с",
+  "electricalprogressivebasics:litres": "л",
+  "electricalprogressivebasics:Liquid_capacity": "Вміст: {0} л",
+  "electricalprogressivebasics:Accepts_any_liquid": "Підтримує будь-яку рідину",
+  "electricalprogressivebasics:wrong_type": "Неправильний тип",
+  "electricalprogressivebasics:blockhelp-watergen-fillliquid": "Відкрити інтерфейс генератора",
+
+
   "resistance_moment": "Опір вала: {0} кН",
   "torque_moment": "Крутний момент: {0} кН"
 }

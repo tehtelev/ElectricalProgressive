@@ -393,6 +393,22 @@
   // ==================== Ostatní ====================
   "game:tabname-electricity": "Elektřina",
 
+
+  "efuelgenerator": "Parní palivový generátor",
+  "block-efuelgenerator-*": "Parní palivový generátor",
+  "block-handbooktitle-efuelgenerator": "Použití",
+  "block-handbooktext-efuelgenerator": "Umožňuje vyrábět elektřinu pomocí tepla ze spalování hořlavých materiálů. Vyžaduje kapalinu k provozu. Lze plnit ručně nebo potrubím.",
+
+  "electricalprogressivebasics:empty": "Prázdné",
+  "electricalprogressivebasics:liquid": "Kapalina: ",
+  "electricalprogressivebasics:requires": "Vyžaduje kapalinu k provozu",
+  "electricalprogressivebasics:current_liquid_consumption": "Aktuální spotřeba kapaliny: {0} l/s",
+  "electricalprogressivebasics:litres": "l",
+  "electricalprogressivebasics:Liquid_capacity": "Kapacita: {0} l",
+  "electricalprogressivebasics:Accepts_any_liquid": "Přijímá jakoukoli kapalinu",
+  "electricalprogressivebasics:wrong_type": "Špatný typ",
+  "electricalprogressivebasics:blockhelp-watergen-fillliquid": "Otevřít rozhraní generátoru",
+
   "resistance_moment": "Odpor hřídele: {0} kN",
   "torque_moment": "Točivý moment: {0} kN"
 }

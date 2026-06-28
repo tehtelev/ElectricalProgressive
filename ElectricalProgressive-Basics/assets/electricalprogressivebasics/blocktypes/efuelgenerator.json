@@ -87,7 +87,7 @@
     // Конфигурация жидкости с температурной зависимостью расхода
     "liquidConfig": {
       "allowedLiquids": [ "waterportion" ],
-      "consumptionRate": 0.1,
+      "consumptionRate": 0.025,
       "minTemperature": 200,
       "capacityLitres": 100,
       "liquidRequired": true,

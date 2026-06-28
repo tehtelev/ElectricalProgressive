@@ -1,5 +1,6 @@
 ﻿using Cairo;
 using System;
+using System.Security.Cryptography;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -30,7 +31,7 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
     
     private void OnSlotModified(int slotid)
     {
-        capi.Event.EnqueueMainThreadTask(SetupDialog, "termogen");
+        capi.Event.EnqueueMainThreadTask(SetupDialog, "efuelgenerator");
     }
     
     public void SetupDialog()
@@ -57,9 +58,9 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
         
         var outputText = CairoFont.WhiteDetailText().WithWeight(FontWeight.Normal);
         
-        SingleComposer = capi.Gui.CreateCompo("termogen" + BlockEntityPosition, window)
+        SingleComposer = capi.Gui.CreateCompo("efuelgenerator" + BlockEntityPosition, window)
             .AddShadedDialogBG(dialog, true, 5)
-            .AddDialogTitleBar(Lang.Get("electricalprogressivebasics:termogen"), OnTitleBarClose)
+            .AddDialogTitleBar(Lang.Get("electricalprogressivebasics:efuelgenerator"), OnTitleBarClose)
             .BeginChildElements(dialog)
             .AddDynamicCustomDraw(stoveBounds, OnBgDraw, "symbolDrawer")
             .AddInset(waterBounds.ForkBoundingParent(2, 2, 2, 2), 2)
@@ -217,15 +218,15 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
         if (hasLiquid && waterAmount > 0)
         {
             if (waterAmount >= 1000)
-                amountText = $"{waterAmount / 1000:F1}KL";
+                amountText = $"{waterAmount / 1000:F1}K"+ Lang.Get("electricalprogressivebasics:litres");
             else if (waterAmount >= 100)
-                amountText = $"{waterAmount:F0}L";
+                amountText = $"{waterAmount:F0}"+ Lang.Get("electricalprogressivebasics:litres");
             else
-                amountText = $"{waterAmount:F1}L";
+                amountText = $"{waterAmount:F1}"+ Lang.Get("electricalprogressivebasics:litres");
         }
         else
         {
-            amountText = "Empty";
+            amountText = Lang.Get("electricalprogressivebasics:empty");
         }
 
         double fontSize = Math.Min(11, currentBounds.InnerWidth / 4.5);
@@ -280,7 +281,8 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
 
     public void Update(float gentemp, float burntime, float waterAmount, bool liquidAllowed = true, float currentConsumptionRate = 0.1f)
     {
-        if (!IsOpened()) return;
+        if (!IsOpened())
+            return;
         
         _gentemp = gentemp;
         _waterAmount = waterAmount;
@@ -300,23 +302,23 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
         
         string newText = $" {_gentemp:F0} °C\n" + 
                         $" {_fuelBurntime:F0} " + Lang.Get("electricalprogressivebasics:gui-word-seconds") + "\n" +
-                        $" {_waterAmount:F1}/{capacity:F0} L";
+                        $" {_waterAmount:F1}/{capacity:F0} "+ Lang.Get("electricalprogressivebasics:litres");
         
         if (!_liquidAllowed && Inventory[1] != null && !Inventory[1].Empty)
         {
-            newText += $"  ({Lang.Get("electricalprogressivebasics:Wrong type")})";
+            newText += $"  ({Lang.Get("electricalprogressivebasics:wrong_type")})";
         }
         
         newText += $"\n {liquidName}";
         
         if (_fuelBurntime > 0.1f && _gentemp > (config?.MinTemperature ?? 200))
         {
-            newText += $"\n {Lang.Get("electricalprogressivebasics:Consumption")}: {_currentConsumptionRate:F2} L/s";
+            newText += $"\n {Lang.Get("electricalprogressivebasics:current_liquid_consumption", $"{_currentConsumptionRate:F2}")}";
         }
         
         if (config != null && config.RequireSpecificLiquid && !_liquidAllowed && Inventory[1] != null && !Inventory[1].Empty)
         {
-            newText += $"\n {Lang.Get("electricalprogressivebasics:Requires")}: " + config.GetAllowedLiquidsText();
+            newText += $"\n {Lang.Get("electricalprogressivebasics:requires")}: " + config.GetAllowedLiquidsText();
         }
         
         if (SingleComposer != null)

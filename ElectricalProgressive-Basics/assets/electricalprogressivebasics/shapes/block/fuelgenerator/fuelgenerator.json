@@ -26,7 +26,7 @@
 		"iron96x96": "block/iron96x96",
 		"stainlesssteel3-96x96": "block/plate/stainlesssteel3-96x96",
 		"steel4-96x96": "block/plate/steel4-96x96",
-		"steel96x96": "block/steel96x96"
+		"steel96x96": "block/plate/steel4-96x96"
 	},
 	"elements": [
 		{

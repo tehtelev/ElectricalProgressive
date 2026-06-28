@@ -394,6 +394,22 @@
   // ==================== Diversos ====================
   "game:tabname-electricity": "Eletricidade",
 
+
+  "efuelgenerator": "Gerador de Combustível a Vapor",
+  "block-efuelgenerator-*": "Gerador de Combustível a Vapor",
+  "block-handbooktitle-efuelgenerator": "Uso",
+  "block-handbooktext-efuelgenerator": "Permite gerar eletricidade usando o calor da queima de materiais combustíveis. Requer líquido para operar. Pode ser preenchido manualmente ou por tubulações.",
+
+  "electricalprogressivebasics:empty": "Vazio",
+  "electricalprogressivebasics:liquid": "Líquido: ",
+  "electricalprogressivebasics:requires": "Requer líquido para operar",
+  "electricalprogressivebasics:current_liquid_consumption": "Consumo atual de líquido: {0} l/s",
+  "electricalprogressivebasics:litres": "l",
+  "electricalprogressivebasics:Liquid_capacity": "Capacidade: {0} l",
+  "electricalprogressivebasics:Accepts_any_liquid": "Aceita qualquer líquido",
+  "electricalprogressivebasics:wrong_type": "Tipo incorreto",
+  "electricalprogressivebasics:blockhelp-watergen-fillliquid": "Abrir interface do gerador",
+
   "resistance_moment": "Resistência do eixo: {0} kN",
   "torque_moment": "Torque: {0} kN"
 }

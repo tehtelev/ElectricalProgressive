@@ -104,7 +104,7 @@ public class BEBehaviorFuelEGenerator : BlockEntityBehavior, IElectricProducer
         
         if (!entity.WaterSlot.Empty)
         {
-            stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:liquid") + entity.WaterAmount.ToString("0.0") + "/" + entity.WaterCapacity + " L");
+            stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:liquid") + entity.WaterAmount.ToString("0.0") + "/" + entity.WaterCapacity + " "+ Lang.Get("electricalprogressivebasics:litres"));
         }
     }
 

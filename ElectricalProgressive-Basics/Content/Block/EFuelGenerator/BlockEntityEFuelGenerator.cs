@@ -50,7 +50,7 @@ public class LiquidConfig
     
     public string GetAllowedLiquidsText()
     {
-        if (!RequireSpecificLiquid) return Lang.Get("electricalprogressivebasics:Any liquid");
+        if (!RequireSpecificLiquid) return Lang.Get("electricalprogressivebasics:Accepts_any_liquid");
         
         string[] names = new string[AllowedLiquids.Length];
         for (int i = 0; i < AllowedLiquids.Length; i++)
@@ -105,7 +105,7 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
             bool hasValidLiquid = !WaterSlot.Empty && IsCurrentLiquidAllowed;
             
             if (_genTemp <= envTemp || _genTemp < MinWorkTemperature || (LiquidRequired && !hasValidLiquid))
-                return 1f;
+                return 0f;
                 
             return (_genTemp - envTemp) * 2f;
         }
@@ -149,8 +149,8 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
     private BlockEntityAnimationUtil AnimUtil => GetBehavior<BEBehaviorAnimatable>()?.animUtil;
     
     public override InventoryBase Inventory => _inventory;
-    public override string DialogTitle => Lang.Get("electricalprogressivebasics:fuelgen");
-    public override string InventoryClassName => "fuelgen";
+    public override string DialogTitle => Lang.Get("electricalprogressivebasics:efuelgenerator");
+    public override string InventoryClassName => "efuelgenerator";
     
     public BEBehaviorElectricalProgressive ElectricalProgressive => GetBehavior<BEBehaviorElectricalProgressive>();
     
@@ -660,7 +660,7 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
             dsc.AppendLine(Lang.Get("electricalprogressivebasics:requires") + ": " + _liquidConfig.GetAllowedLiquidsText());
         
         if (_fuelBurnTime > 0 && _genTemp > MinWorkTemperature)
-            dsc.AppendLine(Lang.Get("electricalprogressivebasics:Current consumption") + $": {CurrentConsumptionRate:F2} L/s");
+            dsc.AppendLine(Lang.Get("electricalprogressivebasics:current_liquid_consumption", $"{CurrentConsumptionRate:F2}"));
     }
     
     public float GetFuelBurnTime()

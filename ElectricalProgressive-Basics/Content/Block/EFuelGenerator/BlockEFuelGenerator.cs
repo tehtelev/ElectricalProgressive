@@ -53,7 +53,12 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
                     MouseButton = EnumMouseButton.Right,
                     HotKeyCode = "ctrl"
                 },
-                new() { ActionLangCode = "blockhelp-watergen-fillliquid", MouseButton = EnumMouseButton.Right }
+                new()
+                    {
+                        ActionLangCode = "electricalprogressivebasics:blockhelp-watergen-fillliquid",
+                        MouseButton = EnumMouseButton.Right
+
+                    }
             };
         });
     }
@@ -427,20 +432,20 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
             var liquidConfig = config.AsObject<LiquidConfig>();
             if (liquidConfig != null)
             {
-                dsc.AppendLine(Lang.Get("electricalprogressivebasics:Liquid capacity") + ": " + capacity + " L");
+                dsc.AppendLine(Lang.Get("electricalprogressivebasics:Liquid_capacity", capacity));
                 if (liquidConfig.RequireSpecificLiquid)
                 {
-                    dsc.AppendLine(Lang.Get("electricalprogressivebasics:Requires liquid") + ": " + liquidConfig.GetAllowedLiquidsText());
+                    dsc.AppendLine(Lang.Get("electricalprogressivebasics:requires") + ": " + liquidConfig.GetAllowedLiquidsText());
                 }
                 else
                 {
-                    dsc.AppendLine(Lang.Get("electricalprogressivebasics:Accepts any liquid"));
+                    dsc.AppendLine(Lang.Get("electricalprogressivebasics:Accepts_any_liquid"));
                 }
                 return;
             }
         }
-        
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Liquid capacity") + ": " + capacity + " L");
+
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Liquid_capacity", capacity));
     }
 
     #endregion

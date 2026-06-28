@@ -392,6 +392,23 @@
   // ==================== Sonstiges ====================
   "game:tabname-electricity": "Elektrizität",
 
+
+  "efuelgenerator": "Dampf-Brennstoffgenerator",
+  "block-efuelgenerator-*": "Dampf-Brennstoffgenerator",
+  "block-handbooktitle-efuelgenerator": "Verwendung",
+  "block-handbooktext-efuelgenerator": "Ermöglicht die Stromerzeugung durch Wärme aus brennbaren Materialien. Erfordert Flüssigkeit zum Betrieb. Kann manuell oder über Flüssigkeitsrohre gefüllt werden.",
+
+  "electricalprogressivebasics:empty": "Leer",
+  "electricalprogressivebasics:liquid": "Flüssigkeit: ",
+  "electricalprogressivebasics:requires": "Erfordert Flüssigkeit zum Betrieb",
+  "electricalprogressivebasics:current_liquid_consumption": "Aktiver Flüssigkeitsverbrauch: {0} l/s",
+  "electricalprogressivebasics:litres": "l",
+  "electricalprogressivebasics:Liquid_capacity": "Fassungsvermögen: {0} l",
+  "electricalprogressivebasics:Accepts_any_liquid": "Akzeptiert jede Flüssigkeit",
+  "electricalprogressivebasics:wrong_type": "Falscher Typ",
+  "electricalprogressivebasics:blockhelp-watergen-fillliquid": "Generator-Schnittstelle öffnen",
+
+
   "resistance_moment": "Wellenwiderstand: {0} kN",
   "torque_moment": "Drehmoment: {0} kN"
 }

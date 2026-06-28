@@ -396,9 +396,20 @@
   "game:tabname-electricity": "Электричество",
 
   // ==================== топливный генератор ====================
+  "efuelgenerator": "Паровой топливный генератор",
+  "block-efuelgenerator-*": "Паровой топливный генератор",
+  "block-handbooktitle-efuelgenerator": "Использование",
+  "block-handbooktext-efuelgenerator": "Позволяет вырабатывать электричество используя тепло от сгорания горючих материалов. Для работы необходима жидкость. Можно заливать вручную или жидкостными трубами.",
+
   "electricalprogressivebasics:empty": "Пусто",
   "electricalprogressivebasics:liquid": "Жидкость: ",
   "electricalprogressivebasics:requires": "Для работы требуется жидкость",
+  "electricalprogressivebasics:current_liquid_consumption": "Текущее потребление жидкости: {0} л/c",
+  "electricalprogressivebasics:litres": "л",
+  "electricalprogressivebasics:Liquid_capacity": "Ёмкость: {0} л",
+  "electricalprogressivebasics:Accepts_any_liquid": "Поддерживает любую жидкость",
+  "electricalprogressivebasics:wrong_type": "Неправильный тип",
+  "electricalprogressivebasics:blockhelp-watergen-fillliquid": "Открыть интерфейс генератора",
 
 
   "resistance_moment": "Сопротивление вала: {0} кН",

@@ -395,6 +395,22 @@
   // ==================== Inne ====================
   "game:tabname-electricity": "Elektryczność",
 
+
+  "efuelgenerator": "Parowy generator paliwa",
+  "block-efuelgenerator-*": "Parowy generator paliwa",
+  "block-handbooktitle-efuelgenerator": "Zastosowanie",
+  "block-handbooktext-efuelgenerator": "Pozwala na wytwarzanie energii elektrycznej wykorzystując ciepło ze spalania materiałów łatwopalnych. Wymaga płynu do pracy. Można napełniać ręcznie lub za pomocą rur do płynów.",
+
+  "electricalprogressivebasics:empty": "Pusty",
+  "electricalprogressivebasics:liquid": "Płyn: ",
+  "electricalprogressivebasics:requires": "Wymaga płynu do pracy",
+  "electricalprogressivebasics:current_liquid_consumption": "Aktualne zużycie płynu: {0} l/s",
+  "electricalprogressivebasics:litres": "l",
+  "electricalprogressivebasics:Liquid_capacity": "Pojemność: {0} l",
+  "electricalprogressivebasics:Accepts_any_liquid": "Akceptuje dowolny płyn",
+  "electricalprogressivebasics:wrong_type": "Nieprawidłowy typ",
+  "electricalprogressivebasics:blockhelp-watergen-fillliquid": "Otwórz interfejs generatora",
+
   "resistance_moment": "Opór wału: {0} kN",
   "torque_moment": "Moment obrotowy: {0} kN"
 }
