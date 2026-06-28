@@ -35,8 +35,7 @@ namespace CakeBuild
             "ElectricalProgressive-Equipment",
             "ElectricalProgressive-QOL",
             "ElectricalProgressive-Industry",
-            "ElectricalProgressive-Transport",
-            "ElectricalProgressive-Claims"
+            "ElectricalProgressive-Transport"
             // Add other project names here
         ];
 
