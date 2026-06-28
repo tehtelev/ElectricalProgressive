@@ -388,7 +388,7 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
     /// <summary>Подготовка модели ротора для отрисовки</summary>
     protected override CompositeShape? GetShape()
     {
-        if (capi == null || Generator == null || Generator.Facing == Facing.None || Block.Variant["type"] == "burned")
+        if (Api==null || Api.Side==EnumAppSide.Server || Generator == null || Generator.Facing == Facing.None || Block.Variant["type"] == "burned")
             return null;
 
         // Инициализируем шейпы один раз
@@ -401,6 +401,7 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
 
             CompositeShape.Base = new AssetLocation($"electricalprogressivebasics:shapes/block/egenerator/egenerator-{tier}-rotor.json");
             CompositeShapeLOD2.Base = new AssetLocation($"electricalprogressivebasics:shapes/block/egenerator/egenerator-{tier}-rotor-lod2.json");
+
         }
 
         // Выбираем нужную модель (High/Low Poly)

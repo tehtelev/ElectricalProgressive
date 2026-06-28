@@ -248,7 +248,7 @@ public class BEBehaviorEMotor : BEBehaviorMPBase, IElectricConsumer
 
     protected override CompositeShape? GetShape()
     {
-        if (capi == null || Motor == null || Motor.Facing == Facing.None || IsBurned)
+        if (Api == null || Api.Side == EnumAppSide.Server || Motor == null || Motor.Facing == Facing.None || IsBurned)
             return null;
 
         // Инициализация моделей один раз при первом запросе
