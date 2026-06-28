@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
 
 namespace ElectricalProgressive.Utils
@@ -8,14 +9,14 @@ namespace ElectricalProgressive.Utils
         /// <summary>
         /// Сериализует массив объектов EParams в байтовый массив.
         /// </summary>
-        /// <param name="eparamsArray"></param>
-        /// <returns></returns>
         public static byte[] Serialize(EParams[] eparamsArray)
         {
+            // Защита от null на входе
+            if (eparamsArray == null) return Array.Empty<byte>();
+
             using var ms = new MemoryStream();
             using (var writer = new BinaryWriter(ms, Encoding.UTF8))
             {
-                // Записываем длину массива
                 writer.Write(eparamsArray.Length);
                 foreach (var eparam in eparamsArray)
                 {
@@ -32,9 +33,14 @@ namespace ElectricalProgressive.Utils
         /// <returns></returns>
         public static EParams[] Deserialize(byte[] data)
         {
+            // Если данные отсутствуют, возвращаем null.
+            // Это безопасно для системы ElectricalProgressive, так как она 
+            // сама инициализирует массив из 6 граней при получении null.
+            if (data == null) return null;
+
             using var ms = new MemoryStream(data);
             using var reader = new BinaryReader(ms, Encoding.UTF8);
-            // Читаем длину массива
+
             var length = reader.ReadInt32();
             var eparamsArray = new EParams[length];
             for (var i = 0; i < length; i++)
@@ -43,7 +49,6 @@ namespace ElectricalProgressive.Utils
             }
             return eparamsArray;
         }
-
 
         /// <summary>
         /// Сериализует один объект EParams
@@ -63,11 +68,11 @@ namespace ElectricalProgressive.Utils
         /// </summary>
         public static EParams DeserializeSingle(byte[] data)
         {
+            if (data == null) return new EParams(); // Для одиночных объектов безопаснее вернуть дефолтный инстанс
             using var ms = new MemoryStream(data);
             using var reader = new BinaryReader(ms, Encoding.UTF8);
             return ReadEParams(reader);
         }
-
         private static void WriteEParams(BinaryWriter writer, EParams eparam)
         {
             writer.Write(eparam.voltage);            // int, 4 байта

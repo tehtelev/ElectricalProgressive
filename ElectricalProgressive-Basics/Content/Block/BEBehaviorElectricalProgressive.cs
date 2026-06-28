@@ -759,15 +759,48 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
 
         var format = tree.GetString("SerializationFormat", "json");
 
+        // Получаем сырые байты. Они могут быть null, если ключ отсутствует в дереве атрибутов
+        byte[]? rawData = tree.GetBytes(BlockEntityEBase.AllEparamsKey);
+
         EParams[]? AllEparamss;
-        if (format == "binary")
+
+        if (rawData != null)
         {
-            AllEparamss = EParamsSerializer.Deserialize(tree.GetBytes(BlockEntityEBase.AllEparamsKey));
+            // Если данные есть, десериализуем их
+            try
+            {
+                if (format == "binary")
+                {
+                    AllEparamss = EParamsSerializer.Deserialize(rawData);
+                }
+                else
+                {
+                    AllEparamss = JsonConvert.DeserializeObject<EParams[]>(Encoding.UTF8.GetString(rawData));  // TODO: в теории уже этот вариант можно убирать
+                }
+            }
+            catch (Exception e)
+            {
+                AllEparamss = null; // При ошибке считаем данные отсутствующими
+            }
         }
         else
         {
-            AllEparamss = JsonConvert.DeserializeObject<EParams[]>(Encoding.UTF8.GetString(tree.GetBytes(BlockEntityEBase.AllEparamsKey)));
+            // Если данных нет (null)
+            if (this.allEparams != null)
+            {
+                // Если мы уже имеем данные (например, это обновление на клиенте, а старые данные есть),
+                // то НЕ перезаписываем их. Сохраняем текущее состояние.
+                AllEparamss = this.allEparams;
+            }
+            else
+            {
+                // Если данных нет и ранее их не было, оставляем null.
+                // Система ElectricalProgressive сама создаст массив из 6 граней при следующей обработке.
+                AllEparamss = null;
+            }
         }
+
+
 
         // Загрузка параметров частиц
         ParticlesType = tree.GetInt("ParticlesType", 0);
