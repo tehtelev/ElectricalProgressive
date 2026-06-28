@@ -20,6 +20,7 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
 
     private const string PowerOrderKey = "electricalprogressive:powerOrder";
     private const string PowerGiveKey = "electricalprogressive:powerGive";
+    private const string AvgPowerOrderKey = "electricalprogressive:avgPowerOrder";
 
     /// <summary>Значения по умолчанию: I_max, speed_max, resistance_factor, resistance_load, base_resistance, kpd_max</summary>
     private static readonly float[] DefaultParams = [100.0F, 0.5F, 0.1F, 0.25F, 0.05F, 1F];
@@ -41,10 +42,15 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
     /// <summary>Фактическая отдаваемая мощность/ток</summary>
     public float PowerGive;
 
-    /// <summary>Фильтр для сглаживания (EMA)</summary>
-    public ExponentialMovingAverage EmaFilter = new(0.05f);
+    /// <summary>Фильтр для сглаживания нагрузки для расчета сопротивления (EMA)</summary>
+    public ExponentialMovingAverage EmaFilterPowerOrder = new(0.05f);
 
-    private float AvgPowerOrder; // Сглаженное значение порядка
+    private float _avgPowerOrder; // Сглаженное значение
+
+    /// <summary>Фильтр для сглаживания скорости(EMA)</summary>
+    public ExponentialMovingAverage EmaFilterSpeed = new(0.05f);
+
+
 
     // --- Рендеринг и Визуал ---
 
@@ -176,7 +182,7 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
         base_resistance = paramsArray[4];
         kpd_max = paramsArray[5];
 
-        AvgPowerOrder = 0;
+        _avgPowerOrder = 0;
     }
 
 
@@ -184,7 +190,7 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
     public float Produce_give()
     {
         // Скорость с учетом передаточного отношения
-        var speed = network?.Speed * GearedRatio ?? 0.0F;
+        var speed = (float)EmaFilterSpeed.Update(GetSpeed());
 
         // Формула: Линейный рост до max speed, затем горизонтальная линия
         var power = (Math.Abs(speed) <= speed_max)
@@ -202,12 +208,17 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
         PowerOrder = amount;
 
         // Сглаживаем фактическую передачу (минимум из того, что просят и того что есть)
-        AvgPowerOrder = (float)EmaFilter.Update(Math.Min(PowerGive, PowerOrder));
+        _avgPowerOrder = (float)EmaFilterPowerOrder.Update(Math.Min(PowerGive, PowerOrder));
     }
 
 
     public float getPowerGive() => PowerGive;
     public float getPowerOrder() => PowerOrder;
+
+    private float GetSpeed()
+    {
+        return Math.Abs(network?.Speed * GearedRatio ?? 0.0F);
+    }
 
 
     /// <summary>Механическая сеть берет отсюда сопротивление этого генератора</summary>
@@ -218,10 +229,18 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
 
         if (isBurnedBlock) return 9999.0F;
 
-        var spd = Math.Abs(network?.Speed * GearedRatio ?? 0.0F);
+        float spd;
+
+        if (Api.Side == EnumAppSide.Server)
+            spd = (float)EmaFilterSpeed.Update(GetSpeed());
+        else
+        {
+            spd = GetSpeed();
+        }
+            
 
         // Расчет сопротивления нагрузки
-        float loadRes = resistance_load * (Math.Min(AvgPowerOrder, I_max) / I_max);
+        float loadRes = resistance_load * (Math.Min(_avgPowerOrder, I_max) / I_max);
 
         // Нелинейный фактор сопротивления при высоких скоростях
         float speedFactor;
@@ -317,6 +336,7 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
         base.ToTreeAttributes(tree);
         tree.SetFloat(PowerOrderKey, PowerOrder);
         tree.SetFloat(PowerGiveKey, PowerGive);
+        tree.SetFloat(AvgPowerOrderKey, _avgPowerOrder);
 
         if (_outFacingForNetworkDiscovery != null)
         {
@@ -329,6 +349,7 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
         base.FromTreeAttributes(tree, worldAccessForResolve);
         PowerOrder = tree.GetFloat(PowerOrderKey);
         PowerGive = tree.GetFloat(PowerGiveKey);
+        _avgPowerOrder= tree.GetFloat(AvgPowerOrderKey);
 
         var savedIndex = tree.GetInt("savedOutFacing", -1);
         if (savedIndex >= 0 && savedIndex < BlockFacing.ALLFACES.Length)
@@ -345,14 +366,14 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
 
         if (Generator == null || Block.Variant["type"] == "burned") return;
 
-        var speed = network?.Speed * GearedRatio ?? 0.0F;
+        var speed = GetSpeed();
 
         // Прогрессбар заполнения
-        var percent = Math.Min(PowerGive, PowerOrder) / I_max * 100;
+        var percent = _avgPowerOrder / I_max * 100;
         stringBuilder.AppendLine(StringHelper.Progressbar(percent));
 
         stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Production") + ": " +
-            ((int)Math.Min(PowerGive, PowerOrder)).ToString() + "/" + (int)I_max + " " + Lang.Get("electricalprogressivebasics:W"));
+            ((int)_avgPowerOrder).ToString() + "/" + (int)I_max + " " + Lang.Get("electricalprogressivebasics:W"));
 
         stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Prod_potential") + ": " +
             ((int)PowerGive).ToString() + " " + Lang.Get("electricalprogressivebasics:W"));
