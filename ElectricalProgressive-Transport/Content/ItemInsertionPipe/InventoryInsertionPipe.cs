@@ -11,7 +11,10 @@ namespace ElectricalProgressive.Content.ItemInsertionPipe;
 /// </summary>
 public class InventoryInsertionPipe : InventoryGeneric
 {
+    internal const string FrozenTemperatureAttribute = "epFrozenFilterTemperature";
+
     private BEItemInsertionPipe _entity;
+    private readonly ItemStack?[] filterSnapshots;
 
     /// <summary>
     /// Конструктор инвентаря трубы.
@@ -20,6 +23,7 @@ public class InventoryInsertionPipe : InventoryGeneric
         : base(slots, className, instanceID, api)
     {
         _entity = entity;
+        filterSnapshots = new ItemStack?[slots];
     }
 
     // --- Создание слотов фильтра ---
@@ -29,7 +33,7 @@ public class InventoryInsertionPipe : InventoryGeneric
     /// </summary>
     private static ItemSlot CreateFilterSlot(int slotId, InventoryBase inventory)
     {
-        return new FilterSlot(inventory);
+        return new FilterSlot(slotId, inventory);
     }
 
     /// <summary>
@@ -48,13 +52,7 @@ public class InventoryInsertionPipe : InventoryGeneric
     /// </summary>
     public override ItemSlot GetAutoPushIntoSlot(BlockFacing atBlockFace, ItemSlot fromSlot)
     {
-        // Ищем первый пустой слот для приема предмета фильтрации
-        for (int i = 0; i < Count; i++)
-        {
-            if (this[i] != null && this[i].Empty)
-                return this[i];
-        }
-
+        // Фильтр заполняется только кликом игрока: это снимок предмета, а не реальный инвентарь.
         return null;
     }
 
@@ -67,17 +65,140 @@ public class InventoryInsertionPipe : InventoryGeneric
         return null;
     }
 
+    internal bool IsFilterSet(int slotId)
+    {
+        return IsValidSlotId(slotId) && filterSnapshots[slotId]?.Collectible != null;
+    }
+
+    internal ItemStack? GetFilterSnapshot(int slotId)
+    {
+        return IsValidSlotId(slotId) ? filterSnapshots[slotId] : null;
+    }
+
+    internal int CountActiveFilterSnapshots()
+    {
+        int count = 0;
+        for (int i = 0; i < filterSnapshots.Length; i++)
+        {
+            if (filterSnapshots[i]?.Collectible != null)
+                count++;
+        }
+
+        return count;
+    }
+
+    internal void SetFilterSnapshot(int slotId, ItemStack? snapshot)
+    {
+        if (!IsValidSlotId(slotId))
+            return;
+
+        filterSnapshots[slotId] = snapshot?.Clone();
+        RestoreFilterSlotSnapshot(slotId);
+    }
+
+    internal void ClearFilterSnapshot(int slotId)
+    {
+        SetFilterSnapshot(slotId, null);
+    }
+
+    internal void CaptureFilterSnapshotsFromSlots(IWorldAccessor world)
+    {
+        for (int i = 0; i < Count && i < filterSnapshots.Length; i++)
+        {
+            filterSnapshots[i] = this[i].Itemstack?.Clone();
+            ResolveFilterSnapshot(filterSnapshots[i], world);
+            NormalizeFilterSnapshot(filterSnapshots[i]);
+        }
+
+        RestoreFilterSlotSnapshots();
+    }
+
+    internal void MaintainFilterSnapshots(IWorldAccessor world)
+    {
+        for (int i = 0; i < filterSnapshots.Length; i++)
+        {
+            ResolveFilterSnapshot(filterSnapshots[i]);
+            FreezeSnapshotTemperature(world, filterSnapshots[i]);
+        }
+
+        RestoreFilterSlotSnapshots();
+    }
+
+    internal static void FreezeSnapshotTemperature(IWorldAccessor world, ItemStack? snapshot)
+    {
+        if (snapshot?.Collectible?.HasTemperature(snapshot) != true)
+            return;
+
+        if (!snapshot.Attributes.HasAttribute(FrozenTemperatureAttribute))
+        {
+            snapshot.Attributes.SetFloat(FrozenTemperatureAttribute, snapshot.Collectible.GetTemperature(world, snapshot));
+        }
+
+        float temperature = snapshot.Attributes.GetFloat(FrozenTemperatureAttribute);
+        snapshot.Collectible.SetTemperature(world, snapshot, temperature, true);
+    }
+
+    private void RestoreFilterSlotSnapshots()
+    {
+        for (int i = 0; i < filterSnapshots.Length && i < Count; i++)
+        {
+            RestoreFilterSlotSnapshot(i);
+        }
+    }
+
+    private void RestoreFilterSlotSnapshot(int slotId)
+    {
+        if (!IsValidSlotId(slotId))
+            return;
+
+        ResolveFilterSnapshot(filterSnapshots[slotId]);
+
+        ItemStack? visibleSnapshot = filterSnapshots[slotId]?.Clone();
+        ResolveFilterSnapshot(visibleSnapshot);
+        NormalizeFilterSnapshot(visibleSnapshot);
+
+        this[slotId].Itemstack = visibleSnapshot?.Collectible == null ? null : visibleSnapshot;
+        this[slotId].MarkDirty();
+    }
+
+    private void ResolveFilterSnapshot(ItemStack? snapshot)
+    {
+        ResolveFilterSnapshot(snapshot, Api?.World);
+    }
+
+    private static void ResolveFilterSnapshot(ItemStack? snapshot, IWorldAccessor? world)
+    {
+        if (snapshot != null && snapshot.Collectible == null && world != null)
+            snapshot.ResolveBlockOrItem(world);
+    }
+
+    private static void NormalizeFilterSnapshot(ItemStack? snapshot)
+    {
+        if (snapshot != null)
+            snapshot.StackSize = 1;
+    }
+
+    private bool IsValidSlotId(int slotId)
+    {
+        return slotId >= 0 && slotId < filterSnapshots.Length && slotId < Count;
+    }
+
     // --- Слот фильтра ---
 
     /// <summary>
-    /// Специализированный слот для хранения одного предмета фильтрации.
-    /// Предметы в этом слоте удаляются при клике (исчезают).
+    /// Специализированный слот для хранения снимка предмета фильтрации.
+    /// Предмет в этом слоте не является реальным инвентарным предметом.
     /// </summary>
-    public class FilterSlot : ItemSlotSurvival
+    public class FilterSlot : ItemSlot
     {
-        public FilterSlot(InventoryBase inventory) : base(inventory)
+        private readonly int slotId;
+
+        public FilterSlot(int slotId, InventoryBase inventory) : base(inventory)
         {
+            this.slotId = slotId;
         }
+
+        private InventoryInsertionPipe FilterInventory => (InventoryInsertionPipe)inventory;
 
         /// <summary>
         /// Максимальный размер стопки в слоте (всегда 1 предмет).
@@ -92,11 +213,10 @@ public class InventoryInsertionPipe : InventoryGeneric
             // --- Клик по заполненному слоту пустой рукой ---
             if (sourceSlot == null || sourceSlot.Empty)
             {
-                if (!this.Empty)
+                if (FilterInventory.IsFilterSet(slotId))
                 {
                     // Удаление предмета из фильтра (предмет исчезает)
-                    this.Itemstack = null;
-                    this.MarkDirty();
+                    FilterInventory.ClearFilterSnapshot(slotId);
 
                     op.MovedQuantity = 1;
                     op.RequestedQuantity = 1;
@@ -119,15 +239,13 @@ public class InventoryInsertionPipe : InventoryGeneric
             }
 
             ItemStack sourceStack = sourceSlot.Itemstack;
+            ItemStack filterSnapshot = CreateFilterSnapshot(sourceStack);
 
             // --- Заполнение пустого слота предметом из руки ---
             if (this.Empty)
             {
-                this.Itemstack = sourceStack.Clone();
-                this.Itemstack.StackSize = 1;
-
                 // Предмет остается в руке, не уменьшается
-                this.MarkDirty();
+                FilterInventory.SetFilterSnapshot(slotId, filterSnapshot);
 
                 op.MovedQuantity = 1;
                 op.RequestedQuantity = 1;
@@ -138,10 +256,7 @@ public class InventoryInsertionPipe : InventoryGeneric
                 if (this.CanHold(sourceSlot))
                 {
                     // Удаляем старый предмет (исчезает) и кладем копию из руки
-                    this.Itemstack = sourceStack.Clone();
-                    this.Itemstack.StackSize = 1;
-
-                    this.MarkDirty();
+                    FilterInventory.SetFilterSnapshot(slotId, filterSnapshot);
 
                     op.MovedQuantity = 1;
                     op.RequestedQuantity = 1;
@@ -164,6 +279,19 @@ public class InventoryInsertionPipe : InventoryGeneric
             ActivateSlot(null, ref op);
         }
 
+        private ItemStack CreateFilterSnapshot(ItemStack sourceStack)
+        {
+            ItemStack snapshot = sourceStack.Clone();
+            snapshot.StackSize = 1;
+
+            if (inventory.Api?.World != null)
+            {
+                FreezeSnapshotTemperature(inventory.Api.World, snapshot);
+            }
+
+            return snapshot;
+        }
+
         /// <summary>
         /// Предотвращение стандартного переворота слотов.
         /// </summary>
@@ -171,26 +299,8 @@ public class InventoryInsertionPipe : InventoryGeneric
         {
             if (itemSlot != null && itemSlot.StackSize > 0)
             {
-                // Заполнение пустого слота копией предмета
-                if (!this.Empty)
-                {
-                    ItemStack singleStack = itemSlot.Itemstack.Clone();
-                    singleStack.StackSize = 1;
-                    this.Itemstack = singleStack;
-
-                    this.MarkDirty();
-                    return true;
-                }
-                else
-                {
-                    // Заполнение пустого слота копией предмета
-                    ItemStack singleStack = itemSlot.Itemstack.Clone();
-                    singleStack.StackSize = 1;
-                    this.Itemstack = singleStack;
-
-                    this.MarkDirty();
-                    return true;
-                }
+                FilterInventory.SetFilterSnapshot(slotId, CreateFilterSnapshot(itemSlot.Itemstack));
+                return true;
             }
 
             return base.TryFlipWith(itemSlot);
@@ -199,7 +309,7 @@ public class InventoryInsertionPipe : InventoryGeneric
         /// <summary>
         /// Автоматическое ограничение размера стопки до 1 предмета.
         /// </summary>
-        public override void OnItemSlotModified(ItemStack extractedStack = null)
+        public override void OnItemSlotModified(ItemStack? extractedStack = null)
         {
             if (!this.Empty && this.Itemstack.StackSize > 1)
                 this.Itemstack.StackSize = 1;

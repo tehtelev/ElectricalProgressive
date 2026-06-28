@@ -1,0 +1,17 @@
+{
+  "profiles": {
+    "Client": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "\"$(VINTAGE_STORY)/Vintagestory.dll\" --tracelog --addModPath \"$(ProjectDir)/bin/$(Configuration)/Mods\" -o test",
+      "workingDirectory": "$(VINTAGE_STORY)",
+      "nativeDebugging": false
+    },
+    "Server": {
+      "commandName": "Executable",
+      "executablePath": "dotnet",
+      "commandLineArgs": "\"$(VINTAGE_STORY)/VintagestoryServer.dll\" --tracelog --addModPath \"$(ProjectDir)/bin/$(Configuration)/Mods\"",
+      "workingDirectory": "$(VINTAGE_STORY)"
+    }
+  }
+}

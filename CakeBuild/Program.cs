@@ -35,7 +35,8 @@ namespace CakeBuild
             "ElectricalProgressive-Equipment",
             "ElectricalProgressive-QOL",
             "ElectricalProgressive-Industry",
-            "ElectricalProgressive-Transport"
+            "ElectricalProgressive-Transport",
+            "ElectricalProgressive-Claims"
             // Add other project names here
         ];
 
@@ -123,7 +124,10 @@ namespace CakeBuild
                     context.EnsureDirectoryExists(releaseDir);
 
                     // Copy published files
-                    var publishSource = $"../{projectName}/bin/{context.BuildConfiguration}/Mods/mod/publish/*";
+                    var flatPublishDir = $"../{projectName}/bin/{context.BuildConfiguration}/Mods/publish";
+                    var nestedPublishDir = $"../{projectName}/bin/{context.BuildConfiguration}/Mods/mod/publish";
+                    var publishDir = Directory.Exists(flatPublishDir) ? flatPublishDir : nestedPublishDir;
+                    var publishSource = $"{publishDir}/*";
                     context.Information("Copying published files from {0} to {1}", publishSource, releaseDir);
                     context.CopyFiles(publishSource, releaseDir);
 

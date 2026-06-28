@@ -1,0 +1,14 @@
+{
+  "type": "code",
+  "modid": "electricalprogressiveclaims",
+  "name": "Electrical Progressive: Claims",
+  "authors": [
+    "Tehtelev",
+    "Kotl"
+  ],
+  "description": "Chunk claim map interface.",
+  "Version": "1.0.0",
+  "dependencies": {
+    "game": "1.22.0"
+  }
+}

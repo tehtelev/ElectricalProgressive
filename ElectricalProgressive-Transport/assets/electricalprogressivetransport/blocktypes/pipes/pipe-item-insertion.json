@@ -12,12 +12,20 @@
     "electricalprogressivetransport": [ "*" ]
   },
   "textures": {
-    "bismuthbronze": { "base": "game:block/metal/plate/bismuthbronze" },
+    "bismuthbronze": { 
+      "base": "game:block/metal/plate/bismuthbronze" 
+    },
     "glasspipe.png": {
       "base": "glasspipe"
     },
+    "pipecenter": {
+      "base": "itempipe"
+    },
     "brass": {
       "base": "game:block/metal/sheet-plain/copper1"
+    },
+    "copper1": {
+      "base": "game:block/metal/sheet-plain/copper5"
     },
     "tinbronze": { "base": "game:item/resource/plate/tinbronze" },
     "iron": { "base": "game:block/metal/plate/iron" },

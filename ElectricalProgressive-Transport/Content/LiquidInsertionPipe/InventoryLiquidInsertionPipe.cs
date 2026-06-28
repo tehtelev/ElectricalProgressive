@@ -5,13 +5,17 @@
 
 using System;
 using Vintagestory.API.Common;
+using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
 
 namespace ElectricalProgressive.Content.LiquidInsertionPipe;
 
 public class InventoryLiquidInsertionPipe : InventoryGeneric
 {
+    internal const string FrozenTemperatureAttribute = "epFrozenLiquidFilterTemperature";
+
     private BELiquidInsertionPipe _entity;
+    private readonly ItemStack?[] filterSnapshots;
 
     /// <summary>
     /// Конструктор инвентаря.
@@ -25,6 +29,7 @@ public class InventoryLiquidInsertionPipe : InventoryGeneric
         : base(slots, className, instanceID, api)
     {
         _entity = entity;
+        filterSnapshots = new ItemStack?[slots];
     }
 
     /// <summary>
@@ -32,7 +37,7 @@ public class InventoryLiquidInsertionPipe : InventoryGeneric
     /// </summary>
     private static ItemSlot CreateLiquidFilterSlot(int slotId, InventoryBase inventory)
     {
-        return new LiquidFilterSlot(inventory);
+        return new LiquidFilterSlot(slotId, inventory);
     }
 
     /// <summary>
@@ -42,23 +47,160 @@ public class InventoryLiquidInsertionPipe : InventoryGeneric
     {
         return CreateLiquidFilterSlot(i, this);
     }
+
+    /// <summary>
+    /// Фильтр заполняется только кликом игрока: это снимок жидкости, а не реальный инвентарь.
+    /// </summary>
+    public override ItemSlot GetAutoPushIntoSlot(BlockFacing atBlockFace, ItemSlot fromSlot)
+    {
+        return null;
+    }
+
+    /// <summary>
+    /// Снимки фильтра не должны выкачиваться автоматикой или трубами других модов.
+    /// </summary>
+    public override ItemSlot GetAutoPullFromSlot(BlockFacing atBlockFace)
+    {
+        return null;
+    }
+
+    internal bool IsFilterSet(int slotId)
+    {
+        return IsValidSlotId(slotId) && filterSnapshots[slotId]?.Collectible != null;
+    }
+
+    internal ItemStack? GetFilterSnapshot(int slotId)
+    {
+        return IsValidSlotId(slotId) ? filterSnapshots[slotId] : null;
+    }
+
+    internal int CountActiveFilterSnapshots()
+    {
+        int count = 0;
+        for (int i = 0; i < filterSnapshots.Length; i++)
+        {
+            if (filterSnapshots[i]?.Collectible != null)
+                count++;
+        }
+
+        return count;
+    }
+
+    internal void SetFilterSnapshot(int slotId, ItemStack? snapshot)
+    {
+        if (!IsValidSlotId(slotId))
+            return;
+
+        filterSnapshots[slotId] = snapshot?.Clone();
+        RestoreFilterSlotSnapshot(slotId);
+    }
+
+    internal void ClearFilterSnapshot(int slotId)
+    {
+        SetFilterSnapshot(slotId, null);
+    }
+
+    internal void CaptureFilterSnapshotsFromSlots(IWorldAccessor world)
+    {
+        for (int i = 0; i < Count && i < filterSnapshots.Length; i++)
+        {
+            filterSnapshots[i] = this[i].Itemstack?.Clone();
+            ResolveFilterSnapshot(filterSnapshots[i], world);
+            NormalizeFilterSnapshot(filterSnapshots[i]);
+        }
+
+        RestoreFilterSlotSnapshots();
+    }
+
+    internal void MaintainFilterSnapshots(IWorldAccessor world)
+    {
+        for (int i = 0; i < filterSnapshots.Length; i++)
+        {
+            ResolveFilterSnapshot(filterSnapshots[i]);
+            FreezeSnapshotTemperature(world, filterSnapshots[i]);
+        }
+
+        RestoreFilterSlotSnapshots();
+    }
+
+    internal static void FreezeSnapshotTemperature(IWorldAccessor world, ItemStack? snapshot)
+    {
+        if (snapshot?.Collectible?.HasTemperature(snapshot) != true)
+            return;
+
+        if (!snapshot.Attributes.HasAttribute(FrozenTemperatureAttribute))
+        {
+            snapshot.Attributes.SetFloat(FrozenTemperatureAttribute, snapshot.Collectible.GetTemperature(world, snapshot));
+        }
+
+        float temperature = snapshot.Attributes.GetFloat(FrozenTemperatureAttribute);
+        snapshot.Collectible.SetTemperature(world, snapshot, temperature, true);
+    }
+
+    private void RestoreFilterSlotSnapshots()
+    {
+        for (int i = 0; i < filterSnapshots.Length && i < Count; i++)
+        {
+            RestoreFilterSlotSnapshot(i);
+        }
+    }
+
+    private void RestoreFilterSlotSnapshot(int slotId)
+    {
+        if (!IsValidSlotId(slotId))
+            return;
+
+        ResolveFilterSnapshot(filterSnapshots[slotId]);
+
+        ItemStack? visibleSnapshot = filterSnapshots[slotId]?.Clone();
+        ResolveFilterSnapshot(visibleSnapshot);
+        NormalizeFilterSnapshot(visibleSnapshot);
+
+        this[slotId].Itemstack = visibleSnapshot?.Collectible == null ? null : visibleSnapshot;
+        this[slotId].MarkDirty();
+    }
+
+    private void ResolveFilterSnapshot(ItemStack? snapshot)
+    {
+        ResolveFilterSnapshot(snapshot, Api?.World);
+    }
+
+    private static void ResolveFilterSnapshot(ItemStack? snapshot, IWorldAccessor? world)
+    {
+        if (snapshot != null && snapshot.Collectible == null && world != null)
+            snapshot.ResolveBlockOrItem(world);
+    }
+
+    private static void NormalizeFilterSnapshot(ItemStack? snapshot)
+    {
+        if (snapshot != null)
+            snapshot.StackSize = 1;
+    }
+
+    private bool IsValidSlotId(int slotId)
+    {
+        return slotId >= 0 && slotId < filterSnapshots.Length && slotId < Count;
+    }
 }
 
 /// <summary>
 /// Слот для фильтрации жидкостей.
 /// Принимает только жидкости и блоки с контейнером для жидкости.
 /// </summary>
-public class LiquidFilterSlot : ItemSlotWatertight
+public class LiquidFilterSlot : ItemSlot
 {
+    private readonly int slotId;
+
     /// <summary>
     /// Конструктор слота фильтра.
-    /// Большая емкость (1000 литров) позволяет фильтровать большие объемы жидкостей.
     /// </summary>
-    public LiquidFilterSlot(InventoryBase inventory)
-        : base(inventory, 1000f) // Емкость в литрах - уже установлена в базовом конструкторе
+    public LiquidFilterSlot(int slotId, InventoryBase inventory)
+        : base(inventory)
     {
-        // capacityLitres установлен в базовом конструкторе ItemSlotWatertight
+        this.slotId = slotId;
     }
+
+    private InventoryLiquidInsertionPipe FilterInventory => (InventoryLiquidInsertionPipe)inventory;
 
     /// <summary>
     /// Максимальный размер стопки в слоте.
@@ -147,18 +289,25 @@ public class LiquidFilterSlot : ItemSlotWatertight
     }
 
     /// <summary>
+    /// Запрещает вытягивание снимка фильтра стандартной логикой слотов.
+    /// </summary>
+    public override bool CanTakeFrom(ItemSlot sourceSlot, EnumMergePriority priority = EnumMergePriority.AutoMerge)
+    {
+        return false;
+    }
+
+    /// <summary>
     /// Обработка активации слота (левый клик).
-    /// Обрабатывает перемещение жидкостей между слотами.
+    /// Запоминает снимок жидкости без изменения исходного предмета.
     /// </summary>
     public override void ActivateSlot(ItemSlot sourceSlot, ref ItemStackMoveOperation op)
     {
         // Если кликаем пустой рукой - очищаем слот
         if (sourceSlot == null || sourceSlot.Empty)
         {
-            if (!this.Empty)
+            if (FilterInventory.IsFilterSet(slotId))
             {
-                this.Itemstack = null;
-                this.MarkDirty();
+                FilterInventory.ClearFilterSnapshot(slotId);
                 op.MovedQuantity = 1;
             }
             return;
@@ -173,300 +322,58 @@ public class LiquidFilterSlot : ItemSlotWatertight
             return;
         }
 
-        ItemStack sourceStack = sourceSlot.Itemstack;
-
-        // Если пытаемся положить контейнер с жидкостью (ведро)
-        if (sourceStack.Block is BlockLiquidContainerBase block)
-        {
-            HandleLiquidContainer(sourceSlot, block, ref op);
-            return;
-        }
-
-        // Если предмет имеет contentItemCode (бутылки и т.д.)
-        if (sourceStack.ItemAttributes?["contentItemCode"].Exists == true)
-        {
-            HandleContentItem(sourceSlot, ref op);
-            return;
-        }
-
-        // Если это жидкость (portion)
-        string itemCode = sourceStack.Collectible.Code?.ToString() ?? "";
-        if (itemCode.ToLower().Contains("portion") || sourceStack.Collectible.IsLiquid())
-        {
-            HandleLiquidItem(sourceSlot, ref op);
-            return;
-        }
-
-        // Для других разрешенных жидкостей - стандартная логика с ограничением количества
-        if (this.Empty)
-        {
-            // Берем только 1 предмет
-            this.Itemstack = sourceStack.Clone();
-            this.Itemstack.StackSize = 1;
-
-            if (sourceSlot.StackSize == 1)
-            {
-                sourceSlot.Itemstack = null;
-            }
-            else
-            {
-                sourceSlot.Itemstack.StackSize -= 1;
-            }
-
-            sourceSlot.MarkDirty();
-            this.MarkDirty();
-
-            op.MovedQuantity = 1;
-            op.RequestedQuantity = 1;
-        }
-        else
-        {
-            // Заменяем содержимое слота
-            ItemStack temp = this.Itemstack;
-            this.Itemstack = sourceStack.Clone();
-            this.Itemstack.StackSize = 1;
-
-            sourceSlot.Itemstack = temp;
-            if (sourceSlot.Itemstack != null)
-            {
-                sourceSlot.Itemstack.StackSize = Math.Min(sourceSlot.Itemstack.StackSize, sourceSlot.MaxSlotStackSize);
-            }
-
-            sourceSlot.MarkDirty();
-            this.MarkDirty();
-
-            op.MovedQuantity = 1;
-            op.RequestedQuantity = 1;
-        }
-    }
-
-    /// <summary>
-    /// Обрабатывает контейнер с жидкостью (ведро).
-    /// Переливает содержимое ведра в слот фильтра.
-    /// </summary>
-    private void HandleLiquidContainer(ItemSlot containerSlot, BlockLiquidContainerBase block, ref ItemStackMoveOperation op)
-    {
-        // Если слот фильтра пустой
-        if (this.Empty)
-        {
-            // Создаем копию содержимого ведра
-            ItemStack content = block.GetContent(containerSlot.Itemstack);
-            if (content != null)
-            {
-                // Клонируем содержимое ведра
-                this.Itemstack = content.Clone();
-                this.Itemstack.StackSize = 1;
-                this.MarkDirty();
-
-                op.MovedQuantity = 1;
-                op.RequestedQuantity = 1;
-            }
-            else
-            {
-                // Ведро пустое - ничего не делаем
-                op.MovedQuantity = 0;
-                op.RequestedQuantity = 0;
-            }
-        }
-        else
-        {
-            // Если в слоте уже есть что-то, заменяем
-            ItemStack temp = this.Itemstack;
-
-            ItemStack content = block.GetContent(containerSlot.Itemstack);
-            if (content != null)
-            {
-                this.Itemstack = content.Clone();
-                this.Itemstack.StackSize = 1;
-            }
-            else
-            {
-                this.Itemstack = null;
-            }
-
-            this.MarkDirty();
-
-            // Возвращаем старую жидкость в контейнер
-            if (temp != null)
-            {
-                // Пытаемся положить обратно
-                containerSlot.Itemstack = temp;
-                containerSlot.Itemstack.StackSize = 1;
-                containerSlot.MarkDirty();
-            }
-
-            op.MovedQuantity = 1;
-            op.RequestedQuantity = 1;
-        }
-    }
-
-    /// <summary>
-    /// Обрабатывает предметы с contentItemCode (бутылки и т.д.).
-    /// Переливает содержимое бутылки в слот фильтра.
-    /// </summary>
-    private void HandleContentItem(ItemSlot sourceSlot, ref ItemStackMoveOperation op)
-    {
-        IWorldAccessor world = this.inventory.Api.World;
-
-        // Получаем код содержимого из атрибутов
-        string contentCode = sourceSlot.Itemstack.ItemAttributes["contentItemCode"].AsString();
-        if (contentCode == null)
+        ItemStack filterSnapshot = CreateLiquidFilterSnapshot(sourceSlot.Itemstack);
+        if (filterSnapshot == null)
         {
             op.MovedQuantity = 0;
             op.RequestedQuantity = 0;
             return;
         }
 
-        AssetLocation contentAsset = AssetLocation.Create(contentCode, sourceSlot.Itemstack.Collectible.Code.Domain);
-        Vintagestory.API.Common.Item contentItem = world.GetItem(contentAsset);
+        FilterInventory.SetFilterSnapshot(slotId, filterSnapshot);
 
-        if (contentItem == null)
+        op.MovedQuantity = 1;
+        op.RequestedQuantity = 1;
+    }
+
+    private ItemStack? CreateLiquidFilterSnapshot(ItemStack? sourceStack)
+    {
+        ItemStack? snapshot = null;
+
+        if (sourceStack?.Block is BlockLiquidContainerBase block)
         {
-            op.MovedQuantity = 0;
-            op.RequestedQuantity = 0;
+            snapshot = block.GetContent(sourceStack)?.Clone();
+        }
+        else if (sourceStack?.ItemAttributes?["contentItemCode"].Exists == true)
+        {
+            string contentCode = sourceStack.ItemAttributes["contentItemCode"].AsString();
+            if (!string.IsNullOrEmpty(contentCode) && inventory.Api?.World != null)
+            {
+                AssetLocation contentAsset = AssetLocation.Create(contentCode, sourceStack.Collectible.Code.Domain);
+                Vintagestory.API.Common.Item contentItem = inventory.Api.World.GetItem(contentAsset);
+                if (contentItem != null)
+                    snapshot = new ItemStack(contentItem);
+            }
+        }
+        else if (sourceStack?.Collectible != null)
+        {
+            snapshot = sourceStack.Clone();
+        }
+
+        if (snapshot == null)
+            return null;
+
+        snapshot.StackSize = 1;
+        FreezeSnapshotTemperature(snapshot);
+        return snapshot;
+    }
+
+    private void FreezeSnapshotTemperature(ItemStack snapshot)
+    {
+        if (inventory.Api?.World == null)
             return;
-        }
 
-        // Создаем стек содержимого
-        ItemStack contentStack = new ItemStack(contentItem);
-
-        if (this.Empty)
-        {
-            // Кладем содержимое в слот фильтра
-            this.Itemstack = contentStack;
-            this.Itemstack.StackSize = 1;
-            this.MarkDirty();
-
-            // Создаем пустой контейнер
-            string emptiedBlockCode = sourceSlot.Itemstack.ItemAttributes["emptiedBlockCode"].AsString();
-            if (emptiedBlockCode != null)
-            {
-                AssetLocation emptiedAsset = AssetLocation.Create(emptiedBlockCode, sourceSlot.Itemstack.Collectible.Code.Domain);
-                Vintagestory.API.Common.Block emptiedBlock = world.GetBlock(emptiedAsset);
-
-                if (emptiedBlock != null)
-                {
-                    ItemStack emptiedStack = new ItemStack(emptiedBlock);
-
-                    if (sourceSlot.StackSize == 1)
-                    {
-                        sourceSlot.Itemstack = emptiedStack;
-                    }
-                    else
-                    {
-                        sourceSlot.Itemstack.StackSize -= 1;
-                        if (!op.ActingPlayer.InventoryManager.TryGiveItemstack(emptiedStack))
-                        {
-                            world.SpawnItemEntity(emptiedStack, op.ActingPlayer.Entity.Pos.XYZ);
-                        }
-                    }
-                    sourceSlot.MarkDirty();
-                }
-            }
-
-            op.MovedQuantity = 1;
-            op.RequestedQuantity = 1;
-        }
-        else
-        {
-            // Заменяем содержимое слота
-            ItemStack temp = this.Itemstack;
-            this.Itemstack = contentStack;
-            this.Itemstack.StackSize = 1;
-            this.MarkDirty();
-
-            // Возвращаем старую жидкость
-            if (temp != null)
-            {
-                sourceSlot.Itemstack = temp;
-                sourceSlot.Itemstack.StackSize = 1;
-                sourceSlot.MarkDirty();
-            }
-
-            op.MovedQuantity = 1;
-            op.RequestedQuantity = 1;
-        }
-    }
-
-    /// <summary>
-    /// Обрабатывает предметы жидкости (waterportion и т.д.).
-    /// Переливает жидкость между слотами фильтра.
-    /// </summary>
-    private void HandleLiquidItem(ItemSlot liquidSlot, ref ItemStackMoveOperation op)
-    {
-        if (this.Empty)
-        {
-            // Берем 1 предмет жидкости
-            this.Itemstack = liquidSlot.Itemstack.Clone();
-            this.Itemstack.StackSize = 1;
-
-            if (liquidSlot.StackSize == 1)
-            {
-                liquidSlot.Itemstack = null;
-            }
-            else
-            {
-                liquidSlot.Itemstack.StackSize -= 1;
-            }
-
-            liquidSlot.MarkDirty();
-            this.MarkDirty();
-
-            op.MovedQuantity = 1;
-            op.RequestedQuantity = 1;
-        }
-        else if (this.Itemstack != null && liquidSlot.Itemstack != null)
-        {
-            // Проверяем, та же ли это жидкость
-            if (AreLiquidsEqual(this.Itemstack, liquidSlot.Itemstack))
-            {
-                // Та же жидкость - ничего не делаем
-                op.MovedQuantity = 0;
-                op.RequestedQuantity = 0;
-            }
-            else
-            {
-                // Разная жидкость - заменяем
-                ItemStack temp = this.Itemstack;
-                this.Itemstack = liquidSlot.Itemstack.Clone();
-                this.Itemstack.StackSize = 1;
-
-                liquidSlot.Itemstack = temp;
-                if (liquidSlot.Itemstack != null)
-                {
-                    liquidSlot.Itemstack.StackSize = 1;
-                }
-
-                liquidSlot.MarkDirty();
-                this.MarkDirty();
-
-                op.MovedQuantity = 1;
-                op.RequestedQuantity = 1;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Проверяет, одинаковые ли жидкости.
-    /// </summary>
-    private bool AreLiquidsEqual(ItemStack stack1, ItemStack stack2)
-    {
-        if (stack1 == null || stack2 == null)
-            return false;
-
-        // Сравниваем коды предметов
-        if (!stack1.Collectible.Code.Equals(stack2.Collectible.Code))
-            return false;
-
-        // Для контейнеров с жидкостью сравниваем содержимое
-        if (stack1.Attributes.HasAttribute("content") && stack2.Attributes.HasAttribute("content"))
-        {
-            string content1 = stack1.Attributes.GetString("content", "");
-            string content2 = stack2.Attributes.GetString("content", "");
-            return content1 == content2;
-        }
-
-        return true;
+        InventoryLiquidInsertionPipe.FreezeSnapshotTemperature(inventory.Api.World, snapshot);
     }
 
     /// <summary>
@@ -478,10 +385,9 @@ public class LiquidFilterSlot : ItemSlotWatertight
         // Если кликаем правой кнопкой с пустой рукой - очищаем слот
         if (sourceSlot == null || sourceSlot.Empty)
         {
-            if (!this.Empty)
+            if (FilterInventory.IsFilterSet(slotId))
             {
-                this.Itemstack = null;
-                this.MarkDirty();
+                FilterInventory.ClearFilterSnapshot(slotId);
                 op.MovedQuantity = 1;
             }
             return;
@@ -503,7 +409,7 @@ public class LiquidFilterSlot : ItemSlotWatertight
     }
 
     /// <summary>
-    /// Переопределяем TryFlipWith для ограничения количества.
+    /// Переопределяем TryFlipWith для снимка фильтра без перемещения исходного предмета.
     /// </summary>
     public override bool TryFlipWith(ItemSlot itemSlot)
     {
@@ -511,37 +417,23 @@ public class LiquidFilterSlot : ItemSlotWatertight
         if (!CanHold(itemSlot))
             return false;
 
-        if (itemSlot != null && itemSlot.StackSize > 1)
+        if (itemSlot != null && itemSlot.StackSize > 0)
         {
-            // Если пытаются положить больше 1 предмета
-            if (!this.Empty)
-            {
-                // Если слот не пуст, нельзя обменять
+            ItemStack? filterSnapshot = CreateLiquidFilterSnapshot(itemSlot.Itemstack);
+            if (filterSnapshot == null)
                 return false;
-            }
 
-            // Берем только 1 предмет
-            ItemStack singleStack = itemSlot.Itemstack.Clone();
-            singleStack.StackSize = 1;
-            this.Itemstack = singleStack;
-
-            itemSlot.Itemstack.StackSize -= 1;
-            if (itemSlot.Itemstack.StackSize <= 0)
-                itemSlot.Itemstack = null;
-
-            itemSlot.MarkDirty();
-            this.MarkDirty();
+            FilterInventory.SetFilterSnapshot(slotId, filterSnapshot);
             return true;
         }
 
-        // Для 1 предмета - обычный обмен
-        return base.TryFlipWith(itemSlot);
+        return false;
     }
 
     /// <summary>
     /// Гарантируем, что в слоте не больше 1 предмета.
     /// </summary>
-    public override void OnItemSlotModified(ItemStack extractedStack = null)
+    public override void OnItemSlotModified(ItemStack? extractedStack = null)
     {
         if (!this.Empty && this.Itemstack.StackSize > 1)
         {

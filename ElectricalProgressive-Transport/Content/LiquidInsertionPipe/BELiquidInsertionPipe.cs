@@ -24,7 +24,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     #region Поля таймингов и состояния
 
     private long transferTimer;
-    private long perishTimer;
+    private long filterSnapshotTimer;
     private int transferRate = 100; // Скорость передачи в миллилитрах за тик
     private BlockFacing outputFacing = null;
     private int debugCounter = 0;
@@ -57,17 +57,6 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     }
 
     private FilterMode currentFilterMode = FilterMode.AllowList;
-
-    #endregion
-
-    #region Настройки остановки порчи
-
-    /// <summary>Включена ли остановка порчи</summary>
-    private bool stopPerishEnabled = true;
-    /// <summary>Множитель скорости порчи (0 = полностью остановить)</summary>
-    private float perishRateMultiplier = 0f;
-    /// <summary>Останавливать все переходные состояния</summary>
-    private bool stopAllTransitions = false;
 
     #endregion
 
@@ -126,14 +115,6 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     /// <summary>Текущий режим фильтрации</summary>
     public FilterMode CurrentFilterMode => currentFilterMode;
 
-    // Свойства для остановки порчи
-    /// <summary>Включена ли остановка порчи</summary>
-    public bool StopPerishEnabled => stopPerishEnabled;
-    /// <summary>Множитель скорости порчи</summary>
-    public float PerishRateMultiplier => perishRateMultiplier;
-    /// <summary>Останавливать все переходные состояния</summary>
-    public bool StopAllTransitions => stopAllTransitions;
-
     public BELiquidInsertionPipe()
     {
         _inventory = new InventoryLiquidInsertionPipe(6, InventoryClassName, null, null, this);
@@ -149,11 +130,11 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         if (api.Side == EnumAppSide.Server)
         {
             transferTimer = api.World.RegisterGameTickListener(OnTransferTick, TransferTickIntervalMs);
-            // Тик для обработки порчи предметов в инвентаре
-            perishTimer = api.World.RegisterGameTickListener(OnPerishTick, 2000);
         }
 
-        _inventory.OnAcquireTransitionSpeed += OnAcquireTransitionSpeed;
+        filterSnapshotTimer = api.World.RegisterGameTickListener(OnFilterSnapshotTick, 1000);
+        _inventory.OnAcquireTransitionSpeed -= FreezeFilterTransitionSpeed;
+        _inventory.OnAcquireTransitionSpeed += FreezeFilterTransitionSpeed;
     }
 
     /// <summary>Получает базовый код блока для жидкостной трубы</summary>
@@ -172,88 +153,18 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         cachedRealTargetPos = null;
     }
 
-    #region Методы обработки порчи предметов
-
-    /// <summary>
-    /// Обработчик скорости переходных состояний для контроля порчи.
-    /// </summary>
-    private float OnAcquireTransitionSpeed(EnumTransitionType transType, ItemStack stack, float baseMul)
+    private static float FreezeFilterTransitionSpeed(EnumTransitionType transType, ItemStack stack, float baseMul)
     {
-        // Если отключена остановка порчи или предмет не портится
-        if (!stopPerishEnabled || transType != EnumTransitionType.Perish)
-        {
-            // Проверяем, нужно ли останавливать все переходы
-            if (stopAllTransitions && ShouldStopTransition(transType))
-            {
-                return 0f;
-            }
-
-            return baseMul;
-        }
-
-        // Применяем множитель скорости порчи
-        return baseMul * perishRateMultiplier;
+        return 0f;
     }
 
-    /// <summary>
-    /// Проверяет, нужно ли останавливать этот тип перехода состояния.
-    /// </summary>
-    private static bool ShouldStopTransition(EnumTransitionType transType)
+    private void OnFilterSnapshotTick(float dt)
     {
-        switch (transType)
-        {
-            case EnumTransitionType.Perish:     // Порча
-            case EnumTransitionType.Harden:     // Затвердевание
-            case EnumTransitionType.Melt:       // Плавление
-            case EnumTransitionType.None:       // Нет перехода
-            case EnumTransitionType.Burn:       // Сгорание
-            case EnumTransitionType.Ripen:      // Созревание
-            case EnumTransitionType.Convert:    // Превращение
-            case EnumTransitionType.Dry:        // Сушка
-            case EnumTransitionType.Cure:       // Выдержка
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    /// <summary>
-    /// Тик для обработки порчи предметов в инвентаре.
-    /// </summary>
-    private void OnPerishTick(float dt)
-    {
-        if (Api?.Side != EnumAppSide.Server || !stopPerishEnabled)
+        if (Api?.World == null)
             return;
 
-        // Обновляем состояние всех предметов в инвентаре
-        foreach (var slot in _inventory)
-        {
-            if (slot.Itemstack != null)
-            {
-                var before = slot.Itemstack.Clone();
-                slot.Itemstack.Collectible.UpdateAndGetTransitionStates(Api.World, slot);
-
-                // Если предмет изменился, помечаем как грязный для сохранения
-                if (!slot.Itemstack.Equals(Api.World, before))
-                {
-                    MarkDirty();
-                }
-            }
-        }
+        _inventory.MaintainFilterSnapshots(Api.World);
     }
-
-    /// <summary>
-    /// Устанавливает настройки обработки порчи.
-    /// </summary>
-    public void SetPerishSettings(bool enabled, float multiplier = 0f, bool stopAll = false)
-    {
-        stopPerishEnabled = enabled;
-        perishRateMultiplier = GameMath.Clamp(multiplier, 0f, 10f);
-        stopAllTransitions = stopAll;
-        MarkDirty(true);
-    }
-
-    #endregion
 
     /// <summary>
     /// Обработка клика игрока по блоку. Открывает GUI на клиенте.
@@ -511,8 +422,17 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         if (sink == null)
             return false;
 
+        // Используем сеть для поиска источников жидкости
+        var network = NetworkManager.GetNetwork(Pos);
+        if (network == null)
+        {
+            return false;
+        }
+
+        var excludedSourcePositions = BuildExcludedLiquidSourcePositions(network, targetPos);
+
         if (preferredSource != null && preferredSourcePos != null && preferredRealSourcePos != null &&
-            !preferredSourcePos.Equals(Pos) && !preferredSourcePos.Equals(targetPos))
+            !excludedSourcePositions.Contains(preferredSourcePos))
         {
             if (TryTransferFromBlockSourceToSink(
                     preferredSourcePos,
@@ -533,13 +453,6 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
             preferredSourcePipePos = null;
         }
 
-        // Используем сеть для поиска источников жидкости
-        var network = NetworkManager.GetNetwork(Pos);
-        if (network == null)
-        {
-            return false;
-        }
-
         int sourceCount = network.LiquidSources.Count;
         if (sourceCount == 0)
             return false;
@@ -556,7 +469,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
             int index = (sourceCursor + checkedCount) % sourceCount;
             var sourceEndpoint = network.LiquidSources[index];
             BlockPos sourcePos = sourceEndpoint.EndpointPos;
-            if (sourcePos.Equals(Pos) || sourcePos.Equals(targetPos))
+            if (excludedSourcePositions.Contains(sourcePos))
                 continue;
 
             ILiquidSource liquidSource = GetLiquidSourceAtPosition(sourcePos);
@@ -580,6 +493,28 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         return false;
     }
 
+    private HashSet<BlockPos> BuildExcludedLiquidSourcePositions(PipeNetwork network, BlockPos targetPos)
+    {
+        var excluded = new HashSet<BlockPos>
+        {
+            Pos.Copy(),
+            targetPos.Copy()
+        };
+
+        foreach (var inserterPos in network.Inserters)
+        {
+            excluded.Add(inserterPos.Copy());
+
+            if (Api.World.BlockAccessor.GetBlockEntity(inserterPos) is BELiquidInsertionPipe otherPipe
+                && otherPipe.outputFacing != null)
+            {
+                excluded.Add(inserterPos.AddCopy(otherPipe.outputFacing));
+            }
+        }
+
+        return excluded;
+    }
+
     /// <summary>
     /// Попытка передачи жидкости от источника к sink.
     /// </summary>
@@ -592,6 +527,9 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         BlockPos targetPos,
         BlockPos realTargetPos)
     {
+        if (realSourcePos.Equals(realTargetPos))
+            return false;
+
         if (!IsLivePipePathConnected(sourcePipePos, Pos))
             return false;
 
@@ -1060,7 +998,7 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         bool hasAnyFilters = false;
         for (int i = 0; i < _inventory.Count; i++)
         {
-            if (!_inventory[i].Empty)
+            if (_inventory.IsFilterSet(i))
             {
                 hasAnyFilters = true;
                 break;
@@ -1078,11 +1016,11 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         // Проверяем все слоты фильтра
         for (int i = 0; i < _inventory.Count; i++)
         {
-            ItemSlot filterSlot = _inventory[i];
-            if (!filterSlot.Empty)
+            ItemStack filterStack = _inventory.GetFilterSnapshot(i);
+            if (filterStack?.Collectible != null)
             {
                 // Сравниваем коды предметов
-                if (itemstack.Collectible.Code.Equals(filterSlot.Itemstack.Collectible.Code))
+                if (itemstack.Collectible.Code.Equals(filterStack.Collectible.Code))
                 {
                     hasMatchingFilter = true;
                     break;
@@ -1151,35 +1089,10 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         int activeFilters = 0;
         for (int i = 0; i < _inventory.Count; i++)
         {
-            if (!_inventory[i].Empty) activeFilters++;
+            if (_inventory.IsFilterSet(i)) activeFilters++;
         }
 
         sb.AppendLine(Lang.Get("electricalprogressivetransport:active-liquid-filters", activeFilters, _inventory.Count));
-
-        // Информация о настройках порчи
-        sb.AppendLine("══════════════════════════════════════════");
-        sb.AppendLine(Lang.Get("electricalprogressivetransport:preservation-settings"));
-
-        if (stopPerishEnabled)
-        {
-            if (perishRateMultiplier <= 0.001f)
-            {
-                sb.AppendLine(Lang.Get("electricalprogressivetransport:perish-fully-stopped"));
-            }
-            else
-            {
-                sb.AppendLine(Lang.Get("electricalprogressivetransport:perish-slowed-factor", Math.Round(1f / perishRateMultiplier, 1)));
-            }
-
-            if (stopAllTransitions)
-            {
-                sb.AppendLine(Lang.Get("electricalprogressivetransport:all-transitions-stopped"));
-            }
-        }
-        else
-        {
-            sb.AppendLine(Lang.Get("electricalprogressivetransport:preservation-disabled"));
-        }
     }
 
     /// <summary>Обработка удаления блока</summary>
@@ -1193,8 +1106,10 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         if (Api?.Side == EnumAppSide.Server)
         {
             Api.World.UnregisterGameTickListener(transferTimer);
-            Api.World.UnregisterGameTickListener(perishTimer);
         }
+
+        _inventory.OnAcquireTransitionSpeed -= FreezeFilterTransitionSpeed;
+        Api?.World.UnregisterGameTickListener(filterSnapshotTimer);
 
         if (_clientDialog != null && _clientDialog.IsOpened())
         {
@@ -1206,29 +1121,23 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
     {
         base.FromTreeAttributes(tree, worldAccessForResolve);
+        _inventory.CaptureFilterSnapshotsFromSlots(worldAccessForResolve);
 
         transferRate = tree.GetInt("transferRate", 100);
         currentFilterMode = (FilterMode)tree.GetInt("filterMode", 0);
         transferRate = Math.Max(10, Math.Min(transferRate, 1000));
-
-        // Загружаем настройки порчи
-        stopPerishEnabled = tree.GetBool("stopPerishEnabled", true);
-        perishRateMultiplier = tree.GetFloat("perishRateMultiplier", 0f);
-        stopAllTransitions = tree.GetBool("stopAllTransitions", false);
     }
 
     /// <summary>Сохранение атрибутов в дерево</summary>
     public override void ToTreeAttributes(ITreeAttribute tree)
     {
+        if (Api?.World != null)
+            _inventory.MaintainFilterSnapshots(Api.World);
+
         base.ToTreeAttributes(tree);
 
         tree.SetInt("transferRate", transferRate);
         tree.SetInt("filterMode", (int)currentFilterMode);
-
-        // Сохраняем настройки порчи
-        tree.SetBool("stopPerishEnabled", stopPerishEnabled);
-        tree.SetFloat("perishRateMultiplier", perishRateMultiplier);
-        tree.SetBool("stopAllTransitions", stopAllTransitions);
     }
 
     public override void OnReceivedServerPacket(int packetid, byte[] data)
@@ -1301,26 +1210,9 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
                 Api.World.BlockAccessor.MarkBlockDirty(Pos);
             }
         }
-        else if (packetid == 2004) // Обновление настроек порчи
+        else if (packetid == 2004) // Старый пакет настроек порчи: больше не нужен для пассивных фильтр-снимков.
         {
-            try
-            {
-                var tree = new TreeAttribute();
-                tree.FromBytes(data);
-
-                bool enabled = tree.GetBool("stopPerishEnabled", true);
-                float multiplier = tree.GetFloat("perishRateMultiplier", 0f);
-                bool stopAll = tree.GetBool("stopAllTransitions", false);
-
-                SetPerishSettings(enabled, multiplier, stopAll);
-
-                MarkDirty();
-                Api.World.BlockAccessor.MarkBlockDirty(Pos);
-            }
-            catch (Exception ex)
-            {
-                Api?.Logger?.Error($"Ошибка при обновлении настроек порчи: {ex.Message}");
-            }
+            MarkDirty();
         }
     }
 
@@ -1341,6 +1233,9 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     public override void OnBlockUnloaded()
     {
         base.OnBlockUnloaded();
+        _inventory.OnAcquireTransitionSpeed -= FreezeFilterTransitionSpeed;
+        Api?.World.UnregisterGameTickListener(filterSnapshotTimer);
+
         if (_clientDialog != null && _clientDialog.IsOpened())
         {
             _clientDialog?.TryClose();

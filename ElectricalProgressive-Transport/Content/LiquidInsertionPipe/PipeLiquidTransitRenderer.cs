@@ -23,6 +23,8 @@ public class PipeLiquidTransitRenderer : IRenderer
     private const int FlowAnimationFrames = 24;
     private const int CylinderSides = 24;
     private const int CylinderRings = 6;
+    private const int MaxLiquidLanes = 4;
+    private const float LaneWallClearance = 0.01f;
     private const float Alpha = 0.9f;
 
     private readonly ICoreClientAPI capi;
@@ -115,28 +117,40 @@ public class PipeLiquidTransitRenderer : IRenderer
                 if (segment.Center.SquareDistanceTo(cameraPos) > MaxRenderDistanceSq)
                     continue;
 
+                if (!TryGetSegmentLane(flow, segment, now, out int laneIndex, out int laneCount))
+                    continue;
+
                 int frame = GetFlowFrame(flow, segment, now);
                 MeshRef mesh = GetMeshRef(flow, frame, segment.MeshKind);
                 if (mesh.Disposed)
                     continue;
 
-                RenderLiquidSegment(mesh, flow, segment, cameraPos);
+                RenderLiquidSegment(mesh, flow, segment, cameraPos, laneIndex, laneCount);
             }
         }
     }
 
-    private void RenderLiquidSegment(MeshRef mesh, ActivePipeFlow flow, FilledPipeSegment segment, Vec3d cameraPos)
+    private void RenderLiquidSegment(
+        MeshRef mesh,
+        ActivePipeFlow flow,
+        FilledPipeSegment segment,
+        Vec3d cameraPos,
+        int laneIndex,
+        int laneCount)
     {
+        float laneRadius = GetLaneRadius(laneCount);
+        Vec3d laneOffset = GetLaneOffset(segment.Direction, laneIndex, laneCount, laneRadius);
+
         Mat4f.Identity(modelMatrix);
         Mat4f.Translate(
             modelMatrix,
             modelMatrix,
-            (float)(segment.Center.X - cameraPos.X),
-            (float)(segment.Center.Y - cameraPos.Y),
-            (float)(segment.Center.Z - cameraPos.Z));
+            (float)(segment.Center.X + laneOffset.X - cameraPos.X),
+            (float)(segment.Center.Y + laneOffset.Y - cameraPos.Y),
+            (float)(segment.Center.Z + laneOffset.Z - cameraPos.Z));
 
         ApplyDirectionRotation(segment.Direction);
-        Mat4f.Scale(modelMatrix, modelMatrix, LiquidRadius, LiquidRadius, segment.Length);
+        Mat4f.Scale(modelMatrix, modelMatrix, laneRadius, laneRadius, segment.Length);
 
         IStandardShaderProgram shader = capi.Render.PreparedStandardShader(
             (int)Math.Floor(segment.Center.X),
@@ -152,6 +166,84 @@ public class PipeLiquidTransitRenderer : IRenderer
 
         capi.Render.RenderMesh(mesh);
         shader.Stop();
+    }
+
+    private bool TryGetSegmentLane(ActivePipeFlow currentFlow, FilledPipeSegment segment, long now, out int laneIndex, out int laneCount)
+    {
+        var flowKeys = new List<string>();
+
+        foreach (ActivePipeFlow flow in activeFlows)
+        {
+            if (now >= flow.ExpiresMs || !FlowTouchesSegment(flow, segment.SegmentKey))
+                continue;
+
+            if (!flowKeys.Contains(flow.FlowKey))
+                flowKeys.Add(flow.FlowKey);
+        }
+
+        flowKeys.Sort(StringComparer.Ordinal);
+        laneIndex = flowKeys.IndexOf(currentFlow.FlowKey);
+        laneCount = Math.Min(flowKeys.Count, MaxLiquidLanes);
+
+        return laneIndex >= 0 && laneIndex < laneCount;
+    }
+
+    private static bool FlowTouchesSegment(ActivePipeFlow flow, string segmentKey)
+    {
+        foreach (FilledPipeSegment segment in flow.Segments)
+        {
+            if (segment.SegmentKey == segmentKey)
+                return true;
+        }
+
+        return false;
+    }
+
+    private static float GetLaneRadius(int laneCount)
+    {
+        return laneCount switch
+        {
+            <= 1 => LiquidRadius,
+            2 => LiquidRadius * 0.44f,
+            3 => LiquidRadius * 0.36f,
+            _ => LiquidRadius * 0.32f
+        };
+    }
+
+    private static Vec3d GetLaneOffset(Vec3d direction, int laneIndex, int laneCount, float laneRadius)
+    {
+        if (laneCount <= 1)
+            return new Vec3d();
+
+        Vec3d axis = Normalize(direction);
+        Vec3d reference = Math.Abs(axis.Y) < 0.85 ? new Vec3d(0, 1, 0) : new Vec3d(1, 0, 0);
+        Vec3d right = Normalize(Cross(axis, reference));
+        Vec3d up = Normalize(Cross(right, axis));
+
+        double angle = GameMath.TWOPI * laneIndex / laneCount;
+        double distance = Math.Max(0, LiquidRadius - laneRadius - LaneWallClearance);
+
+        return new Vec3d(
+            (right.X * Math.Cos(angle) + up.X * Math.Sin(angle)) * distance,
+            (right.Y * Math.Cos(angle) + up.Y * Math.Sin(angle)) * distance,
+            (right.Z * Math.Cos(angle) + up.Z * Math.Sin(angle)) * distance);
+    }
+
+    private static Vec3d Normalize(Vec3d value)
+    {
+        double length = Math.Sqrt(value.X * value.X + value.Y * value.Y + value.Z * value.Z);
+        if (length < 0.0001)
+            return new Vec3d(0, 0, 1);
+
+        return new Vec3d(value.X / length, value.Y / length, value.Z / length);
+    }
+
+    private static Vec3d Cross(Vec3d left, Vec3d right)
+    {
+        return new Vec3d(
+            left.Y * right.Z - left.Z * right.Y,
+            left.Z * right.X - left.X * right.Z,
+            left.X * right.Y - left.Y * right.X);
     }
 
     private void ApplyDirectionRotation(Vec3d direction)
@@ -446,7 +538,8 @@ public class PipeLiquidTransitRenderer : IRenderer
                 Direction = direction,
                 Length = (float)length,
                 PathDistance = pathDistance,
-                MeshKind = meshKind
+                MeshKind = meshKind,
+                SegmentKey = BuildSegmentKey(start, end)
             });
 
             pathDistance += (float)length;
@@ -520,6 +613,18 @@ public class PipeLiquidTransitRenderer : IRenderer
     private static BlockPos ToBlockPos(Vec3d point)
     {
         return new BlockPos((int)Math.Floor(point.X), (int)Math.Floor(point.Y), (int)Math.Floor(point.Z));
+    }
+
+    private static string BuildSegmentKey(Vec3d start, Vec3d end)
+    {
+        string first = BuildPointKey(start);
+        string second = BuildPointKey(end);
+        return string.CompareOrdinal(first, second) <= 0 ? $"{first}>{second}" : $"{second}>{first}";
+    }
+
+    private static string BuildPointKey(Vec3d point)
+    {
+        return $"{(int)Math.Round(point.X * 1000)},{(int)Math.Round(point.Y * 1000)},{(int)Math.Round(point.Z * 1000)}";
     }
 
     private static string BuildFlowKey(string liquidKey, List<Vec3d> points)
@@ -715,6 +820,7 @@ public class PipeLiquidTransitRenderer : IRenderer
         public float Length;
         public float PathDistance;
         public FlowMeshKind MeshKind;
+        public string SegmentKey = "unknown";
     }
 
     private enum FlowMeshKind

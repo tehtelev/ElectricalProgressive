@@ -15,11 +15,17 @@
     "bismuthbronze": {
       "base": "game:block/metal/plate/bismuthbronze"
     },
-    "glasspipe.png": {
+    "glasspipe": {
       "base": "glasspipe"
+    },
+    "pipecenter": {
+      "base": "pipecenter"
     },
     "brass": {
       "base": "game:block/metal/sheet-plain/copper1"
+    },
+    "copper1": {
+      "base": "game:block/metal/sheet-plain/copper5"
     },
     "tinbronze": {
       "base": "game:item/resource/plate/tinbronze"
@@ -28,7 +34,7 @@
       "base": "game:block/metal/plate/iron"
     },
     "steel": {
-      "base": "game:block/metal/plate/steel"
+      "base": "game:block/metal/sheet/steel1"
     },
     "steel1": {
       "base": "game:block/metal/sheet/steel1"

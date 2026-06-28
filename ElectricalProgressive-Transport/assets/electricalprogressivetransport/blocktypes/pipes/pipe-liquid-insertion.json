@@ -18,8 +18,14 @@
     "glasspipe.png": {
       "base": "glasspipe"
     },
+    "pipecenter": {
+      "base": "liquidpipe"
+    },
     "brass": {
       "base": "game:block/metal/sheet-plain/copper1"
+    },
+    "copper1": {
+      "base": "game:block/metal/sheet-plain/copper5"
     },
     "tinbronze": {
       "base": "game:item/resource/plate/tinbronze"
