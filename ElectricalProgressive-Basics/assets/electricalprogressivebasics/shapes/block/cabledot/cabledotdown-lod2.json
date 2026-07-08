@@ -18,16 +18,17 @@
 	"elements": [
 		{
 			"name": "Cube14",
-			"from": [ 5.0, 2.5, 11.0 ],
-			"to": [ 11.0, 5.6, 17.0 ],
-			"rotationOrigin": [ 5.0, 2.7, 11.0 ],
+			"from": [ 3.7, 2.5, 8.0 ],
+			"to": [ 9.7, 5.6, 14.0 ],
+			"rotationOrigin": [ 3.7, 2.7, 8.0 ],
 			"rotationX": 180.0,
+			"rotationY": 45.0,
 			"faces": {
 				"north": { "texture": "#iron", "uv": [ 0.0, 0.0, 6.0, 3.0 ] },
 				"east": { "texture": "#iron", "uv": [ 0.0, 0.0, 6.0, 3.0 ] },
 				"south": { "texture": "#iron", "uv": [ 0.0, 0.0, 6.0, 3.0 ] },
 				"west": { "texture": "#iron", "uv": [ 0.0, 0.0, 6.0, 3.0 ] },
-				"up": { "texture": "#iron", "uv": [ 0.0, 0.0, 6.0, 6.0 ] },
+				"up": { "texture": "#iron", "uv": [ 0.0, 0.0, 6.0, 6.0 ], "enabled": false },
 				"down": { "texture": "#iron", "uv": [ 0.0, 0.0, 6.0, 6.0 ] }
 			},
 			"children": [
@@ -41,7 +42,7 @@
 						"east": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ] },
 						"south": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ] },
 						"west": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ] },
-						"up": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ] },
+						"up": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ], "enabled": false },
 						"down": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ] }
 					}
 				},
@@ -55,7 +56,7 @@
 						"east": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 9.0 ] },
 						"south": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 9.0 ] },
 						"west": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 9.0 ] },
-						"up": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 4.5 ] },
+						"up": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 4.5 ], "enabled": false },
 						"down": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 4.5 ] }
 					}
 				}

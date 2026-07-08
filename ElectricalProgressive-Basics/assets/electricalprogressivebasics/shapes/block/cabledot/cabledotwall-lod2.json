@@ -40,9 +40,9 @@
 			"rotationX": -90.0,
 			"rotationZ": -180.0,
 			"faces": {
-				"north": { "texture": "#iron", "uv": [ 0.0, 0.0, 2.0, 1.0 ] },
+				"north": { "texture": "#iron", "uv": [ 0.0, 0.0, 2.0, 1.0 ], "enabled": false },
 				"east": { "texture": "#iron", "uv": [ 0.0, 0.0, 6.0, 1.0 ] },
-				"south": { "texture": "#iron", "uv": [ 0.0, 0.0, 2.0, 1.0 ] },
+				"south": { "texture": "#iron", "uv": [ 0.0, 0.0, 2.0, 1.0 ], "enabled": false },
 				"west": { "texture": "#iron", "uv": [ 0.0, 0.0, 6.0, 1.0 ] },
 				"up": { "texture": "#iron", "uv": [ 0.0, 0.0, 2.0, 6.0 ] },
 				"down": { "texture": "#iron", "uv": [ 0.0, 0.0, 2.0, 6.0 ] }
@@ -73,7 +73,7 @@
 								"east": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ] },
 								"south": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ] },
 								"west": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ] },
-								"up": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ] },
+								"up": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ], "enabled": false },
 								"down": { "texture": "#electrum", "uv": [ 0.0, 0.0, 2.0, 2.0 ] }
 							}
 						},
@@ -87,7 +87,7 @@
 								"east": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 9.0 ] },
 								"south": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 9.0 ] },
 								"west": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 9.0 ] },
-								"up": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 4.5 ] },
+								"up": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 4.5 ], "enabled": false },
 								"down": { "texture": "#ceramic", "uv": [ 0.0, 0.0, 4.5, 4.5 ] }
 							}
 						}

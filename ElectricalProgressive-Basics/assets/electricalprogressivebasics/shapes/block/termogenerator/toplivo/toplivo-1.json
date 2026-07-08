@@ -13,16 +13,16 @@
 	"elements": [
 		{
 			"name": "toplivo",
-			"from": [ 1.5, 2.5, 1.5 ],
-			"to": [ 14.5, 3.5, 14.5 ],
+			"from": [ 1.5, 1.5, 1.5 ],
+			"to": [ 14.5, 2.5, 14.5 ],
 			"rotationOrigin": [ 6.0, 0.0, 6.0 ],
 			"faces": {
-				"north": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 13.0, 1.0 ], "glow": 220 },
-				"east": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 13.0, 1.0 ], "glow": 220 },
-				"south": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 13.0, 1.0 ], "glow": 220 },
-				"west": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 13.0, 1.0 ], "glow": 220 },
+				"north": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 13.0, 1.0 ], "glow": 220, "enabled": false },
+				"east": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 13.0, 1.0 ], "glow": 220, "enabled": false },
+				"south": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 13.0, 1.0 ], "glow": 220, "enabled": false },
+				"west": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 13.0, 1.0 ], "glow": 220, "windMode": [-1,-1,-1,-1] },
 				"up": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 13.0, 13.0 ], "glow": 220 },
-				"down": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 13.0, 13.0 ], "glow": 220 }
+				"down": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 13.0, 13.0 ], "glow": 220, "enabled": false }
 			}
 		}
 	]}
