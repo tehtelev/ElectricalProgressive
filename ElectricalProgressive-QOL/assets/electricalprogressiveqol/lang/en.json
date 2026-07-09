@@ -7,7 +7,7 @@
   "block-eoven-*": "Electric Oven",
   "block-eoven-burned-north": "Electric Oven (burnt)",
   "block-handbooktitle-eoven": "Usage",
-  "block-handbooktext-eoven": "The electric oven can completely replace a kiln. It turns off automatically when the baking process is finished. No more burning!<br>Supports automatic input and output via chutes.",
+  "block-handbooktext-eoven": "The electric oven can completely replace a clay oven. It turns off automatically when the baking process is finished. No more burning!<br>Supports automatic input and output via chutes.",
   "block-ehorn-*": "Electric Forge",
   "block-ehorn-burned-south": "Electric Forge (burnt)",
   "block-handbooktitle-ehorn": "Usage",
