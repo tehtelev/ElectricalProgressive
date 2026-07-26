@@ -65,6 +65,14 @@ public class ElectricalProgressiveTransport : ModSystem
         liquidTransitRenderer = new PipeLiquidTransitRenderer(api);
         PipeLiquidTransitRenderer.Instance = liquidTransitRenderer;
         api.Event.RegisterRenderer(liquidTransitRenderer, EnumRenderStage.Opaque, "ep-pipe-liquid-transit");
+
+        // Build creative filter cache after world is ready, not on first GUI open.
+        api.Event.LevelFinalize += () =>
+        {
+            api.Event.EnqueueMainThreadTask(
+                () => PipeFilterItemBrowser.Prewarm(api),
+                "ep-pipe-filter-prewarm");
+        };
     }
 
     public override void Dispose()

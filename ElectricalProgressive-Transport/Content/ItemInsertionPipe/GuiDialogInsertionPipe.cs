@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using ElectricalProgressive.Content;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -8,22 +11,24 @@ using Vintagestory.API.MathTools;
 namespace ElectricalProgressive.Content.ItemInsertionPipe;
 
 /// <summary>
-/// Диалоговое окно для настройки фильтрации и скорости передачи предметов
-/// в фильтрующей трубе.
+/// Диалог фильтра предметной трубы: поиск + виртуальная плитка 6x3 + настройки.
 /// </summary>
 public class GuiDialogInsertionPipe : GuiDialogBlockEntity
 {
-    // Поля диалога
-    private BEItemInsertionPipe blockEntity;         // Ссылка на блок-сущность
-    private int transferRate = 1;                    // Текущая скорость передачи (1-8)
-    private BEItemInsertionPipe.FilterMode filterMode = BEItemInsertionPipe.FilterMode.AllowList;
-    private bool matchMod = false;                   // Сопоставление мода предмета
-    private bool matchType = true;                   // Сопоставление типа предмета
-    private bool matchAttributes = false;           // Сопоставление атрибутов предмета
+    public const int SetFilterStackPacketId = 1006;
 
-    /// <summary>
-    /// Конструктор диалога.
-    /// </summary>
+    private readonly BEItemInsertionPipe blockEntity;
+    private readonly PipeFilterItemBrowser browserInventory;
+
+    private int transferRate = 1;
+    private BEItemInsertionPipe.FilterMode filterMode = BEItemInsertionPipe.FilterMode.AllowList;
+    private bool matchMod;
+    private bool matchType = true;
+    private bool matchAttributes;
+
+    private float rowHeight = 50f;
+    private float visibleGridHeight = 150f;
+
     public GuiDialogInsertionPipe(
         string DialogTitle,
         InventoryBase Inventory,
@@ -33,159 +38,341 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
         : base(DialogTitle, Inventory, BlockEntityPosition, capi)
     {
         this.blockEntity = blockEntity;
+        browserInventory = PipeFilterItemBrowser.Create(capi, liquidsOnly: false);
+        browserInventory.OnStackClicked = ApplyBrowserStackToFilter;
 
-        // Защита от дубликатов диалога
-        if (this.IsDuplicate)
+        if (IsDuplicate)
             return;
 
-        // Инициализация текущими настройками блока
         transferRate = blockEntity.TransferRate;
         filterMode = blockEntity.CurrentFilterMode;
         matchMod = blockEntity.MatchMod;
         matchType = blockEntity.MatchType;
         matchAttributes = blockEntity.MatchAttributes;
 
-        // Открываем инвентарь для выбора предметов в фильтрах
-        capi.World.Player.InventoryManager.OpenInventory((IInventory)Inventory);
+        if (Inventory != null)
+            capi.World.Player.InventoryManager.OpenInventory(Inventory);
 
-        // Создаем и настраиваем интерфейс
         SetupDialog();
     }
 
-    /// <summary>
-    /// Инициализация элементов GUI.
-    /// </summary>
     private void SetupDialog()
     {
-        // Настройка размеров окна диалога (320x400 пикселей)
-        var dialogBounds = ElementBounds.Fixed(0, 0, 320, 400);
+        double slotPad = GuiElementItemSlotGridBase.unscaledSlotPadding;
+        ElementBounds gridMeasure = ElementStdBounds
+            .SlotGrid(EnumDialogArea.None, 0, 0, PipeFilterItemBrowser.Cols, PipeFilterItemBrowser.VisibleRows)
+            .FixedGrow(2.0 * slotPad, 2.0 * slotPad);
 
-        // Выравнивание по центру правой части экрана
+        double gridW = gridMeasure.fixedWidth;
+        double gridH = gridMeasure.fixedHeight;
+        // Content width = browser (grid + scrollbar); all rows share the same left/right edges.
+        double contentW = Math.Max(
+            gridW + 6 + PipeFilterGuiStyle.ScrollGap + PipeFilterGuiStyle.ScrollWidth,
+            PipeFilterGuiStyle.MinContentWidth);
+        double dialogW = contentW + PipeFilterGuiStyle.OuterPad * 2;
+        double left = PipeFilterGuiStyle.OuterPad;
+        double right = left + contentW;
+
+        // Vertical stack with consistent gaps (title bar ~30px).
+        double y = 36;
+
+        const double searchResultW = 56;
+        ElementBounds searchBounds = ElementBounds.Fixed(
+            left, y, contentW - searchResultW - PipeFilterGuiStyle.ButtonGap, PipeFilterGuiStyle.SearchHeight);
+        ElementBounds searchResultsBounds = ElementBounds.Fixed(
+            right - searchResultW, y + 5, searchResultW, 20);
+        y += PipeFilterGuiStyle.SearchHeight + PipeFilterGuiStyle.RowGap;
+
+        // Browser flush to left; scrollbar flush to right edge of content.
+        double insetW = contentW - PipeFilterGuiStyle.ScrollWidth - PipeFilterGuiStyle.ScrollGap;
+        ElementBounds insetBounds = ElementBounds.Fixed(left, y, insetW, gridH + 6);
+        // Center slot grid inside the inset when content is wider than the grid.
+        double gridLeft = left + Math.Max(3, (insetW - gridW) / 2.0);
+        ElementBounds gridBounds = ElementBounds.Fixed(gridLeft, y + 3, gridW, gridH);
+        ElementBounds scrollbarBounds = ElementBounds.Fixed(
+            right - PipeFilterGuiStyle.ScrollWidth,
+            y,
+            PipeFilterGuiStyle.ScrollWidth,
+            gridH + 6);
+
+        visibleGridHeight = (float)gridH;
+        rowHeight = visibleGridHeight / PipeFilterItemBrowser.VisibleRows;
+        y += gridH + 6 + PipeFilterGuiStyle.SectionGap;
+
+        ElementBounds settingsHeader = ElementBounds.Fixed(left, y, contentW, PipeFilterGuiStyle.LabelHeight);
+        y += PipeFilterGuiStyle.LabelHeight + PipeFilterGuiStyle.RowGap;
+
+        // Mode buttons: left and right edges of content, equal width, gap in center.
+        double modeBtnW = (contentW - PipeFilterGuiStyle.ButtonGap) / 2.0;
+        ElementBounds btnAllow = ElementBounds.Fixed(left, y, modeBtnW, PipeFilterGuiStyle.ButtonHeight);
+        ElementBounds btnDeny = ElementBounds.Fixed(
+            right - modeBtnW, y, modeBtnW, PipeFilterGuiStyle.ButtonHeight);
+        y += PipeFilterGuiStyle.ButtonHeight + PipeFilterGuiStyle.SectionGap;
+
+        // Match switches: switch on left edge, label fills remaining width to right edge.
+        const double switchW = 36;
+        const double switchLabelGap = 6;
+        ElementBounds swMod = ElementBounds.Fixed(left, y, switchW, 24);
+        ElementBounds lbMod = ElementBounds.Fixed(
+            left + switchW + switchLabelGap, y + 3, contentW - switchW - switchLabelGap, PipeFilterGuiStyle.LabelHeight);
+        y += PipeFilterGuiStyle.SwitchRowHeight;
+
+        ElementBounds swType = ElementBounds.Fixed(left, y, switchW, 24);
+        ElementBounds lbType = ElementBounds.Fixed(
+            left + switchW + switchLabelGap, y + 3, contentW - switchW - switchLabelGap, PipeFilterGuiStyle.LabelHeight);
+        y += PipeFilterGuiStyle.SwitchRowHeight;
+
+        ElementBounds swAttr = ElementBounds.Fixed(left, y, switchW, 24);
+        ElementBounds lbAttr = ElementBounds.Fixed(
+            left + switchW + switchLabelGap, y + 3, contentW - switchW - switchLabelGap, PipeFilterGuiStyle.LabelHeight);
+        y += PipeFilterGuiStyle.SwitchRowHeight + PipeFilterGuiStyle.SectionGap;
+
+        ElementBounds speedHeader = ElementBounds.Fixed(left, y, contentW, PipeFilterGuiStyle.LabelHeight);
+        y += PipeFilterGuiStyle.LabelHeight + PipeFilterGuiStyle.RowGap;
+
+        // Speed: − left edge, value centered, + right edge (same column as mode buttons).
+        const double rateW = 44;
+        double speedBtnW = (contentW - rateW - PipeFilterGuiStyle.ButtonGap * 2) / 2.0;
+        ElementBounds btnDown = ElementBounds.Fixed(left, y, speedBtnW, PipeFilterGuiStyle.ButtonHeight);
+        ElementBounds rateText = ElementBounds.Fixed(
+            left + speedBtnW + PipeFilterGuiStyle.ButtonGap, y + 4, rateW, PipeFilterGuiStyle.ButtonHeight);
+        ElementBounds btnUp = ElementBounds.Fixed(
+            right - speedBtnW, y, speedBtnW, PipeFilterGuiStyle.ButtonHeight);
+        y += PipeFilterGuiStyle.ButtonHeight + PipeFilterGuiStyle.SectionGap;
+
+        ElementBounds countText = ElementBounds.Fixed(left, y, contentW, PipeFilterGuiStyle.LabelHeight);
+        y += PipeFilterGuiStyle.LabelHeight + PipeFilterGuiStyle.OuterPad;
+
+        var dialogBounds = ElementBounds.Fixed(0, 0, dialogW, y);
         var dialogAlignment = ElementStdBounds.AutosizedMainDialog
             .WithAlignment(EnumDialogArea.RightMiddle)
             .WithFixedAlignmentOffset(-GuiStyle.DialogToScreenPadding, 0.0);
 
-        this.ClearComposers();
+        ClearComposers();
 
-        // Создаем компоновщик GUI
         SingleComposer = capi.Gui
-            .CreateCompo("insertionpipegui" + BlockEntityPosition.ToString(), dialogAlignment)
+            .CreateCompo("insertionpipegui" + BlockEntityPosition, dialogAlignment)
             .AddShadedDialogBG(dialogBounds, true)
             .AddDialogTitleBar(DialogTitle, OnTitleBarClose)
             .BeginChildElements(dialogBounds)
 
-        // --- Секция 1: Сетка фильтров (4x3 = 12 слотов) ---
-        
-        // Заголовок секции фильтров
-        .AddStaticText(Lang.Get("electricalprogressivetransport:filter-pipe-comment"),
-            CairoFont.WhiteDetailText(),
-            ElementBounds.Fixed(10, 40, 320, 25))
+            .AddTextInput(searchBounds, OnSearchTextChanged, PipeFilterGuiStyle.SearchFont(), "searchbox")
+            .AddDynamicText(
+                "",
+                PipeFilterGuiStyle.MutedFont().WithOrientation(EnumTextOrientation.Right),
+                searchResultsBounds,
+                "searchResults")
 
-        // Сетка из 12 слотов для предметов фильтрации
-        .AddItemSlotGrid(
-            (IInventory)Inventory,
-            SendInvPacket,
-            6, // Количество колонок
-            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], // Нумерация слотов
-            ElementStdBounds.SlotGrid(EnumDialogArea.None, 10, 60, 6, 2), // Размер сетки 4x3
-            "filterSlots")
+            .AddInset(insetBounds, 3)
+            .AddItemSlotGrid(
+                browserInventory,
+                _ => { },
+                PipeFilterItemBrowser.Cols,
+                gridBounds,
+                "browserSlots")
+            .AddVerticalScrollbar(OnBrowserScrollbar, scrollbarBounds, "browserScrollbar")
 
-        // --- Секция 2: Настройки режима фильтрации ---
+            .AddStaticText(
+                Lang.Get("electricalprogressivetransport:filter-pipe-settings"),
+                PipeFilterGuiStyle.HeaderFont().WithOrientation(EnumTextOrientation.Center),
+                settingsHeader)
 
-        .AddStaticText(Lang.Get("electricalprogressivetransport:filter-pipe-settings"),
-            CairoFont.WhiteDetailText().WithWeight(Cairo.FontWeight.Bold),
-            ElementBounds.Fixed(10, 165, 300, 25))
+            .AddSmallButton(
+                Lang.Get("electricalprogressivetransport:filter-mode-allow"),
+                OnAllowListClicked,
+                btnAllow,
+                EnumButtonStyle.Normal,
+                "btnAllowList")
 
-        // Разделительная линия
-        .AddStaticText("═════════════════════════════",
-            CairoFont.WhiteDetailText(),
-            ElementBounds.Fixed(10, 175, 300, 25))
+            .AddSmallButton(
+                Lang.Get("electricalprogressivetransport:filter-mode-deny"),
+                OnDenyListClicked,
+                btnDeny,
+                EnumButtonStyle.Normal,
+                "btnDenyList")
 
-        // Кнопки выбора режима фильтрации
-        .AddSmallButton(Lang.Get("electricalprogressivetransport:filter-mode-allow"),
-            OnAllowListClicked,
-            ElementBounds.Fixed(10, 190, 130, 30), EnumButtonStyle.Normal, "btnAllowList")
+            .AddSwitch(OnMatchModToggled, swMod, "swMatchMod")
+            .AddStaticText(
+                Lang.Get("electricalprogressivetransport:filter-match-mod"),
+                PipeFilterGuiStyle.LabelFont(),
+                lbMod)
 
-        .AddSmallButton(Lang.Get("electricalprogressivetransport:filter-mode-deny"),
-            OnDenyListClicked,
-            ElementBounds.Fixed(170, 190, 130, 30), EnumButtonStyle.Normal, "btnDenyList")
+            .AddSwitch(OnMatchTypeToggled, swType, "swMatchType")
+            .AddStaticText(
+                Lang.Get("electricalprogressivetransport:filter-match-type"),
+                PipeFilterGuiStyle.LabelFont(),
+                lbType)
 
-        // Разделительная линия
-        .AddStaticText("═════════════════════════════",
-            CairoFont.WhiteDetailText(),
-            ElementBounds.Fixed(10, 225, 300, 25))
+            .AddSwitch(OnMatchAttrsToggled, swAttr, "swMatchAttrs")
+            .AddStaticText(
+                Lang.Get("electricalprogressivetransport:filter-match-attrs"),
+                PipeFilterGuiStyle.LabelFont(),
+                lbAttr)
 
-        // Чекбоксы для настройки условий фильтрации
-        .AddSwitch(OnMatchModToggled, ElementBounds.Fixed(10, 235, 40, 25), "swMatchMod")
-        .AddStaticText(Lang.Get("electricalprogressivetransport:filter-match-mod"),
-            CairoFont.WhiteDetailText(),
-            ElementBounds.Fixed(55, 240, 160, 25))
+            .AddStaticText(
+                Lang.Get("electricalprogressivetransport:filter-speet-transfer"),
+                PipeFilterGuiStyle.HeaderFont().WithOrientation(EnumTextOrientation.Center),
+                speedHeader)
 
-        .AddSwitch(OnMatchTypeToggled, ElementBounds.Fixed(10, 270, 40, 25), "swMatchType")
-        .AddStaticText(Lang.Get("electricalprogressivetransport:filter-match-type"),
-            CairoFont.WhiteDetailText(),
-            ElementBounds.Fixed(55, 275, 160, 25))
+            .AddSmallButton(
+                Lang.Get("electricalprogressivetransport:filter-speet-down"),
+                OnDecreaseRateClicked,
+                btnDown,
+                EnumButtonStyle.Normal,
+                "btnDecrease")
 
-        .AddSwitch(OnMatchAttrsToggled, ElementBounds.Fixed(10, 305, 40, 25), "swMatchAttrs")
-        .AddStaticText(Lang.Get("electricalprogressivetransport:filter-match-attrs"),
-            CairoFont.WhiteDetailText(),
-            ElementBounds.Fixed(55, 310, 160, 25))
+            .AddDynamicText(
+                transferRate.ToString(),
+                PipeFilterGuiStyle.ValueFont(18).WithOrientation(EnumTextOrientation.Center),
+                rateText,
+                "txtTransferRate")
 
-        // Разделительная линия
-        .AddStaticText("═════════════════════════════",
-            CairoFont.WhiteDetailText(),
-            ElementBounds.Fixed(10, 350, 300, 25))
+            .AddSmallButton(
+                Lang.Get("electricalprogressivetransport:filter-speet-up"),
+                OnIncreaseRateClicked,
+                btnUp,
+                EnumButtonStyle.Normal,
+                "btnIncrease")
 
-        // --- Секция 3: Настройка скорости передачи ---
+            .AddDynamicText(
+                "",
+                PipeFilterGuiStyle.CountFont().WithOrientation(EnumTextOrientation.Center),
+                countText,
+                "filterCountText")
 
-        .AddStaticText(Lang.Get("electricalprogressivetransport:filter-speet-transfer"),
-            CairoFont.WhiteDetailText().WithWeight(Cairo.FontWeight.Bold),
-            ElementBounds.Fixed(10, 340, 150, 25))
+            .EndChildElements()
+            .Compose();
 
-        // Кнопка уменьшения скорости
-        .AddSmallButton(Lang.Get("electricalprogressivetransport:filter-speet-down"),
-            OnDecreaseRateClicked,
-            ElementBounds.Fixed(12, 365, 100, 30), EnumButtonStyle.Normal, "btnDecrease")
+        var searchBox = SingleComposer.GetTextInput("searchbox");
+        searchBox?.SetPlaceHolderText(Lang.Get("electricalprogressivetransport:filter-search-placeholder"));
 
-        // Отображение текущей скорости
-        .AddDynamicText(transferRate.ToString(),
-            CairoFont.WhiteDetailText().WithFontSize(18).WithWeight(Cairo.FontWeight.Bold),
-            ElementBounds.Fixed(150, 368, 40, 30), "txtTransferRate")
-
-        // Кнопка увеличения скорости
-        .AddSmallButton(Lang.Get("electricalprogressivetransport:filter-speet-up"),
-            OnIncreaseRateClicked,
-            ElementBounds.Fixed(200, 365, 100, 30), EnumButtonStyle.Normal, "btnIncrease")
-
-        .EndChildElements()
-        .Compose();
-
-        // Применяем начальные значения чекбоксов
         ApplyInitialSwitchValues();
-
-        // Обновляем состояние элементов UI
         UpdateFilterButtons();
         UpdateTransferRateDisplay();
+        RefreshBrowser(resetScroll: true);
     }
 
-    /// <summary>
-    /// Применение начальных значений чекбоксов при создании диалога.
-    /// </summary>
+    private void OnSearchTextChanged(string text)
+    {
+        browserInventory.SetSearch(text ?? "", resetScroll: true);
+        UpdateScrollbarAndCounters(resetScrollPos: true);
+    }
+
+    private void RefreshBrowser(bool resetScroll)
+    {
+        if (Inventory is not InventoryInsertionPipe filterInv)
+            return;
+
+        var codes = new List<string>();
+        for (int i = 0; i < filterInv.Count; i++)
+        {
+            ItemStack? snap = filterInv.GetFilterSnapshot(i);
+            string code = PipeFilterItemBrowser.GetCodeKey(snap);
+            if (!string.IsNullOrEmpty(code))
+                codes.Add(code);
+        }
+
+        string search = SingleComposer?.GetTextInput("searchbox")?.GetText() ?? "";
+        browserInventory.SetSelectedCodes(codes, resetScroll);
+        browserInventory.SetSearch(search, resetScroll);
+        UpdateScrollbarAndCounters(resetScrollPos: resetScroll);
+
+        int active = 0;
+        for (int i = 0; i < filterInv.Count; i++)
+        {
+            if (filterInv.IsFilterSet(i))
+                active++;
+        }
+
+        SingleComposer?.GetDynamicText("filterCountText")?.SetNewText(
+            Lang.Get("electricalprogressivetransport:active-filters", active, filterInv.Count));
+    }
+
+    private void UpdateScrollbarAndCounters(bool resetScrollPos)
+    {
+        var scrollbar = SingleComposer?.GetScrollbar("browserScrollbar");
+        var resultsText = SingleComposer?.GetDynamicText("searchResults");
+
+        float totalH = browserInventory.GetScrollTotalHeight(visibleGridHeight, rowHeight);
+        scrollbar?.SetHeights(visibleGridHeight, totalH);
+        if (resetScrollPos)
+            scrollbar?.SetScrollbarPosition(0);
+
+        resultsText?.SetNewText(
+            Lang.Get("electricalprogressivetransport:filter-search-results", browserInventory.FilteredCount));
+    }
+
+    private void OnBrowserScrollbar(float value)
+    {
+        browserInventory.SetScrollPixels(value, rowHeight);
+    }
+
+    private void ApplyBrowserStackToFilter(ItemStack stack)
+    {
+        if (Inventory is not InventoryInsertionPipe filterInv || stack?.Collectible == null)
+            return;
+
+        stack.StackSize = 1;
+
+        for (int i = 0; i < filterInv.Count; i++)
+        {
+            ItemStack? existing = filterInv.GetFilterSnapshot(i);
+            if (PipeFilterItemBrowser.StacksMatchForFilter(capi.World, existing, stack))
+            {
+                filterInv.ClearFilterSnapshot(i);
+                SendSetFilterStackPacket(i, null);
+                PlayClickSound();
+                RefreshBrowser(resetScroll: false);
+                return;
+            }
+        }
+
+        int targetSlot = -1;
+        for (int i = 0; i < filterInv.Count; i++)
+        {
+            if (!filterInv.IsFilterSet(i))
+            {
+                targetSlot = i;
+                break;
+            }
+        }
+
+        if (targetSlot < 0)
+            targetSlot = filterInv.Count - 1;
+
+        filterInv.SetFilterSnapshot(targetSlot, stack);
+        SendSetFilterStackPacket(targetSlot, stack);
+        PlayClickSound();
+        RefreshBrowser(resetScroll: false);
+    }
+
+    private void SendSetFilterStackPacket(int slotId, ItemStack? stack)
+    {
+        var tree = new TreeAttribute();
+        tree.SetInt("slotId", slotId);
+        if (stack != null)
+            tree.SetItemstack("stack", stack.Clone());
+
+        capi.Network.SendBlockEntityPacket(BlockEntityPosition, SetFilterStackPacketId, tree.ToBytes());
+    }
+
+    private void PlayClickSound()
+    {
+        capi.World.PlaySoundAt(
+            new AssetLocation("sounds/player/collect"),
+            capi.World.Player.Entity,
+            null,
+            true,
+            16f);
+    }
+
     private void ApplyInitialSwitchValues()
     {
-        var swMatchMod = SingleComposer.GetSwitch("swMatchMod");
-        swMatchMod?.SetValue(matchMod);
-
-        var swMatchType = SingleComposer.GetSwitch("swMatchType");
-        swMatchType?.SetValue(matchType);
-
-        var swMatchAttrs = SingleComposer.GetSwitch("swMatchAttrs");
-        swMatchAttrs?.SetValue(matchAttributes);
+        SingleComposer.GetSwitch("swMatchMod")?.SetValue(matchMod);
+        SingleComposer.GetSwitch("swMatchType")?.SetValue(matchType);
+        SingleComposer.GetSwitch("swMatchAttrs")?.SetValue(matchAttributes);
     }
 
-    /// <summary>
-    /// Обновление состояния кнопок режима фильтрации.
-    /// </summary>
     private void UpdateFilterButtons()
     {
         var btnAllow = SingleComposer.GetButton("btnAllowList");
@@ -198,45 +385,30 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
             btnDeny.Enabled = filterMode != BEItemInsertionPipe.FilterMode.DenyList;
     }
 
-    /// <summary>
-    /// Обновление отображения и состояния кнопок скорости передачи.
-    /// </summary>
     private void UpdateTransferRateDisplay()
     {
         var txtRate = SingleComposer.GetDynamicText("txtTransferRate");
-        if (txtRate != null)
-        {
-            txtRate.SetNewText(transferRate.ToString());
+        if (txtRate == null)
+            return;
 
-            var btnDecrease = SingleComposer.GetButton("btnDecrease");
-            var btnIncrease = SingleComposer.GetButton("btnIncrease");
+        txtRate.SetNewText(transferRate.ToString());
 
-            if (btnDecrease != null)
-                btnDecrease.Enabled = transferRate > 1;
+        var btnDecrease = SingleComposer.GetButton("btnDecrease");
+        var btnIncrease = SingleComposer.GetButton("btnIncrease");
 
-            if (btnIncrease != null)
-                btnIncrease.Enabled = transferRate < 8;
-        }
+        if (btnDecrease != null)
+            btnDecrease.Enabled = transferRate > 1;
+
+        if (btnIncrease != null)
+            btnIncrease.Enabled = transferRate < 8;
     }
 
-    // --- Обработчики событий ---
-
-    /// <summary>
-    /// Обработка закрытия заголовка диалога.
-    /// </summary>
     private void OnTitleBarClose()
     {
         TryClose();
-
-        // Отправка пакета серверу о закрытии GUI
-        capi.Network.SendBlockEntityPacket(
-            BlockEntityPosition,
-            1001); // Пакет закрытия GUI
+        capi.Network.SendBlockEntityPacket(BlockEntityPosition, 1001);
     }
 
-    /// <summary>
-    /// Обработка клика по кнопке "Разрешить" (Allow List).
-    /// </summary>
     private bool OnAllowListClicked()
     {
         filterMode = BEItemInsertionPipe.FilterMode.AllowList;
@@ -245,9 +417,6 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
         return true;
     }
 
-    /// <summary>
-    /// Обработка клика по кнопке "Запретить" (Deny List).
-    /// </summary>
     private bool OnDenyListClicked()
     {
         filterMode = BEItemInsertionPipe.FilterMode.DenyList;
@@ -256,36 +425,24 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
         return true;
     }
 
-    /// <summary>
-    /// Обработка переключения чекбокса "Сопоставление мода".
-    /// </summary>
     private void OnMatchModToggled(bool state)
     {
         matchMod = state;
         SendFilterSettings();
     }
 
-    /// <summary>
-    /// Обработка переключения чекбокса "Сопоставление типа".
-    /// </summary>
     private void OnMatchTypeToggled(bool state)
     {
         matchType = state;
         SendFilterSettings();
     }
 
-    /// <summary>
-    /// Обработка переключения чекбокса "Сопоставление атрибутов".
-    /// </summary>
     private void OnMatchAttrsToggled(bool state)
     {
         matchAttributes = state;
         SendFilterSettings();
     }
 
-    /// <summary>
-    /// Обработка нажатия кнопки уменьшения скорости.
-    /// </summary>
     private bool OnDecreaseRateClicked()
     {
         if (transferRate > 1)
@@ -298,9 +455,6 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
         return true;
     }
 
-    /// <summary>
-    /// Обработка нажатия кнопки увеличения скорости.
-    /// </summary>
     private bool OnIncreaseRateClicked()
     {
         if (transferRate < 8)
@@ -313,70 +467,44 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
         return true;
     }
 
-    // --- Отправка данных на сервер ---
-
-    /// <summary>
-    /// Обновление скорости передачи.
-    /// </summary>
     private void SendTransferRateUpdate()
     {
         try
         {
             var tree = new TreeAttribute();
             tree.SetInt("transferRate", transferRate);
-
             capi.Network.SendBlockEntityPacket(BlockEntityPosition, 1003, tree.ToBytes());
         }
-        catch (Exception ex)
+        catch
         {
-            //Api.Logger.Error($"Ошибка при отправке скорости передачи: {ex.Message}");
+            // ignore
         }
     }
 
-    /// <summary>
-    /// Отправка настроек фильтрации на сервер.
-    /// </summary>
     private void SendFilterSettings()
     {
-        using var ms = new System.IO.MemoryStream();
-        using var bw = new System.IO.BinaryWriter(ms);
+        using var ms = new MemoryStream();
+        using var bw = new BinaryWriter(ms);
 
         bw.Write((int)filterMode);
         bw.Write(matchMod);
         bw.Write(matchType);
         bw.Write(matchAttributes);
 
-        capi.Network.SendBlockEntityPacket(
-            BlockEntityPosition,
-            1002, // Пакет настроек фильтра
-            ms.ToArray());
+        capi.Network.SendBlockEntityPacket(BlockEntityPosition, 1002, ms.ToArray());
     }
-
-    /// <summary>
-    /// Отправка инвентаря для отображения в слотах фильтра.
-    /// </summary>
-    private void SendInvPacket(object p)
-    {
-        capi.Network.SendBlockEntityPacket(
-            BlockEntityPosition.X,
-            BlockEntityPosition.Y,
-            BlockEntityPosition.Z,
-            p);
-    }
-
-    // --- Жизненный цикл ---
 
     public override void OnGuiClosed()
     {
         base.OnGuiClosed();
 
-        // Сохранение настроек при закрытии
         SendTransferRateUpdate();
+        SingleComposer?.GetSlotGrid("browserSlots")?.OnGuiClosed(capi);
 
-        var slotGrid = SingleComposer?.GetSlotGrid("filterSlots");
+        if (Inventory != null)
+            capi.World.Player.InventoryManager.CloseInventory(Inventory);
 
-        slotGrid?.OnGuiClosed(capi);
-
-        capi.World.Player.InventoryManager.CloseInventory((IInventory)Inventory);
+        browserInventory.OnStackClicked = null;
+        browserInventory.DiscardAll();
     }
 }

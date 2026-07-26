@@ -157,7 +157,11 @@ public class InventoryLiquidInsertionPipe : InventoryGeneric
         NormalizeFilterSnapshot(visibleSnapshot);
 
         this[slotId].Itemstack = visibleSnapshot?.Collectible == null ? null : visibleSnapshot;
-        this[slotId].MarkDirty();
+
+        // MarkDirty requires inventory.Api; during chunk FromTreeAttributes Api is still null
+        // and DidModifyItemSlot throws NRE, which discards the whole block entity.
+        if (Api != null)
+            this[slotId].MarkDirty();
     }
 
     private void ResolveFilterSnapshot(ItemStack? snapshot)

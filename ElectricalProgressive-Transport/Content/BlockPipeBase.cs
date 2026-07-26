@@ -77,7 +77,7 @@ namespace ElectricalProgressive.Content
             if (newBlock == null)
                 return false;
 
-            ITreeAttribute tree = SaveEntityData(world, pos);
+            ITreeAttribute tree = SaveEntityData(world, pos, baseType, nextBaseType);
 
             world.BlockAccessor.SetBlock(newBlock.BlockId, pos);
             world.Api.Event.EnqueueMainThreadTask(() =>
@@ -103,7 +103,11 @@ namespace ElectricalProgressive.Content
             return true;
         }
 
-        private ITreeAttribute SaveEntityData(IWorldAccessor world, BlockPos pos)
+        private ITreeAttribute SaveEntityData(
+            IWorldAccessor world,
+            BlockPos pos,
+            string fromType,
+            string toType)
         {
             var currentEntity = world.BlockAccessor.GetBlockEntity(pos);
             if (currentEntity == null)
@@ -126,7 +130,28 @@ namespace ElectricalProgressive.Content
                 tree.SetInt("filterMode", (int)liquidPipe.CurrentFilterMode);
             }
 
+            // Item filters must not carry over into a liquid pipe (different filter domain).
+            if (fromType == "pipe-item-insertion" && toType == "pipe-liquid-insertion")
+                ClearFilterInventoryForTransform(tree, slotCount: 18);
+
             return tree;
+        }
+
+        /// <summary>
+        /// Drops filter slot contents (and item-only match flags) so the next pipe type starts empty.
+        /// </summary>
+        private static void ClearFilterInventoryForTransform(ITreeAttribute tree, int slotCount)
+        {
+            if (tree == null)
+                return;
+
+            var invTree = new TreeAttribute();
+            invTree.SetInt("qslots", slotCount);
+            tree["inventory"] = invTree;
+
+            tree.RemoveAttribute("matchMod");
+            tree.RemoveAttribute("matchType");
+            tree.RemoveAttribute("matchAttributes");
         }
 
         private void UpdateNeighborConnections(IWorldAccessor world, BlockPos pos)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using ElectricalProgressive.Content.NetworkPipe;
 using ElectricalProgressive.Content.NormalPipe;
@@ -110,6 +111,11 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     public override InventoryBase Inventory => _inventory;
     public override string InventoryClassName => "liquidinsertionpipe";
 
+    private static readonly FieldInfo? BaseInventoryField =
+        typeof(BlockEntityGenericTypedContainer).GetField(
+            "inventory",
+            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+
     /// <summary>Скорость передачи жидкости</summary>
     public int TransferRate => transferRate;
     /// <summary>Текущий режим фильтрации</summary>
@@ -117,13 +123,45 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
 
     public BELiquidInsertionPipe()
     {
-        _inventory = new InventoryLiquidInsertionPipe(6, InventoryClassName, null, null, this);
+        quantitySlots = 18;
+        inventoryClassName = "liquidinsertionpipe";
+        // 18 слотов фильтра (плитка 6x3), как у предметной трубы
+        _inventory = new InventoryLiquidInsertionPipe(18, inventoryClassName, null, null, this);
+        BindBaseInventoryField();
+    }
+
+    /// <summary>
+    /// Keep specialized liquid filter inventory and bind it to the base container field.
+    /// Fixes missing BE after world rejoin (base InitInventory / null inventory tree).
+    /// </summary>
+    protected override void InitInventory(Vintagestory.API.Common.Block block)
+    {
+        if (_inventory == null)
+            _inventory = new InventoryLiquidInsertionPipe(18, "liquidinsertionpipe", null, null, this);
+
+        quantitySlots = 18;
+        inventoryClassName = "liquidinsertionpipe";
+        BindBaseInventoryField();
+    }
+
+    private void BindBaseInventoryField()
+    {
+        try
+        {
+            BaseInventoryField?.SetValue(this, _inventory);
+        }
+        catch
+        {
+            // ignore
+        }
     }
 
     /// <summary>Инициализация блок-сущности</summary>
     public override void Initialize(ICoreAPI api)
     {
+        BindBaseInventoryField();
         base.Initialize(api);
+        BindBaseInventoryField();
 
         DetermineOutputDirection();
 
@@ -1117,11 +1155,43 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         }
     }
 
+    /// <summary>
+    /// Safe late-init during chunk load: base container.LateInit() NREs when Api is unset.
+    /// </summary>
+    public override void LateInitInventory()
+    {
+        BindBaseInventoryField();
+        if (Api == null || Inventory == null || Pos == null)
+            return;
+
+        Inventory.LateInitialize(InventoryClassName + "-" + Pos, Api);
+        Inventory.ResolveBlocksOrItems();
+        if (Inventory.Pos == null)
+            Inventory.Pos = Pos;
+    }
+
     /// <summary>Загрузка атрибутов из дерева</summary>
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
     {
+        BindBaseInventoryField();
+
+        // Pre-seed type so base does not treat first load as type-change → early LateInitInventory.
+        if (tree != null)
+        {
+            type = tree.GetString("type", defaultType) ?? defaultType;
+            isPerPlayer = tree.GetBool("isPerPlayer", false);
+
+            if (!tree.HasAttribute("inventory"))
+            {
+                var invTree = new TreeAttribute();
+                invTree.SetInt("qslots", _inventory?.Count ?? 18);
+                tree["inventory"] = invTree;
+            }
+        }
+
         base.FromTreeAttributes(tree, worldAccessForResolve);
-        _inventory.CaptureFilterSnapshotsFromSlots(worldAccessForResolve);
+        BindBaseInventoryField();
+        _inventory?.CaptureFilterSnapshotsFromSlots(worldAccessForResolve);
 
         transferRate = tree.GetInt("transferRate", 100);
         currentFilterMode = (FilterMode)tree.GetInt("filterMode", 0);
@@ -1131,6 +1201,8 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     /// <summary>Сохранение атрибутов в дерево</summary>
     public override void ToTreeAttributes(ITreeAttribute tree)
     {
+        BindBaseInventoryField();
+
         if (Api?.World != null)
             _inventory.MaintainFilterSnapshots(Api.World);
 
@@ -1213,6 +1285,49 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         else if (packetid == 2004) // Старый пакет настроек порчи: больше не нужен для пассивных фильтр-снимков.
         {
             MarkDirty();
+        }
+        else if (packetid == GuiDialogLiquidInsertionPipe.SetFilterStackPacketId)
+        {
+            ApplyFilterStackPacket(data);
+        }
+    }
+
+    private void ApplyFilterStackPacket(byte[] data)
+    {
+        if (data == null || _inventory == null)
+            return;
+
+        try
+        {
+            var tree = new TreeAttribute();
+            tree.FromBytes(data);
+
+            int slotId = tree.GetInt("slotId", -1);
+            if (slotId < 0 || slotId >= _inventory.Count)
+                return;
+
+            ItemStack? stack = tree.GetItemstack("stack");
+            if (stack == null)
+            {
+                _inventory.ClearFilterSnapshot(slotId);
+            }
+            else
+            {
+                stack.ResolveBlockOrItem(Api.World);
+                if (stack.Collectible == null)
+                    return;
+
+                stack.StackSize = 1;
+                InventoryLiquidInsertionPipe.FreezeSnapshotTemperature(Api.World, stack);
+                _inventory.SetFilterSnapshot(slotId, stack);
+            }
+
+            MarkDirty(true);
+            Api.World.BlockAccessor.MarkBlockDirty(Pos);
+        }
+        catch (Exception ex)
+        {
+            Api?.Logger?.Error($"Ошибка при установке жидкостного фильтра из списка: {ex.Message}");
         }
     }
 

@@ -1,0 +1,1637 @@
+diff --git a/ElectricalProgressive-Claims/Content/ClaimMapDialog.cs b/ElectricalProgressive-Claims/Content/ClaimMapDialog.cs
+index 197fc96..9db89fe 100644
+--- a/ElectricalProgressive-Claims/Content/ClaimMapDialog.cs
++++ b/ElectricalProgressive-Claims/Content/ClaimMapDialog.cs
+@@ -11,13 +11,31 @@ namespace ElectricalProgressive.Content;
+ public sealed class ClaimMapDialog : GuiDialog
+ {
+     private const int DefaultRadius = 10;
++    private const int PageMap = 0;
++    private const int PageClaims = 1;
+ 
+     private readonly ICoreClientAPI clientApi;
+     private readonly IClientNetworkChannel channel;
+     private ClaimMapGridElement? gridElement;
++    private ClaimMapStatePacket? mapState;
++    private ClaimListStatePacket? claimListState;
+     private int centerChunkX;
+     private int centerChunkZ;
+     private int radius = DefaultRadius;
++    private int activePage = PageMap;
++    private int selectedClaimId;
++    private string selectedMemberUid = "";
++    private string selectedMemberName = "";
++    private string memberNameInput = "";
++    private string claimNameInput = "";
++    private bool accessUse = true;
++    private bool accessBuild = true;
++    private float claimListScrollValue;
++    private float memberListScrollValue;
++    private ElementBounds? claimListTableBounds;
++    private ElementBounds? claimListClipBounds;
++    private ElementBounds? memberListTableBounds;
++    private ElementBounds? memberListClipBounds;
+ 
+     public override string ToggleKeyCombinationCode => "epclaimsopenmap";
+     public override bool PrefersUngrabbedMouse => true;
+@@ -64,6 +82,7 @@ public sealed class ClaimMapDialog : GuiDialog
+ 
+     public void ApplyState(ClaimMapStatePacket packet)
+     {
++        mapState = packet;
+         centerChunkX = packet.CenterChunkX;
+         centerChunkZ = packet.CenterChunkZ;
+         radius = packet.Radius;
+@@ -72,12 +91,52 @@ public sealed class ClaimMapDialog : GuiDialog
+         UpdateText(packet);
+     }
+ 
++    public void ApplyClaimList(ClaimListStatePacket packet)
++    {
++        claimListState = packet;
++
++        if (packet.Claims.Count == 0)
++        {
++            selectedClaimId = 0;
++            selectedMemberUid = "";
++            selectedMemberName = "";
++        }
++        else if (selectedClaimId == 0 || packet.Claims.All(claim => claim.ClaimId != selectedClaimId))
++        {
++            SelectClaim(packet.Claims[0]);
++        }
++
++        var selectedClaim = GetSelectedClaim();
++        if (selectedClaim == null || selectedClaim.Members.All(member => member.PlayerUid != selectedMemberUid))
++        {
++            selectedMemberUid = "";
++            selectedMemberName = "";
++        }
++
++        if (activePage == PageClaims)
++        {
++            ComposeDialog();
++        }
++    }
++
++    public void ApplyClaimShow(ClaimShowStatePacket packet)
++    {
++        if (claimListState != null)
++        {
++            claimListState.Message = packet.Message ?? "";
++            claimListState.MessageType = packet.MessageType;
++        }
++
++        SingleComposer?.GetDynamicText("claimsMessage").SetNewText(packet.Message ?? "");
++    }
++
+     public override void OnGuiOpened()
+     {
+         base.OnGuiOpened();
+         CenterOnPlayer();
+         gridElement?.CenterMapOnPlayer();
+         RequestRefresh();
++        RequestClaimList();
+     }
+ 
+     public override bool OnEscapePressed()
+@@ -88,7 +147,7 @@ public sealed class ClaimMapDialog : GuiDialog
+ 
+     private void ComposeDialog()
+     {
+-        var mainBounds = ElementBounds.Fixed(0, 0, 760, 650);
++        var mainBounds = ElementBounds.Fixed(0, 0, 780, 690);
+         var bgBounds = ElementBounds.Fill.WithFixedPadding(GuiStyle.ElementToDialogPadding);
+         bgBounds.BothSizing = ElementSizing.FitToChildren;
+         bgBounds.WithChildren(mainBounds);
+@@ -96,29 +155,131 @@ public sealed class ClaimMapDialog : GuiDialog
+         var dialogBounds = ElementStdBounds.AutosizedMainDialog
+             .WithAlignment(EnumDialogArea.CenterMiddle);
+ 
+-        var gridBounds = ElementBounds.Fixed(18, 72, 540, 540);
+-        var warning: in the working copy of 'ElectricalProgressive-Claims/Content/ClaimMapDialog.cs', LF will be replaced by CRLF the next time Git touches it
+sidePanelBounds = ElementBounds.Fixed(571, 69, 175, 505);
+-        gridElement = new ClaimMapGridElement(clientApi, gridBounds, OnChunksSelected, () => RequestRefresh(useMapView: true));
++        gridElement?.Dispose();
++        gridElement = null;
++        if (activePage == PageMap)
++        {
++            gridElement = new ClaimMapGridElement(clientApi, ElementBounds.Fixed(18, 102, 540, 540), OnChunksSelected, () => RequestRefresh(useMapView: true));
++        }
+ 
+         ClearComposers();
+-        SingleComposer = clientApi.Gui
++        var composer = clientApi.Gui
+             .CreateCompo("epclaimmap", dialogBounds)
+             .AddShadedDialogBG(bgBounds, true)
+             .AddDialogTitleBar(Lang.Get("electricalprogressiveclaims:claim-map-title"), OnTitleBarClose)
+             .BeginChildElements(bgBounds)
+-            .AddStaticText(Lang.Get("electricalprogressiveclaims:claim-map-coords"), CairoFont.WhiteDetailText(), ElementBounds.Fixed(18, 40, 180, 24), "coordsLabel")
+-            .AddStaticText(Lang.Get("electricalprogressiveclaims:claim-map-hint"), CairoFont.WhiteSmallText(), ElementBounds.Fixed(18, 58, 520, 18), "hintLabel")
+-            .AddDynamicText("", CairoFont.WhiteDetailText(), ElementBounds.Fixed(94, 40, 260, 24), "coordsText")
+-            .AddDynamicCustomDraw(sidePanelBounds, DrawSidePanelBackground, "sidePanelBg")
+-            .AddInteractiveElement(gridElement, "chunkGrid")
+-            .AddStaticText(Lang.Get("electricalprogressiveclaims:claim-map-used"), CairoFont.WhiteDetailText(), ElementBounds.Fixed(582, 78, 150, 24), "usedLabel")
+-            .AddDynamicText("", CairoFont.WhiteDetailText(), ElementBounds.Fixed(582, 106, 150, 54), "usedText")
+-            .AddStaticText(Lang.Get("electricalprogressiveclaims:claim-map-legend-title"), CairoFont.WhiteDetailText(), ElementBounds.Fixed(582, 178, 150, 24), "legendTitle")
+-            .AddDynamicCustomDraw(ElementBounds.Fixed(582, 210, 150, 115), DrawLegend, "legend")
+-            .AddDynamicText("", CairoFont.WhiteDetailText(), ElementBounds.Fixed(582, 350, 150, 88), "messageText")
+-            .AddButton(Lang.Get("electricalprogressiveclaims:claim-map-center"), CenterButton, ElementBounds.Fixed(582, 536, 150, 34), EnumButtonStyle.Normal, "centerButton")
+-            .EndChildElements()
+-            .Compose();
++            .AddButton(Lang.Get("electricalprogressiveclaims:claim-map-tab-map"), SwitchToMapPage, ElementBounds.Fixed(18, 40, 110, 30), activePage == PageMap ? EnumButtonStyle.Small : EnumButtonStyle.Normal, "mapTab")
++            .AddButton(Lang.Get("electricalprogressiveclaims:claim-map-tab-claims"), SwitchToClaimsPage, ElementBounds.Fixed(136, 40, 130, 30), activePage != PageMap ? EnumButtonStyle.Small : EnumButtonStyle.Normal, "claimsTab");
++
++        if (activePage == PageMap)
++        {
++            ComposeMapPage(composer);
++        }
++        else
++        {
++            ComposeClaimsPage(composer);
++        }
++
++        SingleComposer = composer.EndChildElements().Compose();
++        ApplyClaimsPageWidgetState();
++        UpdateText(null);
++    }
++
++    private void ComposeMapPage(GuiComposer composer)
++    {
++        composer
++            .AddStaticText(Lang.Get("electricalprogressiveclaims:claim-map-coords"), CairoFont.WhiteDetailText(), ElementBounds.Fixed(18, 72, 180, 24), "coordsLabel")
++            .AddStaticText(Lang.Get("electricalprogressiveclaims:claim-map-hint"), CairoFont.WhiteSmallText(), ElementBounds.Fixed(18, 88, 520, 18), "hintLabel")
++            .AddDynamicText("", CairoFont.WhiteDetailText(), ElementBounds.Fixed(94, 72, 260, 24), "coordsText")
++            .AddDynamicCustomDraw(ElementBounds.Fixed(571, 99, 175, 505), DrawSidePanelBackground, "sidePanelBg");
++
++        if (gridElement != null)
++        {
++            composer.AddInteractiveElement(gridElement, "chunkGrid");
++        }
++
++        composer
++            .AddStaticText(Lang.Get("electricalprogressiveclaims:claim-map-used"), CairoFont.WhiteDetailText(), ElementBounds.Fixed(582, 108, 150, 24), "usedLabel")
++            .AddDynamicText("", CairoFont.WhiteDetailText(), ElementBounds.Fixed(582, 136, 150, 54), "usedText")
++            .AddStaticText(Lang.Get("electricalprogressiveclaims:claim-map-legend-title"), CairoFont.WhiteDetailText(), ElementBounds.Fixed(582, 208, 150, 24), "legendTitle")
++            .AddDynamicCustomDraw(ElementBounds.Fixed(582, 240, 150, 115), DrawLegend, "legend")
++            .AddDynamicText("", CairoFont.WhiteDetailText(), ElementBounds.Fixed(582, 380, 150, 88), "messageText")
++            .AddButton(Lang.Get("electricalprogressiveclaims:claim-map-center"), CenterButton, ElementBounds.Fixed(582, 566, 150, 34), EnumButtonStyle.Normal, "centerButton");
++    }
++
++    private void ComposeClaimsPage(GuiComposer composer)
++    {
++        composer
++            .AddDynamicCustomDraw(ElementBounds.Fixed(18, 84, 258, 570), DrawSidePanelBackground, "claimListBg")
++            .AddDynamicCustomDraw(ElementBounds.Fixed(292, 84, 454, 570), DrawSidePanelBackground, "claimDetailsBg")
++            .AddStaticText(Lang.Get("electricalprogressiveclaims:claims-list-title"), CairoFont.WhiteDetailText(), ElementBounds.Fixed(30, 96, 224, 24), "claimsListTitle")
++            .AddButton(Lang.Get("electricalprogressiveclaims:claims-show"), ShowSelectedClaimButton, ElementBounds.Fixed(30, 596, 104, 28), EnumButtonStyle.Small, "claimsShow")
++            .AddButton(Lang.Get("electricalprogressiveclaims:claims-refresh"), RefreshClaimsButton, ElementBounds.Fixed(150, 596, 104, 28), EnumButtonStyle.Small, "claimsRefresh");
++
++        var claims = claimListState?.Claims ?? [];
++        var claimListBounds = ElementBounds.Fixed(30, 130, 224, 452);
++        claimListClipBounds = claimListBounds.ForkContainingChild(3, 3, 3, 3);
++        claimListTableBounds = claimListClipBounds.ForkContainingChild(0, 0, 0, -3).WithFixedPadding(3);
++
++        composer
++            .AddInset(claimListBounds, 3, 0.85f)
++            .AddVerticalScrollbar(OnClaimListScroll, ElementStdBounds.VerticalScrollbar(claimListBounds), "claimListScroll")
++            .BeginClip(claimListClipBounds)
++            .AddCellList(claimListTableBounds, CreateClaimListCell, BuildClaimCells(), "claimList")
++            .EndClip();
++
++        if (claims.Count == 0)
++        {
++            composer.AddStaticText(Lang.Get("electricalprogressiveclaims:claims-empty"), CairoFont.WhiteSmallText(), ElementBounds.Fixed(30, 130, 224, 40), "claimsEmpty");
++        }
++
++        var selectedClaim = GetSelectedClaim();
++        if (selectedClaim == null)
++        {
++            composer.AddStaticText(Lang.Get("electricalprogressiveclaims:claims-select"), CairoFont.WhiteDetailText(), ElementBounds.Fixed(310, 104, 410, 40), "claimSelectHint");
++            return;
++        }
++
++        composer
++            .AddStaticText(selectedClaim.Name, CairoFont.WhiteDetailText(), ElementBounds.Fixed(310, 96, 410, 28), "claimName")
++            .AddStaticText(Lang.Get("electricalprogressiveclaims:claims-owner", selectedClaim.OwnerName), CairoFont.WhiteSmallText(), ElementBounds.Fixed(310, 122, 410, 22), "ownerText")
++            .AddStaticText(Lang.Get("electricalprogressiveclaims:claims-stats", selectedClaim.AreaCount, selectedClaim.Volume), CairoFont.WhiteSmallText(), ElementBounds.Fixed(310, 144, 410, 22), "claimStats")
++            .AddStaticText(Lang.Get("electricalprogressiveclaims:claims-rename"), CairoFont.WhiteSmallText(), ElementBounds.Fixed(310, 176, 110, 20), "renameLabel")
++            .AddDynamicCustomDraw(ElementBounds.Fixed(426, 168, 188, 36), DrawTextInputBackground, "claimNameInputBg")
++            .AddTextInput(ElementBounds.Fixed(430, 172, 180, 28), text => claimNameInput = text, CairoFont.WhiteDetailText(), "claimNameInput")
++            .AddButton(Lang.Get("electricalprogressiveclaims:claims-rename-button"), RenameClaimButton, ElementBounds.Fixed(620, 172, 104, 28), EnumButtonStyle.Small, "renameClaim")
++            .AddStaticText(Lang.Get("electricalprogressiveclaims:claims-members-title"), CairoFont.WhiteDetailText(), ElementBounds.Fixed(310, 222, 180, 24), "membersTitle");
++
++        var memberListBounds = ElementBounds.Fixed(310, 252, 284, 208);
++        memberListClipBounds = memberListBounds.ForkContainingChild(3, 3, 3, 3);
++        memberListTableBounds = memberListClipBounds.ForkContainingChild(0, 0, 0, -3).WithFixedPadding(3);
++
++        composer
++            .AddInset(memberListBounds, 3, 0.85f)
++            .AddVerticalScrollbar(OnMemberListScroll, ElementStdBounds.VerticalScrollbar(memberListBounds), "memberListScroll")
++            .BeginClip(memberListClipBounds)
++            .AddCellList(memberListTableBounds, CreateMemberCell, BuildMemberCells(selectedClaim), "memberList")
++            .EndClip();
++
++        if (selectedClaim.Members.Count == 0)
++        {
++            composer.AddStaticText(Lang.Get("electricalprogressiveclaims:claims-members-empty"), CairoFont.WhiteSmallText(), ElementBounds.Fixed(310, 252, 260, 30), "membersEmpty");
++        }
++
++        composer
++            .AddStaticText(Lang.Get("electricalprogressiveclaims:claims-player-name"), CairoFont.WhiteSmallText(), ElementBounds.Fixed(310, 466, 130, 20), "playerNameLabel")
++            .AddDynamicCustomDraw(ElementBounds.Fixed(426, 458, 188, 36), DrawTextInputBackground, "memberNameInputBg")
++            .AddTextInput(ElementBounds.Fixed(430, 462, 180, 28), text => memberNameInput = text, CairoFont.WhiteDetailText(), "memberNameInput")
++            .AddStaticText(Lang.Get("electricalprogressiveclaims:claims-access-title"), CairoFont.WhiteSmallText(), ElementBounds.Fixed(310, 505, 72, 20), "accessTitle")
++            .AddSwitch(OnAccessUseToggled, ElementBounds.Fixed(390, 502, 40, 24), "accessUseSwitch")
++            .AddStaticText(Lang.Get("electricalprogressiveclaims:claims-access-use"), CairoFont.WhiteSmallText(), ElementBounds.Fixed(436, 505, 96, 20), "accessUseLabel")
++            .AddSwitch(OnAccessBuildToggled, ElementBounds.Fixed(540, 502, 40, 24), "accessBuildSwitch")
++            .AddStaticText(Lang.Get("electricalprogressiveclaims:claims-access-build"), CairoFont.WhiteSmallText(), ElementBounds.Fixed(586, 505, 132, 20), "accessBuildLabel")
++            .AddButton(Lang.Get("electricalprogressiveclaims:claims-add-player"), AddMemberButton, ElementBounds.Fixed(310, 542, 104, 30), EnumButtonStyle.Normal, "addMember")
++            .AddButton(Lang.Get("electricalprogressiveclaims:claims-remove-player"), RemoveMemberButton, ElementBounds.Fixed(424, 542, 104, 30), EnumButtonStyle.Normal, "removeMember")
++            .AddButton(Lang.Get("electricalprogressiveclaims:claims-show"), ShowSelectedClaimButton, ElementBounds.Fixed(538, 542, 88, 30), EnumButtonStyle.Normal, "claimsShowRight")
++            .AddButton(Lang.Get("electricalprogressiveclaims:claims-delete-short"), DeleteClaimButton, ElementBounds.Fixed(636, 542, 88, 30), EnumButtonStyle.Normal, "deleteClaim")
++            .AddDynamicText(claimListState?.Message ?? "", CairoFont.WhiteSmallText(), ElementBounds.Fixed(310, 590, 410, 48), "claimsMessage");
+     }
+ 
+     private void OnChunksSelected(IReadOnlyList<(int ChunkX, int ChunkZ)> chunks)
+@@ -162,6 +323,358 @@ public sealed class ClaimMapDialog : GuiDialog
+         }
+     }
+ 
++    private void RequestClaimList()
++    {
++        channel.SendPacket(new ClaimListRequestPacket());
++    }
++
++    private bool SwitchToMapPage()
++    {
++        activePage = PageMap;
++        ComposeDialog();
++        if (mapState != null)
++        {
++            gridElement?.SetState(mapState);
++        }
++
++        return true;
++    }
++
++    private bool SwitchToClaimsPage()
++    {
++        activePage = PageClaims;
++        RequestClaimList();
++        ComposeDialog();
++        return true;
++    }
++
++    private bool RefreshClaimsButton()
++    {
++        RequestClaimList();
++        return true;
++    }
++
++    private bool ShowSelectedClaimButton()
++    {
++        if (selectedClaimId <= 0)
++        {
++            return true;
++        }
++
++        channel.SendPacket(new ClaimShowRequestPacket
++        {
++            ClaimId = selectedClaimId
++        });
++        return true;
++    }
++
++    private bool SelectClaimButton(ClaimInfoPacket claim)
++    {
++        SaveScrollPositions();
++        SelectClaim(claim);
++        ComposeDialog();
++        return true;
++    }
++
++    private bool OpenClaimEditorButton(ClaimInfoPacket claim)
++    {
++        SaveScrollPositions();
++        SelectClaim(claim);
++        ComposeDialog();
++        return true;
++    }
++
++    private void SelectClaim(ClaimInfoPacket claim)
++    {
++        selectedClaimId = claim.ClaimId;
++        selectedMemberUid = "";
++        selectedMemberName = "";
++        claimNameInput = claim.Name;
++    }
++
++    private bool SelectMemberButton(ClaimMemberPacket member)
++    {
++        SaveScrollPositions();
++        selectedMemberUid = member.PlayerUid;
++        selectedMemberName = member.PlayerName;
++        memberNameInput = member.PlayerName;
++        SetAccessFlags(member.AccessFlags);
++        ComposeDialog();
++        return true;
++    }
++
++    private void OnAccessUseToggled(bool on)
++    {
++        accessUse = on;
++    }
++
++    private void OnAccessBuildToggled(bool on)
++    {
++        accessBuild = on;
++    }
++
++    private bool AddMemberButton()
++    {
++        memberNameInput = SingleComposer?.GetTextInput("memberNameInput")?.GetText() ?? memberNameInput;
++        SendClaimAction(ClaimAccessActionType.AddPlayer, memberNameInput, GetAccessFlags(), "");
++        return true;
++    }
++
++    private bool RemoveMemberButton()
++    {
++        var playerName = selectedMemberName;
++        var typedName = SingleComposer?.GetTextInput("memberNameInput")?.GetText();
++        if (!string.IsNullOrWhiteSpace(typedName))
++        {
++            playerName = typedName;
++        }
++
++        SendClaimAction(ClaimAccessActionType.RemovePlayer, playerName, GetAccessFlags(), "");
++        return true;
++    }
++
++    private bool RenameClaimButton()
++    {
++        claimNameInput = SingleComposer?.GetTextInput("claimNameInput")?.GetText() ?? claimNameInput;
++        SendClaimAction(ClaimAccessActionType.RenameClaim, "", GetAccessFlags(), claimNameInput);
++        return true;
++    }
++
++    private bool DeleteClaimButton()
++    {
++        SendClaimAction(ClaimAccessActionType.DeleteClaim, "", GetAccessFlags(), "");
++        return true;
++    }
++
++    private void SendClaimAction(int action, string playerName, int accessFlags, string claimName)
++    {
++        if (selectedClaimId <= 0)
++        {
++            return;
++        }
++
++        channel.SendPacket(new ClaimAccessActionPacket
++        {
++            ClaimId = selectedClaimId,
++            Action = action,
++            PlayerName = playerName,
++            AccessFlags = accessFlags,
++            ClaimName = claimName
++        });
++    }
++
++    private IGuiElementCell CreateClaimListCell(SavegameCellEntry cell, ElementBounds bounds)
++    {
++        var element = new GuiElementMainMenuCell(clientApi, cell, bounds);
++        element.OnMouseDownOnCellLeft = SelectClaimCell;
++        element.OnMouseDownOnCellRight = ShowClaimCell;
++        return element;
++    }
++
++    private IGuiElementCell CreateMemberCell(SavegameCellEntry cell, ElementBounds bounds)
++    {
++        var element = new GuiElementMainMenuCell(clientApi, cell, bounds);
++        element.OnMouseDownOnCellLeft = SelectMemberCell;
++        element.OnMouseDownOnCellRight = SelectMemberCell;
++        return element;
++    }
++
++    private IEnumerable<SavegameCellEntry> BuildClaimCells()
++    {
++        foreach (var claim in claimListState?.Claims ?? [])
++        {
++            yield return new SavegameCellEntry
++            {
++                Title = claim.Name,
++                DetailText = Lang.Get("electricalprogressiveclaims:claims-stats", claim.AreaCount, claim.Volume),
++                RightTopText = Lang.Get("electricalprogressiveclaims:claims-show"),
++                Selected = claim.ClaimId == selectedClaimId,
++                Enabled = true,
++                DrawAsButton = true,
++                OnClick = () => SelectClaimButton(claim)
++            };
++        }
++    }
++
++    private IEnumerable<SavegameCellEntry> BuildMemberCells(ClaimInfoPacket selectedClaim)
++    {
++        foreach (var member in selectedClaim.Members)
++        {
++            yield return new SavegameCellEntry
++            {
++                Title = member.PlayerName,
++                DetailText = member.AccessName,
++                RightTopText = member.PlayerUid == selectedMemberUid ? Lang.Get("electricalprogressiveclaims:claims-selected") : "",
++                Selected = member.PlayerUid == selectedMemberUid,
++                Enabled = true,
++                DrawAsButton = true,
++                OnClick = () => SelectMemberButton(member)
++            };
++        }
++    }
++
++    private void SelectClaimCell(int index)
++    {
++        var claim = GetClaimAt(index);
++        if (claim == null)
++        {
++            return;
++        }
++
++        SelectClaimButton(claim);
++    }
++
++    private void ShowClaimCell(int index)
++    {
++        var claim = GetClaimAt(index);
++        if (claim == null)
++        {
++            return;
++        }
++
++        SelectClaim(claim);
++        ShowSelectedClaimButton();
++    }
++
++    private void SelectMemberCell(int index)
++    {
++        var member = GetMemberAt(index);
++        if (member == null)
++        {
++            return;
++        }
++
++        SelectMemberButton(member);
++    }
++
++    private ClaimInfoPacket? GetSelectedClaim()
++    {
++        return claimListState?.Claims.FirstOrDefault(claim => claim.ClaimId == selectedClaimId);
++    }
++
++    private ClaimInfoPacket? GetClaimAt(int index)
++    {
++        var claims = claimListState?.Claims;
++        if (claims == null || index < 0 || index >= claims.Count)
++        {
++            return null;
++        }
++
++        return claims[index];
++    }
++
++    private ClaimMemberPacket? GetMemberAt(int index)
++    {
++        var members = GetSelectedClaim()?.Members;
++        if (members == null || index < 0 || index >= members.Count)
++        {
++            return null;
++        }
++
++        return members[index];
++    }
++
++    private void OnClaimListScroll(float value)
++    {
++        claimListScrollValue = value;
++        var cellList = SingleComposer?.GetCellList<SavegameCellEntry>("claimList");
++        if (cellList == null)
++        {
++            return;
++        }
++
++        cellList.Bounds.fixedY = -value;
++        cellList.Bounds.CalcWorldBounds();
++    }
++
++    private void SaveScrollPositions()
++    {
++        var claimScroll = SingleComposer?.GetScrollbar("claimListScroll");
++        if (claimScroll != null)
++        {
++            claimListScrollValue = claimScroll.CurrentYPosition;
++        }
++
++        var memberScroll = SingleComposer?.GetScrollbar("memberListScroll");
++        if (memberScroll != null)
++        {
++            memberListScrollValue = memberScroll.CurrentYPosition;
++        }
++    }
++
++    private void OnMemberListScroll(float value)
++    {
++        memberListScrollValue = value;
++        var cellList = SingleComposer?.GetCellList<SavegameCellEntry>("memberList");
++        if (cellList == null)
++        {
++            return;
++        }
++
++        cellList.Bounds.fixedY = -value;
++        cellList.Bounds.CalcWorldBounds();
++    }
++
++    private void ApplyClaimsPageWidgetState()
++    {
++        if (activePage == PageMap || SingleComposer == null)
++        {
++            return;
++        }
++
++        claimListTableBounds?.CalcWorldBounds();
++        claimListClipBounds?.CalcWorldBounds();
++        memberListTableBounds?.CalcWorldBounds();
++        memberListClipBounds?.CalcWorldBounds();
++
++        var claimScroll = SingleComposer.GetScrollbar("claimListScroll");
++        if (claimScroll != null && claimListTableBounds != null && claimListClipBounds != null)
++        {
++            claimScroll.SetHeights((float)claimListClipBounds.fixedHeight, (float)claimListTableBounds.fixedHeight);
++            claimListScrollValue = System.Math.Clamp(claimListScrollValue, 0, (float)System.Math.Max(0, claimListTableBounds.fixedHeight - claimListClipBounds.fixedHeight));
++            claimScroll.CurrentYPosition = claimListScrollValue;
++            claimScroll.RecomposeHandle();
++            OnClaimListScroll(claimListScrollValue);
++        }
++
++        var memberScroll = SingleComposer.GetScrollbar("memberListScroll");
++        if (memberScroll != null && memberListTableBounds != null && memberListClipBounds != null)
++        {
++            memberScroll.SetHeights((float)memberListClipBounds.fixedHeight, (float)memberListTableBounds.fixedHeight);
++            memberListScrollValue = System.Math.Clamp(memberListScrollValue, 0, (float)System.Math.Max(0, memberListTableBounds.fixedHeight - memberListClipBounds.fixedHeight));
++            memberScroll.CurrentYPosition = memberListScrollValue;
++            memberScroll.RecomposeHandle();
++            OnMemberListScroll(memberListScrollValue);
++        }
++
++        SingleComposer.GetSwitch("accessUseSwitch")?.SetValue(accessUse);
++        SingleComposer.GetSwitch("accessBuildSwitch")?.SetValue(accessBuild);
++        SingleComposer.GetTextInput("claimNameInput")?.SetValue(claimNameInput, true);
++        SingleComposer.GetTextInput("memberNameInput")?.SetValue(memberNameInput, true);
++    }
++
++    private int GetAccessFlags()
++    {
++        var flags = 0;
++        if (accessUse)
++        {
++            flags |= (int)EnumBlockAccessFlags.Use;
++        }
++
++        if (accessBuild)
++        {
++            flags |= (int)EnumBlockAccessFlags.BuildOrBreak;
++        }
++
++        return flags;
++    }
++
++    private void SetAccessFlags(int accessFlags)
++    {
++        accessUse = ((EnumBlockAccessFlags)accessFlags).HasFlag(EnumBlockAccessFlags.Use);
++        accessBuild = ((EnumBlockAccessFlags)accessFlags).HasFlag(EnumBlockAccessFlags.BuildOrBreak);
++    }
++
+     private bool CenterButton()
+     {
+         CenterOnPlayer();
+@@ -186,8 +699,14 @@ public sealed class ClaimMapDialog : GuiDialog
+         centerChunkZ = FloorDiv(blockPos.Z, chunkSize);
+     }
+ 
+-    private void UpdateText(ClaimMapStatePacket packet)
++    private void UpdateText(ClaimMapStatePacket? packet)
+     {
++        packet ??= mapState;
++        if (packet == null || activePage != PageMap)
++        {
++            return;
++        }
++
+         SingleComposer?.GetDynamicText("coordsText").SetNewText($"{packet.CenterChunkX}, {packet.CenterChunkZ}");
+ 
+         var maxText = packet.MaxVolume > 0 ? packet.MaxVolume.ToString() : Lang.Get("electricalprogressiveclaims:claim-map-unlimited");
+@@ -211,6 +730,21 @@ public sealed class ClaimMapDialog : GuiDialog
+         ctx.Stroke();
+     }
+ 
++    private static void DrawTextInputBackground(Cairo.Context ctx, Cairo.ImageSurface surface, ElementBounds bounds)
++    {
++        var width = bounds.OuterWidth;
++        var height = bounds.OuterHeight;
++
++        ctx.SetSourceRGBA(0.06, 0.065, 0.07, 0.98);
++        ctx.Rectangle(0, 0, width, height);
++        ctx.Fill();
++
++        ctx.SetSourceRGBA(0.85, 0.9, 0.95, 0.7);
++        ctx.LineWidth = 1.5;
++        ctx.Rectangle(1, 1, width - 2, height - 2);
++        ctx.Stroke();
++    }
++
+     private void DrawLegend(Cairo.Context ctx, Cairo.ImageSurface surface, ElementBounds bounds)
+     {
+         DrawLegendRow(ctx, 0, 0.16, 0.19, 0.17, Lang.Get("electricalprogressiveclaims:claim-map-legend-free"));
+diff --git a/ElectricalProgressive-Claims/Content/ClaimMapGridElement.cs b/ElectricalProgressive-Claims/Content/ClaimMapGridElement.cs
+index d00bde8..dba6ca0 100644
+--- a/ElectricalProgressive-Claims/Content/ClaimMapGridElement.cs
++++ b/ElectricalProgressive-Claims/Content/ClaimMapGridElement.cs
+@@ -532,6 +532,8 @@ public sealed class ClaimMapGridElement : GuiElement
+             DrawChunkBorder(ctx, chunk, 0, 0, 0, 0.42, 1.0);
+         }
+ 
++        DrawClaimContours(ctx, cellsByCoord);
++
+         if (cellsByCoord.TryGetValue(Pack(state.PlayerChunkX, state.PlayerChunkZ), out var playerChunk))
+         {
+             DrawPlayerMarker(ctx, playerChunk);
+@@ -599,6 +601,75 @@ public sealed class ClaimMapGridElement : GuiElement
+         ctx.Stroke();
+     }
+ 
++    private void DrawClaimContours(Context ctx, IReadOnlyDictionary<long, ClaimChunkCellPacket> cellsByCoord)
++    {
++        foreach (var chunk in cellsByCoord.Values)
++        {
++            if (!IsClaimedChunk(chunk) || !TryGetChunkScreenRect(chunk.ChunkX, chunk.ChunkZ, out var x, out var y, out var width, out var height))
++            {
++                continue;
++            }
++
++            SetClaimContourColor(ctx, chunk.State);
++            ctx.LineWidth = 3.0;
++
++            if (!HasSameClaimNeighbor(cellsByCoord, chunk, -1, 0))
++            {
++                DrawLine(ctx, x, y, x, y + height);
++            }
++
++            if (!HasSameClaimNeighbor(cellsByCoord, chunk, 1, 0))
++            {
++                DrawLine(ctx, x + width, y, x + width, y + height);
++            }
++
++            if (!HasSameClaimNeighbor(cellsByCoord, chunk, 0, -1))
++            {
++                DrawLine(ctx, x, y, x + width, y);
++            }
++
++            if (!HasSameClaimNeighbor(cellsByCoord, chunk, 0, 1))
++            {
++                DrawLine(ctx, x, y + height, x + width, y + height);
++            }
++        }
++    }
++
++    private static bool HasSameClaimNeighbor(
++        IReadOnlyDictionary<long, ClaimChunkCellPacket> cellsByCoord,
++        ClaimChunkCellPacket chunk,
++        int offsetX,
++        int offsetZ)
++    {
++        return cellsByCoord.TryGetValue(Pack(chunk.ChunkX + offsetX, chunk.ChunkZ + offsetZ), out var neighbor)
++            && neighbor.ClaimId == chunk.ClaimId
++            && IsClaimedChunk(neighbor);
++    }
++
++    private static bool IsClaimedChunk(ClaimChunkCellPacket chunk)
++    {
++        return chunk.ClaimId > 0
++            && (chunk.State == ClaimChunkCellState.Own || chunk.State == ClaimChunkCellState.Other);
++    }
++
++    private static void SetClaimContourColor(Context ctx, int cellState)
++    {
++        if (cellState == ClaimChunkCellState.Own)
++        {
++            ctx.SetSourceRGBA(0.0, 0.92, 1.0, 0.98);
++            return;
++        }
++
++        ctx.SetSourceRGBA(1.0, 0.26, 0.2, 0.98);
++    }
++
++    private static void DrawLine(Context ctx, double x1, double y1, double x2, double y2)
++    {
++        ctx.MoveTo(x1, y1);
++        ctx.LineTo(x2, y2);
++        ctx.Stroke();
++    }
++
+     private void DrawPlayerMarker(Context ctx, ClaimChunkCellPacket chunk)
+     {
+         if (!TryGetChunkScreenRect(chunk.ChunkX, chunk.ChunkZ, out var x, out var y, out var width, out var height))
+@@ -809,4 +880,4 @@ public sealed class ClaimMapGridElement : GuiElement
+     {
+         overlayDirty = true;
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/ElectricalProgressive-Claims/ElectricalProgressiveClaims.cs b/ElectricalProgressive-Claims/ElectricalProgressiveClaims.cs
+index 00f3dd7..8e7585e 100644
+--- a/ElectricalProgressive-Claims/ElectricalProgressiveClaims.cs
++++ b/ElectricalProgressive-Claims/ElectricalProgressiveClaims.cs
+@@ -54,9 +54,16 @@ public sealed class ElectricalProgressiveClaims : ModSystem
+             .RegisterMessageType<ClaimChunkActionPacket>()
+             .RegisterMessageType<ClaimChunksBatchActionPacket>()
+             .RegisterMessageType<ClaimMapStatePacket>()
+-            .SetMessageHandler<ClaimMapStatePacket>(OnMapStatePacket);
++            .RegisterMessageType<ClaimListRequestPacket>()
++            .RegisterMessageType<ClaimShowRequestPacket>()
++            .RegisterMessageType<ClaimShowStatePacket>()
++            .RegisterMessageType<ClaimAccessActionPacket>()
++            .RegisterMessageType<ClaimListStatePacket>()
++            .SetMessageHandler<ClaimMapStatePacket>(OnMapStatePacket)
++            .SetMessageHandler<ClaimListStatePacket>(OnClaimListStatePacket)
++            .SetMessageHandler<ClaimShowStatePacket>(OnClaimShowStatePacket);
+ 
+-        api.Logger.Notification("[EPClaims] Client channel registered with 4 message types");
++        api.Logger.Notification("[EPClaims] Client claim channel registered");
+ 
+         api.Input.RegisterHotKey("epclaimsopenmap", Lang.Get("electricalprogressiveclaims:open-map-hotkey"), GlKeys.P, HotkeyType.GUIOrOtherControls);
+         api.Input.SetHotKeyHandler("epclaimsopenmap", _ =>
+@@ -88,11 +95,19 @@ public sealed class ElectricalProgressiveClaims : ModSystem
+             .RegisterMessageType<ClaimChunkActionPacket>()
+             .RegisterMessageType<ClaimChunksBatchActionPacket>()
+             .RegisterMessageType<ClaimMapStatePacket>()
++            .RegisterMessageType<ClaimListRequestPacket>()
++            .RegisterMessageType<ClaimShowRequestPacket>()
++            .RegisterMessageType<ClaimShowStatePacket>()
++            .RegisterMessageType<ClaimAccessActionPacket>()
++            .RegisterMessageType<ClaimListStatePacket>()
+             .SetMessageHandler<ClaimMapRequestPacket>(OnMapRequest)
+             .SetMessageHandler<ClaimChunkActionPacket>(OnChunkAction)
+-            .SetMessageHandler<ClaimChunksBatchActionPacket>(OnChunksBatchAction);
++            .SetMessageHandler<ClaimChunksBatchActionPacket>(OnChunksBatchAction)
++            .SetMessageHandler<ClaimListRequestPacket>(OnClaimListRequest)
++            .SetMessageHandler<ClaimShowRequestPacket>(OnClaimShowRequest)
++            .SetMessageHandler<ClaimAccessActionPacket>(OnClaimAccessAction);
+ 
+-        api.Logger.Notification("[EPClaims] Server channel registered with handlers for request + action");
++        api.Logger.Notification("[EPClaims] Server claim channel registered");
+     }
+ 
+     public override void Dispose()
+@@ -170,6 +185,26 @@ public sealed class ElectricalProgressiveClaims : ModSystem
+         dialog.ApplyState(packet);
+     }
+ 
++    private void OnClaimListStatePacket(ClaimListStatePacket packet)
++    {
++        if (dialog == null || !dialog.IsOpened())
++        {
++            return;
++        }
++
++        dialog.ApplyClaimList(packet);
++    }
++
++    private void OnClaimShowStatePacket(ClaimShowStatePacket packet)
++    {
++        if (dialog == null || !dialog.IsOpened())
++        {
++            return;
++        }
++
++        dialog.ApplyClaimShow(packet);
++    }
++
+     private void OnMapRequest(IServerPlayer fromPlayer, ClaimMapRequestPacket packet)
+     {
+         try
+@@ -237,6 +272,127 @@ public sealed class ElectricalProgressiveClaims : ModSystem
+         }
+     }
+ 
++    private void OnClaimListRequest(IServerPlayer fromPlayer, ClaimListRequestPacket packet)
++    {
++        SendClaimList(fromPlayer, "", 0);
++    }
++
++    private void OnClaimShowRequest(IServerPlayer fromPlayer, ClaimShowRequestPacket packet)
++    {
++        SendClaimShow(fromPlayer, packet.ClaimId);
++    }
++
++    private void OnClaimAccessAction(IServerPlayer fromPlayer, ClaimAccessActionPacket packet)
++    {
++        try
++        {
++            var result = ProcessClaimAccessAction(fromPlayer, packet);
++            SendClaimList(fromPlayer, result.Message, result.MessageType);
++        }
++        catch (Exception exception)
++        {
++            serverApi?.Logger.Error("[EPClaims] Claim access action failed for {0}: {1}", fromPlayer.PlayerName, exception);
++            SendClaimList(fromPlayer, Lang.Get("electricalprogressiveclaims:error-unknown"), 1);
++        }
++    }
++
++    private ClaimActionResult ProcessClaimAccessAction(IServerPlayer player, ClaimAccessActionPacket packet)
++    {
++        if (serverApi == null)
++        {
++            return ClaimActionResult.Error("Server API is not ready.");
++        }
++
++        if (!TryGetClaimById(packet.ClaimId, out var claim) || claim.OwnedByPlayerUid != player.PlayerUID)
++        {
++            return ClaimActionResult.Error(Lang.Get("electricalprogressiveclaims:claims-error-not-found"));
++        }
++
++        switch (packet.Action)
++        {
++            case ClaimAccessActionType.Refresh:
++                return ClaimActionResult.Success("");
++            case ClaimAccessActionType.AddPlayer:
++                return TryAddClaimMember(player, claim, packet.PlayerName, (EnumBlockAccessFlags)packet.AccessFlags);
++            case ClaimAccessActionType.RemovePlayer:
++                return TryRemoveClaimMember(claim, packet.PlayerName);
++            case ClaimAccessActionType.RenameClaim:
++                return TryRenameClaim(claim, packet.ClaimName);
++            case ClaimAccessActionType.DeleteClaim:
++                serverApi.World.Claims.Remove(claim);
++                return ClaimActionResult.Success(Lang.Get("electricalprogressiveclaims:claims-message-deleted"));
++            default:
++                return ClaimActionResult.Error(Lang.Get("electricalprogressiveclaims:error-unknown"));
++        }
++    }
++
++    private ClaimActionResult TryAddClaimMember(IServerPlayer owner, LandClaim claim, string playerName, EnumBlockAccessFlags accessFlags)
++    {
++        var playerData = ResolvePlayerData(playerName);
++        if (playerData == null)
++        {
++            return ClaimActionResult.Error(Lang.Get("electricalprogressiveclaims:claims-error-player-not-found"));
++        }
++
++        if (playerData.PlayerUID == owner.PlayerUID)
++        {
++            return ClaimActionResult.Error(Lang.Get("electricalprogressiveclaims:claims-error-owner-member"));
++        }
++
++        claim.PermittedPlayerUids ??= [];
++        claim.PermittedPlayerUids[playerData.PlayerUID] = accessFlags;
++        TouchClaim(claim);
++        return ClaimActionResult.Success(Lang.Get("electricalprogressiveclaims:claims-message-player-added", playerData.LastKnownPlayername));
++    }
++
++    private ClaimActionResult TryRemoveClaimMember(LandClaim claim, string playerName)
++    {
++        var playerData = ResolvePlayerData(playerName);
++        if (playerData == null)
++        {
++            return ClaimActionResult.Error(Lang.Get("electricalprogressiveclaims:claims-error-player-not-found"));
++        }
++
++        if (claim.PermittedPlayerUids == null || !claim.PermittedPlayerUids.Remove(playerData.PlayerUID))
++        {
++            return ClaimActionResult.Error(Lang.Get("electricalprogressiveclaims:claims-error-member-not-found"));
++        }
++
++        TouchClaim(claim);
++        return ClaimActionResult.Success(Lang.Get("electricalprogressiveclaims:claims-message-player-removed", playerData.LastKnownPlayername));
++    }
++
++    private ClaimActionResult TryRenameClaim(LandClaim claim, string claimName)
++    {
++        claimName = claimName.Trim();
++        if (string.IsNullOrWhiteSpace(claimName))
++        {
++            return ClaimActionResult.Error(Lang.Get("electricalprogressiveclaims:claims-error-empty-name"));
++        }
++
++        claim.Description = claimName;
++        TouchClaim(claim);
++        return ClaimActionResult.Success(Lang.Get("electricalprogressiveclaims:claims-message-renamed"));
++    }
++
++    private IServerPlayerData? ResolvePlayerData(string playerName)
++    {
++        playerName = playerName.Trim();
++        if (string.IsNullOrWhiteSpace(playerName) || serverApi == null)
++        {
++            return null;
++        }
++
++        var onlinePlayer = serverApi.World.AllPlayers
++            .FirstOrDefault(player => string.Equals(player.PlayerName, playerName, StringComparison.OrdinalIgnoreCase));
++        if (onlinePlayer != null)
++        {
++            return serverApi.PlayerData.GetPlayerDataByUid(onlinePlayer.PlayerUID);
++        }
++
++        return serverApi.PlayerData.GetPlayerDataByLastKnownName(playerName);
++    }
++
+     private ClaimActionResult ProcessChunksBatch(IServerPlayer player, IReadOnlyList<ClaimChunkCoordPacket> chunks)
+     {
+         if (chunks.Count == 0)
+@@ -637,6 +793,189 @@ public sealed class ElectricalProgressiveClaims : ModSystem
+         }
+     }
+ 
++    private void SendClaimList(IServerPlayer player, string message, int messageType)
++    {
++        if (serverApi == null || serverChannel == null)
++        {
++            return;
++        }
++
++        try
++        {
++            serverChannel.SendPacket(BuildClaimListPacket(player, message, messageType), [player]);
++        }
++        catch (Exception exception)
++        {
++            serverApi.Logger.Error("Failed to send claim list to {0}: {1}", player.PlayerName, exception);
++        }
++    }
++
++    private void SendClaimShow(IServerPlayer player, int claimId)
++    {
++        if (serverApi == null || serverChannel == null)
++        {
++            return;
++        }
++
++        try
++        {
++            serverChannel.SendPacket(BuildClaimShowPacket(player, claimId), [player]);
++        }
++        catch (Exception exception)
++        {
++            serverApi.Logger.Error("Failed to send claim highlight to {0}: {1}", player.PlayerName, exception);
++        }
++    }
++
++    private ClaimShowStatePacket BuildClaimShowPacket(IServerPlayer player, int claimId)
++    {
++        var packet = new ClaimShowStatePacket
++        {
++            ClaimId = claimId
++        };
++
++        if (!TryGetClaimById(claimId, out var claim) || claim.OwnedByPlayerUid != player.PlayerUID)
++        {
++            packet.Message = Lang.Get("electricalprogressiveclaims:claims-error-not-found");
++            packet.MessageType = 1;
++            return packet;
++        }
++
++        HighlightClaim(player, claim);
++
++        foreach (var area in claim.Areas ?? [])
++        {
++            packet.Areas.Add(new ClaimAreaPacket
++            {
++                X1 = area.X1,
++                Y1 = area.Y1,
++                Z1 = area.Z1,
++                X2 = area.X2,
++                Y2 = area.Y2,
++                Z2 = area.Z2
++            });
++        }
++
++        packet.Message = Lang.Get("electricalprogressiveclaims:claims-message-shown");
++        return packet;
++    }
++
++    private void HighlightClaim(IServerPlayer player, LandClaim claim)
++    {
++        var areas = claim.Areas;
++        if (serverApi == null || areas == null)
++        {
++            return;
++        }
++
++        var blocks = new List<BlockPos>(areas.Count * 2);
++        var colors = new List<int>(areas.Count);
++        var color = ColorUtil.ToRgba(64, 100, 255, 100);
++
++        foreach (var area in areas)
++        {
++            blocks.Add(new BlockPos(area.X1, area.Y1, area.Z1));
++            blocks.Add(new BlockPos(area.X2, area.Y2, area.Z2));
++            colors.Add(color);
++        }
++
++        serverApi.World.HighlightBlocks(
++            player,
++            (int)EnumHighlightSlot.LandClaim,
++            blocks,
++            colors,
++            EnumHighlightBlocksMode.Absolute,
++            EnumHighlightShape.Cubes,
++            1f);
++    }
++
++    private ClaimListStatePacket BuildClaimListPacket(IServerPlayer player, string message, int messageType)
++    {
++        var packet = new ClaimListStatePacket
++        {
++            Message = message ?? "",
++            MessageType = messageType
++        };
++
++        var allClaims = serverApi?.World.Claims?.All;
++        if (allClaims == null)
++        {
++            return packet;
++        }
++
++        for (var i = 0; i < allClaims.Count; i++)
++        {
++            var claim = allClaims[i];
++            if (claim.OwnedByPlayerUid != player.PlayerUID)
++            {
++                continue;
++            }
++
++            packet.Claims.Add(BuildClaimInfo(i + 1, claim));
++        }
++
++        return packet;
++    }
++
++    private ClaimInfoPacket BuildClaimInfo(int claimId, LandClaim claim)
++    {
++        var info = new ClaimInfoPacket
++        {
++            ClaimId = claimId,
++            Name = string.IsNullOrWhiteSpace(claim.Description) ? claim.LastKnownOwnerName ?? "" : claim.Description,
++            OwnerName = claim.LastKnownOwnerName ?? ResolvePlayerName(claim.OwnedByPlayerUid),
++            AreaCount = claim.Areas?.Count ?? 0,
++            Volume = claim.SizeXYZ
++        };
++
++        if (claim.PermittedPlayerUids == null)
++        {
++            return info;
++        }
++
++        foreach (var entry in claim.PermittedPlayerUids.OrderBy(pair => ResolvePlayerName(pair.Key), StringComparer.OrdinalIgnoreCase))
++        {
++            info.Members.Add(new ClaimMemberPacket
++            {
++                PlayerUid = entry.Key,
++                PlayerName = ResolvePlayerName(entry.Key),
++                AccessFlags = (int)entry.Value,
++                AccessName = entry.Value.ToString()
++            });
++        }
++
++        return info;
++    }
++
++    private string ResolvePlayerName(string playerUid)
++    {
++        if (serverApi == null)
++        {
++            return playerUid;
++        }
++
++        var onlinePlayer = serverApi.World.AllPlayers.FirstOrDefault(player => player.PlayerUID == playerUid);
++        if (onlinePlayer != null)
++        {
++            return onlinePlayer.PlayerName;
++        }
++
++        return serverApi.PlayerData.GetPlayerDataByUid(playerUid)?.LastKnownPlayername ?? playerUid;
++    }
++
++    private bool TryGetClaimById(int claimId, out LandClaim claim)
++    {
++        claim = null!;
++        var allClaims = serverApi?.World.Claims?.All;
++        if (allClaims == null || claimId <= 0 || claimId > allClaims.Count)
++        {
++            return false;
++        }
++
++        claim = allClaims[claimId - 1];
++        return true;
++    }
++
+     private ClaimMapStatePacket BuildStatePacket(IServerPlayer player, int centerChunkX, int centerChunkZ, int radius, string message, int messageType)
+     {
+         var sapi = serverApi!;
+@@ -653,6 +992,7 @@ public sealed class ElectricalProgressiveClaims : ModSystem
+         }
+ 
+         var ownClaims = GetOwnClaims(player.PlayerUID).ToList();
++        var allClaims = sapi.World.Claims?.All?.ToList() ?? [];
+         var packet = new ClaimMapStatePacket
+         {
+             CenterChunkX = centerChunkX,
+@@ -675,7 +1015,7 @@ public sealed class ElectricalProgressiveClaims : ModSystem
+         {
+             for (var x = centerChunkX - radius; x <= centerChunkX + radius; x++)
+             {
+-                packet.Chunks.Add(BuildCell(player, x, z));
++                packet.Chunks.Add(BuildCell(player, x, z, allClaims));
+             }
+         }
+ 
+@@ -706,6 +1046,11 @@ public sealed class ElectricalProgressiveClaims : ModSystem
+     }
+ 
+     private ClaimChunkCellPacket BuildCell(IServerPlayer player, int chunkX, int chunkZ)
++    {
++        return BuildCell(player, chunkX, chunkZ, serverApi?.World.Claims?.All?.ToList() ?? []);
++    }
++
++    private ClaimChunkCellPacket BuildCell(IServerPlayer player, int chunkX, int chunkZ, IReadOnlyList<LandClaim> allClaims)
+     {
+         if (!TryBuildChunkArea(chunkX, chunkZ, out var area))
+         {
+@@ -717,8 +1062,8 @@ public sealed class ElectricalProgressiveClaims : ModSystem
+             };
+         }
+ 
+-        var claim = FindIntersectingClaim(area);
+-        if (claim == null)
++        var claimIndex = FindIntersectingClaimIndex(area, allClaims);
++        if (claimIndex < 0)
+         {
+             return new ClaimChunkCellPacket
+             {
+@@ -728,13 +1073,15 @@ public sealed class ElectricalProgressiveClaims : ModSystem
+             };
+         }
+ 
++        var claim = allClaims[claimIndex];
+         var ownerName = claim.LastKnownOwnerName ?? "";
+         return new ClaimChunkCellPacket
+         {
+             ChunkX = chunkX,
+             ChunkZ = chunkZ,
+             State = claim.OwnedByPlayerUid == player.PlayerUID ? ClaimChunkCellState.Own : ClaimChunkCellState.Other,
+-            OwnerName = ownerName
++            OwnerName = ownerName,
++            ClaimId = claimIndex + 1
+         };
+     }
+ 
+@@ -791,6 +1138,8 @@ public sealed class ElectricalProgressiveClaims : ModSystem
+             return ClaimActionResult.Success(Lang.Get("electricalprogressiveclaims:message-claimed"));
+         }
+ 
++        var usedAreas = ownClaims.Sum(static claim => claim.Areas?.Count ?? 0);
++        var maxAreas = GetLandClaimMaxAreas(player);
+         var adjacentClaim = FindAdjacentOwnClaim(ownClaims, area);
+         if (adjacentClaim != null)
+         {
+@@ -802,11 +1151,23 @@ public sealed class ElectricalProgressiveClaims : ModSystem
+                 return ClaimActionResult.Success(Lang.Get("electricalprogressiveclaims:message-claimed"));
+             }
+ 
+-            return ClaimActionResult.Error(Lang.Get("electricalprogressiveclaims:error-overlap"));
++            if (maxAreas > 0 && usedAreas + 1 > maxAreas)
++            {
++                return ClaimActionResult.Error(Lang.Get("electricalprogressiveclaims:error-areas"));
++            }
++
++            var addAdjacentError = adjacentClaim.AddArea(area);
++            if (addAdjacentError != EnumClaimError.NoError)
++            {
++                return ClaimActionResult.Error(ClaimErrorText(addAdjacentError));
++            }
++
++            ConsolidateClaimAreas(adjacentClaim);
++            MergeTouchingOwnClaims(player, adjacentClaim);
++            TouchClaim(adjacentClaim);
++            return ClaimActionResult.Success(Lang.Get("electricalprogressiveclaims:message-claimed"));
+         }
+ 
+-        var usedAreas = ownClaims.Sum(static claim => claim.Areas?.Count ?? 0);
+-        var maxAreas = GetLandClaimMaxAreas(player);
+         if (maxAreas > 0 && usedAreas + 1 > maxAreas)
+         {
+             return ClaimActionResult.Error(Lang.Get("electricalprogressiveclaims:error-areas"));
+@@ -1103,12 +1464,12 @@ public sealed class ElectricalProgressiveClaims : ModSystem
+ 
+         if (removeArea.X1 > area.X1)
+         {
+-            remainingPieces.Add(new Cuboidi(area.X1, area.Y1, area.Z1, removeArea.X1 - 1, area.Y2, area.Z2));
++            remainingPieces.Add(new Cuboidi(area.X1, area.Y1, area.Z1, removeArea.X1, area.Y2, area.Z2));
+         }
+ 
+         if (removeArea.X2 < area.X2)
+         {
+-            remainingPieces.Add(new Cuboidi(removeArea.X2 + 1, area.Y1, area.Z1, area.X2, area.Y2, area.Z2));
++            remainingPieces.Add(new Cuboidi(removeArea.X2, area.Y1, area.Z1, area.X2, area.Y2, area.Z2));
+         }
+ 
+         var overlapX1 = Math.Max(area.X1, removeArea.X1);
+@@ -1116,15 +1477,15 @@ public sealed class ElectricalProgressiveClaims : ModSystem
+ 
+         if (removeArea.Z1 > area.Z1)
+         {
+-            remainingPieces.Add(new Cuboidi(overlapX1, area.Y1, area.Z1, overlapX2, area.Y2, removeArea.Z1 - 1));
++            remainingPieces.Add(new Cuboidi(overlapX1, area.Y1, area.Z1, overlapX2, area.Y2, removeArea.Z1));
+         }
+ 
+         if (removeArea.Z2 < area.Z2)
+         {
+-            remainingPieces.Add(new Cuboidi(overlapX1, area.Y1, removeArea.Z2 + 1, overlapX2, area.Y2, area.Z2));
++            remainingPieces.Add(new Cuboidi(overlapX1, area.Y1, removeArea.Z2, overlapX2, area.Y2, area.Z2));
+         }
+ 
+-        remainingPieces.RemoveAll(static piece => piece.X1 > piece.X2 || piece.Z1 > piece.Z2);
++        remainingPieces.RemoveAll(static piece => piece.X1 >= piece.X2 || piece.Z1 >= piece.Z2);
+         return true;
+     }
+ 
+@@ -1194,13 +1555,13 @@ public sealed class ElectricalProgressiveClaims : ModSystem
+ 
+         if (existing.Z1 == chunkArea.Z1 && existing.Z2 == chunkArea.Z2)
+         {
+-            if (existing.X2 + 1 == chunkArea.X1)
++            if (existing.X2 == chunkArea.X1)
+             {
+                 expanded = new Cuboidi(existing.X1, existing.Y1, existing.Z1, chunkArea.X2, existing.Y2, existing.Z2);
+                 return true;
+             }
+ 
+-            if (chunkArea.X2 + 1 == existing.X1)
++            if (chunkArea.X2 == existing.X1)
+             {
+                 expanded = new Cuboidi(chunkArea.X1, existing.Y1, existing.Z1, existing.X2, existing.Y2, existing.Z2);
+                 return true;
+@@ -1209,13 +1570,13 @@ public sealed class ElectricalProgressiveClaims : ModSystem
+ 
+         if (existing.X1 == chunkArea.X1 && existing.X2 == chunkArea.X2)
+         {
+-            if (existing.Z2 + 1 == chunkArea.Z1)
++            if (existing.Z2 == chunkArea.Z1)
+             {
+                 expanded = new Cuboidi(existing.X1, existing.Y1, existing.Z1, existing.X2, existing.Y2, chunkArea.Z2);
+                 return true;
+             }
+ 
+-            if (chunkArea.Z2 + 1 == existing.Z1)
++            if (chunkArea.Z2 == existing.Z1)
+             {
+                 expanded = new Cuboidi(existing.X1, existing.Y1, chunkArea.Z1, existing.X2, existing.Y2, existing.Z2);
+                 return true;
+@@ -1236,13 +1597,13 @@ public sealed class ElectricalProgressiveClaims : ModSystem
+         {
+             if (existing.X1 == chunkArea.X1 && existing.X2 > chunkArea.X2)
+             {
+-                existing.X1 = chunkArea.X2 + 1;
++                existing.X1 = chunkArea.X2;
+                 return true;
+             }
+ 
+             if (existing.X2 == chunkArea.X2 && existing.X1 < chunkArea.X1)
+             {
+-                existing.X2 = chunkArea.X1 - 1;
++                existing.X2 = chunkArea.X1;
+                 return true;
+             }
+         }
+@@ -1251,13 +1612,13 @@ public sealed class ElectricalProgressiveClaims : ModSystem
+         {
+             if (existing.Z1 == chunkArea.Z1 && existing.Z2 > chunkArea.Z2)
+             {
+-                existing.Z1 = chunkArea.Z2 + 1;
++                existing.Z1 = chunkArea.Z2;
+                 return true;
+             }
+ 
+             if (existing.Z2 == chunkArea.Z2 && existing.Z1 < chunkArea.Z1)
+             {
+-                existing.Z2 = chunkArea.Z1 - 1;
++                existing.Z2 = chunkArea.Z1;
+                 return true;
+             }
+         }
+@@ -1320,15 +1681,15 @@ public sealed class ElectricalProgressiveClaims : ModSystem
+             return false;
+         }
+ 
+-        var touchesX = first.X2 + 1 == second.X1 || second.X2 + 1 == first.X1;
+-        var overlapsZ = first.Z1 <= second.Z2 && second.Z1 <= first.Z2;
++        var touchesX = first.X2 == second.X1 || second.X2 == first.X1;
++        var overlapsZ = first.Z1 < second.Z2 && second.Z1 < first.Z2;
+         if (touchesX && overlapsZ)
+         {
+             return true;
+         }
+ 
+-        var touchesZ = first.Z2 + 1 == second.Z1 || second.Z2 + 1 == first.Z1;
+-        var overlapsX = first.X1 <= second.X2 && second.X1 <= first.X2;
++        var touchesZ = first.Z2 == second.Z1 || second.Z2 == first.Z1;
++        var overlapsX = first.X1 < second.X2 && second.X1 < first.X2;
+         return touchesZ && overlapsX;
+     }
+ 
+@@ -1378,6 +1739,26 @@ public sealed class ElectricalProgressiveClaims : ModSystem
+         return null;
+     }
+ 
++    private int FindIntersectingClaimIndex(Cuboidi area, IReadOnlyList<LandClaim> claims)
++    {
++        for (var i = 0; i < claims.Count; i++)
++        {
++            try
++            {
++                if (claims[i].Intersects(area))
++                {
++                    return i;
++                }
++            }
++            catch (Exception exception)
++            {
++                serverApi?.Logger.Warning("Skipped invalid land claim while building map: {0}", exception.Message);
++            }
++        }
++
++        return -1;
++    }
++
+     private bool TryBuildChunkArea(int chunkX, int chunkZ, out Cuboidi area)
+     {
+         var sapi = serverApi!;
+@@ -1413,9 +1794,9 @@ public sealed class ElectricalProgressiveClaims : ModSystem
+             return false;
+         }
+ 
+-        var x2 = Math.Min(ix1 + chunkSize - 1, mapSizeX - 1);
+-        var z2 = Math.Min(iz1 + chunkSize - 1, mapSizeZ - 1);
+-        area = new Cuboidi(ix1, 0, iz1, x2, mapSizeY - 1, z2);
++        var x2 = Math.Min(ix1 + chunkSize, mapSizeX);
++        var z2 = Math.Min(iz1 + chunkSize, mapSizeZ);
++        area = new Cuboidi(ix1, 0, iz1, x2, mapSizeY, z2);
+         return true;
+     }
+ 
+diff --git a/ElectricalProgressive-Claims/Net/ClaimMapPackets.cs b/ElectricalProgressive-Claims/Net/ClaimMapPackets.cs
+index 963d36f..dc713aa 100644
+--- a/ElectricalProgressive-Claims/Net/ClaimMapPackets.cs
++++ b/ElectricalProgressive-Claims/Net/ClaimMapPackets.cs
+@@ -118,6 +118,135 @@ public class ClaimMapStatePacket
+     public List<ClaimChunkCellPacket> Chunks { get; set; } = [];
+ }
+ 
++public static class ClaimAccessActionType
++{
++    public const int Refresh = 0;
++    public const int AddPlayer = 1;
++    public const int RemovePlayer = 2;
++    public const int RenameClaim = 3;
++    public const int DeleteClaim = 4;
++}
++
++[ProtoContract]
++public class ClaimListRequestPacket
++{
++}
++
++[ProtoContract]
++public class ClaimShowRequestPacket
++{
++    [ProtoMember(1)]
++    public int ClaimId { get; set; }
++}
++
++[ProtoContract]
++public class ClaimShowStatePacket
++{
++    [ProtoMember(1)]
++    public int ClaimId { get; set; }
++
++    [ProtoMember(2)]
++    public List<ClaimAreaPacket> Areas { get; set; } = [];
++
++    [ProtoMember(3)]
++    public string Message { get; set; } = "";
++
++    [ProtoMember(4)]
++    public int MessageType { get; set; }
++}
++
++[ProtoContract]
++public class ClaimAreaPacket
++{
++    [ProtoMember(1)]
++    public int X1 { get; set; }
++
++    [ProtoMember(2)]
++    public int Y1 { get; set; }
++
++    [ProtoMember(3)]
++    public int Z1 { get; set; }
++
++    [ProtoMember(4)]
++    public int X2 { get; set; }
++
++    [ProtoMember(5)]
++    public int Y2 { get; set; }
++
++    [ProtoMember(6)]
++    public int Z2 { get; set; }
++}
++
++[ProtoContract]
++public class ClaimAccessActionPacket
++{
++    [ProtoMember(1)]
++    public int ClaimId { get; set; }
++
++    [ProtoMember(2)]
++    public int Action { get; set; }
++
++    [ProtoMember(3)]
++    public string PlayerName { get; set; } = "";
++
++    [ProtoMember(4)]
++    public int AccessFlags { get; set; }
++
++    [ProtoMember(5)]
++    public string ClaimName { get; set; } = "";
++}
++
++[ProtoContract]
++public class ClaimListStatePacket
++{
++    [ProtoMember(1)]
++    public List<ClaimInfoPacket> Claims { get; set; } = [];
++
++    [ProtoMember(2)]
++    public string Message { get; set; } = "";
++
++    [ProtoMember(3)]
++    public int MessageType { get; set; }
++}
++
++[ProtoContract]
++public class ClaimInfoPacket
++{
++    [ProtoMember(1)]
++    public int ClaimId { get; set; }
++
++    [ProtoMember(2)]
++    public string Name { get; set; } = "";
++
++    [ProtoMember(3)]
++    public int AreaCount { get; set; }
++
++    [ProtoMember(4)]
++    public long Volume { get; set; }
++
++    [ProtoMember(5)]
++    public List<ClaimMemberPacket> Members { get; set; } = [];
++
++    [ProtoMember(6)]
++    public string OwnerName { get; set; } = "";
++}
++
++[ProtoContract]
++public class ClaimMemberPacket
++{
++    [ProtoMember(1)]
++    public string PlayerUid { get; set; } = "";
++
++    [ProtoMember(2)]
++    public string PlayerName { get; set; } = "";
++
++    [ProtoMember(3)]
++    public int AccessFlags { get; set; }
++
++    [ProtoMember(4)]
++    public string AccessName { get; set; } = "";
++}
++
+ [ProtoContract]
+ public class ClaimChunkCellPacket
+ {
+@@ -132,4 +261,7 @@ public class ClaimChunkCellPacket
+ 
+     [ProtoMember(4)]
+     public string OwnerName { get; set; } = "";
+-}
+\ No newline at end of file
++
++    [ProtoMember(5)]
++    public int ClaimId { get; set; }
++}
+diff --git a/ElectricalProgressive-Claims/assets/electricalprogressiveclaims/lang/en.json b/ElectricalProgressive-Claims/assets/electricalprogressiveclaims/lang/en.json
+index 57fa2d5..0799ddb 100644
+--- a/ElectricalProgressive-Claims/assets/electricalprogressiveclaims/lang/en.json
++++ b/ElectricalProgressive-Claims/assets/electricalprogressiveclaims/lang/en.json
+@@ -27,5 +27,41 @@
+   "error-not-adjacent": "New claim area must be adjacent to an existing area.",
+   "error-overlap": "Claim overlaps an existing claim.",
+   "error-batch-not-connected": "Selected chunks must form one connected area.",
+-  "error-unknown": "Claim action failed."
++  "error-unknown": "Claim action failed.",
++  "claim-map-tab-map": "Map",
++  "claim-map-tab-claims": "Claims",
++  "claims-list-title": "Your claims",
++  "claims-refresh": "Refresh",
++  "claims-edit-short": "✎ Edit",
++  "claims-show": "Show",
++  "claims-edit-title": "Claim settings",
++  "claims-back": "Back",
++  "claims-selected": "Selected",
++  "claims-empty": "No claims.",
++  "claims-select": "Select a claim.",
++  "claims-stats": "Areas: {0}   Volume: {1}",
++  "claims-rename": "Name:",
++  "claims-rename-button": "Rename",
++  "claims-members-title": "Players",
++  "claims-owner": "Owner: {0}",
++  "claims-members-empty": "No added players.",
++  "claims-player-name": "Player:",
++  "claims-access-title": "Access:",
++  "claims-access-use": "Use",
++  "claims-access-build": "Build / break",
++  "claims-access-full": "Full",
++  "claims-add-player": "Add",
++  "claims-remove-player": "Remove",
++  "claims-delete": "Delete claim",
++  "claims-delete-short": "Delete",
++  "claims-message-player-added": "{0} added.",
++  "claims-message-player-removed": "{0} removed.",
++  "claims-message-renamed": "Claim renamed.",
++  "claims-message-deleted": "Claim deleted.",
++  "claims-message-shown": "Claim highlighted.",
++  "claims-error-not-found": "Claim not found.",
++  "claims-error-player-not-found": "Player not found.",
++  "claims-error-owner-member": "Owner already has access.",
++  "claims-error-member-not-found": "Player is not added to this claim.",
++  "claims-error-empty-name": "Claim name is empty."
+ }
+diff --git a/ElectricalProgressive-Claims/assets/electricalprogressiveclaims/lang/ru.json b/ElectricalProgressive-Claims/assets/electricalprogressiveclaims/lang/ru.json
+index 2d76339..aa855a9 100644
+--- a/ElectricalProgressive-Claims/assets/electricalprogressiveclaims/lang/ru.json
++++ b/ElectricalProgressive-Claims/assets/electricalprogressiveclaims/lang/ru.json
+@@ -28,4 +28,40 @@
+   "error-overlap": "Приват пересекается с существующим приватом.",
+   "error-batch-not-connected": "Выделенные чанки должны образовывать одну связную область.",
+   "error-unknown": "Не удалось изменить приват."
++  ,"claim-map-tab-map": "Карта",
++  "claim-map-tab-claims": "Приваты",
++  "claims-list-title": "Твои приваты",
++  "claims-refresh": "Обновить",
++  "claims-edit-short": "✎ Правка",
++  "claims-show": "Показать",
++  "claims-edit-title": "Настройки привата",
++  "claims-back": "Назад",
++  "claims-selected": "Выбран",
++  "claims-empty": "Приватов нет.",
++  "claims-select": "Выбери приват.",
++  "claims-stats": "Областей: {0}   Объем: {1}",
++  "claims-rename": "Название:",
++  "claims-rename-button": "Переим.",
++  "claims-members-title": "Игроки",
++  "claims-owner": "Владелец: {0}",
++  "claims-members-empty": "Игроков нет.",
++  "claims-player-name": "Игрок:",
++  "claims-access-title": "Доступ:",
++  "claims-access-use": "Использование",
++  "claims-access-build": "Стройка / ломание",
++  "claims-access-full": "Полный",
++  "claims-add-player": "Добавить",
++  "claims-remove-player": "Удалить",
++  "claims-delete": "Удалить приват",
++  "claims-delete-short": "Удалить",
++  "claims-message-player-added": "{0} добавлен.",
++  "claims-message-player-removed": "{0} удален.",
++  "claims-message-renamed": "Приват переименован.",
++  "claims-message-deleted": "Приват удален.",
++  "claims-message-shown": "Приват подсвечен.",
++  "claims-error-not-found": "Приват не найден.",
++  "claims-error-player-not-found": "Игрок не найден.",
++  "claims-error-owner-member": "Владелец уже имеет доступ.",
++  "claims-error-member-not-found": "Игрок не добавлен в этот приват.",
++  "claims-error-empty-name": "Название привата пустое."
+ }
+warning: in the working copy of 'ElectricalProgressive-Claims/Content/ClaimMapGridElement.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ElectricalProgressive-Claims/ElectricalProgressiveClaims.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ElectricalProgressive-Claims/Net/ClaimMapPackets.cs', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ElectricalProgressive-Claims/assets/electricalprogressiveclaims/lang/en.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'ElectricalProgressive-Claims/assets/electricalprogressiveclaims/lang/ru.json', LF will be replaced by CRLF the next time Git touches it

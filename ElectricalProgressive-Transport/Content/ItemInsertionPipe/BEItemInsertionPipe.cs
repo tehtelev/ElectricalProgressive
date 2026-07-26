@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using ElectricalProgressive.Content.NetworkPipe;
 using Vintagestory.API.Client;
@@ -60,6 +61,12 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
 
     // === Переопределение свойства Inventory ===
     public override InventoryBase Inventory => _inventory;
+    public override string InventoryClassName => "insertionpipe";
+
+    private static readonly FieldInfo? BaseInventoryField =
+        typeof(BlockEntityGenericTypedContainer).GetField(
+            "inventory",
+            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
     // === Геттеры для публичного доступа к настройкам ===
     public int TransferRate => transferRate;
@@ -71,14 +78,45 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
     // === Конструктор ===
     public BEItemInsertionPipe()
     {
-        // 12 слотов для фильтров (6x2 в GUI)
-        _inventory = new InventoryInsertionPipe(12, "insertionpipe", null, null, this);
+        quantitySlots = 18;
+        inventoryClassName = "insertionpipe";
+        // 18 слотов фильтра (плитка 6x3)
+        _inventory = new InventoryInsertionPipe(18, inventoryClassName, null, null, this);
+        BindBaseInventoryField();
+    }
+
+    /// <summary>
+    /// Prevents base container from creating a plain InventoryGeneric and desyncing the inventory field.
+    /// That mismatch + null inventory tree caused BE to fail loading after world rejoin.
+    /// </summary>
+    protected override void InitInventory(Vintagestory.API.Common.Block block)
+    {
+        if (_inventory == null)
+            _inventory = new InventoryInsertionPipe(18, "insertionpipe", null, null, this);
+
+        quantitySlots = 18;
+        inventoryClassName = "insertionpipe";
+        BindBaseInventoryField();
+    }
+
+    private void BindBaseInventoryField()
+    {
+        try
+        {
+            BaseInventoryField?.SetValue(this, _inventory);
+        }
+        catch
+        {
+            // Reflection must not prevent entity creation.
+        }
     }
 
     // === Инициализация ===
     public override void Initialize(ICoreAPI api)
     {
+        BindBaseInventoryField();
         base.Initialize(api);
+        BindBaseInventoryField();
 
         // Определяем направление вывода (куда будем класть предметы)
         DetermineOutputDirection();
@@ -90,6 +128,7 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         }
 
         filterSnapshotTimer = api.World.RegisterGameTickListener(OnFilterSnapshotTick, 1000);
+        _inventory.OnAcquireTransitionSpeed -= FreezeFilterTransitionSpeed;
         _inventory.OnAcquireTransitionSpeed += FreezeFilterTransitionSpeed;
     }
 
@@ -836,10 +875,45 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         }
     }
 
+    /// <summary>
+    /// Safe late-init: base version calls container.LateInit() while container.Api is still null
+    /// during chunk deserialization (type null→default triggers re-init). That discards the BE.
+    /// Full container init happens later in Initialize().
+    /// </summary>
+    public override void LateInitInventory()
+    {
+        BindBaseInventoryField();
+        if (Api == null || Inventory == null || Pos == null)
+            return;
+
+        Inventory.LateInitialize(InventoryClassName + "-" + Pos, Api);
+        Inventory.ResolveBlocksOrItems();
+        if (Inventory.Pos == null)
+            Inventory.Pos = Pos;
+    }
+
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
     {
+        BindBaseInventoryField();
+
+        // Pre-seed type/isPerPlayer so GenericTypedContainer does not treat first load as a type
+        // change (null → "normal-generic") and call LateInitInventory before container.Init.
+        if (tree != null)
+        {
+            type = tree.GetString("type", defaultType) ?? defaultType;
+            isPerPlayer = tree.GetBool("isPerPlayer", false);
+
+            if (!tree.HasAttribute("inventory"))
+            {
+                var invTree = new TreeAttribute();
+                invTree.SetInt("qslots", _inventory?.Count ?? 18);
+                tree["inventory"] = invTree;
+            }
+        }
+
         base.FromTreeAttributes(tree, worldAccessForResolve);
-        _inventory.CaptureFilterSnapshotsFromSlots(worldAccessForResolve);
+        BindBaseInventoryField();
+        _inventory?.CaptureFilterSnapshotsFromSlots(worldAccessForResolve);
 
         // Загружаем настройки фильтра
         transferRate = tree.GetInt("transferRate", 1);
@@ -854,6 +928,8 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
 
     public override void ToTreeAttributes(ITreeAttribute tree)
     {
+        BindBaseInventoryField();
+
         if (Api?.World != null)
             _inventory.MaintainFilterSnapshots(Api.World);
 
@@ -865,7 +941,6 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         tree.SetBool("matchMod", matchMod);
         tree.SetBool("matchType", matchType);
         tree.SetBool("matchAttributes", matchAttributes);
-
     }
 
     public override void OnReceivedServerPacket(int packetid, byte[] data)
@@ -953,6 +1028,48 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         else if (packetid == 1004) // Старый пакет настроек порчи: больше не нужен для пассивных фильтр-снимков.
         {
             MarkDirty();
+        }
+        else if (packetid == GuiDialogInsertionPipe.SetFilterStackPacketId)
+        {
+            ApplyFilterStackPacket(data);
+        }
+    }
+
+    private void ApplyFilterStackPacket(byte[] data)
+    {
+        if (data == null || _inventory == null)
+            return;
+
+        try
+        {
+            var tree = new TreeAttribute();
+            tree.FromBytes(data);
+
+            int slotId = tree.GetInt("slotId", -1);
+            if (slotId < 0 || slotId >= _inventory.Count)
+                return;
+
+            ItemStack? stack = tree.GetItemstack("stack");
+            if (stack == null)
+            {
+                _inventory.ClearFilterSnapshot(slotId);
+            }
+            else
+            {
+                stack.ResolveBlockOrItem(Api.World);
+                if (stack.Collectible == null)
+                    return;
+
+                stack.StackSize = 1;
+                _inventory.SetFilterSnapshot(slotId, stack);
+            }
+
+            MarkDirty(true);
+            Api.World.BlockAccessor.MarkBlockDirty(Pos);
+        }
+        catch (Exception ex)
+        {
+            Api?.Logger?.Error($"Ошибка при установке фильтра из списка предметов: {ex.Message}");
         }
     }
 
