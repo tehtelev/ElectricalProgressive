@@ -10,7 +10,7 @@ internal static class PipeMeshBuilder
 {
     private const string ShapeDomain = "electricalprogressivetransport";
     private const string ShapePath = "shapes/block/itempipe";
-    private const int MeshCacheVersion = 33;
+    private const int MeshCacheVersion = 34;
 
     private const float PipeCenter = 0.5f;
 

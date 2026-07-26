@@ -1,4 +1,6 @@
 ﻿using ElectricalProgressive.Content;
+using ElectricalProgressive.Content.ItemInsertionPipe;
+using ElectricalProgressive.Content.LiquidInsertionPipe;
 using System.Collections.Generic;
 using System.Text;
 using Vintagestory.API.Common;
@@ -8,6 +10,8 @@ using Vintagestory.API.MathTools;
 public class BEPipe : BlockEntity, IPipeRenderState
 {
     private PipeConnectionComponent _pipeConnection;
+    /// <summary>Stashed until Initialize — FromTreeAttributes runs before the connection component exists.</summary>
+    private ITreeAttribute _pendingConnectionTree;
 
     /// <summary>
     /// Статус подключений по сторонам блока.
@@ -26,6 +30,12 @@ public class BEPipe : BlockEntity, IPipeRenderState
     {
         base.Initialize(api);
         _pipeConnection = new PipeConnectionComponent(this, api, Pos);
+        if (_pendingConnectionTree != null)
+        {
+            _pipeConnection.FromTreeAttributes(_pendingConnectionTree);
+            _pendingConnectionTree = null;
+        }
+
         _pipeConnection.Initialize();
     }
 
@@ -51,7 +61,10 @@ public class BEPipe : BlockEntity, IPipeRenderState
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
     {
         base.FromTreeAttributes(tree, worldAccessForResolve);
-        _pipeConnection?.FromTreeAttributes(tree);
+        if (_pipeConnection != null)
+            _pipeConnection.FromTreeAttributes(tree);
+        else if (tree != null)
+            _pendingConnectionTree = tree;
     }
 
     /// <summary>
@@ -114,6 +127,13 @@ public class BEPipe : BlockEntity, IPipeRenderState
 
             // Уведомляем компонент о удалении для внутреннего состояния
             _pipeConnection.OnPipeRemoved();
+        }
+
+        // Client: liquid/item transit meshes otherwise linger until their timer expires.
+        if (Api?.Side == EnumAppSide.Client && Pos != null)
+        {
+            PipeLiquidTransitRenderer.Instance?.CancelTransitsThrough(Pos);
+            PipeItemTransitRenderer.Instance?.CancelTransitsThrough(Pos);
         }
 
         base.OnBlockRemoved();

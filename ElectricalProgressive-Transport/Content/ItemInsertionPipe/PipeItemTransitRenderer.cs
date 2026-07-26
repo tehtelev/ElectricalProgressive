@@ -59,6 +59,34 @@ public class PipeItemTransitRenderer : IRenderer, ITexPositionSource
         });
     }
 
+    /// <summary>
+    /// Drop item-in-pipe visuals that still travel through a broken/removed pipe cell.
+    /// </summary>
+    public void CancelTransitsThrough(BlockPos brokenPos)
+    {
+        if (brokenPos == null || items.Count == 0)
+            return;
+
+        for (int i = items.Count - 1; i >= 0; i--)
+        {
+            List<Vec3d> points = items[i].Points;
+            if (points == null)
+                continue;
+
+            for (int p = 0; p < points.Count; p++)
+            {
+                Vec3d pt = points[p];
+                if ((int)Math.Floor(pt.X) == brokenPos.X
+                    && (int)Math.Floor(pt.Y) == brokenPos.Y
+                    && (int)Math.Floor(pt.Z) == brokenPos.Z)
+                {
+                    items.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+    }
+
     public void OnRenderFrame(float deltaTime, EnumRenderStage stage)
     {
         if (items.Count == 0 || capi.IsGamePaused)

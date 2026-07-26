@@ -1,4 +1,6 @@
 ﻿using ElectricalProgressive.Content;
+using ElectricalProgressive.Content.ItemInsertionPipe;
+using ElectricalProgressive.Content.LiquidInsertionPipe;
 using ElectricalProgressive.Content.NetworkPipe;
 using System.Collections.Generic;
 using System.Text;
@@ -13,6 +15,11 @@ using Vintagestory.API.MathTools;
 public abstract class BlockEntityPipeBase : BlockEntity, IPipeRenderState
 {
     private PipeConnectionComponent _pipeConnection;
+    /// <summary>
+    /// FromTreeAttributes runs before Initialize, when _pipeConnection is still null.
+    /// Stash tree so connections can be restored when the component is created.
+    /// </summary>
+    private ITreeAttribute? _pendingConnectionTree;
 
     /// <summary>Player UID of who placed (or first configured) this pipe — used for claim-aware transfers.</summary>
     public string? OwnerUid { get; private set; }
@@ -65,6 +72,13 @@ public abstract class BlockEntityPipeBase : BlockEntity, IPipeRenderState
         EnsureInventoryInitialized(api);
 
         _pipeConnection = new PipeConnectionComponent(this, api, Pos);
+        // Restore saved connection flags before first scan (chunk-border / load order).
+        if (_pendingConnectionTree != null)
+        {
+            _pipeConnection.FromTreeAttributes(_pendingConnectionTree);
+            _pendingConnectionTree = null;
+        }
+
         _pipeConnection.Initialize();
     }
 
@@ -79,7 +93,16 @@ public abstract class BlockEntityPipeBase : BlockEntity, IPipeRenderState
             Inventory.LateInitialize(invId, api);
 
         Inventory.Pos = Pos;
-        Inventory.ResolveBlocksOrItems();
+
+        // Safe after LateInitialize — Api is set.
+        try
+        {
+            Inventory.ResolveBlocksOrItems();
+        }
+        catch
+        {
+            // Already resolved in LoadFilterInventory when possible.
+        }
     }
 
     public virtual void UpdateConnections(bool updateNeighbors = true, bool forceEndpointRefresh = false)
@@ -108,7 +131,11 @@ public abstract class BlockEntityPipeBase : BlockEntity, IPipeRenderState
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
     {
         base.FromTreeAttributes(tree, worldAccessForResolve);
-        _pipeConnection?.FromTreeAttributes(tree);
+
+        if (_pipeConnection != null)
+            _pipeConnection.FromTreeAttributes(tree);
+        else if (tree != null)
+            _pendingConnectionTree = tree;
 
         OwnerUid = tree?.GetString("ownerUid", null);
         if (string.IsNullOrEmpty(OwnerUid))
@@ -136,9 +163,21 @@ public abstract class BlockEntityPipeBase : BlockEntity, IPipeRenderState
         if (tree["inventory"] is ITreeAttribute invTree)
             Inventory.FromTreeAttributes(invTree);
 
-        // Resolve item codes once after load (cheap when empty).
-        if (world != null)
-            Inventory.ResolveBlocksOrItems();
+        // FromTreeAttributes runs before Initialize — Inventory.Api is still null.
+        // InventoryBase.ResolveBlocksOrItems() uses Api.World and NREs (BE discarded on chunk load).
+        // Resolve against the world accessor passed into FromTreeAttributes instead.
+        if (world == null)
+            return;
+
+        for (int i = 0; i < Inventory.Count; i++)
+        {
+            ItemSlot slot = Inventory[i];
+            if (slot?.Itemstack == null)
+                continue;
+
+            if (!slot.Itemstack.ResolveBlockOrItem(world))
+                slot.Itemstack = null;
+        }
     }
 
     protected void SaveFilterInventory(ITreeAttribute tree)
@@ -208,6 +247,8 @@ public abstract class BlockEntityPipeBase : BlockEntity, IPipeRenderState
         // Drop filter snapshots — not real loot.
         Inventory?.DiscardAll();
 
+        CancelClientTransitVisuals();
+
         base.OnBlockRemoved();
 
         if (Api?.World == null)
@@ -222,6 +263,16 @@ public abstract class BlockEntityPipeBase : BlockEntity, IPipeRenderState
             else if (be is BlockEntityPipeBase pipe2)
                 pipe2.UpdateConnections(updateNeighbors: false);
         }
+    }
+
+    /// <summary>Client: stop liquid/item flow meshes that still draw through this cell.</summary>
+    protected void CancelClientTransitVisuals()
+    {
+        if (Api?.Side != EnumAppSide.Client || Pos == null)
+            return;
+
+        PipeLiquidTransitRenderer.Instance?.CancelTransitsThrough(Pos);
+        PipeItemTransitRenderer.Instance?.CancelTransitsThrough(Pos);
     }
 
     public override void GetBlockInfo(IPlayer forPlayer, StringBuilder dsc)

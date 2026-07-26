@@ -62,6 +62,8 @@ public class PipeLiquidTransitRenderer : IRenderer
         if (segments.Count == 0)
             return;
 
+        List<BlockPos> pathBlocks = CollectPathBlocks(points);
+
         string liquidKey = GetLiquidColorKey(renderStack);
         LiquidTexture texture = GetLiquidTexture(renderStack, liquidKey);
         Vec4f color = GetLiquidColor(renderStack);
@@ -73,6 +75,7 @@ public class PipeLiquidTransitRenderer : IRenderer
         {
             existing.ExpiresMs = now + ActiveFlowDurationMs;
             existing.Segments = segments;
+            existing.PathBlocks = pathBlocks;
             existing.MeshKey = texture.MeshKey;
             existing.TextureId = texture.TextureId;
             existing.TexturePosition = texture.TexturePosition;
@@ -86,12 +89,74 @@ public class PipeLiquidTransitRenderer : IRenderer
             ExpiresMs = now + ActiveFlowDurationMs,
             FlowStartedMs = now,
             Segments = segments,
+            PathBlocks = pathBlocks,
             MeshKey = texture.MeshKey,
             TextureId = texture.TextureId,
             TexturePosition = texture.TexturePosition,
             Color = color
         });
     }
+
+    /// <summary>
+    /// Immediately drop liquid visuals that pass through a broken/removed pipe cell.
+    /// </summary>
+    public void CancelTransitsThrough(BlockPos brokenPos)
+    {
+        if (brokenPos == null || activeFlows.Count == 0)
+            return;
+
+        for (int i = activeFlows.Count - 1; i >= 0; i--)
+        {
+            if (FlowTouchesBlock(activeFlows[i], brokenPos))
+                activeFlows.RemoveAt(i);
+        }
+    }
+
+    private static List<BlockPos> CollectPathBlocks(List<Vec3d> points)
+    {
+        var list = new List<BlockPos>(points.Count);
+        for (int i = 0; i < points.Count; i++)
+        {
+            Vec3d p = points[i];
+            var pos = new BlockPos(
+                (int)Math.Floor(p.X),
+                (int)Math.Floor(p.Y),
+                (int)Math.Floor(p.Z));
+            if (list.Count == 0 || !list[list.Count - 1].Equals(pos))
+                list.Add(pos);
+        }
+
+        return list;
+    }
+
+    private static bool FlowTouchesBlock(ActivePipeFlow flow, BlockPos pos)
+    {
+        if (flow.PathBlocks != null)
+        {
+            for (int i = 0; i < flow.PathBlocks.Count; i++)
+            {
+                if (flow.PathBlocks[i].Equals(pos))
+                    return true;
+            }
+        }
+
+        // Fallback for flows without path metadata.
+        if (flow.Segments == null)
+            return false;
+
+        foreach (FilledPipeSegment segment in flow.Segments)
+        {
+            if (PointInBlock(segment.Center, pos))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool PointInBlock(Vec3d point, BlockPos pos)
+        => (int)Math.Floor(point.X) == pos.X
+           && (int)Math.Floor(point.Y) == pos.Y
+           && (int)Math.Floor(point.Z) == pos.Z;
 
     public void OnRenderFrame(float deltaTime, EnumRenderStage stage)
     {
@@ -807,6 +872,7 @@ public class PipeLiquidTransitRenderer : IRenderer
         public long ExpiresMs;
         public long FlowStartedMs;
         public List<FilledPipeSegment> Segments = null!;
+        public List<BlockPos>? PathBlocks;
         public string MeshKey = "unknown";
         public int TextureId;
         public TextureAtlasPosition? TexturePosition;

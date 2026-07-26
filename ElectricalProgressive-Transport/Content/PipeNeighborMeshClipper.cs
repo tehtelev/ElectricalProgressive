@@ -10,6 +10,8 @@ internal static class PipeNeighborMeshClipper
 {
     private const float MinReach = 0.15f;
     private const float RayEpsilon = 0.001f;
+    /// <summary>Slight push into the surface so the arm sits flush (not a hair short of the model).</summary>
+    private const float SurfaceBias = 0.02f;
 
     private static readonly Dictionary<long, MeshData> NeighborMeshCache = [];
 
@@ -20,10 +22,6 @@ internal static class PipeNeighborMeshClipper
         BlockPos neighborPos,
         float maxReach)
     {
-        MeshData mesh = GetRenderedBlockMesh(api, neighborPos);
-        if (mesh?.xyz == null || mesh.VerticesCount == 0)
-            return GameMath.Clamp(0.5f, MinReach, maxReach);
-
         BlockFacing facing = BlockFacing.ALLFACES[sideIndex];
         var rayOrigin = new Vec3d(
             pipePos.X + 0.5 - neighborPos.X,
@@ -31,6 +29,90 @@ internal static class PipeNeighborMeshClipper
             pipePos.Z + 0.5 - neighborPos.Z);
         var rayDir = new Vec3d(facing.Normali.X, facing.Normali.Y, facing.Normali.Z);
 
+        // Prefer selection/collision boxes: open baskets (reed/cattail) have holes in the mesh
+        // so a center ray misses the rim and either fails short or hits the floor.
+        float closest = GetReachFromBlockBoxes(api, neighborPos, rayOrigin, rayDir);
+
+        if (closest == float.MaxValue)
+        {
+            MeshData mesh = GetRenderedBlockMesh(api, neighborPos);
+            if (mesh?.xyz != null && mesh.VerticesCount > 0)
+            {
+                closest = GetReachFromMesh(mesh, rayOrigin, rayDir);
+            }
+        }
+
+        if (closest == float.MaxValue)
+            return GameMath.Clamp(0.5f + SurfaceBias, MinReach, maxReach);
+
+        // Sit flush against the hit surface rather than stopping short.
+        closest += SurfaceBias;
+        return GameMath.Clamp(closest, MinReach, maxReach);
+    }
+
+    /// <summary>
+    /// Ray vs selection boxes (fallback collision). Boxes match the placed model silhouette.
+    /// </summary>
+    private static float GetReachFromBlockBoxes(
+        ICoreClientAPI api,
+        BlockPos neighborPos,
+        Vec3d rayOrigin,
+        Vec3d rayDir)
+    {
+        Vintagestory.API.Common.Block block = api.World.BlockAccessor.GetBlock(neighborPos);
+        if (block == null || block.Id == 0)
+            return float.MaxValue;
+
+        Cuboidf[] boxes = null;
+        try
+        {
+            boxes = block.GetSelectionBoxes(api.World.BlockAccessor, neighborPos);
+        }
+        catch
+        {
+            // ignore BE selection failures
+        }
+
+        if (boxes == null || boxes.Length == 0)
+        {
+            try
+            {
+                boxes = block.GetCollisionBoxes(api.World.BlockAccessor, neighborPos);
+            }
+            catch
+            {
+                return float.MaxValue;
+            }
+        }
+
+        if (boxes == null || boxes.Length == 0)
+            return float.MaxValue;
+
+        float closest = float.MaxValue;
+        for (int i = 0; i < boxes.Length; i++)
+        {
+            Cuboidf box = boxes[i];
+            if (box == null)
+                continue;
+
+            if (TryRayAabbIntersect(
+                    rayOrigin,
+                    rayDir,
+                    box.X1, box.Y1, box.Z1,
+                    box.X2, box.Y2, box.Z2,
+                    out double dist)
+                && dist > RayEpsilon
+                && dist < closest)
+            {
+                closest = (float)dist;
+            }
+        }
+
+        return closest;
+    }
+
+    private static float GetReachFromMesh(MeshData mesh, Vec3d rayOrigin, Vec3d rayDir)
+    {
         float closest = float.MaxValue;
         float[] xyz = mesh.xyz;
         int[] indices = mesh.Indices;
@@ -63,10 +145,7 @@ internal static class PipeNeighborMeshClipper
         if (closest == float.MaxValue)
             closest = GetReachFromVertexBounds(xyz, mesh.VerticesCount, rayOrigin, rayDir);
 
-        if (closest == float.MaxValue)
-            return GameMath.Clamp(0.5f, MinReach, maxReach);
-
-        return GameMath.Clamp(closest, MinReach, maxReach);
+        return closest;
     }
 
     private static MeshData GetRenderedBlockMesh(ICoreClientAPI api, BlockPos neighborPos)
@@ -127,6 +206,57 @@ internal static class PipeNeighborMeshClipper
         }
 
         return closest;
+    }
+
+    /// <summary>Slab-method ray vs axis-aligned box (block-local coords).</summary>
+    private static bool TryRayAabbIntersect(
+        Vec3d origin,
+        Vec3d dir,
+        float minX, float minY, float minZ,
+        float maxX, float maxY, float maxZ,
+        out double distance)
+    {
+        distance = 0;
+
+        double tMin = double.NegativeInfinity;
+        double tMax = double.PositiveInfinity;
+
+        if (!ClipSlab(origin.X, dir.X, minX, maxX, ref tMin, ref tMax))
+            return false;
+        if (!ClipSlab(origin.Y, dir.Y, minY, maxY, ref tMin, ref tMax))
+            return false;
+        if (!ClipSlab(origin.Z, dir.Z, minZ, maxZ, ref tMin, ref tMax))
+            return false;
+
+        if (tMax < RayEpsilon)
+            return false;
+
+        // Entering face distance (or 0 if origin is inside the box).
+        double tHit = tMin >= RayEpsilon ? tMin : tMax;
+        if (tHit < RayEpsilon)
+            return false;
+
+        distance = tHit;
+        return true;
+    }
+
+    private static bool ClipSlab(double origin, double dir, float min, float max, ref double tMin, ref double tMax)
+    {
+        if (Math.Abs(dir) < 1e-12)
+        {
+            // Parallel to slab — miss if outside.
+            return origin >= min && origin <= max;
+        }
+
+        double inv = 1.0 / dir;
+        double t1 = (min - origin) * inv;
+        double t2 = (max - origin) * inv;
+        if (t1 > t2)
+            (t1, t2) = (t2, t1);
+
+        tMin = Math.Max(tMin, t1);
+        tMax = Math.Min(tMax, t2);
+        return tMin <= tMax;
     }
 
     private static bool TryRayTriangleIntersect(

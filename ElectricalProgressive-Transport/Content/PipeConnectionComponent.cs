@@ -129,8 +129,12 @@ namespace ElectricalProgressive.Content
                 {
                     for (int i = 0; i < 6; i++)
                     {
-                        if (_connectedSides[i] && !_connectedToInventory[i] && _connectedPipes[i] != null)
-                            NotifyNeighborOfUpdate(_connectedPipes[i]);
+                        if (!_connectedSides[i] || _connectedToInventory[i] || _connectedPipes[i] == null)
+                            continue;
+
+                        // Full rescan on neighbor, plus explicit link toward us (covers load-order gaps).
+                        NotifyNeighborOfUpdate(_connectedPipes[i]);
+                        EnsureNeighborLinksBack(i, _connectedPipes[i]);
                     }
                 }
             }
@@ -147,7 +151,8 @@ namespace ElectricalProgressive.Content
         {
             try
             {
-                return _api.World.BlockAccessor.GetChunkAtBlockPos(pos) != null;
+                var chunk = _api.World.BlockAccessor.GetChunkAtBlockPos(pos);
+                return chunk != null;
             }
             catch
             {
@@ -162,6 +167,24 @@ namespace ElectricalProgressive.Content
                 neighborPipe.UpdateConnections(false);
             else if (be is BEPipe neighborSimplePipe)
                 neighborSimplePipe.UpdateConnections(false);
+        }
+
+        /// <summary>
+        /// Make sure the neighbor pipe has a connection back to this cell on the opposite face.
+        /// </summary>
+        private void EnsureNeighborLinksBack(int ourSideIndex, BlockPos neighborPos)
+        {
+            var be = _api.World.BlockAccessor.GetBlockEntity(neighborPos);
+            if (be == null)
+                return;
+
+            BlockFacing ourFacing = BlockFacing.ALLFACES[ourSideIndex];
+            BlockFacing theirFacing = ourFacing.Opposite;
+
+            if (be is BlockEntityPipeBase neighborPipe)
+                neighborPipe.UpdateSingleConnection(theirFacing, _pos, fromInventory: false);
+            else if (be is BEPipe neighborSimple)
+                neighborSimple.UpdateSingleConnection(theirFacing, _pos, fromInventory: false);
         }
 
         protected virtual bool IsPipeBlock(Vintagestory.API.Common.Block block)
