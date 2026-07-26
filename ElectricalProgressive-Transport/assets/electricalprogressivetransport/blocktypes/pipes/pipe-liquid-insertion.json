@@ -5,17 +5,21 @@
   "shape": {
     "base": "block/itempipe/center"
   },
+  "lod2shape": {
+    "base": "block/itempipe/center-lod2"
+  },
   "shapeInventory": {
     "base": "block/itempipe/center"
   },
   "creativeinventory": {
+    "general": [ "*" ],
     "electricalprogressivetransport": [ "*" ]
   },
   "textures": {
     "bismuthbronze": {
       "base": "game:block/metal/plate/bismuthbronze"
     },
-    "glasspipe.png": {
+    "glasspipe": {
       "base": "glasspipe"
     },
     "pipecenter": {

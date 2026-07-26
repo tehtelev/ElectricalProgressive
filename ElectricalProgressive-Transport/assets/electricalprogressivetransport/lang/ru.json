@@ -1,14 +1,21 @@
 ﻿{
   "game:tabname-electricalprogressivetransport": "Транспортные трубы",
+
   "block-pipe-normal": "Транспортная труба",
   "block-pipe-normal-*": "Транспортная труба",
   "block-pipe-item-insertion": "Фильтрующая труба",
-  "block-pipe-liquid-insertion": "Жидкостная труба",
   "block-pipe-item-*": "Предметная помещающая труба",
+  "block-pipe-liquid-insertion": "Жидкостная труба",
+  "block-pipe-liquid-*": "Жидкостная помещающая труба",
+
   "pipe-normal-info": "Обычная транспортная труба",
   "pipe-insertion-info": "Труба с фильтром для помещения предметов",
+  "pipe-liquid-insertion-info": "Труба для фильтрации и помещения жидкостей",
+
   "blockhelp-filter-settings": "Открыть настройки фильтра",
   "blockhelp-pipe-switch-type": "Сменить тип трубы",
+  "blockhelp-liquid-filter-settings": "Открыть настройки жидкостного фильтра",
+
   "connections": "Соединений: {0}",
   "containers": "Контейнеров: {0}",
   "filter-mode": "Режим фильтра: {0}",
@@ -32,10 +39,7 @@
   "filter-speet-up": "Прибавить",
   "filter-speet-down": "Убавить",
 
-  "block-pipe-liquid-*": "Жидкостная помещающая труба",
   "filter-liquidpipe-comment": "Клик по жидкости — в фильтр (прокрутка)",
-  "pipe-liquid-insertion-info": "Труба для фильтрации и помещения жидкостей",
-  "blockhelp-liquid-filter-settings": "Открыть настройки жидкостного фильтра",
   "liquid-filter-pipe-title": "Жидкостная фильтрующая труба",
   "liquid-filter-pipe-settings": "Настройки жидкостного фильтра:",
   "liquid-inserters": "Жидкостных труб в сети: {0}",
@@ -52,12 +56,8 @@
 
   "block-handbooktitle-pipe-normal": "Использование",
   "block-handbooktext-pipe-normal": "Позволяет передавать предметы и жидкости. Нужно соединить этой трубой необходимые контейнеры/инвентари. Последнюю трубу перед контейнером нужно преобразовать в помещающую трубу. Для этого возьмите в руки гаечный ключ и правой кнопкой мыши нажмите на нужную трубу. Затем в GUI вы сможете настроить необходимые фильтры.",
-
   "block-handbooktitle-pipe-item-insertion": "Использование",
   "block-handbooktext-pipe-item-insertion": "Позволяет помещать предметы в соседние контейнеры. Откройте GUI и кликайте по предметам в списке, чтобы добавить их в фильтр. Также можно положить предмет из инвентаря в слот фильтра. Повторный клик по уже выбранному предмету убирает его из фильтра. Если фильтр пустой — перемещаются все предметы.",
-
   "block-handbooktitle-pipe-liquid-insertion": "Использование",
   "block-handbooktext-pipe-liquid-insertion": "Позволяет помещать жидкости в соседние контейнеры. Откройте GUI и кликайте по жидкостям в списке, чтобы добавить их в фильтр. Если фильтр пустой — перемещаются все жидкости."
-
-
 }

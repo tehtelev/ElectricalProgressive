@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Text;
+using ElectricalProgressive.Content;
 using ElectricalProgressive.Content.NetworkPipe;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -59,14 +59,8 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
     private long lastTransferCleanupTime = 0;
     private readonly List<BlockPos> expiredTransferKeys = [];
 
-    // === Переопределение свойства Inventory ===
     public override InventoryBase Inventory => _inventory;
     public override string InventoryClassName => "insertionpipe";
-
-    private static readonly FieldInfo? BaseInventoryField =
-        typeof(BlockEntityGenericTypedContainer).GetField(
-            "inventory",
-            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
     // === Геттеры для публичного доступа к настройкам ===
     public int TransferRate => transferRate;
@@ -75,59 +69,22 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
     public bool MatchType => matchType;
     public bool MatchAttributes => matchAttributes;
 
-    // === Конструктор ===
     public BEItemInsertionPipe()
     {
-        quantitySlots = 18;
-        inventoryClassName = "insertionpipe";
-        // 18 слотов фильтра (плитка 6x3)
-        _inventory = new InventoryInsertionPipe(18, inventoryClassName, null, null, this);
-        BindBaseInventoryField();
+        _inventory = new InventoryInsertionPipe(18, "insertionpipe", null, null, this);
     }
 
-    /// <summary>
-    /// Prevents base container from creating a plain InventoryGeneric and desyncing the inventory field.
-    /// That mismatch + null inventory tree caused BE to fail loading after world rejoin.
-    /// </summary>
-    protected override void InitInventory(Vintagestory.API.Common.Block block)
-    {
-        if (_inventory == null)
-            _inventory = new InventoryInsertionPipe(18, "insertionpipe", null, null, this);
-
-        quantitySlots = 18;
-        inventoryClassName = "insertionpipe";
-        BindBaseInventoryField();
-    }
-
-    private void BindBaseInventoryField()
-    {
-        try
-        {
-            BaseInventoryField?.SetValue(this, _inventory);
-        }
-        catch
-        {
-            // Reflection must not prevent entity creation.
-        }
-    }
-
-    // === Инициализация ===
     public override void Initialize(ICoreAPI api)
     {
-        BindBaseInventoryField();
         base.Initialize(api);
-        BindBaseInventoryField();
 
-        // Определяем направление вывода (куда будем класть предметы)
-        DetermineOutputDirection();
-
+        // Output facing resolved lazily on first transfer tick (cheaper place).
         if (api.Side == EnumAppSide.Server)
         {
-            // Регистрируем тик для обработки передачи предметов
             transferTimer = api.World.RegisterGameTickListener(OnTransferTick, 1000);
+            filterSnapshotTimer = api.World.RegisterGameTickListener(OnFilterSnapshotTick, 1000);
         }
 
-        filterSnapshotTimer = api.World.RegisterGameTickListener(OnFilterSnapshotTick, 1000);
         _inventory.OnAcquireTransitionSpeed -= FreezeFilterTransitionSpeed;
         _inventory.OnAcquireTransitionSpeed += FreezeFilterTransitionSpeed;
     }
@@ -146,14 +103,12 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
     }
 
     // === Взаимодействие с игроком ===
-    public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
+    public bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
     {
         if (Api.Side == EnumAppSide.Client)
-        {
             OpenGui(byPlayer as IClientPlayer);
-        }
 
-        return true; // возвращаем результат базового метода (true)
+        return true;
     }
 
 
@@ -343,12 +298,26 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
     // Метод обновления настроек фильтра (вызывается из GUI)
     public void UpdateFilterSettings(FilterMode mode, bool matchMod, bool matchType, bool matchAttributes)
     {
+        if (mode != FilterMode.AllowList && mode != FilterMode.DenyList)
+            return;
+
         this.currentFilterMode = mode;
         this.matchMod = matchMod;
         this.matchType = matchType;
         this.matchAttributes = matchAttributes;
 
         MarkDirty();
+    }
+
+    /// <summary>Apply settings after wrench transform without a full FromTreeAttributes.</summary>
+    public void ApplyWrenchTransformSettings(int rate, FilterMode mode, bool matchMod, bool matchType, bool matchAttributes)
+    {
+        transferRate = PipeSecurity.ClampItemTransferRate(rate);
+        if (mode == FilterMode.AllowList || mode == FilterMode.DenyList)
+            currentFilterMode = mode;
+        this.matchMod = matchMod;
+        this.matchType = matchType;
+        this.matchAttributes = matchAttributes;
     }
 
     // === Логика передачи предметов ===
@@ -481,6 +450,10 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         var sourceContainer = sourceBlock.GetBlockEntity<BlockEntityContainer>(sourcePos);
 
         if (sourceContainer == null)
+            return false;
+
+        // Claim-aware: only move between inventories the pipe owner may use.
+        if (!PipeSecurity.MayAutomatedTransfer(Api.World, OwnerUid, sourcePos, targetPos))
             return false;
 
         // Получаем инвентарь источника
@@ -875,72 +848,40 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
         }
     }
 
-    /// <summary>
-    /// Safe late-init: base version calls container.LateInit() while container.Api is still null
-    /// during chunk deserialization (type null→default triggers re-init). That discards the BE.
-    /// Full container init happens later in Initialize().
-    /// </summary>
-    public override void LateInitInventory()
-    {
-        BindBaseInventoryField();
-        if (Api == null || Inventory == null || Pos == null)
-            return;
-
-        Inventory.LateInitialize(InventoryClassName + "-" + Pos, Api);
-        Inventory.ResolveBlocksOrItems();
-        if (Inventory.Pos == null)
-            Inventory.Pos = Pos;
-    }
-
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
     {
-        BindBaseInventoryField();
-
-        // Pre-seed type/isPerPlayer so GenericTypedContainer does not treat first load as a type
-        // change (null → "normal-generic") and call LateInitInventory before container.Init.
-        if (tree != null)
-        {
-            type = tree.GetString("type", defaultType) ?? defaultType;
-            isPerPlayer = tree.GetBool("isPerPlayer", false);
-
-            if (!tree.HasAttribute("inventory"))
-            {
-                var invTree = new TreeAttribute();
-                invTree.SetInt("qslots", _inventory?.Count ?? 18);
-                tree["inventory"] = invTree;
-            }
-        }
-
         base.FromTreeAttributes(tree, worldAccessForResolve);
-        BindBaseInventoryField();
         _inventory?.CaptureFilterSnapshotsFromSlots(worldAccessForResolve);
 
-        // Загружаем настройки фильтра
-        transferRate = tree.GetInt("transferRate", 1);
+        if (tree == null)
+            return;
+
+        transferRate = PipeSecurity.ClampItemTransferRate(tree.GetInt("transferRate", 1));
         currentFilterMode = (FilterMode)tree.GetInt("filterMode", 0);
         matchMod = tree.GetBool("matchMod", false);
         matchType = tree.GetBool("matchType", true);
         matchAttributes = tree.GetBool("matchAttributes", false);
 
-        // Ограничиваем значение скорости
-        transferRate = System.Math.Max(1, System.Math.Min(transferRate, 64));
+        if (!PipeSecurity.IsValidFilterMode((int)currentFilterMode))
+            currentFilterMode = FilterMode.AllowList;
     }
 
     public override void ToTreeAttributes(ITreeAttribute tree)
     {
-        BindBaseInventoryField();
-
-        if (Api?.World != null)
-            _inventory.MaintainFilterSnapshots(Api.World);
-
         base.ToTreeAttributes(tree);
 
-        // Сохраняем настройки фильтра
         tree.SetInt("transferRate", transferRate);
         tree.SetInt("filterMode", (int)currentFilterMode);
         tree.SetBool("matchMod", matchMod);
         tree.SetBool("matchType", matchType);
         tree.SetBool("matchAttributes", matchAttributes);
+    }
+
+    protected override bool IsFilterInventoryEmpty()
+    {
+        if (_inventory == null)
+            return true;
+        return _inventory.CountActiveFilterSnapshots() == 0;
     }
 
     public override void OnReceivedServerPacket(int packetid, byte[] data)
@@ -960,6 +901,9 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
             stack.ResolveBlockOrItem(Api.World);
 
             int pointCount = reader.ReadInt32();
+            if (pointCount < 0 || pointCount > MaxTransitPathPipes + 2)
+                return;
+
             var points = new List<Vec3d>(pointCount);
             for (int i = 0; i < pointCount; i++)
             {
@@ -981,96 +925,100 @@ public class BEItemInsertionPipe : BlockEntityPipeBase
     {
         base.OnReceivedClientPacket(player, packetid, data);
 
-        // Обработка пакетов от GUI
-        if (packetid == 1001) // Закрытие GUI
+        // Only authenticated, in-range players with claim Use may configure this pipe.
+        if (packetid is 1001 or 1002 or 1003 or 1004 or GuiDialogInsertionPipe.SetFilterStackPacketId)
         {
-            if (_clientDialog != null && _clientDialog.IsOpened())
-            {
-                _clientDialog?.TryClose();
-            }
-        }
-        else if (packetid == 1002) // Обновление настроек фильтра
-        {
-            using var ms = new System.IO.MemoryStream(data);
-            using var br = new System.IO.BinaryReader(ms);
-            FilterMode mode = (FilterMode)br.ReadInt32();
-            bool modMatch = br.ReadBoolean();
-            bool typeMatch = br.ReadBoolean();
-            bool attrMatch = br.ReadBoolean();
+            if (Api?.Side != EnumAppSide.Server)
+                return;
+            if (!PipeSecurity.CanPlayerConfigure(Api.World, player, Pos))
+                return;
 
-            UpdateFilterSettings(mode, modMatch, typeMatch, attrMatch);
+            SetOwnerIfEmpty(player);
         }
-        else if (packetid == 1003) // Обновление скорости передачи
+
+        try
         {
-            try
+            // Обработка пакетов от GUI
+            if (packetid == 1001) // Закрытие GUI
             {
+                if (_clientDialog != null && _clientDialog.IsOpened())
+                    _clientDialog?.TryClose();
+            }
+            else if (packetid == 1002) // Обновление настроек фильтра
+            {
+                if (!PipeSecurity.IsPacketSizeOk(data) || data.Length < 7)
+                    return;
+
+                using var ms = new MemoryStream(data);
+                using var br = new BinaryReader(ms);
+                int modeInt = br.ReadInt32();
+                if (!PipeSecurity.IsValidFilterMode(modeInt))
+                    return;
+
+                bool modMatch = br.ReadBoolean();
+                bool typeMatch = br.ReadBoolean();
+                bool attrMatch = br.ReadBoolean();
+                UpdateFilterSettings((FilterMode)modeInt, modMatch, typeMatch, attrMatch);
+            }
+            else if (packetid == 1003) // Обновление скорости передачи
+            {
+                if (!PipeSecurity.IsPacketSizeOk(data))
+                    return;
+
                 var tree = new TreeAttribute();
                 tree.FromBytes(data);
-
-                int newRate = tree.GetInt("transferRate", 1);
-
-                // Ограничиваем значение
-                newRate = System.Math.Max(1, System.Math.Min(newRate, 64));
+                int newRate = PipeSecurity.ClampItemTransferRate(tree.GetInt("transferRate", 1));
 
                 if (newRate != transferRate)
                 {
                     transferRate = newRate;
-
                     MarkDirty();
                     Api.World.BlockAccessor.MarkBlockDirty(Pos);
                 }
             }
-            catch (Exception ex)
+            else if (packetid == 1004) // legacy no-op
             {
-                Api?.Logger?.Error($"Ошибка при обновлении скорости передачи: {ex.Message}");
+                // ignored
+            }
+            else if (packetid == GuiDialogInsertionPipe.SetFilterStackPacketId)
+            {
+                ApplyFilterStackPacket(data);
             }
         }
-        else if (packetid == 1004) // Старый пакет настроек порчи: больше не нужен для пассивных фильтр-снимков.
+        catch (Exception ex)
         {
-            MarkDirty();
-        }
-        else if (packetid == GuiDialogInsertionPipe.SetFilterStackPacketId)
-        {
-            ApplyFilterStackPacket(data);
+            Api?.Logger?.Warning("[ElectricalProgressive Transport] Item pipe packet {0} rejected: {1}", packetid, ex.Message);
         }
     }
 
     private void ApplyFilterStackPacket(byte[] data)
     {
-        if (data == null || _inventory == null)
+        if (!PipeSecurity.IsPacketSizeOk(data) || _inventory == null || Api?.World == null)
             return;
 
-        try
-        {
-            var tree = new TreeAttribute();
-            tree.FromBytes(data);
+        var tree = new TreeAttribute();
+        tree.FromBytes(data);
 
-            int slotId = tree.GetInt("slotId", -1);
-            if (slotId < 0 || slotId >= _inventory.Count)
+        int slotId = tree.GetInt("slotId", -1);
+        if (slotId < 0 || slotId >= _inventory.Count)
+            return;
+
+        ItemStack? stack = tree.GetItemstack("stack");
+        if (stack == null)
+        {
+            _inventory.ClearFilterSnapshot(slotId);
+        }
+        else
+        {
+            ItemStack? clean = PipeSecurity.SanitizeFilterSnapshot(Api.World, stack, liquidsOnly: false);
+            if (clean == null)
                 return;
 
-            ItemStack? stack = tree.GetItemstack("stack");
-            if (stack == null)
-            {
-                _inventory.ClearFilterSnapshot(slotId);
-            }
-            else
-            {
-                stack.ResolveBlockOrItem(Api.World);
-                if (stack.Collectible == null)
-                    return;
-
-                stack.StackSize = 1;
-                _inventory.SetFilterSnapshot(slotId, stack);
-            }
-
-            MarkDirty(true);
-            Api.World.BlockAccessor.MarkBlockDirty(Pos);
+            _inventory.SetFilterSnapshot(slotId, clean);
         }
-        catch (Exception ex)
-        {
-            Api?.Logger?.Error($"Ошибка при установке фильтра из списка предметов: {ex.Message}");
-        }
+
+        MarkDirty(true);
+        Api.World.BlockAccessor.MarkBlockDirty(Pos);
     }
 
     public override void OnBlockBroken(IPlayer byPlayer = null)

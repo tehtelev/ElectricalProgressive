@@ -1,4 +1,5 @@
-﻿using ElectricalProgressive.Content;
+﻿using System;
+using ElectricalProgressive.Content;
 using ElectricalProgressive.Content.ItemInsertionPipe;
 using ElectricalProgressive.Content.LiquidInsertionPipe;
 using ElectricalProgressive.Content.NetworkPipe;
@@ -12,7 +13,7 @@ using Vintagestory.API.Common;
     "electricalprogressivetransport",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
     Description = "Pipeline transport system",
-    Version = "1.0.0",
+    Version = "2.0.0",
     Authors =
     [
         "Tehtelev",
@@ -66,12 +67,16 @@ public class ElectricalProgressiveTransport : ModSystem
         PipeLiquidTransitRenderer.Instance = liquidTransitRenderer;
         api.Event.RegisterRenderer(liquidTransitRenderer, EnumRenderStage.Opaque, "ep-pipe-liquid-transit");
 
-        // Build creative filter cache after world is ready, not on first GUI open.
+        // Build creative filter cache + tessellate heavy pipe parts after world is ready.
         api.Event.LevelFinalize += () =>
         {
             api.Event.EnqueueMainThreadTask(
-                () => PipeFilterItemBrowser.Prewarm(api),
-                "ep-pipe-filter-prewarm");
+                () =>
+                {
+                    PipeFilterItemBrowser.Prewarm(api);
+                    PrewarmPipeMeshes(api);
+                },
+                "ep-pipe-prewarm");
         };
     }
 
@@ -95,6 +100,22 @@ public class ElectricalProgressiveTransport : ModSystem
         liquidTransitRenderer = null;
         clientApi = null;
         base.Dispose();
+    }
+
+    private static void PrewarmPipeMeshes(ICoreClientAPI api)
+    {
+        try
+        {
+            foreach (var block in api.World.Blocks)
+            {
+                if (block is BlockPipeBase)
+                    PipeMeshBuilder.Prewarm(api, block);
+            }
+        }
+        catch (Exception e)
+        {
+            api.Logger.Warning("[ElectricalProgressive Transport] Pipe mesh prewarm failed: {0}", e.Message);
+        }
     }
 
     public PipeNetworkManager GetNetworkManager()

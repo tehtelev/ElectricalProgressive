@@ -36,6 +36,17 @@ namespace ElectricalProgressive.Content
 
             if (be != null)
             {
+                // Claim + range: do not open/configure foreign or remote pipes.
+                if (world.Side == EnumAppSide.Server
+                    && be is BlockEntityPipeBase pipeBe
+                    && !PipeSecurity.CanPlayerConfigure(world, byPlayer, blockSel.Position))
+                {
+                    return false;
+                }
+
+                if (be is BlockEntityPipeBase ownedPipe)
+                    ownedPipe.SetOwnerIfEmpty(byPlayer);
+
                 if (be is BEItemInsertionPipe itempipe)
                     itempipe.OnPlayerRightClick(byPlayer, blockSel);
 
@@ -44,6 +55,18 @@ namespace ElectricalProgressive.Content
             }
 
             return base.OnBlockInteractStart(world, byPlayer, blockSel);
+        }
+
+        public override bool DoPlaceBlock(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel, ItemStack byItemStack)
+        {
+            bool placed = base.DoPlaceBlock(world, byPlayer, blockSel, byItemStack);
+            if (placed && byPlayer != null && blockSel?.Position != null
+                && world.BlockAccessor.GetBlockEntity(blockSel.Position) is BlockEntityPipeBase pipe)
+            {
+                pipe.ForceSetOwner(byPlayer);
+            }
+
+            return placed;
         }
 
         /// <summary>
@@ -77,33 +100,64 @@ namespace ElectricalProgressive.Content
             if (newBlock == null)
                 return false;
 
-            ITreeAttribute tree = SaveEntityData(world, pos, baseType, nextBaseType);
+            // Lightweight state only — full ToTreeAttributes on filter pipes serializes 18 slots (major hitch).
+            ITreeAttribute tree = SaveEntityDataLightweight(world, pos, baseType, nextBaseType);
 
+            // Synchronous SetBlock + re-register. Deferred tasks were racing with old BE.RemovePipe
+            // and left wrench-transformed filter pipes outside the network (place-fresh still worked).
             world.BlockAccessor.SetBlock(newBlock.BlockId, pos);
-            world.Api.Event.EnqueueMainThreadTask(() =>
+
+            BlockEntity newEntity = world.BlockAccessor.GetBlockEntity(pos);
+            if (newEntity != null && tree != null)
             {
-                if (tree != null)
-                {
-                    BlockEntity newEntity = world.BlockAccessor.GetBlockEntity(pos);
-                    if (newEntity != null)
-                    {
-                        newEntity.FromTreeAttributes(tree, world);
-                        newEntity.MarkDirty();
-                    }
-                }
+                // Apply owner/settings only — avoid full FromTreeAttributes stomping a healthy init.
+                ApplyTransformSettings(newEntity, tree, player);
+            }
 
-                UpdatePipeConnections(world, pos, false);
-                UpdateNeighborConnections(world, pos);
+            if (newEntity is BlockEntityPipeBase pipeBase)
+                pipeBase.RefreshConnectionsAfterTransform();
+            else if (newEntity is BEPipe normalPipe)
+                normalPipe.RefreshConnectionsAfterTransform();
+            else
+                UpdatePipeConnections(world, pos, updateNeighbors: true);
 
-                world.BlockAccessor.MarkBlockDirty(pos);
-                world.PlaySoundAt(new AssetLocation("game:sounds/effect/tooluse"),
-                    pos.X, pos.Y, pos.Z, player);
-            }, "transform-pipe");
+            UpdateNeighborConnections(world, pos);
+
+            newEntity?.MarkDirty(true);
+            world.BlockAccessor.MarkBlockDirty(pos);
+            world.PlaySoundAt(new AssetLocation("game:sounds/tool/padlock"),
+                pos.X, pos.Y, pos.Z, player);
 
             return true;
         }
 
-        private ITreeAttribute SaveEntityData(
+        private static void ApplyTransformSettings(BlockEntity entity, ITreeAttribute tree, IPlayer player)
+        {
+            if (entity is BlockEntityPipeBase pipeBase)
+                pipeBase.SetOwnerIfEmpty(player);
+
+            if (entity is BEItemInsertionPipe itemPipe)
+            {
+                itemPipe.ApplyWrenchTransformSettings(
+                    tree.GetInt("transferRate", itemPipe.TransferRate),
+                    (BEItemInsertionPipe.FilterMode)tree.GetInt("filterMode", (int)itemPipe.CurrentFilterMode),
+                    tree.GetBool("matchMod", itemPipe.MatchMod),
+                    tree.GetBool("matchType", itemPipe.MatchType),
+                    tree.GetBool("matchAttributes", itemPipe.MatchAttributes));
+            }
+            else if (entity is BELiquidInsertionPipe liquidPipe)
+            {
+                liquidPipe.ApplyWrenchTransformSettings(
+                    tree.GetInt("transferRate", liquidPipe.TransferRate),
+                    (BELiquidInsertionPipe.FilterMode)tree.GetInt("filterMode", (int)liquidPipe.CurrentFilterMode));
+            }
+        }
+
+        /// <summary>
+        /// Save only what must survive a wrench transform (connections, owner, filter settings).
+        /// Avoids serializing the full 18-slot filter inventory (main transform hitch).
+        /// </summary>
+        private ITreeAttribute SaveEntityDataLightweight(
             IWorldAccessor world,
             BlockPos pos,
             string fromType,
@@ -114,9 +168,13 @@ namespace ElectricalProgressive.Content
                 return null;
 
             var tree = new TreeAttribute();
-            currentEntity.ToTreeAttributes(tree);
 
-            if (currentEntity is BEItemInsertionPipe itemPipe)
+            // Owner only (connections rebuilt live after SetBlock — do not restore stale flags).
+            if (currentEntity is BlockEntityPipeBase pipeBase)
+                pipeBase.WriteTransformState(tree);
+
+            // Settings that can carry into the next filter pipe type.
+            if (toType == "pipe-item-insertion" && currentEntity is BEItemInsertionPipe itemPipe)
             {
                 tree.SetInt("transferRate", itemPipe.TransferRate);
                 tree.SetInt("filterMode", (int)itemPipe.CurrentFilterMode);
@@ -124,14 +182,23 @@ namespace ElectricalProgressive.Content
                 tree.SetBool("matchType", itemPipe.MatchType);
                 tree.SetBool("matchAttributes", itemPipe.MatchAttributes);
             }
-            else if (currentEntity is BELiquidInsertionPipe liquidPipe)
+            else if (toType == "pipe-liquid-insertion")
             {
-                tree.SetInt("transferRate", liquidPipe.TransferRate);
-                tree.SetInt("filterMode", (int)liquidPipe.CurrentFilterMode);
+                if (currentEntity is BELiquidInsertionPipe liquidPipe)
+                {
+                    tree.SetInt("transferRate", liquidPipe.TransferRate);
+                    tree.SetInt("filterMode", (int)liquidPipe.CurrentFilterMode);
+                }
+                else if (currentEntity is BEItemInsertionPipe fromItem)
+                {
+                    // Item → liquid: keep allow/deny mode, reset rate to liquid default.
+                    tree.SetInt("transferRate", 100);
+                    tree.SetInt("filterMode", (int)fromItem.CurrentFilterMode);
+                }
             }
 
-            // Item filters must not carry over into a liquid pipe (different filter domain).
-            if (fromType == "pipe-item-insertion" && toType == "pipe-liquid-insertion")
+            // New filter pipes always start with an empty filter list after wrench transform.
+            if (toType == "pipe-item-insertion" || toType == "pipe-liquid-insertion")
                 ClearFilterInventoryForTransform(tree, slotCount: 18);
 
             return tree;
@@ -158,11 +225,9 @@ namespace ElectricalProgressive.Content
         {
             for (int i = 0; i < 6; i++)
             {
-                BlockFacing facing = BlockFacing.ALLFACES[i];
-                BlockPos neighborPos = pos.AddCopy(facing);
-
+                BlockPos neighborPos = pos.AddCopy(BlockFacing.ALLFACES[i]);
                 if (world.BlockAccessor.GetBlock(neighborPos) is BlockPipeBase)
-                    UpdatePipeConnections(world, neighborPos, true);
+                    UpdatePipeConnections(world, neighborPos, updateNeighbors: false);
             }
         }
 
@@ -218,6 +283,15 @@ namespace ElectricalProgressive.Content
                 pipe2.UpdateConnections(false);
         }
 
+        public override void OnLoaded(ICoreAPI api)
+        {
+            base.OnLoaded(api);
+
+            // Bake Lod2Mesh before first chunk tessellation so the engine runs near+far passes.
+            if (api is ICoreClientAPI capi)
+                PipeMeshBuilder.EnsureLod2Mesh(capi, this);
+        }
+
         public override void OnJsonTesselation(
             ref MeshData sourceMesh,
             ref int[] lightRgbsByCorner,
@@ -233,13 +307,17 @@ namespace ElectricalProgressive.Content
             if (capi.World.BlockAccessor.GetBlockEntity(pos) is not IPipeRenderState renderState)
                 return;
 
+            // EP style: engine already chose shape vs lod2shape (sourceMesh verts differ).
+            bool isLod2 = PipeMeshBuilder.IsLod2Pass(capi, this, sourceMesh);
+
             MeshData builtMesh = PipeMeshBuilder.Build(
                 capi,
                 this,
                 pos,
                 renderState.ConnectedSides,
                 renderState.ConnectedToInventory,
-                renderState.UseInserterHead);
+                renderState.UseInserterHead,
+                isLod2);
 
             if (builtMesh != null)
                 sourceMesh = builtMesh;

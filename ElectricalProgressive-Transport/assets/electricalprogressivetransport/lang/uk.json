@@ -1,11 +1,21 @@
 ﻿{
   "game:tabname-electricalprogressivetransport": "Транспортні труби",
+
+  "block-pipe-normal": "Транспортна труба",
   "block-pipe-normal-*": "Транспортна труба",
+  "block-pipe-item-insertion": "Фільтрувальна труба",
   "block-pipe-item-*": "Предметна вкладальна труба",
+  "block-pipe-liquid-insertion": "Рідинна труба",
+  "block-pipe-liquid-*": "Рідинна вкладальна труба",
+
   "pipe-normal-info": "Звичайна транспортна труба",
   "pipe-insertion-info": "Труба з фільтром для вкладання",
+  "pipe-liquid-insertion-info": "Труба для фільтрації та вкладання рідин",
+
   "blockhelp-filter-settings": "Відкрити налаштування фільтра",
   "blockhelp-pipe-switch-type": "Змінити тип труби",
+  "blockhelp-liquid-filter-settings": "Відкрити налаштування рідинного фільтра",
+
   "connections": "З'єднань: {0}",
   "containers": "Контейнерів: {0}",
   "filter-mode": "Режим фільтра: {0}",
@@ -13,8 +23,11 @@
   "inserters": "Вкладальних труб у мережі: {0}",
   "transfer-rate": "Швидкість передачі: {0}",
   "active-filters": "Фільтрів: {0}/{1}",
+
   "filter-pipe-title": "Фільтрувальна труба",
-  "filter-pipe-comment": "Покладіть предмети у слоти для фільтрації",
+  "filter-pipe-comment": "Клік по предмету — у фільтр (прокрутка)",
+  "filter-search-placeholder": "Пошук...",
+  "filter-search-results": "{0}",
   "filter-pipe-settings": "Налаштування фільтра:",
   "filter-pipe": "Фільтрувальна труба",
   "filter-mode-allow": "Білий список",
@@ -25,26 +38,26 @@
   "filter-speet-transfer": "Швидкість передачі:",
   "filter-speet-up": "Додати",
   "filter-speet-down": "Відняти",
-  "block-pipe-liquid-*": "Рідинна вкладальна труба",
-  "filter-liquidpipe-comment": "Покладіть рідини у слоти для фільтрації",
-  "pipe-liquid-insertion-info": "Труба для фільтрації та вкладання рідин",
-  "blockhelp-liquid-filter-settings": "Відкрити налаштування рідинного фільтра",
+
+  "filter-liquidpipe-comment": "Клік по рідині — у фільтр (прокрутка)",
   "liquid-filter-pipe-title": "Рідинна фільтрувальна труба",
   "liquid-filter-pipe-settings": "Налаштування рідинного фільтра:",
   "liquid-inserters": "Рідинних труб у мережі: {0}",
   "liquid-transfer-rate": "Швидкість передачі рідин: {0} мл/такт",
   "liquid-transfer-speed": "Швидкість передачі:",
   "active-liquid-filters": "Рідинних фільтрів: {0}/{1}",
+
   "preservation-settings": "Налаштування збереження продуктів:",
   "perish-fully-stopped": "• Псування: повністю зупинено",
   "perish-slowed-factor": "• Псування: сповільнено у {0} раз",
   "all-transitions-stopped": "• Усі переходи: зупинено",
   "preservation-disabled": "• Збереження продуктів: вимкнено",
   "inventory-connections": "Підключено інвентарів: {0}",
+
   "block-handbooktitle-pipe-normal": "Використання",
   "block-handbooktext-pipe-normal": "Дозволяє передавати предмети та рідини. Потрібно з'єднати цією трубою необхідні контейнери/інвентарі. Останню трубу перед контейнером потрібно перетворити на вкладальну трубу. Для цього візьміть у руки гайковий ключ і правою кнопкою миші натисніть на потрібну трубу. Потім у GUI ви зможете налаштувати необхідні фільтри.",
   "block-handbooktitle-pipe-item-insertion": "Використання",
-  "block-handbooktext-pipe-item-insertion": "Дозволяє вкладати предмети у сусідні контейнери. Можна налаштовувати фільтри, кладучи потрібний предмет (достатньо будь-якої кількості) всередину порожніх слотів. Якщо залишити фільтр порожнім, то буде переміщувати всі предмети без фільтрації.",
+  "block-handbooktext-pipe-item-insertion": "Дозволяє вкладати предмети у сусідні контейнери. Відкрийте GUI і клікайте по предметах у списку, щоб додати їх у фільтр. Якщо фільтр порожній — переміщуються всі предмети.",
   "block-handbooktitle-pipe-liquid-insertion": "Використання",
-  "block-handbooktext-pipe-liquid-insertion": "Дозволяє вкладати рідини у сусідні контейнери. Можна налаштовувати фільтри, кладучи потрібну рідину (достатньо будь-якої кількості) всередину порожніх слотів. Якщо залишити фільтр порожнім, то буде переміщувати всі рідини без фільтрації."
+  "block-handbooktext-pipe-liquid-insertion": "Дозволяє вкладати рідини у сусідні контейнери. Відкрийте GUI і клікайте по рідинах у списку, щоб додати їх у фільтр. Якщо фільтр порожній — переміщуються всі рідини."
 }

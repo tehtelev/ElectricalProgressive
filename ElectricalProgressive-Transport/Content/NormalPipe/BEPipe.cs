@@ -63,11 +63,17 @@ public class BEPipe : BlockEntity, IPipeRenderState
         _pipeConnection?.ToTreeAttributes(tree);
     }
 
+    /// <summary>No payload — connections are rebuilt live after transform.</summary>
+    public void WriteTransformState(ITreeAttribute tree)
+    {
+        // intentionally empty
+    }
+
     /// <summary>
     /// Обновляет состояние соединений блока и оповещает соседей.
     /// </summary>
-    public void UpdateConnections(bool updateNeighbors = true)
-        => _pipeConnection?.UpdateConnections(updateNeighbors);
+    public void UpdateConnections(bool updateNeighbors = true, bool forceEndpointRefresh = false)
+        => _pipeConnection?.UpdateConnections(updateNeighbors, forceEndpointRefresh);
 
     /// <summary>
     /// Вызывается при размещении нового блока в мире.
@@ -75,8 +81,14 @@ public class BEPipe : BlockEntity, IPipeRenderState
     public override void OnBlockPlaced(ItemStack byItemStack = null)
     {
         base.OnBlockPlaced(byItemStack);
-        // При установке пересчитываем соединения локально и у соседей
-        UpdateConnections(true);
+        // Refresh after place so mutual links + network endpoints are correct.
+        UpdateConnections(updateNeighbors: true);
+    }
+
+    public void RefreshConnectionsAfterTransform()
+    {
+        _pipeConnection?._networkManager?.ReregisterPipe(Pos, this);
+        UpdateConnections(updateNeighbors: true, forceEndpointRefresh: true);
     }
 
     /// <summary>

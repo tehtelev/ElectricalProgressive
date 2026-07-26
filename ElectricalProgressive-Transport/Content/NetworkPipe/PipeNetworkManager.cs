@@ -86,11 +86,25 @@ public class PipeNetworkManager
     }
 
     ///<summary>
-    /// Удаляет трубу и проверяет, не распалась ли сеть на компоненты
+    /// Удаляет трубу и проверяет, не распалась ли сеть на компоненты.
+    /// When wrench-swapping pipe type, the old BE is removed after the new BE already
+    /// registered at the same pos — must NOT unregister the new one or split the network.
     /// </summary>
-    public void RemovePipe(BlockPos pos)
+    public void RemovePipe(BlockPos pos, BlockEntity? caller = null)
     {
-        if (!pipeToNetwork.TryGetValue(pos, out long networkId))
+        // Same-cell replace (wrench): current BE at pos is already the new pipe.
+        if (caller != null && api?.World != null)
+        {
+            var current = api.World.BlockAccessor.GetBlockEntity(pos);
+            if (current != null && !ReferenceEquals(current, caller)
+                && current is BEPipe or BlockEntityPipeBase)
+            {
+                // Leave network registration owned by the new entity.
+                return;
+            }
+        }
+
+        if (!TryGetNetworkId(pos, out long networkId))
             return;
 
         if (!networks.TryGetValue(networkId, out PipeNetwork network))
@@ -98,7 +112,7 @@ public class PipeNetworkManager
 
         var adjacentPipes = GetAdjacentPipesInNetwork(pos, network);
 
-        pipeToNetwork.Remove(pos);
+        RemoveMapKey(pos);
         network.RemovePipe(pos);
 
         if (network.Pipes.Count == 0)
@@ -170,6 +184,81 @@ public class PipeNetworkManager
     {
         if (pipeToNetwork.TryGetValue(pipePos, out long networkId))
             RefreshLocalEndpointCache(networkId, pipePos);
+    }
+
+    /// <summary>
+    /// Drop this position from the network map without splitting components, then re-add.
+    /// Needed after wrench SetBlock: old BE.OnBlockRemoved(RemovePipe) can run after the new
+    /// BE already called AddPipe, wiping the new registration. Place-fresh pipes are fine;
+    /// transform must re-register.
+    /// </summary>
+    public void ReregisterPipe(BlockPos pos, BlockEntity pipe)
+    {
+        if (pos == null || pipe == null || api == null)
+            return;
+
+        SoftUnregister(pos);
+        AddPipe(pos, pipe);
+
+        if (TryGetNetworkId(pos, out long networkId)
+            && networks.TryGetValue(networkId, out PipeNetwork network))
+        {
+            // Full rebuild: type swap changes which cells are inserters/sources/sinks.
+            network.RebuildEndpointCache(api);
+        }
+    }
+
+    /// <summary>Remove pipe from maps/sets only — do not split the network.</summary>
+    private void SoftUnregister(BlockPos pos)
+    {
+        if (!TryGetNetworkId(pos, out long networkId))
+            return;
+
+        RemoveMapKey(pos);
+
+        if (!networks.TryGetValue(networkId, out PipeNetwork network))
+            return;
+
+        network.RemovePipe(pos);
+        if (network.Pipes.Count == 0)
+            networks.Remove(networkId);
+    }
+
+    private bool TryGetNetworkId(BlockPos pos, out long networkId)
+    {
+        if (pipeToNetwork.TryGetValue(pos, out networkId))
+            return true;
+
+        foreach (var kv in pipeToNetwork)
+        {
+            if (kv.Key.Equals(pos))
+            {
+                networkId = kv.Value;
+                return true;
+            }
+        }
+
+        networkId = 0;
+        return false;
+    }
+
+    private void RemoveMapKey(BlockPos pos)
+    {
+        if (pipeToNetwork.Remove(pos))
+            return;
+
+        BlockPos found = null;
+        foreach (var kv in pipeToNetwork)
+        {
+            if (kv.Key.Equals(pos))
+            {
+                found = kv.Key;
+                break;
+            }
+        }
+
+        if (found != null)
+            pipeToNetwork.Remove(found);
     }
 
     private void RefreshLocalEndpointCache(long networkId, BlockPos pipePos)
@@ -257,15 +346,10 @@ public class PipeNetworkManager
     /// </summary>
     public PipeNetwork GetNetwork(BlockPos pipePos)
     {
-        if (pipeToNetwork.TryGetValue(pipePos, out long networkId))
-        {
-            if (networks.TryGetValue(networkId, out PipeNetwork network))
-            {
-                return network;
-            }
-        }
+        if (!TryGetNetworkId(pipePos, out long networkId))
+            return null;
 
-        return null;
+        return networks.TryGetValue(networkId, out PipeNetwork network) ? network : null;
     }
 
     /// <summary>

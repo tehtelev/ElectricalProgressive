@@ -31,17 +31,19 @@ public class PipeNetwork
     }
 
     /// <summary>
-    /// Добавляет трубу в сеть, если её ещё нет
+    /// Добавляет трубу в сеть, если её ещё нет.
+    /// Always refreshes inserter membership (wrench type swap must reclassify the same pos).
     /// </summary>
     public void AddPipe(BlockPos pos, BlockEntity pipe)
     {
-        if (Pipes.Add(pos.Copy()))
-        {
-            if (pipe is BEItemInsertionPipe || pipe is BELiquidInsertionPipe)
-            {
-                Inserters.Add(pos.Copy());
-            }
-        }
+        Pipes.Add(pos.Copy());
+
+        // Re-classify every time: transform normal↔filter keeps the same BlockPos in Pipes,
+        // so a "only on first add" check would leave LiquidSources/Inserters stale.
+        if (pipe is BEItemInsertionPipe || pipe is BELiquidInsertionPipe)
+            Inserters.Add(pos.Copy());
+        else
+            Inserters.Remove(pos);
     }
 
     /// <summary>

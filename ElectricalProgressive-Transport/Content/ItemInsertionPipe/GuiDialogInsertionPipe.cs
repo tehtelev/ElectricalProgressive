@@ -11,7 +11,7 @@ using Vintagestory.API.MathTools;
 namespace ElectricalProgressive.Content.ItemInsertionPipe;
 
 /// <summary>
-/// Диалог фильтра предметной трубы: поиск + виртуальная плитка 6x3 + настройки.
+/// Диалог фильтра предметной трубы: поиск + виртуальная плитка 7x3 + настройки.
 /// </summary>
 public class GuiDialogInsertionPipe : GuiDialogBlockEntity
 {
@@ -58,46 +58,30 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
 
     private void SetupDialog()
     {
-        double slotPad = GuiElementItemSlotGridBase.unscaledSlotPadding;
-        ElementBounds gridMeasure = ElementStdBounds
-            .SlotGrid(EnumDialogArea.None, 0, 0, PipeFilterItemBrowser.Cols, PipeFilterItemBrowser.VisibleRows)
-            .FixedGrow(2.0 * slotPad, 2.0 * slotPad);
-
-        double gridW = gridMeasure.fixedWidth;
-        double gridH = gridMeasure.fixedHeight;
-        // Content width = browser (grid + scrollbar); all rows share the same left/right edges.
-        double contentW = Math.Max(
-            gridW + 6 + PipeFilterGuiStyle.ScrollGap + PipeFilterGuiStyle.ScrollWidth,
-            PipeFilterGuiStyle.MinContentWidth);
-        double dialogW = contentW + PipeFilterGuiStyle.OuterPad * 2;
         double left = PipeFilterGuiStyle.OuterPad;
-        double right = left + contentW;
-
         // Vertical stack with consistent gaps (title bar ~30px).
         double y = 36;
-
-        const double searchResultW = 56;
-        ElementBounds searchBounds = ElementBounds.Fixed(
-            left, y, contentW - searchResultW - PipeFilterGuiStyle.ButtonGap, PipeFilterGuiStyle.SearchHeight);
-        ElementBounds searchResultsBounds = ElementBounds.Fixed(
-            right - searchResultW, y + 5, searchResultW, 20);
-        y += PipeFilterGuiStyle.SearchHeight + PipeFilterGuiStyle.RowGap;
-
-        // Browser flush to left; scrollbar flush to right edge of content.
-        double insetW = contentW - PipeFilterGuiStyle.ScrollWidth - PipeFilterGuiStyle.ScrollGap;
-        ElementBounds insetBounds = ElementBounds.Fixed(left, y, insetW, gridH + 6);
-        // Center slot grid inside the inset when content is wider than the grid.
-        double gridLeft = left + Math.Max(3, (insetW - gridW) / 2.0);
-        ElementBounds gridBounds = ElementBounds.Fixed(gridLeft, y + 3, gridW, gridH);
-        ElementBounds scrollbarBounds = ElementBounds.Fixed(
-            right - PipeFilterGuiStyle.ScrollWidth,
+        double browserY = y + PipeFilterGuiStyle.SearchHeight + PipeFilterGuiStyle.RowGap;
+        var browser = PipeFilterGuiStyle.MeasureBrowser(
+            left,
             y,
-            PipeFilterGuiStyle.ScrollWidth,
-            gridH + 6);
+            browserY,
+            PipeFilterItemBrowser.Cols,
+            PipeFilterItemBrowser.VisibleRows);
 
-        visibleGridHeight = (float)gridH;
+        double contentW = browser.ContentWidth;
+        double dialogW = contentW + PipeFilterGuiStyle.OuterPad * 2;
+        double right = left + contentW;
+
+        ElementBounds searchBounds = browser.SearchBounds;
+        ElementBounds searchResultsBounds = browser.SearchResultsBounds;
+        ElementBounds insetBounds = browser.InsetBounds;
+        ElementBounds gridBounds = browser.GridBounds;
+        ElementBounds scrollbarBounds = browser.ScrollbarBounds;
+
+        visibleGridHeight = (float)browser.GridHeight;
         rowHeight = visibleGridHeight / PipeFilterItemBrowser.VisibleRows;
-        y += gridH + 6 + PipeFilterGuiStyle.SectionGap;
+        y = browserY + browser.InsetHeight + PipeFilterGuiStyle.SectionGap;
 
         ElementBounds settingsHeader = ElementBounds.Fixed(left, y, contentW, PipeFilterGuiStyle.LabelHeight);
         y += PipeFilterGuiStyle.LabelHeight + PipeFilterGuiStyle.RowGap;
@@ -159,7 +143,7 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
             .AddTextInput(searchBounds, OnSearchTextChanged, PipeFilterGuiStyle.SearchFont(), "searchbox")
             .AddDynamicText(
                 "",
-                PipeFilterGuiStyle.MutedFont().WithOrientation(EnumTextOrientation.Right),
+                PipeFilterGuiStyle.MutedFont().WithOrientation(EnumTextOrientation.Center),
                 searchResultsBounds,
                 "searchResults")
 
@@ -327,6 +311,7 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
             }
         }
 
+        // Hard limit: only free slots accept new entries. Click a selected item to free one.
         int targetSlot = -1;
         for (int i = 0; i < filterInv.Count; i++)
         {
@@ -338,7 +323,7 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
         }
 
         if (targetSlot < 0)
-            targetSlot = filterInv.Count - 1;
+            return;
 
         filterInv.SetFilterSnapshot(targetSlot, stack);
         SendSetFilterStackPacket(targetSlot, stack);

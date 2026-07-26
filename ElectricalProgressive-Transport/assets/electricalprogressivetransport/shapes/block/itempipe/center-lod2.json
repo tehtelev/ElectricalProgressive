@@ -1,0 +1,29 @@
+{
+	"editor": {
+		"allAngles": false,
+		"entityTextureMode": false
+	},
+	"textureWidth": 16,
+	"textureHeight": 16,
+	"textureSizes": {
+		"pipecenter": [16,16]
+	},
+	"textures": {
+		"pipecenter": "pipecenter"
+	},
+	"elements": [
+		{
+			"name": "CenterLod2",
+			"from": [ 3.5, 3.5, 3.5 ],
+			"to": [ 12.5, 12.5, 12.5 ],
+			"rotationOrigin": [ 8.0, 8.0, 8.0 ],
+			"faces": {
+				"north": { "texture": "#pipecenter", "uv": [ 2.0, 2.0, 14.0, 14.0 ], "autoUv": false },
+				"east": { "texture": "#pipecenter", "uv": [ 2.0, 2.0, 14.0, 14.0 ], "autoUv": false },
+				"south": { "texture": "#pipecenter", "uv": [ 2.0, 2.0, 14.0, 14.0 ], "autoUv": false },
+				"west": { "texture": "#pipecenter", "uv": [ 2.0, 2.0, 14.0, 14.0 ], "autoUv": false },
+				"up": { "texture": "#pipecenter", "uv": [ 2.0, 2.0, 14.0, 14.0 ], "autoUv": false }
+			}
+		}
+	]
+}

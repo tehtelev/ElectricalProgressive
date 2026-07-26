@@ -1,11 +1,21 @@
 ﻿{
   "game:tabname-electricalprogressivetransport": "Транспартныя трубы",
+
+  "block-pipe-normal": "Транспартная труба",
   "block-pipe-normal-*": "Транспартная труба",
+  "block-pipe-item-insertion": "Фільтруючая труба",
   "block-pipe-item-*": "Прадметная ўстаўная труба",
+  "block-pipe-liquid-insertion": "Вадкасная труба",
+  "block-pipe-liquid-*": "Вадкасная ўстаўная труба",
+
   "pipe-normal-info": "Звычайная транспартная труба",
   "pipe-insertion-info": "Труба з фільтрам для ўстаўкі",
+  "pipe-liquid-insertion-info": "Труба для фільтрацыі і ўстаўкі вадкасцей",
+
   "blockhelp-filter-settings": "Адкрыць налады фільтра",
   "blockhelp-pipe-switch-type": "Змяніць тып трубы",
+  "blockhelp-liquid-filter-settings": "Адкрыць налады вадкаснага фільтра",
+
   "connections": "Злучэнняў: {0}",
   "containers": "Кантэйнераў: {0}",
   "filter-mode": "Рэжым фільтра: {0}",
@@ -13,8 +23,11 @@
   "inserters": "Устаўных труб у сетцы: {0}",
   "transfer-rate": "Хуткасць перадачы: {0}",
   "active-filters": "Фільтраў: {0}/{1}",
+
   "filter-pipe-title": "Фільтруючая труба",
-  "filter-pipe-comment": "Пакладзіце прадметы ў слоты фільтра",
+  "filter-pipe-comment": "Клік па прадмеце — у фільтр (прагортка)",
+  "filter-search-placeholder": "Пошук...",
+  "filter-search-results": "{0}",
   "filter-pipe-settings": "Налады фільтра:",
   "filter-pipe": "Фільтруючая труба",
   "filter-mode-allow": "Белы спіс",
@@ -25,26 +38,26 @@
   "filter-speet-transfer": "Хуткасць перадачы:",
   "filter-speet-up": "+",
   "filter-speet-down": "-",
-  "block-pipe-liquid-*": "Вадкасная ўстаўная труба",
-  "filter-liquidpipe-comment": "Пакладзіце вадкасці ў слоты фільтра",
-  "pipe-liquid-insertion-info": "Труба для фільтрацыі і ўстаўкі вадкасцей",
-  "blockhelp-liquid-filter-settings": "Адкрыць налады вадкаснага фільтра",
+
+  "filter-liquidpipe-comment": "Клік па вадкасці — у фільтр (прагортка)",
   "liquid-filter-pipe-title": "Вадкасная фільтруючая труба",
   "liquid-filter-pipe-settings": "Налады вадкаснага фільтра:",
   "liquid-inserters": "Вадкасных труб у сетцы: {0}",
   "liquid-transfer-rate": "Перадача вадкасцей: {0} мл/такт",
   "liquid-transfer-speed": "Хуткасць перадачы:",
   "active-liquid-filters": "Вадкасных фільтраў: {0}/{1}",
+
   "preservation-settings": "Налады захавання прадуктаў:",
   "perish-fully-stopped": "• Псаванне: цалкам спынена",
   "perish-slowed-factor": "• Псаванне: запаволена ў {0} раз",
   "all-transitions-stopped": "• Усе пераходы: спынены",
   "preservation-disabled": "• Захаванне прадуктаў: выключана",
   "inventory-connections": "Падключана інвентароў: {0}",
+
   "block-handbooktitle-pipe-normal": "Выкарыстанне",
   "block-handbooktext-pipe-normal": "Дазваляе перадаваць прадметы і вадкасці. Трэба злучыць гэтай трубой неабходныя кантэйнеры/інвентары. Апошнюю трубу перад кантэйнерам трэба пераўтварыць ва ўстаўную трубу. Вазьміце ў рукі ключ і націсніце правай кнопкай мышы на патрэбную трубу. Затым у GUI зможаце наладзіць неабходныя фільтры.",
   "block-handbooktitle-pipe-item-insertion": "Выкарыстанне",
-  "block-handbooktext-pipe-item-insertion": "Дазваляе ўстаўляць прадметы ў суседнія кантэйнеры. Можна наладжваць фільтры, кладучы патрэбны прадмет (дастаткова любой колькасці) у пустыя слоты. Калі пакінуць фільтр пустым, будзе перамяшчаць усе прадметы без фільтрацыі.",
+  "block-handbooktext-pipe-item-insertion": "Дазваляе ўстаўляць прадметы ў суседнія кантэйнеры. Адкрыйце GUI і клікайце па прадметах у спісе, каб дадаць іх у фільтр. Калі фільтр пусты — перамяшчаюцца ўсе прадметы.",
   "block-handbooktitle-pipe-liquid-insertion": "Выкарыстанне",
-  "block-handbooktext-pipe-liquid-insertion": "Дазваляе ўстаўляць вадкасці ў суседнія кантэйнеры. Можна наладжваць фільтры, кладучы патрэбную вадкасць (дастаткова любой колькасці) у пустыя слоты. Калі пакінуць фільтр пустым, будзе перамяшчаць усе вадкасці без фільтрацыі."
+  "block-handbooktext-pipe-liquid-insertion": "Дазваляе ўстаўляць вадкасці ў суседнія кантэйнеры. Адкрыйце GUI і клікайце па вадкасцях у спісе, каб дадаць іх у фільтр. Калі фільтр пусты — перамяшчаюцца ўсе вадкасці."
 }

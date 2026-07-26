@@ -14,7 +14,7 @@ namespace ElectricalProgressive.Content;
 public class PipeFilterItemBrowser : InventoryGeneric
 {
     public const string SelectedBackgroundColor = PipeFilterGuiStyle.SelectedSlotColor;
-    public const int Cols = 6;
+    public const int Cols = 7;
     public const int VisibleRows = 3;
     public const int VisibleSlots = Cols * VisibleRows;
 

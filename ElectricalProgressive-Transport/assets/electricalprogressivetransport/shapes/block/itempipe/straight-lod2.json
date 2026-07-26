@@ -1,0 +1,29 @@
+{
+	"editor": {
+		"allAngles": false,
+		"entityTextureMode": false
+	},
+	"textureWidth": 16,
+	"textureHeight": 16,
+	"textureSizes": {
+		"steel1": [16,16]
+	},
+	"textures": {
+	},
+	"elements": [
+		{
+			"name": "StraightLod2",
+			"from": [ 0.0, 5.0, 5.0 ],
+			"to": [ 16.0, 11.0, 11.0 ],
+			"rotationOrigin": [ 8.0, 8.0, 8.0 ],
+			"faces": {
+				"north": { "texture": "#steel1", "uv": [ 0.0, 5.0, 16.0, 11.0 ], "autoUv": false },
+				"east": { "texture": "#steel1", "uv": [ 0.0, 0.0, 6.0, 6.0 ], "autoUv": false },
+				"south": { "texture": "#steel1", "uv": [ 0.0, 5.0, 16.0, 11.0 ], "autoUv": false },
+				"west": { "texture": "#steel1", "uv": [ 0.0, 0.0, 6.0, 6.0 ], "autoUv": false },
+				"up": { "texture": "#steel1", "uv": [ 0.0, 5.0, 16.0, 11.0 ], "autoUv": false },
+				"down": { "texture": "#steel1", "uv": [ 0.0, 5.0, 16.0, 11.0 ], "autoUv": false }
+			}
+		}
+	]
+}

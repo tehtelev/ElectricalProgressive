@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Reflection;
 using System.Text;
+using ElectricalProgressive.Content;
 using ElectricalProgressive.Content.NetworkPipe;
 using ElectricalProgressive.Content.NormalPipe;
 using Vintagestory.API.Client;
@@ -107,14 +107,8 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
 
     #endregion
 
-    // Переопределяем свойство Inventory
     public override InventoryBase Inventory => _inventory;
     public override string InventoryClassName => "liquidinsertionpipe";
-
-    private static readonly FieldInfo? BaseInventoryField =
-        typeof(BlockEntityGenericTypedContainer).GetField(
-            "inventory",
-            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
 
     /// <summary>Скорость передачи жидкости</summary>
     public int TransferRate => transferRate;
@@ -123,54 +117,21 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
 
     public BELiquidInsertionPipe()
     {
-        quantitySlots = 18;
-        inventoryClassName = "liquidinsertionpipe";
-        // 18 слотов фильтра (плитка 6x3), как у предметной трубы
-        _inventory = new InventoryLiquidInsertionPipe(18, inventoryClassName, null, null, this);
-        BindBaseInventoryField();
-    }
-
-    /// <summary>
-    /// Keep specialized liquid filter inventory and bind it to the base container field.
-    /// Fixes missing BE after world rejoin (base InitInventory / null inventory tree).
-    /// </summary>
-    protected override void InitInventory(Vintagestory.API.Common.Block block)
-    {
-        if (_inventory == null)
-            _inventory = new InventoryLiquidInsertionPipe(18, "liquidinsertionpipe", null, null, this);
-
-        quantitySlots = 18;
-        inventoryClassName = "liquidinsertionpipe";
-        BindBaseInventoryField();
-    }
-
-    private void BindBaseInventoryField()
-    {
-        try
-        {
-            BaseInventoryField?.SetValue(this, _inventory);
-        }
-        catch
-        {
-            // ignore
-        }
+        _inventory = new InventoryLiquidInsertionPipe(18, "liquidinsertionpipe", null, null, this);
     }
 
     /// <summary>Инициализация блок-сущности</summary>
     public override void Initialize(ICoreAPI api)
     {
-        BindBaseInventoryField();
         base.Initialize(api);
-        BindBaseInventoryField();
 
-        DetermineOutputDirection();
-
+        // Output facing resolved lazily on first transfer tick (cheaper place).
         if (api.Side == EnumAppSide.Server)
         {
             transferTimer = api.World.RegisterGameTickListener(OnTransferTick, TransferTickIntervalMs);
+            filterSnapshotTimer = api.World.RegisterGameTickListener(OnFilterSnapshotTick, 1000);
         }
 
-        filterSnapshotTimer = api.World.RegisterGameTickListener(OnFilterSnapshotTick, 1000);
         _inventory.OnAcquireTransitionSpeed -= FreezeFilterTransitionSpeed;
         _inventory.OnAcquireTransitionSpeed += FreezeFilterTransitionSpeed;
     }
@@ -181,9 +142,9 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         return "electricalprogressivetransport:pipe-liquid-insertion";
     }
 
-    public override void UpdateConnections(bool updateNeighbors = true)
+    public override void UpdateConnections(bool updateNeighbors = true, bool forceEndpointRefresh = false)
     {
-        base.UpdateConnections(updateNeighbors);
+        base.UpdateConnections(updateNeighbors, forceEndpointRefresh);
         ResetTransferBackoff();
         outputFacing = null;
         cachedSink = null;
@@ -207,13 +168,10 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     /// <summary>
     /// Обработка клика игрока по блоку. Открывает GUI на клиенте.
     /// </summary>
-    public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
+    public bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
     {
-        // Открываем свой GUI только на клиенте
         if (Api.Side == EnumAppSide.Client)
-        {
             OpenGui(byPlayer as IClientPlayer);
-        }
 
         return true;
     }
@@ -364,6 +322,9 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         cachedTargetPos = null;
         cachedRealTargetPos = null;
 
+        BlockFacing? bestFacing = null;
+        float bestFreeSpace = -1f;
+
         for (int i = 0; i < 6; i++)
         {
             BlockFacing facing = BlockFacing.ALLFACES[i];
@@ -372,18 +333,33 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
             // Пропускаем трубы (не передаём жидкость в другие трубы)
             var checkBlock = Api.World.BlockAccessor.GetBlock(checkPos);
             if (checkBlock is BlockPipeBase)
-            {
                 continue;
-            }
 
-            // Ищем ILiquidSink с учётом мультиблоков
             ILiquidSink? liquidSink = GetLiquidSinkAtPosition(checkPos);
+            if (liquidSink == null)
+                continue;
 
-            if (liquidSink != null)
+            // Prefer a sink that can still accept liquid (avoid picking a full barrel as "output").
+            BlockPos realPos = GetRealPosition(checkPos);
+            float free = GetLiquidSinkFreeLitres(liquidSink, realPos);
+            if (free > bestFreeSpace)
             {
-                outputFacing = facing;
-                return;
+                bestFreeSpace = free;
+                bestFacing = facing;
             }
+        }
+
+        if (bestFacing != null && bestFreeSpace > 0f)
+        {
+            outputFacing = bestFacing;
+            return;
+        }
+
+        // Fallback: any adjacent liquid sink (original behaviour).
+        if (bestFacing != null)
+        {
+            outputFacing = bestFacing;
+            return;
         }
 
         outputFacing = null;
@@ -391,6 +367,22 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         preferredSource = null;
         preferredRealSourcePos = null;
         preferredSourcePipePos = null;
+    }
+
+    private static float GetLiquidSinkFreeLitres(ILiquidSink sink, BlockPos realPos)
+    {
+        try
+        {
+            float capacity = sink.CapacityLitres;
+            float current = 0f;
+            if (sink is ILiquidSource src)
+                current = src.GetCurrentLitres(realPos);
+            return Math.Max(0f, capacity - current);
+        }
+        catch
+        {
+            return 1f; // unknown capacity — treat as usable
+        }
     }
 
     /// <summary>Основной тик передачи жидкости</summary>
@@ -464,7 +456,11 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         var network = NetworkManager.GetNetwork(Pos);
         if (network == null)
         {
-            return false;
+            // Network map can lag behind place/transform — re-register this pipe once.
+            NetworkManager.AddPipe(Pos, this);
+            network = NetworkManager.GetNetwork(Pos);
+            if (network == null)
+                return false;
         }
 
         var excludedSourcePositions = BuildExcludedLiquidSourcePositions(network, targetPos);
@@ -493,7 +489,13 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
 
         int sourceCount = network.LiquidSources.Count;
         if (sourceCount == 0)
-            return false;
+        {
+            // Stale endpoint cache after wrench/place — rebuild from live neighbours.
+            network.RebuildEndpointCache(Api);
+            sourceCount = network.LiquidSources.Count;
+            if (sourceCount == 0)
+                return false;
+        }
 
         if (sourceCursor >= sourceCount)
             sourceCursor = 0;
@@ -568,61 +570,75 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         if (realSourcePos.Equals(realTargetPos))
             return false;
 
-        if (!IsLivePipePathConnected(sourcePipePos, Pos))
+        // Prefer live mutual links; if connection flags are stale, fall back to same-network membership.
+        if (!IsLivePipePathConnected(sourcePipePos, Pos) && !IsSamePipeNetwork(sourcePipePos, Pos))
+            return false;
+
+        // Claim-aware (fail-open when no owner / no claims).
+        if (!PipeSecurity.MayAutomatedTransfer(Api.World, OwnerUid, realSourcePos, realTargetPos))
             return false;
 
         // Проверяем тайминг (не передаём слишком часто из одного источника)
         if (!CanTransferFrom(sourcePos))
-        {
             return false;
-        }
 
-        // Получаем содержимое из реальной позиции источника
-        var contentStack = source.GetContent(realSourcePos);
-        if (contentStack == null)
-        {
+        // Clone so container internals are not mutated by put/take.
+        ItemStack? rawContent = source.GetContent(realSourcePos);
+        if (rawContent?.Collectible == null)
             return false;
-        }
 
-        // Проверяем фильтр жидкости
+        ItemStack contentStack = rawContent.Clone();
+        contentStack.ResolveBlockOrItem(Api.World);
+        if (contentStack.Collectible == null)
+            return false;
+
         if (!CheckItemAgainstLiquidFilter(contentStack))
-        {
             return false;
-        }
 
-        // Вычисляем количество для передачи в литрах
         float currentLitres = source.GetCurrentLitres(realSourcePos);
         float litresToTransfer = Math.Min(GetBatchedTransferLitres(), currentLitres);
 
+        // Guarantee at least 1 liquid item when any liquid remains (avoid 0 from float→int).
+        WaterTightContainableProps? props = BlockLiquidContainerBase.GetContainableProps(contentStack);
+        float itemsPerLitre = props?.ItemsPerLitre > 0 ? props.ItemsPerLitre : 100f;
+        float minLitres = 1f / itemsPerLitre;
+        if (litresToTransfer > 0f && litresToTransfer < minLitres && currentLitres >= minLitres)
+            litresToTransfer = minLitres;
+
         if (litresToTransfer <= 0)
-        {
             return false;
-        }
 
-        // Пытаемся передать жидкость в реальную позицию цели
+        // Put then take (same as pre-optimization). Do not reverse on partial take —
+        // VS barrel TryTakeContent can report odd StackSize when emptying.
         int movedItems = sink.TryPutLiquid(realTargetPos, contentStack, litresToTransfer);
+        if (movedItems <= 0)
+            return false;
 
-        if (movedItems > 0)
-        {
-            ItemStack renderStack = contentStack.Clone();
-            renderStack.StackSize = 1;
+        source.TryTakeContent(realSourcePos, movedItems);
 
-            // Забираем переданное количество из реальной позиции источника
-            ItemStack takenStack = source.TryTakeContent(realSourcePos, movedItems);
+        ItemStack renderStack = contentStack.Clone();
+        renderStack.StackSize = 1;
 
-            lastTransferTime[sourcePos] = Api.World.ElapsedMilliseconds;
-            CleanupTransferTimers();
+        lastTransferTime[sourcePos] = Api.World.ElapsedMilliseconds;
+        CleanupTransferTimers();
 
-            bool sourceEmptied = currentLitres <= litresToTransfer + 0.0001f;
-            MarkLiquidEndpointsDirty(realSourcePos, realTargetPos, sourcePos, targetPos, sourceEmptied);
-            BroadcastLiquidTransit(renderStack, sourcePos, sourcePipePos, targetPos, litresToTransfer);
+        bool sourceEmptied = source.GetCurrentLitres(realSourcePos) <= 0.0001f;
+        MarkLiquidEndpointsDirty(realSourcePos, realTargetPos, sourcePos, targetPos, sourceEmptied);
+        BroadcastLiquidTransit(renderStack, sourcePos, sourcePipePos, targetPos, litresToTransfer);
 
+        return true;
+    }
+
+    private bool IsSamePipeNetwork(BlockPos a, BlockPos b)
+    {
+        if (a == null || b == null || NetworkManager == null)
+            return false;
+        if (a.Equals(b))
             return true;
-        }
 
-
-
-        return false;
+        var netA = NetworkManager.GetNetwork(a);
+        var netB = NetworkManager.GetNetwork(b);
+        return netA != null && netA == netB;
     }
 
     private void BroadcastLiquidTransit(ItemStack renderStack, BlockPos sourcePos, BlockPos sourcePipePos, BlockPos targetPos, float litres)
@@ -1103,8 +1119,19 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     /// <summary>Обновляет настройки фильтрации</summary>
     public void UpdateFilterSettings(FilterMode mode)
     {
+        if (mode != FilterMode.AllowList && mode != FilterMode.DenyList)
+            return;
+
         this.currentFilterMode = mode;
         MarkDirty();
+    }
+
+    /// <summary>Apply settings after wrench transform without a full FromTreeAttributes.</summary>
+    public void ApplyWrenchTransformSettings(int rate, FilterMode mode)
+    {
+        transferRate = PipeSecurity.ClampLiquidTransferRate(rate);
+        if (mode == FilterMode.AllowList || mode == FilterMode.DenyList)
+            currentFilterMode = mode;
     }
 
     /// <summary>Получает информацию о блоке для отображения в GUI игрока</summary>
@@ -1155,61 +1182,35 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
         }
     }
 
-    /// <summary>
-    /// Safe late-init during chunk load: base container.LateInit() NREs when Api is unset.
-    /// </summary>
-    public override void LateInitInventory()
-    {
-        BindBaseInventoryField();
-        if (Api == null || Inventory == null || Pos == null)
-            return;
-
-        Inventory.LateInitialize(InventoryClassName + "-" + Pos, Api);
-        Inventory.ResolveBlocksOrItems();
-        if (Inventory.Pos == null)
-            Inventory.Pos = Pos;
-    }
-
     /// <summary>Загрузка атрибутов из дерева</summary>
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
     {
-        BindBaseInventoryField();
-
-        // Pre-seed type so base does not treat first load as type-change → early LateInitInventory.
-        if (tree != null)
-        {
-            type = tree.GetString("type", defaultType) ?? defaultType;
-            isPerPlayer = tree.GetBool("isPerPlayer", false);
-
-            if (!tree.HasAttribute("inventory"))
-            {
-                var invTree = new TreeAttribute();
-                invTree.SetInt("qslots", _inventory?.Count ?? 18);
-                tree["inventory"] = invTree;
-            }
-        }
-
         base.FromTreeAttributes(tree, worldAccessForResolve);
-        BindBaseInventoryField();
         _inventory?.CaptureFilterSnapshotsFromSlots(worldAccessForResolve);
 
-        transferRate = tree.GetInt("transferRate", 100);
+        if (tree == null)
+            return;
+
+        transferRate = PipeSecurity.ClampLiquidTransferRate(tree.GetInt("transferRate", 100));
         currentFilterMode = (FilterMode)tree.GetInt("filterMode", 0);
-        transferRate = Math.Max(10, Math.Min(transferRate, 1000));
+        if (!PipeSecurity.IsValidFilterMode((int)currentFilterMode))
+            currentFilterMode = FilterMode.AllowList;
     }
 
     /// <summary>Сохранение атрибутов в дерево</summary>
     public override void ToTreeAttributes(ITreeAttribute tree)
     {
-        BindBaseInventoryField();
-
-        if (Api?.World != null)
-            _inventory.MaintainFilterSnapshots(Api.World);
-
         base.ToTreeAttributes(tree);
 
         tree.SetInt("transferRate", transferRate);
         tree.SetInt("filterMode", (int)currentFilterMode);
+    }
+
+    protected override bool IsFilterInventoryEmpty()
+    {
+        if (_inventory == null)
+            return true;
+        return _inventory.CountActiveFilterSnapshots() == 0;
     }
 
     public override void OnReceivedServerPacket(int packetid, byte[] data)
@@ -1230,6 +1231,9 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
 
             float litres = reader.ReadSingle();
             int pointCount = reader.ReadInt32();
+            if (pointCount < 0 || pointCount > MaxTransitPathPipes + 2)
+                return;
+
             var points = new List<Vec3d>(pointCount);
             for (int i = 0; i < pointCount; i++)
             {
@@ -1252,83 +1256,95 @@ public class BELiquidInsertionPipe : BlockEntityPipeBase
     {
         base.OnReceivedClientPacket(player, packetid, data);
 
-        if (packetid == 2001) // Закрытие GUI
+        if (packetid is 2001 or 2002 or 2003 or 2004 or GuiDialogLiquidInsertionPipe.SetFilterStackPacketId)
         {
-            if (_clientDialog != null && _clientDialog.IsOpened())
-            {
-                _clientDialog?.TryClose();
-            }
-        }
-        else if (packetid == 2002) // Обновление настроек фильтра
-        {
-            using (var ms = new System.IO.MemoryStream(data))
-            using (var br = new System.IO.BinaryReader(ms))
-            {
-                FilterMode mode = (FilterMode)br.ReadInt32();
-                UpdateFilterSettings(mode);
-            }
-        }
-        else if (packetid == 2003) // Обновление скорости передачи
-        {
-            var tree = new TreeAttribute();
-            tree.FromBytes(data);
-            int newRate = tree.GetInt("transferRate", 100);
-            newRate = Math.Max(10, Math.Min(newRate, 1000));
+            if (Api?.Side != EnumAppSide.Server)
+                return;
+            if (!PipeSecurity.CanPlayerConfigure(Api.World, player, Pos))
+                return;
 
-            if (newRate != transferRate)
+            SetOwnerIfEmpty(player);
+        }
+
+        try
+        {
+            if (packetid == 2001) // Закрытие GUI
             {
-                transferRate = newRate;
-                MarkDirty();
-                Api.World.BlockAccessor.MarkBlockDirty(Pos);
+                if (_clientDialog != null && _clientDialog.IsOpened())
+                    _clientDialog?.TryClose();
+            }
+            else if (packetid == 2002) // Обновление настроек фильтра
+            {
+                if (!PipeSecurity.IsPacketSizeOk(data) || data.Length < 4)
+                    return;
+
+                using var ms = new MemoryStream(data);
+                using var br = new BinaryReader(ms);
+                int modeInt = br.ReadInt32();
+                if (!PipeSecurity.IsValidFilterMode(modeInt))
+                    return;
+
+                UpdateFilterSettings((FilterMode)modeInt);
+            }
+            else if (packetid == 2003) // Обновление скорости передачи
+            {
+                if (!PipeSecurity.IsPacketSizeOk(data))
+                    return;
+
+                var tree = new TreeAttribute();
+                tree.FromBytes(data);
+                int newRate = PipeSecurity.ClampLiquidTransferRate(tree.GetInt("transferRate", 100));
+
+                if (newRate != transferRate)
+                {
+                    transferRate = newRate;
+                    MarkDirty();
+                    Api.World.BlockAccessor.MarkBlockDirty(Pos);
+                }
+            }
+            else if (packetid == 2004)
+            {
+                // legacy no-op
+            }
+            else if (packetid == GuiDialogLiquidInsertionPipe.SetFilterStackPacketId)
+            {
+                ApplyFilterStackPacket(data);
             }
         }
-        else if (packetid == 2004) // Старый пакет настроек порчи: больше не нужен для пассивных фильтр-снимков.
+        catch (Exception ex)
         {
-            MarkDirty();
-        }
-        else if (packetid == GuiDialogLiquidInsertionPipe.SetFilterStackPacketId)
-        {
-            ApplyFilterStackPacket(data);
+            Api?.Logger?.Warning("[ElectricalProgressive Transport] Liquid pipe packet {0} rejected: {1}", packetid, ex.Message);
         }
     }
 
     private void ApplyFilterStackPacket(byte[] data)
     {
-        if (data == null || _inventory == null)
+        if (!PipeSecurity.IsPacketSizeOk(data) || _inventory == null || Api?.World == null)
             return;
 
-        try
-        {
-            var tree = new TreeAttribute();
-            tree.FromBytes(data);
+        var tree = new TreeAttribute();
+        tree.FromBytes(data);
 
-            int slotId = tree.GetInt("slotId", -1);
-            if (slotId < 0 || slotId >= _inventory.Count)
+        int slotId = tree.GetInt("slotId", -1);
+        if (slotId < 0 || slotId >= _inventory.Count)
+            return;
+
+        ItemStack? stack = tree.GetItemstack("stack");
+        if (stack == null)
+        {
+            _inventory.ClearFilterSnapshot(slotId);
+        }
+        else
+        {
+            ItemStack? clean = PipeSecurity.SanitizeFilterSnapshot(Api.World, stack, liquidsOnly: true);
+            if (clean == null)
                 return;
 
-            ItemStack? stack = tree.GetItemstack("stack");
-            if (stack == null)
-            {
-                _inventory.ClearFilterSnapshot(slotId);
-            }
-            else
-            {
-                stack.ResolveBlockOrItem(Api.World);
-                if (stack.Collectible == null)
-                    return;
-
-                stack.StackSize = 1;
-                InventoryLiquidInsertionPipe.FreezeSnapshotTemperature(Api.World, stack);
-                _inventory.SetFilterSnapshot(slotId, stack);
-            }
-
-            MarkDirty(true);
-            Api.World.BlockAccessor.MarkBlockDirty(Pos);
+            _inventory.SetFilterSnapshot(slotId, clean);
         }
-        catch (Exception ex)
-        {
-            Api?.Logger?.Error($"Ошибка при установке жидкостного фильтра из списка: {ex.Message}");
-        }
+
+        MarkDirty(true);
+        Api.World.BlockAccessor.MarkBlockDirty(Pos);
     }
 
     /// <summary>Обработка разрушения блока без дропа предметов</summary>

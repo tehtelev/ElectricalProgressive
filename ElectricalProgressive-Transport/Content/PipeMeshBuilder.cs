@@ -10,7 +10,7 @@ internal static class PipeMeshBuilder
 {
     private const string ShapeDomain = "electricalprogressivetransport";
     private const string ShapePath = "shapes/block/itempipe";
-    private const int MeshCacheVersion = 24;
+    private const int MeshCacheVersion = 33;
 
     private const float PipeCenter = 0.5f;
 
@@ -20,7 +20,19 @@ internal static class PipeMeshBuilder
 
     private static readonly Dictionary<string, Shape> ShapeCache = [];
     private static readonly Dictionary<long, MeshData> MeshCache = [];
+    // key: (blockId << 1) | lodBit
     private static readonly Dictionary<int, MeshData> CenterCubeCache = [];
+    private static readonly Dictionary<int, MeshData> PipePartBaseCache = [];
+    private static readonly Dictionary<int, MeshData> StraightBaseCache = [];
+    // key: (blockId << 4) | (side << 1) | lodBit
+    private static readonly Dictionary<long, MeshData> RotatedArmCache = [];
+    // key: (blockId << 3) | (axis << 1) | lodBit
+    private static readonly Dictionary<long, MeshData> StraightRotatedCache = [];
+    private static readonly Dictionary<int, MeshData> InserterBaseCache = [];
+    private static readonly Dictionary<long, MeshData> RotatedInserterCache = []; // (blockId << 3) | side
+    private static bool inserterHeadShapeMissing;
+
+    private static readonly Vec3f Origin = new(PipeCenter, PipeCenter, PipeCenter);
 
     private static readonly (float rx, float ry, float rz)[] StraightRotationsDeg =
     [
@@ -43,13 +55,98 @@ internal static class PipeMeshBuilder
     // inserter_head.json = Cube66 (north) из cross.json Base.
     private static readonly (float rx, float ry, float rz)[] InserterRotationsDeg =
     [
-        (0f, 0f, 0f),        // north - Cube66
-        (0f, 90f, 0f),       // east  - Cube68
-        (0f, 180f, 0f),      // south - Cube70
-        (0f, -90f, 0f),      // west  - Cube72
-        (180f, 0f, 0f),      // up    - Cube74
-        (180f, -90f, 0f),    // down  - Cube80
+        (0f, 0f, 0f),        // north
+        (0f, 90f, 0f),       // east
+        (0f, 180f, 0f),      // south
+        (0f, -90f, 0f),      // west
+        (180f, 0f, 0f),      // up
+        (180f, -90f, 0f),    // down
     ];
+
+    /// <summary>
+    /// Same pattern as EP cables/connectors: engine dual-pass with shape vs lod2shape.
+    /// sourceMesh is already the correct LOD mesh; VerticesCount differs between near and far.
+    /// </summary>
+    public static bool IsLod2Pass(ICoreClientAPI api, Vintagestory.API.Common.Block block, MeshData sourceMesh)
+    {
+        if (api == null || block == null || sourceMesh == null)
+            return false;
+
+        EnsureLod2Mesh(api, block);
+
+        MeshData lod2Mesh = block.Lod2Mesh;
+        if (lod2Mesh == null || lod2Mesh.VerticesCount <= 0)
+            return false;
+
+        // Engine may pass Lod2Mesh (or an alternate with the same topology).
+        if (ReferenceEquals(sourceMesh, lod2Mesh))
+            return true;
+
+        MeshData nearMesh = api.TesselatorManager.GetDefaultBlockMesh(block);
+        if (nearMesh != null && ReferenceEquals(sourceMesh, nearMesh))
+            return false;
+
+        // EP cable-dot style: VerticesCount differs for LOD0 and LOD2.
+        int farVerts = lod2Mesh.VerticesCount;
+        int nearVerts = nearMesh?.VerticesCount ?? -1;
+        if (nearVerts > 0 && nearVerts == farVerts)
+            return false;
+
+        return sourceMesh.VerticesCount == farVerts;
+    }
+
+    /// <summary>
+    /// Ensure lod2shape/Lod2Mesh exist so the engine runs the far pass (like other EP blocks).
+    /// </summary>
+    public static void EnsureLod2Mesh(ICoreClientAPI api, Vintagestory.API.Common.Block block)
+    {
+        if (api == null || block == null || block.Lod2Mesh != null)
+            return;
+
+        if (block.Lod2Shape == null)
+        {
+            block.Lod2Shape = new CompositeShape
+            {
+                Base = new AssetLocation(ShapeDomain, "block/itempipe/center-lod2")
+            };
+        }
+
+        Shape shape = GetShape(api, $"{ShapePath}/center-lod2.json");
+        if (shape == null)
+            return;
+
+        api.Tesselator.TesselateShape(block, shape, out MeshData mesh);
+        if (mesh != null && mesh.VerticesCount > 0)
+            block.Lod2Mesh = mesh;
+    }
+
+    /// <summary>
+    /// Tessellate heavy pipe parts once per block type so first place/transform is not a hitch.
+    /// Prewarms both near and lod2 part caches (EP dual-pass).
+    /// </summary>
+    public static void Prewarm(ICoreClientAPI api, Vintagestory.API.Common.Block block)
+    {
+        if (api == null || block == null)
+            return;
+
+        EnsureLod2Mesh(api, block);
+
+        for (int lod = 0; lod <= 1; lod++)
+        {
+            bool isLod2 = lod == 1;
+            GetCenterCubeSource(api, block, isLod2);
+            GetPipePartBase(api, block, isLod2);
+            GetStraightBase(api, block, isLod2);
+
+            for (int side = 0; side < 6; side++)
+                GetRotatedArmSource(api, block, side, isLod2);
+
+            for (int axis = 0; axis < 3; axis++)
+                GetStraightRotatedSource(api, block, axis, isLod2);
+        }
+
+        GetInserterBase(api, block);
+    }
 
     public static MeshData Build(
         ICoreClientAPI api,
@@ -57,52 +154,47 @@ internal static class PipeMeshBuilder
         BlockPos pos,
         bool[] connectedSides,
         bool[] connectedToInventory,
-        bool useInserterHead)
+        bool useInserterHead,
+        bool isLod2 = false)
     {
         if (connectedSides == null || connectedSides.Length < 6)
             return null;
 
         connectedToInventory ??= new bool[6];
 
-        long cacheKey = BuildCacheKey(api, block.Id, pos, connectedSides, connectedToInventory, useInserterHead);
+        long cacheKey = BuildCacheKey(api, block.Id, pos, connectedSides, connectedToInventory, useInserterHead, isLod2);
         if (MeshCache.TryGetValue(cacheKey, out MeshData cached))
             return cached;
 
         MeshData finalMesh = null;
-        var origin = new Vec3f(PipeCenter, PipeCenter, PipeCenter);
         int straightAxis = GetStraightAxis(connectedSides, connectedToInventory, useInserterHead);
 
         if (straightAxis >= 0)
         {
-            MeshData straightMesh = TesselateShape(api, block, $"{ShapePath}/straight.json");
+            // Clone once into owned mesh — cache sources must not be mutated.
+            MeshData straightMesh = GetStraightRotatedSource(api, block, straightAxis, isLod2);
             if (straightMesh != null)
-            {
-                var (rx, ry, rz) = StraightRotationsDeg[straightAxis];
-                AddMesh(ref finalMesh, RotateMesh(straightMesh, rx, ry, rz, origin));
-            }
+                finalMesh = straightMesh.Clone();
 
             MeshCache[cacheKey] = finalMesh;
             return finalMesh;
         }
 
         if (ShouldRenderCenterCube(connectedSides, connectedToInventory, useInserterHead))
-        {
-            MeshData centerMesh = GetCenterCube(api, block);
-            if (centerMesh != null)
-                AddMesh(ref finalMesh, centerMesh);
-        }
+            AppendCachedPart(ref finalMesh, GetCenterCubeSource(api, block, isLod2));
 
-        MeshData pipePartMesh = TesselateShape(api, block, $"{ShapePath}/pipe_part.json");
-        if (pipePartMesh != null)
+        MeshData pipePartBase = GetPipePartBase(api, block, isLod2);
+        if (pipePartBase != null)
         {
             for (int i = 0; i < 6; i++)
             {
                 if (!ShouldRenderArm(i, connectedSides))
                     continue;
 
-                MeshData armMesh = pipePartMesh.Clone();
                 if (connectedToInventory[i])
                 {
+                    // Inventory reach is position-dependent: scale unrotated west arm, then rotate.
+                    MeshData armMesh = pipePartBase.Clone();
                     BlockPos neighborPos = pos.AddCopy(BlockFacing.ALLFACES[i]);
                     float reach = PipeNeighborMeshClipper.GetReachAlongFacing(
                         api,
@@ -111,32 +203,35 @@ internal static class PipeMeshBuilder
                         neighborPos,
                         PipeArmInventoryMaxReach);
                     ScaleArmToReach(armMesh, reach);
+                    var (rx, ry, rz) = SideRotationsDeg[i];
+                    AppendOwnedPart(ref finalMesh, RotateMesh(armMesh, rx, ry, rz, Origin));
                 }
-
-                var (rx, ry, rz) = SideRotationsDeg[i];
-                AddMesh(ref finalMesh, RotateMesh(armMesh, rx, ry, rz, origin));
+                else
+                {
+                    // Shared rotated arm — append without mutating cache.
+                    AppendCachedPart(ref finalMesh, GetRotatedArmSource(api, block, i, isLod2));
+                }
             }
         }
 
-        if (useInserterHead)
+        // Inserter heads are small; keep full detail at all LODs (shape is optional).
+        if (useInserterHead && !inserterHeadShapeMissing)
         {
-            MeshData inserterMesh = TesselateShape(api, block, $"{ShapePath}/inserter_head.json");
-            if (inserterMesh != null)
+            for (int i = 0; i < 6; i++)
             {
-                for (int i = 0; i < 6; i++)
-                {
-                    if (!connectedSides[i] || !connectedToInventory[i])
-                        continue;
+                if (!connectedSides[i] || !connectedToInventory[i])
+                    continue;
 
-                    var (rx, ry, rz) = InserterRotationsDeg[i];
-                    AddMesh(ref finalMesh, RotateMesh(inserterMesh.Clone(), rx, ry, rz, origin));
-                }
+                AppendCachedPart(ref finalMesh, GetRotatedInserterSource(api, block, i));
             }
         }
 
         MeshCache[cacheKey] = finalMesh;
         return finalMesh;
     }
+
+    private static int PartCacheKey(int blockId, bool isLod2)
+        => (blockId << 1) | (isLod2 ? 1 : 0);
 
     private static bool ShouldRenderArm(int sideIndex, bool[] connectedSides)
         => connectedSides[sideIndex];
@@ -148,7 +243,7 @@ internal static class PipeMeshBuilder
             currentReach = PipeArmFullReach;
 
         float scale = targetReach / currentReach;
-        mesh.Scale(new Vec3f(PipeCenter, PipeCenter, PipeCenter), scale, 1f, 1f);
+        mesh.Scale(Origin, scale, 1f, 1f);
     }
 
     private static float GetArmReachAlongScaleAxis(MeshData mesh)
@@ -167,6 +262,9 @@ internal static class PipeMeshBuilder
 
     private static MeshData RotateMesh(MeshData mesh, float rxDeg, float ryDeg, float rzDeg, Vec3f origin)
     {
+        if (mesh == null)
+            return null;
+
         if (rxDeg == 0f && ryDeg == 0f && rzDeg == 0f)
             return mesh;
 
@@ -191,7 +289,8 @@ internal static class PipeMeshBuilder
         BlockPos pos,
         bool[] connectedSides,
         bool[] connectedToInventory,
-        bool useInserterHead)
+        bool useInserterHead,
+        bool isLod2)
     {
         long key = ((long)MeshCacheVersion << 32) | (uint)blockId;
         long reachHash = 0;
@@ -222,11 +321,15 @@ internal static class PipeMeshBuilder
         if (straightAxis >= 0)
             key ^= 1L << (15 + straightAxis);
 
+        if (isLod2)
+            key ^= 1L << 18;
+
         return key;
     }
 
     /// <summary>
-    /// Предметные и жидкостные трубы всегда с кубом. Обычные — на углах без противоположных пар.
+    /// Filter/insertion pipes always keep the center cube.
+    /// Normal pipes skip it on pure straight runs and some multi-way opposite pairs.
     /// </summary>
     private static bool ShouldRenderCenterCube(bool[] connectedSides, bool[] connectedToInventory, bool useInserterHead)
     {
@@ -292,6 +395,10 @@ internal static class PipeMeshBuilder
             || connectedSides[4] && connectedSides[5];
     }
 
+    /// <summary>
+    /// Pure pipe runs (1 end or opposite pair, no inventory) use straight.json — normal pipes only.
+    /// Filter/insertion pipes never use straight: they always build center + arms.
+    /// </summary>
     private static int GetStraightAxis(bool[] connectedSides, bool[] connectedToInventory, bool useInserterHead)
     {
         if (useInserterHead)
@@ -306,7 +413,7 @@ internal static class PipeMeshBuilder
             if (!connectedSides[i])
                 continue;
 
-            if (connectedToInventory[i])
+            if (connectedToInventory != null && connectedToInventory[i])
                 return -1;
 
             if (pipeCount == 0)
@@ -336,16 +443,121 @@ internal static class PipeMeshBuilder
         };
     }
 
-    private static MeshData GetCenterCube(ICoreClientAPI api, Vintagestory.API.Common.Block block)
+    private static MeshData GetCenterCubeSource(ICoreClientAPI api, Vintagestory.API.Common.Block block, bool isLod2)
     {
-        if (!CenterCubeCache.TryGetValue(block.Id, out MeshData center))
+        int key = PartCacheKey(block.Id, isLod2);
+        if (!CenterCubeCache.TryGetValue(key, out MeshData center))
         {
-            center = TesselateShape(api, block, $"{ShapePath}/center.json");
+            string path = isLod2 ? $"{ShapePath}/center-lod2.json" : $"{ShapePath}/center.json";
+            center = TesselateShape(api, block, path);
+            // Fall back to full detail if LOD asset missing.
+            if (center == null && isLod2)
+                center = TesselateShape(api, block, $"{ShapePath}/center.json");
             if (center != null)
-                CenterCubeCache[block.Id] = center;
+                CenterCubeCache[key] = center;
         }
 
-        return center?.Clone();
+        return center;
+    }
+
+    private static MeshData GetPipePartBase(ICoreClientAPI api, Vintagestory.API.Common.Block block, bool isLod2)
+    {
+        int key = PartCacheKey(block.Id, isLod2);
+        if (!PipePartBaseCache.TryGetValue(key, out MeshData part))
+        {
+            string path = isLod2 ? $"{ShapePath}/pipe_part-lod2.json" : $"{ShapePath}/pipe_part.json";
+            part = TesselateShape(api, block, path);
+            if (part == null && isLod2)
+                part = TesselateShape(api, block, $"{ShapePath}/pipe_part.json");
+            if (part != null)
+                PipePartBaseCache[key] = part;
+        }
+
+        return part;
+    }
+
+    private static MeshData GetStraightBase(ICoreClientAPI api, Vintagestory.API.Common.Block block, bool isLod2)
+    {
+        int key = PartCacheKey(block.Id, isLod2);
+        if (!StraightBaseCache.TryGetValue(key, out MeshData straight))
+        {
+            string path = isLod2 ? $"{ShapePath}/straight-lod2.json" : $"{ShapePath}/straight.json";
+            straight = TesselateShape(api, block, path);
+            if (straight == null && isLod2)
+                straight = TesselateShape(api, block, $"{ShapePath}/straight.json");
+            if (straight != null)
+                StraightBaseCache[key] = straight;
+        }
+
+        return straight;
+    }
+
+    private static MeshData GetRotatedArmSource(ICoreClientAPI api, Vintagestory.API.Common.Block block, int side, bool isLod2)
+    {
+        long key = ((long)block.Id << 4) | ((long)side << 1) | (uint)(isLod2 ? 1 : 0);
+        if (RotatedArmCache.TryGetValue(key, out MeshData cached))
+            return cached;
+
+        MeshData basePart = GetPipePartBase(api, block, isLod2);
+        if (basePart == null)
+            return null;
+
+        var (rx, ry, rz) = SideRotationsDeg[side];
+        MeshData rotated = RotateMesh(basePart.Clone(), rx, ry, rz, Origin);
+        RotatedArmCache[key] = rotated;
+        return rotated;
+    }
+
+    private static MeshData GetStraightRotatedSource(ICoreClientAPI api, Vintagestory.API.Common.Block block, int axis, bool isLod2)
+    {
+        long key = ((long)block.Id << 3) | ((long)axis << 1) | (uint)(isLod2 ? 1 : 0);
+        if (StraightRotatedCache.TryGetValue(key, out MeshData cached))
+            return cached;
+
+        MeshData baseStraight = GetStraightBase(api, block, isLod2);
+        if (baseStraight == null)
+            return null;
+
+        var (rx, ry, rz) = StraightRotationsDeg[axis];
+        MeshData rotated = RotateMesh(baseStraight.Clone(), rx, ry, rz, Origin);
+        StraightRotatedCache[key] = rotated;
+        return rotated;
+    }
+
+    private static MeshData GetInserterBase(ICoreClientAPI api, Vintagestory.API.Common.Block block)
+    {
+        if (inserterHeadShapeMissing)
+            return null;
+
+        if (InserterBaseCache.TryGetValue(block.Id, out MeshData head))
+            return head;
+
+        if (GetShape(api, $"{ShapePath}/inserter_head.json") == null)
+        {
+            inserterHeadShapeMissing = true;
+            return null;
+        }
+
+        head = TesselateShape(api, block, $"{ShapePath}/inserter_head.json");
+        if (head != null)
+            InserterBaseCache[block.Id] = head;
+        return head;
+    }
+
+    private static MeshData GetRotatedInserterSource(ICoreClientAPI api, Vintagestory.API.Common.Block block, int side)
+    {
+        long key = ((long)block.Id << 3) | (uint)side;
+        if (RotatedInserterCache.TryGetValue(key, out MeshData cached))
+            return cached;
+
+        MeshData baseHead = GetInserterBase(api, block);
+        if (baseHead == null)
+            return null;
+
+        var (rx, ry, rz) = InserterRotationsDeg[side];
+        MeshData rotated = RotateMesh(baseHead.Clone(), rx, ry, rz, Origin);
+        RotatedInserterCache[key] = rotated;
+        return rotated;
     }
 
     private static MeshData TesselateShape(ICoreClientAPI api, Vintagestory.API.Common.Block block, string shapePath)
@@ -364,21 +576,34 @@ internal static class PipeMeshBuilder
         if (!ShapeCache.TryGetValue(key, out Shape shape))
         {
             shape = Shape.TryGet(api, key);
-            if (shape != null)
-                ShapeCache[key] = shape;
+            // Cache misses too so missing shapes (inserter_head) are not re-queried every frame.
+            ShapeCache[key] = shape;
         }
 
         return shape;
     }
 
-    private static void AddMesh(ref MeshData target, MeshData part)
+    /// <summary>Append a shared cached part (clone only for the first piece).</summary>
+    private static void AppendCachedPart(ref MeshData target, MeshData cachedPart)
     {
-        if (part == null)
+        if (cachedPart == null)
             return;
 
         if (target == null || target.VerticesCount == 0)
-            target = part;
+            target = cachedPart.Clone();
         else
-            target.AddMeshData(part);
+            target.AddMeshData(cachedPart);
+    }
+
+    /// <summary>Append a mesh we already own (no extra clone).</summary>
+    private static void AppendOwnedPart(ref MeshData target, MeshData ownedPart)
+    {
+        if (ownedPart == null)
+            return;
+
+        if (target == null || target.VerticesCount == 0)
+            target = ownedPart;
+        else
+            target.AddMeshData(ownedPart);
     }
 }

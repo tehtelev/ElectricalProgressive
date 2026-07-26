@@ -5,10 +5,14 @@
   "shape": {
     "base": "block/itempipe/center"
   },
+  "lod2shape": {
+    "base": "block/itempipe/center-lod2"
+  },
   "shapeInventory": {
     "base": "block/itempipe/center"
   },
   "creativeinventory": {
+    "general": [ "*" ],
     "electricalprogressivetransport": [ "*" ]
   },
   "textures": {

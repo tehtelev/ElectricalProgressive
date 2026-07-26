@@ -21,6 +21,9 @@ namespace ElectricalProgressive.Content
         private readonly bool[] _connectedSides = new bool[6];
         private readonly BlockPos?[] _connectedPipes = new BlockPos?[6];
         private readonly bool[] _connectedToInventory = new bool[6];
+        // Scratch buffers — avoid allocating Clone() arrays on every connection scan.
+        private readonly bool[] _prevSides = new bool[6];
+        private readonly bool[] _prevInventory = new bool[6];
 
         private bool _isUpdating;
 
@@ -51,10 +54,12 @@ namespace ElectricalProgressive.Content
         public void Initialize()
         {
             _networkManager?.AddPipe(_pos, _owner);
-            UpdateConnections();
+            // Notify loaded neighbors so chunk-border pipes re-link after world/chunk load.
+            // Local-only scan left the far side disconnected until a manual block update.
+            UpdateConnections(updateNeighbors: true);
         }
 
-        public virtual void UpdateConnections(bool updateNeighbors = true)
+        public virtual void UpdateConnections(bool updateNeighbors = true, bool forceEndpointRefresh = false)
         {
             if (_isUpdating)
                 return;
@@ -63,11 +68,10 @@ namespace ElectricalProgressive.Content
 
             try
             {
-                bool[] oldConnectedSides = (bool[])_connectedSides.Clone();
-                bool[] oldConnectedToInventory = (bool[])_connectedToInventory.Clone();
-
                 for (int i = 0; i < 6; i++)
                 {
+                    _prevSides[i] = _connectedSides[i];
+                    _prevInventory[i] = _connectedToInventory[i];
                     _connectedSides[i] = false;
                     _connectedPipes[i] = null;
                     _connectedToInventory[i] = false;
@@ -77,6 +81,20 @@ namespace ElectricalProgressive.Content
                 {
                     BlockFacing facing = BlockFacing.ALLFACES[i];
                     BlockPos checkPos = _pos.AddCopy(facing);
+
+                    // Unloaded neighbor chunk: GetBlock is air — keep previous/saved link until chunk loads.
+                    if (!IsChunkLoaded(checkPos))
+                    {
+                        if (_prevSides[i])
+                        {
+                            _connectedSides[i] = true;
+                            _connectedToInventory[i] = _prevInventory[i];
+                            _connectedPipes[i] = checkPos.Copy();
+                        }
+
+                        continue;
+                    }
+
                     var neighborBlock = _api.World.BlockAccessor.GetBlock(checkPos);
 
                     if (IsPipeBlock(neighborBlock))
@@ -84,7 +102,7 @@ namespace ElectricalProgressive.Content
                         _connectedSides[i] = true;
                         _connectedPipes[i] = checkPos.Copy();
                     }
-                    else if (HasValidInventoryBlock(checkPos))
+                    else if (HasValidInventoryBlock(checkPos, neighborBlock))
                     {
                         _connectedSides[i] = true;
                         _connectedPipes[i] = checkPos.Copy();
@@ -92,17 +110,18 @@ namespace ElectricalProgressive.Content
                     }
                 }
 
-                bool connectionsChanged = !SameConnections(oldConnectedSides, oldConnectedToInventory);
+                bool connectionsChanged = !SameConnections(_prevSides, _prevInventory);
                 if (connectionsChanged)
                 {
                     _owner.MarkDirty(true);
-                    if (_api.Side == EnumAppSide.Server)
-                        _api.World.BlockAccessor.MarkBlockDirty(_pos);
+                    // Client + server: retesselate arms when border pipe re-links after chunk load.
+                    _api.World.BlockAccessor.MarkBlockDirty(_pos);
 
                     _networkManager?.RefreshNetworkCache(_pos);
                 }
-                else if (!updateNeighbors)
+                else if (forceEndpointRefresh)
                 {
+                    // Wrench type-swap: flags may match but inserter/source role changed.
                     _networkManager?.RefreshNetworkCache(_pos);
                 }
 
@@ -118,6 +137,21 @@ namespace ElectricalProgressive.Content
             finally
             {
                 _isUpdating = false;
+            }
+        }
+
+        /// <summary>
+        /// True when the chunk containing pos is available. Unloaded border cells look like air.
+        /// </summary>
+        private bool IsChunkLoaded(BlockPos pos)
+        {
+            try
+            {
+                return _api.World.BlockAccessor.GetChunkAtBlockPos(pos) != null;
+            }
+            catch
+            {
+                return false;
             }
         }
 
@@ -139,29 +173,38 @@ namespace ElectricalProgressive.Content
             return code.Contains("pipe") || block is BlockPipeBase;
         }
 
-        protected virtual bool HasValidInventoryBlock(BlockPos pos)
+        protected virtual bool HasValidInventoryBlock(BlockPos pos, Vintagestory.API.Common.Block? block = null)
         {
             if (_api == null)
                 return false;
 
             try
             {
-                var block = _api.World.BlockAccessor.GetBlock(pos);
-                if (block == null)
+                block ??= _api.World.BlockAccessor.GetBlock(pos);
+                if (block == null || block.Id == 0)
                     return false;
 
-                var blockEntity = _api.World.BlockAccessor.GetBlockEntity(pos);
-                if (blockEntity != null)
+                // Most solid terrain has no entity class — skip BE lookup.
+                string entityClass = block.EntityClass;
+                if (!string.IsNullOrEmpty(entityClass))
                 {
-                    IInventory inventory = GetInventoryFromBlockEntity(blockEntity);
-                    if (inventory?.Count > 0)
-                        return true;
+                    var blockEntity = _api.World.BlockAccessor.GetBlockEntity(pos);
+                    if (blockEntity != null)
+                    {
+                        IInventory inventory = GetInventoryFromBlockEntity(blockEntity);
+                        if (inventory?.Count > 0)
+                            return true;
+                    }
                 }
 
-                string code = block.Code?.ToString() ?? "";
-                foreach (var keyword in inventoryKeywords)
+                // Keyword fallback for blocks that act as containers without a standard BE inventory.
+                string code = block.Code?.Path ?? "";
+                if (code.Length == 0)
+                    return false;
+
+                for (int k = 0; k < inventoryKeywords.Length; k++)
                 {
-                    if (code.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                    if (code.Contains(inventoryKeywords[k], StringComparison.OrdinalIgnoreCase))
                         return true;
                 }
 
@@ -189,9 +232,7 @@ namespace ElectricalProgressive.Content
             if (changed)
             {
                 _owner.MarkDirty(true);
-                if (_api.Side == EnumAppSide.Server)
-                    _api.World.BlockAccessor.MarkBlockDirty(_pos);
-
+                _api.World.BlockAccessor.MarkBlockDirty(_pos);
                 _networkManager?.RefreshNetworkCache(_pos);
             }
         }
@@ -208,16 +249,15 @@ namespace ElectricalProgressive.Content
             if (changed)
             {
                 _owner.MarkDirty(true);
-                if (_api.Side == EnumAppSide.Server)
-                    _api.World.BlockAccessor.MarkBlockDirty(_pos);
-
+                _api.World.BlockAccessor.MarkBlockDirty(_pos);
                 _networkManager?.RefreshNetworkCache(_pos);
             }
         }
 
         public virtual void OnPipeRemoved()
         {
-            _networkManager?.RemovePipe(_pos);
+            // Pass caller so same-cell wrench replace does not unregister the new pipe BE.
+            _networkManager?.RemovePipe(_pos, _owner);
         }
 
         private bool SameConnections(bool[] oldConnectedSides, bool[] oldConnectedToInventory)
@@ -302,6 +342,8 @@ namespace ElectricalProgressive.Content
 
         public void FromTreeAttributes(ITreeAttribute tree)
         {
+            // Prefer live scan after load/transform. Only apply saved flags when present AND
+            // leave positions for a subsequent UpdateConnections to overwrite with world truth.
             var connBytes = tree.GetBytes("connections", null);
             if (connBytes != null && connBytes.Length == 6)
             {
@@ -314,6 +356,14 @@ namespace ElectricalProgressive.Content
             {
                 for (int i = 0; i < 6; i++)
                     _connectedToInventory[i] = invConnBytes[i] == 1;
+            }
+
+            // Tree only stores flags — rebuild neighbour positions so pathfinding/endpoints work.
+            for (int i = 0; i < 6; i++)
+            {
+                _connectedPipes[i] = _connectedSides[i]
+                    ? _pos.AddCopy(BlockFacing.ALLFACES[i])
+                    : null;
             }
         }
 

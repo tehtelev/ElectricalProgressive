@@ -1,21 +1,34 @@
 ﻿{
   "game:tabname-electricalprogressivetransport": "Transportrohre",
+
+  "block-pipe-normal": "Transportrohr",
   "block-pipe-normal-*": "Transportrohr",
+  "block-pipe-item-insertion": "Gegenstand-Einführungsrohr",
   "block-pipe-item-*": "Gegenstand-Einführungsrohr",
+  "block-pipe-liquid-insertion": "Flüssigkeitseinführungsrohr",
+  "block-pipe-liquid-*": "Flüssigkeitseinführungsrohr",
+
   "pipe-normal-info": "Normales Transportrohr",
   "pipe-insertion-info": "Einführungsfilterrohr",
+  "pipe-liquid-insertion-info": "Rohr für Flüssigkeitsfilter & -einführung",
+
   "blockhelp-filter-settings": "Filter einstellen",
   "blockhelp-pipe-switch-type": "Rohrtyp wechseln",
+  "blockhelp-liquid-filter-settings": "Flüssigkeitsfilter einstellen",
+
   "connections": "Anschlüsse: {0}",
   "containers": "Container: {0}",
   "filter-mode": "Filtermodus: {0}",
   "network-size": "Rohrnetzgröße: {0}",
-  "inserters": "Einführungsrohre i Netz:{0}",
+  "inserters": "Einführungsrohre im Netz: {0}",
   "transfer-rate": "Transferrate: {0}",
   "active-filters": "Filter: {0}/{1}",
+
   "filter-pipe-title": "Filterrohr",
-  "filter-pipe-comment": "Legen Gegenstände in Filterplätze",
-  "filter-pipe-settings": "Filtereinst.:",
+  "filter-pipe-comment": "Klick auf Gegenstand setzt Filter (scrollen)",
+  "filter-search-placeholder": "Suchen...",
+  "filter-search-results": "{0}",
+  "filter-pipe-settings": "Filtereinstellungen:",
   "filter-pipe": "Filterrohr",
   "filter-mode-allow": "Weiße Liste",
   "filter-mode-deny": "Schwarze Liste",
@@ -25,26 +38,26 @@
   "filter-speet-transfer": "Transferrate:",
   "filter-speet-up": "Erhöhen",
   "filter-speet-down": "Senken",
-  "block-pipe-liquid-*": "Flüssigkeitseinführungsrohr",
-  "filter-liquidpipe-comment": "Legen Flüssigkeiten in Filterplätze",
-  "pipe-liquid-insertion-info": "Rohr für Flüssigkeitsfilter & -einführung",
-  "blockhelp-liquid-filter-settings": "Flüssigkeitsfilter einstellen",
+
+  "filter-liquidpipe-comment": "Klick auf Flüssigkeit setzt Filter (scrollen)",
   "liquid-filter-pipe-title": "Flüssigkeitsfilterrohr",
   "liquid-filter-pipe-settings": "Flüssigkeitsfiltereinstellungen:",
-  "liquid-inserters": "Flüssigkeitsrohre i Netz:{0}",
+  "liquid-inserters": "Flüssigkeitsrohre im Netz: {0}",
   "liquid-transfer-rate": "Flüssigkeitstransferrate: {0} ml/Takt",
   "liquid-transfer-speed": "Transferrate:",
   "active-liquid-filters": "Flüssigkeitsfilter: {0}/{1}",
+
   "preservation-settings": "Produkterhaltungseinstellungen:",
   "perish-fully-stopped": "• Verderb: vollständig gestoppt",
   "perish-slowed-factor": "• Verderb: {0}x verlangsamt",
   "all-transitions-stopped": "• Alle Übergänge: gestoppt",
   "preservation-disabled": "• Produkterhaltung: deaktiviert",
-  "inventory-connections": "Inventare angeschlossen:{0}",
+  "inventory-connections": "Inventare angeschlossen: {0}",
+
   "block-handbooktitle-pipe-normal": "Verwendung",
   "block-handbooktext-pipe-normal": "Ermöglicht die Übertragung von Gegenständen und Flüssigkeiten. Verbinden Sie die erforderlichen Container/Inventare mit diesem Rohr. Das letzte Rohr vor dem Container muss in ein Einführungsrohr umgewandelt werden. Nehmen Sie dazu einen Schraubenschlüssel in die Hand und klicken Sie mit der rechten Maustaste auf das gewünschte Rohr. Dann können Sie im GUI die erforderlichen Filter einstellen.",
   "block-handbooktitle-pipe-item-insertion": "Verwendung",
-  "block-handbooktext-pipe-item-insertion": "Ermöglicht das Einfügen von Gegenständen in benachbarte Container. Sie können Filter einrichten, indem Sie den gewünschten Gegenstand (beliebige Menge) in einen leeren Slot legen. Wenn der Filter leer bleibt, werden alle Gegenstände ohne Filterung transferiert.",
+  "block-handbooktext-pipe-item-insertion": "Ermöglicht das Einfügen von Gegenständen in benachbarte Container. Öffnen Sie das GUI und klicken Sie Gegenstände in der Liste an, um Filter zu setzen. Wenn der Filter leer bleibt, werden alle Gegenstände ohne Filterung transferiert.",
   "block-handbooktitle-pipe-liquid-insertion": "Verwendung",
-  "block-handbooktext-pipe-liquid-insertion": "Ermöglicht das Einfügen von Flüssigkeiten in benachbarte Container. Sie können Filter einrichten, indem Sie die gewünschte Flüssigkeit (beliebige Menge) in einen leeren Slot legen. Wenn der Filter leer bleibt, werden alle Flüssigkeiten ohne Filterung transferiert."
+  "block-handbooktext-pipe-liquid-insertion": "Ermöglicht das Einfügen von Flüssigkeiten in benachbarte Container. Öffnen Sie das GUI und klicken Sie Flüssigkeiten in der Liste an, um Filter zu setzen. Wenn der Filter leer bleibt, werden alle Flüssigkeiten ohne Filterung transferiert."
 }
