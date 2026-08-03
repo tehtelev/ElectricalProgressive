@@ -18,6 +18,15 @@
   "block-handbooktitle-edrawing": "Використання",
   "block-handbooktext-edrawing": "Дозволяє створювати деякі предмети шляхом продавлювання металу через калібри, витягуючи метал потрібної форми.<br>Підтримує автоматичне завантаження та розвантаження за допомогою лійок.",
 
+  "block-ecrusher-*": "Електрична дробарка (контролер)",
+  "block-handbooktitle-ecrusher": "Використання",
+  "block-handbooktext-ecrusher": "Контролер багатоблочної дробарки (збірка як у сталевої печі). 2×2×2: контролер + 5 iron metalblock + 2 copper metalblock (тимчасова заглушка замість роторів). Shift+ПКМ — схема. Працює лише зібраною.",
+
+  "ecrusher-structure-incomplete": "Структура дробарки не зібрана",
+  "ecrusher-structure-complete": "Структура дробарки зібрана",
+  "ecrusher-structure-hint": "2×2×2: 5 iron + 2 copper metalblock. Shift+ПКМ — схема.",
+  "ecrusher-structure-hint-short": "Shift+ПКМ — показати схему збірки",
+
   "game:ewoodcutter-title-gui": "Електричний лісоруб",
   "block-ewoodcutter-normal": "Електричний лісоруб",
   "block-ewoodcutter-normal-burned": "Електричний лісоруб (згорілий)",
@@ -25,6 +34,7 @@
   "game:ehammer-title-gui": "Автомолот",
   "game:epress-title-gui": "Автопрес",
   "game:edrawing-title-gui": "Волочувальна машина",
+  "game:ecrusher-title-gui": "Електрична дробарка",
 
   "block-pressform-axe": "Пресформа сокири",
   "block-pressform-pickaxe": "Пресформа кирки",

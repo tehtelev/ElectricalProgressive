@@ -55,6 +55,9 @@ public class BEBehaviorERecycler : BlockEntityBehavior, IElectricConsumer
         {
             if (Blockentity is BlockEntityERecycler entity)
             {
+                if (!entity.StructureComplete)
+                    return false;
+
                 if (entity.ElectricalProgressive == null &&
                     entity.ElectricalProgressive.AllEparams == null &&
                     entity.ElectricalProgressive.AllEparams.Any(e => e.burnout))
@@ -86,6 +89,14 @@ public class BEBehaviorERecycler : BlockEntityBehavior, IElectricConsumer
 
         if (IsBurned)
         {
+            return;
+        }
+
+        if (!entity.StructureComplete)
+        {
+            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-incomplete"));
+            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-hint"));
+            stringBuilder.AppendLine();
             return;
         }
 

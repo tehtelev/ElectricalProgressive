@@ -1,4 +1,4 @@
-﻿﻿using ElectricalProgressive.RecipeSystem;
+using ElectricalProgressive.RecipeSystem;
 using ElectricalProgressive.RecipeSystem.Recipe;
 using ElectricalProgressive.Utils;
 using System;
@@ -10,6 +10,7 @@ using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
+using MachineConstruct = global::ElectricalProgressive.Construction.BEBehaviorMachineConstruct;
 
 namespace ElectricalProgressive.Content.Block.ERecycler;
 
@@ -33,6 +34,20 @@ public class BlockEntityERecycler : BlockEntityGenericTypedContainer
     /// Накопленная энергия для текущего рецепта (целые единицы)
     /// </summary>
     public int AccumulatedEnergy { get; set; }
+
+    /// <summary>
+    /// Машина готова к работе (сборка Core MachineConstruct завершена / formed).
+    /// </summary>
+    public bool StructureComplete
+    {
+        get
+        {
+            var construct = GetBehavior<MachineConstruct>();
+            if (construct != null && construct.HasConstruction)
+                return construct.IsReady;
+            return true;
+        }
+    }
 
     public override string DialogTitle => Lang.Get("erecycler-title-gui");
 
@@ -70,6 +85,9 @@ public class BlockEntityERecycler : BlockEntityGenericTypedContainer
     /// </summary>
     public void AddEnergy(int amount)
     {
+        if (!StructureComplete)
+            return;
+
         if (CurrentRecipe == null || InputSlot.Empty)
             return;
     
@@ -498,6 +516,9 @@ public class BlockEntityERecycler : BlockEntityGenericTypedContainer
 
     public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
     {
+        if (!StructureComplete)
+            return true;
+
         if (this.Api.Side == EnumAppSide.Client)
             this.toggleInventoryDialogClient(byPlayer, (CreateDialogDelegate)(() =>
             {

@@ -15,10 +15,15 @@
         <HintPath>$(VINTAGE_STORY)/Lib/Newtonsoft.Json.dll</HintPath>
         <Private>False</Private>
       </Reference>
-      <Reference Include="ElectricalProgressive-Core">
-			<HintPath>..\Releases\electricalprogressivecore\ElectricalProgressive-Core.dll</HintPath>
-        <Private>False</Private>
-      </Reference>
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\ElectricalProgressive-Core\ElectricalProgressive-Core.csproj">
+        <Private>false</Private>
+      </ProjectReference>
+      <DependentMod Include="ElectricalProgressive-Core" FolderName="core" />
+    </ItemGroup>
+    <Import Project="..\build\CopyDependentMods.targets" />
+    <ItemGroup>
       <Reference Include="VintagestoryAPI">
             <HintPath>$(VINTAGE_STORY)/VintagestoryAPI.dll</HintPath>
             <Private>False</Private>

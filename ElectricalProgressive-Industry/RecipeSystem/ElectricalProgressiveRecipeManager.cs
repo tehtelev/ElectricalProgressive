@@ -42,7 +42,7 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         RecyclerRecipes = [];
         LoadRecipes<RecyclerRecipe>("Recycler Recipe", "recipes/electric/recyclerrecipe", RecyclerRecipes.Add);
         api.World.Logger.Debug(Lang.Get("electricalprogressiveindustry:recipeloading"));
-        machines.Add("erecycler-", ("electricalprogressiveindustry:recycler-north", RecyclerRecipes));
+        machines.Add("erecycler-", ("electricalprogressiveindustry:erecycler-incomplete-north", RecyclerRecipes));
     }
 
     private void LoadHammerRecipes()
@@ -74,7 +74,7 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         CrusherRecipes = [];
         LoadRecipes<CrusherRecipe>("Crusher Recipe", "recipes/electric/crusherrecipe", CrusherRecipes.Add);
         api.World.Logger.Debug(Lang.Get("electricalprogressiveindustry:recipeloading"));
-        machines.Add("ecrusher-", ("electricalprogressiveindustry:ecrusher-north", CrusherRecipes));
+        machines.Add("ecrusher-", ("electricalprogressiveindustry:ecrusher-incomplete-north", CrusherRecipes));
     }
     
     private void LoadBlastFurnaceRecipes()

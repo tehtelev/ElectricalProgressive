@@ -399,7 +399,14 @@
   "efuelgenerator": "Паровой топливный генератор",
   "block-efuelgenerator-*": "Паровой топливный генератор",
   "block-handbooktitle-efuelgenerator": "Использование",
-  "block-handbooktext-efuelgenerator": "Позволяет вырабатывать электричество используя тепло от сгорания горючих материалов. Для работы необходима жидкость. Можно заливать вручную или жидкостными трубами.",
+  "block-handbooktext-efuelgenerator": "Многоблочный паровой генератор (2×2×3), 128 В. Вырабатывает электричество от сжигания топлива; нужна вода. Заливка вручную или трубами.",
+
+  "efuelgenerator-structure-incomplete": "Генератор не собран",
+  "efuelgenerator-structure-hint": "ПКМ: 8 железных + 4 медных пластины → 4 катушки + 2 ротора → статор tier3 + 16 проводов 128 В.",
+  "efuelgenerator-handbook-place-controller": "Поставить контроллер",
+  "efuelgenerator-construct-frame": "Обшивка: 8 железных + 4 медных пластины",
+  "efuelgenerator-construct-core": "Механика: 4 катушки + 2 ротора",
+  "efuelgenerator-construct-finish": "Финал: статор tier3 + 16 медных проводов 128 В",
 
   "electricalprogressivebasics:empty": "Пусто",
   "electricalprogressivebasics:liquid": "Жидкость: ",

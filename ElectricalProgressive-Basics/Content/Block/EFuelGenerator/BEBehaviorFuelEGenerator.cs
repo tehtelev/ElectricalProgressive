@@ -80,6 +80,12 @@ public class BEBehaviorFuelEGenerator : BlockEntityBehavior, IElectricProducer
         if (Blockentity is not BlockEntityEFuelGenerator temp)
             return 0f;
 
+        if (!temp.StructureComplete)
+        {
+            _powerGive = 0f;
+            return 0f;
+        }
+
         _powerGive = temp.Power;
         return _powerGive;
     }
@@ -98,6 +104,14 @@ public class BEBehaviorFuelEGenerator : BlockEntityBehavior, IElectricProducer
 
         if (Blockentity is not BlockEntityEFuelGenerator entity)
             return;
+
+        if (!entity.StructureComplete)
+        {
+            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-incomplete"));
+            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-hint"));
+            stringBuilder.AppendLine();
+            return;
+        }
 
         stringBuilder.AppendLine(StringHelper.Progressbar(Math.Min(_powerGive, _powerOrder) / Math.Max(1f, _powerGive) * 100));
         stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Production") + ": " + ((int)Math.Min(_powerGive, _powerOrder)) + "/" + Math.Max(1f, _powerGive) + " " + Lang.Get("electricalprogressivebasics:W"));

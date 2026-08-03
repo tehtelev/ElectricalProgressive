@@ -1,32 +1,30 @@
-﻿[
+[
   {
     "enabled": true,
-    "ingredientPattern": "GIH,GIE",
+    "ingredientPattern": "PPP,S_H,PPP",
     "width": 3,
-    "height": 2,
+    "height": 3,
     "ingredients": {
-      "E": {
-        "type": "block",
-        "code": "electricalprogressivebasics:egenerator-tier3-stator"
-      },
-      "G": {
+      "P": {
         "type": "item",
-        "code": "game:metalplate-copper"
+        "code": "game:metalplate-iron",
+        "quantity": 1
       },
-      "I": {
+      "S": {
         "type": "item",
-        "code": "game:metalplate-iron"
+        "code": "game:metalplate-steel",
+        "quantity": 1
       },
       "H": {
         "type": "item",
         "code": "game:hammer-*",
         "isTool": true,
-        "toolDurabilityCost": 4
+        "toolDurabilityCost": 8
       }
     },
     "output": {
       "type": "block",
-      "code": "electricalprogressivebasics:efuelgenerator-south",
+      "code": "electricalprogressivebasics:efuelgenerator-incomplete-south",
       "quantity": 1
     }
   }

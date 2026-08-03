@@ -1,4 +1,4 @@
-﻿{
+{
   "code": "erecycler",
   "class": "BlockERecycler",
   "entityClass": "BlockEntityERecycler",
@@ -19,29 +19,84 @@
           "text": "electricalprogressiveindustry:block-handbooktext-erecycler"
         }
       ]
+    },
+    "construction": {
+      "brokenDropsRatio": 1,
+      "levels": [
+        {
+          "shape": "block/erecycler/eRecycler_base",
+          "actionLangCode": "electricalprogressiveindustry:erecycler-handbook-place-controller"
+        },
+        {
+          "shape": "block/erecycler/eRecycler_base2",
+          "actionLangCode": "electricalprogressiveindustry:erecycler-construct-frame",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "game:metalplate-iron",
+              "quantity": 8
+            },
+            {
+              "type": "item",
+              "code": "game:metalplate-copper",
+              "quantity": 2
+            }
+          ]
+        },
+        {
+          "shape": "block/erecycler/eRecycler_base3",
+          "actionLangCode": "electricalprogressiveindustry:erecycler-construct-coils",
+          "requireStacks": [
+            {
+              "type": "block",
+              "code": "electricalprogressivebasics:switch-enabled",
+              "quantity": 1
+            },
+            {
+              "type": "item",
+              "code": "electricalprogressivebasics:coil",
+              "quantity": 4
+            }
+          ]
+        },
+        {
+          "shape": "block/erecycler/eRecycler",
+          "actionLangCode": "electricalprogressiveindustry:erecycler-construct-rotors",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "electricalprogressivebasics:engineshaft",
+              "quantity": 2
+            },
+            {
+              "type": "block",
+              "code": "electricalprogressivebasics:ecable-128v-copper-single-part",
+              "quantity": 16
+            }
+          ],
+          "formMachine": true
+        }
+      ]
     }
   },
 
-
   "entityBehaviors": [
-    {
-      "name": "Animatable"
-    },
-    {
-      "name": "BEBehaviorERecycler"
-    },
-    {
-      "name": "ElectricalProgressive"
-    }
+    { "name": "Animatable" },
+    { "name": "BEBehaviorERecycler" },
+    { "name": "ElectricalProgressive" }
   ],
 
   "creativeinventory": {
-    "general": [ "*-north", "*-north" ],
-    "electricity": [ "*-north" ]
+    "general": [ "*-incomplete-north" ],
+    "electricity": [ "*-incomplete-north" ]
   },
 
   "behaviors": [
-    { "name": "HorizontalOrientable" },
+    {
+      "name": "HorizontalOrientable",
+      "properties": { "handleDrop": false }
+    },
+    { "name": "BlockEntityInteract" },
     {
       "name": "Multiblock",
       "propertiesByType": {
@@ -49,41 +104,25 @@
           "sizex": 2,
           "sizey": 2,
           "sizez": 2,
-          "cposition": {
-            "x": 0,
-            "y": 0,
-            "z": 1
-          }
+          "cposition": { "x": 0, "y": 0, "z": 1 }
         },
         "*-east": {
           "sizex": 2,
           "sizey": 2,
           "sizez": 2,
-          "cposition": {
-            "x": 0,
-            "y": 0,
-            "z": 0
-          }
+          "cposition": { "x": 0, "y": 0, "z": 0 }
         },
         "*-south": {
           "sizex": 2,
           "sizey": 2,
           "sizez": 2,
-          "cposition": {
-            "x": 1,
-            "y": 0,
-            "z": 0
-          }
+          "cposition": { "x": 1, "y": 0, "z": 0 }
         },
         "*-west": {
           "sizex": 2,
           "sizey": 2,
           "sizez": 2,
-          "cposition": {
-            "x": 1,
-            "y": 0,
-            "z": 1
-          }
+          "cposition": { "x": 1, "y": 0, "z": 1 }
         }
       }
     }
@@ -93,33 +132,66 @@
 
   "variantgroups": [
     {
+      "code": "state",
+      "states": [ "incomplete", "formed" ]
+    },
+    {
       "code": "side",
       "loadFromProperties": "abstract/horizontalorientation"
     }
   ],
 
-
-
-
   "shapebytype": {
-    "*-north": {
+    "*-incomplete-north": {
+      "base": "block/erecycler/eRecycler_base",
+      "rotateY": 0
+    },
+    "*-incomplete-east": {
+      "base": "block/erecycler/eRecycler_base",
+      "rotateY": 270
+    },
+    "*-incomplete-south": {
+      "base": "block/erecycler/eRecycler_base",
+      "rotateY": 180
+    },
+    "*-incomplete-west": {
+      "base": "block/erecycler/eRecycler_base",
+      "rotateY": 90
+    },
+    "*-formed-north": {
       "base": "block/erecycler/eRecycler",
       "rotateY": 0
     },
-    "*-east": {
+    "*-formed-east": {
       "base": "block/erecycler/eRecycler",
       "rotateY": 270
     },
-    "*-south": {
+    "*-formed-south": {
       "base": "block/erecycler/eRecycler",
       "rotateY": 180
     },
-    "*-west": {
+    "*-formed-west": {
       "base": "block/erecycler/eRecycler",
       "rotateY": 90
     }
   },
-  "lightAbsorption": 120,
+
+  "shapeInventoryByType": {
+    "*-incomplete-*": {
+      "base": "block/erecycler/eRecycler",
+      "rotateY": 0
+    },
+    "*-formed-*": {
+      "base": "block/erecycler/eRecycler",
+      "rotateY": 0
+    }
+  },
+
+  "lightAbsorptionByType": {
+    "*-incomplete-*": 0,
+    "*-formed-*": 120
+  },
+
   "sidesolidByType": {
     "*-north": {
       "all": false,
@@ -148,48 +220,41 @@
   },
 
   "sideopaque": {
-    "all": "false"
-  },
-
-  "emitSideAo": { // Ambient Oclusion
     "all": false
   },
-  "sideAo": { // Ambient Oclusion
+  "emitSideAo": {
+    "all": false
+  },
+  "sideAo": {
     "all": true
   },
   "resistance": 3.5,
+
   "sounds": {
     "place": "game:block/anvil",
     "walk": "game:walk/metal"
   },
+
   "guiTransform": {
-    "rotation": {
-      "x": -22.6,
-      "y": -145,
-      "z": 0
-    },
-    "origin": {
-      "x": 0.5,
-      "y": 0.9,
-      "z": 0.5
-    },
+    "rotation": { "x": -22.6, "y": -145, "z": 0 },
+    "origin": { "x": 0.5, "y": 0.9, "z": 0.5 },
     "scale": 0.72
   },
+
+  "groundTransform": {
+    "translation": { "x": 0, "y": 0.1, "z": 0 },
+    "rotation": { "x": 0, "y": -45, "z": 0 },
+    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
+    "scale": 1.6
+  },
+
   "heldTpIdleAnimation": "holdbothhandslarge",
   "heldRightReadyAnimation": "heldblockready",
   "heldTpUseAnimation": "twohandplaceblock",
+
   "tpHandTransform": {
-    "translation": {
-      "x": -0.6,
-      "y": -0.91,
-      "z": -0.8
-    },
-    "rotation": {
-      "x": -2,
-      "y": 25,
-      "z": -78
-    },
+    "translation": { "x": -0.6, "y": -0.91, "z": -0.8 },
+    "rotation": { "x": -2, "y": 25, "z": -78 },
     "scale": 0.4
   }
-
 }

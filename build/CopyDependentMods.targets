@@ -1,0 +1,36 @@
+<!--
+  Import in csproj:
+    Import Project="..\build\CopyDependentMods.targets"
+    ItemGroup DependentMod Include="ElectricalProgressive-Core" FolderName="core"
+
+  On Build: ProjectReference builds deps first; this target copies each
+  dep bin/Config/Mods/mod/* into bin/Config/Mods/FolderName/
+  so launch addModPath on the Mods folder loads all mods.
+-->
+<Project>
+  <Target Name="CopyDependentMods" AfterTargets="Build" Condition="'@(DependentMod)' != ''">
+    <PropertyGroup>
+      <_LocalModsDir>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)\bin\$(Configuration)\Mods'))</_LocalModsDir>
+    </PropertyGroup>
+
+    <!-- Копируем только нужное для игры (без .pdb — меньше lock при F5) -->
+    <ItemGroup>
+      <_DepFiles Include="$(MSBuildProjectDirectory)\..\%(DependentMod.Identity)\bin\$(Configuration)\Mods\mod\**\*.*"
+                 Exclude="$(MSBuildProjectDirectory)\..\%(DependentMod.Identity)\bin\$(Configuration)\Mods\mod\**\*.pdb;$(MSBuildProjectDirectory)\..\%(DependentMod.Identity)\bin\$(Configuration)\Mods\mod\**\*.xml;$(MSBuildProjectDirectory)\..\%(DependentMod.Identity)\bin\$(Configuration)\Mods\mod\**\*.deps.json">
+        <FolderName Condition="'%(DependentMod.FolderName)' != ''">%(DependentMod.FolderName)</FolderName>
+        <FolderName Condition="'%(DependentMod.FolderName)' == ''">%(DependentMod.Identity)</FolderName>
+      </_DepFiles>
+    </ItemGroup>
+
+    <Message Importance="high"
+             Text="CopyDependentMods to $(_LocalModsDir) deps: @(DependentMod, ', ')" />
+
+    <Copy SourceFiles="@(_DepFiles)"
+          DestinationFiles="@(_DepFiles->'$(_LocalModsDir)\%(FolderName)\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true"
+          Retries="1"
+          RetryDelayMilliseconds="100"
+          Condition="'@(_DepFiles)' != ''"
+          ContinueOnError="true" />
+  </Target>
+</Project>

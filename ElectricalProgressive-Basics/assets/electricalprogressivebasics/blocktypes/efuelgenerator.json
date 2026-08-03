@@ -1,4 +1,4 @@
-﻿{
+{
   "code": "efuelgenerator",
   "class": "BlockEFuelGenerator",
   "entityClass": "BlockEntityEFuelGenerator",
@@ -7,9 +7,11 @@
     {
       "name": "HorizontalOrientable",
       "properties": {
-        "dropBlockFace": "south"
+        "dropBlockFace": "south",
+        "handleDrop": false
       }
     },
+    { "name": "BlockEntityInteract" },
     {
       "name": "Multiblock",
       "propertiesByType": {
@@ -17,56 +19,34 @@
           "sizex": 2,
           "sizey": 2,
           "sizez": 3,
-          "cposition": {
-            "x": 0,
-            "y": 0,
-            "z": 2
-          }
+          "cposition": { "x": 0, "y": 0, "z": 2 }
         },
         "*-east": {
           "sizex": 3,
           "sizey": 2,
           "sizez": 2,
-          "cposition": {
-            "x": 0,
-            "y": 0,
-            "z": 0
-          }
+          "cposition": { "x": 0, "y": 0, "z": 0 }
         },
         "*-south": {
           "sizex": 2,
           "sizey": 2,
           "sizez": 3,
-          "cposition": {
-            "x": 1,
-            "y": 0,
-            "z": 0
-          }
+          "cposition": { "x": 1, "y": 0, "z": 0 }
         },
         "*-west": {
           "sizex": 3,
           "sizey": 2,
           "sizez": 2,
-          "cposition": {
-            "x": 2,
-            "y": 0,
-            "z": 1
-          }
+          "cposition": { "x": 2, "y": 0, "z": 1 }
         }
       }
     }
   ],
 
   "entityBehaviors": [
-    {
-      "name": "Animatable"
-    },
-    {
-      "name": "BEBehaviorFuelEGenerator"
-    },
-    {
-      "name": "ElectricalProgressive"
-    }
+    { "name": "Animatable" },
+    { "name": "BEBehaviorFuelEGenerator" },
+    { "name": "ElectricalProgressive" }
   ],
 
   "attributes": {
@@ -84,7 +64,6 @@
     "isolatedEnvironment": true,
     "maxHeat": 10.0,
 
-    // Конфигурация жидкости с температурной зависимостью расхода
     "liquidConfig": {
       "allowedLiquids": [ "waterportion" ],
       "consumptionRate": 0.025,
@@ -105,15 +84,78 @@
           "text": "electricalprogressivebasics:block-handbooktext-efuelgenerator"
         }
       ]
+    },
+
+    "construction": {
+      "brokenDropsRatio": 1,
+      "levels": [
+        {
+          "shape": "block/fuelgenerator/fuelgenerator_core",
+          "actionLangCode": "electricalprogressivebasics:efuelgenerator-handbook-place-controller"
+        },
+        {
+          "shape": "block/fuelgenerator/fuelgenerator_core2",
+          "actionLangCode": "electricalprogressivebasics:efuelgenerator-construct-frame",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "game:metalplate-iron",
+              "quantity": 8
+            },
+            {
+              "type": "item",
+              "code": "game:metalplate-copper",
+              "quantity": 4
+            }
+          ]
+        },
+        {
+          "shape": "block/fuelgenerator/fuelgenerator_core3",
+          "actionLangCode": "electricalprogressivebasics:efuelgenerator-construct-core",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "electricalprogressivebasics:coil",
+              "quantity": 4
+            },
+            {
+              "type": "item",
+              "code": "electricalprogressivebasics:engineshaft",
+              "quantity": 2
+            }
+          ]
+        },
+        {
+          "shape": "block/fuelgenerator/fuelgenerator",
+          "actionLangCode": "electricalprogressivebasics:efuelgenerator-construct-finish",
+          "requireStacks": [
+            {
+              "type": "block",
+              "code": "electricalprogressivebasics:egenerator-tier3-stator",
+              "quantity": 1
+            },
+            {
+              "type": "block",
+              "code": "electricalprogressivebasics:ecable-128v-copper-single-part",
+              "quantity": 16
+            }
+          ],
+          "formMachine": true
+        }
+      ]
     }
   },
 
   "creativeinventory": {
-    "general": [ "*-south" ],
-    "electricity": [ "*-south" ]
+    "general": [ "*-incomplete-south" ],
+    "electricity": [ "*-incomplete-south" ]
   },
 
   "variantgroups": [
+    {
+      "code": "state",
+      "states": [ "incomplete", "formed" ]
+    },
     {
       "code": "side",
       "loadFromProperties": "abstract/horizontalorientation"
@@ -152,29 +194,50 @@
   },
 
   "shapebytype": {
-    "*-north": {
+    "*-incomplete-north": {
+      "base": "block/fuelgenerator/fuelgenerator_core",
+      "rotateY": 0
+    },
+    "*-incomplete-east": {
+      "base": "block/fuelgenerator/fuelgenerator_core",
+      "rotateY": 270
+    },
+    "*-incomplete-south": {
+      "base": "block/fuelgenerator/fuelgenerator_core",
+      "rotateY": 180
+    },
+    "*-incomplete-west": {
+      "base": "block/fuelgenerator/fuelgenerator_core",
+      "rotateY": 90
+    },
+    "*-formed-north": {
       "base": "block/fuelgenerator/fuelgenerator",
       "rotateY": 0
     },
-    "*-east": {
+    "*-formed-east": {
       "base": "block/fuelgenerator/fuelgenerator",
       "rotateY": 270
     },
-    "*-south": {
+    "*-formed-south": {
       "base": "block/fuelgenerator/fuelgenerator",
       "rotateY": 180
     },
-    "*-west": {
+    "*-formed-west": {
       "base": "block/fuelgenerator/fuelgenerator",
       "rotateY": 90
     }
   },
 
+  "shapeInventory": {
+    "base": "block/fuelgenerator/fuelgenerator",
+    "rotateY": 180
+  },
+
   "blockmaterial": "Stone",
-  "emitSideAo": { // Ambient Oclusion
+  "emitSideAo": {
     "all": false
   },
-  "sideAo": { // Ambient Oclusion
+  "sideAo": {
     "all": true
   },
   "sidesolid": {
@@ -184,7 +247,10 @@
     "all": false
   },
   "resistance": 3.5,
-  "lightAbsorption": 0,
+  "lightAbsorptionByType": {
+    "*-incomplete-*": 0,
+    "*-formed-*": 0
+  },
 
   "sounds": {
     "walk": "game:walk/stone"

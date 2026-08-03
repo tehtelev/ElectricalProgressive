@@ -36,15 +36,18 @@
             <HintPath>$(VINTAGE_STORY)/Lib/0Harmony.dll</HintPath>
             <Private>False</Private>
         </Reference>
-      <Reference Include="ElectricalProgressive-Core">
-        <HintPath>..\Releases\electricalprogressivecore\ElectricalProgressive-Core.dll</HintPath>
-        <Private>False</Private>
-      </Reference>
-      <Reference Include="ElectricalProgressive-Basics">
-        <HintPath>..\Releases\electricalprogressivebasics\ElectricalProgressive-Basics.dll</HintPath>
-        <Private>False</Private>
-      </Reference>
     </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\ElectricalProgressive-Core\ElectricalProgressive-Core.csproj">
+        <Private>false</Private>
+      </ProjectReference>
+      <ProjectReference Include="..\ElectricalProgressive-Basics\ElectricalProgressive-Basics.csproj">
+        <Private>false</Private>
+      </ProjectReference>
+      <DependentMod Include="ElectricalProgressive-Core" FolderName="core" />
+      <DependentMod Include="ElectricalProgressive-Basics" FolderName="basics" />
+    </ItemGroup>
+    <Import Project="..\build\CopyDependentMods.targets" />
   <ItemGroup>
     <Content Include="assets\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

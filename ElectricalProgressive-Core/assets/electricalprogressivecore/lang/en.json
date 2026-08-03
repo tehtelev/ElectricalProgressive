@@ -1,5 +1,11 @@
-﻿{
+{
+  "AltPressForNetworkName": "Display detailed electrical circuit info",
 
-  "AltPressForNetworkName": "Display detailed electrical circuit info"
+  "construction-incomplete": "Machine is not assembled",
+  "construction-hint": "Right-click with materials in hand to assemble (see block hints)",
 
+  "construction-handbook-assembly": "Assembly",
+  "construction-handbook-assembly-hint": "Right-click the placed controller while holding materials (like the water wheel):",
+  "construction-handbook-step": "Step {0}",
+  "construction-handbook-result": "finished machine"
 }

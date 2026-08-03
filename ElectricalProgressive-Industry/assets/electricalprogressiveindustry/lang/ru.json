@@ -5,7 +5,19 @@
 
   "block-erecycler-*": "Переработчик",
   "block-handbooktitle-erecycler": "Используется",
-  "block-handbooktext-erecycler": "Позволяет измельчать и перерабатывать все портящиеся предметы/продукты сразу в компост. Количество получаемого компоста в два раза меньше, чем при использовании ванильного способа. Также поддерживает кастомные рецепты переработки, которые будут отображаться в описании переработчика и самого предмета.<br>Поддерживает автоматическую загрузку и разгрузку с помощью желобов.",
+  "block-handbooktext-erecycler": "Многоблочный переработчик (2×2×2), 32 В. Перерабатывает портящиеся продукты в компост и кастомные рецепты; поддерживает желоба.",
+
+  "erecycler-structure-incomplete": "Переработчик не собран",
+  "erecycler-structure-hint": "ПКМ: 8 железных + 2 медных пластины → переключатель + 4 катушки → 2 ротора + 16 медных проводов 128 В.",
+  "erecycler-handbook-place-controller": "Поставить контроллер",
+  "erecycler-construct-frame": "Обшивка: 8 железных + 2 медных пластины",
+  "erecycler-construct-coils": "Электрика: переключатель + 4 медных катушки",
+  "erecycler-construct-rotors": "Привод: 2 ротора + 16 медных проводов 128 В",
+
+  "construction-handbook-assembly": "Сборка",
+  "construction-handbook-assembly-hint": "ПКМ по установленному контроллеру, держа ресурсы в руке (как водяное колесо):",
+  "construction-handbook-step": "Шаг {0}",
+  "construction-handbook-result": "готовая машина",
 
 
   "block-ehammer-*": "Автомолот",
@@ -20,6 +32,24 @@
   "block-handbooktitle-eextruder": "Используется",
   "block-handbooktext-eextruder": "Позволяет создавать некоторые предметы продолговатой формы путем выдавливания металла.<br>Поддерживает автоматическую загрузку и разгрузку с помощью желобов.",
 
+  "block-ecrusher-*": "Электрическая дробилка",
+  "block-handbooktitle-ecrusher": "Используется",
+  "block-handbooktext-ecrusher": "Многоблочная дробилка (2×2×2), 128 В. Измельчает руду с бонусным выходом; поддерживает желоба.",
+
+  "ecrusher-structure-incomplete": "Дробилка не собрана",
+  "ecrusher-structure-complete": "Дробилка собрана",
+  "ecrusher-structure-hint": "ПКМ по контроллеру с ресурсами: 5 железных + 2 медных пластины.",
+  "ecrusher-structure-hint-short": "ПКМ с ресурсами — собрать (подсказки на блоке)",
+  "ecrusher-formed-hint": "Собранная дробилка 2×2×2.",
+  "ecrusher-construct-frame": "Установить железный каркас",
+  "ecrusher-construct-rollers": "Установить медные вальцы",
+
+  "ecrusher-handbook-assembly": "Сборка",
+  "ecrusher-handbook-assembly-hint": "ПКМ по установленному контроллеру, держа ресурсы в руке (как водяное колесо):",
+  "ecrusher-handbook-step": "Шаг {0}",
+  "ecrusher-handbook-place-controller": "Поставить контроллер",
+  "ecrusher-handbook-result": "готовая дробилка",
+
   "game:ewoodcutter-title-gui": "Электрический лесоруб",
   "block-ewoodcutter-normal": "Электрический лесоруб",
   "block-ewoodcutter-normal-burned": "Электрический лесоруб (сгоревший)",
@@ -27,6 +57,7 @@
   "game:ehammer-title-gui": "Автомолот",
   "game:epress-title-gui": "Автопресс",
   "game:eextruder-title-gui": "Волочильная машина",
+  "game:ecrusher-title-gui": "Электрическая дробилка",
 
   "block-pressform-axe": "Прессформа топора",
   "block-pressform-pickaxe": "Прессформа кирки",

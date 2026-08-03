@@ -10,6 +10,7 @@ using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
+using MachineConstruct = global::ElectricalProgressive.Construction.BEBehaviorMachineConstruct;
 
 namespace ElectricalProgressive.Content.Block.ECrusher
 {
@@ -32,6 +33,33 @@ namespace ElectricalProgressive.Content.Block.ECrusher
         /// Накопленная энергия для текущего рецепта (целые единицы)
         /// </summary>
         public int AccumulatedEnergy { get; set; }
+
+        /// <summary>
+        /// Машина готова к работе (сборка Core MachineConstruct завершена / formed).
+        /// </summary>
+        public bool StructureComplete
+        {
+            get
+            {
+                var construct = GetBehavior<MachineConstruct>();
+                if (construct != null && construct.HasConstruction)
+                    return construct.IsReady;
+                // Нет construction — всегда «собрана»
+                return true;
+            }
+            set { /* совместимость; состояние в BEBehaviorMachineConstruct */ }
+        }
+
+        public bool IsFormed => Block?.Variant?["state"] == "formed";
+
+        public bool IsConstructionComplete
+        {
+            get
+            {
+                var construct = GetBehavior<MachineConstruct>();
+                return construct?.IsConstructionComplete ?? true;
+            }
+        }
 
         // Слоты (1 вход, 1 основной выход, 1 бонусный выход)
         public ItemSlot InputSlot => inventory[0];
@@ -85,6 +113,9 @@ namespace ElectricalProgressive.Content.Block.ECrusher
         /// </summary>
         public void AddEnergy(int amount)
         {
+            if (!StructureComplete)
+                return;
+
             if (CurrentRecipe == null || InputSlot.Empty)
                 return;
     
@@ -721,6 +752,9 @@ namespace ElectricalProgressive.Content.Block.ECrusher
 
         public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
         {
+            if (!StructureComplete)
+                return true;
+
             if (Api.Side == EnumAppSide.Client)
             {
                 toggleInventoryDialogClient(byPlayer, () =>
@@ -783,6 +817,7 @@ namespace ElectricalProgressive.Content.Block.ECrusher
             tree["_inventory"] = invTree;
             tree.SetFloat("PowerCurrent", RecipeProgress);
             tree.SetInt("accumulatedEnergy", AccumulatedEnergy);
+            tree.SetBool("structureComplete", StructureComplete);
         }
 
         #endregion
@@ -801,6 +836,7 @@ namespace ElectricalProgressive.Content.Block.ECrusher
 
         public override bool OnTesselation(ITerrainMeshPool mesher, ITesselatorAPI tesselator)
         {
+            // MachineConstruct (Core) рисует stage-mesh сам через BEBehavior.OnTesselation
             base.OnTesselation(mesher, tesselator);
 
             if (_meshes != null!)

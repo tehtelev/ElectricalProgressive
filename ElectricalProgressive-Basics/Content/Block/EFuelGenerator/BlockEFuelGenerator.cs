@@ -1,4 +1,4 @@
-﻿﻿using ElectricalProgressive.Utils;
+using ElectricalProgressive.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,14 +11,17 @@ using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
+using MachineConstruct = global::ElectricalProgressive.Construction.BEBehaviorMachineConstruct;
+using MachineConstructAccess = global::ElectricalProgressive.Construction.MachineConstructAccess;
 
 namespace ElectricalProgressive.Content.Block.EFuelGenerator;
 
 /// <summary>
 /// Блок электрического генератора на топливе.
 /// Реализует интерфейсы для работы с жидкостями (ILiquidSink, ILiquidSource).
+/// IMultiBlockInteract — сборка/GUI с любой клетки multiblock.
 /// </summary>
-public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
+public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource, IMultiBlockInteract
 {
     // === Параметры контейнера для жидкости ===
     public float CapacityLitres 
@@ -130,7 +133,10 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
 
     private BlockEntityEFuelGenerator GetBlockEntity(BlockPos pos)
     {
-        return api?.World?.BlockAccessor.GetBlockEntity(pos) as BlockEntityEFuelGenerator;
+        var controllerPos = api?.World != null
+            ? MachineConstructAccess.GetControllerPos(api.World, pos)
+            : pos;
+        return api?.World?.BlockAccessor.GetBlockEntity(controllerPos) as BlockEntityEFuelGenerator;
     }
     
     public virtual void SetContents(ItemStack containerStack, ItemStack[] stacks)
@@ -301,12 +307,25 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
     public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack,
        BlockSelection blockSel, ref string failureCode)
     {
-        //неваляжка - только вертикально
-        // целая ли грань, на которую ставим
-        if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSel.Position, Facing.DownAll))
+        // GUI — полная модель; в мир — всегда incomplete
+        if (itemstack?.Block != null)
         {
-            return false;
+            var side = itemstack.Block.Variant.ContainsKey("side")
+                ? itemstack.Block.Variant["side"]
+                : (Variant.ContainsKey("side") ? Variant["side"] : "south");
+
+            if (itemstack.Block.Variant.ContainsKey("state") &&
+                itemstack.Block.Variant["state"] != "incomplete")
+            {
+                var incomplete = world.GetBlock(CodeWithVariants(["state", "side"],
+                    ["incomplete", side]));
+                if (incomplete != null)
+                    itemstack = new ItemStack(incomplete);
+            }
         }
+
+        if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSel.Position, Facing.DownAll))
+            return false;
 
         return base.TryPlaceBlock(world, byPlayer, itemstack, blockSel, ref failureCode);
     }
@@ -349,6 +368,60 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
         IPlayer byPlayer,
         BlockSelection blockSel)
     {
+        if (blockSel is null)
+            return false;
+
+        if (!world.Claims.TryAccess(byPlayer, blockSel.Position, EnumBlockAccessFlags.Use))
+            return false;
+
+        var controllerPos = MachineConstructAccess.GetControllerPos(world, blockSel.Position);
+        return HandleInteract(world, byPlayer, controllerPos, blockSel);
+    }
+
+    public bool MBOnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel,
+        Vec3i offsetInv)
+    {
+        if (!world.Claims.TryAccess(byPlayer, blockSel.Position, EnumBlockAccessFlags.Use))
+            return false;
+
+        var controllerPos = MachineConstructAccess.GetControllerPos(blockSel.Position, offsetInv);
+        return HandleInteract(world, byPlayer, controllerPos, blockSel);
+    }
+
+    private bool HandleInteract(IWorldAccessor world, IPlayer byPlayer, BlockPos controllerPos,
+        BlockSelection blockSel)
+    {
+        blockSel.Block = this;
+
+        // 1) Сборка MachineConstruct (с любой клетки multiblock)
+        if (MachineConstructAccess.TryConstructInteract(world, byPlayer, controllerPos))
+            return true;
+
+        var be = world.BlockAccessor.GetBlockEntity(controllerPos) as BlockEntityEFuelGenerator;
+        var construct = be?.GetBehavior<MachineConstruct>();
+        if (construct != null && construct.HasConstruction && !construct.IsReady)
+        {
+            if (world.Api is ICoreClientAPI capi)
+            {
+                capi.TriggerIngameError(this, "incomplete",
+                    Lang.Get("electricalprogressivebasics:efuelgenerator-structure-incomplete"));
+            }
+
+            return true;
+        }
+
+        if (be != null && !be.StructureComplete)
+        {
+            if (world.Api is ICoreClientAPI capi)
+            {
+                capi.TriggerIngameError(this, "incomplete",
+                    Lang.Get("electricalprogressivebasics:efuelgenerator-structure-incomplete"));
+            }
+
+            return true;
+        }
+
+        // 2) Жидкости / GUI (как раньше, но BE на controllerPos)
         ItemSlot activeHotbarSlot = byPlayer.InventoryManager.ActiveHotbarSlot;
         if (!activeHotbarSlot.Empty)
         {
@@ -362,7 +435,8 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
             }
         }
         if (activeHotbarSlot.Empty || !(activeHotbarSlot.Itemstack.Collectible is ILiquidInterface))
-            return base.OnBlockInteractStart(world, byPlayer, blockSel);
+            return OpenGuiOrBase(world, byPlayer, blockSel, controllerPos);
+
         CollectibleObject collectible = activeHotbarSlot.Itemstack.Collectible;
         bool shiftKey = byPlayer.WorldData.EntityControls.ShiftKey;
         bool ctrlKey = byPlayer.WorldData.EntityControls.CtrlKey;
@@ -373,7 +447,7 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
                 return false;
             ItemStack content = objLso.GetContent(activeHotbarSlot.Itemstack);
             float desiredLitres = ctrlKey ? objLso.TransferSizeLitres : objLso.CapacityLitres;
-            int moved = this.TryPutLiquid(blockSel.Position, content, desiredLitres);
+            int moved = this.TryPutLiquid(controllerPos, content, desiredLitres);
             if (moved > 0)
             {
                 this.SplitStackAndPerformAction((Entity) byPlayer.Entity, activeHotbarSlot, (System.Func<ItemStack, int>) (stack =>
@@ -390,31 +464,48 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
         {
             if (!objLsi.AllowHeldLiquidTransfer)
                 return false;
-            ItemStack owncontentStack = this.GetContent(blockSel.Position);
+            ItemStack owncontentStack = this.GetContent(controllerPos);
             if (owncontentStack == null)
-                return base.OnBlockInteractStart(world, byPlayer, blockSel);
+                return OpenGuiOrBase(world, byPlayer, blockSel, controllerPos);
             ItemStack contentStack = owncontentStack.Clone();
             float litres = shiftKey ? objLsi.TransferSizeLitres : objLsi.CapacityLitres;
             int num = this.SplitStackAndPerformAction((Entity) byPlayer.Entity, activeHotbarSlot, (System.Func<ItemStack, int>) (stack => objLsi.TryPutLiquid(stack, owncontentStack, litres)));
             if (num > 0)
             {
-                this.TryTakeContent(blockSel.Position, num);
+                this.TryTakeContent(controllerPos, num);
                 this.DoLiquidMovedEffects(byPlayer, contentStack, num, BlockLiquidContainerBase.EnumLiquidDirection.Fill);
                 return true;
             }
         }
+        return OpenGuiOrBase(world, byPlayer, blockSel, controllerPos);
+    }
+
+    private bool OpenGuiOrBase(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel,
+        BlockPos controllerPos)
+    {
+        var be = world.BlockAccessor.GetBlockEntity(controllerPos);
+        if (be is BlockEntityOpenableContainer openable)
+        {
+            openable.OnPlayerRightClick(byPlayer, blockSel);
+            return true;
+        }
+
         return base.OnBlockInteractStart(world, byPlayer, blockSel);
     }
-    
 
-    public override ItemStack[] GetDrops(IWorldAccessor world, BlockPos pos, IPlayer byPlayer,
-        float dropQuantityMultiplier = 1)
-    {
-        return [OnPickBlock(world, pos)];
-    }
+    // Дропы — через BlockBehaviorMachineConstruct (PreventSubsequent)
+    // public override ItemStack[] GetDrops — не переопределяем
 
     public override WorldInteraction[] GetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection selection, IPlayer forPlayer)
     {
+        var beh = MachineConstructAccess.GetBehavior(world, selection.Position);
+        if (beh != null && beh.HasConstruction && !beh.IsReady)
+        {
+            var help = beh.GetInteractionHelp(world, forPlayer);
+            if (help is { Length: > 0 })
+                return help;
+        }
+
         return _interactions;
     }
 
@@ -423,6 +514,8 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
         base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + (MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
+        dsc.AppendLine();
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:efuelgenerator-structure-hint"));
         
         // Информация о жидкости
         float capacity = CapacityLitres;
@@ -447,6 +540,50 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource
 
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:Liquid_capacity", capacity));
     }
+
+    #region IMultiBlockInteract
+
+    public bool MBDoPartialSelection(IWorldAccessor world, BlockPos pos, Vec3i offset) => false;
+
+    public bool MBOnBlockInteractStep(float secondsUsed, IWorldAccessor world, IPlayer byPlayer,
+        BlockSelection blockSel, Vec3i offset) => false;
+
+    public void MBOnBlockInteractStop(float secondsUsed, IWorldAccessor world, IPlayer byPlayer,
+        BlockSelection blockSel, Vec3i offset)
+    {
+    }
+
+    public bool MBOnBlockInteractCancel(float secondsUsed, IWorldAccessor world, IPlayer byPlayer,
+        BlockSelection blockSel, EnumItemUseCancelReason cancelReason, Vec3i offset) => true;
+
+    public ItemStack MBOnPickBlock(IWorldAccessor world, BlockPos pos, Vec3i offset)
+    {
+        var controllerPos = MachineConstructAccess.GetControllerPos(pos, offset);
+        foreach (var bh in BlockBehaviors)
+        {
+            var h = EnumHandling.PassThrough;
+            var stack = bh.OnPickBlock(world, controllerPos, ref h);
+            if (h != EnumHandling.PassThrough && stack != null)
+                return stack;
+        }
+
+        return OnPickBlock(world, controllerPos);
+    }
+
+    public WorldInteraction[] MBGetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection blockSel,
+        IPlayer forPlayer, Vec3i offset)
+    {
+        var controllerPos = MachineConstructAccess.GetControllerPos(blockSel.Position, offset);
+        var sel = blockSel.Clone();
+        sel.Position = controllerPos;
+        return GetPlacedBlockInteractionHelp(world, sel, forPlayer);
+    }
+
+    public BlockSounds MBGetSounds(IBlockAccessor blockAccessor, BlockSelection blockSel, ItemStack stack,
+        Vec3i offset) =>
+        Sounds;
+
+    #endregion
 
     #endregion
 }

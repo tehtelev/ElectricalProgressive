@@ -1,4 +1,4 @@
-﻿﻿using ElectricalProgressive.Utils;
+using ElectricalProgressive.Utils;
 using System;
 using System.Text;
 using Vintagestory.API.Client;
@@ -8,6 +8,7 @@ using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Server;
 using Vintagestory.GameContent;
+using MachineConstruct = global::ElectricalProgressive.Construction.BEBehaviorMachineConstruct;
 
 namespace ElectricalProgressive.Content.Block.EFuelGenerator;
 
@@ -97,10 +98,25 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
         }
     }
     
+    /// <summary>Сборка MachineConstruct завершена / formed.</summary>
+    public bool StructureComplete
+    {
+        get
+        {
+            var construct = GetBehavior<MachineConstruct>();
+            if (construct != null && construct.HasConstruction)
+                return construct.IsReady;
+            return true;
+        }
+    }
+
     public float Power
     {
         get
         {
+            if (!StructureComplete)
+                return 0f;
+
             var envTemp = EnvironmentTemperature();
             bool hasValidLiquid = !WaterSlot.Empty && IsCurrentLiquidAllowed;
             
@@ -561,6 +577,9 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
     
     public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
     {
+        if (!StructureComplete)
+            return true;
+
         if (Api.Side == EnumAppSide.Client)
         {
             toggleInventoryDialogClient(byPlayer, () =>

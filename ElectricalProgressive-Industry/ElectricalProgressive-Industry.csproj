@@ -7,14 +7,21 @@
         <RootNamespace>ElectricalProgressive</RootNamespace>
     </PropertyGroup>
     <ItemGroup>
-      <Reference Include="ElectricalProgressive-Core">
-        <HintPath>..\Releases\electricalprogressivecore\ElectricalProgressive-Core.dll</HintPath>
-        <Private>False</Private>
-      </Reference>
-      <Reference Include="ElectricalProgressive-Basics">
-        <HintPath>..\Releases\electricalprogressivebasics\ElectricalProgressive-Basics.dll</HintPath>
-        <Private>False</Private>
-      </Reference>
+      <!-- ProjectReference: при F5/Build Industry сначала соберутся Core и Basics -->
+      <ProjectReference Include="..\ElectricalProgressive-Core\ElectricalProgressive-Core.csproj">
+        <Private>false</Private>
+      </ProjectReference>
+      <ProjectReference Include="..\ElectricalProgressive-Basics\ElectricalProgressive-Basics.csproj">
+        <Private>false</Private>
+      </ProjectReference>
+    </ItemGroup>
+    <ItemGroup>
+      <!-- Какие моды копировать рядом в bin/.../Mods/ для запуска -->
+      <DependentMod Include="ElectricalProgressive-Core" FolderName="core" />
+      <DependentMod Include="ElectricalProgressive-Basics" FolderName="basics" />
+    </ItemGroup>
+    <Import Project="..\build\CopyDependentMods.targets" />
+    <ItemGroup>
         <Reference Include="protobuf-net">
             <HintPath>$(VINTAGE_STORY)/Lib/protobuf-net.dll</HintPath>
             <Private>False</Private>

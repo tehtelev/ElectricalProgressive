@@ -7,6 +7,13 @@
         <RootNamespace>ElectricalProgressive</RootNamespace>
     </PropertyGroup>
     <ItemGroup>
+      <ProjectReference Include="..\ElectricalProgressive-Core\ElectricalProgressive-Core.csproj">
+        <Private>false</Private>
+      </ProjectReference>
+      <DependentMod Include="ElectricalProgressive-Core" FolderName="core" />
+    </ItemGroup>
+    <Import Project="..\build\CopyDependentMods.targets" />
+    <ItemGroup>
         <Reference Include="protobuf-net">
             <HintPath>$(VINTAGE_STORY)/Lib/protobuf-net.dll</HintPath>
             <Private>False</Private>
@@ -29,10 +36,6 @@
         </Reference>
       <Reference Include="VSSurvivalLib">
         <HintPath>$(VINTAGE_STORY)/VintagestoryLib.dll</HintPath>
-        <Private>False</Private>
-      </Reference>
-      <Reference Include="ElectricalProgressive-Core">
-        <HintPath>..\Releases\electricalprogressivecore\ElectricalProgressive-Core.dll</HintPath>
         <Private>False</Private>
       </Reference>
 		<Reference Include="cairo-sharp">

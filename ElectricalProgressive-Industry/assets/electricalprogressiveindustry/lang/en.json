@@ -6,6 +6,22 @@
   "block-handbooktitle-ecentrifuge": "Usage",
   "block-handbooktext-ecentrifuge": "Allows grinding and processing all perishable items/foods directly into compost. The amount of compost obtained is half that of the vanilla method. Also supports custom processing recipes, which will be displayed in the description of the processor and the item itself.<br>Supports automatic loading and unloading via hoppers.",
 
+  "block-erecycler-*": "Recycler",
+  "block-handbooktitle-erecycler": "Usage",
+  "block-handbooktext-erecycler": "Multiblock recycler (2×2×2), 32 V. Processes perishables into compost and custom recipes; hoppers supported.",
+
+  "erecycler-structure-incomplete": "Recycler is not assembled",
+  "erecycler-structure-hint": "RMB: 8 iron + 2 copper plates → switch + 4 coils → 2 rotors + 16 copper 128 V wires.",
+  "erecycler-handbook-place-controller": "Place the controller",
+  "erecycler-construct-frame": "Plating: 8 iron + 2 copper plates",
+  "erecycler-construct-coils": "Electrics: switch + 4 copper coils",
+  "erecycler-construct-rotors": "Drive: 2 rotors + 16 copper 128 V wires",
+
+  "construction-handbook-assembly": "Assembly",
+  "construction-handbook-assembly-hint": "Right-click the placed controller while holding materials (like the water wheel):",
+  "construction-handbook-step": "Step {0}",
+  "construction-handbook-result": "finished machine",
+
   "block-ehammer-*": "Auto-Hammer",
   "block-handbooktitle-ehammer": "Usage",
   "block-handbooktext-ehammer": "Simplifies and automates work on the anvil. There is a chance to obtain additional materials when processing.<br>Supports automatic loading and unloading via hoppers.",
@@ -18,13 +34,33 @@
   "block-handbooktitle-edrawing": "Usage",
   "block-handbooktext-edrawing": "Allows creating certain items by forcing metal through dies, drawing the metal into the desired shape.<br>Supports automatic loading and unloading via hoppers.",
 
+  "block-ecrusher-*": "Electric Crusher",
+  "block-handbooktitle-ecrusher": "Usage",
+  "block-handbooktext-ecrusher": "Multiblock crusher (2×2×2), 128 V. Crushes ore with bonus outputs; hoppers supported.",
+
+  "ecrusher-structure-incomplete": "Crusher is not assembled",
+  "ecrusher-structure-complete": "Crusher assembled",
+  "ecrusher-structure-hint": "Right-click the controller with materials: 5 iron + 2 copper plates.",
+  "ecrusher-structure-hint-short": "RMB with materials — assemble (see block hints)",
+  "ecrusher-formed-hint": "Assembled 2×2×2 crusher.",
+  "ecrusher-construct-frame": "Install iron frame",
+  "ecrusher-construct-rollers": "Install copper rollers",
+
+  "ecrusher-handbook-assembly": "Assembly",
+  "ecrusher-handbook-assembly-hint": "Right-click the placed controller while holding materials (like the water wheel):",
+  "ecrusher-handbook-step": "Step {0}",
+  "ecrusher-handbook-place-controller": "Place the controller",
+  "ecrusher-handbook-result": "finished crusher",
+
   "game:ewoodcutter-title-gui": "Electric Woodcutter",
   "block-ewoodcutter-normal": "Electric Woodcutter",
   "block-ewoodcutter-normal-burned": "Electric Woodcutter (Burned)",
   "game:ecentrifuge-title-gui": "Processor",
+  "game:erecycler-title-gui": "Recycler",
   "game:ehammer-title-gui": "Auto-Hammer",
   "game:epress-title-gui": "Auto-Press",
   "game:edrawing-title-gui": "Drawing Machine",
+  "game:ecrusher-title-gui": "Electric Crusher",
 
   "block-pressform-axe": "Axe Press Mold",
   "block-pressform-pickaxe": "Pickaxe Press Mold",

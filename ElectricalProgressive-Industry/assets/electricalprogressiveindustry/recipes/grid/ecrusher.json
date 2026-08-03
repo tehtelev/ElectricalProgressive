@@ -11,7 +11,7 @@
       },
       "B": {
         "type": "item",
-        "code": "game:metalplate-tinbronze",
+        "code": "game:metalplate-steel",
         "quantity": 1
       },
       "H": {
@@ -23,7 +23,7 @@
     },
     "output": {
       "type": "block",
-      "code": "electricalprogressiveindustry:erecycler-incomplete-north",
+      "code": "electricalprogressiveindustry:ecrusher-incomplete-north",
       "quantity": 1
     }
   }

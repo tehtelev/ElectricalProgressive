@@ -18,6 +18,10 @@
   "block-handbooktitle-edrawing": "Použití",
   "block-handbooktext-edrawing": "Umožňuje vytvářet určité předměty protlačováním kovu přes tažnice a tažením do požadovaného tvaru.<br>Podporuje automatické nakládání a vykládání pomocí násypek.",
 
+  "block-ecrusher-*": "Elektrický drtič",
+  "block-handbooktitle-ecrusher": "Použití",
+  "block-handbooktext-ecrusher": "Víceblokový stroj 2×2×2. Drtí rudu a další materiály a dává více nugetů než ruční zpracování. Podporuje bonusové výstupy podle receptur.<br>Podporuje automatické nakládání a vykládání pomocí násypek. Napájení: 128 V.",
+
   "game:ewoodcutter-title-gui": "Elektrický dřevorubec",
   "block-ewoodcutter-normal": "Elektrický dřevorubec",
   "block-ewoodcutter-normal-burned": "Elektrický dřevorubec (Spálený)",
@@ -25,6 +29,7 @@
   "game:ehammer-title-gui": "Automatické kladivo",
   "game:epress-title-gui": "Automatický lis",
   "game:edrawing-title-gui": "Tahací stroj",
+  "game:ecrusher-title-gui": "Elektrický drtič",
 
   "block-pressform-axe": "Lisovací forma sekery",
   "block-pressform-pickaxe": "Lisovací forma krumpáče",

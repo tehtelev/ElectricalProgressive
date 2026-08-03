@@ -18,6 +18,10 @@
   "block-handbooktitle-edrawing": "Выкарыстанне",
   "block-handbooktext-edrawing": "Дазваляе ствараць пэўныя прадметы шляхам працягвання металу праз валакі, надаючы яму патрэбную форму.<br>Падтрымлівае аўтаматычную загрузку і выгрузку праз жалабы.",
 
+  "block-ecrusher-*": "Электрычная драбiлка",
+  "block-handbooktitle-ecrusher": "Выкарыстанне",
+  "block-handbooktext-ecrusher": "Шматблочная машына 2×2×2. Драбніць руду і іншыя матэрыялы, даючы больш самародкаў, чым пры ручной апрацоўцы. Падтрымлівае бонусны выхад па рэцэптах.<br>Падтрымлівае аўтаматычную загрузку і выгрузку праз жалабы. Сілкаванне: 128 В.",
+
   "game:ewoodcutter-title-gui": "Электрычны дрэвасек",
   "block-ewoodcutter-normal": "Электрычны дрэвасек",
   "block-ewoodcutter-normal-burned": "Электрычны дрэвасек (згарэлы)",
@@ -25,6 +29,7 @@
   "game:ehammer-title-gui": "Аўтамалат",
   "game:epress-title-gui": "Аўтапрэс",
   "game:edrawing-title-gui": "Валачыльны стан",
+  "game:ecrusher-title-gui": "Электрычная драбiлка",
 
   "block-pressform-axe": "Форма для прэсавання сякеры",
   "block-pressform-pickaxe": "Форма для прэсавання кірхі",

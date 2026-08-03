@@ -18,6 +18,10 @@
   "block-handbooktitle-edrawing": "Uso",
   "block-handbooktext-edrawing": "Permite criar certos itens forçando o metal através de fieiras, esticando-o na forma desejada.<br>Suporta carregamento e descarregamento automático via funis.",
 
+  "block-ecrusher-*": "Britador elétrico",
+  "block-handbooktitle-ecrusher": "Uso",
+  "block-handbooktext-ecrusher": "Máquina multibloco 2×2×2. Tritura minério e outros materiais, rendendo mais pepitas do que o processamento manual. Suporta saídas bônus via receitas.<br>Suporta carregamento e descarregamento automático via funis. Alimentação: 128 V.",
+
   "game:ewoodcutter-title-gui": "Cortador de Madeira Elétrico",
   "block-ewoodcutter-normal": "Cortador de Madeira Elétrico",
   "block-ewoodcutter-normal-burned": "Cortador de Madeira Elétrico (Queimado)",
@@ -25,6 +29,7 @@
   "game:ehammer-title-gui": "Martelo Automático",
   "game:epress-title-gui": "Prensa Automática",
   "game:edrawing-title-gui": "Máquina de Trefilar",
+  "game:ecrusher-title-gui": "Britador elétrico",
 
   "block-pressform-axe": "Molde de Prensa para Machado",
   "block-pressform-pickaxe": "Molde de Prensa para Picareta",

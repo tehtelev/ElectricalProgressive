@@ -1,4 +1,5 @@
-﻿using ElectricalProgressive.Interface;
+﻿using ElectricalProgressive.Construction;
+using ElectricalProgressive.Interface;
 using ElectricalProgressive.Patch;
 using ElectricalProgressive.Utils;
 using HarmonyLib;
@@ -115,6 +116,17 @@ namespace ElectricalProgressive
 
             harmony3 = new Harmony("electricalprogressive.ShapeElementPatch");
             ShapeElementPatch.RegisterPatch(harmony3, api);
+
+            MachineConstructSystem.Register(api);
+        }
+
+        /// <summary>
+        /// Автоподключение MachineConstruct к блокам с attributes.construction.levels.
+        /// </summary>
+        public override void AssetsFinalize(ICoreAPI api)
+        {
+            base.AssetsFinalize(api);
+            MachineConstructSystem.InjectIntoBlocks(api);
         }
 
 
@@ -225,6 +237,8 @@ namespace ElectricalProgressive
 
             RegisterAltKeys();
 
+            // Сборка (construction.levels) в handbook — для Basics, Industry и любых модов на Core
+            HandbookConstructionPatch.Apply(api);
 
             //listenerId2 = capi.Event.RegisterGameTickListener(this.OnGameTickClient, tickTimeMs);
         }

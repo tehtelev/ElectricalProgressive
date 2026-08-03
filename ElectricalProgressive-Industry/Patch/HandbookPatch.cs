@@ -74,6 +74,7 @@ public class HandbookPatch
                 var components = new List<RichTextComponentBase>(__result);
                 var haveText = components.Count > 0;
 
+                // Секция «Сборка» — в Core (HandbookConstructionPatch), для Basics + Industry
                 CheckAndAddRecipes(components, capi, stack, openDetailPageFor, ref haveText);
 
                 __result = components.ToArray();
@@ -408,7 +409,9 @@ public class HandbookPatch
             ItemStack stack,
             ActionConsumable<string> openDetailPageFor)
         {
-            var component = new ItemstackTextComponent(capi, stack, ItemSize, 10.0, EnumFloat.Inline,
+            // Не просвечивать сквозь креатив / GUI поверх handbook
+            var component = new global::ElectricalProgressive.Patch.HandbookItemstackTextComponent(
+                capi, stack, ItemSize, 10.0, EnumFloat.Inline,
                 onStackClicked: (cs) => openDetailPageFor(GuiHandbookItemStackPage.PageCodeForStack(cs)))
             {
                 ShowStacksize = true,

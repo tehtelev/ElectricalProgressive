@@ -18,6 +18,10 @@
   "block-handbooktitle-edrawing": "Utilisation",
   "block-handbooktext-edrawing": "Permet de créer certains objets en forçant le métal à travers des filières, pour lui donner la forme souhaitée.<br>Prend en charge le chargement et le déchargement automatiques via des entonnoirs.",
 
+  "block-ecrusher-*": "Concasseur électrique",
+  "block-handbooktitle-ecrusher": "Utilisation",
+  "block-handbooktext-ecrusher": "Machine multibloc 2×2×2. Broie le minerai et d'autres matériaux, produisant plus de pépites qu'un traitement manuel. Prend en charge les sorties bonus via les recettes.<br>Prend en charge le chargement et le déchargement automatiques via des entonnoirs. Alimentation : 128 V.",
+
   "game:ewoodcutter-title-gui": "Bûcheron électrique",
   "block-ewoodcutter-normal": "Bûcheron électrique",
   "block-ewoodcutter-normal-burned": "Bûcheron électrique (Brûlé)",
@@ -25,6 +29,7 @@
   "game:ehammer-title-gui": "Marteau automatique",
   "game:epress-title-gui": "Presse automatique",
   "game:edrawing-title-gui": "Machine à étirer",
+  "game:ecrusher-title-gui": "Concasseur électrique",
 
   "block-pressform-axe": "Moule de presse pour hache",
   "block-pressform-pickaxe": "Moule de presse pour pioche",

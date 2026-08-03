@@ -18,6 +18,15 @@
   "block-handbooktitle-edrawing": "Verwendung",
   "block-handbooktext-edrawing": "Ermöglicht die Herstellung bestimmter Gegenstände, indem Metall durch Ziehsteine gepresst wird, um es in die gewünschte Form zu ziehen.<br>Unterstützt automatisches Laden und Entladen über Trichter.",
 
+  "block-ecrusher-*": "Elektrischer Brecher (Controller)",
+  "block-handbooktitle-ecrusher": "Verwendung",
+  "block-handbooktext-ecrusher": "Controller für den Brecher-Multiblock (Aufbau wie der Zementierofen). 2×2×2: Controller + 5 Eisen-Metallblöcke + 2 Kupfer-Metallblöcke (Platzhalter statt Rotoren). Shift+RMB = Schema. Funktioniert nur vollständig gebaut.",
+
+  "ecrusher-structure-incomplete": "Brecherstruktur unvollständig",
+  "ecrusher-structure-complete": "Brecherstruktur vollständig",
+  "ecrusher-structure-hint": "2×2×2: 5 Eisen- + 2 Kupfer-Metallblöcke. Shift+RMB für Schema.",
+  "ecrusher-structure-hint-short": "Shift+RMB — Aufbauschema anzeigen",
+
   "game:ewoodcutter-title-gui": "Elektro-Holzfäller",
   "block-ewoodcutter-normal": "Elektro-Holzfäller",
   "block-ewoodcutter-normal-burned": "Elektro-Holzfäller (Verbrannt)",
@@ -25,6 +34,7 @@
   "game:ehammer-title-gui": "Auto-Hammer",
   "game:epress-title-gui": "Auto-Presse",
   "game:edrawing-title-gui": "Ziehmaschine",
+  "game:ecrusher-title-gui": "Elektrischer Brecher",
 
   "block-pressform-axe": "Axt Pressform",
   "block-pressform-pickaxe": "Spitzhacken Pressform",

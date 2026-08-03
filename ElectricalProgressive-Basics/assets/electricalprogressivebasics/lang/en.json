@@ -400,7 +400,14 @@
   "efuelgenerator": "Steam Fuel Generator",
   "block-efuelgenerator-*": "Steam Fuel Generator",
   "block-handbooktitle-efuelgenerator": "Usage",
-  "block-handbooktext-efuelgenerator": "Allows generating electricity using heat from burning combustible materials. Requires liquid to operate. Can be filled manually or via liquid pipes.",
+  "block-handbooktext-efuelgenerator": "Multiblock steam generator (2×2×3), 128 V. Generates power from burning fuel; needs water. Fill manually or via liquid pipes.",
+
+  "efuelgenerator-structure-incomplete": "Generator is not assembled",
+  "efuelgenerator-structure-hint": "RMB: 8 iron + 4 copper plates → 4 coils + 2 rotors → tier3 stator + 16 copper 128 V wires.",
+  "efuelgenerator-handbook-place-controller": "Place the controller",
+  "efuelgenerator-construct-frame": "Plating: 8 iron + 4 copper plates",
+  "efuelgenerator-construct-core": "Mechanics: 4 coils + 2 rotors",
+  "efuelgenerator-construct-finish": "Finish: tier3 stator + 16 copper 128 V wires",
 
   "electricalprogressivebasics:empty": "Empty",
   "electricalprogressivebasics:liquid": "Liquid: ",
