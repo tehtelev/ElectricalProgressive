@@ -1,4 +1,4 @@
-﻿{
+{
   "code": "etermogenerator",
   "class": "BlockETermoGenerator",
   "entityClass": "BlockEntityETermoGenerator",
@@ -8,9 +8,11 @@
     {
       "name": "HorizontalOrientable",
       "properties": {
-        "dropBlockFace": "south"
+        "dropBlockFace": "south",
+        "handleDrop": false
       }
     },
+    { "name": "BlockEntityInteract" },
     {
       "name": "Multiblock",
       "propertiesByType": {
@@ -18,58 +20,34 @@
           "sizex": 3,
           "sizey": 3,
           "sizez": 3,
-          "cposition": {
-            "x": 2,
-            "y": 0,
-            "z": 0
-          }
+          "cposition": { "x": 2, "y": 0, "z": 0 }
         },
         "*-east": {
           "sizex": 3,
           "sizey": 3,
           "sizez": 3,
-          "cposition": {
-            "x": 2,
-            "y": 0,
-            "z": 2
-          }
+          "cposition": { "x": 2, "y": 0, "z": 2 }
         },
         "*-south": {
           "sizex": 3,
           "sizey": 3,
           "sizez": 3,
-          "cposition": {
-            "x": 0,
-            "y": 0,
-            "z": 2
-          }
+          "cposition": { "x": 0, "y": 0, "z": 2 }
         },
         "*-west": {
           "sizex": 3,
           "sizey": 3,
           "sizez": 3,
-          "cposition": {
-            "x": 0,
-            "y": 0,
-            "z": 0
-          }
+          "cposition": { "x": 0, "y": 0, "z": 0 }
         }
       }
     }
   ],
 
-
-
   "entityBehaviors": [
-    {
-      "name": "Animatable"
-    },
-    {
-      "name": "BEBehaviorTermoEGenerator"
-    },
-    {
-      "name": "ElectricalProgressive"
-    }
+    { "name": "Animatable" },
+    { "name": "BEBehaviorTermoEGenerator" },
+    { "name": "ElectricalProgressive" }
   ],
 
   "attributes": {
@@ -80,7 +58,7 @@
     "maxCurrent": 1024.0,
     "isolated": true,
     "isolatedEnvironment": true,
-    "maxHeat": 10.0, // достигает при 1300 градусах
+    "maxHeat": 10.0,
     "handbook": {
       "groupBy": [ "etermogenerator-*" ],
       "extraSections": [
@@ -89,74 +67,143 @@
           "text": "electricalprogressivebasics:block-handbooktext-etermogenerator"
         }
       ]
+    },
+    "construction": {
+      "brokenDropsRatio": 1,
+      "levels": [
+        {
+          "shape": "block/termogenerator/termogenerator_base",
+          "actionLangCode": "electricalprogressivebasics:etermogenerator-handbook-place-controller"
+        },
+        {
+          "shape": "block/termogenerator/termogenerator_base2",
+          "actionLangCode": "electricalprogressivebasics:etermogenerator-construct-frame",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "game:burnedbrick-fire",
+              "quantity": 16
+            },
+            {
+              "type": "item",
+              "code": "game:metalplate-iron",
+              "quantity": 2
+            }
+          ]
+        },
+        {
+          "shape": "block/termogenerator/termogenerator_base3",
+          "actionLangCode": "electricalprogressivebasics:etermogenerator-construct-core",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "game:burnedbrick-fire",
+              "quantity": 8
+            },
+            {
+              "type": "item",
+              "code": "game:metalplate-copper",
+              "quantity": 2
+            }
+          ]
+        },
+        {
+          "shape": "block/termogenerator/termogenerator",
+          "actionLangCode": "electricalprogressivebasics:etermogenerator-construct-finish",
+          "requireStacks": [
+            {
+              "type": "block",
+              "code": "electricalprogressivebasics:ecable-32v-copper-single-part",
+              "quantity": 2
+            },
+            {
+              "type": "item",
+              "code": "electricalprogressivebasics:coil",
+              "quantity": 2
+            }
+          ],
+          "formMachine": true
+        }
+      ]
     }
   },
 
   "attributesbytype": {
     "*-north": {
-      "particlesOffsetPos": [
-        [ -0.6, 3, 1.7 ]
-      ]
+      "particlesOffsetPos": [ [ -0.6, 3, 1.7 ] ]
     },
     "*-east": {
-      "particlesOffsetPos": [
-        [ -0.7, 3, -0.6 ]
-      ]
+      "particlesOffsetPos": [ [ -0.7, 3, -0.6 ] ]
     },
     "*-south": {
-      "particlesOffsetPos": [
-        [ 1.7, 3, -0.6 ]
-      ]
+      "particlesOffsetPos": [ [ 1.7, 3, -0.6 ] ]
     },
     "*-west": {
-      "particlesOffsetPos": [
-        [ 1.7, 3, 1.5 ]
-      ]
+      "particlesOffsetPos": [ [ 1.7, 3, 1.5 ] ]
     }
   },
 
-
   "creativeinventory": {
-    "general": [ "*-south" ],
-    "electricity": [ "*-south" ]
+    "general": [ "*-incomplete-south" ],
+    "electricity": [ "*-incomplete-south" ]
   },
 
   "variantgroups": [
+    {
+      "code": "state",
+      "states": [ "incomplete", "formed" ]
+    },
     {
       "code": "side",
       "loadFromProperties": "abstract/horizontalorientation"
     }
   ],
 
-
-
-
   "shapebytype": {
-    "*-north": {
+    "*-incomplete-north": {
+      "base": "block/termogenerator/termogenerator_base",
+      "rotateY": 0
+    },
+    "*-incomplete-east": {
+      "base": "block/termogenerator/termogenerator_base",
+      "rotateY": 270
+    },
+    "*-incomplete-south": {
+      "base": "block/termogenerator/termogenerator_base",
+      "rotateY": 180
+    },
+    "*-incomplete-west": {
+      "base": "block/termogenerator/termogenerator_base",
+      "rotateY": 90
+    },
+    "*-formed-north": {
       "base": "block/termogenerator/termogenerator",
       "rotateY": 0
     },
-    "*-east": {
+    "*-formed-east": {
       "base": "block/termogenerator/termogenerator",
       "rotateY": 270
     },
-    "*-south": {
+    "*-formed-south": {
       "base": "block/termogenerator/termogenerator",
       "rotateY": 180
     },
-    "*-west": {
+    "*-formed-west": {
       "base": "block/termogenerator/termogenerator",
       "rotateY": 90
     }
   },
 
-
+  "shapeInventory": {
+    "base": "block/termogenerator/termogenerator",
+    "rotateY": 180
+  },
 
   "blockmaterial": "Stone",
-  "emitSideAo": { // Ambient Oclusion
+  "emitSideAo": {
     "all": false
   },
-  "sideAo": { // Ambient Oclusion
+  "sideAo": {
     "all": true
   },
   "sidesolid": {

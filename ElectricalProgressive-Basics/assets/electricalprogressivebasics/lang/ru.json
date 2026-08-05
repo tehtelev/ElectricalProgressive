@@ -138,7 +138,14 @@
   "termogen": "Термогенератор",
   "block-etermogenerator-*": "Термоэлектрический генератор",
   "block-handbooktitle-etermogenerator": "Использование",
-  "block-handbooktext-etermogenerator": "Преобразует тепловую энергию в электрическую! Работает на всем, что поддерживает горение. Чем выше температура горения топлива, тем больше будет выходная мощность. Также выходная мощность немного зависит от температуры окружающей среды: чем ниже температура окружающего воздуха, тем больше будет выработка энергии. Сам по себе не работает - сзади требуется установка <a href=\"handbook:\/\/block-electricalprogressivebasics:termoplastini-south\">термоэлектрических пластин<\/a>.<br><br>Может загружаться топливом автоматически с помощью желобов.",
+  "block-handbooktext-etermogenerator": "Многоблочный термогенератор (3×3×3), 32 В. Преобразует тепло в электричество; сзади — <a href=\"handbook://block-electricalprogressivebasics:termoplastini-south\">термоэлектрические пластины</a> (до 10). Топливо — вручную или желобами.",
+
+  "etermogenerator-structure-incomplete": "Термогенератор не собран",
+  "etermogenerator-structure-hint": "Собирается ПКМ ресурсами по этапам.",
+  "etermogenerator-handbook-place-controller": "Поставить контроллер",
+  "etermogenerator-construct-frame": "Этап 2",
+  "etermogenerator-construct-core": "Этап 3",
+  "etermogenerator-construct-finish": "Финал",
 
   "termoplastini": "Термоэлектрические пластины",
   "block-termoplastini-*": "Термоэлектрические пластины",

@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Content.Block.Termoplastini;
+using ElectricalProgressive.Content.Block.Termoplastini;
 using ElectricalProgressive.Utils;
 using System;
 using System.Collections.Generic;
@@ -11,6 +11,7 @@ using Vintagestory.API.MathTools;
 using Vintagestory.API.Server;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
+using MachineConstruct = global::ElectricalProgressive.Construction.BEBehaviorMachineConstruct;
 
 namespace ElectricalProgressive.Content.Block.ETermoGenerator;
 
@@ -101,6 +102,18 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
     public float GenTemp => _genTemp;
 
 
+    /// <summary>Сборка MachineConstruct завершена / formed.</summary>
+    public bool StructureComplete
+    {
+        get
+        {
+            var construct = GetBehavior<MachineConstruct>();
+            if (construct != null && construct.HasConstruction)
+                return construct.IsReady;
+            return true;
+        }
+    }
+
     /// <summary>
     /// Собственно выходная максимальная мощность
     /// </summary>
@@ -108,6 +121,9 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
     {
         get
         {
+            if (!StructureComplete)
+                return 0f;
+
             var envTemp = EnvironmentTemperature(); //температура окружающей среды
             if (Kpd > 0)
             {
@@ -126,21 +142,33 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
     }
 
     /// <summary>
-    /// Подготавливает анимационный утилит для блока, загружая меш и форму из ресурсов
+    /// Подготавливает анимационный утилит: всегда полная модель termogenerator.
+    /// Incomplete ходит по stage-shapes (base/base2/base3) — у них нет корректных
+    /// open/close, а static-кэш _mesh иначе залипает на base после установки контроллера.
     /// </summary>
-    /// <param name="api"></param>
     private void PrepareAnimUtil(ICoreAPI api, string cacheDictKey)
     {
-        if (_mesh == null || _resultingShape == null)
+        if (_mesh != null && _resultingShape != null)
+            return;
+
+        // Полная formed-модель (анимации крышки / work-on)
+        var shapePath = new AssetLocation(Block.Code.Domain,
+            "shapes/block/termogenerator/termogenerator.json");
+        var shape = Shape.TryGet(api, shapePath);
+
+        // Fallback: текущий Block.Shape (если ассет переименован)
+        if (shape == null && Block.Shape?.Base != null)
         {
-            AssetLocation shapePath = Block.Shape.Base.Clone().WithPathPrefixOnce("shapes/")
+            shapePath = Block.Shape.Base.Clone()
+                .WithPathPrefixOnce("shapes/")
                 .WithPathAppendixOnce(".json");
-
-            Shape _shape = Shape.TryGet(api, shapePath);
-
-            _mesh = AnimUtil.CreateMesh(cacheDictKey, _shape, out _resultingShape, null);
-
+            shape = Shape.TryGet(api, shapePath);
         }
+
+        if (shape == null)
+            return;
+
+        _mesh = AnimUtil.CreateMesh(cacheDictKey, shape, out _resultingShape, null);
     }
 
     /// <summary>
@@ -511,20 +539,29 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
 
         
 
-        if (!MeshData.TryGetValue((sizeFuel, Block.Shape.rotateY), out var fuelMesh))
+        var rotY = Block.Shape.rotateY;
+        if (!MeshData.TryGetValue((sizeFuel, rotY), out var fuelMesh))
         {
-            // если есть топливо, то добавляем его в мэш
-            
-            _capi?.Tesselator.TesselateShape(this.Block, Vintagestory.API.Common.Shape.TryGet(Api, "electricalprogressivebasics:shapes/block/termogenerator/toplivo/toplivo-" + sizeFuel + ".json"), out fuelMesh);
+            // локальный mesh топлива (в model space «как south») → поворот как у блока → сдвиг в топку
+            _capi?.Tesselator.TesselateShape(this.Block,
+                Vintagestory.API.Common.Shape.TryGet(Api,
+                    "electricalprogressivebasics:shapes/block/termogenerator/toplivo/toplivo-" + sizeFuel + ".json"),
+                out fuelMesh);
 
-            _capi?.TesselatorManager.ThreadDispose(); //обязательно
+            _capi?.TesselatorManager.ThreadDispose();
 
-            var offset = fuelMeshOffset[Block.Shape.rotateY];
+            if (fuelMesh != null)
+            {
+                fuelMesh = fuelMesh.Clone();
+                // в shape включена south (к люку hatchBase на +Z); крутим как block shape
+                if (rotY != 0)
+                    fuelMesh.Rotate(new Vec3f(0.5f, 0.5f, 0.5f), 0, rotY * GameMath.DEG2RAD, 0);
 
-            fuelMesh =fuelMesh.Clone().Translate(offset.X, offset.Y, offset.Z);
+                if (fuelMeshOffset.TryGetValue(rotY, out var offset) && offset != null)
+                    fuelMesh.Translate(offset.X, offset.Y, offset.Z);
 
-            MeshData.TryAdd((sizeFuel, Block.Shape.rotateY), fuelMesh!);
-            
+                MeshData.TryAdd((sizeFuel, rotY), fuelMesh);
+            }
         }
 
         if (fuelMesh != null)
@@ -715,6 +752,8 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
     /// <returns></returns>
     public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
     {
+        if (!StructureComplete)
+            return true;
 
         // открываем диалоговое окно
         if (this.Api.Side == EnumAppSide.Client)

@@ -19,8 +19,8 @@
 			"faces": {
 				"north": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 13.0, 6.0 ], "glow": 220, "enabled": false },
 				"east": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 13.0, 6.0 ], "glow": 220, "enabled": false },
-				"south": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 13.0, 6.0 ], "glow": 220, "enabled": false },
-				"west": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 13.0, 6.0 ], "glow": 220, "windMode": [-1,-1,-1,-1] },
+				"south": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 13.0, 6.0 ], "glow": 220 },
+				"west": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 13.0, 6.0 ], "glow": 220, "enabled": false },
 				"up": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 13.0, 13.0 ], "glow": 220 },
 				"down": { "texture": "#copper-hot", "uv": [ 0.0, 0.0, 13.0, 13.0 ], "glow": 220, "enabled": false }
 			}

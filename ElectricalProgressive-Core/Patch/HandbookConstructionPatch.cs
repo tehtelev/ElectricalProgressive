@@ -122,13 +122,10 @@ public static class HandbookConstructionPatch
             if (level == null)
                 continue;
 
-            var stepTitle = !string.IsNullOrEmpty(level.ActionLangCode)
-                ? Lang.Get(level.ActionLangCode)
-                : Lang.Get("electricalprogressivecore:construction-handbook-step", i);
-
+            // Только «Шаг N» — материалы видны на иконках requireStacks, без дублирования списком
             components.Add(new ClearFloatTextComponent(capi, RecipeSpacing));
             components.Add(new RichTextComponent(capi,
-                Lang.Get("electricalprogressivecore:construction-handbook-step", i) + ": " + stepTitle + "\n",
+                Lang.Get("electricalprogressivecore:construction-handbook-step", i) + "\n",
                 CairoFont.WhiteSmallText().WithWeight(FontWeight.Bold)));
 
             if (level.RequireStacks == null || level.RequireStacks.Length == 0)

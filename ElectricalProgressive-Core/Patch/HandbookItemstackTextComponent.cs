@@ -42,8 +42,22 @@ public class HandbookItemstackTextComponent : ItemstackTextComponent
 
     public bool TryGetScreenCenter(double renderX, double renderY, out double cx, out double cy)
     {
-        cx = 0;
-        cy = 0;
+        if (!TryGetScreenRect(renderX, renderY, out var x, out var y, out var w, out var h))
+        {
+            cx = 0;
+            cy = 0;
+            return false;
+        }
+
+        cx = x + w * 0.5;
+        cy = y + h * 0.5;
+        return true;
+    }
+
+    /// <summary>Экранный rect иконки (для scissor / visibility).</summary>
+    public bool TryGetScreenRect(double renderX, double renderY, out double x, out double y, out double w, out double h)
+    {
+        x = y = w = h = 0;
 
         var lines = BoundsPerLine;
         if (lines is not { Length: > 0 } || lines[0] == null)
@@ -54,13 +68,17 @@ public class HandbookItemstackTextComponent : ItemstackTextComponent
 
         if (line.Width >= 1 && line.Height >= 1)
         {
-            cx = renderX + line.X + line.Width * 0.5 + offX;
-            cy = renderY + line.Y + line.Height * 0.5 + offY;
+            x = renderX + line.X + offX;
+            y = renderY + line.Y + offY;
+            w = line.Width;
+            h = line.Height;
         }
         else
         {
-            cx = renderX + line.X + size * 0.5 + offX;
-            cy = renderY + line.Y + size * 0.5 + offY;
+            x = renderX + line.X + offX;
+            y = renderY + line.Y + offY;
+            w = size;
+            h = size;
         }
 
         return true;

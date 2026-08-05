@@ -1,15 +1,18 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
-using Vintagestory.API.Client;
-using Vintagestory.API.Common;
-using Vintagestory.GameContent;
+using System.Reflection;
 using HarmonyLib;
+using Vintagestory.API.Client;
+using Vintagestory.GameContent;
 
 namespace ElectricalProgressive.Patch;
 
 /// <summary>
 /// Как в Questbook: 3D-иконки не рисуются внутри richtext RenderInteractiveElements,
 /// а батчатся и рисуются в конце OnRenderGUI handbook — после 2D-панели.
-/// Перекрытие: только Focused не-handbook диалог, если накрывает центр иконки.
+/// Обязательно scissor по clip-viewport handbook (BeginClip), иначе иконки
+/// уезжают за пределы окна при скролле.
 /// </summary>
 public static class HandbookIconDeferred
 {
@@ -36,6 +39,10 @@ public static class HandbookIconDeferred
     private static bool _patched;
     private static ICoreClientAPI? _capi;
 
+    private static FieldInfo? _interactiveDrawOrderField;
+    private static FieldInfo? _clipFlagField;
+    private static Type? _clipType;
+
     public static void EnsurePatched(ICoreClientAPI capi)
     {
         _capi = capi;
@@ -61,7 +68,7 @@ public static class HandbookIconDeferred
         Queue.Add(new Request(component, deltaTime, renderX, renderY, renderZ));
     }
 
-    /// <summary>После 2D handbook — рисуем 3D-иконки (как QuestbookDialog.OnRenderGUI).</summary>
+    /// <summary>После 2D handbook — 3D-иконки внутри scissor clip-области.</summary>
     public static void OnHandbookRendered(GuiDialogHandbook __instance, float deltaTime)
     {
         if (Queue.Count == 0)
@@ -74,8 +81,20 @@ public static class HandbookIconDeferred
             return;
         }
 
+        var clip = TryGetHandbookClipBounds(__instance);
+        var scissorPushed = false;
+
         try
         {
+            if (clip != null)
+            {
+                clip.CalcWorldBounds();
+                // stacking:false — отдельный viewport; иконки ItemstackTextComponent
+                // внутри сами PushScissor(stacking:true) → пересечение с clip
+                capi.Render.PushScissor(clip, stacking: false);
+                scissorPushed = true;
+            }
+
             foreach (var req in Queue)
             {
                 if (req.Component == null)
@@ -84,14 +103,125 @@ public static class HandbookIconDeferred
                 if (IsOccludedByFocusedOverlay(capi, req))
                     continue;
 
-                // Реальный рендер 3D (base ItemstackTextComponent)
+                // За пределами viewport (скролл) — не рисуем и не тратим GPU
+                if (clip != null && !IsIconVisibleInClip(req, clip))
+                    continue;
+
                 req.Component.RenderNow(req.DeltaTime, req.RenderX, req.RenderY, req.RenderZ);
             }
         }
         finally
         {
+            if (scissorPushed)
+            {
+                try
+                {
+                    capi.Render.PopScissor();
+                }
+                catch
+                {
+                    // ignore mismatched stack
+                }
+            }
+
             Queue.Clear();
         }
+    }
+
+    /// <summary>
+    /// Bounds первого GuiElementClip(clip:true) активного composer —
+    /// тот же viewport, что BeginClip у detail/overview handbook.
+    /// </summary>
+    private static ElementBounds? TryGetHandbookClipBounds(GuiDialogHandbook handbook)
+    {
+        try
+        {
+            var composer = handbook.SingleComposer;
+            if (composer == null)
+                return null;
+
+            _interactiveDrawOrderField ??= AccessTools.Field(typeof(GuiComposer), "interactiveElementsInDrawOrder");
+            var list = _interactiveDrawOrderField?.GetValue(composer) as IList;
+            if (list == null || list.Count == 0)
+                return null;
+
+            foreach (var item in list)
+            {
+                if (item is not GuiElement el)
+                    continue;
+
+                var t = el.GetType();
+                if (!IsClipElementType(t))
+                    continue;
+
+                _clipFlagField ??= AccessTools.Field(t, "clip");
+                // clip:true = BeginClip, clip:false = EndClip
+                if (_clipFlagField == null || _clipFlagField.DeclaringType != t)
+                    _clipFlagField = AccessTools.Field(t, "clip");
+
+                if (_clipFlagField == null)
+                    continue;
+
+                if (_clipFlagField.GetValue(el) is not true)
+                    continue;
+
+                var b = el.Bounds;
+                if (b == null)
+                    continue;
+
+                b.CalcWorldBounds();
+                if (b.OuterWidth > 8 && b.OuterHeight > 8)
+                    return b;
+            }
+
+            // fallback: bounds самого composer (диалог целиком, лучше чем ничего)
+            var root = composer.Bounds;
+            if (root != null)
+            {
+                root.CalcWorldBounds();
+                if (root.OuterWidth > 8 && root.OuterHeight > 8)
+                    return root;
+            }
+        }
+        catch
+        {
+            // reflection / API drift
+        }
+
+        return null;
+    }
+
+    private static bool IsClipElementType(Type t)
+    {
+        if (_clipType != null)
+            return t == _clipType || t.IsSubclassOf(_clipType);
+
+        if (t.Name == "GuiElementClip")
+        {
+            _clipType = t;
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>Иконка пересекается с clip (с небольшим запасом).</summary>
+    private static bool IsIconVisibleInClip(Request req, ElementBounds clip)
+    {
+        if (!req.Component.TryGetScreenRect(req.RenderX, req.RenderY, out var x, out var y, out var w, out var h))
+            return false;
+
+        const double pad = 4;
+        var clipL = clip.absX - pad;
+        var clipT = clip.absY - pad;
+        var clipR = clip.absX + clip.OuterWidth + pad;
+        var clipB = clip.absY + clip.OuterHeight + pad;
+
+        var iconR = x + w;
+        var iconB = y + h;
+
+        // AABB intersection
+        return x < clipR && iconR > clipL && y < clipB && iconB > clipT;
     }
 
     /// <summary>
@@ -113,7 +243,6 @@ public static class HandbookIconDeferred
             }
         }
 
-        // Handbook в фокусе или никто — не перекрыто
         if (focused == null || IsHandbookDialog(focused))
             return false;
 
@@ -153,7 +282,6 @@ public static class HandbookIconDeferred
 
         try
         {
-            // PointInside использует absX/absY (экранные)
             return b.PointInside(sx, sy);
         }
         catch
@@ -165,5 +293,5 @@ public static class HandbookIconDeferred
 
     private static bool IsHandbookDialog(GuiDialog dlg) =>
         dlg is GuiDialogHandbook
-        || dlg.GetType().Name.Contains("Handbook", System.StringComparison.OrdinalIgnoreCase);
+        || dlg.GetType().Name.Contains("Handbook", StringComparison.OrdinalIgnoreCase);
 }

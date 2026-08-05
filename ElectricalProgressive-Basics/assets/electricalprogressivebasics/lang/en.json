@@ -138,7 +138,14 @@
   "termogen": "Thermogenerator",
   "block-etermogenerator-*": "Thermoelectric Generator",
   "block-handbooktitle-etermogenerator": "Usage",
-  "block-handbooktext-etermogenerator": "Converts thermal energy into electrical energy! Runs on anything that supports combustion. The higher the combustion temperature of the fuel, the greater the output power. Output power also slightly depends on the ambient temperature: the lower the ambient air temperature, the greater the energy generation. It does not work by itself - it requires <a href=\"handbook:\/\/block-electricalprogressivebasics:termoplastini-south\">thermoelectric plates<\/a> installed at the back.<br><br>Can be loaded with fuel automatically using hoppers.",
+  "block-handbooktext-etermogenerator": "Multiblock thermoelectric generator (3×3×3), 32 V. Converts heat to electricity; needs <a href=\"handbook://block-electricalprogressivebasics:termoplastini-south\">thermoelectric plates</a> at the back (up to 10). Fuel manually or via hoppers.",
+
+  "etermogenerator-structure-incomplete": "Thermogenerator is not assembled",
+  "etermogenerator-structure-hint": "Right-click with materials to assemble (see stages).",
+  "etermogenerator-handbook-place-controller": "Place the controller",
+  "etermogenerator-construct-frame": "Stage 2",
+  "etermogenerator-construct-core": "Stage 3",
+  "etermogenerator-construct-finish": "Finish",
 
   "termoplastini": "Thermoelectric Plates",
   "block-termoplastini-*": "Thermoelectric Plates",

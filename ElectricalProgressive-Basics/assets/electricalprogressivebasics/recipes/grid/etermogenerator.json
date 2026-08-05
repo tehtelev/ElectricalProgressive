@@ -1,45 +1,29 @@
-﻿[
+[
   {
-    "ingredientPattern": "HS,XM,CL",
-    "width": 2,
+    "ingredientPattern": "PPP,S_H,PPP",
+    "width": 3,
     "height": 3,
     "ingredients": {
-      "L": {
+      "P": {
         "type": "item",
-        "code": "game:metalplate-copper",
+        "code": "game:metalplate-iron",
         "quantity": 1
       },
       "S": {
         "type": "item",
-        "code": "game:saw-*",
-        "isTool": true,
-        "toolDurabilityCost": 8
-      },
-      "X": {
-        "type": "item",
-        "code": "game:chisel-*",
-        "isTool": true,
-        "toolDurabilityCost": 8
+        "code": "game:metalplate-steel",
+        "quantity": 1
       },
       "H": {
         "type": "item",
-        "code": "game:burnedbrick-fire",
-        "quantity": 24
-      },
-      "M": {
-        "type": "item",
-        "code": "game:metalplate-iron",
-        "quantity": 2
-      },
-      "C": {
-        "type": "block",
-        "code": "electricalprogressivebasics:ecable-32v-copper-single-part",
-        "quantity": 2
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
       }
     },
     "output": {
       "type": "block",
-      "code": "electricalprogressivebasics:etermogenerator-south",
+      "code": "electricalprogressivebasics:etermogenerator-incomplete-south",
       "quantity": 1
     }
   }

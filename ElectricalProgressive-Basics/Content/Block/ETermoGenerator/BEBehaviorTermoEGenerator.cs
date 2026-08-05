@@ -110,6 +110,12 @@ public class BEBehaviorTermoEGenerator : BlockEntityBehavior, IElectricProducer
             return 0f;
         }
 
+        if (!temp.StructureComplete)
+        {
+            _powerGive = 0f;
+            return 0f;
+        }
+
         // отдаём энергию только если температура генератора выше 20 градусов
         if (temp.GenTemp > 20)
             _powerGive = temp.Power;
@@ -150,7 +156,16 @@ public class BEBehaviorTermoEGenerator : BlockEntityBehavior, IElectricProducer
         if (IsBurned)
             return;
 
-        stringBuilder.AppendLine(StringHelper.Progressbar(Math.Min(_powerGive, _powerOrder) / entity.Power * 100));
+        if (!entity.StructureComplete)
+        {
+            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-incomplete"));
+            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-hint"));
+            stringBuilder.AppendLine();
+            return;
+        }
+
+        var maxPower = Math.Max(1f, entity.Power);
+        stringBuilder.AppendLine(StringHelper.Progressbar(Math.Min(_powerGive, _powerOrder) / maxPower * 100));
         stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Production") + ": " + ((int)Math.Min(_powerGive, _powerOrder)).ToString() + "/" + ((int)entity.Power).ToString() + " " + Lang.Get("electricalprogressivebasics:W"));
         stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:termoplastini") + ": " + entity.HeightTermoplastin);
         stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:kpd") + ": " + (entity.Kpd * 100).ToString("F1") + " %");
