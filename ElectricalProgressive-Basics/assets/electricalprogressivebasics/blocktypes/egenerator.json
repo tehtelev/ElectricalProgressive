@@ -108,7 +108,7 @@
 
 
   "resistance": 1,
-  "lightAbsorption": 200.0,
+  "lightAbsorption": 1,
   "faceCullMode": "NeverCull",
   "renderPass": "OpaqueNoCull",
   "emitSideAo": { // Ambient Oclusion

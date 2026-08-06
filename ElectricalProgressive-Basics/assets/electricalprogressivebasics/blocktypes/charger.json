@@ -106,7 +106,7 @@
   },
 
   "replaceable": 500,
-  "lightAbsorption": 0,
+  "lightAbsorption": 1,
   "lightHsvByType": {
     "*-disabled-*": [ 0, 0, 0 ],
     "*-enabled-*": [ 7, 7, 11 ]

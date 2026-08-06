@@ -116,7 +116,7 @@
   "blockMaterial": "Stone",
 
   "replaceable": 500,
-  "lightAbsorption": 0,
+  "lightAbsorption": 2,
 
   "lightHsvByType": {
     "*-disabled-*": [ 0, 0, 0 ],

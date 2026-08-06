@@ -1,4 +1,4 @@
-{
+﻿{
   "code": "etermogenerator",
   "class": "BlockETermoGenerator",
   "entityClass": "BlockEntityETermoGenerator",
@@ -213,7 +213,7 @@
     "all": false
   },
   "resistance": 3.5,
-  "lightAbsorption": 0,
+  "lightAbsorption": 2,
 
   "sounds": {
     "walk": "game:walk/stone"
