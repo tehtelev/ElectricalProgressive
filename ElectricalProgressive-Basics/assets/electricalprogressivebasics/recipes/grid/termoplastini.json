@@ -1,93 +1,37 @@
-﻿[
+[
   {
-    "ingredientPattern": "HS,XM,CL",
-    "width": 2,
+    "ingredientPattern": "H_S,_P_,_X_",
+    "width": 3,
     "height": 3,
     "ingredients": {
-      "L": {
+      "P": {
         "type": "item",
-        "code": "game:metalplate-lead",
-        "quantity": 2
+        "code": "game:metalplate-iron",
+        "quantity": 1
       },
       "S": {
         "type": "item",
         "code": "game:saw-*",
         "isTool": true,
-        "toolDurabilityCost": 8
+        "toolDurabilityCost": 4
       },
       "X": {
         "type": "item",
         "code": "game:chisel-*",
         "isTool": true,
-        "toolDurabilityCost": 8
+        "toolDurabilityCost": 4
       },
       "H": {
         "type": "item",
         "code": "game:hammer-*",
         "isTool": true,
-        "toolDurabilityCost": 8
-      },
-      "M": {
-        "type": "item",
-        "code": "game:metalplate-tin",
-        "quantity": 2
-      },
-      "C": {
-        "type": "block",
-        "code": "electricalprogressivebasics:ecable-32v-copper-single-part",
-        "quantity": 4
+        "toolDurabilityCost": 4
       }
     },
     "output": {
       "type": "block",
-      "code": "electricalprogressivebasics:termoplastini-south",
-      "quantity": 2
-    }
-  },
-
-  {
-    "ingredientPattern": "HS,XM,CL",
-    "width": 2,
-    "height": 3,
-    "ingredients": {
-      "L": {
-        "type": "item",
-        "code": "game:metalplate-lead",
-        "quantity": 2
-      },
-      "S": {
-        "type": "item",
-        "code": "game:saw-*",
-        "isTool": true,
-        "toolDurabilityCost": 8
-      },
-      "X": {
-        "type": "item",
-        "code": "game:chisel-*",
-        "isTool": true,
-        "toolDurabilityCost": 8
-      },
-      "H": {
-        "type": "item",
-        "code": "game:hammer-*",
-        "isTool": true,
-        "toolDurabilityCost": 8
-      },
-      "M": {
-        "type": "item",
-        "code": "game:metalplate-copper",
-        "quantity": 2
-      },
-      "C": {
-        "type": "block",
-        "code": "electricalprogressivebasics:ecable-32v-copper-single-part",
-        "quantity": 4
-      }
-    },
-    "output": {
-      "type": "block",
-      "code": "electricalprogressivebasics:termoplastini-south",
-      "quantity": 2
+      "code": "electricalprogressivebasics:termoplastini-incomplete-south",
+      "quantity": 1
     }
   }
 ]

@@ -6,28 +6,40 @@ using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
+using Vintagestory.API.Util;
 using Vintagestory.GameContent;
 
 namespace ElectricalProgressive.Construction;
 
 /// <summary>
-/// Универсальная пошаговая сборка (как waterwheel): ПКМ ресурсами по блоку.
-/// Активируется атрибутом <c>attributes.construction.levels</c>.
+/// Сборка машины ПКМ: incomplete → blueprint полной модели, затем stage-shape, formed.
 /// </summary>
 public class BEBehaviorMachineConstruct : BlockEntityBehavior
 {
+    private static readonly AssetLocation FlatTexLoc =
+        new("electricalprogressivecore", "block/blueprint-flat");
+
+    private static TextureAtlasPosition? _flatTexPos;
+
     private RightClickConstruction? _rcc;
     private ConstructionLevel[]? _levels;
     private float _brokenDropsRatio = 1f;
     private ITreeAttribute? _pendingTree;
     private bool _forming;
 
-    private MeshData? _stageMesh;
-    private int _stageMeshIndex = -1;
+    private MeshData? _mesh;
+    private bool _meshReady;
+    private int _meshStage = int.MinValue;
+
+    /// <summary>Визуальный прогресс (синк клиент/сервер).</summary>
+    private int _revealedStages;
 
     private string _stateVariant = "state";
     private string _incompleteState = "incomplete";
     private string _formedState = "formed";
+    private string? _blueprintShape;
+
+    private byte _fillR = 75, _fillG = 135, _fillB = 190, _fillA = 255;
 
     private readonly List<ItemStack> _consumedMaterials = new();
 
@@ -35,7 +47,9 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
     {
     }
 
-    /// <summary>Сформирована (state=formed) или нет вариантов — по флагу.</summary>
+    /// <summary>Incomplete: BE не должен дорисовывать свой default shape.</summary>
+    public bool IsRenderingBlueprint => HasConstruction && !IsReady && !IsFormed;
+
     public bool IsFormed
     {
         get
@@ -61,7 +75,6 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
     public bool IsConstructionComplete =>
         IsFormed || (_rcc?.Stages != null && _rcc.CurrentCompletedStage >= _rcc.Stages.Length - 1);
 
-    /// <summary>Можно ли пользоваться машиной (собрана / formed).</summary>
     public bool IsReady => IsFormed || IsConstructionComplete;
 
     public bool HasConstruction => _levels is { Length: > 0 } || _rcc != null;
@@ -82,12 +95,29 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
         _stateVariant = conf["stateVariant"].AsString("state");
         _incompleteState = conf["incompleteState"].AsString("incomplete");
         _formedState = conf["formedState"].AsString("formed");
+        if (conf.KeyExists("blueprintShape"))
+            _blueprintShape = conf["blueprintShape"].AsString(null);
+
+        if (conf.KeyExists("blueprint"))
+        {
+            var bp = conf["blueprint"];
+            if (bp.KeyExists("fillR") || bp.KeyExists("r"))
+            {
+                _fillR = (byte)GameMath.Clamp(bp.KeyExists("fillR") ? bp["fillR"].AsInt(_fillR) : bp["r"].AsInt(_fillR), 0, 255);
+                _fillG = (byte)GameMath.Clamp(bp.KeyExists("fillG") ? bp["fillG"].AsInt(_fillG) : bp["g"].AsInt(_fillG), 0, 255);
+                _fillB = (byte)GameMath.Clamp(bp.KeyExists("fillB") ? bp["fillB"].AsInt(_fillB) : bp["b"].AsInt(_fillB), 0, 255);
+            }
+
+            if (bp.KeyExists("fillA") || bp.KeyExists("a"))
+                _fillA = (byte)GameMath.Clamp(bp.KeyExists("fillA") ? bp["fillA"].AsInt(_fillA) : bp["a"].AsInt(_fillA), 40, 255);
+        }
 
         _levels = conf["levels"].AsObject<ConstructionLevel[]>(null!);
         if (_levels == null || _levels.Length == 0)
             return;
 
-        // Formed-вариант: сборка уже закончена
+        PatchLevelShapesFromJson(conf["levels"], _levels);
+
         if (IsFormed)
             return;
 
@@ -105,7 +135,62 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
             _pendingTree = null;
         }
 
+        SyncRevealedFromRcc();
         InvalidateMesh();
+    }
+
+    private static bool LevelHasMaterials(ConstructionLevel? level)
+        => level?.RequireStacks is { Length: > 0 };
+
+    private int CountMaterialStagesCompleted()
+    {
+        if (_rcc?.Stages == null || _levels == null)
+            return 0;
+
+        var max = Math.Min(_rcc.CurrentCompletedStage, _levels.Length - 1);
+        if (max < 0)
+            return 0;
+
+        var count = 0;
+        for (var i = 0; i <= max; i++)
+        {
+            if (LevelHasMaterials(_levels[i]))
+                count++;
+        }
+
+        return count;
+    }
+
+    private void SyncRevealedFromRcc()
+    {
+        if (_rcc == null)
+            return;
+        if (_rcc.CurrentCompletedStage > _revealedStages)
+            _revealedStages = _rcc.CurrentCompletedStage;
+        var mats = CountMaterialStagesCompleted();
+        if (mats > _revealedStages)
+            _revealedStages = mats;
+    }
+
+    private int VisualStageKey
+    {
+        get
+        {
+            SyncRevealedFromRcc();
+            var rcc = _rcc?.CurrentCompletedStage ?? -1;
+            return Math.Max(_revealedStages, Math.Max(rcc, CountMaterialStagesCompleted()));
+        }
+    }
+
+    private int RenderStageIndex
+    {
+        get
+        {
+            if (_levels == null || _levels.Length == 0)
+                return 0;
+            var idx = Math.Max(_rcc?.CurrentCompletedStage ?? -1, _revealedStages);
+            return GameMath.Clamp(idx, 0, _levels.Length - 1);
+        }
     }
 
     public bool TryConstruct(IPlayer byPlayer)
@@ -123,21 +208,20 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
         if (!_rcc.OnInteract(byPlayer.Entity, byPlayer.Entity.RightHandItemSlot))
             return false;
 
-        // После OnInteract CurrentCompletedStage = стейдж, чьи ресурсы только что потрачены.
-        // Нельзя полагаться на RightClickConstruction.GetDrops: он
-        //  • возвращает пусто при CurrentCompletedStage <= 1
-        //  • не включает материалы последнего завершённого стейджа (i < stage)
         if (Api.Side == EnumAppSide.Server)
             RecordMaterialsForCompletedStage(_rcc.CurrentCompletedStage);
+
+        _revealedStages = Math.Max(_revealedStages, _rcc.CurrentCompletedStage);
+        _revealedStages = Math.Max(_revealedStages, CountMaterialStagesCompleted());
 
         InvalidateMesh();
         Blockentity.MarkDirty(true);
 
-        if (ShouldFormMachineNow())
-        {
-            if (Api.Side == EnumAppSide.Server)
-                TryFormMachine();
-        }
+        if (Api is ICoreClientAPI capi)
+            capi.World.BlockAccessor.MarkBlockDirty(Blockentity.Pos);
+
+        if (ShouldFormMachineNow() && Api.Side == EnumAppSide.Server)
+            TryFormMachine();
 
         return true;
     }
@@ -164,7 +248,6 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
         if (!ShouldFormMachineNow())
             return;
 
-        // Нет state-варианта — просто считаем готовым
         if (Blockentity.Block?.Variant == null ||
             !Blockentity.Block.Variant.ContainsKey(_stateVariant))
         {
@@ -175,8 +258,6 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
         _forming = true;
         try
         {
-            // Материалы уже накоплены в TryConstruct; при пустом списке (старый сейв) —
-            // восстанавливаем по стейджам, включая текущий.
             if (_consumedMaterials.Count == 0)
                 RebuildConsumedMaterialsFromStages();
 
@@ -190,9 +271,7 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
             }
 
             var pos = Blockentity.Pos;
-            // Сохраняем consumedMats до/после ExchangeBlock (BE обычно сохраняется)
             Blockentity.MarkDirty(true);
-
             Api.World.BlockAccessor.ExchangeBlock(formedBlock.Id, pos);
 
             var placed = Api.World.BlockAccessor.GetBlock(pos);
@@ -203,24 +282,19 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
                 mb.OnBlockPlaced(Api.World, pos, ref handling);
             }
 
-            // BE мог сохраниться — обновим ссылку и снова сохраним материалы
             var be = Api.World.BlockAccessor.GetBlockEntity(pos);
             if (be != null)
             {
                 be.Block = placed;
-
-                // Если BE пересоздали — перенесём материалы в новый behavior
                 var construct = be.GetBehavior<BEBehaviorMachineConstruct>();
-                if (construct != null && !ReferenceEquals(construct, this) &&
-                    _consumedMaterials.Count > 0)
-                {
+                if (construct != null && !ReferenceEquals(construct, this) && _consumedMaterials.Count > 0)
                     construct.ReplaceConsumedMaterials(_consumedMaterials);
-                }
             }
 
             be?.MarkDirty(true);
             Api.World.BlockAccessor.MarkBlockDirty(pos);
-
+            // Соседи (в т.ч. термогенератор) — пересчитать после form
+            Api.World.BlockAccessor.TriggerNeighbourBlockUpdate(pos);
             Api.World.PlaySoundAt(
                 new AssetLocation("game:sounds/block/anvil"),
                 pos.X + 0.5, pos.Y + 0.5, pos.Z + 0.5, null);
@@ -231,7 +305,6 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
         }
     }
 
-    /// <summary>Перенос списка материалов (если BE пересоздали при ExchangeBlock).</summary>
     internal void ReplaceConsumedMaterials(IEnumerable<ItemStack> materials)
     {
         _consumedMaterials.Clear();
@@ -242,23 +315,15 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
         }
     }
 
-    /// <summary>
-    /// Записать ресурсы стейджа <paramref name="stageIndex"/> (тот, что только что завершён).
-    /// </summary>
     private void RecordMaterialsForCompletedStage(int stageIndex)
     {
         if (_rcc?.Stages == null || Api == null)
             return;
         if (stageIndex < 0 || stageIndex >= _rcc.Stages.Length)
             return;
-
-        AppendResolvedMaterials(_rcc.Stages[stageIndex]?.RequireStacks);
+        AppendResolvedMaterials(_rcc.Stages[stageIndex]?.RequireStacks, _consumedMaterials);
     }
 
-    /// <summary>
-    /// Fallback: все requireStacks стейджей 0..CurrentCompletedStage включительно.
-    /// (RCC.GetDrops намеренно не используем — у него off-by-one и early-return.)
-    /// </summary>
     private void RebuildConsumedMaterialsFromStages()
     {
         _consumedMaterials.Clear();
@@ -269,12 +334,7 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
         }
     }
 
-    private void AppendResolvedMaterials(ConstructionIngredient[]? ingredients)
-    {
-        AppendResolvedMaterialsInto(ingredients, _consumedMaterials);
-    }
-
-    private void AppendResolvedMaterialsInto(ConstructionIngredient[]? ingredients, List<ItemStack> target)
+    private void AppendResolvedMaterials(ConstructionIngredient[]? ingredients, List<ItemStack> target)
     {
         if (ingredients == null || ingredients.Length == 0 || Api == null)
             return;
@@ -284,7 +344,6 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
             if (ing == null)
                 continue;
 
-            // Клонируем, чтобы не портить ингредиент в Stages
             var toResolve = ing.Clone();
             if (!string.IsNullOrEmpty(ing.StoreWildCard) &&
                 _rcc?.StoredWildCards != null &&
@@ -316,32 +375,17 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
         return _rcc.GetInteractionHelp(world, forPlayer);
     }
 
-    /// <summary>
-    /// Материалы, вложенные в сборку (с учётом brokenDropsRatio).
-    /// Без сайд-эффектов: не мутирует _consumedMaterials.
-    /// </summary>
     public ItemStack[] GetMaterialDrops()
     {
         IEnumerable<ItemStack> source;
         if (_consumedMaterials.Count > 0)
-        {
             source = _consumedMaterials;
-        }
         else if (_rcc != null && !IsFormed)
-        {
-            // Старые сейвы / mid-build без consumedMats: восстановить по стейджам
             source = ResolveMaterialsFromStages();
-        }
         else if (IsFormed && _levels != null)
-        {
-            // Formed без сохранённых mats (старый form через RCC.GetDrops) —
-            // отдать все requireStacks из levels
             source = ResolveAllLevelMaterials();
-        }
         else
-        {
             return Array.Empty<ItemStack>();
-        }
 
         var list = new List<ItemStack>();
         var rand = Api?.World.Rand;
@@ -364,7 +408,6 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
         return list.ToArray();
     }
 
-    /// <summary>Все requireStacks стейджей 0..CurrentCompletedStage (клоны, без записи в поле).</summary>
     private List<ItemStack> ResolveMaterialsFromStages()
     {
         var result = new List<ItemStack>();
@@ -376,12 +419,11 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
             return result;
 
         for (var i = 0; i <= max && i < _rcc.Stages.Length; i++)
-            AppendResolvedMaterialsInto(_rcc.Stages[i]?.RequireStacks, result);
+            AppendResolvedMaterials(_rcc.Stages[i]?.RequireStacks, result);
 
         return result;
     }
 
-    /// <summary>Все requireStacks из levels (для formed без сохранённых mats).</summary>
     private List<ItemStack> ResolveAllLevelMaterials()
     {
         var result = new List<ItemStack>();
@@ -389,7 +431,7 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
             return result;
 
         foreach (var level in _levels)
-            AppendResolvedMaterialsInto(level?.RequireStacks, result);
+            AppendResolvedMaterials(level?.RequireStacks, result);
 
         return result;
     }
@@ -401,7 +443,6 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
             return new ItemStack(Blockentity.Block);
 
         var code = Blockentity.Block.CodeWithVariant(_stateVariant, _incompleteState);
-        // side north for inventory consistency if present
         if (Blockentity.Block.Variant.ContainsKey("side"))
             code = Blockentity.Block.CodeWithVariants(
                 [_stateVariant, "side"],
@@ -411,66 +452,373 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
         return block != null ? new ItemStack(block) : null;
     }
 
+    // ——— Mesh / shapes ———
+
     private void InvalidateMesh()
     {
-        _stageMeshIndex = -1;
-        _stageMesh = null;
+        _mesh = null;
+        _meshReady = false;
+        _meshStage = int.MinValue;
     }
 
-    private string? GetShapePathForStage()
+    private string? GetStageShapePath()
     {
         if (_levels == null || _levels.Length == 0)
+            return GetFullShapePath();
+
+        var idx = RenderStageIndex;
+        for (var i = idx; i >= 0; i--)
+        {
+            if (!string.IsNullOrEmpty(_levels[i]?.Shape))
+                return _levels[i]!.Shape;
+        }
+
+        for (var i = idx + 1; i < _levels.Length; i++)
+        {
+            if (!string.IsNullOrEmpty(_levels[i]?.Shape))
+                return _levels[i]!.Shape;
+        }
+
+        return GetFullShapePath();
+    }
+
+    private static void PatchLevelShapesFromJson(JsonObject levelsToken, ConstructionLevel[] levels)
+    {
+        try
+        {
+            var arr = levelsToken.AsArray();
+            if (arr == null || arr.Length == 0)
+                return;
+
+            var n = Math.Min(arr.Length, levels.Length);
+            for (var i = 0; i < n; i++)
+            {
+                var el = arr[i];
+                if (el == null || !el.KeyExists("shape"))
+                    continue;
+                var s = el["shape"].AsString(null);
+                if (string.IsNullOrEmpty(s))
+                    continue;
+                levels[i] ??= new ConstructionLevel();
+                levels[i].Shape = s;
+            }
+        }
+        catch
+        {
+            // AsObject fields remain
+        }
+    }
+
+    private string? GetFullShapePath()
+    {
+        if (!string.IsNullOrEmpty(_blueprintShape))
+            return _blueprintShape;
+
+        if (_levels is { Length: > 0 })
+        {
+            for (var i = _levels.Length - 1; i >= 0; i--)
+            {
+                if (!string.IsNullOrEmpty(_levels[i]?.Shape))
+                    return _levels[i]!.Shape;
+            }
+        }
+
+        return GetFormedBlockShapePath();
+    }
+
+    private string? GetFormedBlockShapePath()
+    {
+        var formed = ResolveFormedBlock();
+        var baseLoc = formed?.Shape?.Base;
+        if (baseLoc?.Path == null)
             return null;
 
-        var stage = _rcc?.CurrentCompletedStage ?? 0;
-        if (stage < 0) stage = 0;
+        var path = baseLoc.Path.Replace('\\', '/');
+        if (path.StartsWith("shapes/", StringComparison.OrdinalIgnoreCase))
+            path = path["shapes/".Length..];
+        if (path.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+            path = path[..^5];
 
-        for (var i = Math.Min(stage, _levels.Length - 1); i >= 0; i--)
+        if (!string.IsNullOrEmpty(baseLoc.Domain) && baseLoc.Domain != "game"
+            && formed?.Code != null && baseLoc.Domain != formed.Code.Domain)
+            return baseLoc.Domain + ":" + path;
+
+        return path;
+    }
+
+    private Block? ResolveFormedBlock()
+    {
+        var block = Blockentity.Block;
+        if (block?.Variant != null && block.Variant.ContainsKey(_stateVariant))
         {
-            var shape = _levels[i]?.Shape;
-            if (!string.IsNullOrEmpty(shape))
+            var formed = Api?.World.GetBlock(block.CodeWithVariant(_stateVariant, _formedState));
+            if (formed != null)
+                return formed;
+        }
+
+        return block;
+    }
+
+    private Shape? LoadShape(string shapePath)
+    {
+        if (string.IsNullOrEmpty(shapePath) || Api == null)
+            return null;
+
+        var domain = Blockentity.Block?.Code?.Domain ?? "game";
+        var loc = AssetLocation.Create(shapePath, domain)
+            .WithPathPrefixOnce("shapes/")
+            .WithPathAppendixOnce(".json");
+        var shape = Shape.TryGet(Api, loc);
+        if (shape != null)
+            return shape;
+
+        if (shapePath.Contains(':'))
+        {
+            shape = Shape.TryGet(Api, AssetLocation.Create(shapePath)
+                .WithPathPrefixOnce("shapes/")
+                .WithPathAppendixOnce(".json"));
+            if (shape != null)
                 return shape;
         }
 
         return null;
     }
 
-    private MeshData? GetStageMesh(ITesselatorAPI tesselator)
+    private Shape? LoadFullShape()
     {
-        if (Api?.Side != EnumAppSide.Client || IsFormed || _rcc == null)
-            return null;
-
-        var stage = _rcc.CurrentCompletedStage;
-        if (_stageMesh != null && _stageMeshIndex == stage)
-            return _stageMesh;
-
-        var shapePath = GetShapePathForStage();
-        if (string.IsNullOrEmpty(shapePath))
-            return null;
-
-        var block = Blockentity.Block;
-        var loc = AssetLocation.Create(shapePath, block.Code.Domain)
-            .WithPathPrefixOnce("shapes/")
-            .WithPathAppendixOnce(".json");
-
-        var shape = Shape.TryGet(Api, loc);
-        if (shape == null)
+        var path = GetFullShapePath();
+        if (!string.IsNullOrEmpty(path))
         {
-            Api.World.Logger.Warning("MachineConstruct: shape not found: {0}", loc);
-            return null;
+            var s = LoadShape(path!);
+            if (s != null)
+                return s;
         }
 
-        tesselator.TesselateShape(block, shape, out var mesh);
+        var formed = ResolveFormedBlock();
+        if (formed?.Shape?.Base != null)
+        {
+            var s = Shape.TryGet(Api, formed.Shape.Base.Clone()
+                .WithPathPrefixOnce("shapes/")
+                .WithPathAppendixOnce(".json"));
+            if (s != null)
+                return s;
+        }
 
+        if (formed?.ShapeInventory?.Base != null)
+        {
+            var s = Shape.TryGet(Api, formed.ShapeInventory.Base.Clone()
+                .WithPathPrefixOnce("shapes/")
+                .WithPathAppendixOnce(".json"));
+            if (s != null)
+                return s;
+        }
+
+        return null;
+    }
+
+    private Vec3f GetBlockRotation()
+    {
+        var block = Blockentity.Block;
         var side = block.Variant.ContainsKey("side") ? block.Variant["side"] : "north";
         var adjustedIndex = ((BlockFacing.FromCode(side)?.HorizontalAngleIndex ?? 1) + 3) & 3;
-        var rotY = adjustedIndex * 90;
-        if (rotY != 0)
-            mesh.Rotate(new Vec3f(0.5f, 0.5f, 0.5f), 0, rotY * GameMath.DEG2RAD, 0);
+        return new Vec3f(0, adjustedIndex * 90, 0);
+    }
 
-        _stageMesh = mesh;
-        _stageMeshIndex = stage;
-        return _stageMesh;
+    private static TextureAtlasPosition GetFlatTexture(ICoreClientAPI capi)
+    {
+        if (_flatTexPos != null)
+            return _flatTexPos;
+
+        try
+        {
+            if (capi.BlockTextureAtlas.GetOrInsertTexture(FlatTexLoc, out _, out var pos, null, 0.005f)
+                && pos != null)
+            {
+                _flatTexPos = pos;
+                return pos;
+            }
+        }
+        catch (Exception ex)
+        {
+            capi.Logger.Error("[MachineConstruct] blueprint texture: {0}", ex);
+        }
+
+        return capi.BlockTextureAtlas.UnknownTexturePosition;
+    }
+
+    private sealed class FlatTexSource : ITexPositionSource
+    {
+        private readonly TextureAtlasPosition _flat;
+        private readonly Size2i _atlasSize;
+
+        public FlatTexSource(ICoreClientAPI capi, TextureAtlasPosition flat)
+        {
+            _flat = flat;
+            _atlasSize = capi.BlockTextureAtlas.Size;
+        }
+
+        public Size2i AtlasSize => _atlasSize;
+        public TextureAtlasPosition this[string textureCode] => _flat;
+    }
+
+    private static bool HasDrawables(MeshData? mesh)
+        => mesh is { VerticesCount: > 0, IndicesCount: > 0 };
+
+    private static void SetRenderPass(MeshData mesh, EnumChunkRenderPass pass)
+    {
+        var ipf = mesh.IndicesPerFace > 0 ? mesh.IndicesPerFace : 3;
+        var faces = Math.Max(1, mesh.IndicesCount / ipf);
+        if (faces * ipf != mesh.IndicesCount && mesh.IndicesCount > 0)
+            faces = Math.Max(1, mesh.IndicesCount / 3);
+
+        if (mesh.RenderPassesAndExtraBits == null || mesh.RenderPassesAndExtraBits.Length != faces)
+            mesh.RenderPassesAndExtraBits = new short[faces];
+        mesh.RenderPassesAndExtraBits.Fill((short)pass);
+    }
+
+    private MeshData TintBlueprint(MeshData solid, TextureAtlasPosition flat)
+    {
+        var mesh = solid.Clone();
+        var uv = mesh.Uv;
+        if (uv != null)
+        {
+            for (var i = 0; i < mesh.VerticesCount; i++)
+            {
+                uv[i * 2] = 0.5f;
+                uv[i * 2 + 1] = 0.5f;
+            }
+        }
+
+        mesh.SetTexPos(flat);
+        mesh.TextureIds = [flat.atlasTextureId];
+        if (mesh.TextureIndices == null || mesh.TextureIndices.Length < mesh.VerticesCount)
+            mesh.TextureIndices = new byte[mesh.VerticesCount];
+        mesh.TextureIndices.Fill((byte)0);
+
+        if (mesh.ClimateColorMapIds is { Length: > 0 })
+            mesh.ClimateColorMapIds.Fill((byte)0);
+        if (mesh.SeasonColorMapIds is { Length: > 0 })
+            mesh.SeasonColorMapIds.Fill((byte)0);
+
+        var rgba = mesh.Rgba;
+        if (rgba is { Length: >= 4 })
+        {
+            for (var vi = 0; vi < mesh.VerticesCount; vi++)
+            {
+                var i = vi * 4;
+                var lum = (rgba[i] + rgba[i + 1] + rgba[i + 2]) / (3f * 255f);
+                var shade = 0.62f + lum * 0.38f;
+                var col = ColorUtil.ColorFromRgba(
+                    GameMath.Clamp((int)(_fillR * shade), 0, 255),
+                    GameMath.Clamp((int)(_fillG * shade), 0, 255),
+                    GameMath.Clamp((int)(_fillB * shade), 0, 255),
+                    _fillA);
+                rgba[i] = (byte)col;
+                rgba[i + 1] = (byte)(col >> 8);
+                rgba[i + 2] = (byte)(col >> 16);
+                rgba[i + 3] = (byte)(col >> 24);
+            }
+        }
+
+        SetRenderPass(mesh, EnumChunkRenderPass.OpaqueNoCull);
+        if (mesh.Flags is { Length: > 0 })
+        {
+            for (var i = 0; i < mesh.Flags.Length && i < mesh.VerticesCount; i++)
+            {
+                var f = mesh.Flags[i] & ~VertexFlags.GlowLevelBitMask;
+                f |= 18 & VertexFlags.GlowLevelBitMask;
+                f = (f & VertexFlags.ClearZOffsetMask) | (6 << VertexFlags.ZOffsetBitPos);
+                mesh.Flags[i] = f;
+            }
+        }
+
+        return mesh;
+    }
+
+    private MeshData? BuildMesh(ITesselatorAPI tesselator, ICoreClientAPI capi)
+    {
+        SyncRevealedFromRcc();
+        var rot = GetBlockRotation();
+
+        var showBlueprint = (_rcc?.CurrentCompletedStage ?? 0) <= 0
+            && CountMaterialStagesCompleted() <= 0
+            && _revealedStages <= 0;
+
+        if (showBlueprint)
+        {
+            var full = LoadFullShape();
+            if (full == null)
+                return null;
+
+            var flat = GetFlatTexture(capi);
+            tesselator.TesselateShape(
+                "MachineConstructBP", full, out var solid, new FlatTexSource(capi, flat), rot,
+                0, 0, 0, null, null);
+            if (!HasDrawables(solid))
+                return null;
+
+            var mesh = TintBlueprint(solid, flat);
+            mesh.Translate(0f, 0.01f, 0f);
+            return mesh;
+        }
+
+        var path = GetStageShapePath() ?? GetFullShapePath();
+        var shape = !string.IsNullOrEmpty(path) ? LoadShape(path!) : null;
+        shape ??= LoadFullShape();
+        if (shape == null)
+            return null;
+
+        try
+        {
+            var texSrc = new ShapeTextureSource(capi, shape, "MachineConstructStage");
+            tesselator.TesselateShape("MachineConstructStage", shape, out var mesh, texSrc, rot,
+                0, 0, 0, null, null);
+
+            if (!HasDrawables(mesh))
+            {
+                var texBlock = ResolveFormedBlock() ?? Blockentity.Block;
+                if (texBlock != null)
+                    tesselator.TesselateShape(texBlock, shape, out mesh, rot, null, null);
+            }
+
+            if (!HasDrawables(mesh))
+                return null;
+
+            SetRenderPass(mesh!, EnumChunkRenderPass.Opaque);
+            mesh!.Translate(0f, 0.01f, 0f);
+            return mesh;
+        }
+        catch (Exception ex)
+        {
+            Api?.World.Logger.Warning("[MachineConstruct] stage mesh: {0}", ex.Message);
+            return null;
+        }
+    }
+
+    private void EnsureMesh(ITesselatorAPI tesselator)
+    {
+        if (Api is not ICoreClientAPI || IsFormed || _rcc == null)
+            return;
+
+        var key = VisualStageKey;
+        if (_meshReady && _meshStage == key && HasDrawables(_mesh))
+            return;
+
+        _mesh = null;
+        _meshReady = false;
+
+        try
+        {
+            _mesh = BuildMesh(tesselator, (ICoreClientAPI)Api);
+            _meshStage = key;
+            _meshReady = HasDrawables(_mesh);
+        }
+        catch (Exception ex)
+        {
+            Api.World.Logger.Error("[MachineConstruct] mesh build failed: {0}", ex);
+            _mesh = null;
+            _meshReady = false;
+        }
     }
 
     public override bool OnTesselation(ITerrainMeshPool mesher, ITesselatorAPI tessThreadTesselator)
@@ -478,22 +826,28 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
         if (IsFormed || _rcc == null)
             return false;
 
-        var mesh = GetStageMesh(tessThreadTesselator);
-        if (mesh == null)
+        EnsureMesh(tessThreadTesselator);
+        if (!HasDrawables(_mesh))
             return false;
 
-        mesher.AddMeshData(mesh);
-        return true; // не рисовать дефолтный shape incomplete, если есть stage mesh
+        mesher.AddMeshData(_mesh);
+        return true;
     }
 
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
     {
         base.FromTreeAttributes(tree, worldAccessForResolve);
 
+        var stageBefore = VisualStageKey;
+
         if (_rcc != null)
             _rcc.FromTreeAttributes(tree);
         else
             _pendingTree = tree.Clone() as ITreeAttribute ?? tree;
+
+        if (tree.HasAttribute("constructRevealedStages"))
+            _revealedStages = Math.Max(_revealedStages, tree.GetInt("constructRevealedStages"));
+        SyncRevealedFromRcc();
 
         _consumedMaterials.Clear();
         if (tree["consumedMats"] is TreeAttribute mats)
@@ -505,13 +859,15 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
             }
         }
 
-        InvalidateMesh();
+        if (VisualStageKey != stageBefore || !_meshReady)
+            InvalidateMesh();
     }
 
     public override void ToTreeAttributes(ITreeAttribute tree)
     {
         base.ToTreeAttributes(tree);
         _rcc?.ToTreeAttributes(tree);
+        tree.SetInt("constructRevealedStages", _revealedStages);
 
         if (_consumedMaterials.Count > 0)
         {
@@ -530,12 +886,14 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
             return;
 
         dsc.AppendLine(Lang.Get("electricalprogressivecore:construction-incomplete"));
-        dsc.AppendLine(Lang.Get("electricalprogressivecore:construction-hint"));
-    }
-
-    public override void OnBlockBroken(IPlayer? byPlayer = null)
-    {
-        // Дропы материалов — через BlockBehaviorMachineConstruct.GetDrops
-        base.OnBlockBroken(byPlayer);
+        dsc.AppendLine(Lang.Get("electricalprogressivecore:construction-blueprint-hint"));
+        if (_rcc?.Stages is { Length: > 0 })
+        {
+            var stage = RenderStageIndex;
+            dsc.AppendLine($"Build: {stage + 1}/{_rcc.Stages.Length}");
+            var shape = GetStageShapePath();
+            if (!string.IsNullOrEmpty(shape))
+                dsc.AppendLine(shape);
+        }
     }
 }

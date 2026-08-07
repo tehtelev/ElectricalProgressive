@@ -49,8 +49,9 @@ public static class MachineConstructAccess
         if (beh == null || !beh.HasConstruction || beh.IsReady)
             return false;
 
-        beh.TryConstruct(byPlayer);
-        return true;
+        // true = этап принят (ресурсы списаны) или «ещё incomplete» (чтобы GUI не перехватывал)
+        var advanced = beh.TryConstruct(byPlayer);
+        return advanced || !beh.IsReady;
     }
 
     public static bool TryConstructInteract(IWorldAccessor world, IPlayer byPlayer, BlockPos clickedPos,
@@ -60,7 +61,7 @@ public static class MachineConstructAccess
         if (beh == null || !beh.HasConstruction || beh.IsReady)
             return false;
 
-        beh.TryConstruct(byPlayer);
-        return true;
+        var advanced = beh.TryConstruct(byPlayer);
+        return advanced || !beh.IsReady;
     }
 }

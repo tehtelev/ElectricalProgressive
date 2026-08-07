@@ -1,12 +1,14 @@
-﻿{
+{
   "code": "termoplastini",
   "class": "BlockTermoplastini",
+  "entityClass": "BlockEntityTermoplastini",
 
   "behaviors": [
     {
       "name": "HorizontalOrientable",
       "properties": {
-        "dropBlockFace": "south"
+        "dropBlockFace": "south",
+        "handleDrop": false
       }
     },
     {
@@ -16,81 +18,85 @@
           "sizex": 3,
           "sizey": 2,
           "sizez": 1,
-          "cposition": {
-            "x": 1,
-            "y": 0,
-            "z": 0
-          }
+          "cposition": { "x": 1, "y": 0, "z": 0 }
         },
         "*-east": {
           "sizex": 1,
           "sizey": 2,
           "sizez": 3,
-          "cposition": {
-            "x": 0,
-            "y": 0,
-            "z": 1
-          }
+          "cposition": { "x": 0, "y": 0, "z": 1 }
         },
         "*-south": {
           "sizex": 3,
           "sizey": 2,
           "sizez": 1,
-          "cposition": {
-            "x": 1,
-            "y": 0,
-            "z": 0
-          }
+          "cposition": { "x": 1, "y": 0, "z": 0 }
         },
         "*-west": {
           "sizex": 1,
           "sizey": 2,
           "sizez": 3,
-          "cposition": {
-            "x": 0,
-            "y": 0,
-            "z": 1
-          }
+          "cposition": { "x": 0, "y": 0, "z": 1 }
         }
       }
     }
   ],
 
-
   "creativeinventory": {
-    "general": [ "*-south" ],
-    "electricity": [ "*-south" ]
+    "general": [ "*-incomplete-south" ],
+    "electricity": [ "*-incomplete-south" ]
   },
 
   "variantgroups": [
+    {
+      "code": "state",
+      "states": [ "incomplete", "formed" ]
+    },
     {
       "code": "side",
       "loadFromProperties": "abstract/horizontalorientation"
     }
   ],
 
-
-
-
   "shapebytype": {
-    "*-north": {
+    "*-incomplete-north": {
+      "base": "block/termoplastini/termoplastini_base",
+      "rotateY": 0
+    },
+    "*-incomplete-east": {
+      "base": "block/termoplastini/termoplastini_base",
+      "rotateY": 270
+    },
+    "*-incomplete-south": {
+      "base": "block/termoplastini/termoplastini_base",
+      "rotateY": 180
+    },
+    "*-incomplete-west": {
+      "base": "block/termoplastini/termoplastini_base",
+      "rotateY": 90
+    },
+    "*-formed-north": {
       "base": "block/termoplastini/termoplastini",
       "rotateY": 0
     },
-    "*-east": {
+    "*-formed-east": {
       "base": "block/termoplastini/termoplastini",
       "rotateY": 270
     },
-    "*-south": {
+    "*-formed-south": {
       "base": "block/termoplastini/termoplastini",
       "rotateY": 180
     },
-    "*-west": {
+    "*-formed-west": {
       "base": "block/termoplastini/termoplastini",
       "rotateY": 90
     }
   },
 
+  "shapeInventory": {
+    "base": "block/termoplastini/termoplastini",
+    "rotateY": 180
+  },
 
   "attributes": {
     "handbook": {
@@ -101,16 +107,61 @@
           "text": "electricalprogressivebasics:block-handbooktext-termoplastini"
         }
       ]
+    },
+    "construction": {
+      "brokenDropsRatio": 1,
+      "levels": [
+        {
+          "shape": "block/termoplastini/termoplastini_base",
+          "actionLangCode": "electricalprogressivebasics:termoplastini-handbook-place-controller"
+        },
+        {
+          "shape": "block/termoplastini/termoplastini_base",
+          "actionLangCode": "electricalprogressivebasics:termoplastini-construct-frame",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "game:metalplate-iron",
+              "quantity": 4
+            },
+            {
+              "type": "block",
+              "code": "game:metalblock-new-riveted-copper",
+              "quantity": 1
+            }
+          ]
+        },
+        {
+          "shape": "block/termoplastini/termoplastini",
+          "actionLangCode": "electricalprogressivebasics:termoplastini-construct-finish",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "game:metalplate-zinc",
+              "quantity": 2
+            },
+            {
+              "type": "item",
+              "code": "game:metalplate-copper",
+              "quantity": 2
+            },
+            {
+              "type": "block",
+              "code": "electricalprogressivebasics:ecable-32v-copper-single-part",
+              "quantity": 4
+            }
+          ],
+          "formMachine": true
+        }
+      ]
     }
   },
 
-
-
   "blockmaterial": "Stone",
-  "emitSideAo": { // Ambient Oclusion
+  "emitSideAo": {
     "all": false
   },
-  "sideAo": { // Ambient Oclusion
+  "sideAo": {
     "all": true
   },
   "sidesolid": {
@@ -120,6 +171,10 @@
     "all": false
   },
   "resistance": 3.5,
+  "lightAbsorptionByType": {
+    "*-incomplete-*": 0,
+    "*-formed-*": 0
+  },
 
   "sounds": {
     "walk": "game:walk/stone"
@@ -129,35 +184,19 @@
   "heldTpUseAnimation": "twohandplaceblock",
 
   "guiTransform": {
-    "translation": {
-      "x": 0,
-      "y": 5,
-      "z": 0
-    },
+    "translation": { "x": 0, "y": 5, "z": 0 },
     "scale": 0.67
   },
 
   "tpHandTransform": {
-    "translation": {
-      "x": -2.1,
-      "y": -1.8,
-      "z": -1
-    },
-    "rotation": {
-      "x": -70,
-      "y": -161,
-      "z": 96
-    }
+    "translation": { "x": -2.1, "y": -1.8, "z": -1 },
+    "rotation": { "x": -70, "y": -161, "z": 96 }
   },
 
   "collisionSelectionBoxes": [
     {
-      "x1": 0,
-      "y1": 0,
-      "z1": 0,
-      "x2": 1.0,
-      "y2": 1.0,
-      "z2": 1.0
+      "x1": 0, "y1": 0, "z1": 0,
+      "x2": 1.0, "y2": 1.0, "z2": 1.0
     }
   ]
 }

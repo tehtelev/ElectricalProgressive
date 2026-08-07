@@ -94,8 +94,8 @@ public class BlockETermoGenerator : BlockEBase, IMultiBlockInteract
     {
         base.OnNeighbourBlockChange(world, pos, neibpos);
 
-        if (world.BlockAccessor.GetBlockEntity(pos) is not BlockEntityETermoGenerator)
-            return;
+        if (world.BlockAccessor.GetBlockEntity(pos) is BlockEntityETermoGenerator gen)
+            gen.RefreshKpdFromNeighbours();
 
         if (MyMiniLib.CheckSolidFace(world.BlockAccessor, pos, Facing.DownAll))
             return;

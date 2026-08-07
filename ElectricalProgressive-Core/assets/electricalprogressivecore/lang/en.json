@@ -1,11 +1,12 @@
 {
   "AltPressForNetworkName": "Display detailed electrical circuit info",
 
-  "construction-incomplete": "Machine is not assembled",
+  "construction-incomplete": "Machine is not assembled (blueprint)",
   "construction-hint": "Right-click with materials in hand to assemble (see block hints)",
+  "construction-blueprint-hint": "Blueprint: right-click with required materials in hand to fill the ghost",
 
   "construction-handbook-assembly": "Assembly",
-  "construction-handbook-assembly-hint": "Right-click the placed controller while holding materials (like the water wheel):",
+  "construction-handbook-assembly-hint": "Place the controller (blue blueprint ghost), then right-click while holding materials:",
   "construction-handbook-step": "Step {0}",
   "construction-handbook-result": "finished machine"
 }

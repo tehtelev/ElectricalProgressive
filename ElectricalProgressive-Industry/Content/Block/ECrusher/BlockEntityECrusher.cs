@@ -836,6 +836,11 @@ namespace ElectricalProgressive.Content.Block.ECrusher
 
         public override bool OnTesselation(ITerrainMeshPool mesher, ITesselatorAPI tesselator)
         {
+            // Incomplete: только blueprint — иначе return false дорисует обычный incomplete shape
+            var construct = GetBehavior<MachineConstruct>();
+            if (construct is { IsRenderingBlueprint: true })
+                return base.OnTesselation(mesher, tesselator);
+
             // MachineConstruct (Core) рисует stage-mesh сам через BEBehavior.OnTesselation
             base.OnTesselation(mesher, tesselator);
 

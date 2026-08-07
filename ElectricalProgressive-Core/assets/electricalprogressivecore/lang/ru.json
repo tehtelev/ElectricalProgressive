@@ -1,11 +1,12 @@
 {
   "game:AltPressForNetworkName": "Вывод подробной информации об эл. цепи",
 
-  "construction-incomplete": "Машина не собрана",
+  "construction-incomplete": "Машина не собрана (blueprint)",
   "construction-hint": "ПКМ с ресурсами в руке — собрать (подсказки на блоке)",
+  "construction-blueprint-hint": "Blueprint: ПКМ нужными ресурсами в руке — заполнить призрак",
 
   "construction-handbook-assembly": "Сборка",
-  "construction-handbook-assembly-hint": "ПКМ по установленному контроллеру, держа ресурсы в руке (как водяное колесо):",
+  "construction-handbook-assembly-hint": "Поставьте контроллер (синий blueprint-призрак), затем ПКМ, держа ресурсы:",
   "construction-handbook-step": "Шаг {0}",
   "construction-handbook-result": "готовая машина"
 }

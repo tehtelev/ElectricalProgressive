@@ -118,6 +118,7 @@ public class ElectricalProgressiveBasics : ModSystem
 
 
         api.RegisterBlockClass("BlockTermoplastini", typeof(BlockTermoplastini));
+        api.RegisterBlockEntityClass("BlockEntityTermoplastini", typeof(BlockEntityTermoplastini));
 
         api.RegisterItemClass("ESoldering", typeof(ESoldering));
 

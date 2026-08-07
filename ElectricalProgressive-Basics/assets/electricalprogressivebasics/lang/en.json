@@ -149,8 +149,15 @@
 
   "termoplastini": "Thermoelectric Plates",
   "block-termoplastini-*": "Thermoelectric Plates",
+  "block-termoplastini-incomplete-*": "Thermoelectric Plates (incomplete)",
+  "block-termoplastini-formed-*": "Thermoelectric Plates",
   "block-handbooktitle-termoplastini": "Usage",
-  "block-handbooktext-termoplastini": "Thermoelectric plates are used in thermoelectric generators to convert thermal energy into electrical energy. The operating principle is based on the generation of thermoelectromotive force at the contact point of two dissimilar metals. The temperature difference is created by smoke from combustible fuel on one side and ambient air on the other side.<br><br>Placed behind the <a href=\"handbook:\/\/block-electricalprogressivebasics:etermogenerator-south\">thermoelectric generator<\/a>, up to 10 pieces. Can only be attached to the copper pad of the heat exchanger. Each subsequent section provides a smaller power increase. In total, 10 thermoplates will give 100% power to the thermogenerator. Two generators can be used on the same set of thermoelectric plates.",
+  "block-handbooktext-termoplastini": "Thermoelectric plates convert heat to electricity for the <a href=\"handbook://block-electricalprogressivebasics:etermogenerator-incomplete-south\">thermoelectric generator</a>. Craft the incomplete frame, place it on the copper pad behind the generator, then assemble with RMB: 4 iron plates + riveted copper block, then 2 zinc + 2 copper plates + 4× 32V copper cables.<br><br>Up to 10 sections. Only attach to the heat-exchanger copper pad. Each extra section adds less power; 10 plates ≈ 100%. Two generators can share one plate stack.",
+  "termoplastini-structure-incomplete": "Thermoelectric plates are not assembled",
+  "termoplastini-structure-hint": "Place on the generator, then add materials with RMB",
+  "termoplastini-handbook-place-controller": "Place the plate frame",
+  "termoplastini-construct-frame": "Install iron plates (×4) and riveted copper block",
+  "termoplastini-construct-finish": "Zinc, copper plates and 32V cables",
 
   // ==================== Solar Generator ====================
   "block-esolargenerator-*": "Solar Panel Generator",

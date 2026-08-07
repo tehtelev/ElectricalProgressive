@@ -524,6 +524,11 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
     /// <returns></returns>
     public override bool OnTesselation(ITerrainMeshPool mesher, ITesselatorAPI tesselator)
     {
+        // Incomplete: только blueprint из MachineConstruct — без топлива и без обычного shape
+        var construct = GetBehavior<MachineConstruct>();
+        if (construct is { IsRenderingBlueprint: true })
+            return base.OnTesselation(mesher, tesselator);
+
         base.OnTesselation(mesher, tesselator); // вызываем базовую логику тесселяции
 
 
@@ -637,21 +642,74 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
 
 
     /// <summary>
-    /// Расчет КПД генератора
+    /// Направление «назад» генератора (куда вешаются пластины).
     /// </summary>
-    private void Calculate_kpd()
+    private BlockFacing GetPlateChainFacing()
     {
-        // Получаем доступ к блочным данным один раз
-        var accessor = this.Api.World.BlockAccessor;
-        Kpd = 0f;
-        
-        // Перебираем потенциальные термопластины по высоте
-        for (var level = 1; level <= 11; level++)
+        if (Block.Variant != null && Block.Variant.TryGetValue("side", out var sideCode))
         {
-            // Получаем позицию и блок термопластины
-            BlockFacing facing = varRotate[Block.Shape.rotateY];
-            BlockPos platePos = Pos.AddCopy(BlockTermoplastini.varRotateOffset[facing]);
+            var side = BlockFacing.FromCode(sideCode);
+            if (side != null)
+                return side;
+        }
 
+        var rotY = Block.Shape?.rotateY ?? 0f;
+        if (varRotate.TryGetValue(rotY, out var facing))
+            return facing;
+
+        return BlockFacing.NORTH;
+    }
+
+    /// <summary>
+    /// Блок на позиции с разрешением meta-multiblock → контроллер.
+    /// </summary>
+    private static Vintagestory.API.Common.Block ResolveBlockAt(IBlockAccessor accessor, BlockPos pos,
+        out BlockPos controlPos)
+    {
+        controlPos = pos;
+        var block = accessor.GetBlock(pos);
+        if (block is BlockMultiblock mb)
+        {
+            controlPos = mb.GetControlBlockPos(pos);
+            block = accessor.GetBlock(controlPos);
+        }
+
+        return block;
+    }
+
+    /// <summary>
+    /// Formed-термопластина (incomplete при сборке КПД не даёт).
+    /// </summary>
+    private static bool IsFormedTermoplastini(Vintagestory.API.Common.Block block)
+    {
+        if (block is not BlockTermoplastini)
+            return false;
+        // без state — legacy; с state — только formed
+        if (!block.Variant.ContainsKey("state"))
+            return true;
+        return block.Variant["state"] == "formed";
+    }
+
+    /// <summary>
+    /// Расчет КПД по цепочке formed-термопластин сзади генератора.
+    /// </summary>
+    public void Calculate_kpd()
+    {
+        if (Api == null)
+            return;
+
+        var accessor = Api.World.BlockAccessor;
+        Kpd = 0f;
+        HeightTermoplastin = 0;
+
+        var facing = GetPlateChainFacing();
+        if (!BlockTermoplastini.VarRotateOffset.TryGetValue(facing, out var baseOff) || baseOff == null)
+            return;
+
+        var maxPlates = KpdPerDistance.Length; // 10
+        for (var level = 1; level <= maxPlates; level++)
+        {
+            var platePos = Pos.AddCopy(baseOff);
             if (facing == BlockFacing.NORTH)
                 platePos = platePos.NorthCopy(level);
             else if (facing == BlockFacing.SOUTH)
@@ -661,21 +719,22 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
             else if (facing == BlockFacing.WEST)
                 platePos = platePos.WestCopy(level);
             else
-            {
-                HeightTermoplastin = level - 1; //сохраняем высоту термопластин
                 break;
-            }
 
-            if (accessor.GetBlock(platePos) is not BlockTermoplastini)
-            {
-                HeightTermoplastin = level - 1; //сохраняем высоту термопластин
+            var plateBlock = ResolveBlockAt(accessor, platePos, out _);
+            if (!IsFormedTermoplastini(plateBlock))
                 break;
-            }
-            
 
-            // Учитываем множитель КПД на данном уровне
-            Kpd +=  KpdPerDistance[level - 1];
+            Kpd += KpdPerDistance[level - 1];
+            HeightTermoplastin = level;
         }
+    }
+
+    /// <summary>Сосед/пластина изменились — пересчитать КПД сразу (не ждать тик топлива).</summary>
+    public void RefreshKpdFromNeighbours()
+    {
+        Calculate_kpd();
+        MarkDirty(true);
     }
 
 

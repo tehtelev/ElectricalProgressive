@@ -1,22 +1,26 @@
+using Newtonsoft.Json;
 using Vintagestory.GameContent;
 
 namespace ElectricalProgressive.Construction;
 
 /// <summary>
-/// Уровень сборки машины (blocktypes → attributes.construction.levels).
+/// Уровень сборки (attributes.construction.levels).
 /// </summary>
 public class ConstructionLevel
 {
-    /// <summary>Модель уровня (shapes path без shapes/ и .json).</summary>
+    /// <summary>Shape этапа (base / base2 / … / full). Последний — full blueprint.</summary>
+    [JsonProperty("shape")]
     public string? Shape { get; set; }
 
-    /// <summary>Lang-ключ подсказки / handbook.</summary>
+    [JsonProperty("actionLangCode")]
     public string? ActionLangCode { get; set; }
 
-    /// <summary>Ресурсы для перехода <b>на</b> этот уровень (ПКМ). У 0-го обычно пусто.</summary>
+    /// <summary>Ресурсы этапа. У 0-го (place) обычно пусто.</summary>
+    [JsonProperty("requireStacks")]
     public ConstructionIngredient[]? RequireStacks { get; set; }
 
-    /// <summary>После уровня — сменить state на formed (и Multiblock, если прописан).</summary>
+    /// <summary>После этапа → state=formed.</summary>
+    [JsonProperty("formMachine")]
     public bool FormMachine { get; set; }
 
     public ConstructionStage ToConstructionStage()
@@ -24,9 +28,7 @@ public class ConstructionLevel
         return new ConstructionStage
         {
             ActionLangCode = string.IsNullOrEmpty(ActionLangCode) ? "rollers-construct" : ActionLangCode,
-            // null ломает RightClickConstruction — всегда массив
             RequireStacks = RequireStacks ?? System.Array.Empty<ConstructionIngredient>()
         };
     }
 }
-
