@@ -58,7 +58,7 @@
     "all": false
   },
   "resistance": 3.5,
-  "lightAbsorption": 0,
+  "lightAbsorption": 5,
   "sounds": {
     "walk": "game:walk/stone"
   },

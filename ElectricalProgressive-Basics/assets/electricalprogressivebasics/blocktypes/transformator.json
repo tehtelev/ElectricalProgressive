@@ -97,7 +97,7 @@
 
   "resistance": 1,
   "drawType": "JSON",
-  "lightAbsorption": 128.0,
+  "lightAbsorption": 2,
   "faceCullMode": "NeverCull",
   "renderPass": "OpaqueNoCull",
   "emitSideAo": { // Ambient Oclusion

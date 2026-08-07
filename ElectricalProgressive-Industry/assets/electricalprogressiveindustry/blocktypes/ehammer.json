@@ -122,7 +122,7 @@
       "rotateY": 90
     }
   },
-  "lightAbsorption": 100,
+  "lightAbsorption": 5,
   "sidesolidByType": {
     "*-north": {
       "all": false,
