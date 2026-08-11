@@ -21,6 +21,18 @@
   "block-ecrusher-*": "Elektrischer Brecher (Controller)",
   "block-handbooktitle-ecrusher": "Verwendung",
   "block-handbooktext-ecrusher": "Controller für den Brecher-Multiblock (Aufbau wie der Zementierofen). 2×2×2: Controller + 5 Eisen-Metallblöcke + 2 Kupfer-Metallblöcke (Platzhalter statt Rotoren). Shift+RMB = Schema. Funktioniert nur vollständig gebaut.",
+  "block-eblastfurnace-*": "Elektrischer Hochofen",
+  "block-handbooktitle-eblastfurnace": "Verwendung",
+  "block-handbooktext-eblastfurnace": "Elektrischer Hochofen zum Schmelzen von Erz mit Flussmittel. Multiblock 3×2×2, 128 V. Zusammenbau mit Stahlplatten, Kupferspulen und feuerfesten Ziegeln Stufe 3 (RMB auf Controller). Unterstützt Trichter.",
+  "eblastfurnace-structure-incomplete": "Hochofen ist nicht zusammengebaut",
+  "eblastfurnace-structure-complete": "Hochofen zusammengebaut",
+  "eblastfurnace-structure-hint": "Rechtsklick auf den Controller mit Materialien: 8 Stahlplatten → 4 Kupferspulen → 8 Feuerfestziegel Stufe 3.",
+  "eblastfurnace-structure-hint-short": "RMB mit Materialien — zusammenbauen (siehe Blockhinweise)",
+  "eblastfurnace-formed-hint": "Zusammengebauter elektrischer Hochofen.",
+  "eblastfurnace-construct-frame": "Stahlrahmen installieren",
+  "eblastfurnace-construct-coils": "Kupferspulen installieren",
+  "eblastfurnace-construct-lining": "Feuerfeste Auskleidung Stufe 3 installieren",
+  "eblastfurnace-handbook-place-controller": "Controller platzieren",
 
   "ecrusher-structure-incomplete": "Brecherstruktur unvollständig",
   "ecrusher-structure-complete": "Brecherstruktur vollständig",
@@ -35,6 +47,7 @@
   "game:epress-title-gui": "Auto-Presse",
   "game:edrawing-title-gui": "Ziehmaschine",
   "game:ecrusher-title-gui": "Elektrischer Brecher",
+  "game:eblastfurnace-title-gui": "Elektrischer Hochofen",
 
   "block-pressform-axe": "Axt Pressform",
   "block-pressform-pickaxe": "Spitzhacken Pressform",
@@ -48,6 +61,9 @@
 
   "block-gauge-32v": "32V Kabelziehstein",
   "block-gauge-128v": "128V Kabelziehstein",
+
+  "electricalprogressive:input": "Eingang",
+  "electricalprogressive:output": "Ausgang",
 
   "electricalprogressive:produced-in": "Verarbeitet in:",
   "electricalprogressive:energy-required": "Benötigte Energie",

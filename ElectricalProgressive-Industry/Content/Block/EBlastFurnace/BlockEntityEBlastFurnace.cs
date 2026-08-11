@@ -10,6 +10,7 @@ using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
+using MachineConstruct = global::ElectricalProgressive.Construction.BEBehaviorMachineConstruct;
 
 namespace ElectricalProgressive.Content.Block.EBlastFurnace
 {
@@ -26,6 +27,23 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
         public string CurrentRecipeName;
         public float RecipeProgress;
         public int AccumulatedEnergy { get; set; }
+
+        /// <summary>
+        /// Машина готова к работе (сборка Core MachineConstruct завершена / formed).
+        /// </summary>
+        public bool StructureComplete
+        {
+            get
+            {
+                var construct = GetBehavior<MachineConstruct>();
+                if (construct != null && construct.HasConstruction)
+                    return construct.IsReady;
+                return true;
+            }
+            set { /* совместимость; состояние в BEBehaviorMachineConstruct */ }
+        }
+
+        public bool IsFormed => Block?.Variant?["state"] == "formed";
 
         // Новые поля для нагрева
         private const float MAX_TEMP = 2000f;
@@ -210,6 +228,9 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
 
         public void AddEnergy(int amount)
         {
+            if (!StructureComplete)
+                return;
+
             if (CurrentRecipe == null || InputSlot1.Empty || InputSlot2.Empty)
                 return;
             
@@ -603,7 +624,7 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
         private void Every1000Ms(float dt)
         {
             var beh = GetBehavior<BEBehaviorEBlastFurnace>();
-            if (beh == null)
+            if (beh == null || !StructureComplete)
             {
                 StopWorkingAnim();
                 return;
@@ -643,6 +664,9 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
 
         public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
         {
+            if (!StructureComplete)
+                return true;
+
             if (Api.Side == EnumAppSide.Client)
             {
                 OpenLid();
@@ -704,6 +728,7 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
             tree["_inventory"] = invTree;
             tree.SetFloat("PowerCurrent", RecipeProgress);
             tree.SetInt("accumulatedEnergy", AccumulatedEnergy);
+            tree.SetBool("structureComplete", StructureComplete);
         }
 
         #endregion
@@ -719,7 +744,14 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
 
         public override bool OnTesselation(ITerrainMeshPool mesher, ITesselatorAPI tesselator)
         {
+            // Incomplete: только blueprint — иначе return false дорисует обычный incomplete shape
+            var construct = GetBehavior<MachineConstruct>();
+            if (construct is { IsRenderingBlueprint: true })
+                return base.OnTesselation(mesher, tesselator);
+
+            // MachineConstruct (Core) рисует stage-mesh сам через BEBehavior.OnTesselation
             base.OnTesselation(mesher, tesselator);
+
             if (_meshes != null)
             {
                 for (var i = 0; i < _meshes.Length; i++)

@@ -21,6 +21,18 @@
   "block-ecrusher-*": "Elektryczna kruszarka",
   "block-handbooktitle-ecrusher": "Zastosowanie",
   "block-handbooktext-ecrusher": "Maszyna wieloblokowa 2×2×2. Rozdrabnia rudę i inne materiały, dając więcej bryłek niż przy ręcznej obróbce. Obsługuje dodatkowe wyjścia według receptur.<br>Obsługuje automatyczne ładowanie i rozładowywanie za pomocą lejów. Zasilanie: 128 V.",
+  "block-eblastfurnace-*": "Elektryczny wielki piec",
+  "block-handbooktitle-eblastfurnace": "Użycie",
+  "block-handbooktext-eblastfurnace": "Elektryczny wielki piec do wytopu rudy z topnikiem. Multiblok 3×2×2, 128 V. Montaż: płyty stalowe, miedziane cewki i cegły ogniotrwałe poziomu 3 (PPM na kontroler). Obsługuje leje.",
+  "eblastfurnace-structure-incomplete": "Wielki piec nie jest zmontowany",
+  "eblastfurnace-structure-complete": "Wielki piec zmontowany",
+  "eblastfurnace-structure-hint": "PPM na kontroler z materiałami: 8 stalowych płyt → 4 miedziane cewki → 8 cegieł ogniotrwałych poziomu 3.",
+  "eblastfurnace-structure-hint-short": "PPM z materiałami — zmontuj (patrz podpowiedzi bloku)",
+  "eblastfurnace-formed-hint": "Zmontowany elektryczny wielki piec.",
+  "eblastfurnace-construct-frame": "Zainstaluj stalową ramę",
+  "eblastfurnace-construct-coils": "Zainstaluj miedziane cewki",
+  "eblastfurnace-construct-lining": "Zainstaluj wykładzinę z cegieł ogniotrwałych poziomu 3",
+  "eblastfurnace-handbook-place-controller": "Postaw kontroler",
 
   "game:ewoodcutter-title-gui": "Elektryczny drwal",
   "block-ewoodcutter-normal": "Elektryczny drwal",
@@ -30,6 +42,7 @@
   "game:epress-title-gui": "Prasa automatyczna",
   "game:edrawing-title-gui": "Ciągadło",
   "game:ecrusher-title-gui": "Elektryczna kruszarka",
+  "game:eblastfurnace-title-gui": "Elektryczny wielki piec",
 
   "block-pressform-axe": "Forma tłoczenia topora",
   "block-pressform-pickaxe": "Forma tłoczenia kilofa",
@@ -43,6 +56,9 @@
 
   "block-gauge-32v": "Ciągadło na kable 32V",
   "block-gauge-128v": "Ciągadło na kable 128V",
+
+  "electricalprogressive:input": "Wejście",
+  "electricalprogressive:output": "Wyjście",
 
   "electricalprogressive:produced-in": "Przetwarzane w:",
   "electricalprogressive:energy-required": "Wymagana energia",

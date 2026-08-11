@@ -82,7 +82,7 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         BlastFurnaceRecipes = [];
         LoadRecipes<BlastFurnaceRecipe>("BlastFurnace Recipe", "recipes/electric/blastfurnacerecipe", BlastFurnaceRecipes.Add);
         api.World.Logger.Debug(Lang.Get("electricalprogressiveindustry:recipeloading"));
-        machines.Add("eblastfurnace-", ("electricalprogressiveindustry:eblastfurnace-north", BlastFurnaceRecipes));
+        machines.Add("eblastfurnace-", ("electricalprogressiveindustry:eblastfurnace-incomplete-north", BlastFurnaceRecipes));
     }
 
     // НОВЫЙ МЕТОД

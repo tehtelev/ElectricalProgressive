@@ -71,6 +71,9 @@ public class BEBehaviorEBlastFurnace : BlockEntityBehavior, IElectricConsumer
         {
             if (Blockentity is BlockEntityEBlastFurnace entity)
             {
+                if (!entity.StructureComplete)
+                    return false;
+
                 if (entity.ElectricalProgressive == null &&
                     entity.ElectricalProgressive.AllEparams == null &&
                     entity.ElectricalProgressive.AllEparams.Any(e => e.burnout))
@@ -101,6 +104,14 @@ public class BEBehaviorEBlastFurnace : BlockEntityBehavior, IElectricConsumer
             return;
 
         if (IsBurned) return;
+
+        if (!entity.StructureComplete)
+        {
+            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-incomplete"));
+            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-hint"));
+            stringBuilder.AppendLine();
+            return;
+        }
 
         stringBuilder.AppendLine(StringHelper.Progressbar(PowerSetting * 100.0f / _maxConsumption));
         stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Consumption") + ": " + PowerSetting + "/" + _maxConsumption + " " + Lang.Get("electricalprogressivebasics:W"));
@@ -140,6 +151,9 @@ public class BEBehaviorEBlastFurnace : BlockEntityBehavior, IElectricConsumer
     {
         if (Blockentity is not BlockEntityEBlastFurnace entity)
             return PowerSetting = 0;
+
+        if (!entity.StructureComplete)
+            return PowerSetting = 0;
         
         var hasRecipe = BlockEntityEBlastFurnace.FindMatchingRecipe(ref entity.CurrentRecipe, ref entity.CurrentRecipeName, entity.inventory);
         
@@ -152,6 +166,15 @@ public class BEBehaviorEBlastFurnace : BlockEntityBehavior, IElectricConsumer
     public void Consume_receive(float amount)
     {
         if (Blockentity is not BlockEntityEBlastFurnace entity)
+        {
+            PowerSetting = 0;
+            _accumulatedEnergy = 0;
+            _lastEnergyTime = 0;
+            _currentState = FurnaceState.Idle;
+            return;
+        }
+
+        if (!entity.StructureComplete)
         {
             PowerSetting = 0;
             _accumulatedEnergy = 0;

@@ -21,6 +21,18 @@
   "block-ecrusher-*": "Trituradora eléctrica",
   "block-handbooktitle-ecrusher": "Uso",
   "block-handbooktext-ecrusher": "Máquina multibloque 2×2×2. Tritura mineral y otros materiales, produciendo más pepitas que el procesado manual. Admite salidas extra según las recetas.<br>Admite carga y descarga automática mediante tolvas. Alimentación: 128 V.",
+  "block-eblastfurnace-*": "Alto horno eléctrico",
+  "block-handbooktitle-eblastfurnace": "Uso",
+  "block-handbooktext-eblastfurnace": "Alto horno eléctrico para fundir mineral con fundente. Multibloque 3×2×2, 128 V. Ensamblar con placas de acero, bobinas de cobre y ladrillos refractarios nivel 3 (clic derecho en el controlador). Admite tolvas.",
+  "eblastfurnace-structure-incomplete": "El alto horno no está ensamblado",
+  "eblastfurnace-structure-complete": "Alto horno ensamblado",
+  "eblastfurnace-structure-hint": "Clic derecho en el controlador con materiales: 8 placas de acero → 4 bobinas de cobre → 8 ladrillos refractarios nivel 3.",
+  "eblastfurnace-structure-hint-short": "Clic derecho con materiales — ensamblar (ver pistas del bloque)",
+  "eblastfurnace-formed-hint": "Alto horno eléctrico ensamblado.",
+  "eblastfurnace-construct-frame": "Instalar bastidor de acero",
+  "eblastfurnace-construct-coils": "Instalar bobinas de cobre",
+  "eblastfurnace-construct-lining": "Instalar revestimiento de ladrillos refractarios nivel 3",
+  "eblastfurnace-handbook-place-controller": "Colocar el controlador",
 
   "game:ewoodcutter-title-gui": "Cortador de Madera Eléctrico",
   "block-ewoodcutter-normal": "Cortador de Madera Eléctrico",
@@ -30,6 +42,7 @@
   "game:epress-title-gui": "Prensa Automática",
   "game:edrawing-title-gui": "Máquina de Trefilar",
   "game:ecrusher-title-gui": "Trituradora eléctrica",
+  "game:eblastfurnace-title-gui": "Alto horno eléctrico",
 
   "block-pressform-axe": "Molde de Prensa para Hacha",
   "block-pressform-pickaxe": "Molde de Prensa para Pico",
@@ -43,6 +56,9 @@
 
   "block-gauge-32v": "Hiladora para Cable 32V",
   "block-gauge-128v": "Hiladora para Cable 128V",
+
+  "electricalprogressive:input": "Entrada",
+  "electricalprogressive:output": "Salida",
 
   "electricalprogressive:produced-in": "Procesado en:",
   "electricalprogressive:energy-required": "Energía requerida",

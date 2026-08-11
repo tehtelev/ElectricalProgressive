@@ -1,4 +1,4 @@
-{
+﻿{
   "electricalprogressiveindustry:recipeloading": "Рэцэпт паспяхова загружаны",
   "electricalprogressiveindustry:blockhelp-pickup": "Падняць",
 
@@ -21,6 +21,18 @@
   "block-ecrusher-*": "Электрычная драбiлка",
   "block-handbooktitle-ecrusher": "Выкарыстанне",
   "block-handbooktext-ecrusher": "Шматблочная машына 2×2×2. Драбніць руду і іншыя матэрыялы, даючы больш самародкаў, чым пры ручной апрацоўцы. Падтрымлівае бонусны выхад па рэцэптах.<br>Падтрымлівае аўтаматычную загрузку і выгрузку праз жалабы. Сілкаванне: 128 В.",
+  "block-eblastfurnace-*": "Электрычная домна",
+  "block-handbooktitle-eblastfurnace": "Выкарыстанне",
+  "block-handbooktext-eblastfurnace": "Электрычная домна для плаўкі руды з флюсам. Шматблок 3×2×2, 128 В. Зборка: сталёвыя пласціны, медныя катушкі і вогнетрывалая цэгла 3 узроўню (ПКМ па кантролеру). Падтрымлівае жолабы.",
+  "eblastfurnace-structure-incomplete": "Домна не сабрана",
+  "eblastfurnace-structure-complete": "Домна сабрана",
+  "eblastfurnace-structure-hint": "ПКМ па кантролеру з рэсурсамі: 8 сталёвых пласцін → 4 медныя катушкі → 8 вогнетрывалых цэглін 3 узроўню.",
+  "eblastfurnace-structure-hint-short": "ПКМ з рэсурсамі — сабраць (падказкі на блоку)",
+  "eblastfurnace-formed-hint": "Сабраная электрычная домна.",
+  "eblastfurnace-construct-frame": "Усталяваць сталёвы каркас",
+  "eblastfurnace-construct-coils": "Усталяваць медныя катушкі",
+  "eblastfurnace-construct-lining": "Усталяваць футэраванне з вогнетрывалай цэглы 3 узроўню",
+  "eblastfurnace-handbook-place-controller": "Паставіць кантролер",
 
   "game:ewoodcutter-title-gui": "Электрычны дрэвасек",
   "block-ewoodcutter-normal": "Электрычны дрэвасек",
@@ -30,6 +42,7 @@
   "game:epress-title-gui": "Аўтапрэс",
   "game:edrawing-title-gui": "Валачыльны стан",
   "game:ecrusher-title-gui": "Электрычная драбiлка",
+  "game:eblastfurnace-title-gui": "Электрычная домна",
 
   "block-pressform-axe": "Форма для прэсавання сякеры",
   "block-pressform-pickaxe": "Форма для прэсавання кірхі",
@@ -43,6 +56,9 @@
 
   "block-gauge-32v": "Валака для кабеля 32В",
   "block-gauge-128v": "Валака для кабеля 128В",
+
+  "electricalprogressive:input": "Уваход",
+  "electricalprogressive:output": "Выхад",
 
   "electricalprogressive:produced-in": "Перапрацоўваецца ў:",
   "electricalprogressive:energy-required": "Патрабуецца энергіі",

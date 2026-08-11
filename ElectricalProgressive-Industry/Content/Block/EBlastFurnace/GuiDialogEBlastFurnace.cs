@@ -82,8 +82,7 @@ public class GuiDialogEBlastFurnace : GuiDialogBlockEntity
             .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 1, new int[2] { 0, 1 }, inputSlotBounds, "inputSlot")
             .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 2, new int[2] { 2, 3 }, outputSlotBounds, "outputslot")
             
-            .AddStaticText(Lang.Get("electricalprogressive:ore"), CairoFont.WhiteDetailText(), ElementBounds.Fixed(10, 150, 40, 20))
-            .AddStaticText(Lang.Get("electricalprogressive:flux"), CairoFont.WhiteDetailText(), ElementBounds.Fixed(55, 150, 40, 20))
+            .AddStaticText(Lang.Get("electricalprogressive:input"), CairoFont.WhiteDetailText(), ElementBounds.Fixed(10, 150, 50, 20))
             .AddStaticText(Lang.Get("electricalprogressive:output"), CairoFont.WhiteDetailText(), ElementBounds.Fixed(230, 120, 50, 20))
             
             .EndChildElements()

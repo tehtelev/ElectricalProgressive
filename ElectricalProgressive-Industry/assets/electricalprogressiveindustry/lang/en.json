@@ -37,6 +37,18 @@
   "block-ecrusher-*": "Electric Crusher",
   "block-handbooktitle-ecrusher": "Usage",
   "block-handbooktext-ecrusher": "Multiblock crusher (2×2×2), 128 V. Crushes ore with bonus outputs; hoppers supported.",
+  "block-eblastfurnace-*": "Electric Blast Furnace",
+  "block-handbooktitle-eblastfurnace": "Usage",
+  "block-handbooktext-eblastfurnace": "Electric blast furnace for smelting ore with flux. Multiblock 3×2×2, 128 V. Assemble with steel plates, copper coils and tier 3 refractory bricks (RMB on controller). Supports hoppers.",
+  "eblastfurnace-structure-incomplete": "Blast furnace is not assembled",
+  "eblastfurnace-structure-complete": "Blast furnace assembled",
+  "eblastfurnace-structure-hint": "Right-click the controller with materials: 8 steel plates → 4 copper coils → 8 tier 3 refractory bricks.",
+  "eblastfurnace-structure-hint-short": "RMB with materials — assemble (see block hints)",
+  "eblastfurnace-formed-hint": "Assembled electric blast furnace.",
+  "eblastfurnace-construct-frame": "Install steel frame",
+  "eblastfurnace-construct-coils": "Install copper coils",
+  "eblastfurnace-construct-lining": "Install tier 3 refractory brick lining",
+  "eblastfurnace-handbook-place-controller": "Place the controller",
 
   "ecrusher-structure-incomplete": "Crusher is not assembled",
   "ecrusher-structure-complete": "Crusher assembled",
@@ -61,6 +73,7 @@
   "game:epress-title-gui": "Auto-Press",
   "game:edrawing-title-gui": "Drawing Machine",
   "game:ecrusher-title-gui": "Electric Crusher",
+  "game:eblastfurnace-title-gui": "Electric Blast Furnace",
 
   "block-pressform-axe": "Axe Press Mold",
   "block-pressform-pickaxe": "Pickaxe Press Mold",
@@ -74,6 +87,9 @@
 
   "block-gauge-32v": "32V Cable Gauge",
   "block-gauge-128v": "128V Cable Gauge",
+
+  "electricalprogressive:input": "Input",
+  "electricalprogressive:output": "Output",
 
   "electricalprogressive:produced-in": "Processed in:",
   "electricalprogressive:energy-required": "Energy required",

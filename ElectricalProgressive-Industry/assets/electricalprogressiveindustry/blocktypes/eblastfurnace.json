@@ -1,4 +1,4 @@
-﻿{
+{
   "code": "eblastfurnace",
   "class": "BlockEBlastFurnace",
   "entityClass": "BlockEntityEBlastFurnace",
@@ -18,11 +18,55 @@
     "isolated": true,
     "isolatedEnvironment": true,
     "handbook": {
-      "groupBy": [ "eblastfurnace" ],
+      "groupBy": [ "eblastfurnace-*" ],
       "extraSections": [
         {
           "title": "electricalprogressiveindustry:block-handbooktitle-eblastfurnace",
           "text": "electricalprogressiveindustry:block-handbooktext-eblastfurnace"
+        }
+      ]
+    },
+    "construction": {
+      "brokenDropsRatio": 1,
+      "blueprintShape": "block/eblastfurnace/eblastfurnace",
+      "levels": [
+        {
+          "shape": "block/eblastfurnace/eblastfurnace_base",
+          "actionLangCode": "electricalprogressiveindustry:eblastfurnace-handbook-place-controller"
+        },
+        {
+          "shape": "block/eblastfurnace/eblastfurnace_base",
+          "actionLangCode": "electricalprogressiveindustry:eblastfurnace-construct-frame",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "game:metalplate-steel",
+              "quantity": 8
+            }
+          ]
+        },
+        {
+          "shape": "block/eblastfurnace/eblastfurnace_base2",
+          "actionLangCode": "electricalprogressiveindustry:eblastfurnace-construct-coils",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "electricalprogressivebasics:coil",
+              "quantity": 4
+            }
+          ]
+        },
+        {
+          "shape": "block/eblastfurnace/eblastfurnace_base3",
+          "actionLangCode": "electricalprogressiveindustry:eblastfurnace-construct-lining",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "game:refractorybrick-fired-tier3",
+              "quantity": 8
+            }
+          ],
+          "formMachine": true
         }
       ]
     }
@@ -41,12 +85,16 @@
   ],
 
   "creativeinventory": {
-    "general": [ "*-north" ],
-    "electricity": [ "*-north" ]
+    "general": [ "*-incomplete-north" ],
+    "electricity": [ "*-incomplete-north" ]
   },
 
   "behaviors": [
-    { "name": "HorizontalOrientable" },
+    {
+      "name": "HorizontalOrientable",
+      "properties": { "handleDrop": false }
+    },
+    { "name": "BlockEntityInteract" },
     {
       "name": "Multiblock",
       "propertiesByType": {
@@ -98,41 +146,85 @@
 
   "variantgroups": [
     {
+      "code": "state",
+      "states": [ "incomplete", "formed" ]
+    },
+    {
       "code": "side",
       "loadFromProperties": "abstract/horizontalorientation"
     }
   ],
 
   "shapebytype": {
-    "*-north": {
+    "*-incomplete-north": {
+      "base": "block/eblastfurnace/eblastfurnace_base",
+      "rotateY": 0
+    },
+    "*-incomplete-east": {
+      "base": "block/eblastfurnace/eblastfurnace_base",
+      "rotateY": 270
+    },
+    "*-incomplete-south": {
+      "base": "block/eblastfurnace/eblastfurnace_base",
+      "rotateY": 180
+    },
+    "*-incomplete-west": {
+      "base": "block/eblastfurnace/eblastfurnace_base",
+      "rotateY": 90
+    },
+    "*-formed-north": {
       "base": "block/eblastfurnace/eblastfurnace",
       "rotateY": 0
     },
-    "*-east": {
+    "*-formed-east": {
       "base": "block/eblastfurnace/eblastfurnace",
       "rotateY": 270
     },
-    "*-south": {
+    "*-formed-south": {
       "base": "block/eblastfurnace/eblastfurnace",
       "rotateY": 180
     },
-    "*-west": {
+    "*-formed-west": {
       "base": "block/eblastfurnace/eblastfurnace",
       "rotateY": 90
     }
   },
-  "lightAbsorption": 0,
+
+  "shapeInventoryByType": {
+    "*-incomplete-*": {
+      "base": "block/eblastfurnace/eblastfurnace",
+      "rotateY": 0
+    },
+    "*-formed-*": {
+      "base": "block/eblastfurnace/eblastfurnace",
+      "rotateY": 0
+    }
+  },
+
+  "lightAbsorptionByType": {
+    "*-incomplete-*": 0,
+    "*-formed-*": 0
+  },
+
   "sidesolid": {
     "all": false
   },
   "sideopaque": {
     "all": false
   },
+  "emitSideAo": {
+    "all": false
+  },
+  "sideAo": {
+    "all": true
+  },
   "resistance": 3.5,
+
   "sounds": {
     "place": "game:block/anvil",
     "walk": "game:walk/metal"
   },
+
   "guiTransform": {
     "rotation": {
       "x": -22.6,
@@ -146,9 +238,18 @@
     },
     "scale": 0.72
   },
+
+  "groundTransform": {
+    "translation": { "x": 0, "y": 0.1, "z": 0 },
+    "rotation": { "x": 0, "y": -45, "z": 0 },
+    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
+    "scale": 1.6
+  },
+
   "heldTpIdleAnimation": "holdbothhandslarge",
   "heldRightReadyAnimation": "heldblockready",
   "heldTpUseAnimation": "twohandplaceblock",
+
   "tpHandTransform": {
     "translation": {
       "x": -0.6,

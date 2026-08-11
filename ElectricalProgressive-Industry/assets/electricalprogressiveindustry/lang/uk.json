@@ -21,6 +21,18 @@
   "block-ecrusher-*": "Електрична дробарка (контролер)",
   "block-handbooktitle-ecrusher": "Використання",
   "block-handbooktext-ecrusher": "Контролер багатоблочної дробарки (збірка як у сталевої печі). 2×2×2: контролер + 5 iron metalblock + 2 copper metalblock (тимчасова заглушка замість роторів). Shift+ПКМ — схема. Працює лише зібраною.",
+  "block-eblastfurnace-*": "Електрична доменна піч",
+  "block-handbooktitle-eblastfurnace": "Використання",
+  "block-handbooktext-eblastfurnace": "Електрична доменна піч для плавки руди з флюсом. Багатоблок 3×2×2, 128 В. Збірка: сталеві пластини, мідні котушки та вогнетривка цегла 3 рівня (ПКМ по контролеру). Підтримує жолоби.",
+  "eblastfurnace-structure-incomplete": "Доменна піч не зібрана",
+  "eblastfurnace-structure-complete": "Доменна піч зібрана",
+  "eblastfurnace-structure-hint": "ПКМ по контролеру з ресурсами: 8 сталевих пластин → 4 мідні котушки → 8 вогнетривких цеглин 3 рівня.",
+  "eblastfurnace-structure-hint-short": "ПКМ з ресурсами — зібрати (підказки на блоці)",
+  "eblastfurnace-formed-hint": "Зібрана електрична доменна піч.",
+  "eblastfurnace-construct-frame": "Встановити сталевий каркас",
+  "eblastfurnace-construct-coils": "Встановити мідні котушки",
+  "eblastfurnace-construct-lining": "Встановити футеровку з вогнетривкої цегли 3 рівня",
+  "eblastfurnace-handbook-place-controller": "Поставити контролер",
 
   "ecrusher-structure-incomplete": "Структура дробарки не зібрана",
   "ecrusher-structure-complete": "Структура дробарки зібрана",
@@ -35,6 +47,7 @@
   "game:epress-title-gui": "Автопрес",
   "game:edrawing-title-gui": "Волочувальна машина",
   "game:ecrusher-title-gui": "Електрична дробарка",
+  "game:eblastfurnace-title-gui": "Електрична доменна піч",
 
   "block-pressform-axe": "Пресформа сокири",
   "block-pressform-pickaxe": "Пресформа кирки",
@@ -48,6 +61,9 @@
 
   "block-gauge-32v": "Калібр для кабелів 32В",
   "block-gauge-128v": "Калібр для кабелів 128В",
+
+  "electricalprogressive:input": "Вхід",
+  "electricalprogressive:output": "Вихід",
 
   "electricalprogressive:produced-in": "Обробляється в:",
   "electricalprogressive:energy-required": "Потрібно енергії",

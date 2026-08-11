@@ -21,6 +21,18 @@
   "block-ecrusher-*": "Britador elétrico",
   "block-handbooktitle-ecrusher": "Uso",
   "block-handbooktext-ecrusher": "Máquina multibloco 2×2×2. Tritura minério e outros materiais, rendendo mais pepitas do que o processamento manual. Suporta saídas bônus via receitas.<br>Suporta carregamento e descarregamento automático via funis. Alimentação: 128 V.",
+  "block-eblastfurnace-*": "Alto-forno elétrico",
+  "block-handbooktitle-eblastfurnace": "Uso",
+  "block-handbooktext-eblastfurnace": "Alto-forno elétrico para fundir minério com fundente. Multibloco 3×2×2, 128 V. Montagem com placas de aço, bobinas de cobre e tijolos refratários nível 3 (clique direito no controlador). Suporta funis.",
+  "eblastfurnace-structure-incomplete": "O alto-forno não está montado",
+  "eblastfurnace-structure-complete": "Alto-forno montado",
+  "eblastfurnace-structure-hint": "Clique direito no controlador com materiais: 8 placas de aço → 4 bobinas de cobre → 8 tijolos refratários nível 3.",
+  "eblastfurnace-structure-hint-short": "Clique direito com materiais — montar (veja dicas do bloco)",
+  "eblastfurnace-formed-hint": "Alto-forno elétrico montado.",
+  "eblastfurnace-construct-frame": "Instalar estrutura de aço",
+  "eblastfurnace-construct-coils": "Instalar bobinas de cobre",
+  "eblastfurnace-construct-lining": "Instalar revestimento de tijolos refratários nível 3",
+  "eblastfurnace-handbook-place-controller": "Colocar o controlador",
 
   "game:ewoodcutter-title-gui": "Cortador de Madeira Elétrico",
   "block-ewoodcutter-normal": "Cortador de Madeira Elétrico",
@@ -30,6 +42,7 @@
   "game:epress-title-gui": "Prensa Automática",
   "game:edrawing-title-gui": "Máquina de Trefilar",
   "game:ecrusher-title-gui": "Britador elétrico",
+  "game:eblastfurnace-title-gui": "Alto-forno elétrico",
 
   "block-pressform-axe": "Molde de Prensa para Machado",
   "block-pressform-pickaxe": "Molde de Prensa para Picareta",
@@ -43,6 +56,9 @@
 
   "block-gauge-32v": "Fieira para Cabos 32V",
   "block-gauge-128v": "Fieira para Cabos 128V",
+
+  "electricalprogressive:input": "Entrada",
+  "electricalprogressive:output": "Saída",
 
   "electricalprogressive:produced-in": "Processado em:",
   "electricalprogressive:energy-required": "Energia necessária",

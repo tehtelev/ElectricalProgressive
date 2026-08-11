@@ -21,6 +21,18 @@
   "block-ecrusher-*": "Elektrický drtič",
   "block-handbooktitle-ecrusher": "Použití",
   "block-handbooktext-ecrusher": "Víceblokový stroj 2×2×2. Drtí rudu a další materiály a dává více nugetů než ruční zpracování. Podporuje bonusové výstupy podle receptur.<br>Podporuje automatické nakládání a vykládání pomocí násypek. Napájení: 128 V.",
+  "block-eblastfurnace-*": "Elektrická vysoká pec",
+  "block-handbooktitle-eblastfurnace": "Použití",
+  "block-handbooktext-eblastfurnace": "Elektrická vysoká pec na tavení rudy s tavidlem. Multiblok 3×2×2, 128 V. Sestavení ocelovými deskami, měděnými cívkami a žáruvzdornými cihlami 3. úrovně (PKM na kontroler). Podporuje násypky.",
+  "eblastfurnace-structure-incomplete": "Vysoká pec není sestavena",
+  "eblastfurnace-structure-complete": "Vysoká pec sestavena",
+  "eblastfurnace-structure-hint": "Pravé tlačítko na kontroler s materiály: 8 ocelových desek → 4 měděné cívky → 8 žáruvzdorných cihel 3. úrovně.",
+  "eblastfurnace-structure-hint-short": "PKM s materiály — sestavit (viz nápovědy bloku)",
+  "eblastfurnace-formed-hint": "Sestavená elektrická vysoká pec.",
+  "eblastfurnace-construct-frame": "Nainstalovat ocelový rám",
+  "eblastfurnace-construct-coils": "Nainstalovat měděné cívky",
+  "eblastfurnace-construct-lining": "Nainstalovat vyzdívku ze žáruvzdorných cihel 3. úrovně",
+  "eblastfurnace-handbook-place-controller": "Umístit kontroler",
 
   "game:ewoodcutter-title-gui": "Elektrický dřevorubec",
   "block-ewoodcutter-normal": "Elektrický dřevorubec",
@@ -30,6 +42,7 @@
   "game:epress-title-gui": "Automatický lis",
   "game:edrawing-title-gui": "Tahací stroj",
   "game:ecrusher-title-gui": "Elektrický drtič",
+  "game:eblastfurnace-title-gui": "Elektrická vysoká pec",
 
   "block-pressform-axe": "Lisovací forma sekery",
   "block-pressform-pickaxe": "Lisovací forma krumpáče",
@@ -43,6 +56,9 @@
 
   "block-gauge-32v": "Tažnice pro kabel 32V",
   "block-gauge-128v": "Tažnice pro kabel 128V",
+
+  "electricalprogressive:input": "Vstup",
+  "electricalprogressive:output": "Výstup",
 
   "electricalprogressive:produced-in": "Zpracováno v:",
   "electricalprogressive:energy-required": "Potřebná energie",
