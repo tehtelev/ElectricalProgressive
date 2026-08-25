@@ -15,7 +15,7 @@ using MachineConstruct = global::ElectricalProgressive.Construction.BEBehaviorMa
 
 namespace ElectricalProgressive.Content.Block.ESieve
 {
-    public class BlockEntityESieve : BlockEntityGenericTypedContainer, ITexPositionSource
+    public class BlockEntityESieve : BlockEntityGenericTypedContainer
     {
         public const int OUTPUT_SLOTS_COUNT = 25; // 25 выходных слотов
         public const int TOTAL_SLOTS = 1 + OUTPUT_SLOTS_COUNT; // 1 вход + 25 выходов = 26 слотов
@@ -60,10 +60,6 @@ namespace ElectricalProgressive.Content.Block.ESieve
         private int _lastSoundFrame = -1;
         private long _lastAnimationCheckTime;
 
-        private MeshData?[] _meshes;
-        private Shape? _nowTesselatingShape;
-        private CollectibleObject _nowTesselatingObj;
-
         private Facing _facing = Facing.None;
         public BEBehaviorElectricalProgressive ElectricalProgressive => GetBehavior<BEBehaviorElectricalProgressive>();
 
@@ -80,6 +76,24 @@ namespace ElectricalProgressive.Content.Block.ESieve
         }
 
         private AssetLocation _soundSieve;
+
+        /// <summary>
+        /// Низ барабана InvFrame35 — зона крупинок и старт сыпи на лоток (north, блоки).
+        /// </summary>
+        private const float DrumBottomX = 0.941f;
+        private const float DrumBottomY = 1.672f;
+        private const float DrumBottomZ = -0.145f;
+
+        /// <summary>Радиус барабана до панели InvFrame35.</summary>
+        private const float DrumRadius = 0.541f;
+
+        /// <summary>Длина зоны частиц вдоль оси барабана (половина).</summary>
+        private const float DrumHalfLength = 0.85f;
+
+        /// <summary>Лоток Cube160 — куда ссыпаются частицы.</summary>
+        private const float TrayLocalX = -0.631f;
+        private const float TrayLocalY = 0.300f;
+        private const float TrayLocalZ = -0.500f;
 
         public BlockEntityESieve()
         {
@@ -142,18 +156,15 @@ namespace ElectricalProgressive.Content.Block.ESieve
             base.Initialize(api);
             this.inventory.LateInitialize(InventoryClassName + "-" + this.Pos.X.ToString() + "/" + this.Pos.Y.ToString() + "/" + this.Pos.Z.ToString(), api);
             this.RegisterGameTickListener(Every1000Ms, 1000);
+            // Густой поток крупинок — только клиент, часто
+            if (api.Side == EnumAppSide.Client)
+                this.RegisterGameTickListener(SievingFxTick, 70);
 
             if (api.Side == EnumAppSide.Client)
             {
                 _capi = api as ICoreClientAPI;
-                _meshes = new MeshData[this.inventory.Count];
-
-                this.inventory.SlotModified += slotId => UpdateMeshes();
-                UpdateMeshes();
-
                 _soundSieve = new AssetLocation("electricalprogressiveindustry:sounds/esieve/sieve.ogg");
                 this.RegisterGameTickListener(CheckAnimationFrame, 50);
-                UpdateMeshes();
                 EnsureAnimatorReady();
             }
         }
@@ -225,193 +236,7 @@ namespace ElectricalProgressive.Content.Block.ESieve
                 UpdateState(RecipeProgress);
             }
 
-            if (slotid == 0 && Api.Side == EnumAppSide.Client)
-            {
-                UpdateMesh(0);
-            }
-
             MarkDirty();
-        }
-
-        public TextureAtlasPosition this[string textureCode]
-        {
-            get
-            {
-                var assetLocation = default(AssetLocation?);
-
-                if (_nowTesselatingObj is Vintagestory.API.Common.Item item)
-                {
-                    if (item.Textures.TryGetValue(textureCode, out var compositeTexture))
-                        assetLocation = compositeTexture.Baked.BakedName;
-                    else if (item.Textures.TryGetValue("all", out compositeTexture))
-                        assetLocation = compositeTexture.Baked.BakedName;
-                }
-                else if (_nowTesselatingObj is Vintagestory.API.Common.Block block)
-                {
-                    if (block.Textures.TryGetValue(textureCode, out var compositeTexture))
-                        assetLocation = compositeTexture.Baked.BakedName;
-                    else if (block.Textures.TryGetValue("all", out compositeTexture))
-                        assetLocation = compositeTexture.Baked.BakedName;
-                }
-
-                if (assetLocation == null && _nowTesselatingShape != null)
-                    _nowTesselatingShape.Textures.TryGetValue(textureCode, out assetLocation);
-
-                if (assetLocation == null)
-                {
-                    var domain = _nowTesselatingObj.Code.Domain;
-                    assetLocation = new(domain, "textures/item/" + textureCode);
-                }
-
-                return GetOrCreateTexPos(assetLocation);
-            }
-        }
-
-        private TextureAtlasPosition? GetOrCreateTexPos(AssetLocation texturePath)
-        {
-            var textureAtlasPosition = _capi.BlockTextureAtlas[texturePath];
-            if (textureAtlasPosition != null)
-                return textureAtlasPosition;
-
-            var pos = texturePath.Path.IndexOf("++");
-            if (pos >= 0)
-                texturePath.Path = texturePath.Path.Substring(0, pos);
-
-            var asset = _capi.Assets.TryGet(texturePath.Clone().WithPathPrefixOnce("textures/").WithPathAppendixOnce(".png"));
-            if (asset != null)
-            {
-                _capi.BlockTextureAtlas.GetOrInsertTexture(texturePath, out var num, out textureAtlasPosition, null, 0.005f);
-            }
-
-            return textureAtlasPosition;
-        }
-
-        public Size2i AtlasSize => _capi.BlockTextureAtlas.Size;
-
-        public void UpdateMesh(int slotid)
-        {
-            if (Api == null || Api.Side == EnumAppSide.Server || _capi == null)
-                return;
-
-            if (slotid >= this.inventory.Count)
-                return;
-
-            if (slotid != 0)
-            {
-                _meshes[slotid] = null;
-                return;
-            }
-
-            if (this.inventory[slotid].Empty)
-            {
-                _meshes[slotid] = null;
-                return;
-            }
-
-            var stack = this.inventory[slotid].Itemstack;
-
-            if (stack == null || stack.Collectible == null)
-            {
-                _meshes[slotid] = null;
-                return;
-            }
-
-            var meshData = GenMesh(inventory[slotid]);
-            if (meshData != null)
-            {
-                TranslateMesh(meshData, slotid);
-                _meshes[slotid] = meshData;
-            }
-            else
-            {
-                _meshes[slotid] = null;
-            }
-        }
-
-        public void TranslateMesh(MeshData? meshData, int slotId)
-        {
-            if (meshData == null || slotId != 0)
-                return;
-
-            var stack = this.inventory[slotId].Itemstack;
-            var origin = new Vec3f(0.5f, 0, 0.5f);
-            var orientationRotate = Block.Shape.rotateY;
-
-            if (stack.Class == EnumItemClass.Item)
-            {
-                var scaleX = MyMiniLib.GetAttributeFloat(stack.Item, "scaleX", 0.6F);
-                var scaleY = MyMiniLib.GetAttributeFloat(stack.Item, "scaleY", 0.6F);
-                var scaleZ = MyMiniLib.GetAttributeFloat(stack.Item, "scaleZ", 0.6F);
-                var translateX = MyMiniLib.GetAttributeFloat(stack.Item, "translateX", 0F);
-                var translateY = MyMiniLib.GetAttributeFloat(stack.Item, "translateY", 0.2F);
-                var translateZ = MyMiniLib.GetAttributeFloat(stack.Item, "translateZ", 0F);
-                var rotateX = MyMiniLib.GetAttributeFloat(stack.Item, "rotateX", 0F);
-                var rotateY = MyMiniLib.GetAttributeFloat(stack.Item, "rotateY", 0F);
-                var rotateZ = MyMiniLib.GetAttributeFloat(stack.Item, "rotateZ", 0F);
-
-                meshData.Scale(origin, scaleX, scaleY, scaleZ);
-                meshData.Translate(translateX, translateY + 0.3f, translateZ);
-                meshData.Rotate(origin, rotateX * GameMath.DEG2RAD, rotateY * GameMath.DEG2RAD, rotateZ * GameMath.DEG2RAD);
-            }
-            else
-            {
-                meshData.Scale(origin, 0.7f, 0.7f, 0.7f);
-                meshData.Translate(0.5f, 0.3f, 0.5f);
-            }
-    
-            meshData.Rotate(origin, 0, orientationRotate * GameMath.DEG2RAD, 0);
-        }
-
-        public MeshData? GenMesh(ItemSlot slot)
-        {
-            var stack = slot.Itemstack;
-            if (stack == null)
-                return null;
-
-            MeshData meshData;
-            try
-            {
-                var meshSource = stack.Collectible as IContainedMeshSource;
-
-                if (meshSource != null)
-                {
-                    meshData = meshSource.GenMesh(slot, _capi.BlockTextureAtlas, Pos);
-                    meshData.Rotate(new Vec3f(0.5f, 0.5f, 0.5f), 0f, Block.Shape.rotateY * 0.0174532924f, 0f);
-                }
-                else
-                {
-                    if (stack.Class == EnumItemClass.Block)
-                    {
-                        meshData = _capi.TesselatorManager.GetDefaultBlockMesh(stack.Block).Clone();
-                    }
-                    else
-                    {
-                        _nowTesselatingObj = stack.Collectible;
-                        _nowTesselatingShape = null;
-
-                        if (stack.Item.Shape != null)
-                            _nowTesselatingShape = _capi.TesselatorManager.GetCachedShape(stack.Item.Shape.Base);
-
-                        _capi.Tesselator.TesselateItem(stack.Item, out meshData, this);
-                        meshData.RenderPassesAndExtraBits.Fill((short)2);
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Api.World.Logger.Error("Не удалось выполнить тесселяцию предмета {0}: {1}", stack.Item.Code, e.Message);
-                meshData = null;
-            }
-
-            return meshData;
-        }
-
-        public void UpdateMeshes()
-        {
-            for (var i = 0; i < this.inventory.Count; i++)
-                UpdateMesh(i);
-
-            MarkDirty(true);
         }
 
         #region Логика рецептов
@@ -594,6 +419,7 @@ namespace ElectricalProgressive.Content.Block.ESieve
             if (beh == null || !StructureComplete)
             {
                 StopAnimation();
+                _wasSievingLastTick = false;
                 return;
             }
 
@@ -604,9 +430,7 @@ namespace ElectricalProgressive.Content.Block.ESieve
             if (isSievingNow)
             {
                 if (!_wasSievingLastTick)
-                {
                     StartAnimation();
-                }
 
                 if (CurrentRecipe != null && CurrentRecipe.EnergyOperation > 0)
                 {
@@ -621,6 +445,202 @@ namespace ElectricalProgressive.Content.Block.ESieve
             }
 
             _wasSievingLastTick = isSievingNow;
+        }
+
+        /// <summary>
+        /// Клиентский FX: крупинки в нижней трети барабана + сыпь на Cube160.
+        /// </summary>
+        private void SievingFxTick(float dt)
+        {
+            if (Api?.Side != EnumAppSide.Client || !StructureComplete)
+                return;
+
+            var beh = GetBehavior<BEBehaviorESieve>();
+            if (beh == null || beh.PowerSetting <= 0 || InputSlot.Empty)
+                return;
+
+            var sieving = _wasSievingLastTick ||
+                          (beh.PowerSetting >= _maxConsumption * 0.1f &&
+                           FindMatchingRecipe(ref CurrentRecipe, ref CurrentRecipeName, inventory) &&
+                           CurrentRecipe != null);
+            if (!sieving)
+                return;
+
+            SpawnSieveParticles();
+        }
+
+        private void SpawnSieveParticles()
+        {
+            var stack = InputSlot?.Itemstack;
+            if (stack?.Collectible == null || Api == null)
+                return;
+
+            var bottom = GetRotatedOffset(DrumBottomX, DrumBottomY, DrumBottomZ);
+            var tray = GetRotatedOffset(TrayLocalX, TrayLocalY, TrayLocalZ);
+
+            float fillH = DrumRadius * 2f / 3f; // ~1/3 диаметра
+
+            // --- 1) Крупинки в нижней трети барабана (ворошение) ---
+            GetWorldSpawnBox(
+                DrumBottomX - DrumHalfLength, DrumBottomY + 0.02f, DrumBottomZ - 0.18f,
+                DrumBottomX + DrumHalfLength, DrumBottomY + fillH, DrumBottomZ + 0.18f,
+                out var tumbleMin, out var tumbleSize);
+
+            var tumble = new SimpleParticleProperties(
+                minQuantity: 10,
+                maxQuantity: 18,
+                color: ColorUtil.WhiteArgb,
+                minPos: tumbleMin,
+                maxPos: tumbleMin.AddCopy(tumbleSize.X, tumbleSize.Y, tumbleSize.Z),
+                minVelocity: new Vec3f(-0.9f, 0.15f, -0.9f),
+                maxVelocity: new Vec3f(0.9f, 1.1f, 0.9f),
+                lifeLength: 0.55f,
+                gravityEffect: 0.85f,
+                minSize: 0.045f,
+                maxSize: 0.11f,
+                model: EnumParticleModel.Cube
+            );
+            tumble.AddPos = tumbleSize;
+            tumble.SizeEvolve = new EvolvingNatFloat(EnumTransformFunction.LINEAR, -0.03f);
+            tumble.WindAffected = false;
+            tumble.WithTerrainCollision = false;
+            ApplyStackColor(tumble, stack);
+            Api.World.SpawnParticles(tumble);
+
+            // --- 2) Мелкая пыль ---
+            GetWorldSpawnBox(
+                DrumBottomX - DrumHalfLength * 0.8f, DrumBottomY + 0.05f, DrumBottomZ - 0.12f,
+                DrumBottomX + DrumHalfLength * 0.8f, DrumBottomY + fillH + 0.12f, DrumBottomZ + 0.12f,
+                out var dustMin, out var dustSize);
+
+            var dust = new SimpleParticleProperties(
+                minQuantity: 3,
+                maxQuantity: 6,
+                color: ColorUtil.WhiteArgb,
+                minPos: dustMin,
+                maxPos: dustMin.AddCopy(dustSize.X, dustSize.Y, dustSize.Z),
+                minVelocity: new Vec3f(-0.3f, 0.05f, -0.3f),
+                maxVelocity: new Vec3f(0.3f, 0.45f, 0.3f),
+                lifeLength: 0.7f,
+                gravityEffect: 0.15f,
+                minSize: 0.18f,
+                maxSize: 0.4f,
+                model: EnumParticleModel.Quad
+            );
+            dust.AddPos = dustSize;
+            dust.OpacityEvolve = new EvolvingNatFloat(EnumTransformFunction.LINEAR, -180f);
+            dust.SizeEvolve = new EvolvingNatFloat(EnumTransformFunction.LINEAR, 0.4f);
+            dust.WindAffected = false;
+            dust.WithTerrainCollision = false;
+            ApplyStackColor(dust, stack);
+            Api.World.SpawnParticles(dust);
+
+            // --- 3) Струя с днища на Cube160 ---
+            float dx = (float)(tray.X - bottom.X);
+            float dy = (float)(tray.Y - bottom.Y);
+            float dz = (float)(tray.Z - bottom.Z);
+            float fallTime = 0.65f;
+            float vx = dx / fallTime;
+            float vy = dy / fallTime;
+            float vz = dz / fallTime;
+
+            GetWorldSpawnBox(
+                DrumBottomX - 0.35f, DrumBottomY - 0.08f, DrumBottomZ - 0.1f,
+                DrumBottomX + 0.35f, DrumBottomY + 0.04f, DrumBottomZ + 0.1f,
+                out var streamMin, out var streamSize);
+
+            var stream = new SimpleParticleProperties(
+                minQuantity: 8,
+                maxQuantity: 14,
+                color: ColorUtil.WhiteArgb,
+                minPos: streamMin,
+                maxPos: streamMin.AddCopy(streamSize.X, streamSize.Y, streamSize.Z),
+                minVelocity: new Vec3f(vx - 0.12f, vy - 0.2f, vz - 0.12f),
+                maxVelocity: new Vec3f(vx + 0.12f, vy + 0.05f, vz + 0.12f),
+                lifeLength: fallTime + 0.1f,
+                gravityEffect: 0.45f,
+                minSize: 0.04f,
+                maxSize: 0.1f,
+                model: EnumParticleModel.Cube
+            );
+            stream.AddPos = streamSize;
+            stream.WindAffected = false;
+            stream.WithTerrainCollision = false;
+            ApplyStackColor(stream, stack);
+            Api.World.SpawnParticles(stream);
+
+            // --- 4) Удар о лоток ---
+            GetWorldSpawnBox(
+                TrayLocalX - 0.1f, TrayLocalY, TrayLocalZ - 0.1f,
+                TrayLocalX + 0.1f, TrayLocalY + 0.06f, TrayLocalZ + 0.1f,
+                out var landMin, out var landSize);
+
+            var land = new SimpleParticleProperties(
+                minQuantity: 2,
+                maxQuantity: 5,
+                color: ColorUtil.WhiteArgb,
+                minPos: landMin,
+                maxPos: landMin.AddCopy(landSize.X, landSize.Y, landSize.Z),
+                minVelocity: new Vec3f(-0.25f, 0.08f, -0.25f),
+                maxVelocity: new Vec3f(0.25f, 0.35f, 0.25f),
+                lifeLength: 0.4f,
+                gravityEffect: 1.0f,
+                minSize: 0.035f,
+                maxSize: 0.09f,
+                model: EnumParticleModel.Cube
+            );
+            land.AddPos = landSize;
+            land.OpacityEvolve = new EvolvingNatFloat(EnumTransformFunction.LINEAR, -120f);
+            land.WindAffected = false;
+            land.WithTerrainCollision = false;
+            ApplyStackColor(land, stack);
+            Api.World.SpawnParticles(land);
+        }
+
+        /// <summary>
+        /// AABB спавна в мире из двух локальных точек (north), с учётом поворота блока.
+        /// </summary>
+        private void GetWorldSpawnBox(
+            float x0, float y0, float z0,
+            float x1, float y1, float z1,
+            out Vec3d worldMin,
+            out Vec3d size)
+        {
+            var a = GetRotatedOffset(x0, y0, z0);
+            var b = GetRotatedOffset(x1, y1, z1);
+            double minX = Math.Min(a.X, b.X);
+            double minY = Math.Min(a.Y, b.Y);
+            double minZ = Math.Min(a.Z, b.Z);
+            double maxX = Math.Max(a.X, b.X);
+            double maxY = Math.Max(a.Y, b.Y);
+            double maxZ = Math.Max(a.Z, b.Z);
+            worldMin = Pos.ToVec3d().Add(minX, minY, minZ);
+            size = new Vec3d(maxX - minX, maxY - minY, maxZ - minZ);
+        }
+
+        private static void ApplyStackColor(SimpleParticleProperties props, ItemStack stack)
+        {
+            if (stack.Class == EnumItemClass.Item)
+                props.ColorByItem = stack.Item;
+            else if (stack.Block != null)
+                props.ColorByBlock = stack.Block;
+        }
+
+        /// <summary>
+        /// Локальный offset (north) → мировое смещение с учётом поворота блока.
+        /// </summary>
+        private Vec3d GetRotatedOffset(float lx, float ly, float lz)
+        {
+            // Смещение от центра блока, затем поворот как у shape.rotateY
+            float ox = lx - 0.5f;
+            float oz = lz - 0.5f;
+            float deg = Block?.Shape?.rotateY ?? 0;
+            float rad = deg * GameMath.DEG2RAD;
+            float cos = GameMath.Cos(rad);
+            float sin = GameMath.Sin(rad);
+            float rx = ox * cos - oz * sin;
+            float rz = ox * sin + oz * cos;
+            return new Vec3d(0.5f + rx, ly, 0.5f + rz);
         }
 
         protected virtual void UpdateState(float progress)
@@ -769,10 +789,7 @@ namespace ElectricalProgressive.Content.Block.ESieve
                 Inventory.AfterBlocksLoaded(Api.World);
 
             if (Api is ICoreClientAPI)
-            {
-                UpdateMeshes();
                 EnsureAnimatorReady();
-            }
 
             if (Api?.Side == EnumAppSide.Client && _clientDialog != null)
                 _clientDialog.Update(RecipeProgress);
@@ -814,15 +831,6 @@ namespace ElectricalProgressive.Content.Block.ESieve
 
             base.OnTesselation(mesher, tesselator);
 
-            if (_meshes != null!)
-            {
-                for (var i = 0; i < _meshes.Length; i++)
-                {
-                    if (_meshes[i] != null)
-                        mesher.AddMeshData(_meshes[i]);
-                }
-            }
-
             if (AnimUtil?.activeAnimationsByAnimCode == null ||
                 !AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
             {
@@ -856,10 +864,6 @@ namespace ElectricalProgressive.Content.Block.ESieve
 
             _mesh?.Dispose();
             _resultingShape = null;
-
-            _meshes = null!;
-            _nowTesselatingShape = null!;
-            _nowTesselatingObj = null!;
         }
 
         public override void OnBlockUnloaded()
@@ -869,10 +873,6 @@ namespace ElectricalProgressive.Content.Block.ESieve
 
             _mesh?.Dispose();
             _resultingShape = null;
-
-            _meshes = null!;
-            _nowTesselatingShape = null!;
-            _nowTesselatingObj = null!;
             _capi = null!;
         }
 
