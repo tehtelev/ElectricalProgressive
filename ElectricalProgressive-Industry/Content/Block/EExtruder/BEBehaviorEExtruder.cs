@@ -55,6 +55,9 @@ public class BEBehaviorEExtruder : BlockEntityBehavior, IElectricConsumer
         {
             if (Blockentity is BlockEntityEExtruder entity)
             {
+                if (!entity.StructureComplete)
+                    return false;
+
                 // прибор сгорел?
                 if (entity.ElectricalProgressive == null &&
                     entity.ElectricalProgressive.AllEparams == null &&
@@ -96,6 +99,14 @@ public class BEBehaviorEExtruder : BlockEntityBehavior, IElectricConsumer
 
         if (IsBurned)
         {
+            return;
+        }
+
+        if (!entity.StructureComplete)
+        {
+            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-incomplete"));
+            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-hint"));
+            stringBuilder.AppendLine();
             return;
         }
 

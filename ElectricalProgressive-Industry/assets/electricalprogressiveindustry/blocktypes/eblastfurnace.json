@@ -63,7 +63,18 @@
             {
               "type": "item",
               "code": "game:refractorybrick-fired-tier3",
-              "quantity": 8
+              "quantity": 4
+            }
+          ]
+        },
+        {
+          "shape": "block/eblastfurnace/eblastfurnace",
+          "actionLangCode": "electricalprogressiveindustry:eblastfurnace-construct-finish",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "game:refractorybrick-fired-tier3",
+              "quantity": 4
             }
           ],
           "formMachine": true

@@ -1,0 +1,30 @@
+[
+  {
+    "ingredientPattern": "PBP,PPP,_H_",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "P": {
+        "type": "item",
+        "code": "game:metalplate-iron",
+        "quantity": 1
+      },
+      "B": {
+        "type": "item",
+        "code": "game:metalplate-steel",
+        "quantity": 1
+      },
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 10
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveindustry:eextruder-incomplete-north",
+      "quantity": 1
+    }
+  }
+]

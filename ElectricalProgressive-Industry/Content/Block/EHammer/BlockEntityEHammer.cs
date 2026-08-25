@@ -9,6 +9,7 @@ using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
+using MachineConstruct = global::ElectricalProgressive.Construction.BEBehaviorMachineConstruct;
 
 
 namespace ElectricalProgressive.Content.Block.EHammer;
@@ -37,6 +38,22 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
     /// </summary>
     public int AccumulatedEnergy { get; set; }
 
+    /// <summary>
+    /// Машина готова к работе (сборка Core MachineConstruct завершена / formed).
+    /// </summary>
+    public bool StructureComplete
+    {
+        get
+        {
+            var construct = GetBehavior<MachineConstruct>();
+            if (construct != null && construct.HasConstruction)
+                return construct.IsReady;
+            return true;
+        }
+    }
+
+    public bool IsFormed => Block?.Variant?["state"] == "formed";
+
     private static float _maxTargetTemp = 1350f;
 
     public override string DialogTitle => Lang.Get("ehammer-title-gui");
@@ -45,7 +62,8 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
 
     private int _lastSoundFrame = -1;
     private long _lastAnimationCheckTime;
-    private BlockEntityAnimationUtil AnimUtil => this.GetBehavior<BEBehaviorAnimatable>()?.animUtil;
+    private BlockEntityAnimationUtil? AnimUtil => this.GetBehavior<BEBehaviorAnimatable>()?.animUtil;
+    private bool _animatorReadyForFormed;
 
     // Новые поля для системы мешей (как в холодильнике)
     private MeshData?[] _meshes;
@@ -86,6 +104,9 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
     /// </summary>
     public void AddEnergy(int amount)
     {
+        if (!StructureComplete)
+            return;
+
         if (CurrentRecipe == null || InputSlot.Empty)
             return;
 
@@ -172,29 +193,59 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             // Первоначальное создание мешей
             UpdateMeshes();
 
-            if (AnimUtil != null)
-            {
-                PrepareAnimUtil(api, InventoryClassName);
-                AnimUtil.InitializeAnimator(InventoryClassName, _mesh, _resultingShape, new Vec3f(0, GetRotation(), 0f));
-            }
-
             _soundHammer = new AssetLocation("electricalprogressiveindustry:sounds/ehammer/hammer.ogg");
 
             this.RegisterGameTickListener(new Action<float>(this.CheckAnimationFrame), 50);
+            EnsureAnimatorReady();
         }
+    }
+
+    private void EnsureAnimatorReady()
+    {
+        if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
+            return;
+
+        if (!IsFormed)
+            return;
+
+        if (_animatorReadyForFormed && AnimUtil.animator != null)
+            return;
+
+        PrepareAnimUtil(Api, InventoryClassName);
+        AnimUtil.InitializeAnimator(
+            InventoryClassName,
+            _mesh,
+            _resultingShape,
+            new Vec3f(0, GetRotation(), 0f));
+        _animatorReadyForFormed = true;
+    }
+
+    private Vintagestory.API.Common.Block? GetFormedBlockForAnim(ICoreAPI api)
+    {
+        if (Block?.Variant == null || !Block.Variant.ContainsKey("state"))
+            return Block;
+
+        return api.World.GetBlock(Block.CodeWithVariant("state", "formed")) ?? Block;
     }
 
     private void PrepareAnimUtil(ICoreAPI api, string cacheDictKey)
     {
-        if (_mesh == null || _resultingShape == null)
-        {
-            AssetLocation shapePath = Block.Shape.Base.Clone().WithPathPrefixOnce("shapes/")
-                .WithPathAppendixOnce(".json");
+        if (AnimUtil == null)
+            return;
 
-            Shape _shape = Shape.TryGet(api, shapePath);
+        var shapeBlock = GetFormedBlockForAnim(api) ?? Block;
+        if (shapeBlock?.Shape?.Base == null)
+            return;
 
-            _mesh = AnimUtil.CreateMesh(cacheDictKey, _shape, out _resultingShape, null);
-        }
+        AssetLocation shapePath = shapeBlock.Shape.Base.Clone()
+            .WithPathPrefixOnce("shapes/")
+            .WithPathAppendixOnce(".json");
+
+        Shape shape = Shape.TryGet(api, shapePath);
+        if (shape == null)
+            return;
+
+        _mesh = AnimUtil.CreateMesh(cacheDictKey + "-formed", shape, out _resultingShape, null);
     }
 
     public int GetRotation()
@@ -210,7 +261,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             return;
 
         const int startFrame = 27;
-        if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
+        if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on") && AnimUtil.animator != null)
         {
             var currentTime = Api.World.ElapsedMilliseconds;
             _lastAnimationCheckTime = currentTime;
@@ -499,7 +550,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
     private void Every1000Ms(float dt)
     {
         var beh = GetBehavior<BEBehaviorEHammer>();
-        if (beh == null)
+        if (beh == null || !StructureComplete)
         {
             StopAnimation();
             return;
@@ -665,13 +716,16 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
 
     private void StartAnimation()
     {
-        if (Api?.Side != EnumAppSide.Client || AnimUtil == null || CurrentRecipe == null)
+        if (Api?.Side != EnumAppSide.Client || CurrentRecipe == null)
             return;
+
+        EnsureAnimatorReady();
+        if (AnimUtil == null) return;
 
         var beh = GetBehavior<BEBehaviorEHammer>();
         if (beh == null) return;
 
-        if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false)
+        if (!AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
         {
             AnimUtil.StartAnimation(new AnimationMetaData()
             {
@@ -689,7 +743,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
             return;
 
-        if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == true)
+        if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
         {
             AnimUtil.StopAnimation("work-on");
         }
@@ -706,6 +760,9 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
 
     public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
     {
+        if (!StructureComplete)
+            return true;
+
         if (this.Api.Side == EnumAppSide.Client)
             this.toggleInventoryDialogClient(byPlayer, (CreateDialogDelegate)(() =>
             {
@@ -738,6 +795,13 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
 
     public override bool OnTesselation(ITerrainMeshPool mesher, ITesselatorAPI tesselator)
     {
+        var construct = GetBehavior<MachineConstruct>();
+        if (construct is { IsRenderingBlueprint: true })
+            return base.OnTesselation(mesher, tesselator);
+
+        if (IsFormed)
+            EnsureAnimatorReady();
+
         base.OnTesselation(mesher, tesselator);
 
         if (_meshes != null)
@@ -749,7 +813,8 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             }
         }
 
-        if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false)
+        if (AnimUtil?.activeAnimationsByAnimCode == null ||
+            !AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
         {
             return false;
         }
@@ -770,6 +835,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         if (Api is ICoreClientAPI)
         {
             UpdateMeshes();
+            EnsureAnimatorReady();
         }
 
         var api = this.Api;
@@ -786,6 +852,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         tree["_inventory"] = (IAttribute)tree1;
         tree.SetFloat("PowerCurrent", this.RecipeProgress);
         tree.SetInt("accumulatedEnergy", this.AccumulatedEnergy);
+        tree.SetBool("structureComplete", StructureComplete);
     }
 
     public override void OnBlockPlaced(ItemStack? byItemStack = null)

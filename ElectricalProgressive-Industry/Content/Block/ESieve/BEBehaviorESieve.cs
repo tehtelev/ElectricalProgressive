@@ -37,6 +37,9 @@ public class BEBehaviorESieve : BlockEntityBehavior, IElectricConsumer
         {
             if (Blockentity is BlockEntityESieve entity)
             {
+                if (!entity.StructureComplete)
+                    return false;
+
                 if (entity.ElectricalProgressive == null ||
                     entity.ElectricalProgressive.AllEparams == null ||
                     entity.ElectricalProgressive.AllEparams.Any(e => e.burnout))
@@ -64,9 +67,16 @@ public class BEBehaviorESieve : BlockEntityBehavior, IElectricConsumer
         if (this.Blockentity is not BlockEntityESieve entity || IsBurned)
             return;
 
+        if (!entity.StructureComplete)
+        {
+            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-incomplete"));
+            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-hint"));
+            stringBuilder.AppendLine();
+            return;
+        }
+
         stringBuilder.AppendLine(StringHelper.Progressbar(PowerSetting * 100.0f / _maxConsumption));
         stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Consumption") + ": " + PowerSetting + "/" + _maxConsumption + " " + Lang.Get("electricalprogressivebasics:W"));
-
         if (entity.CurrentRecipe != null && entity.CurrentRecipe.EnergyOperation > 0)
         {
             int percent = (int)(entity.RecipeProgress * 100);

@@ -1,4 +1,4 @@
-﻿{
+{
   "code": "esieve",
   "class": "BlockESieve",
   "entityClass": "BlockEntityESieve",
@@ -16,77 +16,114 @@
     "isolated": true,
     "isolatedEnvironment": true,
     "handbook": {
-      "groupBy": [ "ecrusher-*" ],
+      "groupBy": [ "esieve-*" ],
       "extraSections": [
         {
-          "title": "electricalprogressiveindustry:block-handbooktitle-ecrusher",
-          "text": "electricalprogressiveindustry:block-handbooktext-ecrusher"
+          "title": "electricalprogressiveindustry:block-handbooktitle-esieve",
+          "text": "electricalprogressiveindustry:block-handbooktext-esieve"
+        }
+      ]
+    },
+    "construction": {
+      "brokenDropsRatio": 1,
+      "blueprintShape": "block/esieve/esieve",
+      "levels": [
+        {
+          "shape": "block/esieve/esieve_base",
+          "actionLangCode": "electricalprogressiveindustry:esieve-handbook-place-controller"
+        },
+        {
+          "shape": "block/esieve/esieve_base",
+          "actionLangCode": "electricalprogressiveindustry:esieve-construct-frame",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "game:metalplate-steel",
+              "quantity": 8
+            }
+          ]
+        },
+        {
+          "shape": "block/esieve/esieve_base2",
+          "actionLangCode": "electricalprogressiveindustry:esieve-construct-coils",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "electricalprogressivebasics:coil",
+              "quantity": 4
+            }
+          ]
+        },
+        {
+          "shape": "block/esieve/esieve_base3",
+          "actionLangCode": "electricalprogressiveindustry:esieve-construct-housing",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "game:metalplate-iron",
+              "quantity": 4
+            }
+          ]
+        },
+        {
+          "shape": "block/esieve/esieve",
+          "actionLangCode": "electricalprogressiveindustry:esieve-construct-finish",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "game:metalplate-copper",
+              "quantity": 4
+            }
+          ],
+          "formMachine": true
         }
       ]
     }
   },
 
   "entityBehaviors": [
-    {
-      "name": "Animatable"
-    },
-    {
-      "name": "BEBehaviorESieve"
-    },
-    {
-      "name": "ElectricalProgressive"
-    }
+    { "name": "Animatable" },
+    { "name": "BEBehaviorESieve" },
+    { "name": "ElectricalProgressive" }
   ],
 
   "creativeinventory": {
-    "general": [ "*-north", "*-north" ],
-    "electricity": [ "*-north" ]
+    "general": [ "*-incomplete-north" ],
+    "electricity": [ "*-incomplete-north" ]
   },
 
   "behaviors": [
-    { "name": "HorizontalOrientable" },
+    {
+      "name": "HorizontalOrientable",
+      "properties": { "handleDrop": false }
+    },
+    { "name": "BlockEntityInteract" },
     {
       "name": "Multiblock",
       "propertiesByType": {
         "*-north": {
-          "sizex": 2,
-          "sizey": 2,
-          "sizez": 2,
-          "cposition": {
-            "x": 0,
-            "y": 0,
-            "z": 1
-          }
+          "sizex": 5,
+          "sizey": 3,
+          "sizez": 3,
+          "cposition": { "x": 2, "y": 0, "z": 2 }
         },
         "*-east": {
-          "sizex": 2,
-          "sizey": 2,
-          "sizez": 2,
-          "cposition": {
-            "x": 0,
-            "y": 0,
-            "z": 0
-          }
+          "sizex": 3,
+          "sizey": 3,
+          "sizez": 5,
+          "cposition": { "x": 0, "y": 0, "z": 2 }
         },
         "*-south": {
-          "sizex": 2,
-          "sizey": 2,
-          "sizez": 2,
-          "cposition": {
-            "x": 1,
-            "y": 0,
-            "z": 0
-          }
+          "sizex": 5,
+          "sizey": 3,
+          "sizez": 3,
+          "cposition": { "x": 2, "y": 0, "z": 0 }
         },
         "*-west": {
-          "sizex": 2,
-          "sizey": 2,
-          "sizez": 2,
-          "cposition": {
-            "x": 1,
-            "y": 0,
-            "z": 1
-          }
+          "sizex": 3,
+          "sizey": 3,
+          "sizez": 5,
+          "cposition": { "x": 2, "y": 0, "z": 2 }
         }
       }
     }
@@ -96,31 +133,65 @@
 
   "variantgroups": [
     {
+      "code": "state",
+      "states": [ "incomplete", "formed" ]
+    },
+    {
       "code": "side",
       "loadFromProperties": "abstract/horizontalorientation"
     }
   ],
 
   "shapebytype": {
-    "*-north": {
+    "*-incomplete-north": {
+      "base": "block/esieve/esieve_base",
+      "rotateY": 0
+    },
+    "*-incomplete-east": {
+      "base": "block/esieve/esieve_base",
+      "rotateY": 270
+    },
+    "*-incomplete-south": {
+      "base": "block/esieve/esieve_base",
+      "rotateY": 180
+    },
+    "*-incomplete-west": {
+      "base": "block/esieve/esieve_base",
+      "rotateY": 90
+    },
+    "*-formed-north": {
       "base": "block/esieve/esieve",
       "rotateY": 0
     },
-    "*-east": {
+    "*-formed-east": {
       "base": "block/esieve/esieve",
       "rotateY": 270
     },
-    "*-south": {
+    "*-formed-south": {
       "base": "block/esieve/esieve",
       "rotateY": 180
     },
-    "*-west": {
+    "*-formed-west": {
       "base": "block/esieve/esieve",
       "rotateY": 90
     }
   },
 
-  "lightAbsorption": 5,
+  "shapeInventoryByType": {
+    "*-incomplete-*": {
+      "base": "block/esieve/esieve",
+      "rotateY": 0
+    },
+    "*-formed-*": {
+      "base": "block/esieve/esieve",
+      "rotateY": 0
+    }
+  },
+
+  "lightAbsorptionByType": {
+    "*-incomplete-*": 0,
+    "*-formed-*": 5
+  },
 
   "sidesolidByType": {
     "*-north": {
@@ -150,45 +221,30 @@
   },
 
   "sideopaque": {
-    "all": "false"
+    "all": false
   },
-
   "resistance": 3.5,
-
   "sounds": {
     "place": "game:block/anvil",
     "walk": "game:walk/metal"
   },
-
   "guiTransform": {
-    "rotation": {
-      "x": -22.6,
-      "y": -145,
-      "z": 0
-    },
-    "origin": {
-      "x": 0.5,
-      "y": 0.9,
-      "z": 0.5
-    },
+    "rotation": { "x": -22.6, "y": -145, "z": 0 },
+    "origin": { "x": 0.5, "y": 0.9, "z": 0.5 },
     "scale": 0.72
   },
-
+  "groundTransform": {
+    "translation": { "x": 0, "y": 0.1, "z": 0 },
+    "rotation": { "x": 0, "y": -45, "z": 0 },
+    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
+    "scale": 1.6
+  },
   "heldTpIdleAnimation": "holdbothhandslarge",
   "heldRightReadyAnimation": "heldblockready",
   "heldTpUseAnimation": "twohandplaceblock",
-
   "tpHandTransform": {
-    "translation": {
-      "x": -0.6,
-      "y": -0.91,
-      "z": -0.8
-    },
-    "rotation": {
-      "x": -2,
-      "y": 25,
-      "z": -78
-    },
+    "translation": { "x": -0.6, "y": -0.91, "z": -0.8 },
+    "rotation": { "x": -2, "y": 25, "z": -78 },
     "scale": 0.4
   }
 }

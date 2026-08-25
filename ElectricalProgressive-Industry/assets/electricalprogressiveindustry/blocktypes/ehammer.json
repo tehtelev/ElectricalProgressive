@@ -1,4 +1,4 @@
-﻿{
+{
   "code": "ehammer",
   "class": "BlockEHammer",
   "entityClass": "BlockEntityEHammer",
@@ -18,78 +18,114 @@
     "isolated": true,
     "isolatedEnvironment": true,
     "handbook": {
-      "groupBy": [ "ehammer" ],
+      "groupBy": [ "ehammer-*" ],
       "extraSections": [
         {
           "title": "electricalprogressiveindustry:block-handbooktitle-ehammer",
           "text": "electricalprogressiveindustry:block-handbooktext-ehammer"
         }
       ]
+    },
+    "construction": {
+      "brokenDropsRatio": 1,
+      "blueprintShape": "block/ehammer/ehammer",
+      "levels": [
+        {
+          "shape": "block/ehammer/ehammer_base",
+          "actionLangCode": "electricalprogressiveindustry:ehammer-handbook-place-controller"
+        },
+        {
+          "shape": "block/ehammer/ehammer_base",
+          "actionLangCode": "electricalprogressiveindustry:ehammer-construct-frame",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "game:metalplate-steel",
+              "quantity": 8
+            }
+          ]
+        },
+        {
+          "shape": "block/ehammer/ehammer_base2",
+          "actionLangCode": "electricalprogressiveindustry:ehammer-construct-coils",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "electricalprogressivebasics:coil",
+              "quantity": 4
+            }
+          ]
+        },
+        {
+          "shape": "block/ehammer/ehammer_base3",
+          "actionLangCode": "electricalprogressiveindustry:ehammer-construct-housing",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "game:metalplate-iron",
+              "quantity": 4
+            }
+          ]
+        },
+        {
+          "shape": "block/ehammer/ehammer",
+          "actionLangCode": "electricalprogressiveindustry:ehammer-construct-finish",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "game:metalplate-copper",
+              "quantity": 4
+            }
+          ],
+          "formMachine": true
+        }
+      ]
     }
   },
 
-
   "entityBehaviors": [
-    {
-      "name": "Animatable"
-    },
-    {
-      "name": "BEBehaviorEHammer"
-    },
-    {
-      "name": "ElectricalProgressive"
-    }
+    { "name": "Animatable" },
+    { "name": "BEBehaviorEHammer" },
+    { "name": "ElectricalProgressive" }
   ],
 
   "creativeinventory": {
-    "general": [ "*-north", "*-north" ],
-    "electricity": [ "*-north" ]
+    "general": [ "*-incomplete-north" ],
+    "electricity": [ "*-incomplete-north" ]
   },
 
   "behaviors": [
-    { "name": "HorizontalOrientable" },
+    {
+      "name": "HorizontalOrientable",
+      "properties": { "handleDrop": false }
+    },
+    { "name": "BlockEntityInteract" },
     {
       "name": "Multiblock",
       "propertiesByType": {
         "*-north": {
           "sizex": 3,
-          "sizey": 4,
+          "sizey": 3,
           "sizez": 2,
-          "cposition": {
-            "x": 0,
-            "y": 0,
-            "z": 1
-          }
+          "cposition": { "x": 0, "y": 0, "z": 1 }
         },
         "*-east": {
           "sizex": 2,
-          "sizey": 4,
+          "sizey": 3,
           "sizez": 3,
-          "cposition": {
-            "x": 0,
-            "y": 0,
-            "z": 0
-          }
+          "cposition": { "x": 0, "y": 0, "z": 0 }
         },
         "*-south": {
           "sizex": 3,
-          "sizey": 4,
+          "sizey": 3,
           "sizez": 2,
-          "cposition": {
-            "x": 2,
-            "y": 0,
-            "z": 0
-          }
+          "cposition": { "x": 2, "y": 0, "z": 0 }
         },
         "*-west": {
           "sizex": 2,
-          "sizey": 4,
+          "sizey": 3,
           "sizez": 3,
-          "cposition": {
-            "x": 1,
-            "y": 0,
-            "z": 2
-          }
+          "cposition": { "x": 1, "y": 0, "z": 2 }
         }
       }
     }
@@ -99,30 +135,66 @@
 
   "variantgroups": [
     {
+      "code": "state",
+      "states": [ "incomplete", "formed" ]
+    },
+    {
       "code": "side",
       "loadFromProperties": "abstract/horizontalorientation"
     }
   ],
 
   "shapebytype": {
-    "*-north": {
+    "*-incomplete-north": {
+      "base": "block/ehammer/ehammer_base",
+      "rotateY": 0
+    },
+    "*-incomplete-east": {
+      "base": "block/ehammer/ehammer_base",
+      "rotateY": 270
+    },
+    "*-incomplete-south": {
+      "base": "block/ehammer/ehammer_base",
+      "rotateY": 180
+    },
+    "*-incomplete-west": {
+      "base": "block/ehammer/ehammer_base",
+      "rotateY": 90
+    },
+    "*-formed-north": {
       "base": "block/ehammer/ehammer",
       "rotateY": 0
     },
-    "*-east": {
+    "*-formed-east": {
       "base": "block/ehammer/ehammer",
       "rotateY": 270
     },
-    "*-south": {
+    "*-formed-south": {
       "base": "block/ehammer/ehammer",
       "rotateY": 180
     },
-    "*-west": {
+    "*-formed-west": {
       "base": "block/ehammer/ehammer",
       "rotateY": 90
     }
   },
-  "lightAbsorption": 5,
+
+  "shapeInventoryByType": {
+    "*-incomplete-*": {
+      "base": "block/ehammer/ehammer",
+      "rotateY": 0
+    },
+    "*-formed-*": {
+      "base": "block/ehammer/ehammer",
+      "rotateY": 0
+    }
+  },
+
+  "lightAbsorptionByType": {
+    "*-incomplete-*": 0,
+    "*-formed-*": 5
+  },
+
   "sidesolidByType": {
     "*-north": {
       "all": false,
@@ -151,13 +223,12 @@
   },
 
   "sideopaque": {
-    "all": "false"
-  },
-
-  "emitSideAo": { // Ambient Oclusion
     "all": false
   },
-  "sideAo": { // Ambient Oclusion
+  "emitSideAo": {
+    "all": false
+  },
+  "sideAo": {
     "all": true
   },
   "collisionbox": {
@@ -168,41 +239,28 @@
     "y2": 1,
     "z2": 1
   },
-
-
   "resistance": 3.5,
   "sounds": {
     "place": "game:block/anvil",
     "walk": "game:walk/metal"
   },
   "guiTransform": {
-    "rotation": {
-      "x": -22.6,
-      "y": -145,
-      "z": 0
-    },
-    "origin": {
-      "x": 0.5,
-      "y": 0.9,
-      "z": 0.5
-    },
+    "rotation": { "x": -22.6, "y": -145, "z": 0 },
+    "origin": { "x": 0.5, "y": 0.9, "z": 0.5 },
     "scale": 0.72
+  },
+  "groundTransform": {
+    "translation": { "x": 0, "y": 0.1, "z": 0 },
+    "rotation": { "x": 0, "y": -45, "z": 0 },
+    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
+    "scale": 1.6
   },
   "heldTpIdleAnimation": "holdbothhandslarge",
   "heldRightReadyAnimation": "heldblockready",
   "heldTpUseAnimation": "twohandplaceblock",
   "tpHandTransform": {
-    "translation": {
-      "x": -0.6,
-      "y": -0.91,
-      "z": -0.8
-    },
-    "rotation": {
-      "x": -2,
-      "y": 25,
-      "z": -78
-    },
+    "translation": { "x": -0.6, "y": -0.91, "z": -0.8 },
+    "rotation": { "x": -2, "y": 25, "z": -78 },
     "scale": 0.4
   }
-
 }

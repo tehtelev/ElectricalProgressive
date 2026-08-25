@@ -10,6 +10,7 @@ using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
+using MachineConstruct = global::ElectricalProgressive.Construction.BEBehaviorMachineConstruct;
 
 namespace ElectricalProgressive.Content.Block.EExtruder
 {
@@ -33,6 +34,22 @@ namespace ElectricalProgressive.Content.Block.EExtruder
         /// </summary>
         public int AccumulatedEnergy { get; set; }
 
+        /// <summary>
+        /// Машина готова к работе (сборка Core MachineConstruct завершена / formed).
+        /// </summary>
+        public bool StructureComplete
+        {
+            get
+            {
+                var construct = GetBehavior<MachineConstruct>();
+                if (construct != null && construct.HasConstruction)
+                    return construct.IsReady;
+                return true;
+            }
+        }
+
+        public bool IsFormed => Block?.Variant?["state"] == "formed";
+
         // Слоты (2 входа, 2 выхода)
         public ItemSlot InputSlot1 => inventory[0];
         public ItemSlot InputSlot2 => inventory[1];
@@ -43,7 +60,8 @@ namespace ElectricalProgressive.Content.Block.EExtruder
 
         private static MeshData? _mesh;
         private static Shape? _resultingShape;
-        private BlockEntityAnimationUtil AnimUtil => GetBehavior<BEBehaviorAnimatable>()?.animUtil;
+        private BlockEntityAnimationUtil? AnimUtil => GetBehavior<BEBehaviorAnimatable>()?.animUtil;
+        private bool _animatorReadyForFormed;
         private int _lastSoundFrame = -1;
         private long _lastAnimationCheckTime;
 
@@ -86,6 +104,9 @@ namespace ElectricalProgressive.Content.Block.EExtruder
         /// </summary>
         public void AddEnergy(int amount)
         {
+            if (!StructureComplete)
+                return;
+
             if (CurrentRecipe == null || InputSlot1.Empty || InputSlot2.Empty)
                 return;
     
@@ -156,30 +177,60 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 // Первоначальное создание мешей
                 UpdateMeshes();
 
-                if (AnimUtil != null)
-                {
-                    PrepareAnimUtil(api, InventoryClassName);
-                    AnimUtil.InitializeAnimator(InventoryClassName, _mesh, _resultingShape, new Vec3f(0, GetRotation(), 0f));
-                }
-
                 _soundPress = new AssetLocation("electricalprogressiveindustry:sounds/eextruder/extruder.ogg");
 
                 this.RegisterGameTickListener(new Action<float>(this.CheckAnimationFrame), 50);
                 UpdateMeshes();
+                EnsureAnimatorReady();
             }
+        }
+
+        private void EnsureAnimatorReady()
+        {
+            if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
+                return;
+
+            if (!IsFormed)
+                return;
+
+            if (_animatorReadyForFormed && AnimUtil.animator != null)
+                return;
+
+            PrepareAnimUtil(Api, InventoryClassName);
+            AnimUtil.InitializeAnimator(
+                InventoryClassName,
+                _mesh,
+                _resultingShape,
+                new Vec3f(0, GetRotation(), 0f));
+            _animatorReadyForFormed = true;
+        }
+
+        private Vintagestory.API.Common.Block? GetFormedBlockForAnim(ICoreAPI api)
+        {
+            if (Block?.Variant == null || !Block.Variant.ContainsKey("state"))
+                return Block;
+
+            return api.World.GetBlock(Block.CodeWithVariant("state", "formed")) ?? Block;
         }
 
         private void PrepareAnimUtil(ICoreAPI api, string cacheDictKey)
         {
-            if (_mesh == null || _resultingShape == null)
-            {
-                AssetLocation shapePath = Block.Shape.Base.Clone().WithPathPrefixOnce("shapes/")
-                    .WithPathAppendixOnce(".json");
+            if (AnimUtil == null)
+                return;
 
-                Shape _shape = Shape.TryGet(api, shapePath);
+            var shapeBlock = GetFormedBlockForAnim(api) ?? Block;
+            if (shapeBlock?.Shape?.Base == null)
+                return;
 
-                _mesh = AnimUtil.CreateMesh(cacheDictKey, _shape, out _resultingShape, null);
-            }
+            AssetLocation shapePath = shapeBlock.Shape.Base.Clone()
+                .WithPathPrefixOnce("shapes/")
+                .WithPathAppendixOnce(".json");
+
+            Shape shape = Shape.TryGet(api, shapePath);
+            if (shape == null)
+                return;
+
+            _mesh = AnimUtil.CreateMesh(cacheDictKey + "-formed", shape, out _resultingShape, null);
         }
 
         public int GetRotation()
@@ -612,7 +663,7 @@ namespace ElectricalProgressive.Content.Block.EExtruder
         private void Every1000Ms(float dt)
         {
             var beh = GetBehavior<BEBehaviorEExtruder>();
-            if (beh == null)
+            if (beh == null || !StructureComplete)
             {
                 StopAnimation();
                 return;
@@ -659,13 +710,16 @@ namespace ElectricalProgressive.Content.Block.EExtruder
 
         private void StartAnimation()
         {
-            if (Api?.Side != EnumAppSide.Client || AnimUtil == null || CurrentRecipe == null)
+            if (Api?.Side != EnumAppSide.Client || CurrentRecipe == null)
                 return;
+
+            EnsureAnimatorReady();
+            if (AnimUtil == null) return;
 
             var beh = GetBehavior<BEBehaviorEExtruder>();
             if (beh == null) return;
 
-            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false)
+            if (!AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
             {
                 float powerRatio = Math.Max(0.1f, Math.Min(1f, beh.PowerSetting / (float)CurrentRecipe.EnergyOperation));
                 float animationSpeed = powerRatio * 17.706f;
@@ -686,7 +740,7 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
                 return;
 
-            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == true)
+            if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
             {
                 AnimUtil.StopAnimation("work-on");
             }
@@ -694,11 +748,11 @@ namespace ElectricalProgressive.Content.Block.EExtruder
         
         private void CheckAnimationFrame(float dt)
         {
-            if (Api?.Side != EnumAppSide.Client || AnimUtil == null!)
+            if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
                 return;
 
             const int startFrame = 280;
-            if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
+            if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on") && AnimUtil.animator != null)
             {
                 var currentTime = Api.World.ElapsedMilliseconds;
                 _lastAnimationCheckTime = currentTime;
@@ -742,6 +796,9 @@ namespace ElectricalProgressive.Content.Block.EExtruder
 
         public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
         {
+            if (!StructureComplete)
+                return true;
+
             if (Api.Side == EnumAppSide.Client)
             {
                 toggleInventoryDialogClient(byPlayer, () =>
@@ -790,6 +847,7 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             if (Api is ICoreClientAPI)
             {
                 UpdateMeshes();
+                EnsureAnimatorReady();
             }
 
             if (Api?.Side == EnumAppSide.Client && _clientDialog != null)
@@ -804,6 +862,7 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             tree["_inventory"] = invTree;
             tree.SetFloat("PowerCurrent", RecipeProgress);
             tree.SetInt("accumulatedEnergy", AccumulatedEnergy);
+            tree.SetBool("structureComplete", StructureComplete);
         }
 
         #endregion
@@ -822,6 +881,13 @@ namespace ElectricalProgressive.Content.Block.EExtruder
 
         public override bool OnTesselation(ITerrainMeshPool mesher, ITesselatorAPI tesselator)
         {
+            var construct = GetBehavior<MachineConstruct>();
+            if (construct is { IsRenderingBlueprint: true })
+                return base.OnTesselation(mesher, tesselator);
+
+            if (IsFormed)
+                EnsureAnimatorReady();
+
             base.OnTesselation(mesher, tesselator);
 
             if (_meshes != null!)
@@ -833,7 +899,8 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 }
             }
 
-            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false)
+            if (AnimUtil?.activeAnimationsByAnimCode == null ||
+                !AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
             {
                 return false;
             }

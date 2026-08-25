@@ -50,7 +50,7 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         HammerRecipes = [];
         LoadRecipes<HammerRecipe>("Hammer Recipe", "recipes/electric/hammerrecipe", HammerRecipes.Add);
         api.World.Logger.Debug(Lang.Get("electricalprogressiveindustry:recipeloading"));
-        machines.Add("ehammer-", ("electricalprogressiveindustry:ehammer-north", HammerRecipes));
+        machines.Add("ehammer-", ("electricalprogressiveindustry:ehammer-incomplete-north", HammerRecipes));
     }
 
     private void LoadPressRecipes()
@@ -58,7 +58,7 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         PressRecipes = [];
         LoadRecipes<PressRecipe>("Press Recipe", "recipes/electric/pressrecipe", PressRecipes.Add);
         api.World.Logger.Debug(Lang.Get("electricalprogressiveindustry:recipeloading"));
-        machines.Add("epress-", ("electricalprogressiveindustry:epress-north", PressRecipes));
+        machines.Add("epress-", ("electricalprogressiveindustry:epress-incomplete-north", PressRecipes));
     }
 
     private void LoadExtruderRecipes()
@@ -66,7 +66,7 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         ExtruderRecipes = [];
         LoadRecipes<ExtruderRecipe>("Extruder Recipe", "recipes/electric/extruderrecipe", ExtruderRecipes.Add);
         api.World.Logger.Debug(Lang.Get("electricalprogressiveindustry:recipeloading"));
-        machines.Add("eextruder-", ("electricalprogressiveindustry:eextruder-north", ExtruderRecipes));
+        machines.Add("eextruder-", ("electricalprogressiveindustry:eextruder-incomplete-north", ExtruderRecipes));
     }
     
     private void LoadCrusherRecipes()
@@ -91,7 +91,7 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         SieveRecipes = [];
         LoadRecipes<SieveRecipe>("Sieve Recipe", "recipes/electric/sieverecipe", SieveRecipes.Add);
         api.World.Logger.Debug(Lang.Get("electricalprogressiveindustry:recipeloading"));
-        machines.Add("esieve-", ("electricalprogressiveindustry:esieve-north", SieveRecipes));
+        machines.Add("esieve-", ("electricalprogressiveindustry:esieve-incomplete-north", SieveRecipes));
     }
 
     private void LoadRecipes<T>(string name, string path, Action<T> registerMethod)

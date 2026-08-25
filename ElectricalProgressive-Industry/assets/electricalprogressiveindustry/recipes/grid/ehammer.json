@@ -33,7 +33,7 @@
     },
     "output": {
       "type": "block",
-      "code": "electricalprogressiveindustry:ehammer-north",
+      "code": "electricalprogressiveindustry:ehammer-incomplete-north",
       "quantity": 1
     }
   }

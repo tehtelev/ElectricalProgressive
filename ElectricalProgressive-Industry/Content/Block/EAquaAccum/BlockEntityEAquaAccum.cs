@@ -8,6 +8,7 @@ using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
+using MachineConstruct = global::ElectricalProgressive.Construction.BEBehaviorMachineConstruct;
 
 namespace ElectricalProgressive.Content.EAquaAccum;
 
@@ -21,8 +22,25 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
     // === СВОЙСТВА ===
 
     public override InventoryBase Inventory => _inventory;
-    public override string DialogTitle => Lang.Get("electricalprogressivebasics:ewaterpump");
+    public override string DialogTitle => Lang.Get("eaquaaccum-title-gui");
     public override string InventoryClassName => "ewaterpump";
+
+    /// <summary>
+    /// Машина готова к работе (сборка Core MachineConstruct завершена / formed).
+    /// </summary>
+    public bool StructureComplete
+    {
+        get
+        {
+            var construct = GetBehavior<MachineConstruct>();
+            if (construct != null && construct.HasConstruction)
+                return construct.IsReady;
+            return true;
+        }
+    }
+
+    public bool IsFormed => Block?.Variant?["state"] == "formed";
+
 
     // === НАСТРОЙКИ КОНДЕНСАЦИИ ===
     private readonly int _maxConsumption;
@@ -210,6 +228,7 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
     /// </summary>
     public void AddEnergy(float energyAmount)
     {
+        if (!StructureComplete) return;
         if (energyAmount <= 0) return;
         if (IsFull()) return;
     
@@ -454,7 +473,7 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
 
     private void UpdateCondenser(float dt)
     {
-        if (PowerBehavior == null || ElectricalProgressive == null)
+        if (PowerBehavior == null || ElectricalProgressive == null || !StructureComplete)
         {
             StopAnimation();
             StopSound();
@@ -501,6 +520,9 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
 
     public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
     {
+        if (!StructureComplete)
+            return true;
+
         if (Api.Side == EnumAppSide.Client)
         {
             toggleInventoryDialogClient(byPlayer, () =>
@@ -543,11 +565,24 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
 
         tree.SetFloat("pumpProgress", this.PumpProgress);
         tree.SetFloat("pendingWaterFraction", this._pendingWaterFraction);
+        tree.SetBool("structureComplete", StructureComplete);
+    }
+
+    public override bool OnTesselation(ITerrainMeshPool mesher, ITesselatorAPI tesselator)
+    {
+        var construct = GetBehavior<MachineConstruct>();
+        if (construct is { IsRenderingBlueprint: true })
+            return base.OnTesselation(mesher, tesselator);
+
+        return base.OnTesselation(mesher, tesselator);
     }
 
     public override void GetBlockInfo(IPlayer forPlayer, StringBuilder dsc)
     {
         base.GetBlockInfo(forPlayer, dsc);
+
+        if (!StructureComplete)
+            return;
 
         var status = GetCondensationStatus();
 

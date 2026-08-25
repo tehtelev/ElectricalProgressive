@@ -61,7 +61,7 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
         private static MeshData? _mesh;
         private static Shape? _resultingShape;
         
-        private BlockEntityAnimationUtil AnimUtil => GetBehavior<BEBehaviorAnimatable>()?.animUtil!;
+        private BlockEntityAnimationUtil? AnimUtil => GetBehavior<BEBehaviorAnimatable>()?.animUtil;
         
         private MeshData?[] _meshes;
         private Shape? _nowTesselatingShape;
@@ -85,6 +85,8 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
         private AssetLocation _soundDoorOpen;
         private AssetLocation _soundDoorClose;
         private bool _isDoorOpen = false;
+        /// <summary>Аниматор привязан к полной formed-модели (после сборки).</summary>
+        private bool _animatorReadyForFormed;
 
         public BlockEntityEBlastFurnace()
         {
@@ -95,18 +97,53 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
 
         #region Анимации
 
+        /// <summary>
+        /// Incomplete-модели без anim open/work-on. Всегда грузим formed-shape и
+        /// переинициализируем аниматор после ExchangeBlock → formed.
+        /// </summary>
+        private void EnsureAnimatorReady()
+        {
+            if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
+                return;
+
+            // Пока идёт сборка — анимации печи не нужны
+            if (!IsFormed)
+                return;
+
+            if (_animatorReadyForFormed && AnimUtil.animator != null)
+                return;
+
+            PrepareAnimUtil(Api, InventoryClassName);
+            AnimUtil.InitializeAnimator(
+                InventoryClassName,
+                _mesh,
+                _resultingShape,
+                new Vec3f(0, GetRotation(), 0f));
+            _animatorReadyForFormed = true;
+        }
+
+        private Vintagestory.API.Common.Block? GetFormedBlockForAnim(ICoreAPI api)
+        {
+            if (Block?.Variant == null || !Block.Variant.ContainsKey("state"))
+                return Block;
+
+            return api.World.GetBlock(Block.CodeWithVariant("state", "formed")) ?? Block;
+        }
+
         public void OpenLid()
         {
             if (_isDoorOpen) return;
+            EnsureAnimatorReady();
+            if (AnimUtil == null) return;
             
-            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("close") == true)
+            if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("close"))
             {
-                AnimUtil?.StopAnimation("close");
+                AnimUtil.StopAnimation("close");
             }
 
-            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("open") == false)
+            if (!AnimUtil.activeAnimationsByAnimCode.ContainsKey("open"))
             {
-                AnimUtil?.StartAnimation(new AnimationMetaData()
+                AnimUtil.StartAnimation(new AnimationMetaData()
                 {
                     Animation = "open",
                     Code = "open",
@@ -123,15 +160,17 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
         public void CloseLid()
         {
             if (!_isDoorOpen) return;
+            EnsureAnimatorReady();
+            if (AnimUtil == null) return;
             
-            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("open") == true)
+            if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("open"))
             {
-                AnimUtil?.StopAnimation("open");
+                AnimUtil.StopAnimation("open");
             }
 
-            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("close") == false)
+            if (!AnimUtil.activeAnimationsByAnimCode.ContainsKey("close"))
             {
-                AnimUtil?.StartAnimation(new AnimationMetaData()
+                AnimUtil.StartAnimation(new AnimationMetaData()
                 {
                     Animation = "close",
                     Code = "close",
@@ -147,13 +186,16 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
 
         public void StartWorkingAnim()
         {
-            if (Api?.Side != EnumAppSide.Client || AnimUtil == null || CurrentRecipe == null)
+            if (Api?.Side != EnumAppSide.Client || CurrentRecipe == null)
                 return;
+
+            EnsureAnimatorReady();
+            if (AnimUtil == null) return;
 
             var beh = GetBehavior<BEBehaviorEBlastFurnace>();
             if (beh == null) return;
 
-            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false)
+            if (!AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
             {
                 AnimUtil.StartAnimation(new AnimationMetaData()
                 {
@@ -170,7 +212,7 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
         {
             if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == true)
             {
-                AnimUtil?.StopAnimation("work-on");
+                AnimUtil.StopAnimation("work-on");
             }
         }
 
@@ -350,25 +392,33 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
                 this.inventory.SlotModified += slotId => UpdateMeshes();
                 UpdateMeshes();
 
-                if (AnimUtil != null)
-                {
-                    PrepareAnimUtil(api, InventoryClassName);
-                    AnimUtil.InitializeAnimator(InventoryClassName, _mesh, _resultingShape, new Vec3f(0, GetRotation(), 0f));
-                }
-
                 _soundDoorOpen = new AssetLocation("game:sounds/block/cokeovendoor-open");
                 _soundDoorClose = new AssetLocation("game:sounds/block/cokeovendoor-close");
+
+                // Если уже formed (загрузка мира / creative) — сразу готовим аниматор
+                EnsureAnimatorReady();
             }
         }
 
         private void PrepareAnimUtil(ICoreAPI api, string cacheDictKey)
         {
-            if (_mesh == null || _resultingShape == null)
-            {
-                AssetLocation shapePath = Block.Shape.Base.Clone().WithPathPrefixOnce("shapes/").WithPathAppendixOnce(".json");
-                Shape _shape = Shape.TryGet(api, shapePath);
-                _mesh = AnimUtil.CreateMesh(cacheDictKey, _shape, out _resultingShape, null);
-            }
+            if (AnimUtil == null)
+                return;
+
+            // Всегда полная formed-модель: у eblastfurnace_base нет open/work-on
+            var shapeBlock = GetFormedBlockForAnim(api) ?? Block;
+            if (shapeBlock?.Shape?.Base == null)
+                return;
+
+            AssetLocation shapePath = shapeBlock.Shape.Base.Clone()
+                .WithPathPrefixOnce("shapes/")
+                .WithPathAppendixOnce(".json");
+            Shape shape = Shape.TryGet(api, shapePath);
+            if (shape == null)
+                return;
+
+            // Отдельный ключ кэша, чтобы не залипнуть на incomplete-mesh
+            _mesh = AnimUtil.CreateMesh(cacheDictKey + "-formed", shape, out _resultingShape, null);
         }
 
         public int GetRotation()
@@ -714,7 +764,12 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
             AccumulatedEnergy = tree.GetInt("accumulatedEnergy");
 
             if (Api != null) Inventory.AfterBlocksLoaded(Api.World);
-            if (Api is ICoreClientAPI) UpdateMeshes();
+            if (Api is ICoreClientAPI)
+            {
+                UpdateMeshes();
+                // После ExchangeBlock → formed клиент получает новый Block через sync
+                EnsureAnimatorReady();
+            }
 
             if (Api?.Side == EnumAppSide.Client && _clientDialog != null)
                 _clientDialog.Update(RecipeProgress);
@@ -749,6 +804,10 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
             if (construct is { IsRenderingBlueprint: true })
                 return base.OnTesselation(mesher, tesselator);
 
+            // После сборки подхватить аниматор, если ещё не готов
+            if (IsFormed)
+                EnsureAnimatorReady();
+
             // MachineConstruct (Core) рисует stage-mesh сам через BEBehavior.OnTesselation
             base.OnTesselation(mesher, tesselator);
 
@@ -758,7 +817,8 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
                     if (_meshes[i] != null) mesher.AddMeshData(_meshes[i]);
             }
             
-            if (AnimUtil?.activeAnimationsByAnimCode.Count == 0)
+            if (AnimUtil?.activeAnimationsByAnimCode == null ||
+                AnimUtil.activeAnimationsByAnimCode.Count == 0)
             {
                 return false;
             }

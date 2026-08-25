@@ -12,16 +12,21 @@ using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
+using MachineConstruct = global::ElectricalProgressive.Construction.BEBehaviorMachineConstruct;
+using MachineConstructAccess = global::ElectricalProgressive.Construction.MachineConstructAccess;
 
 namespace ElectricalProgressive.Content.EAquaAccum;
 
 /// <summary>
 /// Блок электрической помпы для воды.
 /// Реализует интерфейсы для работы с жидкостями (ILiquidSink, ILiquidSource).
-/// На основе BlockEFruitPress, но с одним слотом для воды.
+/// IMultiBlockInteract — сборка/GUI/жидкости с любого dummy multiblock.
 /// </summary>
-public class BlockEAquaAccum : BlockEBase, ILiquidSink, ILiquidSource
+public class BlockEAquaAccum : BlockEBase, ILiquidSink, ILiquidSource, IMultiBlockInteract
 {
+    public bool IsFormed => Variant.ContainsKey("state") && Variant["state"] == "formed";
+    public bool IsIncomplete => Variant.ContainsKey("state") && Variant["state"] == "incomplete";
+
     // === Параметры контейнера для жидкости ===
     public float CapacityLitres => 100f;
     public bool AllowHeldLiquidTransfer => true;
@@ -329,6 +334,23 @@ public class BlockEAquaAccum : BlockEBase, ILiquidSink, ILiquidSource
     public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack,
        BlockSelection blockSel, ref string failureCode)
     {
+        // В мир всегда incomplete-контроллер
+        if (itemstack?.Block != null)
+        {
+            var side = itemstack.Block.Variant.ContainsKey("side")
+                ? itemstack.Block.Variant["side"]
+                : (Variant.ContainsKey("side") ? Variant["side"] : "north");
+
+            if (itemstack.Block.Variant.ContainsKey("state") &&
+                itemstack.Block.Variant["state"] != "incomplete")
+            {
+                var incomplete = world.GetBlock(CodeWithVariants(["state", "side"],
+                    ["incomplete", side]));
+                if (incomplete != null)
+                    itemstack = new ItemStack(incomplete);
+            }
+        }
+
         var selection = new Selection(blockSel);
         var facing = Facing.None;
 
@@ -357,7 +379,7 @@ public class BlockEAquaAccum : BlockEBase, ILiquidSink, ILiquidSource
     public override bool DoPlaceBlock(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel,
         ItemStack byItemStack)
     {
-        if (byItemStack.Block.Variant["type"] == "burned")
+        if (byItemStack.Block.Code.GetName().Contains("burned"))
             return false;
 
         if (!base.DoPlaceBlock(world, byPlayer, blockSel, byItemStack) ||
@@ -370,31 +392,82 @@ public class BlockEAquaAccum : BlockEBase, ILiquidSink, ILiquidSource
         return true;
     }
 
-    /// <summary>
-    /// Обработка взаимодействия с блоком (ЖИДКОСТИ И ИНВЕНТАРЬ).
-    /// </summary>
-    public override bool OnBlockInteractStart(
-        IWorldAccessor world,
-        IPlayer byPlayer,
+    public override bool OnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection? blockSel)
+    {
+        if (blockSel is null)
+            return false;
+
+        if (!world.Claims.TryAccess(byPlayer, blockSel.Position, EnumBlockAccessFlags.Use))
+            return false;
+
+        return HandleInteract(world, byPlayer, blockSel.Position, blockSel);
+    }
+
+    public bool MBOnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel,
+        Vec3i offsetInv)
+    {
+        if (!world.Claims.TryAccess(byPlayer, blockSel.Position, EnumBlockAccessFlags.Use))
+            return false;
+
+        var controllerPos = MachineConstructAccess.GetControllerPos(blockSel.Position, offsetInv);
+        return HandleInteract(world, byPlayer, controllerPos, blockSel);
+    }
+
+    private bool HandleInteract(IWorldAccessor world, IPlayer byPlayer, BlockPos controllerPos,
         BlockSelection blockSel)
     {
+        blockSel.Block = this;
+
+        // Сборка
+        if (MachineConstructAccess.TryConstructInteract(world, byPlayer, controllerPos))
+            return true;
+
+        var blockEntity = world.BlockAccessor.GetBlockEntity(controllerPos);
+        if (blockEntity is null)
+            return true;
+
+        var construct = blockEntity.GetBehavior<MachineConstruct>();
+        if (construct != null && construct.HasConstruction && !construct.IsReady)
+        {
+            if (world.Api is ICoreClientAPI capi)
+            {
+                capi.TriggerIngameError(this, "incomplete",
+                    Lang.Get("electricalprogressiveindustry:eaquaaccum-structure-incomplete"));
+            }
+
+            return true;
+        }
+
+        if (blockEntity is BlockEntityEAquaAccum aqua && !aqua.StructureComplete)
+        {
+            if (world.Api is ICoreClientAPI capi)
+            {
+                capi.TriggerIngameError(this, "incomplete",
+                    Lang.Get("electricalprogressiveindustry:eaquaaccum-structure-incomplete"));
+            }
+
+            return true;
+        }
+
+        // Жидкости — только по позиции контроллера
+        var liquidSel = blockSel.Clone();
+        liquidSel.Position = controllerPos;
+
         ItemSlot activeHotbarSlot = byPlayer.InventoryManager.ActiveHotbarSlot;
 
-        // ПЕРВОЕ: Проверяем, есть ли в руке контейнер с жидкостью
         if (!activeHotbarSlot.Empty)
         {
             JsonObject attributes = activeHotbarSlot.Itemstack.Collectible.Attributes;
-            if ((attributes != null ? (attributes.IsTrue("handleLiquidContainerInteract") ? 1 : 0) : 0) != 0)
+            if (attributes != null && attributes.IsTrue("handleLiquidContainerInteract"))
             {
                 EnumHandHandling handling = EnumHandHandling.NotHandled;
                 activeHotbarSlot.Itemstack.Collectible.OnHeldInteractStart(activeHotbarSlot,
-                    (EntityAgent)byPlayer.Entity, blockSel, (EntitySelection)null, true, ref handling);
+                    (EntityAgent)byPlayer.Entity, liquidSel, null, true, ref handling);
                 if (handling == EnumHandHandling.PreventDefault || handling == EnumHandHandling.PreventDefaultAction)
                     return true;
             }
         }
 
-        // ВТОРОЕ: Проверяем, есть ли в руке предмет с интерфейсом жидкости
         if (!activeHotbarSlot.Empty && activeHotbarSlot.Itemstack.Collectible is ILiquidInterface)
         {
             CollectibleObject collectible = activeHotbarSlot.Itemstack.Collectible;
@@ -402,44 +475,42 @@ public class BlockEAquaAccum : BlockEBase, ILiquidSink, ILiquidSource
             bool ctrlKey = byPlayer.WorldData.EntityControls.CtrlKey;
             ILiquidSource objLso = collectible as ILiquidSource;
 
-            // Наливание жидкости из контейнера в руке в блок
             if (objLso != null && !shiftKey)
             {
                 if (!objLso.AllowHeldLiquidTransfer)
                     return false;
                 ItemStack content = objLso.GetContent(activeHotbarSlot.Itemstack);
                 float desiredLitres = ctrlKey ? objLso.TransferSizeLitres : objLso.CapacityLitres;
-                int moved = this.TryPutLiquid(blockSel.Position, content, desiredLitres);
+                int moved = this.TryPutLiquid(controllerPos, content, desiredLitres);
                 if (moved > 0)
                 {
                     this.SplitStackAndPerformAction((Entity)byPlayer.Entity, activeHotbarSlot,
-                        (System.Func<ItemStack, int>)(stack =>
+                        stack =>
                         {
                             objLso.TryTakeContent(stack, moved);
                             return moved;
-                        }));
+                        });
                     this.DoLiquidMovedEffects(byPlayer, content, moved,
                         BlockLiquidContainerBase.EnumLiquidDirection.Pour);
                     return true;
                 }
             }
 
-            // Сливание жидкости из блока в контейнер в руке
             ILiquidSink objLsi = collectible as ILiquidSink;
             if (objLsi != null && !ctrlKey)
             {
                 if (!objLsi.AllowHeldLiquidTransfer)
                     return false;
-                ItemStack owncontentStack = this.GetContent(blockSel.Position);
+                ItemStack owncontentStack = this.GetContent(controllerPos);
                 if (owncontentStack == null)
-                    return base.OnBlockInteractStart(world, byPlayer, blockSel);
+                    return true;
                 ItemStack contentStack = owncontentStack.Clone();
                 float litres = shiftKey ? objLsi.TransferSizeLitres : objLsi.CapacityLitres;
                 int num = this.SplitStackAndPerformAction((Entity)byPlayer.Entity, activeHotbarSlot,
-                    (System.Func<ItemStack, int>)(stack => objLsi.TryPutLiquid(stack, owncontentStack, litres)));
+                    stack => objLsi.TryPutLiquid(stack, owncontentStack, litres));
                 if (num > 0)
                 {
-                    this.TryTakeContent(blockSel.Position, num);
+                    this.TryTakeContent(controllerPos, num);
                     this.DoLiquidMovedEffects(byPlayer, contentStack, num,
                         BlockLiquidContainerBase.EnumLiquidDirection.Fill);
                     return true;
@@ -447,34 +518,21 @@ public class BlockEAquaAccum : BlockEBase, ILiquidSink, ILiquidSource
             }
         }
 
-        // ТРЕТЬЕ: Если не работали с жидкостями, открываем инвентарь
-        var blockEntity = world.BlockAccessor.GetBlockEntity(blockSel.Position);
-        if (blockEntity != null && blockEntity is BlockEntityOpenableContainer openableContainer)
+        if (blockEntity is BlockEntityOpenableContainer openableContainer)
         {
-            // Проверяем права доступа
-            if (!world.Claims.TryAccess(byPlayer, blockSel.Position, EnumBlockAccessFlags.Use))
-                return false;
-
-            openableContainer.OnPlayerRightClick(byPlayer, blockSel);
+            openableContainer.OnPlayerRightClick(byPlayer, liquidSel);
             return true;
         }
 
-        // Если ничего не сработало, вызываем базовый метод
-        return base.OnBlockInteractStart(world, byPlayer, blockSel);
+        return true;
     }
 
-    /// <summary>
-    /// Получить дроп при разрушении блока.
-    /// </summary>
     public override ItemStack[] GetDrops(IWorldAccessor world, BlockPos pos, IPlayer byPlayer,
         float dropQuantityMultiplier = 1)
     {
         return [OnPickBlock(world, pos)];
     }
 
-    /// <summary>
-    /// Получить подсказки по взаимодействию с блоком.
-    /// </summary>
     public override WorldInteraction[] GetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection selection, IPlayer forPlayer)
     {
         return new WorldInteraction[]
@@ -487,17 +545,58 @@ public class BlockEAquaAccum : BlockEBase, ILiquidSink, ILiquidSource
         }.Append(base.GetPlacedBlockInteractionHelp(world, selection, forPlayer));
     }
 
-    /// <summary>
-    /// Получить информацию о предмете в руке.
-    /// </summary>
     public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
     {
         base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
+        dsc.AppendLine(Lang.Get("electricalprogressivebasics:Consumption") + ": " + MyMiniLib.GetAttributeFloat(inSlot.Itemstack.Block, "maxConsumption", 0) + " " + Lang.Get("electricalprogressivebasics:W"));
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + (MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
-        dsc.AppendLine(Lang.Get("Pump height") + ": 10 blocks");
-        dsc.AppendLine(Lang.Get("Water check area") + ": 5x5x5 blocks");
-        dsc.AppendLine(Lang.Get("Required water") + ": 50%");
-        dsc.AppendLine(Lang.Get("Liquid capacity") + ": 100 L");
+        dsc.AppendLine();
+        dsc.AppendLine(Lang.Get("electricalprogressiveindustry:eaquaaccum-structure-hint"));
     }
+
+    #region IMultiBlockInteract
+
+    public bool MBDoPartialSelection(IWorldAccessor world, BlockPos pos, Vec3i offset) => false;
+
+    public bool MBOnBlockInteractStep(float secondsUsed, IWorldAccessor world, IPlayer byPlayer,
+        BlockSelection blockSel, Vec3i offset) => false;
+
+    public void MBOnBlockInteractStop(float secondsUsed, IWorldAccessor world, IPlayer byPlayer,
+        BlockSelection blockSel, Vec3i offset)
+    {
+    }
+
+    public bool MBOnBlockInteractCancel(float secondsUsed, IWorldAccessor world, IPlayer byPlayer,
+        BlockSelection blockSel, EnumItemUseCancelReason cancelReason, Vec3i offset) => true;
+
+    public ItemStack MBOnPickBlock(IWorldAccessor world, BlockPos pos, Vec3i offset)
+    {
+        var controllerPos = MachineConstructAccess.GetControllerPos(pos, offset);
+        var handling = EnumHandling.PassThrough;
+        foreach (var bh in BlockBehaviors)
+        {
+            var h = EnumHandling.PassThrough;
+            var stack = bh.OnPickBlock(world, controllerPos, ref h);
+            if (h != EnumHandling.PassThrough && stack != null)
+                return stack;
+        }
+
+        return OnPickBlock(world, controllerPos);
+    }
+
+    public WorldInteraction[] MBGetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection blockSel,
+        IPlayer forPlayer, Vec3i offset)
+    {
+        var controllerPos = MachineConstructAccess.GetControllerPos(blockSel.Position, offset);
+        var sel = blockSel.Clone();
+        sel.Position = controllerPos;
+        return GetPlacedBlockInteractionHelp(world, sel, forPlayer);
+    }
+
+    public BlockSounds MBGetSounds(IBlockAccessor blockAccessor, BlockSelection blockSel, ItemStack stack,
+        Vec3i offset) =>
+        Sounds;
+
+    #endregion
 }

@@ -11,6 +11,7 @@ using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
+using MachineConstruct = global::ElectricalProgressive.Construction.BEBehaviorMachineConstruct;
 
 namespace ElectricalProgressive.Content.Block.ESieve
 {
@@ -31,6 +32,22 @@ namespace ElectricalProgressive.Content.Block.ESieve
         public float RecipeProgress;
         public int AccumulatedEnergy { get; set; }
 
+        /// <summary>
+        /// Машина готова к работе (сборка Core MachineConstruct завершена / formed).
+        /// </summary>
+        public bool StructureComplete
+        {
+            get
+            {
+                var construct = GetBehavior<MachineConstruct>();
+                if (construct != null && construct.HasConstruction)
+                    return construct.IsReady;
+                return true;
+            }
+        }
+
+        public bool IsFormed => Block?.Variant?["state"] == "formed";
+
         public ItemSlot InputSlot => inventory[0];
         public ItemSlot GetOutputSlot(int index) => inventory[1 + index]; // index 0-24
         public override string DialogTitle => Lang.Get("esieve-title-gui");
@@ -38,7 +55,8 @@ namespace ElectricalProgressive.Content.Block.ESieve
 
         private static MeshData? _mesh;
         private static Shape? _resultingShape;
-        private BlockEntityAnimationUtil AnimUtil => GetBehavior<BEBehaviorAnimatable>()?.animUtil;
+        private BlockEntityAnimationUtil? AnimUtil => GetBehavior<BEBehaviorAnimatable>()?.animUtil;
+        private bool _animatorReadyForFormed;
         private int _lastSoundFrame = -1;
         private long _lastAnimationCheckTime;
 
@@ -72,6 +90,9 @@ namespace ElectricalProgressive.Content.Block.ESieve
 
         public void AddEnergy(int amount)
         {
+            if (!StructureComplete)
+                return;
+
             if (CurrentRecipe == null || InputSlot.Empty)
                 return;
     
@@ -130,29 +151,59 @@ namespace ElectricalProgressive.Content.Block.ESieve
                 this.inventory.SlotModified += slotId => UpdateMeshes();
                 UpdateMeshes();
 
-                if (AnimUtil != null)
-                {
-                    PrepareAnimUtil(api, InventoryClassName);
-                    AnimUtil.InitializeAnimator(InventoryClassName, _mesh, _resultingShape, new Vec3f(0, GetRotation(), 0f));
-                }
-
                 _soundSieve = new AssetLocation("electricalprogressiveindustry:sounds/esieve/sieve.ogg");
                 this.RegisterGameTickListener(CheckAnimationFrame, 50);
                 UpdateMeshes();
+                EnsureAnimatorReady();
             }
+        }
+
+        private void EnsureAnimatorReady()
+        {
+            if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
+                return;
+
+            if (!IsFormed)
+                return;
+
+            if (_animatorReadyForFormed && AnimUtil.animator != null)
+                return;
+
+            PrepareAnimUtil(Api, InventoryClassName);
+            AnimUtil.InitializeAnimator(
+                InventoryClassName,
+                _mesh,
+                _resultingShape,
+                new Vec3f(0, GetRotation(), 0f));
+            _animatorReadyForFormed = true;
+        }
+
+        private Vintagestory.API.Common.Block? GetFormedBlockForAnim(ICoreAPI api)
+        {
+            if (Block?.Variant == null || !Block.Variant.ContainsKey("state"))
+                return Block;
+
+            return api.World.GetBlock(Block.CodeWithVariant("state", "formed")) ?? Block;
         }
 
         private void PrepareAnimUtil(ICoreAPI api, string cacheDictKey)
         {
-            if (_mesh == null || _resultingShape == null)
-            {
-                AssetLocation shapePath = Block.Shape.Base.Clone().WithPathPrefixOnce("shapes/")
-                    .WithPathAppendixOnce(".json");
+            if (AnimUtil == null)
+                return;
 
-                Shape _shape = Shape.TryGet(api, shapePath);
+            var shapeBlock = GetFormedBlockForAnim(api) ?? Block;
+            if (shapeBlock?.Shape?.Base == null)
+                return;
 
-                _mesh = AnimUtil.CreateMesh(cacheDictKey, _shape, out _resultingShape, null);
-            }
+            AssetLocation shapePath = shapeBlock.Shape.Base.Clone()
+                .WithPathPrefixOnce("shapes/")
+                .WithPathAppendixOnce(".json");
+
+            Shape shape = Shape.TryGet(api, shapePath);
+            if (shape == null)
+                return;
+
+            _mesh = AnimUtil.CreateMesh(cacheDictKey + "-formed", shape, out _resultingShape, null);
         }
 
         public int GetRotation()
@@ -540,7 +591,7 @@ namespace ElectricalProgressive.Content.Block.ESieve
         private void Every1000Ms(float dt)
         {
             var beh = GetBehavior<BEBehaviorESieve>();
-            if (beh == null)
+            if (beh == null || !StructureComplete)
             {
                 StopAnimation();
                 return;
@@ -586,13 +637,16 @@ namespace ElectricalProgressive.Content.Block.ESieve
 
         private void StartAnimation()
         {
-            if (Api?.Side != EnumAppSide.Client || AnimUtil == null || CurrentRecipe == null)
+            if (Api?.Side != EnumAppSide.Client || CurrentRecipe == null)
                 return;
+
+            EnsureAnimatorReady();
+            if (AnimUtil == null) return;
 
             var beh = GetBehavior<BEBehaviorESieve>();
             if (beh == null) return;
 
-            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false)
+            if (!AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
             {
                 AnimUtil.StartAnimation(new AnimationMetaData()
                 {
@@ -610,7 +664,7 @@ namespace ElectricalProgressive.Content.Block.ESieve
             if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
                 return;
 
-            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == true)
+            if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
             {
                 AnimUtil.StopAnimation("work-on");
             }
@@ -618,11 +672,11 @@ namespace ElectricalProgressive.Content.Block.ESieve
         
         private void CheckAnimationFrame(float dt)
         {
-            if (Api?.Side != EnumAppSide.Client || AnimUtil == null!)
+            if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
                 return;
 
             const int startFrame = 280;
-            if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
+            if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on") && AnimUtil.animator != null)
             {
                 var currentTime = Api.World.ElapsedMilliseconds;
                 _lastAnimationCheckTime = currentTime;
@@ -666,6 +720,9 @@ namespace ElectricalProgressive.Content.Block.ESieve
 
         public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
         {
+            if (!StructureComplete)
+                return true;
+
             if (Api.Side == EnumAppSide.Client)
             {
                 toggleInventoryDialogClient(byPlayer, () =>
@@ -714,6 +771,7 @@ namespace ElectricalProgressive.Content.Block.ESieve
             if (Api is ICoreClientAPI)
             {
                 UpdateMeshes();
+                EnsureAnimatorReady();
             }
 
             if (Api?.Side == EnumAppSide.Client && _clientDialog != null)
@@ -728,6 +786,7 @@ namespace ElectricalProgressive.Content.Block.ESieve
             tree["_inventory"] = invTree;
             tree.SetFloat("PowerCurrent", RecipeProgress);
             tree.SetInt("accumulatedEnergy", AccumulatedEnergy);
+            tree.SetBool("structureComplete", StructureComplete);
         }
 
         #endregion
@@ -746,6 +805,13 @@ namespace ElectricalProgressive.Content.Block.ESieve
 
         public override bool OnTesselation(ITerrainMeshPool mesher, ITesselatorAPI tesselator)
         {
+            var construct = GetBehavior<MachineConstruct>();
+            if (construct is { IsRenderingBlueprint: true })
+                return base.OnTesselation(mesher, tesselator);
+
+            if (IsFormed)
+                EnsureAnimatorReady();
+
             base.OnTesselation(mesher, tesselator);
 
             if (_meshes != null!)
@@ -757,7 +823,8 @@ namespace ElectricalProgressive.Content.Block.ESieve
                 }
             }
 
-            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == false)
+            if (AnimUtil?.activeAnimationsByAnimCode == null ||
+                !AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
             {
                 return false;
             }

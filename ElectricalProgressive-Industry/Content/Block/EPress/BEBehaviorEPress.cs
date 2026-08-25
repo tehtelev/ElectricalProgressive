@@ -55,6 +55,9 @@ public class BEBehaviorEPress : BlockEntityBehavior, IElectricConsumer
         {
             if (Blockentity is BlockEntityEPress entity)
             {
+                if (!entity.StructureComplete)
+                    return false;
+
                 // прибор сгорел?
                 if (entity.ElectricalProgressive == null &&
                     entity.ElectricalProgressive.AllEparams == null &&
@@ -99,9 +102,16 @@ public class BEBehaviorEPress : BlockEntityBehavior, IElectricConsumer
             return;
         }
 
+        if (!entity.StructureComplete)
+        {
+            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-incomplete"));
+            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-hint"));
+            stringBuilder.AppendLine();
+            return;
+        }
+
         stringBuilder.AppendLine(StringHelper.Progressbar(PowerSetting * 100.0f / _maxConsumption));
         stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Consumption") + ": " + PowerSetting + "/" + _maxConsumption + " " + Lang.Get("electricalprogressivebasics:W"));
-
         // Показываем прогресс крафта
         if (entity.CurrentRecipe != null && entity.CurrentRecipe.EnergyOperation > 0)
         {

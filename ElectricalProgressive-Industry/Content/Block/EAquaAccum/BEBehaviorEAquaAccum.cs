@@ -42,6 +42,9 @@ public class BEBehaviorEAquaAccum : BlockEntityBehavior, IElectricConsumer
         {
             if (this.Blockentity is BlockEntityEAquaAccum entity)
             {
+                if (!entity.StructureComplete)
+                    return false;
+
                 // Работаем если бак не полон
                 return !entity.IsFull();
             }
@@ -53,11 +56,19 @@ public class BEBehaviorEAquaAccum : BlockEntityBehavior, IElectricConsumer
     {
         base.GetBlockInfo(forPlayer, stringBuilder);
 
-        if (this.Blockentity is not BlockEntityEAquaAccum)
+        if (this.Blockentity is not BlockEntityEAquaAccum entity)
             return;
 
         if (IsBurned)
             return;
+
+        if (!entity.StructureComplete)
+        {
+            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-incomplete"));
+            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-hint"));
+            stringBuilder.AppendLine();
+            return;
+        }
 
         stringBuilder.AppendLine(StringHelper.Progressbar(PowerSetting * 100.0f / _maxConsumption));
         stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Consumption") + ": " +
@@ -76,6 +87,9 @@ public class BEBehaviorEAquaAccum : BlockEntityBehavior, IElectricConsumer
         if (_cachedEntity == null)
             return 0;
 
+        if (!_cachedEntity.StructureComplete)
+            return 0;
+
         // Потребляем энергию только если бак не полон
         if (_cachedEntity.IsFull())
             return 0;
@@ -89,6 +103,14 @@ public class BEBehaviorEAquaAccum : BlockEntityBehavior, IElectricConsumer
             _cachedEntity = entity;
 
         if (_cachedEntity == null)
+        {
+            PowerSetting = 0;
+            _accumulatedEnergy = 0;
+            _lastEnergyTime = 0;
+            return;
+        }
+
+        if (!_cachedEntity.StructureComplete)
         {
             PowerSetting = 0;
             _accumulatedEnergy = 0;

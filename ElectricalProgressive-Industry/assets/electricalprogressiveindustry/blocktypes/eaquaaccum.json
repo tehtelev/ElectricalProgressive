@@ -1,4 +1,4 @@
-﻿{
+{
   "code": "eaquaaccum",
   "class": "BlockEAquaAccum",
   "entityClass": "BlockEntityEAquaAccum",
@@ -18,13 +18,66 @@
     "isolatedEnvironment": true,
     "capacityLitres": 100,
     "handbook": {
-      "groupBy": [
-        "eaquaaccum-*"
-      ],
+      "groupBy": [ "eaquaaccum-*" ],
       "extraSections": [
         {
-          "title": "Electric aqua accumulator",
-          "text": "An electric aqua accumulator that extracts water from underground sources. Requires at least 50% water blocks in a 5x5x5 area and must be placed directly above a water source. Maximum pumping depth: 10 blocks. Capacity: 100 liters."
+          "title": "electricalprogressiveindustry:block-handbooktitle-eaquaaccum",
+          "text": "electricalprogressiveindustry:block-handbooktext-eaquaaccum"
+        }
+      ]
+    },
+    "construction": {
+      "brokenDropsRatio": 1,
+      "blueprintShape": "block/eaquaaccum/eaquaaccum",
+      "levels": [
+        {
+          "shape": "block/eaquaaccum/eaquaaccum_base",
+          "actionLangCode": "electricalprogressiveindustry:eaquaaccum-handbook-place-controller"
+        },
+        {
+          "shape": "block/eaquaaccum/eaquaaccum_base",
+          "actionLangCode": "electricalprogressiveindustry:eaquaaccum-construct-frame",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "game:metalplate-iron",
+              "quantity": 6
+            }
+          ]
+        },
+        {
+          "shape": "block/eaquaaccum/eaquaaccum_base2",
+          "actionLangCode": "electricalprogressiveindustry:eaquaaccum-construct-coils",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "electricalprogressivebasics:coil",
+              "quantity": 2
+            }
+          ]
+        },
+        {
+          "shape": "block/eaquaaccum/eaquaaccum_base3",
+          "actionLangCode": "electricalprogressiveindustry:eaquaaccum-construct-tank",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "game:metalplate-copper",
+              "quantity": 2
+            }
+          ]
+        },
+        {
+          "shape": "block/eaquaaccum/eaquaaccum",
+          "actionLangCode": "electricalprogressiveindustry:eaquaaccum-construct-finish",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "game:metalplate-copper",
+              "quantity": 2
+            }
+          ],
+          "formMachine": true
         }
       ]
     }
@@ -35,7 +88,6 @@
         [ 0.9, 1.8, 0.4 ],
         [ 1.1, 1.8, 0.4 ],
         [ 1.3, 1.8, 0.4 ]
-
       ]
     },
     "*-east": {
@@ -61,25 +113,21 @@
     }
   },
   "entityBehaviors": [
-    {
-      "name": "Container"
-    },
-    {
-      "name": "Animatable"
-    },
-    {
-      "name": "BEBehaviorEAquaAccum"
-    },
-    {
-      "name": "ElectricalProgressive"
-    }
+    { "name": "Container" },
+    { "name": "Animatable" },
+    { "name": "BEBehaviorEAquaAccum" },
+    { "name": "ElectricalProgressive" }
   ],
   "creativeinventory": {
-    "general": [ "*-north", "*-north" ],
-    "electricity": [ "*-north" ]
+    "general": [ "*-incomplete-north" ],
+    "electricity": [ "*-incomplete-north" ]
   },
   "behaviors": [
-    { "name": "HorizontalOrientable" },
+    {
+      "name": "HorizontalOrientable",
+      "properties": { "handleDrop": false }
+    },
+    { "name": "BlockEntityInteract" },
     {
       "name": "Multiblock",
       "propertiesByType": {
@@ -87,41 +135,25 @@
           "sizex": 2,
           "sizey": 2,
           "sizez": 2,
-          "cposition": {
-            "x": 0,
-            "y": 0,
-            "z": 1
-          }
+          "cposition": { "x": 0, "y": 0, "z": 1 }
         },
         "*-east": {
           "sizex": 2,
           "sizey": 2,
           "sizez": 2,
-          "cposition": {
-            "x": 0,
-            "y": 0,
-            "z": 0
-          }
+          "cposition": { "x": 0, "y": 0, "z": 0 }
         },
         "*-south": {
           "sizex": 2,
           "sizey": 2,
           "sizez": 2,
-          "cposition": {
-            "x": 1,
-            "y": 0,
-            "z": 0
-          }
+          "cposition": { "x": 1, "y": 0, "z": 0 }
         },
         "*-west": {
           "sizex": 2,
           "sizey": 2,
           "sizez": 2,
-          "cposition": {
-            "x": 1,
-            "y": 0,
-            "z": 1
-          }
+          "cposition": { "x": 1, "y": 0, "z": 1 }
         }
       }
     }
@@ -129,29 +161,62 @@
   "blockmaterial": "Metal",
   "variantgroups": [
     {
+      "code": "state",
+      "states": [ "incomplete", "formed" ]
+    },
+    {
       "code": "side",
       "loadFromProperties": "abstract/horizontalorientation"
     }
   ],
   "shapebytype": {
-    "*-north": {
+    "*-incomplete-north": {
+      "base": "block/eaquaaccum/eaquaaccum_base",
+      "rotateY": 0
+    },
+    "*-incomplete-east": {
+      "base": "block/eaquaaccum/eaquaaccum_base",
+      "rotateY": 270
+    },
+    "*-incomplete-south": {
+      "base": "block/eaquaaccum/eaquaaccum_base",
+      "rotateY": 180
+    },
+    "*-incomplete-west": {
+      "base": "block/eaquaaccum/eaquaaccum_base",
+      "rotateY": 90
+    },
+    "*-formed-north": {
       "base": "block/eaquaaccum/eaquaaccum",
       "rotateY": 0
     },
-    "*-east": {
+    "*-formed-east": {
       "base": "block/eaquaaccum/eaquaaccum",
       "rotateY": 270
     },
-    "*-south": {
+    "*-formed-south": {
       "base": "block/eaquaaccum/eaquaaccum",
       "rotateY": 180
     },
-    "*-west": {
+    "*-formed-west": {
       "base": "block/eaquaaccum/eaquaaccum",
       "rotateY": 90
     }
   },
-  "lightAbsorption": 5,
+  "shapeInventoryByType": {
+    "*-incomplete-*": {
+      "base": "block/eaquaaccum/eaquaaccum",
+      "rotateY": 0
+    },
+    "*-formed-*": {
+      "base": "block/eaquaaccum/eaquaaccum",
+      "rotateY": 0
+    }
+  },
+  "lightAbsorptionByType": {
+    "*-incomplete-*": 0,
+    "*-formed-*": 5
+  },
   "sidesolidByType": {
     "*-north": {
       "all": false,
@@ -160,12 +225,12 @@
     }
   },
   "sideopaque": {
-    "all": "false"
-  },
-  "emitSideAo": { // Ambient Oclusion
     "all": false
   },
-  "sideAo": { // Ambient Oclusion
+  "emitSideAo": {
+    "all": false
+  },
+  "sideAo": {
     "all": true
   },
   "resistance": 3.5,
@@ -176,32 +241,22 @@
     "break": "game:block/anvil"
   },
   "guiTransform": {
-    "rotation": {
-      "x": -22.6,
-      "y": -145,
-      "z": 0
-    },
-    "origin": {
-      "x": 0.5,
-      "y": 0.9,
-      "z": 0.5
-    },
+    "rotation": { "x": -22.6, "y": -145, "z": 0 },
+    "origin": { "x": 0.5, "y": 0.9, "z": 0.5 },
     "scale": 0.72
+  },
+  "groundTransform": {
+    "translation": { "x": 0, "y": 0.1, "z": 0 },
+    "rotation": { "x": 0, "y": -45, "z": 0 },
+    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
+    "scale": 1.6
   },
   "heldTpIdleAnimation": "holdbothhandslarge",
   "heldRightReadyAnimation": "heldblockready",
   "heldTpUseAnimation": "twohandplaceblock",
   "tpHandTransform": {
-    "translation": {
-      "x": -0.6,
-      "y": -0.91,
-      "z": -0.8
-    },
-    "rotation": {
-      "x": -2,
-      "y": 25,
-      "z": -78
-    },
+    "translation": { "x": -0.6, "y": -0.91, "z": -0.8 },
+    "rotation": { "x": -2, "y": 25, "z": -78 },
     "scale": 0.4
   }
 }
