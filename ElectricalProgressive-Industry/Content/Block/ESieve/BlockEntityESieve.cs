@@ -627,19 +627,22 @@ namespace ElectricalProgressive.Content.Block.ESieve
         }
 
         /// <summary>
-        /// Локальный offset (north) → мировое смещение с учётом поворота блока.
+        /// Локальный offset (north) → смещение относительно блока с тем же RotateY,
+        /// что у AnimatableRenderer (GetRotation + Mat4f.RotateY вокруг 0.5, 0.5).
         /// </summary>
         private Vec3d GetRotatedOffset(float lx, float ly, float lz)
         {
-            // Смещение от центра блока, затем поворот как у shape.rotateY
             float ox = lx - 0.5f;
             float oz = lz - 0.5f;
-            float deg = Block?.Shape?.rotateY ?? 0;
+            float deg = GetRotation();
+            if (deg == 0)
+                return new Vec3d(lx, ly, lz);
+
             float rad = deg * GameMath.DEG2RAD;
             float cos = GameMath.Cos(rad);
             float sin = GameMath.Sin(rad);
-            float rx = ox * cos - oz * sin;
-            float rz = ox * sin + oz * cos;
+            float rx = ox * cos + oz * sin;
+            float rz = -ox * sin + oz * cos;
             return new Vec3d(0.5f + rx, ly, 0.5f + rz);
         }
 
