@@ -1,4 +1,5 @@
-﻿using ElectricalProgressive.RecipeSystem;
+﻿using ElectricalProgressive.Content.Block;
+using ElectricalProgressive.RecipeSystem;
 using ElectricalProgressive.RecipeSystem.Recipe;
 using ElectricalProgressive.Utils;
 using System;
@@ -39,6 +40,11 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
     public int AccumulatedEnergy { get; set; }
 
     /// <summary>
+    /// Ковка идёт (нагрев до 900°C закончен). Синится на клиент для анимации.
+    /// </summary>
+    public bool IsForging { get; private set; }
+
+    /// <summary>
     /// Машина готова к работе (сборка Core MachineConstruct завершена / formed).
     /// </summary>
     public bool StructureComplete
@@ -55,6 +61,8 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
     public bool IsFormed => Block?.Variant?["state"] == "formed";
 
     private static float _maxTargetTemp = 1350f;
+    public const float CraftStartTemp = 900f;
+    private const float HeatPerEnergy = 0.5f;
 
     public override string DialogTitle => Lang.Get("ehammer-title-gui");
 
@@ -69,6 +77,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
     private MeshData?[] _meshes;
     private Shape? _nowTesselatingShape;
     private CollectibleObject _nowTesselatingObj;
+    private SmithingWorkItemRenderer? _workItemRenderer;
 
     //--------------------------------------------------------------------------------
 
@@ -100,7 +109,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
     }
 
     /// <summary>
-    /// Добавить энергию для обработки рецепта
+    /// Добавить энергию: сначала нагрев входа до 900°C, затем прогресс крафта.
     /// </summary>
     public void AddEnergy(int amount)
     {
@@ -113,25 +122,33 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         if (amount <= 0)
             return;
 
-        // Получаем поведение для проверки потребления
         var beh = GetBehavior<BEBehaviorEHammer>();
         if (beh == null) return;
 
-        // Рассчитываем сколько энергии можно добавить за этот тик
-        // Ограничиваем добавление, чтобы не превысить максимальное потребление в секунду
         float currentPower = beh.PowerSetting;
         if (currentPower <= 0) return;
 
-        // Максимально возможное добавление за один вызов (ограничение)
-        // При 60 тиках в секунду и потреблении 100 Вт - не более 1-2 единиц за тик
         int maxAddPerTick = Math.Max(1, (int)(currentPower / 20f));
         int safeAmount = Math.Min(amount, maxAddPerTick);
 
-        // Ограничиваем добавление энергии, чтобы не перескочить через лимит
+        float currentTemp = GetInputTemperature();
+        if (currentTemp < CraftStartTemp)
+        {
+            float newTemp = Math.Min(currentTemp + safeAmount * HeatPerEnergy, CraftStartTemp);
+            SetInputTemperature(newTemp);
+            RecipeProgress = 0f;
+            SetForging(false);
+            UpdateState(RecipeProgress);
+            MarkDirty(true);
+            return;
+        }
+
+        SetInputTemperature(Math.Min(Math.Max(currentTemp, CraftStartTemp), _maxTargetTemp));
+        SetForging(true);
+
         int maxNeeded = (int)CurrentRecipe.EnergyOperation - AccumulatedEnergy;
         if (maxNeeded <= 0)
         {
-            // Если уже накоплено достаточно для крафта - завершаем его
             ProcessCompletedCraft();
             return;
         }
@@ -139,34 +156,41 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         int energyToAdd = Math.Min(safeAmount, maxNeeded);
         AccumulatedEnergy += energyToAdd;
 
-        // Обновляем прогресс для UI
         if (CurrentRecipe != null && CurrentRecipe.EnergyOperation > 0)
         {
             RecipeProgress = AccumulatedEnergy / (float)CurrentRecipe.EnergyOperation;
-
-            // Обновляем температуру предмета на основе прогресса
-            if (InputSlot?.Itemstack != null)
-            {
-                var stack = InputSlot.Itemstack;
-                if (RecipeProgress < 0.5f)
-                {
-                    stack.Collectible.SetTemperature(this.Api.World, stack, RecipeProgress * 2 * _maxTargetTemp);
-                }
-                else
-                {
-                    stack.Collectible.SetTemperature(this.Api.World, stack, _maxTargetTemp);
-                }
-            }
-
             UpdateState(RecipeProgress);
         }
 
-        // Проверяем, не накопилось ли достаточно для завершения
         if (AccumulatedEnergy >= CurrentRecipe.EnergyOperation)
         {
             ProcessCompletedCraft();
         }
 
+        MarkDirty(true);
+    }
+
+    public float GetInputTemperature()
+    {
+        var stack = InputSlot?.Itemstack;
+        if (stack?.Collectible == null || Api?.World == null)
+            return 0f;
+        return stack.Collectible.GetTemperature(Api.World, stack);
+    }
+
+    private void SetInputTemperature(float temperature)
+    {
+        var stack = InputSlot?.Itemstack;
+        if (stack?.Collectible == null || Api?.World == null)
+            return;
+        stack.Collectible.SetTemperature(Api.World, stack, temperature);
+    }
+
+    private void SetForging(bool forging)
+    {
+        if (IsForging == forging)
+            return;
+        IsForging = forging;
         MarkDirty(true);
     }
 
@@ -189,6 +213,9 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             {
                 UpdateMeshes();
             };
+
+            _workItemRenderer = new SmithingWorkItemRenderer(_capi, () => Pos, () => InputSlot?.Itemstack);
+            _capi.Event.RegisterRenderer(_workItemRenderer, EnumRenderStage.Opaque, "ehammer-workitem");
 
             // Первоначальное создание мешей
             UpdateMeshes();
@@ -386,6 +413,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         if (inventory[slotid].Empty)
         {
             _meshes[slotid] = null;
+            UpdateItemParticleOffset(null);
             return;
         }
 
@@ -399,6 +427,9 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         {
             _meshes[slotid] = null;
         }
+
+        _workItemRenderer?.SetMesh(_meshes[slotid]);
+        UpdateItemParticleOffset(_meshes[slotid]);
     }
 
     public void TranslateMesh(MeshData? meshData, int slotId)
@@ -435,6 +466,54 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         
             meshData.Rotate(origin, 0, orientationRotate * GameMath.DEG2RAD, 0);
         }
+    }
+
+    /// <summary>
+    /// Искры бьют в центр отрисованного меша входного предмета.
+    /// </summary>
+    private void UpdateItemParticleOffset(MeshData? mesh)
+    {
+        var ep = ElectricalProgressive;
+        if (ep?.ParticlesOffsetPos == null)
+            return;
+
+        var center = GetMeshCenter(mesh) ?? new Vec3d(0.5, 1.01, 0.5);
+
+        if (ep.ParticlesOffsetPos.Count == 0)
+        {
+            ep.ParticlesOffsetPos.Add(center);
+            return;
+        }
+
+        for (var i = 0; i < ep.ParticlesOffsetPos.Count; i++)
+            ep.ParticlesOffsetPos[i] = center.Clone();
+    }
+
+    private static Vec3d? GetMeshCenter(MeshData? mesh)
+    {
+        if (mesh?.xyz == null || mesh.VerticesCount <= 0)
+            return null;
+
+        var xyz = mesh.xyz;
+        var n = mesh.VerticesCount;
+        float minX = float.MaxValue, minY = float.MaxValue, minZ = float.MaxValue;
+        float maxX = float.MinValue, maxY = float.MinValue, maxZ = float.MinValue;
+
+        for (var i = 0; i < n; i++)
+        {
+            var o = i * 3;
+            var x = xyz[o];
+            var y = xyz[o + 1];
+            var z = xyz[o + 2];
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (z < minZ) minZ = z;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+            if (z > maxZ) maxZ = z;
+        }
+
+        return new Vec3d((minX + maxX) * 0.5, (minY + maxY) * 0.5, (minZ + maxZ) * 0.5);
     }
 
     public MeshData? GenMesh(ItemSlot slot)
@@ -560,48 +639,38 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
 
         if (stack is null ||
             stack.StackSize == 0 ||
-            stack.Collectible == null ||
-            stack.Collectible.Attributes == null)
+            stack.Collectible == null)
         {
+            SetForging(false);
             StopAnimation();
             return;
         }
 
         var hasPower = beh.PowerSetting >= _maxConsumption * 0.1F;
         var hasRecipe = !InputSlot.Empty && FindMatchingRecipe(ref CurrentRecipe, ref CurrentRecipeName, inventory[0]);
-        var isCraftingNow = hasPower && hasRecipe && CurrentRecipe != null;
+
+        if (Api.Side == EnumAppSide.Server)
+        {
+            var isHotEnough = GetInputTemperature() >= CraftStartTemp;
+            SetForging(hasPower && hasRecipe && CurrentRecipe != null && isHotEnough);
+        }
+
+        var isCraftingNow = hasRecipe && CurrentRecipe != null && IsForging;
 
         if (isCraftingNow)
         {
             if (!_wasCraftingLastTick)
-            {
-                StartAnimation();  // Запускаем анимацию при начале крафта
-            }
+                StartAnimation();
 
-            // Обновляем прогресс...
             if (CurrentRecipe != null && CurrentRecipe.EnergyOperation > 0)
             {
                 RecipeProgress = AccumulatedEnergy / (float)CurrentRecipe.EnergyOperation;
-            
-                if (InputSlot?.Itemstack != null)
-                {
-                    var inputStack = InputSlot.Itemstack;
-                    if (RecipeProgress < 0.5f)
-                    {
-                        inputStack.Collectible.SetTemperature(this.Api.World, inputStack, RecipeProgress * 2 * _maxTargetTemp);
-                    }
-                    else
-                    {
-                        inputStack.Collectible.SetTemperature(this.Api.World, inputStack, _maxTargetTemp);
-                    }
-                }
-            
                 UpdateState(RecipeProgress);
             }
         }
         else if (_wasCraftingLastTick)
         {
-            StopAnimation();  // Останавливаем только если крафт прекратился
+            StopAnimation();
             MarkDirty(true);
         }
 
@@ -617,6 +686,8 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
 
         try
         {
+            float inputTemp = GetInputTemperature();
+
             for (int i = 0; i < CurrentRecipe.Outputs.Length; i++)
             {
                 var output = CurrentRecipe.Outputs[i];
@@ -628,7 +699,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
                 if (outputItem == null)
                     continue;
 
-                outputItem.Collectible.SetTemperature(this.Api.World, outputItem, _maxTargetTemp);
+                outputItem.Collectible.SetTemperature(this.Api.World, outputItem, inputTemp);
 
                 if (i == 0)
                 {
@@ -645,6 +716,8 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             }
 
             InputSlot.TakeOut(CurrentRecipe.Ingredients[0].Quantity);
+            if (!InputSlot.Empty)
+                SetInputTemperature(inputTemp);
             InputSlot.MarkDirty();
             
             // Обнуляем накопленную энергию для следующего рецепта
@@ -666,6 +739,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
                 CurrentRecipe = null;
                 AccumulatedEnergy = 0;
                 RecipeProgress = 0;
+                SetForging(false);
                 StopAnimation();
             }
             
@@ -804,15 +878,6 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
 
         base.OnTesselation(mesher, tesselator);
 
-        if (_meshes != null)
-        {
-            for (var i = 0; i < _meshes.Length; i++)
-            {
-                if (_meshes[i] != null)
-                    mesher.AddMeshData(_meshes[i]);
-            }
-        }
-
         if (AnimUtil?.activeAnimationsByAnimCode == null ||
             !AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
         {
@@ -828,6 +893,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         this.Inventory.FromTreeAttributes(tree.GetTreeAttribute("_inventory"));
         this.RecipeProgress = tree.GetFloat("PowerCurrent");
         this.AccumulatedEnergy = tree.GetInt("accumulatedEnergy");
+        this.IsForging = tree.GetBool("isForging");
 
         if (this.Api != null)
             this.Inventory.AfterBlocksLoaded(this.Api.World);
@@ -836,6 +902,10 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         {
             UpdateMeshes();
             EnsureAnimatorReady();
+            if (IsForging)
+                StartAnimation();
+            else
+                StopAnimation();
         }
 
         var api = this.Api;
@@ -852,6 +922,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         tree["_inventory"] = (IAttribute)tree1;
         tree.SetFloat("PowerCurrent", this.RecipeProgress);
         tree.SetInt("accumulatedEnergy", this.AccumulatedEnergy);
+        tree.SetBool("isForging", IsForging);
         tree.SetBool("structureComplete", StructureComplete);
     }
 
@@ -887,6 +958,8 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             this.AnimUtil?.Dispose();
         }
 
+        _workItemRenderer?.Dispose();
+        _workItemRenderer = null;
         _mesh?.Dispose();
         _resultingShape = null;
         _meshes = null;
@@ -926,6 +999,8 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             this.AnimUtil?.Dispose();
         }
 
+        _workItemRenderer?.Dispose();
+        _workItemRenderer = null;
         _mesh?.Dispose();
         _resultingShape = null;
         _meshes = null;

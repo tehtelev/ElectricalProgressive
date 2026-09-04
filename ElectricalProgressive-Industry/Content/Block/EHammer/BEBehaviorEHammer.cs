@@ -99,11 +99,21 @@ public class BEBehaviorEHammer : BlockEntityBehavior, IElectricConsumer
 
         stringBuilder.AppendLine(StringHelper.Progressbar(PowerSetting * 100.0f / _maxConsumption));
         stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Consumption") + ": " + PowerSetting + "/" + _maxConsumption + " " + Lang.Get("electricalprogressivebasics:W"));
-        // Показываем прогресс крафта
-        if (entity.CurrentRecipe != null && entity.CurrentRecipe.EnergyOperation > 0)
+
+        if (entity.InputSlot?.Itemstack != null)
         {
-            int percent = (int)(entity.RecipeProgress * 100);
-            stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Progress") + ": " + percent + "%");
+            float currentTemp = entity.GetInputTemperature();
+            stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Temperature") + ": " + (int)currentTemp + "°C / " + (int)BlockEntityEHammer.CraftStartTemp + "°C");
+
+            if (currentTemp < BlockEntityEHammer.CraftStartTemp)
+            {
+                stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:State") + ": " + Lang.Get("electricalprogressivebasics:Heating"));
+            }
+            else if (entity.CurrentRecipe != null && entity.CurrentRecipe.EnergyOperation > 0)
+            {
+                int percent = (int)(entity.RecipeProgress * 100);
+                stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Progress") + ": " + percent + "%");
+            }
         }
         
         stringBuilder.AppendLine();

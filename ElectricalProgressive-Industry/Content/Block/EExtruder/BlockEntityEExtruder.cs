@@ -1,4 +1,5 @@
-﻿﻿using ElectricalProgressive.RecipeSystem;
+﻿﻿using ElectricalProgressive.Content.Block;
+using ElectricalProgressive.RecipeSystem;
 using ElectricalProgressive.RecipeSystem.Recipe;
 using ElectricalProgressive.Utils;
 using System;
@@ -33,6 +34,15 @@ namespace ElectricalProgressive.Content.Block.EExtruder
         /// Накопленная энергия для текущего рецепта (целые единицы)
         /// </summary>
         public int AccumulatedEnergy { get; set; }
+
+        /// <summary>
+        /// Экструзия идёт (нагрев слитка до 900°C закончен).
+        /// </summary>
+        public bool IsForging { get; private set; }
+
+        private static float _maxTargetTemp = 1350f;
+        public const float CraftStartTemp = 900f;
+        private const float HeatPerEnergy = 0.5f;
 
         /// <summary>
         /// Машина готова к работе (сборка Core MachineConstruct завершена / formed).
@@ -100,7 +110,7 @@ namespace ElectricalProgressive.Content.Block.EExtruder
         }
 
         /// <summary>
-        /// Добавить энергию для обработки рецепта
+        /// Добавить энергию: сначала нагрев слитка до 900°C, затем прогресс крафта.
         /// </summary>
         public void AddEnergy(int amount)
         {
@@ -109,50 +119,117 @@ namespace ElectricalProgressive.Content.Block.EExtruder
 
             if (CurrentRecipe == null || InputSlot1.Empty || InputSlot2.Empty)
                 return;
-    
+
             if (amount <= 0)
                 return;
-        
-            // Ограничиваем добавление энергии, чтобы не перескочить через лимит
+
+            var beh = GetBehavior<BEBehaviorEExtruder>();
+            if (beh == null) return;
+
+            float currentPower = beh.PowerSetting;
+            if (currentPower <= 0) return;
+
+            int maxAddPerTick = Math.Max(1, (int)(currentPower / 20f));
+            int safeAmount = Math.Min(amount, maxAddPerTick);
+
+            float currentTemp = GetInputTemperature();
+            if (currentTemp < CraftStartTemp)
+            {
+                float newTemp = Math.Min(currentTemp + safeAmount * HeatPerEnergy, CraftStartTemp);
+                SetInputTemperature(newTemp);
+                RecipeProgress = 0f;
+                SetForging(false);
+                UpdateState(RecipeProgress);
+                MarkDirty(true);
+                return;
+            }
+
+            SetInputTemperature(Math.Min(Math.Max(currentTemp, CraftStartTemp), _maxTargetTemp));
+            SetForging(true);
+
             int maxNeeded = (int)CurrentRecipe.EnergyOperation - AccumulatedEnergy;
             if (maxNeeded <= 0)
             {
-                // Если уже накоплено достаточно для крафта - завершаем его
                 while (AccumulatedEnergy >= CurrentRecipe.EnergyOperation && HasRequiredItems())
                 {
                     AccumulatedEnergy -= (int)CurrentRecipe.EnergyOperation;
                     ProcessCompletedCraft();
-            
                     if (!HasRequiredItems() || CurrentRecipe == null)
                         break;
                 }
                 return;
             }
-    
-            int energyToAdd = Math.Min(amount, maxNeeded);
+
+            int energyToAdd = Math.Min(safeAmount, maxNeeded);
             AccumulatedEnergy += energyToAdd;
-    
-            // Обновляем прогресс для UI
+
             if (CurrentRecipe != null && CurrentRecipe.EnergyOperation > 0)
             {
                 RecipeProgress = AccumulatedEnergy / (float)CurrentRecipe.EnergyOperation;
                 UpdateState(RecipeProgress);
             }
-    
-            // Проверяем, не накопилось ли достаточно для завершения
+
             if (AccumulatedEnergy >= CurrentRecipe.EnergyOperation)
             {
                 while (AccumulatedEnergy >= CurrentRecipe.EnergyOperation && HasRequiredItems())
                 {
                     AccumulatedEnergy -= (int)CurrentRecipe.EnergyOperation;
                     ProcessCompletedCraft();
-            
                     if (!HasRequiredItems() || CurrentRecipe == null)
                         break;
                 }
             }
-    
+
             MarkDirty(true);
+        }
+
+        public float GetInputTemperature()
+        {
+            var stack = FindIngotSlot()?.Itemstack;
+            if (stack?.Collectible == null || Api?.World == null)
+                return 0f;
+            return stack.Collectible.GetTemperature(Api.World, stack);
+        }
+
+        private void SetInputTemperature(float temperature)
+        {
+            var stack = FindIngotSlot()?.Itemstack;
+            if (stack?.Collectible == null || Api?.World == null)
+                return;
+            stack.Collectible.SetTemperature(Api.World, stack, temperature);
+        }
+
+        private void SetForging(bool forging)
+        {
+            if (IsForging == forging)
+                return;
+            IsForging = forging;
+            MarkDirty(true);
+        }
+
+        private static bool IsGauge(ItemStack? stack)
+        {
+            return stack?.Collectible?.Code?.Path?.Contains("gauge") == true;
+        }
+
+        private ItemSlot? FindGaugeSlot()
+        {
+            for (var i = 0; i < 2; i++)
+            {
+                if (!inventory[i].Empty && IsGauge(inventory[i].Itemstack))
+                    return inventory[i];
+            }
+            return null;
+        }
+
+        public ItemSlot? FindIngotSlot()
+        {
+            for (var i = 0; i < 2; i++)
+            {
+                if (!inventory[i].Empty && !IsGauge(inventory[i].Itemstack))
+                    return inventory[i];
+            }
+            return null;
         }
 
         public override void Initialize(ICoreAPI api)
@@ -180,7 +257,6 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 _soundPress = new AssetLocation("electricalprogressiveindustry:sounds/eextruder/extruder.ogg");
 
                 this.RegisterGameTickListener(new Action<float>(this.CheckAnimationFrame), 50);
-                UpdateMeshes();
                 EnsureAnimatorReady();
             }
         }
@@ -252,9 +328,9 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 UpdateState(RecipeProgress);
             }
 
-            if (slotid == 1 && Api.Side == EnumAppSide.Client)
+            if (slotid < 2 && Api.Side == EnumAppSide.Client)
             {
-                UpdateMesh(1);
+                UpdateMeshes();
             }
 
             MarkDirty();
@@ -332,52 +408,17 @@ namespace ElectricalProgressive.Content.Block.EExtruder
 
         public void UpdateMesh(int slotid)
         {
-            if (Api == null || Api.Side == EnumAppSide.Server || _capi == null)
-                return;
-
-            if (slotid >= this.inventory.Count)
-                return;
-
-            if (slotid != 1)
-            {
-                _meshes[slotid] = null;
-                return;
-            }
-
-            if (this.inventory[slotid].Empty)
-            {
-                _meshes[slotid] = null;
-                return;
-            }
-
-            var stack = this.inventory[slotid].Itemstack;
-
-            if (stack == null || stack.Collectible == null || !stack.Collectible.Code.Path.Contains("gauge"))
-            {
-                _meshes[slotid] = null;
-                return;
-            }
-
-            var meshData = GenMesh(inventory[slotid]);
-            if (meshData != null)
-            {
-                TranslateMesh(meshData, slotid);
-                _meshes[slotid] = meshData;
-            }
-            else
-            {
-                _meshes[slotid] = null;
-            }
+            if (slotid < 2)
+                UpdateMeshes();
         }
 
-        public void TranslateMesh(MeshData? meshData, int slotId)
+        public void TranslateMesh(MeshData? meshData, ItemSlot slot)
         {
-            if (meshData == null || slotId != 1)
+            if (meshData == null || slot?.Itemstack == null)
                 return;
 
-            var stack = this.inventory[slotId].Itemstack;
+            var stack = slot.Itemstack;
             var origin = new Vec3f(0.5f, 0, 0.5f);
-    
             var orientationRotate = Block.Shape.rotateY;
 
             if (stack.Class == EnumItemClass.Item)
@@ -401,8 +442,53 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 meshData.Scale(origin, 0.8f, 0.8f, 0.8f);
                 meshData.Translate(0.97f, 0.95f, -0.59f);
             }
-    
+
             meshData.Rotate(origin, 0, orientationRotate * GameMath.DEG2RAD, 0);
+        }
+
+        private void UpdateItemParticleOffset(MeshData? mesh)
+        {
+            var ep = ElectricalProgressive;
+            if (ep?.ParticlesOffsetPos == null)
+                return;
+
+            var center = GetMeshCenter(mesh) ?? new Vec3d(0.5, 1.01, 0.5);
+
+            if (ep.ParticlesOffsetPos.Count == 0)
+            {
+                ep.ParticlesOffsetPos.Add(center);
+                return;
+            }
+
+            for (var i = 0; i < ep.ParticlesOffsetPos.Count; i++)
+                ep.ParticlesOffsetPos[i] = center.Clone();
+        }
+
+        private static Vec3d? GetMeshCenter(MeshData? mesh)
+        {
+            if (mesh?.xyz == null || mesh.VerticesCount <= 0)
+                return null;
+
+            var xyz = mesh.xyz;
+            var n = mesh.VerticesCount;
+            float minX = float.MaxValue, minY = float.MaxValue, minZ = float.MaxValue;
+            float maxX = float.MinValue, maxY = float.MinValue, maxZ = float.MinValue;
+
+            for (var i = 0; i < n; i++)
+            {
+                var o = i * 3;
+                var x = xyz[o];
+                var y = xyz[o + 1];
+                var z = xyz[o + 2];
+                if (x < minX) minX = x;
+                if (y < minY) minY = y;
+                if (z < minZ) minZ = z;
+                if (x > maxX) maxX = x;
+                if (y > maxY) maxY = y;
+                if (z > maxZ) maxZ = z;
+            }
+
+            return new Vec3d((minX + maxX) * 0.5, (minY + maxY) * 0.5, (minZ + maxZ) * 0.5);
         }
 
         public MeshData? GenMesh(ItemSlot slot)
@@ -451,9 +537,26 @@ namespace ElectricalProgressive.Content.Block.EExtruder
 
         public void UpdateMeshes()
         {
-            for (var i = 0; i < this.inventory.Count; i++)
-                UpdateMesh(i);
+            if (Api == null || Api.Side == EnumAppSide.Server || _capi == null || _meshes == null)
+                return;
 
+            for (var i = 0; i < _meshes.Length; i++)
+                _meshes[i] = null;
+
+            MeshData? gaugeMesh = null;
+            var gaugeSlot = FindGaugeSlot();
+            if (gaugeSlot != null)
+            {
+                gaugeMesh = GenMesh(gaugeSlot);
+                if (gaugeMesh != null)
+                {
+                    TranslateMesh(gaugeMesh, gaugeSlot);
+                    var idx = gaugeSlot == InputSlot1 ? 0 : 1;
+                    _meshes[idx] = gaugeMesh;
+                }
+            }
+
+            UpdateItemParticleOffset(gaugeMesh);
             MarkDirty(true);
         }
 
@@ -554,6 +657,7 @@ namespace ElectricalProgressive.Content.Block.EExtruder
 
             try
             {
+                float inputTemp = GetInputTemperature();
                 var usedSlots = new List<int>();
 
                 for (int i = 0; i < CurrentRecipe.Outputs.Length; i++)
@@ -566,6 +670,8 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                     var outputItem = output.ResolvedItemstack?.Clone();
                     if (outputItem == null)
                         continue;
+
+                    outputItem.Collectible.SetTemperature(this.Api.World, outputItem, inputTemp);
 
                     if (i == 0)
                     {
@@ -593,6 +699,8 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                         if (!slot.Empty && ingred.SatisfiesAsIngredient(slot.Itemstack))
                         {
                             slot.TakeOut(ingred.Quantity);
+                            if (!slot.Empty)
+                                slot.Itemstack.Collectible.SetTemperature(Api.World, slot.Itemstack, inputTemp);
                             slot.MarkDirty();
                             usedSlots.Add(slotIndex);
                             break;
@@ -600,25 +708,31 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                     }
                 }
 
-                // Проверяем, можно ли продолжить с тем же рецептом
+                AccumulatedEnergy = 0;
+                RecipeProgress = 0;
+
                 if (HasRequiredItems() && CurrentRecipe != null)
                 {
                     if (!FindMatchingRecipe(ref CurrentRecipe, ref CurrentRecipeName, inventory))
                     {
                         CurrentRecipe = null;
-                        AccumulatedEnergy = 0;
-                        RecipeProgress = 0;
+                        SetForging(false);
+                        StopAnimation();
                     }
                 }
                 else
                 {
                     CurrentRecipe = null;
-                    RecipeProgress = 0;
+                    SetForging(false);
+                    StopAnimation();
                 }
+
+                UpdateState(RecipeProgress);
+                MarkDirty(true);
             }
             catch (Exception ex)
             {
-                Api.Logger.Error($"Crafting error in EPress at {Pos}: {ex}");
+                Api.Logger.Error($"Crafting error in EExtruder at {Pos}: {ex}");
             }
         }
 
@@ -671,16 +785,20 @@ namespace ElectricalProgressive.Content.Block.EExtruder
 
             var hasPower = beh.PowerSetting >= _maxConsumption * 0.1f;
             var hasRecipe = !InputSlot1.Empty && !InputSlot2.Empty && FindMatchingRecipe(ref CurrentRecipe, ref CurrentRecipeName, inventory);
-            var isCraftingNow = hasPower && hasRecipe && CurrentRecipe != null;
+
+            if (Api.Side == EnumAppSide.Server)
+            {
+                var isHotEnough = GetInputTemperature() >= CraftStartTemp;
+                SetForging(hasPower && hasRecipe && CurrentRecipe != null && isHotEnough);
+            }
+
+            var isCraftingNow = hasRecipe && CurrentRecipe != null && IsForging;
 
             if (isCraftingNow)
             {
                 if (!_wasCraftingLastTick)
-                {
                     StartAnimation();
-                }
 
-                // Обновляем прогресс из накопленной энергии
                 if (CurrentRecipe != null && CurrentRecipe.EnergyOperation > 0)
                 {
                     RecipeProgress = AccumulatedEnergy / (float)CurrentRecipe.EnergyOperation;
@@ -840,6 +958,7 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             Inventory.FromTreeAttributes(tree.GetTreeAttribute("_inventory"));
             RecipeProgress = tree.GetFloat("PowerCurrent");
             AccumulatedEnergy = tree.GetInt("accumulatedEnergy");
+            IsForging = tree.GetBool("isForging");
 
             if (Api != null)
                 Inventory.AfterBlocksLoaded(Api.World);
@@ -848,6 +967,10 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             {
                 UpdateMeshes();
                 EnsureAnimatorReady();
+                if (IsForging)
+                    StartAnimation();
+                else
+                    StopAnimation();
             }
 
             if (Api?.Side == EnumAppSide.Client && _clientDialog != null)
@@ -862,6 +985,7 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             tree["_inventory"] = invTree;
             tree.SetFloat("PowerCurrent", RecipeProgress);
             tree.SetInt("accumulatedEnergy", AccumulatedEnergy);
+            tree.SetBool("isForging", IsForging);
             tree.SetBool("structureComplete", StructureComplete);
         }
 

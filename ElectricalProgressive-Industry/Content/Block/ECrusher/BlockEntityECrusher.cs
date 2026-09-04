@@ -71,6 +71,7 @@ namespace ElectricalProgressive.Content.Block.ECrusher
         private static MeshData? _mesh;
         private static Shape? _resultingShape;
         private BlockEntityAnimationUtil AnimUtil => GetBehavior<BEBehaviorAnimatable>()?.animUtil;
+        private bool _animatorReadyForFormed;
         private int _lastSoundFrame = -1;
         private long _lastAnimationCheckTime;
 
@@ -186,30 +187,60 @@ namespace ElectricalProgressive.Content.Block.ECrusher
                 // Первоначальное создание мешей
                 UpdateMeshes();
 
-                if (AnimUtil != null)
-                {
-                    PrepareAnimUtil(api, InventoryClassName);
-                    AnimUtil.InitializeAnimator(InventoryClassName, _mesh, _resultingShape, new Vec3f(0, GetRotation(), 0f));
-                }
-
                 _soundCrusher = new AssetLocation("electricalprogressiveindustry:sounds/ecrusher/crusher.ogg");
 
                 this.RegisterGameTickListener(new Action<float>(this.CheckAnimationFrame), 50);
+                EnsureAnimatorReady();
                 UpdateMeshes();
             }
         }
 
+        private void EnsureAnimatorReady()
+        {
+            if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
+                return;
+
+            if (!IsFormed)
+                return;
+
+            if (_animatorReadyForFormed && AnimUtil.animator != null)
+                return;
+
+            PrepareAnimUtil(Api, InventoryClassName);
+            AnimUtil.InitializeAnimator(
+                InventoryClassName,
+                _mesh,
+                _resultingShape,
+                new Vec3f(0, GetRotation(), 0f));
+            _animatorReadyForFormed = true;
+        }
+
+        private Vintagestory.API.Common.Block? GetFormedBlockForAnim(ICoreAPI api)
+        {
+            if (Block?.Variant == null || !Block.Variant.ContainsKey("state"))
+                return Block;
+
+            return api.World.GetBlock(Block.CodeWithVariant("state", "formed")) ?? Block;
+        }
+
         private void PrepareAnimUtil(ICoreAPI api, string cacheDictKey)
         {
-            if (_mesh == null || _resultingShape == null)
-            {
-                AssetLocation shapePath = Block.Shape.Base.Clone().WithPathPrefixOnce("shapes/")
-                    .WithPathAppendixOnce(".json");
+            if (AnimUtil == null)
+                return;
 
-                Shape _shape = Shape.TryGet(api, shapePath);
+            var shapeBlock = GetFormedBlockForAnim(api) ?? Block;
+            if (shapeBlock?.Shape?.Base == null)
+                return;
 
-                _mesh = AnimUtil.CreateMesh(cacheDictKey, _shape, out _resultingShape, null);
-            }
+            AssetLocation shapePath = shapeBlock.Shape.Base.Clone()
+                .WithPathPrefixOnce("shapes/")
+                .WithPathAppendixOnce(".json");
+
+            Shape shape = Shape.TryGet(api, shapePath);
+            if (shape == null)
+                return;
+
+            _mesh = AnimUtil.CreateMesh(cacheDictKey + "-formed", shape, out _resultingShape, null);
         }
 
         public int GetRotation()
@@ -672,8 +703,11 @@ namespace ElectricalProgressive.Content.Block.ECrusher
 
         private void StartAnimation()
         {
-            if (Api?.Side != EnumAppSide.Client || AnimUtil == null || CurrentRecipe == null)
+            if (Api?.Side != EnumAppSide.Client || CurrentRecipe == null)
                 return;
+
+            EnsureAnimatorReady();
+            if (AnimUtil == null) return;
 
             var beh = GetBehavior<BEBehaviorECrusher>();
             if (beh == null) return;
@@ -803,6 +837,7 @@ namespace ElectricalProgressive.Content.Block.ECrusher
             if (Api is ICoreClientAPI)
             {
                 UpdateMeshes();
+                EnsureAnimatorReady();
             }
 
             if (Api?.Side == EnumAppSide.Client && _clientDialog != null)
@@ -842,6 +877,9 @@ namespace ElectricalProgressive.Content.Block.ECrusher
                 return base.OnTesselation(mesher, tesselator);
 
             // MachineConstruct (Core) рисует stage-mesh сам через BEBehavior.OnTesselation
+            if (IsFormed)
+                EnsureAnimatorReady();
+
             base.OnTesselation(mesher, tesselator);
 
             if (_meshes != null!)
