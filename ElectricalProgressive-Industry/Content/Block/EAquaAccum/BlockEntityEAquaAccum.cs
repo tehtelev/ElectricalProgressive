@@ -65,6 +65,9 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
 
     // === АНИМАЦИЯ ===
     private BlockEntityAnimationUtil AnimUtil => GetBehavior<BEBehaviorAnimatable>()?.animUtil;
+    private static MeshData? _mesh;
+    private static Shape? _resultingShape;
+    private bool _animatorReadyForFormed;
     public BEBehaviorElectricalProgressive ElectricalProgressive => GetBehavior<BEBehaviorElectricalProgressive>();
     public BEBehaviorEAquaAccum PowerBehavior => GetBehavior<BEBehaviorEAquaAccum>();
 
@@ -140,12 +143,56 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
         if (api.Side == EnumAppSide.Client)
         {
             _capi = api as ICoreClientAPI;
-
-            if (AnimUtil != null)
-            {
-                AnimUtil.InitializeAnimator(InventoryClassName, null, null, new Vec3f(0, GetRotation(), 0f));
-            }
+            EnsureAnimatorReady();
         }
+    }
+
+    private void EnsureAnimatorReady()
+    {
+        if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
+            return;
+
+        if (!IsFormed)
+            return;
+
+        if (_animatorReadyForFormed && AnimUtil.animator != null)
+            return;
+
+        PrepareAnimUtil(Api, InventoryClassName);
+        AnimUtil.InitializeAnimator(
+            InventoryClassName,
+            _mesh,
+            _resultingShape,
+            new Vec3f(0, GetRotation(), 0f));
+        _animatorReadyForFormed = true;
+    }
+
+    private Vintagestory.API.Common.Block? GetFormedBlockForAnim(ICoreAPI api)
+    {
+        if (Block?.Variant == null || !Block.Variant.ContainsKey("state"))
+            return Block;
+
+        return api.World.GetBlock(Block.CodeWithVariant("state", "formed")) ?? Block;
+    }
+
+    private void PrepareAnimUtil(ICoreAPI api, string cacheDictKey)
+    {
+        if (AnimUtil == null)
+            return;
+
+        var shapeBlock = GetFormedBlockForAnim(api) ?? Block;
+        if (shapeBlock?.Shape?.Base == null)
+            return;
+
+        AssetLocation shapePath = shapeBlock.Shape.Base.Clone()
+            .WithPathPrefixOnce("shapes/")
+            .WithPathAppendixOnce(".json");
+
+        Shape shape = Shape.TryGet(api, shapePath);
+        if (shape == null)
+            return;
+
+        _mesh = AnimUtil.CreateMesh(cacheDictKey + "-formed", shape, out _resultingShape, null);
     }
 
     public int GetRotation()
@@ -407,7 +454,11 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
 
     private void StartAnimation()
     {
-        if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
+        if (Api?.Side != EnumAppSide.Client)
+            return;
+
+        EnsureAnimatorReady();
+        if (AnimUtil == null)
             return;
 
         if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on") == false)
@@ -553,6 +604,9 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
             // КРИТИЧЕСКИ ВАЖНО: обновляем ёмкость слота после загрузки
             (_inventory as InventoryEAquaAccum)?.UpdateLiquidSlotCapacity();
         }
+
+        if (Api is ICoreClientAPI)
+            EnsureAnimatorReady();
     }
 
     public override void ToTreeAttributes(ITreeAttribute tree)
@@ -574,7 +628,18 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
         if (construct is { IsRenderingBlueprint: true })
             return base.OnTesselation(mesher, tesselator);
 
-        return base.OnTesselation(mesher, tesselator);
+        if (IsFormed)
+            EnsureAnimatorReady();
+
+        base.OnTesselation(mesher, tesselator);
+
+        if (AnimUtil?.activeAnimationsByAnimCode == null ||
+            !AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
+        {
+            return false;
+        }
+
+        return true;
     }
 
     public override void GetBlockInfo(IPlayer forPlayer, StringBuilder dsc)
@@ -648,6 +713,14 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
 
         StopAnimation();
         StopSound();
+
+        if (this.Api.Side == EnumAppSide.Client && this.AnimUtil != null)
+        {
+            this.AnimUtil?.Dispose();
+        }
+
+        _mesh?.Dispose();
+        _resultingShape = null;
     }
 
     public override void OnBlockUnloaded()
@@ -655,6 +728,10 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
         base.OnBlockUnloaded();
         this._clientDialog?.TryClose();
         StopSound();
+
+        _mesh?.Dispose();
+        _resultingShape = null;
+        _capi = null!;
     }
 
     public override void OnReceivedClientPacket(IPlayer player, int packetid, byte[] data)

@@ -70,7 +70,7 @@ public class GuiDialogSieve : GuiDialogBlockEntity
         var inputBounds = ElementBounds.Fixed((windowWidth - slotSize) / 2, 20, slotSize, slotSize);
         
         // Прогресс-бар
-        var progressBounds = ElementBounds.Fixed(15, 70, windowWidth - 30, 25);
+        var progressBounds = ElementBounds.Fixed(15, 74, windowWidth - 30, 25);
         
         // Сетка выходных слотов
         var outputGridBounds = ElementBounds.Fixed(15, 110, outputGridWidth, outputGridHeight);
@@ -103,9 +103,6 @@ public class GuiDialogSieve : GuiDialogBlockEntity
             // Сетка выходных слотов 5x5
             .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), outputCols, outputSlotIds, outputGridBounds, "outputSlots")
 
-            // Подписи
-            .AddStaticText(Lang.Get("electricalprogressive:input"), CairoFont.WhiteDetailText(), 
-                ElementBounds.Fixed(inputBounds.fixedX + 5, inputBounds.fixedY + slotSize + 2, 50, 15))
             .AddStaticText(Lang.Get("electricalprogressive:output"), CairoFont.WhiteDetailText(), 
                 ElementBounds.Fixed(outputGridBounds.fixedX + 5, outputGridBounds.fixedY + outputGridHeight + 2, 60, 15))
 
