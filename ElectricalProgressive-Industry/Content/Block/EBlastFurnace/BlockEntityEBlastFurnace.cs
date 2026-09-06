@@ -418,7 +418,9 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
                 return;
 
             // Отдельный ключ кэша, чтобы не залипнуть на incomplete-mesh
-            _mesh = AnimUtil.CreateMesh(cacheDictKey + "-formed", shape, out _resultingShape, null);
+            var src = AnimUtil.CreateMesh(cacheDictKey + "-formed", shape, out _resultingShape, null);
+            _mesh = src?.Clone();
+            _mesh?.Translate(-1f, 0f, 0f);
         }
 
         public int GetRotation()

@@ -107,25 +107,25 @@
           "sizex": 3,
           "sizey": 3,
           "sizez": 2,
-          "cposition": { "x": 0, "y": 0, "z": 1 }
+          "cposition": { "x": 1, "y": 0, "z": 1 }
         },
         "*-east": {
           "sizex": 2,
           "sizey": 3,
           "sizez": 3,
-          "cposition": { "x": 0, "y": 0, "z": 0 }
+          "cposition": { "x": 0, "y": 0, "z": 1 }
         },
         "*-south": {
           "sizex": 3,
           "sizey": 3,
           "sizez": 2,
-          "cposition": { "x": 2, "y": 0, "z": 0 }
+          "cposition": { "x": 1, "y": 0, "z": 0 }
         },
         "*-west": {
           "sizex": 2,
           "sizey": 3,
           "sizez": 3,
-          "cposition": { "x": 1, "y": 0, "z": 2 }
+          "cposition": { "x": 1, "y": 0, "z": 1 }
         }
       }
     }
@@ -147,35 +147,43 @@
   "shapebytype": {
     "*-incomplete-north": {
       "base": "block/ehammer/ehammer_base",
-      "rotateY": 0
+      "rotateY": 0,
+      "offsetX": -1
     },
     "*-incomplete-east": {
       "base": "block/ehammer/ehammer_base",
-      "rotateY": 270
+      "rotateY": 270,
+      "offsetZ": -1
     },
     "*-incomplete-south": {
       "base": "block/ehammer/ehammer_base",
-      "rotateY": 180
+      "rotateY": 180,
+      "offsetX": 1
     },
     "*-incomplete-west": {
       "base": "block/ehammer/ehammer_base",
-      "rotateY": 90
+      "rotateY": 90,
+      "offsetZ": 1
     },
     "*-formed-north": {
       "base": "block/ehammer/ehammer",
-      "rotateY": 0
+      "rotateY": 0,
+      "offsetX": -1
     },
     "*-formed-east": {
       "base": "block/ehammer/ehammer",
-      "rotateY": 270
+      "rotateY": 270,
+      "offsetZ": -1
     },
     "*-formed-south": {
       "base": "block/ehammer/ehammer",
-      "rotateY": 180
+      "rotateY": 180,
+      "offsetX": 1
     },
     "*-formed-west": {
       "base": "block/ehammer/ehammer",
-      "rotateY": 90
+      "rotateY": 90,
+      "offsetZ": 1
     }
   },
 

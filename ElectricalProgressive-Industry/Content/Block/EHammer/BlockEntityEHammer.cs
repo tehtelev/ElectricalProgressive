@@ -272,7 +272,10 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         if (shape == null)
             return;
 
-        _mesh = AnimUtil.CreateMesh(cacheDictKey + "-formed", shape, out _resultingShape, null);
+        // CreateMesh кэширует локальный меш — клонируем, иначе Translate уедет повторно
+        var src = AnimUtil.CreateMesh(cacheDictKey + "-formed", shape, out _resultingShape, null);
+        _mesh = src?.Clone();
+        _mesh?.Translate(-1f, 0f, 0f);
     }
 
     public int GetRotation()
@@ -456,14 +459,16 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             meshData.Scale(origin, scaleX, scaleY, scaleZ);
             meshData.Translate(translateX, translateY, translateZ);
             meshData.Rotate(origin, rotateX * GameMath.DEG2RAD, rotateY * GameMath.DEG2RAD, rotateZ * GameMath.DEG2RAD);
-        
+
+            meshData.Translate(-1f, 0f, 0f);
             meshData.Rotate(origin, 0, orientationRotate * GameMath.DEG2RAD, 0);
         }
         else
         {
             meshData.Scale(origin, 0.8f, 0.8f, 0.8f);
             meshData.Translate(0.97f, 0.95f, -0.59f);
-        
+
+            meshData.Translate(-1f, 0f, 0f);
             meshData.Rotate(origin, 0, orientationRotate * GameMath.DEG2RAD, 0);
         }
     }

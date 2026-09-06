@@ -616,6 +616,16 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
         return null;
     }
 
+    private void ApplyBlockShapeOffset(MeshData mesh)
+    {
+        var sh = Blockentity.Block?.Shape;
+        if (sh == null)
+            return;
+        if (sh.offsetX == 0 && sh.offsetY == 0 && sh.offsetZ == 0)
+            return;
+        mesh.Translate(sh.offsetX, sh.offsetY, sh.offsetZ);
+    }
+
     private Vec3f GetBlockRotation()
     {
         var block = Blockentity.Block;
@@ -758,6 +768,7 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
                 return null;
 
             var mesh = TintBlueprint(solid, flat);
+            ApplyBlockShapeOffset(mesh);
             mesh.Translate(0f, 0.01f, 0f);
             return mesh;
         }
@@ -785,6 +796,7 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
                 return null;
 
             SetRenderPass(mesh!, EnumChunkRenderPass.Opaque);
+            ApplyBlockShapeOffset(mesh!);
             mesh!.Translate(0f, 0.01f, 0f);
             return mesh;
         }

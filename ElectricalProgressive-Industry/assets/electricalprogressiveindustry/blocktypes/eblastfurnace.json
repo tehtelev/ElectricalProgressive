@@ -114,7 +114,7 @@
           "sizey": 2,
           "sizez": 2,
           "cposition": {
-            "x": 0,
+            "x": 1,
             "y": 0,
             "z": 1
           }
@@ -126,7 +126,7 @@
           "cposition": {
             "x": 0,
             "y": 0,
-            "z": 0
+            "z": 1
           }
         },
         "*-south": {
@@ -134,7 +134,7 @@
           "sizey": 2,
           "sizez": 2,
           "cposition": {
-            "x": 2,
+            "x": 1,
             "y": 0,
             "z": 0
           }
@@ -146,7 +146,7 @@
           "cposition": {
             "x": 1,
             "y": 0,
-            "z": 2
+            "z": 1
           }
         }
       }
@@ -169,35 +169,43 @@
   "shapebytype": {
     "*-incomplete-north": {
       "base": "block/eblastfurnace/eblastfurnace_base",
-      "rotateY": 0
+      "rotateY": 0,
+      "offsetX": -1
     },
     "*-incomplete-east": {
       "base": "block/eblastfurnace/eblastfurnace_base",
-      "rotateY": 270
+      "rotateY": 270,
+      "offsetZ": -1
     },
     "*-incomplete-south": {
       "base": "block/eblastfurnace/eblastfurnace_base",
-      "rotateY": 180
+      "rotateY": 180,
+      "offsetX": 1
     },
     "*-incomplete-west": {
       "base": "block/eblastfurnace/eblastfurnace_base",
-      "rotateY": 90
+      "rotateY": 90,
+      "offsetZ": 1
     },
     "*-formed-north": {
       "base": "block/eblastfurnace/eblastfurnace",
-      "rotateY": 0
+      "rotateY": 0,
+      "offsetX": -1
     },
     "*-formed-east": {
       "base": "block/eblastfurnace/eblastfurnace",
-      "rotateY": 270
+      "rotateY": 270,
+      "offsetZ": -1
     },
     "*-formed-south": {
       "base": "block/eblastfurnace/eblastfurnace",
-      "rotateY": 180
+      "rotateY": 180,
+      "offsetX": 1
     },
     "*-formed-west": {
       "base": "block/eblastfurnace/eblastfurnace",
-      "rotateY": 90
+      "rotateY": 90,
+      "offsetZ": 1
     }
   },
 

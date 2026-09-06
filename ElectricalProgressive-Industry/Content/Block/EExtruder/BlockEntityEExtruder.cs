@@ -306,7 +306,10 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             if (shape == null)
                 return;
 
-            _mesh = AnimUtil.CreateMesh(cacheDictKey + "-formed", shape, out _resultingShape, null);
+            // CreateMesh кэширует локальный меш — клонируем, иначе Translate уедет повторно
+            var src = AnimUtil.CreateMesh(cacheDictKey + "-formed", shape, out _resultingShape, null);
+            _mesh = src?.Clone();
+            _mesh?.Translate(-1f, 0f, 1f);
         }
 
         public int GetRotation()
@@ -443,6 +446,7 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 meshData.Translate(0.97f, 0.95f, -0.59f);
             }
 
+            meshData.Translate(-1f, 0f, 1f);
             meshData.Rotate(origin, 0, orientationRotate * GameMath.DEG2RAD, 0);
         }
 

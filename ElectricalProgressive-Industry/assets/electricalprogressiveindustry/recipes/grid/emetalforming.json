@@ -1,0 +1,41 @@
+[
+  {
+    "ingredientPattern": "MXS,MPS,_H_",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "X": {
+        "type": "block",
+        "code": "game:anvil-*",
+        "quantity": 1,
+        "allowedVariants": [ "iron", "meteoriciron", "steel" ]
+      },
+      "S": {
+        "type": "item",
+        "code": "electricalprogressivebasics:engineshaft",
+        "quantity": 1
+      },
+      "M": {
+        "type": "item",
+        "code": "game:metalplate-steel",
+        "quantity": 1
+      },
+      "P": {
+        "type": "item",
+        "code": "game:metalplate-iron",
+        "quantity": 1
+      },
+      "H": {
+        "type": "item",
+        "code": "game:hammer-*",
+        "isTool": true,
+        "toolDurabilityCost": 8
+      }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressiveindustry:emetalforming-incomplete-north",
+      "quantity": 1
+    }
+  }
+]

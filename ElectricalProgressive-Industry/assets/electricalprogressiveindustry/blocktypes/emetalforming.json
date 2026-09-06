@@ -1,40 +1,36 @@
 {
-  "code": "eextruder",
-  "class": "BlockEExtruder",
-  "entityClass": "BlockEntityEExtruder",
+  "code": "emetalforming",
+  "class": "BlockEMetalForming",
+  "entityClass": "BlockEntityEMetalForming",
   "attributes": {
     "blockEProperties": "all",
     "facesEProperties": [ "north", "east", "south", "west", "up", "down" ],
-    "particlesOffsetPos": [ [ 0.1, 1.0, 0.1 ] ],
-    "particlesType": 4,
-    "particlesFramesAnim": [
-      [ 275, 290 ]
-    ],
-    "maxConsumption": 100,
+    "maxConsumption": 200,
+    "energyPerIngot": 5000,
     "voltage": 128,
     "maxCurrent": 100.0,
     "isolated": true,
     "isolatedEnvironment": true,
     "handbook": {
-      "groupBy": [ "eextruder-*" ],
+      "groupBy": [ "emetalforming-*" ],
       "extraSections": [
         {
-          "title": "electricalprogressiveindustry:block-handbooktitle-eextruder",
-          "text": "electricalprogressiveindustry:block-handbooktext-eextruder"
+          "title": "electricalprogressiveindustry:block-handbooktitle-emetalforming",
+          "text": "electricalprogressiveindustry:block-handbooktext-emetalforming"
         }
       ]
     },
     "construction": {
       "brokenDropsRatio": 1,
-      "blueprintShape": "block/eextruder/eextruder",
+      "blueprintShape": "block/emetalforming/emetalforming",
       "levels": [
         {
-          "shape": "block/eextruder/eextruder_base",
-          "actionLangCode": "electricalprogressiveindustry:eextruder-handbook-place-controller"
+          "shape": "block/emetalforming/emetalforming",
+          "actionLangCode": "electricalprogressiveindustry:emetalforming-handbook-place-controller"
         },
         {
-          "shape": "block/eextruder/eextruder_base",
-          "actionLangCode": "electricalprogressiveindustry:eextruder-construct-frame",
+          "shape": "block/emetalforming/emetalforming",
+          "actionLangCode": "electricalprogressiveindustry:emetalforming-construct-frame",
           "requireStacks": [
             {
               "type": "item",
@@ -44,8 +40,8 @@
           ]
         },
         {
-          "shape": "block/eextruder/eextruder_base2",
-          "actionLangCode": "electricalprogressiveindustry:eextruder-construct-coils",
+          "shape": "block/emetalforming/emetalforming",
+          "actionLangCode": "electricalprogressiveindustry:emetalforming-construct-coils",
           "requireStacks": [
             {
               "type": "item",
@@ -55,8 +51,8 @@
           ]
         },
         {
-          "shape": "block/eextruder/eextruder_base3",
-          "actionLangCode": "electricalprogressiveindustry:eextruder-construct-housing",
+          "shape": "block/emetalforming/emetalforming",
+          "actionLangCode": "electricalprogressiveindustry:emetalforming-construct-housing",
           "requireStacks": [
             {
               "type": "item",
@@ -66,8 +62,8 @@
           ]
         },
         {
-          "shape": "block/eextruder/eextruder",
-          "actionLangCode": "electricalprogressiveindustry:eextruder-construct-finish",
+          "shape": "block/emetalforming/emetalforming",
+          "actionLangCode": "electricalprogressiveindustry:emetalforming-construct-finish",
           "requireStacks": [
             {
               "type": "item",
@@ -83,7 +79,7 @@
 
   "entityBehaviors": [
     { "name": "Animatable" },
-    { "name": "BEBehaviorEExtruder" },
+    { "name": "BEBehaviorEMetalForming" },
     { "name": "ElectricalProgressive" }
   ],
 
@@ -102,27 +98,27 @@
       "name": "Multiblock",
       "propertiesByType": {
         "*-north": {
-          "sizex": 3,
-          "sizey": 3,
-          "sizez": 3,
-          "cposition": { "x": 1, "y": 0, "z": 1 }
+          "sizex": 2,
+          "sizey": 2,
+          "sizez": 2,
+          "cposition": { "x": 0, "y": 0, "z": 1 }
         },
         "*-east": {
-          "sizex": 3,
-          "sizey": 3,
-          "sizez": 3,
-          "cposition": { "x": 1, "y": 0, "z": 1 }
+          "sizex": 2,
+          "sizey": 2,
+          "sizez": 2,
+          "cposition": { "x": 0, "y": 0, "z": 0 }
         },
         "*-south": {
-          "sizex": 3,
-          "sizey": 3,
-          "sizez": 3,
-          "cposition": { "x": 1, "y": 0, "z": 1 }
+          "sizex": 2,
+          "sizey": 2,
+          "sizez": 2,
+          "cposition": { "x": 1, "y": 0, "z": 0 }
         },
         "*-west": {
-          "sizex": 3,
-          "sizey": 3,
-          "sizez": 3,
+          "sizex": 2,
+          "sizey": 2,
+          "sizez": 2,
           "cposition": { "x": 1, "y": 0, "z": 1 }
         }
       }
@@ -144,62 +140,46 @@
 
   "shapebytype": {
     "*-incomplete-north": {
-      "base": "block/eextruder/eextruder_base",
-      "rotateY": 0,
-      "offsetX": -1,
-      "offsetZ": 1
+      "base": "block/emetalforming/emetalforming",
+      "rotateY": 0
     },
     "*-incomplete-east": {
-      "base": "block/eextruder/eextruder_base",
-      "rotateY": 270,
-      "offsetX": -1,
-      "offsetZ": -1
+      "base": "block/emetalforming/emetalforming",
+      "rotateY": 270
     },
     "*-incomplete-south": {
-      "base": "block/eextruder/eextruder_base",
-      "rotateY": 180,
-      "offsetX": 1,
-      "offsetZ": -1
+      "base": "block/emetalforming/emetalforming",
+      "rotateY": 180
     },
     "*-incomplete-west": {
-      "base": "block/eextruder/eextruder_base",
-      "rotateY": 90,
-      "offsetX": 1,
-      "offsetZ": 1
+      "base": "block/emetalforming/emetalforming",
+      "rotateY": 90
     },
     "*-formed-north": {
-      "base": "block/eextruder/eextruder",
-      "rotateY": 0,
-      "offsetX": -1,
-      "offsetZ": 1
+      "base": "block/emetalforming/emetalforming",
+      "rotateY": 0
     },
     "*-formed-east": {
-      "base": "block/eextruder/eextruder",
-      "rotateY": 270,
-      "offsetX": -1,
-      "offsetZ": -1
+      "base": "block/emetalforming/emetalforming",
+      "rotateY": 270
     },
     "*-formed-south": {
-      "base": "block/eextruder/eextruder",
-      "rotateY": 180,
-      "offsetX": 1,
-      "offsetZ": -1
+      "base": "block/emetalforming/emetalforming",
+      "rotateY": 180
     },
     "*-formed-west": {
-      "base": "block/eextruder/eextruder",
-      "rotateY": 90,
-      "offsetX": 1,
-      "offsetZ": 1
+      "base": "block/emetalforming/emetalforming",
+      "rotateY": 90
     }
   },
 
   "shapeInventoryByType": {
     "*-incomplete-*": {
-      "base": "block/eextruder/eextruder",
+      "base": "block/emetalforming/emetalforming",
       "rotateY": 0
     },
     "*-formed-*": {
-      "base": "block/eextruder/eextruder",
+      "base": "block/emetalforming/emetalforming",
       "rotateY": 0
     }
   },
@@ -245,6 +225,14 @@
   "sideAo": {
     "all": true
   },
+  "collisionbox": {
+    "x1": 0,
+    "y1": 0,
+    "z1": 0,
+    "x2": 1,
+    "y2": 1,
+    "z2": 1
+  },
   "resistance": 3.5,
   "sounds": {
     "place": "game:block/anvil",
@@ -253,13 +241,13 @@
   "guiTransform": {
     "rotation": { "x": -22.6, "y": -145, "z": 0 },
     "origin": { "x": 0.5, "y": 0.9, "z": 0.5 },
-    "scale": 0.72
+    "scale": 0.55
   },
   "groundTransform": {
     "translation": { "x": 0, "y": 0.1, "z": 0 },
     "rotation": { "x": 0, "y": -45, "z": 0 },
     "origin": { "x": 0.5, "y": 0, "z": 0.5 },
-    "scale": 1.6
+    "scale": 1.2
   },
   "heldTpIdleAnimation": "holdbothhandslarge",
   "heldRightReadyAnimation": "heldblockready",
@@ -267,6 +255,6 @@
   "tpHandTransform": {
     "translation": { "x": -0.6, "y": -0.91, "z": -0.8 },
     "rotation": { "x": -2, "y": 25, "z": -78 },
-    "scale": 0.4
+    "scale": 0.35
   }
 }

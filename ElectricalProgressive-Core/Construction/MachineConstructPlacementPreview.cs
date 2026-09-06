@@ -19,8 +19,14 @@ public class MachineConstructPlacementPreview : ModSystem, IRenderer
 
     private ICoreClientAPI? _capi;
     private TextureAtlasPosition? _flatTexPos;
-    private readonly Dictionary<string, MeshRef> _cache = new();
+    private readonly Dictionary<string, PreviewEntry> _cache = new();
     private readonly Matrixf _modelMat = new();
+
+    private sealed class PreviewEntry
+    {
+        public MeshRef Mesh = null!;
+        public Vec3i[] Cells = [];
+    }
 
     public double RenderOrder => 0.71;
     public int RenderRange => 32;
@@ -38,8 +44,8 @@ public class MachineConstructPlacementPreview : ModSystem, IRenderer
         if (_capi != null)
             _capi.Event.UnregisterRenderer(this, EnumRenderStage.Opaque);
 
-        foreach (var mesh in _cache.Values)
-            mesh?.Dispose();
+        foreach (var entry in _cache.Values)
+            entry.Mesh?.Dispose();
         _cache.Clear();
         _capi = null;
         base.Dispose();
@@ -79,13 +85,14 @@ public class MachineConstructPlacementPreview : ModSystem, IRenderer
         if (oriented == null)
             return;
 
-        var meshRef = GetOrBuildMesh(oriented);
-        if (meshRef == null)
+        var entry = GetOrBuildMesh(oriented);
+        if (entry?.Mesh == null)
             return;
 
         var pos = GetPlacePos(_capi.World, sel, oriented);
         var cam = player.Entity.CameraPos;
         var light = _capi.World.BlockAccessor.GetLightRGBs(pos.X, pos.Y, pos.Z);
+        var canPlace = CanFit(_capi.World, oriented, pos, entry.Cells);
 
         _capi.Render.GlDisableCullFace();
 
@@ -97,7 +104,9 @@ public class MachineConstructPlacementPreview : ModSystem, IRenderer
         prog.FogDensityIn = _capi.Render.FogDensity;
         prog.RgbaLightIn = light;
         prog.RgbaGlowIn = new Vec4f(0, 0, 0, 0);
-        prog.RgbaTint = ColorUtil.WhiteArgbVec;
+        prog.RgbaTint = canPlace
+            ? ColorUtil.WhiteArgbVec
+            : new Vec4f(1.55f, 0.22f, 0.18f, 1f);
         prog.ExtraGlow = 18;
         prog.TempGlowMode = 0;
         prog.DontWarpVertices = 1;
@@ -112,7 +121,7 @@ public class MachineConstructPlacementPreview : ModSystem, IRenderer
         prog.ViewMatrix = _capi.Render.CameraMatrixOriginf;
         prog.ProjectionMatrix = _capi.Render.CurrentProjectionMatrix;
 
-        _capi.Render.RenderMesh(meshRef);
+        _capi.Render.RenderMesh(entry.Mesh);
         prog.Stop();
 
         _capi.Render.GlEnableCullFace();
@@ -133,6 +142,21 @@ public class MachineConstructPlacementPreview : ModSystem, IRenderer
             return pos.AddCopy(sel.Face);
 
         return pos;
+    }
+
+    private static bool CanFit(IWorldAccessor world, Block block, BlockPos origin, Vec3i[] cells)
+    {
+        if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, origin, Facing.DownAll))
+            return false;
+
+        foreach (var cell in cells)
+        {
+            var at = world.BlockAccessor.GetBlock(origin.AddCopy(cell.X, cell.Y, cell.Z));
+            if (at != null && at.Id != 0 && !at.IsReplacableBy(block))
+                return false;
+        }
+
+        return true;
     }
 
     private Block? GetOrientedBlock(IPlayer player, ItemStack stack, BlockSelection sel)
@@ -158,20 +182,70 @@ public class MachineConstructPlacementPreview : ModSystem, IRenderer
         return block;
     }
 
-    private MeshRef? GetOrBuildMesh(Block block)
+    private PreviewEntry? GetOrBuildMesh(Block block)
     {
         var rotY = GetRotationY(block);
         var key = block.Code + "@" + rotY;
-        if (_cache.TryGetValue(key, out var cached) && cached is { Disposed: false })
+        if (_cache.TryGetValue(key, out var cached) && cached.Mesh is { Disposed: false })
             return cached;
 
         var mesh = BuildBlueprintMesh(block, rotY);
         if (mesh == null || mesh.VerticesCount <= 0)
             return null;
 
-        var meshRef = _capi!.Render.UploadMesh(mesh);
-        _cache[key] = meshRef;
-        return meshRef;
+        var entry = new PreviewEntry
+        {
+            Mesh = _capi!.Render.UploadMesh(mesh),
+            Cells = OccupiedCellsFromMesh(mesh)
+        };
+        _cache[key] = entry;
+        return entry;
+    }
+
+    /// <summary>
+    /// Клетки, которые занимает AABB отрендеренного шейпа (уже с rotateY).
+    /// </summary>
+    private static Vec3i[] OccupiedCellsFromMesh(MeshData mesh)
+    {
+        if (mesh.xyz == null || mesh.VerticesCount <= 0)
+            return [new Vec3i(0, 0, 0)];
+
+        var xyz = mesh.xyz;
+        float minX = float.MaxValue, minY = float.MaxValue, minZ = float.MaxValue;
+        float maxX = float.MinValue, maxY = float.MinValue, maxZ = float.MinValue;
+        for (var i = 0; i < mesh.VerticesCount; i++)
+        {
+            var o = i * 3;
+            var x = xyz[o];
+            var y = xyz[o + 1];
+            var z = xyz[o + 2];
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (z < minZ) minZ = z;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+            if (z > maxZ) maxZ = z;
+        }
+
+        const float eps = 0.04f;
+        var x0 = (int)Math.Floor(minX + eps);
+        var y0 = (int)Math.Floor(minY + eps);
+        var z0 = (int)Math.Floor(minZ + eps);
+        var x1 = (int)Math.Ceiling(maxX - eps) - 1;
+        var y1 = (int)Math.Ceiling(maxY - eps) - 1;
+        var z1 = (int)Math.Ceiling(maxZ - eps) - 1;
+        if (x1 < x0) x1 = x0;
+        if (y1 < y0) y1 = y0;
+        if (z1 < z0) z1 = z0;
+
+        var cells = new Vec3i[(x1 - x0 + 1) * (y1 - y0 + 1) * (z1 - z0 + 1)];
+        var n = 0;
+        for (var x = x0; x <= x1; x++)
+        for (var y = y0; y <= y1; y++)
+        for (var z = z0; z <= z1; z++)
+            cells[n++] = new Vec3i(x, y, z);
+
+        return cells;
     }
 
     private static int GetRotationY(Block block)
@@ -212,7 +286,11 @@ public class MachineConstructPlacementPreview : ModSystem, IRenderer
         if (solid == null || solid.VerticesCount <= 0)
             return null;
 
-        return TintBlueprint(solid, flat);
+        var mesh = TintBlueprint(solid, flat);
+        var sh = block.Shape;
+        if (sh != null && (sh.offsetX != 0 || sh.offsetY != 0 || sh.offsetZ != 0))
+            mesh.Translate(sh.offsetX, sh.offsetY, sh.offsetZ);
+        return mesh;
     }
 
     private static string? GetBlueprintShapePath(Block block)
