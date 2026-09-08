@@ -269,6 +269,18 @@
   "item-handbooktitle-coil": "Использование",
   "item-handbooktext-coil": "И куда же без медных катушек в электрических приборах?",
 
+  "item-eresistor": "Резистор",
+  "item-handbooktitle-eresistor": "Использование",
+  "item-handbooktext-eresistor": "Выводной резистор. Вместе с анодами собирается в печатную плату.",
+
+  "item-eanode": "Анод",
+  "item-handbooktitle-eanode": "Использование",
+  "item-handbooktext-eanode": "Стеклянная анодная лампа. Вместе с резисторами собирается в печатную плату.",
+
+  "item-eschematic": "Печатная плата",
+  "item-handbooktitle-eschematic": "Использование",
+  "item-handbooktext-eschematic": "Собирается из резисторов, анодов и медной пластины паяльником.",
+
   "item-engineshaft": "Ротор",
   "item-handbooktitle-engineshaft": "Использование",
   "item-handbooktext-engineshaft": "Обычно ротор нужен в двигателях/генераторах, но не только.",

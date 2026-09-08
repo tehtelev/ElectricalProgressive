@@ -254,6 +254,18 @@
   "item-handbooktitle-coil": "Verwendung",
   "item-handbooktext-coil": "Und wo wären wir ohne Kupferspulen in elektrischen Geräten?",
 
+  "item-eresistor": "Widerstand",
+  "item-handbooktitle-eresistor": "Verwendung",
+  "item-handbooktext-eresistor": "Ein bedrahteter Widerstand. Zusammen mit Anoden zur Leiterplatte zusammengesetzt.",
+
+  "item-eanode": "Anode",
+  "item-handbooktitle-eanode": "Verwendung",
+  "item-handbooktext-eanode": "Eine gläserne Anodenlampe. Zusammen mit Widerständen zur Leiterplatte zusammengesetzt.",
+
+  "item-eschematic": "Leiterplatte",
+  "item-handbooktitle-eschematic": "Verwendung",
+  "item-handbooktext-eschematic": "Wird aus Widerständen, Anoden und einer Kupferplatte mit dem Lötkolben gefertigt.",
+
   "item-engineshaft": "Rotor",
   "item-handbooktitle-engineshaft": "Verwendung",
   "item-handbooktext-engineshaft": "Wird normalerweise in Motoren/Generatoren benötigt, aber nicht nur.",

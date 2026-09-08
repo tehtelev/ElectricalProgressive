@@ -255,6 +255,18 @@
   "item-handbooktitle-coil": "Uso",
   "item-handbooktext-coil": "E onde estaríamos sem bobinas de cobre em aparelhos elétricos?",
 
+  "item-eresistor": "Resistor",
+  "item-handbooktitle-eresistor": "Uso",
+  "item-handbooktext-eresistor": "Um resistor de terminais. Junto com ânodos monta uma placa de circuito impresso.",
+
+  "item-eanode": "Ânodo",
+  "item-handbooktitle-eanode": "Uso",
+  "item-handbooktext-eanode": "Uma lâmpada de ânodo de vidro. Junto com resistores monta uma placa de circuito impresso.",
+
+  "item-eschematic": "Placa de circuito impresso",
+  "item-handbooktitle-eschematic": "Uso",
+  "item-handbooktext-eschematic": "Montada com resistores, ânodos e uma placa de cobre com o ferro de solda.",
+
   "item-engineshaft": "Rotor",
   "item-handbooktitle-engineshaft": "Uso",
   "item-handbooktext-engineshaft": "Geralmente necessário em motores/geradores, mas não só.",

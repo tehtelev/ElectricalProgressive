@@ -1,0 +1,57 @@
+{
+	"code": "eanode",
+	"maxstacksize": 64,
+	"attributes": {
+		"displaycaseable": true,
+		"shelvable": true,
+		"handbook": {
+			"groupBy": [ "eanode" ],
+			"extraSections": [
+				{
+					"title": "electricalprogressivebasics:item-handbooktitle-eanode",
+					"text": "electricalprogressivebasics:item-handbooktext-eanode"
+				}
+			]
+		}
+	},
+	"behaviors": [
+		{
+			"name": "GroundStorable",
+			"properties": {
+				"layout": "Quadrants",
+				"collisionBox": { "x1": 0, "y1": 0, "z1": 0, "x2": 1, "y2": 0.125, "z2": 1 }
+			}
+		}
+	],
+	"materialDensity": 8500,
+	"shape": { "base": "item/electronic/eanode" },
+	"creativeinventory": {
+		"general": [ "*" ],
+		"items": [ "*" ],
+		"electricity": [ "*" ]
+	},
+	"guiTransform": {
+		"translation": { "x": -4, "y": 8, "z": 0 },
+		"rotation": { "x": -115, "y": -82, "z": 8 },
+		"origin": { "x": 0.55, "y": 0.08, "z": 0.55 },
+		"scale": 5.98
+	},
+	"fpHandTransform": {
+		"translation": { "x": 0.08, "y": 0.04, "z": 0 },
+		"rotation": { "x": 68, "y": 10, "z": -6 },
+		"origin": { "x": 0.5, "y": 0.08, "z": 0.5 },
+		"scale": 1.7
+	},
+	"tpHandTransform": {
+		"translation": { "x": -0.74, "y": -0.12, "z": -0.62 },
+		"rotation": { "x": 16, "y": -67, "z": 10 },
+		"origin": { "x": 0.5, "y": 0.08, "z": 0.5 },
+		"scale": 0.84
+	},
+	"groundTransform": {
+		"translation": { "x": 0, "y": 0.02, "z": 0 },
+		"rotation": { "x": 0, "y": 18, "z": 0 },
+		"origin": { "x": 0.5, "y": 0, "z": 0.5 },
+		"scale": 3.2
+	}
+}

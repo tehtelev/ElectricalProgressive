@@ -254,6 +254,18 @@
   "item-handbooktitle-coil": "Zastosowanie",
   "item-handbooktext-coil": "A gdzie bylibyśmy bez miedzianych cewek w urządzeniach elektrycznych?",
 
+  "item-eresistor": "Rezystor",
+  "item-handbooktitle-eresistor": "Użycie",
+  "item-handbooktext-eresistor": "Rezystor przewlekany. Razem z anodami składa się w płytkę drukowaną.",
+
+  "item-eanode": "Anoda",
+  "item-handbooktitle-eanode": "Użycie",
+  "item-handbooktext-eanode": "Szklana lampa anodowa. Razem z rezystorami składa się w płytkę drukowaną.",
+
+  "item-eschematic": "Płytka drukowana",
+  "item-handbooktitle-eschematic": "Użycie",
+  "item-handbooktext-eschematic": "Składa się z rezystorów, anod i miedzianej płyty za pomocą lutownicy.",
+
   "item-engineshaft": "Wirnik",
   "item-handbooktitle-engineshaft": "Zastosowanie",
   "item-handbooktext-engineshaft": "Zwykle potrzebny w silnikach/generatorach, ale nie tylko.",

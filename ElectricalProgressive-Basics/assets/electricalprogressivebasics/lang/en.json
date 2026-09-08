@@ -269,6 +269,18 @@
   "item-handbooktitle-coil": "Usage",
   "item-handbooktext-coil": "And where would we be without copper coils in electrical appliances?",
 
+  "item-eresistor": "Resistor",
+  "item-handbooktitle-eresistor": "Usage",
+  "item-handbooktext-eresistor": "A through-hole resistor. Used together with anodes to assemble a printed circuit board.",
+
+  "item-eanode": "Anode",
+  "item-handbooktitle-eanode": "Usage",
+  "item-handbooktext-eanode": "A glass anode lamp. Used together with resistors to assemble a printed circuit board.",
+
+  "item-eschematic": "Printed Circuit Board",
+  "item-handbooktitle-eschematic": "Usage",
+  "item-handbooktext-eschematic": "Assembled from resistors, anodes and a copper plate with a soldering iron.",
+
   "item-engineshaft": "Rotor",
   "item-handbooktitle-engineshaft": "Usage",
   "item-handbooktext-engineshaft": "Usually needed in motors/generators, but not only.",

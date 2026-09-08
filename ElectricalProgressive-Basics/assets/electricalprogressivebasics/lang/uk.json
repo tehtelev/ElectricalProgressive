@@ -254,6 +254,18 @@
   "item-handbooktitle-coil": "Використання",
   "item-handbooktext-coil": "І куди ж без мідних котушок в електричних приладах?",
 
+  "item-eresistor": "Резистор",
+  "item-handbooktitle-eresistor": "Використання",
+  "item-handbooktext-eresistor": "Вивідний резистор. Разом з анодами збирається в друковану плату.",
+
+  "item-eanode": "Анод",
+  "item-handbooktitle-eanode": "Використання",
+  "item-handbooktext-eanode": "Скляна анодна лампа. Разом з резисторами збирається в друковану плату.",
+
+  "item-eschematic": "Друкована плата",
+  "item-handbooktitle-eschematic": "Використання",
+  "item-handbooktext-eschematic": "Збирається з резисторів, анодів і мідної пластини паяльником.",
+
   "item-engineshaft": "Ротор",
   "item-handbooktitle-engineshaft": "Використання",
   "item-handbooktext-engineshaft": "Зазвичай ротор потрібен у двигунах/генераторах, але не тільки.",

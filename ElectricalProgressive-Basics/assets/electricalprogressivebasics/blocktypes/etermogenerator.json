@@ -223,17 +223,10 @@
   "heldTpUseAnimation": "twohandplaceblock",
 
   "guiTransform": {
-    "translation": {
-      "x": -6,
-      "y": -8,
-      "z": 1
-    },
-    "origin": {
-      "x": 1.5,
-      "y": 1.5,
-      "z": 0
-    },
-    "scale": 0.44
+    "translation": { "x": -1.0, "y": -0.1, "z": 1.25 },
+    "rotation": { "x": -22.6, "y": -145, "z": 0 },
+    "origin": { "x": 1.5, "y": 1.0, "z": -0.75 },
+    "scale": 0.4
   },
   "tpHandTransform": {
     "translation": {

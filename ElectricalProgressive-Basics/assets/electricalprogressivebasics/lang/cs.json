@@ -255,6 +255,18 @@
   "item-handbooktitle-coil": "Použití",
   "item-handbooktext-coil": "A kam bychom se v elektrických spotřebičích obešli bez měděných cívek?",
 
+  "item-eresistor": "Rezistor",
+  "item-handbooktitle-eresistor": "Použití",
+  "item-handbooktext-eresistor": "Vývodový rezistor. Spolu s anodami se skládá do plošného spoje.",
+
+  "item-eanode": "Anoda",
+  "item-handbooktitle-eanode": "Použití",
+  "item-handbooktext-eanode": "Skleněná anodová lampa. Spolu s rezistory se skládá do plošného spoje.",
+
+  "item-eschematic": "Plošný spoj",
+  "item-handbooktitle-eschematic": "Použití",
+  "item-handbooktext-eschematic": "Sestavuje se z rezistorů, anod a měděné desky páječkou.",
+
   "item-engineshaft": "Rotor",
   "item-handbooktitle-engineshaft": "Použití",
   "item-handbooktext-engineshaft": "Obvykle je rotor potřeba v motorech/generátorech, ale nejen tam.",

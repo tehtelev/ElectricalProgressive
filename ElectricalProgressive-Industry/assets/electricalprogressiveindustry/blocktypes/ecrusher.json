@@ -220,9 +220,10 @@
   },
 
   "guiTransform": {
+    "translation": { "x": -0.5, "y": -0.6, "z": 0.5 },
     "rotation": { "x": -22.6, "y": -145, "z": 0 },
-    "origin": { "x": 0.5, "y": 0.9, "z": 0.5 },
-    "scale": 0.72
+    "origin": { "x": 1.0, "y": 1.5, "z": 0.0 },
+    "scale": 0.42
   },
 
   "groundTransform": {

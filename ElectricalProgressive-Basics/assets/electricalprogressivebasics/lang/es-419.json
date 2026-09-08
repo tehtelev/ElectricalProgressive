@@ -255,6 +255,18 @@
   "item-handbooktitle-coil": "Para usar",
   "item-handbooktext-coil": "¿Y qué serían los aparatos eléctricos sin bobinas de cobre?",
 
+  "item-eresistor": "Resistencia",
+  "item-handbooktitle-eresistor": "Uso",
+  "item-handbooktext-eresistor": "Una resistencia de terminales. Junto con ánodos se arma en una placa de circuito impreso.",
+
+  "item-eanode": "Ánodo",
+  "item-handbooktitle-eanode": "Uso",
+  "item-handbooktext-eanode": "Una lámpara de ánodo de vidrio. Junto con resistencias se arma en una placa de circuito impreso.",
+
+  "item-eschematic": "Placa de circuito impreso",
+  "item-handbooktitle-eschematic": "Uso",
+  "item-handbooktext-eschematic": "Se arma con resistencias, ánodos y una placa de cobre con el soldador.",
+
   "item-engineshaft": "Rotor",
   "item-handbooktitle-engineshaft": "Para usar",
   "item-handbooktext-engineshaft": "Generalmente se necesita en motores y generadores, pero no solo ahí.",

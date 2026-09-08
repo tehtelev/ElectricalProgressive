@@ -255,6 +255,18 @@
   "item-handbooktitle-coil": "Выкарыстанне",
   "item-handbooktext-coil": "А куды ж без медных шпулек у электрычных прыборах?",
 
+  "item-eresistor": "Рэзістар",
+  "item-handbooktitle-eresistor": "Выкарыстанне",
+  "item-handbooktext-eresistor": "Вывадны рэзістар. Разам з анодамі збіраецца ў друкаваную плату.",
+
+  "item-eanode": "Анод",
+  "item-handbooktitle-eanode": "Выкарыстанне",
+  "item-handbooktext-eanode": "Шкляная анодная лямпа. Разам з рэзістарамі збіраецца ў друкаваную плату.",
+
+  "item-eschematic": "Друкаваная плата",
+  "item-handbooktitle-eschematic": "Выкарыстанне",
+  "item-handbooktext-eschematic": "Збіраецца з рэзістараў, анодаў і меднай пласціны паяльнікам.",
+
   "item-engineshaft": "Ротар",
   "item-handbooktitle-engineshaft": "Выкарыстанне",
   "item-handbooktext-engineshaft": "Звычайна ротар патрэбны ў рухавіках/генератарах, але не толькі.",

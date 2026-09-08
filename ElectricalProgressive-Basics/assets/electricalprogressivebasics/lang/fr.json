@@ -255,6 +255,18 @@
   "item-handbooktitle-coil": "Utilisation",
   "item-handbooktext-coil": "Et où irions-nous sans bobines de cuivre dans les appareils électriques ?",
 
+  "item-eresistor": "Résistance",
+  "item-handbooktitle-eresistor": "Utilisation",
+  "item-handbooktext-eresistor": "Une résistance à fils. Avec les anodes, elle s'assemble en circuit imprimé.",
+
+  "item-eanode": "Anode",
+  "item-handbooktitle-eanode": "Utilisation",
+  "item-handbooktext-eanode": "Une lampe d'anode en verre. Avec les résistances, elle s'assemble en circuit imprimé.",
+
+  "item-eschematic": "Circuit imprimé",
+  "item-handbooktitle-eschematic": "Utilisation",
+  "item-handbooktext-eschematic": "S'assemble à partir de résistances, d'anodes et d'une plaque de cuivre avec le fer à souder.",
+
   "item-engineshaft": "Rotor",
   "item-handbooktitle-engineshaft": "Utilisation",
   "item-handbooktext-engineshaft": "Généralement nécessaire dans les moteurs/générateurs, mais pas seulement.",

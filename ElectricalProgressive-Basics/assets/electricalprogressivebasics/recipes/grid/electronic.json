@@ -1,0 +1,84 @@
+[
+	{
+		"ingredientPattern": "CL",
+		"width": 2,
+		"height": 1,
+		"ingredients": {
+			"C": {
+				"type": "item",
+				"code": "game:metalbit-copper",
+				"quantity": 2
+			},
+			"L": {
+				"type": "item",
+				"code": "game:metalbit-lead",
+				"quantity": 1
+			}
+		},
+		"output": {
+			"type": "item",
+			"code": "electricalprogressivebasics:eresistor",
+			"quantity": 4
+		}
+	},
+	{
+		"ingredientPattern": "BQ,C_",
+		"width": 2,
+		"height": 2,
+		"ingredients": {
+			"B": {
+				"type": "item",
+				"code": "game:metalplate-brass",
+				"quantity": 1
+			},
+			"Q": {
+				"type": "item",
+				"code": "game:clearquartz",
+				"quantity": 1
+			},
+			"C": {
+				"type": "item",
+				"code": "game:metalbit-copper",
+				"quantity": 2
+			}
+		},
+		"output": {
+			"type": "item",
+			"code": "electricalprogressivebasics:eanode",
+			"quantity": 2
+		}
+	},
+	{
+		"ingredientPattern": "RA,PS",
+		"width": 2,
+		"height": 2,
+		"ingredients": {
+			"R": {
+				"type": "item",
+				"code": "electricalprogressivebasics:eresistor",
+				"quantity": 4
+			},
+			"A": {
+				"type": "item",
+				"code": "electricalprogressivebasics:eanode",
+				"quantity": 3
+			},
+			"P": {
+				"type": "item",
+				"code": "game:metalplate-copper",
+				"quantity": 1
+			},
+			"S": {
+				"type": "item",
+				"code": "electricalprogressivebasics:electricsolderingiron",
+				"isTool": true,
+				"toolDurabilityCost": 8
+			}
+		},
+		"output": {
+			"type": "item",
+			"code": "electricalprogressivebasics:eschematic",
+			"quantity": 1
+		}
+	}
+]
