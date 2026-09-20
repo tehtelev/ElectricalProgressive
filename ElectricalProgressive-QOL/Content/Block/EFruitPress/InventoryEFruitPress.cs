@@ -219,6 +219,8 @@ public class InventoryEFruitPress : InventoryBase, ISlotProvider
         if (targetSlot == FruitSlot)
         {
             // Проверяем, можно ли выжать сок из этого предмета
+            if (sourceSlot.Itemstack?.Collectible == null)
+                return 0f;
             var juiceableProps = sourceSlot.Itemstack.ItemAttributes?["juiceableProperties"];
             if (juiceableProps != null && juiceableProps.Exists)
             {
@@ -251,6 +253,8 @@ public class InventoryEFruitPress : InventoryBase, ISlotProvider
             return LiquidSlot; // Жидкости идут в слот жидкости
         
         // Проверяем, является ли предмет фруктом для отжима
+        if (fromSlot.Itemstack.Collectible == null)
+            return null;
         var juiceableProps = fromSlot.Itemstack.ItemAttributes?["juiceableProperties"];
         if (juiceableProps != null && juiceableProps.Exists)
             return FruitSlot; // Фрукты идут в слот фруктов

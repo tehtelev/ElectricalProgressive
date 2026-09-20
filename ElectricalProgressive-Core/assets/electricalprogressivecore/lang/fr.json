@@ -1,3 +1,14 @@
 ﻿{
-  "AltPressForNetworkName": "Afficher les informations détaillées sur le circuit électrique"
+  "AltPressForNetworkName": "Afficher les informations détaillées sur le circuit électrique",
+
+  "item-econstructionbook": "Livre de plans",
+  "item-handbooktitle-econstructionbook": "Utilisation",
+  "item-handbooktext-econstructionbook": "Clic droit : choisir un plan. Clic droit sur un bloc : placer le blueprint. Sneak + clic droit : changer de plan.",
+  "construction-book-title": "Plans",
+  "construction-book-empty": "Aucune machine constructible chargée.",
+  "construction-book-selected": "Sélection : {0}",
+  "construction-book-hint": "Clic droit pour choisir un plan, puis clic droit pour le placer.",
+  "construction-book-placefail": "Impossible de placer le plan ici.",
+  "construction-book-help-open": "Choisir un plan",
+  "construction-book-help-place": "Placer le plan sélectionné"
 }

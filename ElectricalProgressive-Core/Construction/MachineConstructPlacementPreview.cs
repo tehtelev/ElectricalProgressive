@@ -74,14 +74,15 @@ public class MachineConstructPlacementPreview : ModSystem, IRenderer
 
         var slot = player.InventoryManager.ActiveHotbarSlot;
         var held = slot?.Itemstack;
-        if (held?.Block == null || !MachineConstructSystem.HasConstructionLevels(held.Block))
+        var construct = ConstructionCatalog.ResolveHeldConstructBlock(_capi.World, held);
+        if (construct == null)
             return;
 
         var sel = player.CurrentBlockSelection;
         if (sel?.Position == null)
             return;
 
-        var oriented = GetOrientedBlock(player, held, sel);
+        var oriented = GetOrientedBlock(player, construct, sel);
         if (oriented == null)
             return;
 
@@ -89,7 +90,7 @@ public class MachineConstructPlacementPreview : ModSystem, IRenderer
         if (entry?.Mesh == null)
             return;
 
-        var pos = GetPlacePos(_capi.World, sel, oriented);
+        var pos = ConstructionCatalog.GetPlacePos(_capi.World, sel, oriented);
         var cam = player.Entity.CameraPos;
         var light = _capi.World.BlockAccessor.GetLightRGBs(pos.X, pos.Y, pos.Z);
         var canPlace = CanFit(_capi.World, oriented, pos, entry.Cells);
@@ -127,23 +128,6 @@ public class MachineConstructPlacementPreview : ModSystem, IRenderer
         _capi.Render.GlEnableCullFace();
     }
 
-    /// <summary>
-    /// Клетка постановки: сам блок, если он заменяемый; иначе соседняя клетка по грани прицела.
-    /// DidOffset не используем — клиент часто оставляет Position на целевом блоке.
-    /// </summary>
-    private static BlockPos GetPlacePos(IWorldAccessor world, BlockSelection sel, Block toPlace)
-    {
-        var pos = sel.Position.Copy();
-        var at = world.BlockAccessor.GetBlock(pos);
-        if (at != null && at.IsReplacableBy(toPlace))
-            return pos;
-
-        if (sel.Face != null)
-            return pos.AddCopy(sel.Face);
-
-        return pos;
-    }
-
     private static bool CanFit(IWorldAccessor world, Block block, BlockPos origin, Vec3i[] cells)
     {
         if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, origin, Facing.DownAll))
@@ -159,24 +143,15 @@ public class MachineConstructPlacementPreview : ModSystem, IRenderer
         return true;
     }
 
-    private Block? GetOrientedBlock(IPlayer player, ItemStack stack, BlockSelection sel)
+    private Block? GetOrientedBlock(IPlayer player, Block block, BlockSelection sel)
     {
-        var block = stack.Block;
+        var stack = new ItemStack(block);
         var ho = block.GetBehavior<BlockBehaviorHorizontalOrientable>();
         if (ho != null)
         {
             var oriented = ho.GetLookAwareBlockVariant(player, stack, sel);
             if (oriented != null)
                 block = oriented;
-        }
-
-        if (block.Variant != null &&
-            block.Variant.ContainsKey("state") &&
-            block.Variant["state"] != "incomplete")
-        {
-            var incomplete = _capi!.World.GetBlock(block.CodeWithVariant("state", "incomplete"));
-            if (incomplete != null)
-                block = incomplete;
         }
 
         return block;

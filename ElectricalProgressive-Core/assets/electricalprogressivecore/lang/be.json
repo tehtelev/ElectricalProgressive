@@ -1,3 +1,14 @@
 ﻿{
-  "AltPressForNetworkName": "Паказаць падрабязную інфармацыю пра эл. ланцуг"
+  "AltPressForNetworkName": "Паказаць падрабязную інфармацыю пра эл. ланцуг",
+
+  "item-econstructionbook": "Кніга чарцяжоў",
+  "item-handbooktitle-econstructionbook": "Прымяненне",
+  "item-handbooktext-econstructionbook": "ПКМ — выбраць схему. ПКМ па блоку — паставіць blueprint. Shift+ПКМ — змяніць схему.",
+  "construction-book-title": "Чарцяжы",
+  "construction-book-empty": "Няма машын са зборкай.",
+  "construction-book-selected": "Выбрана: {0}",
+  "construction-book-hint": "ПКМ — выбраць схему, затым ПКМ па блоку — паставіць.",
+  "construction-book-placefail": "Тут нельга паставіць чарцёж.",
+  "construction-book-help-open": "Выбраць схему",
+  "construction-book-help-place": "Паставіць выбраную схему"
 }

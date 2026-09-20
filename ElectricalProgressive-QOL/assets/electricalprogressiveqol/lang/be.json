@@ -84,5 +84,16 @@
   "block-handbooktitle-efence": "Выкарыстанне",
   "block-handbooktext-efence": "Добрая абарона ад непажаданых гасцей. Наносіць паражэнне электрычнасцю пры дотыку. Не спажывае энергію, але неабходна падключэнне да электрычнага ланцуга для працы.",
   "progress": "Прагрэс: {0:P0}",
-  "update_heater_info": "Абнавіць інфармацыю на абагравальніках"
+  "update_heater_info": "Абнавіць інфармацыю на абагравальніках",
+  "block-efruitpress-*": "Электрычны прэс для садавіны",
+  "block-handbooktitle-efruitpress": "Выкарыстанне",
+  "block-handbooktext-efruitpress": "Электрычны прэс, 32 В, 2×2×2. Blueprint ставіцца кнігай чарцяжоў.",
+  "efruitpress-structure-incomplete": "Прэс не сабраны",
+  "efruitpress-structure-hint": "Пастаўце кнігай чарцяжоў, затым ПКМ: 4 жалезныя пласціны → 2 медныя.",
+  "efruitpress-handbook-place-controller": "Паставіць blueprint",
+  "efruitpress-construct-frame": "Каркас: 4 жалезныя пласціны",
+  "efruitpress-construct-finish": "Аздабленне: 2 медныя пласціны",
+  "efruitpress-title-gui": "Электрычны прэс для садавіны",
+  "efruitpress-slot-fruit": "Садавіна",
+  "efruitpress-slot-mash": "Жмых"
 }

@@ -84,5 +84,17 @@
   "block-handbooktitle-efence": "Usage",
   "block-handbooktext-efence": "Good protection against unwanted guests. Deals electric damage on contact. Does not consume energy, but must be connected to an electrical circuit to work.",
   "progress": "Progress: {0:P0}",
-  "update_heater_info": "Update heater information"
+  "update_heater_info": "Update heater information",
+
+  "block-efruitpress-*": "Electric Fruit Press",
+  "block-handbooktitle-efruitpress": "Usage",
+  "block-handbooktext-efruitpress": "Electric fruit press, 32 V. Multiblock 2×2×2. Place a blue blueprint with the schematic book, then right-click the ghost with materials (4 iron plates, then 2 copper plates). Presses fruit into juice. Hoppers supported.",
+  "efruitpress-structure-incomplete": "Fruit press is not assembled",
+  "efruitpress-structure-hint": "Place with the schematic book, then RMB: 4 iron plates → 2 copper plates.",
+  "efruitpress-handbook-place-controller": "Place the blueprint",
+  "efruitpress-construct-frame": "Frame: 4 iron plates",
+  "efruitpress-construct-finish": "Finish: 2 copper plates",
+  "efruitpress-title-gui": "Electric Fruit Press",
+  "efruitpress-slot-fruit": "Fruit",
+  "efruitpress-slot-mash": "Mash"
 }

@@ -114,30 +114,32 @@ public static class HandbookConstructionPatch
             Lang.Get("electricalprogressivecore:construction-handbook-assembly-hint") + "\n",
             CairoFont.WhiteDetailText()));
 
-        components.Add(new ClearFloatTextComponent(capi, SmallPadding));
+        components.Add(new ClearFloatTextComponent(capi, RecipeSpacing));
+
+        var bookItem = capi.World.GetItem(new AssetLocation("electricalprogressivecore", "econstructionbook"));
+        if (bookItem != null)
+        {
+            components.Add(CreateItemStackComponent(capi, new ItemStack(bookItem), openDetailPageFor));
+            components.Add(new RichTextComponent(capi,
+                "  " + Lang.Get("electricalprogressivecore:construction-handbook-place-with-book") + "\n",
+                CairoFont.WhiteSmallText())
+            {
+                VerticalAlign = EnumVerticalAlign.Middle,
+                Float = EnumFloat.Inline
+            });
+            components.Add(new ClearFloatTextComponent(capi, SmallPadding));
+        }
 
         for (var i = 0; i < levels.Length; i++)
         {
             var level = levels[i];
-            if (level == null)
+            if (level?.RequireStacks is not { Length: > 0 })
                 continue;
 
-            // Только «Шаг N» — материалы видны на иконках requireStacks, без дублирования списком
             components.Add(new ClearFloatTextComponent(capi, RecipeSpacing));
             components.Add(new RichTextComponent(capi,
                 Lang.Get("electricalprogressivecore:construction-handbook-step", i) + "\n",
                 CairoFont.WhiteSmallText().WithWeight(FontWeight.Bold)));
-
-            if (level.RequireStacks == null || level.RequireStacks.Length == 0)
-            {
-                if (i == 0)
-                {
-                    var controller = GetIncompleteStack(block, capi) ?? stack.Clone();
-                    components.Add(CreateItemStackComponent(capi, controller, openDetailPageFor));
-                }
-
-                continue;
-            }
 
             AddIngredientIcons(components, capi, level.RequireStacks, openDetailPageFor);
             components.Add(new ClearFloatTextComponent(capi, SmallPadding));
@@ -165,23 +167,6 @@ public static class HandbookConstructionPatch
 
         components.Add(new ClearFloatTextComponent(capi, LineSpacing));
         return true;
-    }
-
-    private static ItemStack? GetIncompleteStack(Block block, ICoreClientAPI capi)
-    {
-        if (block.Variant == null || !block.Variant.ContainsKey("state"))
-            return new ItemStack(block);
-
-        var side = block.Variant.ContainsKey("side") ? block.Variant["side"] : "north";
-        foreach (var trySide in new[] { side, "south", "north" })
-        {
-            var code = block.CodeWithVariants(["state", "side"], ["incomplete", trySide]);
-            var b = capi.World.GetBlock(code);
-            if (b != null)
-                return new ItemStack(b);
-        }
-
-        return null;
     }
 
     private static ItemStack? GetFormedStack(Block block, ICoreClientAPI capi)

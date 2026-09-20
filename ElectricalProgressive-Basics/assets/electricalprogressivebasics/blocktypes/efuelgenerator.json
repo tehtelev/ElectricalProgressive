@@ -147,8 +147,8 @@
   },
 
   "creativeinventory": {
-    "general": [ "*-incomplete-south" ],
-    "electricity": [ "*-incomplete-south" ]
+    "general": [ "*-formed-south" ],
+    "electricity": [ "*-formed-south" ]
   },
 
   "variantgroups": [

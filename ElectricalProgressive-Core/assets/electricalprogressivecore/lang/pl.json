@@ -1,3 +1,14 @@
 ﻿{
-  "AltPressForNetworkName": "Wyświetlaj szczegółowe informacje o obwodzie elektrycznym"
+  "AltPressForNetworkName": "Wyświetlaj szczegółowe informacje o obwodzie elektrycznym",
+
+  "item-econstructionbook": "Księga schematów",
+  "item-handbooktitle-econstructionbook": "Użycie",
+  "item-handbooktext-econstructionbook": "PPM: wybierz schemat. PPM na bloku: postaw blueprint. Skradanie + PPM: zmień schemat.",
+  "construction-book-title": "Schematy",
+  "construction-book-empty": "Brak maszyn do złożenia.",
+  "construction-book-selected": "Wybrano: {0}",
+  "construction-book-hint": "PPM — wybierz schemat, potem PPM na bloku — postaw.",
+  "construction-book-placefail": "Nie można tu postawić schematu.",
+  "construction-book-help-open": "Wybierz schemat",
+  "construction-book-help-place": "Postaw wybrany schemat"
 }

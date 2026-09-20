@@ -119,5 +119,17 @@
   // ==================== Прочие интерфейсные строки ====================
 
   "progress": "Прогресс: {0:P0}",
-  "update_heater_info": "Обновить информацию на обогревателях"
+  "update_heater_info": "Обновить информацию на обогревателях",
+
+  "block-efruitpress-*": "Электрический пресс для фруктов",
+  "block-handbooktitle-efruitpress": "Используется",
+  "block-handbooktext-efruitpress": "Электрический пресс для фруктов, 32 В. Многоблок 2×2×2. Синий blueprint ставится книгой чертежей, затем ПКМ по призраку с материалами (4 железные пластины, затем 2 медные). Отжимает сок. Поддерживает желоба.",
+  "efruitpress-structure-incomplete": "Пресс не собран",
+  "efruitpress-structure-hint": "Поставьте книгой чертежей, затем ПКМ: 4 железные пластины → 2 медные.",
+  "efruitpress-handbook-place-controller": "Поставить blueprint",
+  "efruitpress-construct-frame": "Каркас: 4 железные пластины",
+  "efruitpress-construct-finish": "Отделка: 2 медные пластины",
+  "efruitpress-title-gui": "Электрический пресс для фруктов",
+  "efruitpress-slot-fruit": "Фрукты",
+  "efruitpress-slot-mash": "Жмых"
 }

@@ -1,3 +1,14 @@
 ﻿{
-  "AltPressForNetworkName": "Detaillierte Informationen zur elektrischen Schaltung anzeigen"
+  "AltPressForNetworkName": "Detaillierte Informationen zur elektrischen Schaltung anzeigen",
+
+  "item-econstructionbook": "Bauplanbuch",
+  "item-handbooktitle-econstructionbook": "Verwendung",
+  "item-handbooktext-econstructionbook": "Rechtsklick: Bauplan wählen. Rechtsklick auf einen Block: Blueprint platzieren. Schleichen + Rechtsklick: Auswahl ändern.",
+  "construction-book-title": "Baupläne",
+  "construction-book-empty": "Keine montierbaren Maschinen geladen.",
+  "construction-book-selected": "Ausgewählt: {0}",
+  "construction-book-hint": "Rechtsklick: Bauplan wählen, dann mit Rechtsklick platzieren.",
+  "construction-book-placefail": "Bauplan kann hier nicht platziert werden.",
+  "construction-book-help-open": "Bauplan wählen",
+  "construction-book-help-place": "Gewählten Bauplan platzieren"
 }

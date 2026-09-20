@@ -6,7 +6,19 @@
   "construction-blueprint-hint": "Blueprint: right-click with required materials in hand to fill the ghost",
 
   "construction-handbook-assembly": "Assembly",
-  "construction-handbook-assembly-hint": "Place the controller (blue blueprint ghost), then right-click while holding materials:",
+  "construction-handbook-assembly-hint": "Blueprints are not crafted. Place a blue ghost with the schematic book, then right-click the ghost while holding materials. Breaking the machine returns only the spent materials.",
+  "construction-handbook-place-with-book": "place blueprint (right-click with the book)",
   "construction-handbook-step": "Step {0}",
-  "construction-handbook-result": "finished machine"
+  "construction-handbook-result": "finished machine",
+
+  "item-econstructionbook": "Schematic book",
+  "item-handbooktitle-econstructionbook": "Usage",
+  "item-handbooktext-econstructionbook": "Right-click in the air to choose a machine schematic. Aim at a block and right-click to place its blueprint. Sneak + right-click places against the targeted block (e.g. thermoelectric plates on the generator). Assemble the ghost by right-clicking it with the required materials.",
+  "construction-book-title": "Schematics",
+  "construction-book-empty": "No constructable machines loaded.",
+  "construction-book-selected": "Selected: {0}",
+  "construction-book-hint": "Right-click in the air to choose a schematic, then right-click a block to place it.",
+  "construction-book-placefail": "Cannot place the schematic here.",
+  "construction-book-help-open": "Choose schematic",
+  "construction-book-help-place": "Place selected schematic"
 }

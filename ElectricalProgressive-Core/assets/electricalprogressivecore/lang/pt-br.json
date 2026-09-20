@@ -1,3 +1,14 @@
 ﻿{
-  "AltPressForNetworkName": "Exibir informações detalhadas do circuito elétrico"
+  "AltPressForNetworkName": "Exibir informações detalhadas do circuito elétrico",
+
+  "item-econstructionbook": "Livro de esquemas",
+  "item-handbooktitle-econstructionbook": "Uso",
+  "item-handbooktext-econstructionbook": "Clique direito: escolher um esquema. Clique direito em um bloco: colocar o blueprint. Agachar + clique direito: mudar o esquema.",
+  "construction-book-title": "Esquemas",
+  "construction-book-empty": "Nenhuma máquina construível carregada.",
+  "construction-book-selected": "Selecionado: {0}",
+  "construction-book-hint": "Clique direito para escolher um esquema, depois clique direito para colocá-lo.",
+  "construction-book-placefail": "Não é possível colocar o esquema aqui.",
+  "construction-book-help-open": "Escolher esquema",
+  "construction-book-help-place": "Colocar esquema selecionado"
 }

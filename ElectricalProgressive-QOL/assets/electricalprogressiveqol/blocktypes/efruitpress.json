@@ -1,60 +1,106 @@
-﻿{
+{
   "code": "efruitpress",
   "class": "BlockEFruitPress",
   "entityClass": "BlockEntityEFruitPress",
   "attributes": {
     "blockEProperties": "all",
     "facesEProperties": [ "north", "east", "south", "west", "up", "down" ],
-    "particlesOffsetPos": [ [ 0.1, 1.0, 0.1 ] ],
-    "maxConsumption": 100,
+    "particlesOffsetPos": [ [ 0.8, 0.7, 1.0 ] ],
+    "maxConsumption": 200,
+    "energyPerLitre": 1000,
     "voltage": 32,
     "maxCurrent": 100.0,
     "isolated": true,
     "isolatedEnvironment": true,
     "handbook": {
-      "groupBy": [ "ecentrifuge-*" ],
+      "groupBy": [ "efruitpress-*" ],
       "extraSections": [
         {
-          "title": "electricalprogressiveindustry:block-handbooktitle-ecentrifuge",
-          "text": "electricalprogressiveindustry:block-handbooktext-ecentrifuge"
+          "title": "electricalprogressiveqol:block-handbooktitle-efruitpress",
+          "text": "electricalprogressiveqol:block-handbooktext-efruitpress"
+        }
+      ]
+    },
+    "construction": {
+      "brokenDropsRatio": 1,
+      "blueprintShape": "block/efruitpress/efruitpress",
+      "levels": [
+        {
+          "shape": "block/efruitpress/efruitpress_base",
+          "actionLangCode": "electricalprogressiveqol:efruitpress-handbook-place-controller"
+        },
+        {
+          "shape": "block/efruitpress/efruitpress_base",
+          "actionLangCode": "electricalprogressiveqol:efruitpress-construct-frame",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "game:metalplate-iron",
+              "quantity": 4
+            }
+          ]
+        },
+        {
+          "shape": "block/efruitpress/efruitpress",
+          "actionLangCode": "electricalprogressiveqol:efruitpress-construct-finish",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "game:metalplate-copper",
+              "quantity": 2
+            }
+          ],
+          "formMachine": true
         }
       ]
     }
   },
 
-
   "entityBehaviors": [
-    { "name": "Container" },
-    {
-      "name": "Animatable"
-    },
-    {
-      "name": "BEBehaviorEFruitPress"
-    },
-    {
-      "name": "ElectricalProgressive"
-    }
+    { "name": "Animatable" },
+    { "name": "BEBehaviorEFruitPress" },
+    { "name": "ElectricalProgressive" }
   ],
 
   "creativeinventory": {
-    "general": [ "*-north", "*-north" ],
-    "electricity": [ "*-north" ]
+    "general": [ "*-formed-north" ],
+    "electricity": [ "*-formed-north" ]
   },
 
   "behaviors": [
-    { "name": "HorizontalOrientable" },
+    { "name": "Container" },
+    {
+      "name": "HorizontalOrientable",
+      "properties": { "handleDrop": false }
+    },
+    { "name": "BlockEntityInteract" },
     {
       "name": "Multiblock",
-      "properties": {
-        "sizex": 1,
-        "sizey": 2,
-        "sizez": 1,
-        "cposition": {
-          "x": 0,
-          "y": 0,
-          "z": 0
+      "propertiesByType": {
+        "*-north": {
+          "sizex": 2,
+          "sizey": 2,
+          "sizez": 2,
+          "cposition": { "x": 0, "y": 0, "z": 1 }
+        },
+        "*-east": {
+          "sizex": 2,
+          "sizey": 2,
+          "sizez": 2,
+          "cposition": { "x": 0, "y": 0, "z": 0 }
+        },
+        "*-south": {
+          "sizex": 2,
+          "sizey": 2,
+          "sizez": 2,
+          "cposition": { "x": 1, "y": 0, "z": 0 }
+        },
+        "*-west": {
+          "sizex": 2,
+          "sizey": 2,
+          "sizez": 2,
+          "cposition": { "x": 1, "y": 0, "z": 1 }
         }
-
       }
     }
   ],
@@ -63,110 +109,135 @@
 
   "variantgroups": [
     {
+      "code": "state",
+      "states": [ "incomplete", "formed" ]
+    },
+    {
       "code": "side",
       "loadFromProperties": "abstract/horizontalorientation"
     }
   ],
 
-
-
-
   "shapebytype": {
-    "*-north": {
+    "*-incomplete-north": {
+      "base": "block/efruitpress/efruitpress_base",
+      "rotateY": 0
+    },
+    "*-incomplete-east": {
+      "base": "block/efruitpress/efruitpress_base",
+      "rotateY": 270
+    },
+    "*-incomplete-south": {
+      "base": "block/efruitpress/efruitpress_base",
+      "rotateY": 180
+    },
+    "*-incomplete-west": {
+      "base": "block/efruitpress/efruitpress_base",
+      "rotateY": 90
+    },
+    "*-formed-north": {
       "base": "block/efruitpress/efruitpress",
       "rotateY": 0
     },
-    "*-east": {
+    "*-formed-east": {
       "base": "block/efruitpress/efruitpress",
       "rotateY": 270
     },
-    "*-south": {
+    "*-formed-south": {
       "base": "block/efruitpress/efruitpress",
       "rotateY": 180
     },
-    "*-west": {
+    "*-formed-west": {
       "base": "block/efruitpress/efruitpress",
       "rotateY": 90
     }
   },
-  "lightAbsorption": 5,
+
+  "shapeInventoryByType": {
+    "*-incomplete-*": {
+      "base": "block/efruitpress/efruitpress",
+      "rotateY": 0
+    },
+    "*-formed-*": {
+      "base": "block/efruitpress/efruitpress",
+      "rotateY": 0
+    }
+  },
+
+  "lightAbsorptionByType": {
+    "*-incomplete-*": 0,
+    "*-formed-*": 120
+  },
+
   "sidesolidByType": {
+    "*-incomplete-*": { "all": false },
     "*-north": {
       "all": false,
       "east": true,
       "west": true,
-      "north": true
+      "north": true,
+      "down": true
     },
     "*-east": {
       "all": false,
       "east": true,
       "south": true,
-      "north": true
+      "north": true,
+      "down": true
     },
     "*-south": {
       "all": false,
       "east": true,
       "west": true,
-      "south": true
+      "south": true,
+      "down": true
     },
     "*-west": {
       "all": false,
       "south": true,
       "west": true,
-      "north": true
+      "north": true,
+      "down": true
     }
   },
 
-  "sideopaque": {
-    "all": "false"
-  },
-  "emitSideAo": { // Ambient Oclusion
-    "all": false
-  },
-  "sideAo": { // Ambient Oclusion
-    "all": true
-  },
+  "sideopaque": { "all": false },
+  "emitSideAo": { "all": false },
+  "sideAo": { "all": true },
+
   "collisionbox": {
-    "x1": 0,
-    "y1": 0,
-    "z1": 0,
-    "x2": 1,
-    "y2": 1,
-    "z2": 1
+    "x1": 0, "y1": 0, "z1": 0,
+    "x2": 1, "y2": 1, "z2": 1
   },
+  "selectionbox": {
+    "x1": 0, "y1": 0, "z1": 0,
+    "x2": 1, "y2": 1, "z2": 1
+  },
+
   "resistance": 3.5,
   "sounds": {
     "place": "game:block/anvil",
     "walk": "game:walk/metal"
   },
+
   "guiTransform": {
-    "rotation": {
-      "x": -22.6,
-      "y": -145,
-      "z": 0
-    },
-    "origin": {
-      "x": 0.5,
-      "y": 0.9,
-      "z": 0.5
-    },
-    "scale": 0.72
+    "translation": { "x": -0.5, "y": -0.6, "z": 0.5 },
+    "rotation": { "x": -22.6, "y": -145, "z": 0 },
+    "origin": { "x": 1.0, "y": 1.0, "z": 0.0 },
+    "scale": 0.42
+  },
+  "groundTransform": {
+    "translation": { "x": 0, "y": 0.1, "z": 0 },
+    "rotation": { "x": 0, "y": -45, "z": 0 },
+    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
+    "scale": 0.45
   },
   "heldTpIdleAnimation": "holdbothhandslarge",
   "heldRightReadyAnimation": "heldblockready",
   "heldTpUseAnimation": "twohandplaceblock",
   "tpHandTransform": {
-    "translation": {
-      "x": -0.6,
-      "y": -0.91,
-      "z": -0.8
-    },
-    "rotation": {
-      "x": -2,
-      "y": 25,
-      "z": -78
-    },
-    "scale": 0.4
+    "translation": { "x": -0.6, "y": -0.91, "z": -0.8 },
+    "rotation": { "x": -2, "y": 25, "z": -78 },
+    "scale": 0.25
   }
-
 }

@@ -24,10 +24,11 @@ public class BEBehaviorEFruitPress : BlockEntityBehavior, IElectricConsumer
     
     private readonly int _maxConsumption;
     private float _recipeProgress;
+    private float _lastEnergyTime;
 
     public BEBehaviorEFruitPress(BlockEntity blockEntity) : base(blockEntity)
     {
-        _maxConsumption = MyMiniLib.GetAttributeInt(this.Block, "maxConsumption", 150);
+        _maxConsumption = MyMiniLib.GetAttributeInt(this.Block, "maxConsumption", 200);
     }
 
     public bool IsWorking
@@ -124,6 +125,7 @@ public class BEBehaviorEFruitPress : BlockEntityBehavior, IElectricConsumer
         {
             PowerSetting = 0;
             _accumulatedEnergy = 0;
+            _lastEnergyTime = 0;
             amount = 0;
         }
 
@@ -133,16 +135,24 @@ public class BEBehaviorEFruitPress : BlockEntityBehavior, IElectricConsumer
         // Накопление энергии
         if (IsWorking && amount > 0 && Blockentity is BlockEntityEFruitPress entity)
         {
-            // Добавляем полученную энергию к накопленной
-            _accumulatedEnergy += amount;
-            
-            // Если накопилось целое число или больше
+            float currentTime = (float)(Api.World.ElapsedMilliseconds / 1000.0);
+            if (_lastEnergyTime <= 0.01f)
+            {
+                _lastEnergyTime = currentTime;
+                return;
+            }
+
+            float deltaTime = currentTime - _lastEnergyTime;
+            _lastEnergyTime = currentTime;
+            if (deltaTime > 0.1f)
+                deltaTime = 0.1f;
+
+            _accumulatedEnergy += amount * deltaTime;
+
             if (_accumulatedEnergy >= 1.0f)
             {
                 int wholeUnits = (int)_accumulatedEnergy;
                 _accumulatedEnergy -= wholeUnits;
-                
-                // Передаем целые единицы в рецепт
                 entity.AddEnergy(wholeUnits);
             }
         }

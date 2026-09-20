@@ -84,5 +84,16 @@
   "block-handbooktitle-efence": "Використання",
   "block-handbooktext-efence": "Хороший захист від небажаних гостей. Завдає ураження електрикою при дотику. Не споживає енергію, але необхідне підключення до електричного кола для роботи.",
   "progress": "Прогрес: {0:P0}",
-  "update_heater_info": "Оновити інформацію на обігрівачах"
+  "update_heater_info": "Оновити інформацію на обігрівачах",
+  "block-efruitpress-*": "Електричний прес для фруктів",
+  "block-handbooktitle-efruitpress": "Використання",
+  "block-handbooktext-efruitpress": "Електричний прес, 32 В, 2×2×2. Blueprint ставиться книгою креслень, збірка: 4 залізні пластини, потім 2 мідні.",
+  "efruitpress-structure-incomplete": "Прес не зібрано",
+  "efruitpress-structure-hint": "Поставте книгою креслень, потім ПКМ: 4 залізні пластини → 2 мідні.",
+  "efruitpress-handbook-place-controller": "Поставити blueprint",
+  "efruitpress-construct-frame": "Каркас: 4 залізні пластини",
+  "efruitpress-construct-finish": "Оздоблення: 2 мідні пластини",
+  "efruitpress-title-gui": "Електричний прес для фруктів",
+  "efruitpress-slot-fruit": "Фрукти",
+  "efruitpress-slot-mash": "Жмих"
 }

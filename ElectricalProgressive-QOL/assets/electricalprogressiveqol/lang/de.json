@@ -84,5 +84,16 @@
   "block-handbooktitle-efence": "Verwendung",
   "block-handbooktext-efence": "Guter Schutz vor unerwünschten Gästen. Verursacht bei Berührung Stromschlag. Verbraucht keine Energie, muss aber zum Funktionieren an einen Stromkreis angeschlossen sein.",
   "progress": "Fortschritt: {0:P0}",
-  "update_heater_info": "Heizungsinformationen aktualisieren"
+  "update_heater_info": "Heizungsinformationen aktualisieren",
+  "block-efruitpress-*": "Elektrische Fruchtpresse",
+  "block-handbooktitle-efruitpress": "Usage",
+  "block-handbooktext-efruitpress": "Electric fruit press, 32 V, 2×2×2. Place with the schematic book, then assemble with 4 iron plates and 2 copper plates.",
+  "efruitpress-structure-incomplete": "Fruit press is not assembled",
+  "efruitpress-structure-hint": "Place with the schematic book, then RMB: 4 iron plates → 2 copper plates.",
+  "efruitpress-handbook-place-controller": "Place the blueprint",
+  "efruitpress-construct-frame": "Frame: 4 iron plates",
+  "efruitpress-construct-finish": "Finish: 2 copper plates",
+  "efruitpress-title-gui": "Elektrische Fruchtpresse",
+  "efruitpress-slot-fruit": "Obst",
+  "efruitpress-slot-mash": "Trester"
 }

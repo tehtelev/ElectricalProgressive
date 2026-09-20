@@ -11,6 +11,8 @@ using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
+using MachineConstruct = global::ElectricalProgressive.Construction.BEBehaviorMachineConstruct;
+using MachineConstructAccess = global::ElectricalProgressive.Construction.MachineConstructAccess;
 
 namespace ElectricalProgressive.Content.Block.EFruitPress;
 
@@ -18,7 +20,7 @@ namespace ElectricalProgressive.Content.Block.EFruitPress;
 /// Блок электрического пресса для фруктов.
 /// Реализует интерфейсы для работы с жидкостями (ILiquidSink, ILiquidSource).
 /// </summary>
-public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource
+public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource, IMultiBlockInteract
 {
     // === Параметры контейнера для жидкости ===
     public float CapacityLitres => 100f;
@@ -364,7 +366,9 @@ public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource
     public override bool DoPlaceBlock(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel,
         ItemStack byItemStack)
     {
-        if (byItemStack.Block.Variant["type"] == "burned")
+        if (byItemStack?.Block?.Variant != null &&
+            byItemStack.Block.Variant.TryGetValue("type", out var burnedType) &&
+            burnedType == "burned")
             return false;
 
         if (!base.DoPlaceBlock(world, byPlayer, blockSel, byItemStack) ||
@@ -387,6 +391,46 @@ public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource
         IPlayer byPlayer,
         BlockSelection blockSel)
     {
+        if (blockSel is null)
+            return false;
+        if (!world.Claims.TryAccess(byPlayer, blockSel.Position, EnumBlockAccessFlags.Use))
+            return false;
+
+        return HandleInteract(world, byPlayer, blockSel.Position, blockSel);
+    }
+
+    public bool MBOnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel,
+        Vec3i offsetInv)
+    {
+        if (!world.Claims.TryAccess(byPlayer, blockSel.Position, EnumBlockAccessFlags.Use))
+            return false;
+
+        var controllerPos = MachineConstructAccess.GetControllerPos(blockSel.Position, offsetInv);
+        return HandleInteract(world, byPlayer, controllerPos, blockSel);
+    }
+
+    private bool HandleInteract(IWorldAccessor world, IPlayer byPlayer, BlockPos controllerPos,
+        BlockSelection blockSel)
+    {
+        blockSel.Block = this;
+        var liquidSel = blockSel.Clone();
+        liquidSel.Position = controllerPos;
+
+        if (MachineConstructAccess.TryConstructInteract(world, byPlayer, controllerPos))
+            return true;
+
+        var construct = world.BlockAccessor.GetBlockEntity(controllerPos)?.GetBehavior<MachineConstruct>();
+        if (construct != null && construct.HasConstruction && !construct.IsReady)
+        {
+            if (world.Api is ICoreClientAPI capi)
+            {
+                capi.TriggerIngameError(this, "incomplete",
+                    Lang.Get("electricalprogressiveqol:efruitpress-structure-incomplete"));
+            }
+
+            return true;
+        }
+
         ItemSlot activeHotbarSlot = byPlayer.InventoryManager.ActiveHotbarSlot;
 
         // ПЕРВОЕ: Проверяем, есть ли в руке контейнер с жидкостью
@@ -397,7 +441,7 @@ public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource
             {
                 EnumHandHandling handling = EnumHandHandling.NotHandled;
                 activeHotbarSlot.Itemstack.Collectible.OnHeldInteractStart(activeHotbarSlot,
-                    (EntityAgent)byPlayer.Entity, blockSel, (EntitySelection)null, true, ref handling);
+                    (EntityAgent)byPlayer.Entity, liquidSel, (EntitySelection)null, true, ref handling);
                 if (handling == EnumHandHandling.PreventDefault || handling == EnumHandHandling.PreventDefaultAction)
                     return true;
             }
@@ -418,7 +462,7 @@ public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource
                     return false;
                 ItemStack content = objLso.GetContent(activeHotbarSlot.Itemstack);
                 float desiredLitres = ctrlKey ? objLso.TransferSizeLitres : objLso.CapacityLitres;
-                int moved = this.TryPutLiquid(blockSel.Position, content, desiredLitres);
+                int moved = this.TryPutLiquid(controllerPos, content, desiredLitres);
                 if (moved > 0)
                 {
                     this.SplitStackAndPerformAction((Entity)byPlayer.Entity, activeHotbarSlot,
@@ -439,16 +483,16 @@ public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource
             {
                 if (!objLsi.AllowHeldLiquidTransfer)
                     return false;
-                ItemStack owncontentStack = this.GetContent(blockSel.Position);
+                ItemStack owncontentStack = this.GetContent(controllerPos);
                 if (owncontentStack == null)
-                    return base.OnBlockInteractStart(world, byPlayer, blockSel);
+                    return base.OnBlockInteractStart(world, byPlayer, liquidSel);
                 ItemStack contentStack = owncontentStack.Clone();
                 float litres = shiftKey ? objLsi.TransferSizeLitres : objLsi.CapacityLitres;
                 int num = this.SplitStackAndPerformAction((Entity)byPlayer.Entity, activeHotbarSlot,
                     (System.Func<ItemStack, int>)(stack => objLsi.TryPutLiquid(stack, owncontentStack, litres)));
                 if (num > 0)
                 {
-                    this.TryTakeContent(blockSel.Position, num);
+                    this.TryTakeContent(controllerPos, num);
                     this.DoLiquidMovedEffects(byPlayer, contentStack, num,
                         BlockLiquidContainerBase.EnumLiquidDirection.Fill);
                     return true;
@@ -457,29 +501,55 @@ public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource
         }
 
         // ТРЕТЬЕ: Если не работали с жидкостями, открываем инвентарь
-        var blockEntity = world.BlockAccessor.GetBlockEntity(blockSel.Position);
+        var blockEntity = world.BlockAccessor.GetBlockEntity(controllerPos);
         if (blockEntity != null && blockEntity is BlockEntityOpenableContainer openableContainer)
         {
-            // Проверяем права доступа
-            if (!world.Claims.TryAccess(byPlayer, blockSel.Position, EnumBlockAccessFlags.Use))
-                return false;
-
-            openableContainer.OnPlayerRightClick(byPlayer, blockSel);
+            openableContainer.OnPlayerRightClick(byPlayer, liquidSel);
             return true;
         }
 
-        // Если ничего не сработало, вызываем базовый метод
-        return base.OnBlockInteractStart(world, byPlayer, blockSel);
+        return true;
     }
 
-    /// <summary>
-    /// Получить дроп при разрушении блока
-    /// </summary>
-    public override ItemStack[] GetDrops(IWorldAccessor world, BlockPos pos, IPlayer byPlayer,
-        float dropQuantityMultiplier = 1)
+    public bool MBDoPartialSelection(IWorldAccessor world, BlockPos pos, Vec3i offset) => false;
+
+    public bool MBOnBlockInteractStep(float secondsUsed, IWorldAccessor world, IPlayer byPlayer,
+        BlockSelection blockSel, Vec3i offset) => false;
+
+    public void MBOnBlockInteractStop(float secondsUsed, IWorldAccessor world, IPlayer byPlayer,
+        BlockSelection blockSel, Vec3i offset)
     {
-        return [OnPickBlock(world, pos)];
     }
+
+    public bool MBOnBlockInteractCancel(float secondsUsed, IWorldAccessor world, IPlayer byPlayer,
+        BlockSelection blockSel, EnumItemUseCancelReason cancelReason, Vec3i offset) => true;
+
+    public ItemStack MBOnPickBlock(IWorldAccessor world, BlockPos pos, Vec3i offset)
+    {
+        var controllerPos = MachineConstructAccess.GetControllerPos(pos, offset);
+        foreach (var bh in BlockBehaviors)
+        {
+            var h = EnumHandling.PassThrough;
+            var stack = bh.OnPickBlock(world, controllerPos, ref h);
+            if (h != EnumHandling.PassThrough && stack != null)
+                return stack;
+        }
+
+        return OnPickBlock(world, controllerPos);
+    }
+
+    public WorldInteraction[] MBGetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection blockSel,
+        IPlayer forPlayer, Vec3i offset)
+    {
+        var controllerPos = MachineConstructAccess.GetControllerPos(blockSel.Position, offset);
+        var sel = blockSel.Clone();
+        sel.Position = controllerPos;
+        return GetPlacedBlockInteractionHelp(world, sel, forPlayer);
+    }
+
+    public BlockSounds MBGetSounds(IBlockAccessor blockAccessor, BlockSelection blockSel, ItemStack stack,
+        Vec3i offset) =>
+        Sounds;
 
     /// <summary>
     /// Получить подсказки по взаимодействию с блоком
@@ -517,6 +587,8 @@ public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + (MyMiniLib.GetAttributeBool(block, "isolatedEnvironment", false) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:Liquid capacity") + ": 100 L");
+        dsc.AppendLine();
+        dsc.AppendLine(Lang.Get("electricalprogressiveqol:efruitpress-structure-hint"));
     }
 
     #endregion

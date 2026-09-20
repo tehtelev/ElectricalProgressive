@@ -40,22 +40,6 @@ public class BlockETermoGenerator : BlockEBase, IMultiBlockInteract
     public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack,
         BlockSelection blockSel, ref string failureCode)
     {
-        if (itemstack?.Block != null)
-        {
-            var side = itemstack.Block.Variant.ContainsKey("side")
-                ? itemstack.Block.Variant["side"]
-                : (Variant.ContainsKey("side") ? Variant["side"] : "south");
-
-            if (itemstack.Block.Variant.ContainsKey("state") &&
-                itemstack.Block.Variant["state"] != "incomplete")
-            {
-                var incomplete = world.GetBlock(CodeWithVariants(["state", "side"],
-                    ["incomplete", side]));
-                if (incomplete != null)
-                    itemstack = new ItemStack(incomplete);
-            }
-        }
-
         if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSel.Position, Facing.DownAll))
             return false;
 

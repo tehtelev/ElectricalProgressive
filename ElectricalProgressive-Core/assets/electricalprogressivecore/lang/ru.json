@@ -6,7 +6,19 @@
   "construction-blueprint-hint": "Blueprint: ПКМ нужными ресурсами в руке — заполнить призрак",
 
   "construction-handbook-assembly": "Сборка",
-  "construction-handbook-assembly-hint": "Поставьте контроллер (синий blueprint-призрак), затем ПКМ, держа ресурсы:",
+  "construction-handbook-assembly-hint": "Чертежи не крафтятся. Синий blueprint ставится книгой чертежей, затем ПКМ по призраку с материалами в руке. При поломке машины возвращаются только затраченные ресурсы.",
+  "construction-handbook-place-with-book": "поставить blueprint (ПКМ книгой)",
   "construction-handbook-step": "Шаг {0}",
-  "construction-handbook-result": "готовая машина"
+  "construction-handbook-result": "готовая машина",
+
+  "item-econstructionbook": "Книга чертежей",
+  "item-handbooktitle-econstructionbook": "Применение",
+  "item-handbooktext-econstructionbook": "ПКМ в воздухе — выбрать схему. ПКМ по блоку — поставить blueprint. Shift+ПКМ ставит к указанному блоку (термопластины на генератор). Собирайте призрак ПКМ с материалами в руке.",
+  "construction-book-title": "Чертежи",
+  "construction-book-empty": "Нет машин со сборкой.",
+  "construction-book-selected": "Выбрано: {0}",
+  "construction-book-hint": "ПКМ в воздухе — выбрать схему, ПКМ по блоку — поставить.",
+  "construction-book-placefail": "Здесь нельзя поставить чертёж.",
+  "construction-book-help-open": "Выбрать схему",
+  "construction-book-help-place": "Поставить выбранную схему"
 }

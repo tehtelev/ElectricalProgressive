@@ -84,5 +84,16 @@
   "block-handbooktitle-efence": "Użycie",
   "block-handbooktext-efence": "Dobra ochrona przed nieproszonymi gośćmi. Zadaje obrażenia elektryczne przy dotknięciu. Nie zużywa energii, ale musi być podłączone do obwodu elektrycznego, aby działać.",
   "progress": "Postęp: {0:P0}",
-  "update_heater_info": "Aktualizuj informacje o grzejnikach"
+  "update_heater_info": "Aktualizuj informacje o grzejnikach",
+  "block-efruitpress-*": "Elektryczna prasa do owoców",
+  "block-handbooktitle-efruitpress": "Usage",
+  "block-handbooktext-efruitpress": "Electric fruit press, 32 V, 2×2×2. Place with the schematic book, then assemble with 4 iron plates and 2 copper plates.",
+  "efruitpress-structure-incomplete": "Fruit press is not assembled",
+  "efruitpress-structure-hint": "Place with the schematic book, then RMB: 4 iron plates → 2 copper plates.",
+  "efruitpress-handbook-place-controller": "Place the blueprint",
+  "efruitpress-construct-frame": "Frame: 4 iron plates",
+  "efruitpress-construct-finish": "Finish: 2 copper plates",
+  "efruitpress-title-gui": "Elektryczna prasa do owoców",
+  "efruitpress-slot-fruit": "Owoce",
+  "efruitpress-slot-mash": "Wytłoki"
 }

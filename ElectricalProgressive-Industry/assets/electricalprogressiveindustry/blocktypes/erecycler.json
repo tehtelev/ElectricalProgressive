@@ -87,8 +87,8 @@
   ],
 
   "creativeinventory": {
-    "general": [ "*-incomplete-north" ],
-    "electricity": [ "*-incomplete-north" ]
+    "general": [ "*-formed-north" ],
+    "electricity": [ "*-formed-north" ]
   },
 
   "behaviors": [

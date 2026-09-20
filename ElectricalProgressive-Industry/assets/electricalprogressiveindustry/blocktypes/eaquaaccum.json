@@ -113,16 +113,16 @@
     }
   },
   "entityBehaviors": [
-    { "name": "Container" },
     { "name": "Animatable" },
     { "name": "BEBehaviorEAquaAccum" },
     { "name": "ElectricalProgressive" }
   ],
   "creativeinventory": {
-    "general": [ "*-incomplete-north" ],
-    "electricity": [ "*-incomplete-north" ]
+    "general": [ "*-formed-north" ],
+    "electricity": [ "*-formed-north" ]
   },
   "behaviors": [
+    { "name": "Container" },
     {
       "name": "HorizontalOrientable",
       "properties": { "handleDrop": false }

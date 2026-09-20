@@ -1,5 +1,16 @@
 ﻿{
 
-  "AltPressForNetworkName": "Zobrazit podrobné informace o elektrickém obvodu"
+  "AltPressForNetworkName": "Zobrazit podrobné informace o elektrickém obvodu",
+
+  "item-econstructionbook": "Kniha schémat",
+  "item-handbooktitle-econstructionbook": "Použití",
+  "item-handbooktext-econstructionbook": "Pravé tlačítko: vybrat schéma. Pravé tlačítko na blok: umístit blueprint. Plížení + pravé tlačítko: změnit schéma.",
+  "construction-book-title": "Schémata",
+  "construction-book-empty": "Žádné sestavitelné stroje.",
+  "construction-book-selected": "Vybráno: {0}",
+  "construction-book-hint": "Pravé tlačítko — vybrat schéma, pak umístit.",
+  "construction-book-placefail": "Schéma sem nelze umístit.",
+  "construction-book-help-open": "Vybrat schéma",
+  "construction-book-help-place": "Umístit vybrané schéma"
 
 }

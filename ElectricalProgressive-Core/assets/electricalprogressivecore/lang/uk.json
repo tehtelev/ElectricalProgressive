@@ -1,3 +1,14 @@
 ﻿{
-  "AltPressForNetworkName": "Показати детальну інформацію про електричний ланцюг"
+  "AltPressForNetworkName": "Показати детальну інформацію про електричний ланцюг",
+
+  "item-econstructionbook": "Книга креслень",
+  "item-handbooktitle-econstructionbook": "Застосування",
+  "item-handbooktext-econstructionbook": "ПКМ — вибрати схему машини. ПКМ по блоку — поставити blueprint. Shift+ПКМ — змінити схему.",
+  "construction-book-title": "Креслення",
+  "construction-book-empty": "Немає машин зі збіркою.",
+  "construction-book-selected": "Обрано: {0}",
+  "construction-book-hint": "ПКМ — вибрати схему, потім ПКМ по блоку — поставити.",
+  "construction-book-placefail": "Тут не можна поставити креслення.",
+  "construction-book-help-open": "Вибрати схему",
+  "construction-book-help-place": "Поставити обрану схему"
 }

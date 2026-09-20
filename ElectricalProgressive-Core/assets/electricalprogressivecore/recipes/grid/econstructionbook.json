@@ -1,0 +1,24 @@
+[
+	{
+		"ingredientPattern": "B,C",
+		"width": 1,
+		"height": 2,
+		"ingredients": {
+			"B": {
+				"type": "item",
+				"code": "game:book-normal-*",
+				"quantity": 1
+			},
+			"C": {
+				"type": "item",
+				"code": "game:metalbit-copper",
+				"quantity": 4
+			}
+		},
+		"output": {
+			"type": "item",
+			"code": "electricalprogressivecore:econstructionbook",
+			"quantity": 1
+		}
+	}
+]

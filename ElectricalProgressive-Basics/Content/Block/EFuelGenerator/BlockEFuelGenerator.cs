@@ -307,23 +307,6 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource, IMult
     public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack,
        BlockSelection blockSel, ref string failureCode)
     {
-        // GUI — полная модель; в мир — всегда incomplete
-        if (itemstack?.Block != null)
-        {
-            var side = itemstack.Block.Variant.ContainsKey("side")
-                ? itemstack.Block.Variant["side"]
-                : (Variant.ContainsKey("side") ? Variant["side"] : "south");
-
-            if (itemstack.Block.Variant.ContainsKey("state") &&
-                itemstack.Block.Variant["state"] != "incomplete")
-            {
-                var incomplete = world.GetBlock(CodeWithVariants(["state", "side"],
-                    ["incomplete", side]));
-                if (incomplete != null)
-                    itemstack = new ItemStack(incomplete);
-            }
-        }
-
         if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSel.Position, Facing.DownAll))
             return false;
 
@@ -333,7 +316,9 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource, IMult
     public override bool DoPlaceBlock(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel,
         ItemStack byItemStack)
     {
-        if (byItemStack.Block.Variant["type"] == "burned")
+        if (byItemStack?.Block?.Variant != null &&
+            byItemStack.Block.Variant.TryGetValue("type", out var burnedType) &&
+            burnedType == "burned")
             return false;
 
         if (!base.DoPlaceBlock(world, byPlayer, blockSel, byItemStack) ||

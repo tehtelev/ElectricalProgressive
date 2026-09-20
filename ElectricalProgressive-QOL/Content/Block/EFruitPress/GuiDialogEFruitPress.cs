@@ -2,6 +2,7 @@
 using Cairo;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 
 namespace ElectricalProgressive.Content.Block.EFruitPress;
@@ -91,8 +92,8 @@ public class GuiDialogEFruitPress : GuiDialogBlockEntity
             .AddItemSlotGrid(Inventory, new Action<object>(this.SendInvPacket), 1, [2], mashBounds, "mashSlot")
             
             // Подписи
-            .AddStaticText("Fruit", CairoFont.WhiteDetailText(), ElementBounds.Fixed(15, 120, 50, 20))
-            .AddStaticText("Mash", CairoFont.WhiteDetailText(), ElementBounds.Fixed(190, 120, 50, 20))
+            .AddStaticText(Lang.Get("electricalprogressiveqol:efruitpress-slot-fruit"), CairoFont.WhiteDetailText(), ElementBounds.Fixed(5, 120, 70, 20))
+            .AddStaticText(Lang.Get("electricalprogressiveqol:efruitpress-slot-mash"), CairoFont.WhiteDetailText(), EnumTextOrientation.Center, ElementBounds.Fixed(164, 120, 80, 20))
             
             .EndChildElements()
             .Compose();

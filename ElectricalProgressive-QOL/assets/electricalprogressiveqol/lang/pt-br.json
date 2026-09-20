@@ -84,5 +84,16 @@
   "block-handbooktitle-efence": "Uso",
   "block-handbooktext-efence": "Boa proteção contra visitantes indesejados. Causa dano elétrico ao contato. Não consome energia, mas precisa estar conectada a um circuito elétrico para funcionar.",
   "progress": "Progresso: {0:P0}",
-  "update_heater_info": "Atualizar informações do aquecedor"
+  "update_heater_info": "Atualizar informações do aquecedor",
+  "block-efruitpress-*": "Prensa de frutas elétrica",
+  "block-handbooktitle-efruitpress": "Usage",
+  "block-handbooktext-efruitpress": "Electric fruit press, 32 V, 2×2×2. Place with the schematic book, then assemble with 4 iron plates and 2 copper plates.",
+  "efruitpress-structure-incomplete": "Fruit press is not assembled",
+  "efruitpress-structure-hint": "Place with the schematic book, then RMB: 4 iron plates → 2 copper plates.",
+  "efruitpress-handbook-place-controller": "Place the blueprint",
+  "efruitpress-construct-frame": "Frame: 4 iron plates",
+  "efruitpress-construct-finish": "Finish: 2 copper plates",
+  "efruitpress-title-gui": "Prensa de frutas elétrica",
+  "efruitpress-slot-fruit": "Frutas",
+  "efruitpress-slot-mash": "Bagaço"
 }
