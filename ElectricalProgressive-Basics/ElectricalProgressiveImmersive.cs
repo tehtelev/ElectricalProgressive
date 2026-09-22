@@ -2,6 +2,7 @@
 using ElectricalProgressive.Content.Block.CableDot;
 using ElectricalProgressive.Content.Block.CableSwitch;
 using ElectricalProgressive.Content.Block.EAccumulator;
+using ElectricalProgressive.Content.Block.EAcidAccum;
 using ElectricalProgressive.Content.Block.EGenerator;
 using ElectricalProgressive.Content.Block.EMotor;
 using ElectricalProgressive.Content.Block.HVSFonar;
@@ -113,6 +114,10 @@ namespace ElectricalProgressive
             api.RegisterBlockEntityBehaviorClass("BEBehaviorWConnector", typeof(BEBehaviorWConnector));
 
             api.RegisterBlockClass("BlockWire", typeof(BlockWire));
+
+            api.RegisterBlockClass("BlockEAcidAccum", typeof(BlockEAcidAccum));
+            api.RegisterBlockEntityClass("BlockEntityEAcidAccum", typeof(BlockEntityEAcidAccum));
+            api.RegisterBlockEntityBehaviorClass("BEBehaviorEAcidAccum", typeof(BEBehaviorEAcidAccum));
 
             api.RegisterBlockEntityBehaviorClass("ElectricalProgressiveImmersive", typeof(BEBehaviorEPImmersive));
         }

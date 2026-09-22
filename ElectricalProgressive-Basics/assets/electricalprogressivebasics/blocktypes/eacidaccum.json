@@ -1,0 +1,203 @@
+{
+  "code": "eacidaccum",
+  "class": "BlockEAcidAccum",
+  "entityClass": "BlockEntityEAcidAccum",
+  "attributes": {
+    "voltage": 512,
+    "maxCurrent": 100.0,
+    "isolated": true,
+    "isolatedEnvironment": true,
+    "maxcapacity": 4096000,
+    "power": 2048.0,
+    "capacityLitres": 100,
+    "chargable": false,
+    "handbook": {
+      "groupBy": [ "eacidaccum-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivebasics:block-handbooktitle-eacidaccum",
+          "text": "electricalprogressivebasics:block-handbooktext-eacidaccum"
+        }
+      ]
+    },
+    "wireNodes": [
+      {
+        "index": 0,
+        "voltage": "512",
+        "x": 0.42,
+        "y": 2.32,
+        "z": -0.44,
+        "dxdydz": 0.1
+      }
+    ],
+    "construction": {
+      "brokenDropsRatio": 1,
+      "blueprintShape": "block/eacidaccum/eacidaccum",
+      "levels": [
+        {
+          "shape": "block/eacidaccum/eacidaccum_base",
+          "actionLangCode": "electricalprogressivebasics:eacidaccum-handbook-place-controller"
+        },
+        {
+          "shape": "block/eacidaccum/eacidaccum_base2",
+          "actionLangCode": "electricalprogressivebasics:eacidaccum-construct-frame",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "game:metalplate-steel",
+              "quantity": 6
+            },
+            {
+              "type": "item",
+              "code": "electricalprogressivebasics:coil",
+              "quantity": 8
+            }
+          ]
+        },
+        {
+          "shape": "block/eacidaccum/eacidaccum_base3",
+          "actionLangCode": "electricalprogressivebasics:eacidaccum-construct-board",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "electricalprogressivebasics:eschematic",
+              "quantity": 1
+            },
+            {
+              "type": "block",
+              "code": "electricalprogressivebasics:cabledotdown",
+              "quantity": 1
+            }
+          ]
+        },
+        {
+          "shape": "block/eacidaccum/eacidaccum",
+          "actionLangCode": "electricalprogressivebasics:eacidaccum-construct-finish",
+          "requireStacks": [
+            {
+              "type": "block",
+              "code": "electricalprogressivebasics:accumulator-tier2-normal",
+              "quantity": 1
+            }
+          ],
+          "formMachine": true
+        }
+      ]
+    }
+  },
+  "entityBehaviors": [
+    { "name": "BEBehaviorEAcidAccum" },
+    { "name": "ElectricalProgressiveImmersive" }
+  ],
+  "creativeinventory": {
+    "general": [ "*-formed-north" ],
+    "electricity": [ "*-formed-north" ]
+  },
+  "behaviors": [
+    { "name": "Container" },
+    {
+      "name": "HorizontalOrientable",
+      "properties": { "handleDrop": false }
+    },
+    { "name": "BlockEntityInteract" },
+    {
+      "name": "Multiblock",
+      "propertiesByType": {
+        "*-north": {
+          "sizex": 2,
+          "sizey": 3,
+          "sizez": 2,
+          "cposition": { "x": 0, "y": 0, "z": 1 }
+        },
+        "*-east": {
+          "sizex": 2,
+          "sizey": 3,
+          "sizez": 2,
+          "cposition": { "x": 0, "y": 0, "z": 0 }
+        },
+        "*-south": {
+          "sizex": 2,
+          "sizey": 3,
+          "sizez": 2,
+          "cposition": { "x": 1, "y": 0, "z": 0 }
+        },
+        "*-west": {
+          "sizex": 2,
+          "sizey": 3,
+          "sizez": 2,
+          "cposition": { "x": 1, "y": 0, "z": 1 }
+        }
+      }
+    }
+  ],
+  "blockmaterial": "Metal",
+  "variantgroups": [
+    {
+      "code": "state",
+      "states": [ "incomplete", "formed", "burned" ]
+    },
+    {
+      "code": "side",
+      "loadFromProperties": "abstract/horizontalorientation"
+    }
+  ],
+  "shapebytype": {
+    "*-incomplete-north": { "base": "block/eacidaccum/eacidaccum_base", "rotateY": 0 },
+    "*-incomplete-east": { "base": "block/eacidaccum/eacidaccum_base", "rotateY": 270 },
+    "*-incomplete-south": { "base": "block/eacidaccum/eacidaccum_base", "rotateY": 180 },
+    "*-incomplete-west": { "base": "block/eacidaccum/eacidaccum_base", "rotateY": 90 },
+    "*-formed-north": { "base": "block/eacidaccum/eacidaccum", "rotateY": 0 },
+    "*-formed-east": { "base": "block/eacidaccum/eacidaccum", "rotateY": 270 },
+    "*-formed-south": { "base": "block/eacidaccum/eacidaccum", "rotateY": 180 },
+    "*-formed-west": { "base": "block/eacidaccum/eacidaccum", "rotateY": 90 },
+    "*-burned-north": { "base": "block/eacidaccum/eacidaccum", "rotateY": 0 },
+    "*-burned-east": { "base": "block/eacidaccum/eacidaccum", "rotateY": 270 },
+    "*-burned-south": { "base": "block/eacidaccum/eacidaccum", "rotateY": 180 },
+    "*-burned-west": { "base": "block/eacidaccum/eacidaccum", "rotateY": 90 }
+  },
+  "shapeInventoryByType": {
+    "*": { "base": "block/eacidaccum/eacidaccum", "rotateY": 0 }
+  },
+  "lightAbsorptionByType": {
+    "*-incomplete-*": 0,
+    "*-formed-*": 120,
+    "*-burned-*": 120
+  },
+  "sidesolid": { "all": false },
+  "sideopaque": { "all": false },
+  "emitSideAo": { "all": false },
+  "sideAo": { "all": true },
+  "collisionbox": {
+    "x1": 0, "y1": 0, "z1": 0,
+    "x2": 1, "y2": 1, "z2": 1
+  },
+  "selectionbox": {
+    "x1": 0, "y1": 0, "z1": 0,
+    "x2": 1, "y2": 1, "z2": 1
+  },
+  "resistance": 3.5,
+  "sounds": {
+    "place": "game:block/anvil",
+    "walk": "game:walk/metal"
+  },
+  "guiTransform": {
+    "translation": { "x": -0.5, "y": -0.6, "z": 0.5 },
+    "rotation": { "x": -22.6, "y": -145, "z": 0 },
+    "origin": { "x": 1.0, "y": 1.0, "z": 0.0 },
+    "scale": 0.38
+  },
+  "groundTransform": {
+    "translation": { "x": 0, "y": 0.1, "z": 0 },
+    "rotation": { "x": 0, "y": -45, "z": 0 },
+    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
+    "scale": 0.4
+  },
+  "heldTpIdleAnimation": "holdbothhandslarge",
+  "heldRightReadyAnimation": "heldblockready",
+  "heldTpUseAnimation": "twohandplaceblock",
+  "tpHandTransform": {
+    "translation": { "x": -0.6, "y": -0.91, "z": -0.8 },
+    "rotation": { "x": -2, "y": 25, "z": -78 },
+    "scale": 0.22
+  }
+}

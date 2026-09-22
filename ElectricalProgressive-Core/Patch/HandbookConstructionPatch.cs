@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -71,9 +72,14 @@ public static class HandbookConstructionPatch
                 return;
 
             var components = new List<RichTextComponentBase>(__result);
+            RestrictAcidAccumLiquids(components, capi, stack, openDetailPageFor);
+
             var haveText = components.Count > 0;
             if (!AddConstructionInfo(components, capi, stack, openDetailPageFor, ref haveText))
+            {
+                __result = components.ToArray();
                 return;
+            }
 
             __result = components.ToArray();
         }
@@ -81,6 +87,104 @@ public static class HandbookConstructionPatch
         {
             capi.Logger.Error($"[MachineConstruct] Handbook construction: {ex}");
         }
+    }
+
+    private static void RestrictAcidAccumLiquids(
+        List<RichTextComponentBase> components,
+        ICoreClientAPI capi,
+        ItemStack stack,
+        ActionConsumable<string> openDetailPageFor)
+    {
+        if (stack.Block?.Code?.Path == null || !stack.Block.Code.Path.StartsWith("eacidaccum"))
+            return;
+
+        var acidItem = capi.World.GetItem(new AssetLocation("game", "acid-full-sulfuric"));
+        if (acidItem == null)
+            return;
+
+        var storedIn = Lang.Get("handbook-storedin");
+        var acidSlide = new SlideshowItemstackTextComponent(
+            capi,
+            [new ItemStack(acidItem)],
+            40.0,
+            EnumFloat.Inline,
+            cs => openDetailPageFor(GuiHandbookItemStackPage.PageCodeForStack(cs)))
+        {
+            VerticalAlign = EnumVerticalAlign.Middle
+        };
+
+        var storedAt = -1;
+        for (var i = 0; i < components.Count; i++)
+        {
+            var text = GetComponentText(components[i]);
+            if (string.IsNullOrEmpty(text))
+                continue;
+            if (text.Contains(storedIn) || text.Contains("Может содержать") || text.Contains("Can hold"))
+            {
+                storedAt = i;
+                break;
+            }
+        }
+
+        if (storedAt >= 0)
+        {
+            var j = storedAt + 1;
+            while (j < components.Count && IsHoldListComponent(components[j]))
+                components.RemoveAt(j);
+            components.Insert(j, acidSlide);
+            return;
+        }
+
+        for (var i = 0; i < components.Count; i++)
+        {
+            if (!IsHoldListComponent(components[i]))
+                continue;
+            if (GetSlideshowCount(components[i]) <= 1)
+                continue;
+            components[i] = acidSlide;
+        }
+    }
+
+    private static bool IsHoldListComponent(RichTextComponentBase c)
+    {
+        if (c is SlideshowItemstackTextComponent or ItemstackTextComponent)
+            return true;
+        var name = c.GetType().Name;
+        return name.Contains("Slideshow", StringComparison.Ordinal) ||
+               name.Contains("Itemstack", StringComparison.Ordinal);
+    }
+
+    private static int GetSlideshowCount(RichTextComponentBase c)
+    {
+        if (c is SlideshowItemstackTextComponent slide && slide.Itemstacks != null)
+            return slide.Itemstacks.Length;
+
+        foreach (var name in new[] { "Itemstacks", "itemstacks", "Stacks", "stacks" })
+        {
+            var p = c.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (p?.GetValue(c) is ItemStack[] arr)
+                return arr.Length;
+            var f = c.GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (f?.GetValue(c) is ItemStack[] arr2)
+                return arr2.Length;
+        }
+
+        return 0;
+    }
+
+    private static string? GetComponentText(RichTextComponentBase c)
+    {
+        foreach (var name in new[] { "DisplayText", "Text", "text", "ActualText" })
+        {
+            var p = c.GetType().GetProperty(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (p?.GetValue(c) is string s && s.Length > 0)
+                return s;
+            var f = c.GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (f?.GetValue(c) is string s2 && s2.Length > 0)
+                return s2;
+        }
+
+        return null;
     }
 
     private static bool AddConstructionInfo(
