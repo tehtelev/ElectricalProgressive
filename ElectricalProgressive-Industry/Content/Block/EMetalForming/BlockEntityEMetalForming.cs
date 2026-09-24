@@ -73,6 +73,8 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
 
     public bool IsWorkAnimating => IsAnimPlaying("load") || IsAnimPlaying("forge");
 
+    public bool IsForgeAnimating => IsAnimPlaying("forge");
+
     /// <summary>
     /// Кадр загрузки для предмета в руке. Во время отбивки деталь уже на ленте.
     /// </summary>

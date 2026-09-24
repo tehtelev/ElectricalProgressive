@@ -47,6 +47,9 @@ public class MetalFormingCrateRenderer : IRenderer
     private readonly Matrixf _modelMat = new();
     private MultiTextureMeshRef? _meshRef;
     private string? _meshKey;
+    private bool _beltFrozen;
+    private float _beltCx;
+    private float _beltCz;
 
     public double RenderOrder => 0.51;
     public int RenderRange => 24;
@@ -65,6 +68,7 @@ public class MetalFormingCrateRenderer : IRenderer
             return;
 
         _meshKey = key;
+        _beltFrozen = false;
         _meshRef?.Dispose();
         _meshRef = null;
 
@@ -201,11 +205,13 @@ public class MetalFormingCrateRenderer : IRenderer
         if (pose?.AnimModelMatrix == null)
             return;
 
-        if (frame >= DropOnBeltFrame)
+        if (frame >= DropOnBeltFrame || _be.IsForgeAnimating)
         {
-            RenderOnBelt(prog, pose, pos, cam, rotY, itemScale);
+            RenderOnBelt(prog, pose, pos, cam, rotY, itemScale, _be.IsForgeAnimating);
             return;
         }
+
+        _beltFrozen = false;
 
         BeginBlockMatrix(pos, cam, rotY);
         _modelMat.Mul(pose.AnimModelMatrix);
@@ -230,13 +236,28 @@ public class MetalFormingCrateRenderer : IRenderer
     /// XZ как у DynPlate (та же матрица, что в руке), Y — высота ленты в мире.
     /// </summary>
     private void RenderOnBelt(IStandardShaderProgram prog, ElementPose pose,
-        BlockPos pos, Vec3d cam, int rotY, float itemScale)
+        BlockPos pos, Vec3d cam, int rotY, float itemScale, bool freeze)
     {
         BeginBlockMatrix(pos, cam, rotY);
         _modelMat.Mul(pose.AnimModelMatrix);
         _modelMat.Translate(2f / 16f, 2f / 16f, 0.1f / 16f);
+        var camX = (float)(pos.X - cam.X);
+        var camZ = (float)(pos.Z - cam.Z);
         var cx = _modelMat.Values[12];
         var cz = _modelMat.Values[14];
+
+        // В матрице уже вычтена камера. Храним сдвиг от блока, иначе слиток едет за курсором.
+        if (freeze && _beltFrozen)
+        {
+            cx = camX + _beltCx;
+            cz = camZ + _beltCz;
+        }
+        else
+        {
+            _beltCx = cx - camX;
+            _beltCz = cz - camZ;
+            _beltFrozen = true;
+        }
 
         _modelMat.Identity()
             .Translate(cx, (float)(pos.Y - cam.Y + BeltY), cz)
