@@ -64,9 +64,17 @@ public class GuiDialogEAcidAccum : GuiDialogBlockEntity
 
         PullStats();
 
-        var bounds1 = ElementBounds.Fixed(0.0, 0.0, 160.0, 150.0);
-        var acidBounds = ElementBounds.Fixed(20, 30, 45, 110);
-        var energyBounds = ElementBounds.Fixed(85, 30, 45, 110);
+        const double contentW = 250;
+        const double contentH = 255;
+        const double colW = 88;
+        const double colH = 190;
+        const double gap = 28;
+        var side = (contentW - (colW * 2 + gap)) / 2.0;
+        var colY = GuiStyle.TitleBarHeight + (contentH - GuiStyle.TitleBarHeight - colH) / 2.0;
+
+        var bounds1 = ElementBounds.Fixed(0.0, 0.0, contentW, contentH);
+        var acidBounds = ElementBounds.Fixed(side, colY, colW, colH);
+        var energyBounds = ElementBounds.Fixed(side + colW + gap, colY, colW, colH);
 
         var bounds4 = ElementBounds.Fill.WithFixedPadding(GuiStyle.ElementToDialogPadding);
         bounds4.BothSizing = ElementSizing.FitToChildren;
@@ -149,7 +157,7 @@ public class GuiDialogEAcidAccum : GuiDialogBlockEntity
         for (var i = 1; i < divisions; i++)
         {
             var y = currentBounds.InnerHeight / divisions * i;
-            var lineWidth = i % 2 == 0 ? 8 : 5;
+            var lineWidth = (i % 2 == 0 ? 0.16 : 0.1) * currentBounds.InnerWidth;
             ctx.MoveTo(0, y);
             ctx.LineTo(lineWidth, y);
             ctx.Stroke();
@@ -185,7 +193,7 @@ public class GuiDialogEAcidAccum : GuiDialogBlockEntity
     {
         ctx.Save();
         ctx.SelectFontFace("sans-serif", FontSlant.Normal, FontWeight.Bold);
-        var fontSize = Math.Max(8, Math.Min(11, currentBounds.InnerWidth / 4.5));
+        var fontSize = Math.Max(12, Math.Min(18, currentBounds.InnerWidth / 4.2));
         ctx.SetFontSize(fontSize);
         var ext = ctx.TextExtents(text);
         if (ext.Width > currentBounds.InnerWidth * 0.9)
