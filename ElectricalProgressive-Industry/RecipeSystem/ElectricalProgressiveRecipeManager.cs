@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
@@ -33,8 +34,26 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         api.Event.SaveGameLoaded += LoadCrusherRecipes;
         api.Event.SaveGameLoaded += LoadBlastFurnaceRecipes;
         api.Event.SaveGameLoaded += LoadSieveRecipes;  // НОВОЕ
+        api.Event.SaveGameLoaded += () => RegisterMetalFormingRecipes(api);
 
         machines = new Dictionary<string, (string, IEnumerable<IRecipeMultyBase>)>(4);
+    }
+
+    public override void StartClientSide(ICoreClientAPI api)
+    {
+        if (machines == null)
+            machines = new Dictionary<string, (string, IEnumerable<IRecipeMultyBase>)>();
+
+        api.Event.LevelFinalize += () => RegisterMetalFormingRecipes(api);
+    }
+
+    private static void RegisterMetalFormingRecipes(ICoreAPI api)
+    {
+        if (machines == null)
+            machines = new Dictionary<string, (string, IEnumerable<IRecipeMultyBase>)>();
+
+        machines[MetalFormingHandbookRecipes.MachineKey] =
+            (MetalFormingHandbookRecipes.MachineCode, MetalFormingHandbookRecipes.Build(api));
     }
 
     private void LoadRecyclerRecipes()

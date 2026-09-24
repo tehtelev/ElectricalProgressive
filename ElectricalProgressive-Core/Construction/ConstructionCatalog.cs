@@ -61,6 +61,11 @@ public static class ConstructionCatalog
         stack.Attributes.SetString(AttrSelected, code);
     }
 
+    public static void ClearSelected(ItemStack stack)
+    {
+        stack.Attributes?.RemoveAttribute(AttrSelected);
+    }
+
     /// <summary>Блок-схема из книги или сам held-блок машины.</summary>
     public static Block? ResolveHeldConstructBlock(IWorldAccessor world, ItemStack? held)
     {

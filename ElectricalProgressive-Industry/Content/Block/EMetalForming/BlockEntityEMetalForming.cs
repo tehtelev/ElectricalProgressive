@@ -56,6 +56,12 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
     private readonly int _energyPerIngot;
     private ICoreClientAPI? _capi;
     private bool _wasCraftingLastTick;
+    private bool _loadPlaying;
+    private bool _seenLoadStart;
+    private bool _needRestart;
+    private int _restartWaits;
+    private int _craftSerial;
+    private int _queuedSerial = -1;
     private Facing _facing = Facing.None;
     private bool _animatorReadyForFormed;
     private GuiDialog? _recipeSelector;
@@ -65,16 +71,18 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
 
     public AnimatorBase? GetAnimator() => AnimUtil?.animator;
 
-    public bool IsWorkAnimating =>
-        AnimUtil?.activeAnimationsByAnimCode != null &&
-        AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on");
+    public bool IsWorkAnimating => IsAnimPlaying("load") || IsAnimPlaying("forge");
 
-    /// <summary>Кадр work-on или -1, если анимация не идёт.</summary>
+    /// <summary>
+    /// Кадр загрузки для предмета в руке. Во время отбивки деталь уже на ленте.
+    /// </summary>
     public float GetWorkOnFrame()
     {
-        if (!IsWorkAnimating || AnimUtil?.animator?.Animations == null || AnimUtil.animator.Animations.Length == 0)
-            return -1f;
-        return AnimUtil.animator.Animations[0].CurrentFrame;
+        if (IsAnimPlaying("forge"))
+            return 400f;
+
+        var frame = AnimFrame("load");
+        return frame ?? -1f;
     }
 
     public BEBehaviorElectricalProgressive? ElectricalProgressive =>
@@ -130,11 +138,28 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
         inventory.SlotModified += OnSlotModified;
     }
 
+    public static bool IsIngot(ItemStack? stack)
+    {
+        var path = stack?.Collectible?.Code?.Path;
+        return path != null && path.StartsWith("ingot-", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public static bool IsIngotRecipe(SmithingRecipe? recipe)
+    {
+        if (recipe == null)
+            return false;
+
+        var path = recipe.Ingredient?.Code?.Path;
+        if (!string.IsNullOrEmpty(path) &&
+            path.StartsWith("ingot", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return IsIngot(recipe.Ingredient?.ResolvedItemStack);
+    }
+
     public static bool IsWorkableInput(ItemStack? stack)
     {
-        if (stack?.Collectible == null)
-            return false;
-        if (stack.Collectible is ItemWorkItem)
+        if (!IsIngot(stack) || stack!.Collectible is ItemWorkItem)
             return false;
         return stack.Collectible.GetCollectibleInterface<IAnvilWorkable>() != null;
     }
@@ -233,6 +258,8 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
         if (IsForging == forging)
             return;
         IsForging = forging;
+        if (forging)
+            _craftSerial++;
         MarkDirty(true);
     }
 
@@ -241,6 +268,8 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
         base.Initialize(api);
         inventory.LateInitialize(InventoryClassName + "-" + Pos.X + "/" + Pos.Y + "/" + Pos.Z, api);
         RegisterGameTickListener(Every1000Ms, 1000);
+        if (api.Side == EnumAppSide.Client)
+            RegisterGameTickListener(OnAnimTick, 50);
         ResolveSelectedRecipe();
         // Block в конструкторе ещё null — перечитываем атрибуты
 
@@ -267,6 +296,7 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
             return [];
 
         return list
+            .Where(IsIngotRecipe)
             .OrderBy(r => r.Output?.ResolvedItemstack?.Collectible?.Code?.ToString() ?? "")
             .ToList();
     }
@@ -278,36 +308,101 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
             return [];
 
         return list
-            .Where(r => r?.Output?.ResolvedItemstack != null)
+            .Where(r => r?.Output?.ResolvedItemstack != null && IsIngotRecipe(r))
             .ToList();
     }
 
-    public static string ProductKeyFromCode(AssetLocation? code)
+    public static string ProductKey(SmithingRecipe? recipe)
     {
-        if (code == null)
+        var output = recipe?.Output?.ResolvedItemstack?.Collectible?.Code;
+        if (output == null)
             return "";
-        var path = code.Path;
-        var dash = path.LastIndexOf('-');
-        if (dash > 0)
-            path = path[..dash];
-        return code.Domain + ":" + path;
+
+        var metal = recipe!.Ingredient?.ResolvedItemStack?.Collectible?.LastCodePart();
+        var path = output.Path;
+        if (!string.IsNullOrEmpty(metal) &&
+            path.EndsWith("-" + metal, StringComparison.OrdinalIgnoreCase))
+            path = path[..^(metal.Length + 1)];
+
+        return output.Domain + ":" + path;
     }
 
-    public static string ProductKey(SmithingRecipe recipe) =>
-        ProductKeyFromCode(recipe.Output?.ResolvedItemstack?.Collectible?.Code);
+    public static string ProductDisplayName(ItemStack? stack) =>
+        GenericCollectibleName(stack == null ? [] : [stack]);
 
-    public static string ProductDisplayName(ItemStack? stack)
+    /// <summary>
+    /// Общее имя без металла: «пластина», а не «висмутовая пластина».
+    /// Берётся из слов, которые есть во всех вариантах.
+    /// </summary>
+    public static string GenericCollectibleName(IEnumerable<ItemStack?> stacks)
     {
-        if (stack?.Collectible?.Code == null)
+        var names = new List<string>();
+        foreach (var stack in stacks)
+        {
+            if (stack?.Collectible == null)
+                continue;
+            var name = stack.GetName();
+            if (string.IsNullOrWhiteSpace(name))
+                continue;
+            if (names.Exists(n => string.Equals(n, name, StringComparison.OrdinalIgnoreCase)))
+                continue;
+            names.Add(name);
+        }
+
+        if (names.Count == 0)
             return "";
-        var key = ProductKeyFromCode(stack.Collectible.Code);
-        var colon = key.IndexOf(':');
-        var path = colon >= 0 ? key[(colon + 1)..] : key;
-        var langKey = (stack.Class == EnumItemClass.Block ? "block-" : "item-") + path + "-*";
-        var named = Lang.Get(langKey);
-        if (!string.IsNullOrEmpty(named) && named != langKey)
-            return named;
-        return stack.GetName();
+        if (names.Count == 1)
+            return StripMaterialQualifier(names[0]);
+
+        var lists = names.ConvertAll(SplitWords);
+        var common = new HashSet<string>(lists[0].ConvertAll(w => w.ToLowerInvariant()));
+        for (var i = 1; i < lists.Count; i++)
+        {
+            var set = new HashSet<string>(lists[i].ConvertAll(w => w.ToLowerInvariant()));
+            common.IntersectWith(set);
+        }
+
+        foreach (var stop in new[] { "из", "of", "from", "the", "a", "an" })
+            common.Remove(stop);
+
+        var source = lists.OrderBy(l => l.Count).First();
+        var words = new List<string>();
+        foreach (var word in source)
+        {
+            if (!common.Contains(word.ToLowerInvariant()))
+                continue;
+            if (words.Exists(w => string.Equals(w, word, StringComparison.OrdinalIgnoreCase)))
+                continue;
+            words.Add(word);
+        }
+
+        if (words.Count == 0)
+            return StripMaterialQualifier(names.OrderBy(n => n.Length).First());
+
+        var text = string.Join(" ", words);
+        return char.ToUpper(text[0]) + text[1..];
+    }
+
+    private static List<string> SplitWords(string name) =>
+        name.Split([' ', '-', '—'], StringSplitOptions.RemoveEmptyEntries).ToList();
+
+    private static string StripMaterialQualifier(string name)
+    {
+        var ofRu = name.IndexOf(" из ", StringComparison.OrdinalIgnoreCase);
+        if (ofRu > 0)
+            return name[..ofRu];
+        var ofEn = name.IndexOf(" of ", StringComparison.OrdinalIgnoreCase);
+        if (ofEn > 0)
+            return name[..ofEn];
+
+        var words = SplitWords(name);
+        if (words.Count >= 2)
+        {
+            var last = words[^1];
+            return char.ToUpper(last[0]) + last[1..];
+        }
+
+        return name;
     }
 
     public void OpenRecipeSelector()
@@ -318,7 +413,7 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
         var groups = GetAllSmithingRecipes()
             .GroupBy(ProductKey)
             .Where(g => !string.IsNullOrEmpty(g.Key))
-            .OrderBy(g => ProductDisplayName(g.First().Output.ResolvedItemstack))
+            .OrderBy(g => GenericCollectibleName(g.Select(r => r.Output?.ResolvedItemstack)))
             .ToList();
 
         if (groups.Count == 0)
@@ -328,27 +423,27 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
             return;
         }
 
-        var outputs = groups.Select(g => g.First().Output.ResolvedItemstack).ToArray();
         _recipeSelector?.Dispose();
-        _recipeSelector = new GuiDialogBlockEntityRecipeSelector(
+        var selector = new GuiDialogMetalFormingRecipes(
             Lang.Get("electricalprogressiveindustry:emetalforming-select"),
-            outputs,
+            groups.Select(g => (IReadOnlyList<SmithingRecipe>)g.ToList()).ToList(),
             selectedIndex =>
             {
                 var key = groups[selectedIndex].Key;
                 SelectProduct(key);
                 capi.Network.SendBlockEntityPacket(Pos, PacketSelectRecipe, SerializerUtil.Serialize(key));
             },
-            () => { },
             Pos,
             capi);
-
         for (var i = 0; i < groups.Count; i++)
         {
             var ingred = GetRecipeIngredientPreview(groups[i].First());
-            if (ingred != null)
-                ((GuiDialogBlockEntityRecipeSelector)_recipeSelector).SetIngredientCounts(i, [ingred]);
+            if (ingred == null)
+                continue;
+            var material = GenericCollectibleName(groups[i].Select(r => r.Ingredient?.ResolvedItemStack));
+            selector.SetIngredientCounts(i, ingred.StackSize, material);
         }
+        _recipeSelector = selector;
 
         capi.Gui.RegisterDialog(_recipeSelector);
         _recipeSelector.TryOpen();
@@ -425,7 +520,7 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
             return;
         }
 
-        CurrentRecipeName = ProductDisplayName(group[0].Output.ResolvedItemstack);
+        CurrentRecipeName = GenericCollectibleName(group.Select(g => g.Output?.ResolvedItemstack));
 
         var matching = GetRecipesForInput();
         var hit = group.FirstOrDefault(g => matching.Any(m => m.RecipeId == g.RecipeId));
@@ -457,9 +552,9 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
             return false;
 
         if (!string.IsNullOrEmpty(SelectedProductKey))
-            return list.Any(r => ProductKey(r) == SelectedProductKey);
+            return list.Any(r => IsIngotRecipe(r) && ProductKey(r) == SelectedProductKey);
 
-        return list.Any(r => r.RecipeId == SelectedRecipe!.RecipeId);
+        return list.Any(r => IsIngotRecipe(r) && r.RecipeId == SelectedRecipe!.RecipeId);
     }
 
     private void RecalcRecipeCosts() => RecalcRecipeCosts(SelectedRecipe);
@@ -609,17 +704,14 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
         var isCraftingNow = CanProcess && IsForging;
         if (isCraftingNow)
         {
-            if (!_wasCraftingLastTick)
-                StartAnimation();
             if (EnergyOperation > 0)
             {
                 RecipeProgress = AccumulatedEnergy / (float)EnergyOperation;
                 UpdateState(RecipeProgress);
             }
         }
-        else if (_wasCraftingLastTick)
+        else if (_wasCraftingLastTick && Api.Side == EnumAppSide.Server)
         {
-            StopAnimation();
             MarkDirty(true);
         }
 
@@ -668,6 +760,10 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
             {
                 SetForging(false);
                 StopAnimation();
+            }
+            else
+            {
+                _craftSerial++;
             }
 
             UpdateState(RecipeProgress);
@@ -731,35 +827,128 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
         targetSlot.MarkDirty();
     }
 
-    private void StartAnimation()
+    private void OnAnimTick(float dt)
     {
-        if (Api?.Side != EnumAppSide.Client || SelectedRecipe == null)
+        if (Api?.Side != EnumAppSide.Client)
             return;
 
-        EnsureAnimatorReady();
-        if (AnimUtil == null)
-            return;
-
-        if (!AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
+        if (!IsForging)
         {
-            AnimUtil.StartAnimation(new AnimationMetaData
-            {
-                Animation = "work-on",
-                Code = "work-on",
-                AnimationSpeed = 1.5f,
-                EaseOutSpeed = 2.0f,
-                EaseInSpeed = 1f
-            });
+            if (_loadPlaying || IsAnimPlaying("load") || IsAnimPlaying("forge"))
+                StopAnimation();
+            _needRestart = false;
+            return;
         }
+
+        if (_queuedSerial != _craftSerial)
+        {
+            _queuedSerial = _craftSerial;
+            _needRestart = true;
+            _restartWaits = 0;
+            _seenLoadStart = false;
+            _loadPlaying = false;
+            StopOne("forge");
+            StopOne("load");
+            return;
+        }
+
+        if (_needRestart)
+        {
+            if (SelectedRecipe == null)
+                return;
+
+            // Пока прошлый клип ещё в аниматоре, новый старт игнорируется.
+            if ((AnimFrame("load") != null || AnimFrame("forge") != null ||
+                 IsAnimPlaying("load") || IsAnimPlaying("forge")) && _restartWaits < 4)
+            {
+                _restartWaits++;
+                StopOne("forge");
+                StopOne("load");
+                return;
+            }
+            _restartWaits = 0;
+
+            EnsureAnimatorReady();
+            Play("load");
+            if (!IsAnimPlaying("load"))
+                return;
+
+            _needRestart = false;
+            _loadPlaying = true;
+            return;
+        }
+
+        TryStartForge();
+    }
+
+    private void TryStartForge()
+    {
+        if (!_loadPlaying || IsAnimPlaying("forge"))
+            return;
+
+        var frame = AnimFrame("load") ?? -1f;
+        if (!_seenLoadStart)
+        {
+            if (frame >= 0f && frame < 30f)
+                _seenLoadStart = true;
+            return;
+        }
+
+        if (frame < 414f)
+            return;
+
+        Play("forge");
+    }
+
+    private void Play(string code)
+    {
+        if (AnimUtil == null || IsAnimPlaying(code))
+            return;
+
+        AnimUtil.StartAnimation(new AnimationMetaData
+        {
+            Animation = code,
+            Code = code,
+            AnimationSpeed = 1.5f,
+            EaseOutSpeed = 2f,
+            EaseInSpeed = 1f
+        });
     }
 
     private void StopAnimation()
     {
+        _loadPlaying = false;
+        StopOne("load");
+        StopOne("forge");
+    }
+
+    private void StopOne(string code)
+    {
         if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
             return;
+        if (IsAnimPlaying(code))
+            AnimUtil.StopAnimation(code);
+    }
 
-        if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
-            AnimUtil.StopAnimation("work-on");
+    private bool IsAnimPlaying(string code) =>
+        AnimUtil?.activeAnimationsByAnimCode != null &&
+        AnimUtil.activeAnimationsByAnimCode.ContainsKey(code);
+
+    private float? AnimFrame(string code)
+    {
+        var anims = AnimUtil?.animator?.Animations;
+        if (anims == null)
+            return null;
+
+        foreach (var anim in anims)
+        {
+            if (anim?.Animation == null || !anim.Active)
+                continue;
+            if (anim.Animation.Code == code || anim.Animation.Name == code)
+                return anim.CurrentFrame;
+        }
+
+        return null;
     }
 
     protected virtual void UpdateState(float recipeProgress)
@@ -835,8 +1024,7 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
 
         base.OnTesselation(mesher, tesselator);
 
-        if (AnimUtil?.activeAnimationsByAnimCode == null ||
-            !AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
+        if (!IsWorkAnimating)
             return false;
 
         return true;
@@ -849,6 +1037,7 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
         RecipeProgress = tree.GetFloat("PowerCurrent");
         AccumulatedEnergy = tree.GetInt("accumulatedEnergy");
         IsForging = tree.GetBool("isForging");
+        _craftSerial = tree.GetInt("craftSerial");
         SelectedRecipeId = tree.GetInt("selectedRecipeId", -1);
         SelectedProductKey = tree.GetString("selectedProductKey") ?? "";
 
@@ -862,9 +1051,7 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
         {
             EnsureAnimatorReady();
             _crateRenderer?.UpdateMesh();
-            if (IsForging)
-                StartAnimation();
-            else
+            if (!IsForging)
                 StopAnimation();
             _clientDialog?.Update(RecipeProgress, CurrentRecipeName);
         }
@@ -879,6 +1066,7 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
         tree.SetFloat("PowerCurrent", RecipeProgress);
         tree.SetInt("accumulatedEnergy", AccumulatedEnergy);
         tree.SetBool("isForging", IsForging);
+        tree.SetInt("craftSerial", _craftSerial);
         tree.SetBool("structureComplete", StructureComplete);
         tree.SetInt("selectedRecipeId", SelectedRecipeId);
         tree.SetString("selectedProductKey", SelectedProductKey ?? "");

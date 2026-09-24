@@ -90,10 +90,6 @@ public class GuiDialogMetalForming : GuiDialogBlockEntity
             .AddDynamicCustomDraw(progressBounds, OnProgressDraw, "progressDrawer")
             .AddItemSlotGrid(Inventory, SendInvPacket, 1, [0], inputBounds, "inputSlot")
             .AddItemSlotGrid(Inventory, SendInvPacket, 1, [1, 2], outputBounds, "outputslot")
-            .AddStaticText(Lang.Get("electricalprogressive:input"), CairoFont.WhiteDetailText(),
-                ElementBounds.Fixed(12, 105, 50, 18))
-            .AddStaticText(Lang.Get("electricalprogressive:output"), CairoFont.WhiteDetailText(),
-                ElementBounds.Fixed(228, 135, 50, 18))
             .AddDynamicText(recipeLabel, CairoFont.WhiteDetailText(), recipeTextBounds, "recipename")
             .AddSmallButton(Lang.Get("electricalprogressiveindustry:emetalforming-select"),
                 OnSelectRecipe, buttonBounds)

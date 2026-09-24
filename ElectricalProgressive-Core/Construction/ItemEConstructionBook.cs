@@ -82,6 +82,17 @@ public class ItemEConstructionBook : Item
         }
     }
 
+    private static void ClearBookSelection(IWorldAccessor world, IPlayer byPlayer)
+    {
+        var book = byPlayer.InventoryManager?.ActiveHotbarSlot;
+        if (book?.Itemstack?.Item is not ItemEConstructionBook)
+            return;
+
+        ConstructionCatalog.ClearSelected(book.Itemstack);
+        if (world.Side == EnumAppSide.Server)
+            book.MarkDirty();
+    }
+
     private static void PlayPlaceSound(IWorldAccessor world, IPlayer byPlayer, Vintagestory.API.MathTools.BlockPos pos)
     {
         world.PlaySoundAt(new AssetLocation("sounds/player/build"), pos.X, pos.Y, pos.Z, byPlayer);
@@ -99,6 +110,7 @@ public class ItemEConstructionBook : Item
             if (block.TryPlaceBlock(world, byPlayer, stack, blockSel, ref fail))
             {
                 PlayPlaceSound(world, byPlayer, blockSel.Position);
+                ClearBookSelection(world, byPlayer);
                 return;
             }
 
@@ -108,6 +120,7 @@ public class ItemEConstructionBook : Item
                 block.DoPlaceBlock(world, byPlayer, sel, stack))
             {
                 PlayPlaceSound(world, byPlayer, sel.Position);
+                ClearBookSelection(world, byPlayer);
                 return;
             }
 

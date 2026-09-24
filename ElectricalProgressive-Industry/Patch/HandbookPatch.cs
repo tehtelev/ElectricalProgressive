@@ -111,7 +111,10 @@ public class HandbookPatch
                         GetCachedTranslation("electricalprogressive:produced-in"),
                         openDetailPageFor,
                         ref haveText);
-                    AddRecipes(components, capi, machine.Value.recipes, openDetailPageFor);
+                    if (machine.Key == MetalFormingHandbookRecipes.MachineKey)
+                        AddMetalFormingRecipes(components, capi, machine.Value.recipes, openDetailPageFor);
+                    else
+                        AddRecipes(components, capi, machine.Value.recipes, openDetailPageFor);
                 }
             }
             else
@@ -169,6 +172,95 @@ public class HandbookPatch
                 machineIcon.VerticalAlign = EnumVerticalAlign.Middle;
                 machineIcon.Float = EnumFloat.Inline;
                 components.Add(machineIcon);
+            }
+        }
+
+        private static void AddMetalFormingRecipes(
+            List<RichTextComponentBase> components,
+            ICoreClientAPI capi,
+            IEnumerable<dynamic> recipes,
+            ActionConsumable<string> openDetailPageFor)
+        {
+            var rows = new Dictionary<string, List<(ItemStack Ingot, ItemStack Output, double Energy)>>();
+            foreach (dynamic recipe in recipes)
+            {
+                ItemStack ingot = null;
+                ItemStack output = null;
+                try
+                {
+                    if (recipe.Ingredients != null && recipe.Ingredients.Length > 0)
+                        ingot = GetOrCreateStack((AssetLocation)recipe.Ingredients[0].Code,
+                            (int)recipe.Ingredients[0].Quantity, capi.World);
+                    if (recipe.Outputs != null && recipe.Outputs.Length > 0)
+                        output = GetOrCreateStack((AssetLocation)recipe.Outputs[0].Code,
+                            (int)recipe.Outputs[0].StackSize, capi.World);
+                }
+                catch
+                {
+                    continue;
+                }
+
+                if (ingot?.Collectible?.Code == null || output?.Collectible?.Code == null)
+                    continue;
+
+                var metal = ingot.Collectible.LastCodePart();
+                var path = output.Collectible.Code.Path;
+                if (!string.IsNullOrEmpty(metal) &&
+                    path.EndsWith("-" + metal, StringComparison.OrdinalIgnoreCase))
+                    path = path[..^(metal.Length + 1)];
+                var key = output.Collectible.Code.Domain + ":" + path;
+                if (!rows.TryGetValue(key, out var list))
+                {
+                    list = [];
+                    rows[key] = list;
+                }
+
+                list.Add((ingot, output, (double)recipe.EnergyOperation));
+            }
+
+            components.Add(new ClearFloatTextComponent(capi, SmallPadding));
+            foreach (var row in rows.OrderBy(r => r.Key))
+            {
+                var pairs = row.Value
+                    .GroupBy(p => p.Ingot.Collectible.Code.ToString() + ">" + p.Output.Collectible.Code.ToString())
+                    .Select(g => g.First())
+                    .OrderBy(p => p.Ingot.Collectible.Code.ToString())
+                    .ToList();
+                if (pairs.Count == 0)
+                    continue;
+
+                components.Add(new ClearFloatTextComponent(capi, RecipeSpacing));
+                var groupKey = "emf-" + row.Key;
+                components.Add(new SyncedSlideshowItemstackTextComponent(
+                    capi,
+                    pairs.Select(p => p.Ingot).ToArray(),
+                    40.0,
+                    EnumFloat.Inline,
+                    cs => openDetailPageFor(GuiHandbookItemStackPage.PageCodeForStack(cs)),
+                    groupKey)
+                {
+                    ShowStackSize = true,
+                    VerticalAlign = EnumVerticalAlign.Middle
+                });
+                components.Add(new RichTextComponent(capi, " → ",
+                    CairoFont.WhiteMediumText().WithWeight(FontWeight.Bold))
+                {
+                    VerticalAlign = EnumVerticalAlign.Middle
+                });
+                components.Add(new SyncedSlideshowItemstackTextComponent(
+                    capi,
+                    pairs.Select(p => p.Output).ToArray(),
+                    40.0,
+                    EnumFloat.Inline,
+                    cs => openDetailPageFor(GuiHandbookItemStackPage.PageCodeForStack(cs)),
+                    groupKey)
+                {
+                    ShowStackSize = true,
+                    VerticalAlign = EnumVerticalAlign.Middle
+                });
+                components.Add(new RichTextComponent(capi,
+                    $"\n{GetCachedTranslation("electricalprogressive:energy-required")}: {pairs[0].Energy} {GetCachedTranslation("electricalprogressive:energy-unit")}",
+                    CairoFont.WhiteSmallText()));
             }
         }
 
@@ -329,8 +421,11 @@ public class HandbookPatch
 
                     components.Add(outputSlideShow);
 
-                    // Добавляем шанс если он меньше 100%
-                    var chance = recipeList[0].Outputs[i].Chance;
+                    // У рецептов одной группы разное число выходов (изделие и обрезки).
+                    var chance = 1.0f;
+                    var firstOutputs = recipeList[0].Outputs;
+                    if (firstOutputs != null && i < firstOutputs.Length)
+                        chance = firstOutputs[i].Chance;
                     if (chance < 1.0f)
                     {
                         components.Add(new RichTextComponent(capi,
