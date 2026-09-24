@@ -14,8 +14,7 @@
         "type": "block",
         "code": "game:ingotmold-*-fired",
         "quantity": 0,
-        "name": "variant",
-        "allowedVariants": [ "blue", "fire", "black", "brown", "cream", "earthyorange", "gray", "orange", "red", "tan" ]
+        "name": "variant"
       }
     ],
     "outputs": [
@@ -41,8 +40,7 @@
         "type": "block",
         "code": "game:ingotmold-*-fired",
         "quantity": 0,
-        "name": "variant",
-        "allowedVariants": [ "blue", "fire", "black", "brown", "cream", "earthyorange", "gray", "orange", "red", "tan" ]
+        "name": "variant"
       }
     ],
     "outputs": [
@@ -68,8 +66,7 @@
         "type": "block",
         "code": "game:ingotmold-*-fired",
         "quantity": 0,
-        "name": "variant",
-        "allowedVariants": [ "blue", "fire", "black", "brown", "cream", "earthyorange", "gray", "orange", "red", "tan" ]
+        "name": "variant"
       }
     ],
     "outputs": [
@@ -95,8 +92,7 @@
         "type": "block",
         "code": "game:ingotmold-*-fired",
         "quantity": 0,
-        "name": "variant",
-        "allowedVariants": [ "blue", "fire", "black", "brown", "cream", "earthyorange", "gray", "orange", "red", "tan" ]
+        "name": "variant"
       }
     ],
     "outputs": [
@@ -122,8 +118,7 @@
         "type": "block",
         "code": "game:ingotmold-*-fired",
         "quantity": 0,
-        "name": "variant",
-        "allowedVariants": [ "blue", "fire", "black", "brown", "cream", "earthyorange", "gray", "orange", "red", "tan" ]
+        "name": "variant"
       }
     ],
     "outputs": [
@@ -149,8 +144,7 @@
         "type": "block",
         "code": "game:ingotmold-*-fired",
         "quantity": 0,
-        "name": "variant",
-        "allowedVariants": [ "blue", "fire", "black", "brown", "cream", "earthyorange", "gray", "orange", "red", "tan" ]
+        "name": "variant"
       }
     ],
     "outputs": [
@@ -176,8 +170,7 @@
         "type": "block",
         "code": "game:ingotmold-*-fired",
         "quantity": 0,
-        "name": "variant",
-        "allowedVariants": [ "blue", "fire", "black", "brown", "cream", "earthyorange", "gray", "orange", "red", "tan" ]
+        "name": "variant"
       }
     ],
     "outputs": [
@@ -212,6 +205,30 @@
     ]
   },
   {
+    "code": "steel_bits_ingot",
+    "EnergyOperation": 55172,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:metalbit-steel",
+        "quantity": 20
+      },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0,
+        "name": "variant"
+      }
+    ],
+    "outputs": [
+      {
+        "type": "item",
+        "code": "game:ingot-steel",
+        "stackSize": 1
+      }
+    ]
+  },
+  {
     "code": "nickel_ingot",
     "EnergyOperation": 50172,
     "ingredients": [
@@ -226,8 +243,7 @@
         "type": "block",
         "code": "game:ingotmold-*-fired",
         "quantity": 0,
-        "name": "variant",
-        "allowedVariants": [ "blue", "fire", "black", "brown", "cream", "earthyorange", "gray", "orange", "red", "tan" ]
+        "name": "variant"
       }
     ],
     "outputs": [
@@ -253,8 +269,7 @@
         "type": "block",
         "code": "game:ingotmold-*-fired",
         "quantity": 0,
-        "name": "variant",
-        "allowedVariants": [ "blue", "fire", "black", "brown", "cream", "earthyorange", "gray", "orange", "red", "tan" ]
+        "name": "variant"
       }
     ],
     "outputs": [
@@ -280,8 +295,7 @@
         "type": "block",
         "code": "game:ingotmold-*-fired",
         "quantity": 0,
-        "name": "variant",
-        "allowedVariants": [ "blue", "fire", "black", "brown", "cream", "earthyorange", "gray", "orange", "red", "tan" ]
+        "name": "variant"
       }
     ],
     "outputs": [
@@ -307,8 +321,7 @@
         "type": "block",
         "code": "game:ingotmold-*-fired",
         "quantity": 0,
-        "name": "variant",
-        "allowedVariants": [ "blue", "fire", "black", "brown", "cream", "earthyorange", "gray", "orange", "red", "tan" ]
+        "name": "variant"
       }
     ],
     "outputs": [
@@ -317,6 +330,416 @@
         "code": "game:ingot-chromium",
         "stackSize": 1
       }
+    ]
+  },
+  {
+    "code": "tinbronze_mix",
+    "EnergyOperation": 38200,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 18,
+        "name": "cu",
+        "allowedVariants": [ "nugget-nativecopper", "nugget-malachite", "metalbit-copper" ]
+      },
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 2,
+        "name": "sn",
+        "allowedVariants": [ "nugget-cassiterite", "metalbit-tin" ]
+      },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0
+      }
+    ],
+    "outputs": [
+      { "type": "item", "code": "game:ingot-tinbronze", "stackSize": 1 }
+    ]
+  },
+  {
+    "code": "brass_mix",
+    "EnergyOperation": 34100,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 14,
+        "name": "cu",
+        "allowedVariants": [ "nugget-nativecopper", "nugget-malachite", "metalbit-copper" ]
+      },
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 6,
+        "name": "zn",
+        "allowedVariants": [ "nugget-sphalerite", "metalbit-zinc" ]
+      },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0
+      }
+    ],
+    "outputs": [
+      { "type": "item", "code": "game:ingot-brass", "stackSize": 1 }
+    ]
+  },
+  {
+    "code": "electrum_mix",
+    "EnergyOperation": 39100,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 10,
+        "name": "au",
+        "allowedVariants": [ "nugget-nativegold", "metalbit-gold" ]
+      },
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 10,
+        "name": "ag",
+        "allowedVariants": [ "nugget-nativesilver", "metalbit-silver" ]
+      },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0
+      }
+    ],
+    "outputs": [
+      { "type": "item", "code": "game:ingot-electrum", "stackSize": 1 }
+    ]
+  },
+  {
+    "code": "cupronickel_mix",
+    "EnergyOperation": 46200,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 14,
+        "name": "cu",
+        "allowedVariants": [ "nugget-nativecopper", "nugget-malachite", "metalbit-copper" ]
+      },
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 6,
+        "name": "ni",
+        "allowedVariants": [ "nugget-pentlandite", "metalbit-nickel" ]
+      },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0
+      }
+    ],
+    "outputs": [
+      { "type": "item", "code": "game:ingot-cupronickel", "stackSize": 1 }
+    ]
+  },
+  {
+    "code": "molybdochalkos_mix",
+    "EnergyOperation": 15500,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 18,
+        "name": "pb",
+        "allowedVariants": [ "nugget-galena", "metalbit-lead" ]
+      },
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 2,
+        "name": "cu",
+        "allowedVariants": [ "nugget-nativecopper", "nugget-malachite", "metalbit-copper" ]
+      },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0
+      }
+    ],
+    "outputs": [
+      { "type": "item", "code": "game:ingot-molybdochalkos", "stackSize": 1 }
+    ]
+  },
+  {
+    "code": "leadsolder_mix",
+    "EnergyOperation": 10800,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 10,
+        "name": "pb",
+        "allowedVariants": [ "nugget-galena", "metalbit-lead" ]
+      },
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 10,
+        "name": "sn",
+        "allowedVariants": [ "nugget-cassiterite", "metalbit-tin" ]
+      },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0
+      }
+    ],
+    "outputs": [
+      { "type": "item", "code": "game:ingot-leadsolder", "stackSize": 1 }
+    ]
+  },
+  {
+    "code": "silversolder_mix",
+    "EnergyOperation": 23000,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 10,
+        "name": "ag",
+        "allowedVariants": [ "nugget-nativesilver", "metalbit-silver" ]
+      },
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 10,
+        "name": "sn",
+        "allowedVariants": [ "nugget-cassiterite", "metalbit-tin" ]
+      },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0
+      }
+    ],
+    "outputs": [
+      { "type": "item", "code": "game:ingot-silversolder", "stackSize": 1 }
+    ]
+  },
+  {
+    "code": "tinbronze_bits",
+    "EnergyOperation": 37414,
+    "ingredients": [
+      { "type": "item", "code": "game:metalbit-tinbronze", "quantity": 20 },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0,
+        "name": "variant"
+      }
+    ],
+    "outputs": [
+      { "type": "item", "code": "game:ingot-tinbronze", "stackSize": 1 }
+    ]
+  },
+  {
+    "code": "brass_bits",
+    "EnergyOperation": 37414,
+    "ingredients": [
+      { "type": "item", "code": "game:metalbit-brass", "quantity": 20 },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0,
+        "name": "variant"
+      }
+    ],
+    "outputs": [
+      { "type": "item", "code": "game:ingot-brass", "stackSize": 1 }
+    ]
+  },
+  {
+    "code": "bismuthbronze_bits",
+    "EnergyOperation": 37414,
+    "ingredients": [
+      { "type": "item", "code": "game:metalbit-bismuthbronze", "quantity": 20 },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0,
+        "name": "variant"
+      }
+    ],
+    "outputs": [
+      { "type": "item", "code": "game:ingot-bismuthbronze", "stackSize": 1 }
+    ]
+  },
+  {
+    "code": "blackbronze_bits",
+    "EnergyOperation": 37414,
+    "ingredients": [
+      { "type": "item", "code": "game:metalbit-blackbronze", "quantity": 20 },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0,
+        "name": "variant"
+      }
+    ],
+    "outputs": [
+      { "type": "item", "code": "game:ingot-blackbronze", "stackSize": 1 }
+    ]
+  },
+  {
+    "code": "electrum_bits",
+    "EnergyOperation": 35000,
+    "ingredients": [
+      { "type": "item", "code": "game:metalbit-electrum", "quantity": 20 },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0,
+        "name": "variant"
+      }
+    ],
+    "outputs": [
+      { "type": "item", "code": "game:ingot-electrum", "stackSize": 1 }
+    ]
+  },
+  {
+    "code": "cupronickel_bits",
+    "EnergyOperation": 42000,
+    "ingredients": [
+      { "type": "item", "code": "game:metalbit-cupronickel", "quantity": 20 },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0,
+        "name": "variant"
+      }
+    ],
+    "outputs": [
+      { "type": "item", "code": "game:ingot-cupronickel", "stackSize": 1 }
+    ]
+  },
+  {
+    "code": "bismuthbronze_mix",
+    "EnergyOperation": 30800,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 12,
+        "name": "cu",
+        "allowedVariants": [ "nugget-nativecopper", "nugget-malachite", "metalbit-copper" ]
+      },
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 5,
+        "name": "zn",
+        "allowedVariants": [ "nugget-sphalerite", "metalbit-zinc" ]
+      },
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 3,
+        "name": "bi",
+        "allowedVariants": [ "nugget-bismuthinite", "metalbit-bismuth" ]
+      },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0
+      }
+    ],
+    "outputs": [
+      { "type": "item", "code": "game:ingot-bismuthbronze", "stackSize": 1 }
+    ]
+  },
+  {
+    "code": "blackbronze_mix",
+    "EnergyOperation": 41100,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 14,
+        "name": "cu",
+        "allowedVariants": [ "nugget-nativecopper", "nugget-malachite", "metalbit-copper" ]
+      },
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 3,
+        "name": "ag",
+        "allowedVariants": [ "nugget-nativesilver", "metalbit-silver" ]
+      },
+      {
+        "type": "item",
+        "code": "game:*",
+        "quantity": 3,
+        "name": "au",
+        "allowedVariants": [ "nugget-nativegold", "metalbit-gold" ]
+      },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0
+      }
+    ],
+    "outputs": [
+      { "type": "item", "code": "game:ingot-blackbronze", "stackSize": 1 }
+    ]
+  },
+  {
+    "code": "molybdochalkos_bits",
+    "EnergyOperation": 15500,
+    "ingredients": [
+      { "type": "item", "code": "game:metalbit-molybdochalkos", "quantity": 20 },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0,
+        "name": "variant"
+      }
+    ],
+    "outputs": [
+      { "type": "item", "code": "game:ingot-molybdochalkos", "stackSize": 1 }
+    ]
+  },
+  {
+    "code": "leadsolder_bits",
+    "EnergyOperation": 10800,
+    "ingredients": [
+      { "type": "item", "code": "game:metalbit-leadsolder", "quantity": 20 },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0,
+        "name": "variant"
+      }
+    ],
+    "outputs": [
+      { "type": "item", "code": "game:ingot-leadsolder", "stackSize": 1 }
+    ]
+  },
+  {
+    "code": "silversolder_bits",
+    "EnergyOperation": 23000,
+    "ingredients": [
+      { "type": "item", "code": "game:metalbit-silversolder", "quantity": 20 },
+      {
+        "type": "block",
+        "code": "game:ingotmold-*-fired",
+        "quantity": 0,
+        "name": "variant"
+      }
+    ],
+    "outputs": [
+      { "type": "item", "code": "game:ingot-silversolder", "stackSize": 1 }
     ]
   }
 ]

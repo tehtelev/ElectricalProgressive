@@ -9,6 +9,7 @@ using System.Linq;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
+using Vintagestory.API.Util;
 using Vintagestory.GameContent;
 
 namespace ElectricalProgressive.Patch;
@@ -206,20 +207,33 @@ public class HandbookPatch
 
                 foreach (var recipe in recipeList)
                 {
-                    // Обрабатываем ингредиенты
                     var ingIndex = 0;
                     foreach (var ing in recipe.Ingredients)
                     {
-                        var resolved = GetOrCreateStack((AssetLocation)ing.Code, (int)ing.Quantity, capi.World);
-                        if (resolved != null)
+                        if (ingIndex >= allIngredients.Count)
+                            allIngredients.Add([]);
+
+                        var qty = (int)ing.Quantity;
+                        string[] variants = null;
+                        try { variants = ing.AllowedVariants; } catch { /* dynamic */ }
+
+                        if (variants != null && variants.Length > 0)
                         {
-                            if (ingIndex >= allIngredients.Count)
+                            var domain = ((AssetLocation)ing.Code).Domain ?? "game";
+                            foreach (var v in variants)
                             {
-                                allIngredients.Add([]);
+                                var resolvedVar = GetOrCreateStack(new AssetLocation(domain, v), qty, capi.World);
+                                if (resolvedVar != null)
+                                    allIngredients[ingIndex].Add(resolvedVar);
                             }
-                            allIngredients[ingIndex].Add(resolved);
-                            ingIndex++;
                         }
+                        else
+                        {
+                            foreach (var resolved in GetMatchingStacks((AssetLocation)ing.Code, qty, capi.World))
+                                allIngredients[ingIndex].Add(resolved);
+                        }
+
+                        ingIndex++;
                     }
 
                     // Обрабатываем выходы
@@ -253,9 +267,17 @@ public class HandbookPatch
                         components.Add(plus);
                     }
 
+                    var uniqueOptions = ingredientOptions
+                        .Where(s => s?.Collectible?.Code != null)
+                        .GroupBy(s => s.Collectible.Code.ToString())
+                        .Select(g => g.First())
+                        .ToArray();
+                    if (uniqueOptions.Length == 0)
+                        continue;
+
                     var ingredientSlideShow = new SyncedSlideshowItemstackTextComponent(
                         capi,
-                        ingredientOptions.ToArray(),
+                        uniqueOptions,
                         40.0,
                         EnumFloat.Inline,
                         (Action<ItemStack>)(cs => openDetailPageFor(GuiHandbookItemStackPage.PageCodeForStack(cs))),
@@ -339,6 +361,10 @@ public class HandbookPatch
             var firstIngredient = true;
             foreach (var ing in recipe.Ingredients)
             {
+                var stacks = GetMatchingStacks((AssetLocation)ing.Code, (int)ing.Quantity, capi.World);
+                if (stacks.Count == 0)
+                    continue;
+
                 if (!firstIngredient)
                 {
                     var plus = new RichTextComponent(capi, "+ ",
@@ -349,10 +375,21 @@ public class HandbookPatch
                     components.Add(plus);
                 }
 
-                var resolved = GetOrCreateStack((AssetLocation)ing.Code, (int)ing.Quantity, capi.World);
-                if (resolved != null)
+                if (stacks.Count == 1)
+                    components.Add(CreateItemStackComponent(capi, stacks[0], openDetailPageFor));
+                else
                 {
-                    components.Add(CreateItemStackComponent(capi, resolved, openDetailPageFor));
+                    components.Add(new SyncedSlideshowItemstackTextComponent(
+                        capi,
+                        stacks.ToArray(),
+                        40.0,
+                        EnumFloat.Inline,
+                        (Action<ItemStack>)(cs => openDetailPageFor(GuiHandbookItemStackPage.PageCodeForStack(cs))),
+                        (string)recipe.Code)
+                    {
+                        ShowStackSize = true,
+                        VerticalAlign = EnumVerticalAlign.Middle
+                    });
                 }
 
                 firstIngredient = false;
@@ -420,16 +457,56 @@ public class HandbookPatch
             return component;
         }
 
+        private static List<ItemStack> GetMatchingStacks(AssetLocation code, int quantity, IWorldAccessor world)
+        {
+            var result = new List<ItemStack>();
+            if (code == null)
+                return result;
+
+            var qty = Math.Max(quantity, 1);
+            if (!code.Path.Contains('*'))
+            {
+                var one = ResolveExactStack(code, qty, world);
+                if (one != null)
+                    result.Add(one);
+                return result;
+            }
+
+            foreach (var it in world.Items)
+            {
+                if (it?.Code == null || it.IsMissing)
+                    continue;
+                if (!WildcardUtil.Match(code, it.Code))
+                    continue;
+                result.Add(new ItemStack(it, qty));
+            }
+
+            foreach (var bl in world.Blocks)
+            {
+                if (bl?.Code == null || bl.IsMissing)
+                    continue;
+                if (!WildcardUtil.Match(code, bl.Code))
+                    continue;
+                result.Add(new ItemStack(bl, qty));
+            }
+
+            return result;
+        }
+
         private static ItemStack GetOrCreateStack(AssetLocation code, int quantity, IWorldAccessor world)
+        {
+            var matches = GetMatchingStacks(code, quantity, world);
+            return matches.Count > 0 ? matches[0] : null;
+        }
+
+        private static ItemStack ResolveExactStack(AssetLocation code, int quantity, IWorldAccessor world)
         {
             if (code == null)
                 return null;
 
             var cacheKey = $"{code}-{quantity}";
             if (_stackCache.TryGetValue(cacheKey, out var cachedStack))
-            {
                 return cachedStack;
-            }
 
             try
             {
@@ -448,14 +525,13 @@ public class HandbookPatch
                     _stackCache.TryAdd(cacheKey, stack);
                     return stack;
                 }
-
-                return null;
             }
             catch (Exception ex)
             {
                 _capi?.Logger.Error($"Error resolving item {code}: {ex}");
-                return null;
             }
+
+            return null;
         }
 
         private static bool IsItemInRecipe(ItemStack stack, dynamic recipe)

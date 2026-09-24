@@ -13,18 +13,33 @@ public class SmithingWorkItemRenderer : IRenderer
 {
     private readonly ICoreClientAPI _capi;
     private readonly Func<BlockPos> _getPos;
-    private readonly Func<ItemStack?> _getStack;
+    private readonly Func<float> _getTemp;
+    private readonly Func<ItemStack?>? _getStack;
     private MultiTextureMeshRef? _meshRef;
     private readonly Matrixf _modelMat = new();
 
-    public double RenderOrder => 0.5;
+    public double RenderOrder => HideWhenCold ? 0.6 : 0.5;
     public int RenderRange => 24;
+    public bool HideWhenCold { get; set; }
 
     public SmithingWorkItemRenderer(ICoreClientAPI capi, Func<BlockPos> getPos, Func<ItemStack?> getStack)
     {
         _capi = capi;
         _getPos = getPos;
         _getStack = getStack;
+        _getTemp = () =>
+        {
+            var stack = getStack();
+            if (stack?.Collectible == null) return 20f;
+            return stack.Collectible.GetTemperature(capi.World, stack);
+        };
+    }
+
+    public SmithingWorkItemRenderer(ICoreClientAPI capi, Func<BlockPos> getPos, Func<float> getTemp)
+    {
+        _capi = capi;
+        _getPos = getPos;
+        _getTemp = getTemp;
     }
 
     public void SetMesh(MeshData? mesh)
@@ -40,8 +55,7 @@ public class SmithingWorkItemRenderer : IRenderer
         if (_meshRef == null)
             return;
 
-        var stack = _getStack();
-        if (stack?.Collectible == null)
+        if (_getStack != null && _getStack()?.Collectible == null)
             return;
 
         var prog = _capi.ModLoader.GetModSystem<SurvivalCoreSystem>()?.smithingWorkItemShader;
@@ -49,7 +63,9 @@ public class SmithingWorkItemRenderer : IRenderer
             return;
 
         var pos = _getPos();
-        float temp = stack.Collectible.GetTemperature(_capi.World, stack);
+        float temp = _getTemp();
+        if (HideWhenCold && temp < 400)
+            return;
         float[] incand = ColorUtil.GetIncandescenceColorAsColor4f((int)temp);
         int extraGlow = GameMath.Clamp((int)temp - 550, 0, 255);
         var glowRgba = new Vec4f(incand[0], incand[1], incand[2], 255f);
@@ -57,6 +73,8 @@ public class SmithingWorkItemRenderer : IRenderer
         var cam = _capi.World.Player.Entity.CameraPos;
 
         _capi.Render.GlDisableCullFace();
+        if (HideWhenCold)
+            _capi.Render.GLDepthMask(false);
         prog.Use();
         prog.Uniform("rgbaAmbientIn", _capi.Render.AmbientColor);
         prog.Uniform("rgbaFogIn", _capi.Render.FogColor);
@@ -78,6 +96,8 @@ public class SmithingWorkItemRenderer : IRenderer
 
         _capi.Render.RenderMultiTextureMesh(_meshRef, "tex");
         prog.Stop();
+        if (HideWhenCold)
+            _capi.Render.GLDepthMask(true);
     }
 
     public void Dispose()

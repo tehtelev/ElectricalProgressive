@@ -1,4 +1,7 @@
 using ElectricalProgressive.Utils;
+using ImmersiveWireBlock = ElectricalProgressive.Content.Block.ImmersiveWireBlock;
+using System;
+using System.Collections.Generic;
 using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -13,7 +16,7 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace;
 /// <summary>
 /// IMultiBlockInteract — сборка/GUI с любого dummy multiblock, не только с контроллера.
 /// </summary>
-public class BlockEBlastFurnace : Vintagestory.API.Common.Block, IMultiBlockInteract
+public class BlockEBlastFurnace : ImmersiveWireBlock, IMultiBlockInteract, IMultiBlockColSelBoxes
 {
     public bool IsFormed => Variant["state"] == "formed";
     public bool IsIncomplete => Variant["state"] == "incomplete";
@@ -47,6 +50,9 @@ public class BlockEBlastFurnace : Vintagestory.API.Common.Block, IMultiBlockInte
 
         // Сборка с контроллера (или после редиректа с dummy)
         if (MachineConstructAccess.TryConstructInteract(world, byPlayer, controllerPos))
+            return true;
+
+        if (IsHoldingEKit(byPlayer))
             return true;
 
         var blockEntity = world.BlockAccessor.GetBlockEntity(controllerPos);
@@ -120,7 +126,72 @@ public class BlockEBlastFurnace : Vintagestory.API.Common.Block, IMultiBlockInte
 
     #region IMultiBlockInteract
 
-    public bool MBDoPartialSelection(IWorldAccessor world, BlockPos pos, Vec3i offset) => false;
+    public override void OnLoaded(ICoreAPI coreApi)
+    {
+        base.OnLoaded(coreApi);
+        _skipNonCenterCollisions = true;
+    }
+
+    public override bool DoPartialSelection(IWorldAccessor world, BlockPos pos) => IsEKitMode();
+
+    public override Cuboidf[] GetSelectionBoxes(IBlockAccessor blockAccessor, BlockPos pos)
+    {
+        if (IsEKitMode())
+            return GetNodeSelectionBoxes(blockAccessor, pos);
+        return BodySelectionBoxes();
+    }
+
+    public new Cuboidf[] MBGetSelectionBoxes(IBlockAccessor blockAccessor, BlockPos pos, Vec3i offset)
+    {
+        if (IsEKitMode())
+        {
+            var coll = GetNodeSelectionBoxes(blockAccessor, pos.AddCopy(offset));
+            foreach (var col in coll)
+            {
+                col.X1 += offset.X;
+                col.Y1 += offset.Y;
+                col.Z1 += offset.Z;
+                col.X2 += offset.X;
+                col.Y2 += offset.Y;
+                col.Z2 += offset.Z;
+            }
+            return coll;
+        }
+
+        if (Math.Abs(offset.Y) >= 2)
+            return [];
+
+        return BodySelectionBoxes();
+    }
+
+    public new Cuboidf[] MBGetCollisionBoxes(IBlockAccessor blockAccessor, BlockPos pos, Vec3i offset)
+    {
+        if (Math.Abs(offset.Y) >= 2)
+            return [];
+
+        var boxes = new List<Cuboidf>(1);
+        boxes.AddRange(base.GetCollisionBoxes(blockAccessor, pos));
+        return boxes.ToArray();
+    }
+
+    private bool IsEKitMode()
+    {
+        if (api.Side != EnumAppSide.Client)
+            return false;
+        var player = ((ICoreClientAPI)api).World.Player;
+        return player != null && IsHoldingEKit(player);
+    }
+
+    private Cuboidf[] BodySelectionBoxes()
+    {
+        if (_CustomSelBoxes is { Length: > 0 })
+            return _CustomSelBoxes;
+        if (SelectionBoxes is { Length: > 0 })
+            return SelectionBoxes;
+        return [new Cuboidf(0, 0, 0, 1, 1, 1)];
+    }
+
+    public bool MBDoPartialSelection(IWorldAccessor world, BlockPos pos, Vec3i offset) => IsEKitMode();
 
     public bool MBOnBlockInteractStep(float secondsUsed, IWorldAccessor world, IPlayer byPlayer,
         BlockSelection blockSel, Vec3i offset) => false;
@@ -128,6 +199,9 @@ public class BlockEBlastFurnace : Vintagestory.API.Common.Block, IMultiBlockInte
     public void MBOnBlockInteractStop(float secondsUsed, IWorldAccessor world, IPlayer byPlayer,
         BlockSelection blockSel, Vec3i offset)
     {
+        var sel = blockSel.Clone();
+        sel.Position = MachineConstructAccess.GetControllerPos(blockSel.Position, offset);
+        base.OnBlockInteractStop(secondsUsed, world, byPlayer, sel);
     }
 
     public bool MBOnBlockInteractCancel(float secondsUsed, IWorldAccessor world, IPlayer byPlayer,

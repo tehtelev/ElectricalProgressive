@@ -14,32 +14,30 @@ public class InventoryEBlastFurnace : InventoryGeneric
     public InventoryEBlastFurnace(ICoreAPI api) : base(api) { }
 
     public InventoryEBlastFurnace(int slots, string className, string instanceID, ICoreAPI api, NewSlotDelegate onNewSlot, BlockEntityEBlastFurnace entity)
-        : base(slots, className, instanceID, api)
+        : base(slots, className, instanceID, api, onNewSlot)
     {
         _entity = entity;
     }
 
     public override float GetSuitability(ItemSlot sourceSlot, ItemSlot targetSlot, bool isMerge)
     {
-        if (targetSlot == this[0] || targetSlot == this[1])
-        {
-            var block = sourceSlot.Itemstack?.Collectible as Vintagestory.API.Common.Block;
-            if (block != null && (block.BlockMaterial == EnumBlockMaterial.Ore || 
-                                  block.BlockMaterial == EnumBlockMaterial.Metal ||
-                                  sourceSlot.Itemstack?.Collectible.Code.Path.Contains("coal") == true))
-                return 4f;
-            return 0f;
-        }
-        
+        if (targetSlot is ItemSlotBlastFurnaceMold)
+            return BlastFurnaceSlotUtil.IsIngotMold(sourceSlot.Itemstack) ? 5f : 0f;
+        if (targetSlot is ItemSlotBlastFurnaceCharge)
+            return BlastFurnaceSlotUtil.IsCharge(sourceSlot.Itemstack) ? 4f : 0f;
         return 0f;
     }
 
     public override ItemSlot GetAutoPushIntoSlot(BlockFacing atBlockFace, ItemSlot fromSlot)
     {
+        if (BlastFurnaceSlotUtil.IsIngotMold(fromSlot.Itemstack) && Count > 5)
+            return this[5];
         if (this[0].Empty || GetSuitability(fromSlot, this[0], false) > 0)
             return this[0];
         if (this[1].Empty || GetSuitability(fromSlot, this[1], false) > 0)
             return this[1];
+        if (Count > 4 && (this[4].Empty || GetSuitability(fromSlot, this[4], false) > 0))
+            return this[4];
         return this[0];
     }
 
@@ -55,8 +53,7 @@ public class InventoryEBlastFurnace : InventoryGeneric
             lastSlotUpdateTime = _entity.Api.World.ElapsedMilliseconds;
         }
 
-        var hasRecipe = !this[0].Empty && !this[1].Empty && 
-                        BlockEntityEBlastFurnace.FindMatchingRecipe(ref _entity.CurrentRecipe, ref _entity.CurrentRecipeName, this);
+        var hasRecipe = BlockEntityEBlastFurnace.FindMatchingRecipe(ref _entity.CurrentRecipe, ref _entity.CurrentRecipeName, this);
 
         if (!hasRecipe || _entity.CurrentRecipe == null)
         {
@@ -68,10 +65,8 @@ public class InventoryEBlastFurnace : InventoryGeneric
             }
         }
 
-        for (var i = 2; i < this.Count; i++)
-        {
-            if (!this[i].Empty) return this[i];
-        }
+        if (!this[2].Empty) return this[2];
+        if (!this[3].Empty) return this[3];
 
         return null!;
     }

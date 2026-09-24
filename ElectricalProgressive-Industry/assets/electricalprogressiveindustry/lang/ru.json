@@ -115,7 +115,7 @@
   "eaquaaccum-construct-finish": "Завершить сборку",
   "eaquaaccum-handbook-place-controller": "Поставить контроллер",
   "block-handbooktitle-eblastfurnace": "Используется",
-  "block-handbooktext-eblastfurnace": "Электрическая доменная печь для плавки руды с флюсом. Многоблок 3×2×2, 128 В. Сборка: стальные пластины, медные катушки и огнеупорный кирпич 3 уровня (ПКМ по контроллеру). Поддерживает желоба.",
+  "block-handbooktext-eblastfurnace": "Электрическая доменная печь для плавки руды с флюсом. Многоблок 3×3×2, 512 В. Подключается иммерсивным проводом к клемме CableDot. Сборка: стальные пластины, медные катушки и огнеупорный кирпич 3 уровня (ПКМ по контроллеру). Поддерживает желоба.",
   "eblastfurnace-structure-incomplete": "Доменная печь не собрана",
   "eblastfurnace-structure-complete": "Доменная печь собрана",
   "eblastfurnace-structure-hint": "ПКМ по контроллеру с ресурсами: 8 стальных пластин → 4 медных катушки → 4+4 огнеупорных кирпича 3 уровня.",
@@ -151,6 +151,9 @@
   "game:eextruder-title-gui": "Волочильная машина",
   "game:ecrusher-title-gui": "Электрическая дробилка",
   "game:eblastfurnace-title-gui": "Электрическая доменная печь",
+  "eblastfurnace-slot-charge": "Шихта",
+  "eblastfurnace-slot-mold": "Форма",
+  "eblastfurnace-slot-output": "Выход",
   "game:eaquaaccum-title-gui": "Электрический аквааккумулятор",
 
   "block-pressform-axe": "Прессформа топора",

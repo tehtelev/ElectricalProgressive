@@ -825,6 +825,51 @@ namespace ElectricalProgressive.Content.Block
 
 
         /// <summary>
+        /// Меш проводов этого блока. Аниматор с return true из OnTesselation
+        /// выкидывает chunk mesh, куда OnJsonTesselation кладёт провода.
+        /// </summary>
+        public MeshData? GetWiresMesh(BlockPos position)
+        {
+            var beh = api.World.BlockAccessor.GetBlockEntity(position)?.GetBehavior<BEBehaviorEPImmersive>();
+            if (beh == null)
+                return null;
+
+            var connections = beh.GetImmersiveConnections();
+            var cacheKey = new WireMeshCacheKey(position.Copy(), connections);
+
+            if (WireMeshesCache.TryGetValue(cacheKey, out var cachedWiresMesh) && cachedWiresMesh != null)
+                return cachedWiresMesh;
+
+            MeshData wiresMesh = null;
+            if (connections != null && connections.Count > 0)
+            {
+                var connectedWires = GetConnectedWires(position, beh);
+                if (connectedWires != null && connectedWires.Count > 0)
+                {
+                    foreach (var wireConnection in connectedWires)
+                    {
+                        var wireMesh = CreateWireSegmentMesh(
+                            wireConnection.StartPos,
+                            wireConnection.EndPos,
+                            wireConnection.Thickness,
+                            wireConnection.Asset,
+                            wireConnection.SagFactor,
+                            wireConnection.IsReverse
+                        );
+
+                        if (wireMesh != null)
+                            AddMeshData(ref wiresMesh, wireMesh);
+                    }
+                }
+            }
+
+            if (wiresMesh != null)
+                WireMeshesCache[cacheKey] = wiresMesh;
+
+            return wiresMesh;
+        }
+
+        /// <summary>
         /// Основной метод тесселяции - с кэшированием только мешей проводов
         /// </summary>
         public override void OnJsonTesselation(ref MeshData sourceMesh, ref int[] lightRgbsByCorner, BlockPos position, Vintagestory.API.Common.Block[] chunkExtBlocks, int extIndex3d)
@@ -837,76 +882,19 @@ namespace ElectricalProgressive.Content.Block
                 return;
             }
 
-            // Получаем подключенные провода
-            var connections = beh.GetImmersiveConnections();
-
-
-            // Создаем ключ для кэша проводов
-            var cacheKey = new WireMeshCacheKey(position.Copy(), connections);
-
-            // Получаем базовый меш (генерируется каждый раз, но это дешево)
             MeshData baseMeshData = null;
             if (_CustomMeshData == null)
-                //baseMeshData = GetBaseMesh();
                 baseMeshData = sourceMesh;
             else
-            {
                 baseMeshData = _CustomMeshData;
-            }
 
             if (!_drawBaseMesh)
                 baseMeshData = null;
 
-
-            var finalMesh = baseMeshData?.Clone() ?? new MeshData(4,6);
-
-            // Пытаемся получить меши проводов из кэша
-            if (WireMeshesCache.TryGetValue(cacheKey, out var cachedWiresMesh))
-            {
-                // Если нашли в кэше - просто добавляем провода к базовому мешу
-                if (cachedWiresMesh != null)
-                {
-                    finalMesh.AddMeshData(cachedWiresMesh);
-                }
-            }
-            else
-            {
-                // Если в кэше нет, генерируем меши проводов
-                MeshData wiresMesh = null;
-
-                if (connections != null && connections.Count > 0)
-                {
-                    var connectedWires = GetConnectedWires(position, beh);
-                    if (connectedWires != null && connectedWires.Count > 0)
-                    {
-                        foreach (var wireConnection in connectedWires)
-                        {
-                            var wireMesh = CreateWireSegmentMesh(
-                                wireConnection.StartPos,
-                                wireConnection.EndPos,
-                                wireConnection.Thickness,
-                                wireConnection.Asset,
-                                wireConnection.SagFactor,
-                                wireConnection.IsReverse
-                            );
-
-                            if (wireMesh != null)
-                            {
-                                AddMeshData(ref wiresMesh, wireMesh);
-                            }
-                        }
-                    }
-                }
-
-
-
-                // Добавляем провода к финальному мешу
-                if (wiresMesh != null)
-                {
-                    WireMeshesCache[cacheKey] = wiresMesh;
-                    finalMesh.AddMeshData(wiresMesh);
-                }
-            }
+            var finalMesh = baseMeshData?.Clone() ?? new MeshData(4, 6);
+            var wiresMesh = GetWiresMesh(position);
+            if (wiresMesh != null)
+                finalMesh.AddMeshData(wiresMesh);
 
             sourceMesh = finalMesh;
             base.OnJsonTesselation(ref sourceMesh, ref lightRgbsByCorner, position, chunkExtBlocks, extIndex3d);

@@ -144,38 +144,33 @@ public class ElectricalProgressiveRecipeManager : ModSystem
             List<T> expanded = [];
 
             var num = 1;
-            var first = true;
             foreach (var kvp in nameToCodeMapping)
             {
-                num = first ? kvp.Value.Length : num * kvp.Value.Length;
-                first = false;
+                if (kvp.Value == null || kvp.Value.Length == 0)
+                {
+                    num = 0;
+                    break;
+                }
+
+                num *= kvp.Value.Length;
             }
 
-            var firstKey = true;
-            foreach (var kvp in nameToCodeMapping)
+            for (var index = 0; index < num; index++)
             {
-                var key = kvp.Key;
-                var variants = kvp.Value;
+                var entry = (T)recipe.Clone();
+                var remaining = index;
 
-                for (var index = 0; index < num; index++)
+                foreach (var kvp in nameToCodeMapping)
                 {
-                    T entry;
-                    if (firstKey)
-                    {
-                        expanded.Add(entry = (T)recipe.Clone());
-                    }
-                    else
-                    {
-                        entry = expanded[index];
-                    }
-
-                    var variant = variants[index % variants.Length];
+                    var variants = kvp.Value;
+                    var variant = variants[remaining % variants.Length];
+                    remaining /= variants.Length;
 
                     if (entry.Ingredients != null)
                     {
                         foreach (var ingredient in entry.Ingredients)
                         {
-                            if (ingredient.Name == key)
+                            if (ingredient.Name == kvp.Key)
                                 ingredient.Code = ingredient.Code.CopyWithPath(ingredient.Code.Path.Replace("*", variant));
                         }
                     }
@@ -183,11 +178,11 @@ public class ElectricalProgressiveRecipeManager : ModSystem
                     if (entry.Outputs != null)
                     {
                         foreach (var output in entry.Outputs)
-                            output.FillPlaceHolder(key, variant);
+                            output.FillPlaceHolder(kvp.Key, variant);
                     }
                 }
 
-                firstKey = false;
+                expanded.Add(entry);
             }
 
             if (expanded.Count == 0)

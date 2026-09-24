@@ -9,7 +9,7 @@ using Vintagestory.API.MathTools;
 
 namespace ElectricalProgressive.Content.Block.EBlastFurnace;
 
-public class BEBehaviorEBlastFurnace : BlockEntityBehavior, IElectricConsumer
+public class BEBehaviorEBlastFurnace : BlockEntityBehavior, IElectricConsumer, IEImmersiveConsumer
 {
     public enum FurnaceState
     {
@@ -74,9 +74,7 @@ public class BEBehaviorEBlastFurnace : BlockEntityBehavior, IElectricConsumer
                 if (!entity.StructureComplete)
                     return false;
 
-                if (entity.ElectricalProgressive == null &&
-                    entity.ElectricalProgressive.AllEparams == null &&
-                    entity.ElectricalProgressive.AllEparams.Any(e => e.burnout))
+                if (entity.EPImmersive?.MainEparams().burnout == true)
                     return false;
 
                 var entityStack = entity.Inventory[0]?.Itemstack;
@@ -121,10 +119,11 @@ public class BEBehaviorEBlastFurnace : BlockEntityBehavior, IElectricConsumer
         {
             case FurnaceState.Heating:
                 stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:State") + ": " + Lang.Get("electricalprogressivebasics:Heating"));
-                if (entity.InputSlot1?.Itemstack != null)
+                var resourceStack = entity.FindResourceSlot()?.Itemstack;
+                if (resourceStack != null)
                 {
-                    float currentTemp = entity.InputSlot1.Itemstack.Collectible.GetTemperature(Api.World, entity.InputSlot1.Itemstack);
-                    float meltingPoint = GetMeltingPoint(entity.InputSlot1.Itemstack);
+                    float currentTemp = resourceStack.Collectible.GetTemperature(Api.World, resourceStack);
+                    float meltingPoint = entity.GetMeltingPointFromStack(resourceStack);
                     if (meltingPoint > 0)
                     {
                         int percent = (int)((currentTemp / meltingPoint) * 100);
@@ -195,7 +194,10 @@ public class BEBehaviorEBlastFurnace : BlockEntityBehavior, IElectricConsumer
         }
 
         if (PowerSetting != (int)amount)
+        {
             PowerSetting = (int)amount;
+            entity.MarkDirty();
+        }
         
         if (amount > 0)
         {
@@ -228,14 +230,13 @@ public class BEBehaviorEBlastFurnace : BlockEntityBehavior, IElectricConsumer
     public void Update()
     {
         if (Blockentity is not BlockEntityEBlastFurnace entity ||
-            entity.ElectricalProgressive == null ||
-            entity.ElectricalProgressive.AllEparams is null)
+            entity.EPImmersive == null)
             return;
 
         bool anyBurnout = false;
         bool anyPrepareBurnout = false;
+        var eParam = entity.EPImmersive.MainEparams();
 
-        foreach (var eParam in entity.ElectricalProgressive.AllEparams)
         {
             if (!hasBurnout && eParam.burnout)
             {

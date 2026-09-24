@@ -96,6 +96,7 @@ public class ElectricalProgressiveIndustry : ModSystem
         base.StartClientSide(api);
         this.capi = api;
         HandbookPatch.ApplyPatches(api);
+        BlastFurnaceSlotIcons.Register(api);
     }
 
 }

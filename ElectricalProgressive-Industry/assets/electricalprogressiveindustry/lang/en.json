@@ -117,7 +117,7 @@
   "eaquaaccum-construct-finish": "Finish assembly",
   "eaquaaccum-handbook-place-controller": "Place the controller",
   "block-handbooktitle-eblastfurnace": "Usage",
-  "block-handbooktext-eblastfurnace": "Electric blast furnace for smelting ore with flux. Multiblock 3×2×2, 128 V. Assemble with steel plates, copper coils and tier 3 refractory bricks (RMB on controller). Supports hoppers.",
+  "block-handbooktext-eblastfurnace": "Electric blast furnace for smelting ore with flux. Multiblock 3×3×2, 512 V. Connect an immersive wire to the CableDot terminal. Assemble with steel plates, copper coils and tier 3 refractory bricks (RMB on controller). Supports hoppers.",
   "eblastfurnace-structure-incomplete": "Blast furnace is not assembled",
   "eblastfurnace-structure-complete": "Blast furnace assembled",
   "eblastfurnace-structure-hint": "Right-click the controller with materials: 8 steel plates → 4 copper coils → 4+4 tier 3 refractory bricks.",
@@ -154,6 +154,9 @@
   "game:edrawing-title-gui": "Drawing Machine",
   "game:ecrusher-title-gui": "Electric Crusher",
   "game:eblastfurnace-title-gui": "Electric Blast Furnace",
+  "eblastfurnace-slot-charge": "Charge",
+  "eblastfurnace-slot-mold": "Mold",
+  "eblastfurnace-slot-output": "Output",
   "game:eaquaaccum-title-gui": "Electric Aqua Accumulator",
 
   "block-pressform-axe": "Axe Press Mold",

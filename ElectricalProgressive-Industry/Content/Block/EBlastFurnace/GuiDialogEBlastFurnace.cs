@@ -58,10 +58,26 @@ public class GuiDialogEBlastFurnace : GuiDialogBlockEntity
         else
             itemSlot = null;
             
-        var bounds1 = ElementBounds.Fixed(0.0, 0.0, 300.0, 160.0);
-        var inputSlotBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 5.0, 45.0, 1, 2);
-        var outputSlotBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, 200.0, 70.0, 1, 2);
-        var progressBounds = ElementBounds.Fixed(55, 82, 140, 25);
+        const double slot = 48;
+        const double pad = 3;
+        const double gap = 10;
+        const double top = 40;
+        const double barW = 96;
+        const double barH = 20;
+
+        var gridX = 12.0;
+        var gridW = slot * 2 + pad;
+        var gridH = slot * 2 + pad;
+        var barX = gridX + gridW + gap;
+        var outX = barX + barW + gap;
+        var rowY = top + (gridH - slot) / 2;
+        var barY = rowY + (slot - barH) / 2;
+
+        var bounds1 = ElementBounds.Fixed(0.0, 0.0, outX + slot * 2 + pad + 16, top + gridH + 16);
+        var inputGridBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, gridX, top, 2, 2);
+        var progressBounds = ElementBounds.Fixed(barX, barY, barW, barH);
+        var outputSlotBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, outX, rowY, 1, 1);
+        var chanceSlotBounds = ElementStdBounds.SlotGrid(EnumDialogArea.None, outX + slot + pad, rowY, 1, 1);
         
         var bounds4 = ElementBounds.Fill.WithFixedPadding(GuiStyle.ElementToDialogPadding);
         bounds4.BothSizing = ElementSizing.FitToChildren;
@@ -79,11 +95,9 @@ public class GuiDialogEBlastFurnace : GuiDialogBlockEntity
             
             .AddDynamicCustomDraw(progressBounds, new DrawDelegateWithBounds(this.OnProgressDraw), "progressDrawer")
             
-            .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 1, new int[2] { 0, 1 }, inputSlotBounds, "inputSlot")
-            .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 2, new int[2] { 2, 3 }, outputSlotBounds, "outputslot")
-            
-            .AddStaticText(Lang.Get("electricalprogressive:input"), CairoFont.WhiteDetailText(), ElementBounds.Fixed(10, 150, 50, 20))
-            .AddStaticText(Lang.Get("electricalprogressive:output"), CairoFont.WhiteDetailText(), ElementBounds.Fixed(230, 120, 50, 20))
+            .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 2, new int[4] { 0, 1, 4, 5 }, inputGridBounds, "inputSlot")
+            .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 1, new int[1] { 2 }, outputSlotBounds, "outputslot")
+            .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 1, new int[1] { 3 }, chanceSlotBounds, "chanceslot")
             
             .EndChildElements()
             .Compose();
@@ -192,6 +206,7 @@ public class GuiDialogEBlastFurnace : GuiDialogBlockEntity
         this.Inventory.SlotModified -= new Action<int>(this.OnInventorySlotModified);
         this.SingleComposer?.GetSlotGrid("inputSlot")?.OnGuiClosed(this.capi);
         this.SingleComposer?.GetSlotGrid("outputslot")?.OnGuiClosed(this.capi);
+        this.SingleComposer?.GetSlotGrid("chanceslot")?.OnGuiClosed(this.capi);
         
         // Вызываем событие закрытия диалога
         OnDialogClosed?.Invoke();

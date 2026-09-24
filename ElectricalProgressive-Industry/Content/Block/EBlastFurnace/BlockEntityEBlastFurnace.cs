@@ -1,4 +1,5 @@
-﻿using ElectricalProgressive.RecipeSystem;
+﻿using ElectricalProgressive.Content.Block;
+using ElectricalProgressive.RecipeSystem;
 using ElectricalProgressive.RecipeSystem.Recipe;
 using ElectricalProgressive.Utils;
 using System;
@@ -22,6 +23,8 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
         private readonly int _maxConsumption;
         private ICoreClientAPI _capi;
         private bool _wasCraftingLastTick;
+        private float _powerDisplay;
+        private float _leverDisplay;
 
         public BlastFurnaceRecipe CurrentRecipe;
         public string CurrentRecipeName;
@@ -47,11 +50,14 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
 
         // Новые поля для нагрева
         private const float MAX_TEMP = 2000f;
-        private const float HEATING_POWER = 100f; // Мощность нагрева в градусах в секунду при полной энергии
+        private const float HEATING_POWER = 100f; // °C/с при полной мощности
+        private long _lastHeatMs;
         
         // Слоты (2 входа, 2 выхода)
         public ItemSlot InputSlot1 => inventory[0];
         public ItemSlot InputSlot2 => inventory[1];
+        public ItemSlot InputSlot3 => inventory[4];
+        public ItemSlot MoldSlot => inventory[5];
         public ItemSlot OutputSlot1 => inventory[2];
         public ItemSlot OutputSlot2 => inventory[3];
         
@@ -66,9 +72,26 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
         private MeshData?[] _meshes;
         private Shape? _nowTesselatingShape;
         private CollectibleObject _nowTesselatingObj;
+        private SmithingWorkItemRenderer? _resourceRenderer;
+        private BlastFurnaceCoilRenderer? _coilRenderer;
+        private MeshData? _coilGlowMesh;
+        private bool _coilMeshReady;
+
+        private static readonly Vec3f[] NuggetPileOffsets =
+        [
+            new(0f, 0f, 0f),
+            new(0.05f, 0.015f, 0.08f),
+            new(-0.05f, 0.015f, -0.07f),
+            new(0.06f, 0.03f, -0.05f),
+            new(-0.04f, 0.03f, 0.05f),
+            new(0.01f, 0.05f, 0.02f),
+            new(-0.02f, 0.045f, -0.09f),
+            new(0.04f, 0.06f, 0.09f)
+        ];
 
         private Facing _facing = Facing.None;
-        public BEBehaviorElectricalProgressive ElectricalProgressive => GetBehavior<BEBehaviorElectricalProgressive>();
+        public BEBehaviorElectricalProgressive? ElectricalProgressive => GetBehavior<BEBehaviorElectricalProgressive>();
+        public BEBehaviorEPImmersive? EPImmersive => GetBehavior<BEBehaviorEPImmersive>();
 
         public Facing Facing
         {
@@ -76,9 +99,7 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
             set
             {
                 if (value != this._facing)
-                {
-                    this.ElectricalProgressive!.Connection = FacingHelper.FullFace(this._facing = value);
-                }
+                    this._facing = value;
             }
         }
 
@@ -91,9 +112,17 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
         public BlockEntityEBlastFurnace()
         {
             _maxConsumption = MyMiniLib.GetAttributeInt(Block, "maxConsumption", 800);
-            this.inventory = new InventoryEBlastFurnace(4, InventoryClassName, null, null, null, this);
+            this.inventory = new InventoryEBlastFurnace(6, InventoryClassName, null, null, CreateSlot, this);
             inventory.SlotModified += OnSlotModified;
         }
+
+        private static ItemSlot CreateSlot(int slotId, InventoryGeneric inv) => slotId switch
+        {
+            5 => new ItemSlotBlastFurnaceMold(inv),
+            0 or 1 or 4 => new ItemSlotBlastFurnaceCharge(inv),
+            3 => new ItemSlotBlastFurnaceChance(inv),
+            _ => new ItemSlot(inv)
+        };
 
         #region Анимации
 
@@ -120,6 +149,89 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
                 _resultingShape,
                 new Vec3f(0, GetRotation(), 0f));
             _animatorReadyForFormed = true;
+            StartHeldAnim("power");
+            StartHeldAnim("lever");
+        }
+
+        public bool IsConsumingEnergy()
+        {
+            var beh = GetBehavior<BEBehaviorEBlastFurnace>();
+            return beh != null && beh.PowerSetting > 0;
+        }
+
+        private static void DisableFaces(ShapeElement elem)
+        {
+            if (elem.FacesResolved == null)
+                return;
+            foreach (var face in elem.FacesResolved)
+            {
+                if (face != null)
+                    face.Enabled = false;
+            }
+        }
+
+        private static void KeepOnlyCoils(ShapeElement elem, bool keepGeometry)
+        {
+            if (!keepGeometry)
+                DisableFaces(elem);
+            if (elem.Children == null)
+                return;
+            var parentIs52 = string.Equals(elem.Name, "Cube52", StringComparison.OrdinalIgnoreCase);
+            foreach (var child in elem.Children)
+            {
+                var childKeep = keepGeometry
+                    || (parentIs52 && child.Name is "Cube3" or "Cube153" or "Cube165");
+                KeepOnlyCoils(child, childKeep);
+            }
+        }
+
+        private void EnsureCoilGlowMesh()
+        {
+            if (_coilMeshReady || _capi == null || !IsFormed)
+                return;
+
+            var shapeBlock = GetFormedBlockForAnim(Api) ?? Block;
+            if (shapeBlock?.Shape?.Base == null)
+                return;
+
+            var shapePath = shapeBlock.Shape.Base.Clone()
+                .WithPathPrefixOnce("shapes/")
+                .WithPathAppendixOnce(".json");
+            var asset = _capi.Assets.TryGet(shapePath);
+            var coilShape = asset?.ToObject<Shape>();
+            if (coilShape?.Elements == null)
+                return;
+
+            foreach (var root in coilShape.Elements)
+            {
+                root.ResolveReferences();
+                KeepOnlyCoils(root, false);
+            }
+
+            var texSrc = new ShapeTextureSource(_capi, coilShape, "eblastfurnace-coil");
+            _capi.Tesselator.TesselateShape(
+                "eblastfurnace-coil",
+                coilShape,
+                out var coilMesh,
+                texSrc,
+                new Vec3f(0, 0, 0),
+                255, 0, 0,
+                null,
+                null);
+
+            if (coilMesh == null || coilMesh.VerticesCount <= 0)
+                return;
+
+            coilMesh = coilMesh.Clone();
+            coilMesh.SetVertexFlags(VertexFlags.GlowLevelBitMask);
+            coilMesh.Translate(-1f, 0f, 0f);
+            var rot = GetRotation();
+            if (rot != 0)
+                coilMesh.Rotate(new Vec3f(0.5f, 0.5f, 0.5f), 0, rot * GameMath.DEG2RAD, 0);
+
+            _coilGlowMesh = coilMesh;
+            _coilRenderer?.SetMesh(coilMesh);
+            _coilMeshReady = true;
         }
 
         private Vintagestory.API.Common.Block? GetFormedBlockForAnim(ICoreAPI api)
@@ -148,12 +260,15 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
                     Animation = "open",
                     Code = "open",
                     AnimationSpeed = 1.4f,
+                    EaseInSpeed = 10,
                     EaseOutSpeed = 10,
-                    EaseInSpeed = 10
+                    Weight = 1,
+                    BlendMode = EnumAnimationBlendMode.Add
                 });
 
                 _capi?.World.PlaySoundAt(_soundDoorOpen, Pos.X, Pos.Y, Pos.Z, null, false, 8.0F, 0.4F);
                 _isDoorOpen = true;
+                MarkDirty(true);
             }
         }
 
@@ -175,44 +290,90 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
                     Animation = "close",
                     Code = "close",
                     AnimationSpeed = 1.4f,
+                    EaseInSpeed = 10,
                     EaseOutSpeed = 10,
-                    EaseInSpeed = 10
+                    Weight = 1,
+                    BlendMode = EnumAnimationBlendMode.Add
                 });
             }
 
             _capi?.World.PlaySoundAt(_soundDoorClose, Pos.X, Pos.Y, Pos.Z, null, false, 8.0F, 0.4F);
             _isDoorOpen = false;
+            MarkDirty(true);
         }
 
         public void StartWorkingAnim()
         {
-            if (Api?.Side != EnumAppSide.Client || CurrentRecipe == null)
-                return;
-
-            EnsureAnimatorReady();
-            if (AnimUtil == null) return;
-
-            var beh = GetBehavior<BEBehaviorEBlastFurnace>();
-            if (beh == null) return;
-
-            if (!AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
-            {
-                AnimUtil.StartAnimation(new AnimationMetaData()
-                {
-                    Animation = "work-on",
-                    Code = "work-on",
-                    AnimationSpeed = 1F,
-                    EaseOutSpeed = 2.0f,
-                    EaseInSpeed = 1f
-                });
-            }
         }
 
         public void StopWorkingAnim()
         {
             if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey("work-on") == true)
-            {
                 AnimUtil.StopAnimation("work-on");
+        }
+
+        private void UpdatePowerIndicator(float dt)
+        {
+            if (Api?.Side != EnumAppSide.Client || !IsFormed)
+                return;
+
+            EnsureAnimatorReady();
+            if (AnimUtil?.animator == null)
+                return;
+
+            if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
+                AnimUtil.StopAnimation("work-on");
+
+            StartHeldAnim("power");
+            StartHeldAnim("lever");
+
+            var beh = GetBehavior<BEBehaviorEBlastFurnace>();
+            var watts = beh?.PowerSetting ?? 0;
+            var ratio = _maxConsumption > 0
+                ? GameMath.Clamp(watts / (float)_maxConsumption, 0f, 1f)
+                : 0f;
+            if (ratio > 0.9f)
+                ratio = 1f;
+
+            var k = GameMath.Clamp(dt * 10f, 0.08f, 1f);
+            _powerDisplay += (ratio - _powerDisplay) * k;
+            _leverDisplay = watts > 0 ? 1f : 0f;
+
+            SetAnimFrame("power", _powerDisplay);
+            SetAnimFrame("lever", _leverDisplay);
+        }
+
+        private void StartHeldAnim(string code)
+        {
+            if (AnimUtil?.activeAnimationsByAnimCode.ContainsKey(code) == true)
+                return;
+            AnimUtil?.StartAnimation(new AnimationMetaData
+            {
+                Animation = code,
+                Code = code,
+                AnimationSpeed = 0.0001f,
+                EaseInSpeed = 1000,
+                EaseOutSpeed = 1000,
+                Weight = 1,
+                BlendMode = EnumAnimationBlendMode.Add
+            });
+        }
+
+        private void SetAnimFrame(string code, float t)
+        {
+            var anims = AnimUtil?.animator?.Animations;
+            if (anims == null)
+                return;
+            foreach (var anim in anims)
+            {
+                var animCode = anim?.Animation?.Code ?? anim?.Animation?.Name;
+                if (!string.Equals(animCode, code, StringComparison.OrdinalIgnoreCase))
+                    continue;
+                var frames = anim.Animation.QuantityFrames;
+                anim.CurrentFrame = t >= 0.999f
+                    ? Math.Max(frames - 1, 1)
+                    : GameMath.Clamp(t, 0f, 1f) * Math.Max(frames - 1, 1);
+                break;
             }
         }
 
@@ -225,42 +386,40 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
         /// </summary>
         public float GetMeltingPointFromStack(ItemStack stack)
         {
-            if (stack?.Collectible == null) return 0f;
-    
-            var collectible = stack.Collectible;
-            var code = collectible.Code?.ToString() ?? "";
-    
-            // Пытаемся получить через CombustibleProps (стандартный механизм Vintagestory)
-            if (collectible is Vintagestory.API.Common.Item item)
-            {
-                // Проверяем свойство CombustibleProps
-                var combustibleProps = item.CombustibleProps;
-                if (combustibleProps != null)
-                {
-                    return combustibleProps.MeltingPoint;
-                }
-            }
-            
-            return 0f;
+            if (stack?.Collectible == null) return 1200f;
+
+            var meltingPoint = stack.Collectible.CombustibleProps?.MeltingPoint ?? 0f;
+            if (meltingPoint <= 0)
+                meltingPoint = 1200f;
+
+            return meltingPoint;
         }
         
         /// <summary>
-        /// Получение текущей температуры предмета
+        /// Получение текущей температуры переплавляемого ресурса
         /// </summary>
         public float GetCurrentTemperature()
         {
-            if (InputSlot1?.Itemstack == null) return 20f;
-            return InputSlot1.Itemstack.Collectible.GetTemperature(this.Api.World, InputSlot1.Itemstack);
+            var temp = 20f;
+            foreach (var slot in ChargeSlots())
+            {
+                if (slot.Itemstack?.Collectible == null)
+                    continue;
+                temp = Math.Max(temp, slot.Itemstack.Collectible.GetTemperature(Api.World, slot.Itemstack));
+            }
+            return temp;
         }
 
         /// <summary>
-        /// Установка температуры предмета
+        /// Установка температуры переплавляемого ресурса
         /// </summary>
         public void SetTemperature(float temperature)
         {
-            if (InputSlot1?.Itemstack != null)
+            foreach (var slot in ChargeSlots())
             {
-                InputSlot1.Itemstack.Collectible.SetTemperature(this.Api.World, InputSlot1.Itemstack, temperature);
+                if (slot.Itemstack?.Collectible == null)
+                    continue;
+                slot.Itemstack.Collectible.SetTemperature(Api.World, slot.Itemstack, temperature);
             }
         }
 
@@ -273,47 +432,48 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
             if (!StructureComplete)
                 return;
 
-            if (CurrentRecipe == null || InputSlot1.Empty || InputSlot2.Empty)
+            if (CurrentRecipe == null || !HasRequiredItems())
                 return;
+
+            var resourceStack = FindResourceSlot()?.Itemstack;
+            if (resourceStack == null) return;
             
             if (amount <= 0) return;
-            
-            float meltingPoint = GetMeltingPointFromStack(InputSlot1.Itemstack);
-            float currentTemp = GetCurrentTemperature();
-            
-            // Если нет температуры плавления или предмет уже достаточно горячий - плавим
-            if (meltingPoint <= 0 || currentTemp >= meltingPoint)
-            {
-                ProcessSmelting(amount);
-            }
+
+            var meltingPoint = GetMeltingPointFromStack(resourceStack);
+            var currentTemp = GetCurrentTemperature();
+
+            if (currentTemp < meltingPoint)
+                ProcessHeating(currentTemp, meltingPoint);
             else
-            {
-                ProcessHeating(amount, currentTemp, meltingPoint);
-            }
+                ProcessSmelting(amount);
             
-            MarkDirty(true);
+            MarkDirty();
         }
 
-        private void ProcessHeating(int amount, float currentTemp, float meltingPoint)
+        private void ProcessHeating(float currentTemp, float meltingPoint)
         {
             var beh = GetBehavior<BEBehaviorEBlastFurnace>();
             if (beh != null)
                 beh.CurrentState = BEBehaviorEBlastFurnace.FurnaceState.Heating;
 
-            // Рассчитываем нагрев: энергия конвертируется в тепло
-            // При полной мощности (800W) нагреваем на HEATING_POWER градусов в секунду
-            float powerPercent = amount / (float)_maxConsumption;
-            float heatingRate = HEATING_POWER * powerPercent;
-            
-            // Нагрев за тик (1 секунда, так как AddEnergy вызывается раз в секунду)
-            float newTemp = currentTemp + heatingRate;
-            newTemp = Math.Min(newTemp, meltingPoint);
-            
+            var now = Api.World.ElapsedMilliseconds;
+            float dt;
+            if (_lastHeatMs <= 0)
+                dt = 0.05f;
+            else
+                dt = (now - _lastHeatMs) / 1000f;
+            _lastHeatMs = now;
+            if (dt > 1f) dt = 1f;
+            if (dt < 0f) dt = 0f;
+
+            var powerPercent = 1f;
+            if (beh != null && _maxConsumption > 0)
+                powerPercent = GameMath.Clamp(beh.PowerSetting / (float)_maxConsumption, 0.05f, 1f);
+
+            var newTemp = Math.Min(currentTemp + HEATING_POWER * powerPercent * dt, meltingPoint);
             SetTemperature(newTemp);
-            
-            // Обновляем прогресс-бар для отображения нагрева
-            float heatProgress = newTemp / meltingPoint;
-            UpdateState(heatProgress);
+            UpdateState(newTemp / meltingPoint);
         }
 
         private void ProcessSmelting(int amount)
@@ -321,26 +481,6 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
             var beh = GetBehavior<BEBehaviorEBlastFurnace>();
             if (beh != null)
                 beh.CurrentState = BEBehaviorEBlastFurnace.FurnaceState.Smelting;
-            
-            // Поддерживаем температуру выше температуры плавления
-            float meltingPoint = GetMeltingPointFromStack(InputSlot1.Itemstack);
-            if (meltingPoint > 0)
-            {
-                float currentTemp = GetCurrentTemperature();
-                if (currentTemp < meltingPoint)
-                {
-                    // Если остыл - возвращаемся к нагреву
-                    ProcessHeating(amount, currentTemp, meltingPoint);
-                    return;
-                }
-                
-                // Поддерживаем температуру (немного подогреваем если нужно)
-                if (currentTemp < meltingPoint + 100)
-                {
-                    float newTemp = Math.Min(currentTemp + 10, meltingPoint + 200);
-                    SetTemperature(newTemp);
-                }
-            }
             
             int maxNeeded = (int)CurrentRecipe.EnergyOperation - AccumulatedEnergy;
             if (maxNeeded <= 0)
@@ -383,6 +523,8 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
             base.Initialize(api);
             this.inventory.LateInitialize(InventoryClassName + "-" + this.Pos.X + "/" + this.Pos.Y + "/" + this.Pos.Z, api);
             this.RegisterGameTickListener(new Action<float>(this.Every1000Ms), 1000);
+            if (IsFormed)
+                LoadImmersiveEProperties.Load(Block, this);
 
             if (api.Side == EnumAppSide.Client)
             {
@@ -390,6 +532,8 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
                 _meshes = new MeshData[this.inventory.Count];
 
                 this.inventory.SlotModified += slotId => UpdateMeshes();
+                _resourceRenderer = new SmithingWorkItemRenderer(_capi, () => Pos, () => FindResourceSlot()?.Itemstack);
+                _capi.Event.RegisterRenderer(_resourceRenderer, EnumRenderStage.Opaque, "eblastfurnace-resource");
                 UpdateMeshes();
 
                 _soundDoorOpen = new AssetLocation("game:sounds/block/cokeovendoor-open");
@@ -397,6 +541,7 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
 
                 // Если уже formed (загрузка мира / creative) — сразу готовим аниматор
                 EnsureAnimatorReady();
+                RegisterGameTickListener(UpdatePowerIndicator, 1);
             }
         }
 
@@ -417,10 +562,26 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
             if (shape == null)
                 return;
 
-            // Отдельный ключ кэша, чтобы не залипнуть на incomplete-mesh
-            var src = AnimUtil.CreateMesh(cacheDictKey + "-formed", shape, out _resultingShape, null);
+            // shapebytype offsetX -1: сдвиг корней на -16 vx, чтобы шарниры дверцы
+            // совпали с вершинами. Translate меша ломает origin анимации — дверца
+            // уходит внутрь и не с той петли (у термогенератора offset нет).
+            var animShape = shape.Clone();
+            ShiftRootElementsX(animShape, -16);
+
+            var src = AnimUtil.CreateMesh(cacheDictKey + "-formed-offx", animShape, out _resultingShape, null);
             _mesh = src?.Clone();
-            _mesh?.Translate(-1f, 0f, 0f);
+        }
+
+        private static void ShiftRootElementsX(Shape shape, double voxels)
+        {
+            if (shape?.Elements == null)
+                return;
+            foreach (var el in shape.Elements)
+            {
+                if (el.From != null) el.From[0] += voxels;
+                if (el.To != null) el.To[0] += voxels;
+                if (el.RotationOrigin != null) el.RotationOrigin[0] += voxels;
+            }
         }
 
         public int GetRotation()
@@ -435,10 +596,11 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
             if (Api is ICoreClientAPI)
                 _clientDialog?.Update(RecipeProgress);
 
-            if (slotid < 2)
+            if (slotid is 0 or 1 or 4 or 5)
             {
                 RecipeProgress = 0f;
                 AccumulatedEnergy = 0;
+                _lastHeatMs = 0;
                 UpdateState(RecipeProgress);
             }
 
@@ -496,18 +658,210 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
 
         public Size2i AtlasSize => _capi.BlockTextureAtlas.Size;
 
+        private static bool IsIngotMold(ItemStack? stack)
+        {
+            return stack?.Collectible?.Code?.Path?.Contains("ingotmold") == true;
+        }
+
+        private ItemSlot? FindMoldSlot()
+        {
+            if (!inventory[5].Empty && IsIngotMold(inventory[5].Itemstack))
+                return inventory[5];
+            foreach (var i in new[] { 0, 1, 4 })
+            {
+                if (!inventory[i].Empty && IsIngotMold(inventory[i].Itemstack))
+                    return inventory[i];
+            }
+
+            return null;
+        }
+
+        public ItemSlot? FindResourceSlot()
+        {
+            foreach (var slot in ChargeSlots())
+                return slot;
+            return null;
+        }
+
+        private IEnumerable<ItemSlot> ChargeSlots()
+        {
+            foreach (var i in new[] { 0, 1, 4 })
+            {
+                if (!inventory[i].Empty && !IsIngotMold(inventory[i].Itemstack))
+                    yield return inventory[i];
+            }
+        }
+
         public void UpdateMesh(int slotid)
         {
-            if (Api == null || Api.Side == EnumAppSide.Server || _capi == null) return;
-            if (slotid >= this.inventory.Count) return;
-            _meshes[slotid] = null;
+            if (slotid is 0 or 1 or 4 or 5)
+                UpdateMeshes();
         }
+
+        private string? _inventoryVisualKey;
 
         public void UpdateMeshes()
         {
-            for (var i = 0; i < this.inventory.Count; i++)
-                UpdateMesh(i);
-            MarkDirty(true);
+            if (Api == null || Api.Side == EnumAppSide.Server || _capi == null || _meshes == null)
+                return;
+
+            for (var i = 0; i < _meshes.Length; i++)
+                _meshes[i] = null;
+
+            if (!IsFormed)
+            {
+                MarkDirty(true);
+                return;
+            }
+
+            MeshData? moldMesh = null;
+            var moldSlot = FindMoldSlot();
+            if (moldSlot != null)
+            {
+                moldMesh = GenMesh(moldSlot);
+                if (moldMesh != null)
+                {
+                    TranslateIntoHearth(moldMesh);
+                    _meshes[moldSlot == InputSlot1 ? 0 : 1] = moldMesh;
+                }
+            }
+
+            MeshData? resourceMesh = null;
+            var pileIndex = 0;
+            foreach (var resourceSlot in ChargeSlots())
+            {
+                var pile = BuildResourcePile(resourceSlot, moldMesh);
+                if (pile == null)
+                    continue;
+                pile.Translate(pileIndex * 0.07f, pileIndex * 0.02f, pileIndex * 0.05f);
+                if (resourceMesh == null)
+                    resourceMesh = pile;
+                else
+                    resourceMesh.AddMeshData(pile);
+                pileIndex++;
+            }
+
+            _resourceRenderer?.SetMesh(resourceMesh);
+
+            if (InventoryVisual.Changed(ref _inventoryVisualKey, inventory))
+                MarkDirty(true);
+        }
+
+        /// <summary>
+        /// Полость между половинами корпуса, пол на y=2 vx.
+        /// shapebytype offsetX -1 уже в рендере блока; меш слота в локали контроллера.
+        /// </summary>
+        private void TranslateIntoHearth(MeshData mesh)
+        {
+            var origin = new Vec3f(0.5f, 0f, 0.5f);
+            mesh.Translate(0f, 0.25f, -0.5f);
+            mesh.Rotate(origin, 0, Block.Shape.rotateY * GameMath.DEG2RAD, 0);
+        }
+
+        private MeshData? BuildResourcePile(ItemSlot resourceSlot, MeshData? moldMesh)
+        {
+            var unit = GenMesh(resourceSlot);
+            if (unit == null)
+                return null;
+
+            var shown = GameMath.Clamp(resourceSlot.StackSize, 1, 8);
+            var scale = moldMesh != null ? 0.5f : 0.45f;
+            var origin = new Vec3f(0.5f, 0f, 0.5f);
+            MeshData? pile = null;
+
+            for (var i = 0; i < shown; i++)
+            {
+                var piece = unit.Clone();
+                piece.Scale(origin, scale, scale, scale);
+                var off = NuggetPileOffsets[i];
+                piece.Translate(off.X, off.Y, off.Z);
+                if (i > 0)
+                    piece.Rotate(origin, 0, i * 37f * GameMath.DEG2RAD, 0);
+
+                if (pile == null)
+                    pile = piece;
+                else
+                    pile.AddMeshData(piece);
+            }
+
+            pile.Rotate(origin, 0, Block.Shape.rotateY * GameMath.DEG2RAD, 0);
+
+            if (moldMesh != null)
+            {
+                var moldCenter = GetMeshCenter(moldMesh);
+                var pileCenter = GetMeshCenter(pile);
+                if (moldCenter != null && pileCenter != null)
+                {
+                    pile.Translate(
+                        (float)(moldCenter.X - pileCenter.X),
+                        (float)(moldCenter.Y - pileCenter.Y) + 0.03f,
+                        (float)(moldCenter.Z - pileCenter.Z));
+                }
+            }
+            else
+                TranslateIntoHearth(pile);
+
+            return pile;
+        }
+
+        private static Vec3d? GetMeshCenter(MeshData? mesh)
+        {
+            if (mesh?.xyz == null || mesh.VerticesCount <= 0)
+                return null;
+
+            var xyz = mesh.xyz;
+            var n = mesh.VerticesCount;
+            float minX = float.MaxValue, minY = float.MaxValue, minZ = float.MaxValue;
+            float maxX = float.MinValue, maxY = float.MinValue, maxZ = float.MinValue;
+
+            for (var i = 0; i < n; i++)
+            {
+                var o = i * 3;
+                var x = xyz[o];
+                var y = xyz[o + 1];
+                var z = xyz[o + 2];
+                if (x < minX) minX = x;
+                if (y < minY) minY = y;
+                if (z < minZ) minZ = z;
+                if (x > maxX) maxX = x;
+                if (y > maxY) maxY = y;
+                if (z > maxZ) maxZ = z;
+            }
+
+            return new Vec3d((minX + maxX) * 0.5, (minY + maxY) * 0.5, (minZ + maxZ) * 0.5);
+        }
+
+        public MeshData? GenMesh(ItemSlot slot)
+        {
+            var stack = slot.Itemstack;
+            if (stack == null)
+                return null;
+
+            MeshData meshData;
+            try
+            {
+                if (stack.Class == EnumItemClass.Block)
+                {
+                    meshData = _capi.TesselatorManager.GetDefaultBlockMesh(stack.Block).Clone();
+                }
+                else
+                {
+                    _nowTesselatingObj = stack.Collectible;
+                    _nowTesselatingShape = null;
+                    if (stack.Item.Shape != null)
+                        _nowTesselatingShape = _capi.TesselatorManager.GetCachedShape(stack.Item.Shape.Base);
+
+                    _capi.Tesselator.TesselateItem(stack.Item, out meshData, this);
+                    meshData.RenderPassesAndExtraBits.Fill((short)2);
+                }
+            }
+            catch (Exception e)
+            {
+                Api.World.Logger.Error("Не удалось выполнить тесселяцию предмета {0}: {1}", stack.Collectible?.Code, e.Message);
+                meshData = null;
+            }
+
+            return meshData;
         }
 
         #region Логика рецептов
@@ -532,44 +886,13 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
 
         private static bool MatchesRecipe(BlastFurnaceRecipe recipe, InventoryEBlastFurnace inventory)
         {
-            var usedSlots = new List<int>();
-
-            for (var ingredIndex = 0; ingredIndex < recipe.Ingredients.Length && ingredIndex < 2; ingredIndex++)
-            {
-                var ingred = recipe.Ingredients[ingredIndex];
-                var foundSlot = false;
-
-                for (var slotIndex = 0; slotIndex < 2; slotIndex++)
-                {
-                    if (usedSlots.Contains(slotIndex)) continue;
-
-                    var slot = inventory[slotIndex];
-                    if (!slot.Empty && ingred.SatisfiesAsIngredient(slot.Itemstack))
-                    {
-                        usedSlots.Add(slotIndex);
-                        foundSlot = true;
-                        break;
-                    }
-                }
-
-                if (!foundSlot) return false;
-            }
-
-            return true;
+            return recipe.Matches([inventory[0], inventory[1], inventory[4], inventory[5]], out _);
         }
 
         private bool HasRequiredItems()
         {
             if (CurrentRecipe == null) return false;
-
-            for (var i = 0; i < CurrentRecipe.Ingredients.Length && i < 2; i++)
-            {
-                var ingred = CurrentRecipe.Ingredients[i];
-                var slot = GetInputSlot(i);
-                if (slot.Empty || !ingred.SatisfiesAsIngredient(slot.Itemstack))
-                    return false;
-            }
-            return true;
+            return MatchesRecipe(CurrentRecipe, inventory);
         }
 
         private void ProcessCompletedCraft()
@@ -601,7 +924,7 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
 
                 foreach (var ingred in CurrentRecipe.Ingredients)
                 {
-                    for (var slotIndex = 0; slotIndex < 2; slotIndex++)
+                    for (var slotIndex = 0; slotIndex < 4; slotIndex++)
                     {
                         if (usedSlots.Contains(slotIndex)) continue;
 
@@ -666,6 +989,8 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
         {
             0 => InputSlot1,
             1 => InputSlot2,
+            2 => InputSlot3,
+            3 => MoldSlot,
             _ => throw new ArgumentOutOfRangeException()
         };
 
@@ -675,39 +1000,13 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
 
         private void Every1000Ms(float dt)
         {
-            var beh = GetBehavior<BEBehaviorEBlastFurnace>();
-            if (beh == null || !StructureComplete)
-            {
-                StopWorkingAnim();
-                return;
-            }
-
-            var hasPower = beh.PowerSetting >= _maxConsumption * 0.1f;
-            var hasRecipe = !InputSlot1.Empty && !InputSlot2.Empty && FindMatchingRecipe(ref CurrentRecipe, ref CurrentRecipeName, inventory);
-            
-            var isActive = hasPower && hasRecipe && CurrentRecipe != null;
-            
-            if (isActive)
-            {
-                if (!_wasCraftingLastTick)
-                {
-                    StartWorkingAnim();
-                }
-            }
-            else if (_wasCraftingLastTick)
-            {
-                StopWorkingAnim();
-                MarkDirty(true);
-            }
-            
-            _wasCraftingLastTick = isActive;
         }
 
         protected virtual void UpdateState(float progress)
         {
             if (Api?.Side == EnumAppSide.Client && _clientDialog?.IsOpened() == true)
                 _clientDialog.Update(progress);
-            MarkDirty(true);
+            MarkDirty();
         }
 
         #endregion
@@ -795,8 +1094,7 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
         public override void OnBlockPlaced(ItemStack? byItemStack = null)
         {
             base.OnBlockPlaced(byItemStack);
-            if (ElectricalProgressive == null || byItemStack == null) return;
-            LoadEProperties.Load(this.Block, this);
+            LoadImmersiveEProperties.Load(this.Block, this);
         }
 
         public override bool OnTesselation(ITerrainMeshPool mesher, ITesselatorAPI tesselator)
@@ -818,27 +1116,32 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
                 for (var i = 0; i < _meshes.Length; i++)
                     if (_meshes[i] != null) mesher.AddMeshData(_meshes[i]);
             }
-            
-            if (AnimUtil?.activeAnimationsByAnimCode == null ||
-                AnimUtil.activeAnimationsByAnimCode.Count == 0)
-            {
-                return false;
-            }
-            
-            return true;
+
+            // Formed: корпус всегда рисует аниматор (power/open/close). Не переключать
+            // _drawBaseMesh каждый тик — из-за этого корпус мигал.
+            if (Block is ImmersiveWireBlock wireBlock)
+                wireBlock._drawBaseMesh = !(IsFormed && _animatorReadyForFormed);
+
+            return false;
         }
 
         public override void OnBlockRemoved()
         {
             base.OnBlockRemoved();
-            if (ElectricalProgressive != null) ElectricalProgressive.Connection = Facing.None;
             if (this.Api is ICoreClientAPI && this._clientDialog != null)
             {
                 this._clientDialog?.TryClose();
                 this._clientDialog = null;
             }
             StopWorkingAnim();
+            if (Block is ImmersiveWireBlock wb)
+                wb._drawBaseMesh = true;
             if (this.Api.Side == EnumAppSide.Client && this.AnimUtil != null) this.AnimUtil?.Dispose();
+            _resourceRenderer?.Dispose();
+            _resourceRenderer = null;
+            _coilRenderer?.Dispose();
+            _coilRenderer = null;
+            _coilMeshReady = false;
             _mesh?.Dispose();
             _resultingShape = null;
             _meshes = null;
@@ -850,6 +1153,11 @@ namespace ElectricalProgressive.Content.Block.EBlastFurnace
         {
             base.OnBlockUnloaded();
             this._clientDialog?.TryClose();
+            _resourceRenderer?.Dispose();
+            _resourceRenderer = null;
+            _coilRenderer?.Dispose();
+            _coilRenderer = null;
+            _coilMeshReady = false;
             _mesh?.Dispose();
             _resultingShape = null;
             _meshes = null;

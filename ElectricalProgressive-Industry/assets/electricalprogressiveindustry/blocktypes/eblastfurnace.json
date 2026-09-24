@@ -13,10 +13,20 @@
       [ 95, 99 ]
     ],
     "maxConsumption": 800,
-    "voltage": 128,
+    "voltage": 512,
     "maxCurrent": 100.0,
     "isolated": true,
     "isolatedEnvironment": true,
+    "wireNodes": [
+      {
+        "index": 0,
+        "voltage": "512",
+        "x": 0.50,
+        "y": 2.79,
+        "z": -0.06,
+        "dxdydz": 0.1
+      }
+    ],
     "handbook": {
       "groupBy": [ "eblastfurnace-*" ],
       "extraSections": [
@@ -91,7 +101,7 @@
       "name": "BEBehaviorEBlastFurnace"
     },
     {
-      "name": "ElectricalProgressive"
+      "name": "ElectricalProgressiveImmersive"
     }
   ],
 
@@ -111,7 +121,7 @@
       "propertiesByType": {
         "*-north": {
           "sizex": 3,
-          "sizey": 2,
+          "sizey": 3,
           "sizez": 2,
           "cposition": {
             "x": 1,
@@ -121,7 +131,7 @@
         },
         "*-east": {
           "sizex": 2,
-          "sizey": 2,
+          "sizey": 3,
           "sizez": 3,
           "cposition": {
             "x": 0,
@@ -131,7 +141,7 @@
         },
         "*-south": {
           "sizex": 3,
-          "sizey": 2,
+          "sizey": 3,
           "sizez": 2,
           "cposition": {
             "x": 1,
@@ -141,7 +151,7 @@
         },
         "*-west": {
           "sizex": 2,
-          "sizey": 2,
+          "sizey": 3,
           "sizez": 3,
           "cposition": {
             "x": 1,
