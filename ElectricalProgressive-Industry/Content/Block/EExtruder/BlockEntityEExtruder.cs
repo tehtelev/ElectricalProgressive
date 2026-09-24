@@ -140,7 +140,7 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 RecipeProgress = 0f;
                 SetForging(false);
                 UpdateState(RecipeProgress);
-                MarkDirty(true);
+                MarkDirty();
                 return;
             }
 
@@ -180,7 +180,7 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 }
             }
 
-            MarkDirty(true);
+            MarkDirty();
         }
 
         public float GetInputTemperature()
@@ -539,6 +539,8 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             return meshData;
         }
 
+        private string? _inventoryVisualKey;
+
         public void UpdateMeshes()
         {
             if (Api == null || Api.Side == EnumAppSide.Server || _capi == null || _meshes == null)
@@ -561,7 +563,8 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             }
 
             UpdateItemParticleOffset(gaugeMesh);
-            MarkDirty(true);
+            if (InventoryVisual.Changed(ref _inventoryVisualKey, inventory))
+                MarkDirty(true);
         }
 
         #region Логика рецептов
@@ -732,7 +735,7 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 }
 
                 UpdateState(RecipeProgress);
-                MarkDirty(true);
+                MarkDirty();
             }
             catch (Exception ex)
             {
@@ -823,7 +826,7 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             if (Api?.Side == EnumAppSide.Client && _clientDialog?.IsOpened() == true)
                 _clientDialog.Update(progress);
 
-            MarkDirty(true);
+            MarkDirty();
         }
 
         #endregion

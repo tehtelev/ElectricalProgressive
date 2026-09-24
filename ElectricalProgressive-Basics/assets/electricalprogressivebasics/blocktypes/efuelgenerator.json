@@ -154,7 +154,7 @@
   "variantgroups": [
     {
       "code": "state",
-      "states": [ "incomplete", "formed" ]
+      "states": [ "incomplete", "formed", "lit" ]
     },
     {
       "code": "side",
@@ -225,6 +225,22 @@
     "*-formed-west": {
       "base": "block/fuelgenerator/fuelgenerator",
       "rotateY": 90
+    },
+    "*-lit-north": {
+      "base": "block/fuelgenerator/fuelgenerator",
+      "rotateY": 0
+    },
+    "*-lit-east": {
+      "base": "block/fuelgenerator/fuelgenerator",
+      "rotateY": 270
+    },
+    "*-lit-south": {
+      "base": "block/fuelgenerator/fuelgenerator",
+      "rotateY": 180
+    },
+    "*-lit-west": {
+      "base": "block/fuelgenerator/fuelgenerator",
+      "rotateY": 90
     }
   },
 
@@ -249,7 +265,11 @@
   "resistance": 3.5,
   "lightAbsorptionByType": {
     "*-incomplete-*": 0,
-    "*-formed-*": 0
+    "*-formed-*": 0,
+    "*-lit-*": 0
+  },
+  "lightHsvByType": {
+    "*-lit-*": [ 0, 0, 14 ]
   },
 
   "sounds": {

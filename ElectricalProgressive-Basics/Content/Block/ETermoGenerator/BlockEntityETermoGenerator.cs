@@ -19,6 +19,7 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
 {
 
     private Facing _facing = Facing.None;
+    private int _shownFuelSize = -1;
 
     public BEBehaviorElectricalProgressive? ElectricalProgressive => GetBehavior<BEBehaviorElectricalProgressive>();
 
@@ -475,6 +476,17 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
 
     }
 
+    /// <summary>Ступень кучи топлива в топке, 0 или 1–8. Сетка меняется только при смене ступени.</summary>
+    private int FuelMeshSize()
+    {
+        var stack = Inventory[0].Itemstack;
+        if (stack?.Collectible?.CombustibleProps == null)
+            return 0;
+
+        var size = (int)(stack.StackSize * 8f / stack.Collectible.MaxStackSize) + 1;
+        return Math.Clamp(size, 1, 8);
+    }
+
     /// <summary>
     /// Обработчик изменения слота инвентаря
     /// </summary>
@@ -492,7 +504,10 @@ public class BlockEntityETermoGenerator : BlockEntityGenericTypedContainer, IHea
         }
 
         base.Block = this.Api.World.BlockAccessor.GetBlock(this.Pos);
-        this.MarkDirty(this.Api.Side == EnumAppSide.Server, null);
+        var fuelSize = FuelMeshSize();
+        var redrawFuel = fuelSize != _shownFuelSize;
+        _shownFuelSize = fuelSize;
+        this.MarkDirty(redrawFuel);
 
         if (this.Api is ICoreClientAPI && this._clientDialog != null)
         {

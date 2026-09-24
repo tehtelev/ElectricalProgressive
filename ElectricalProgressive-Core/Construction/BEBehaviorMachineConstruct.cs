@@ -58,7 +58,9 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
                 return false;
             if (!Blockentity.Block.Variant.ContainsKey(_stateVariant))
                 return _rcc != null && IsConstructionComplete;
-            return Blockentity.Block.Variant[_stateVariant] == _formedState;
+            var state = Blockentity.Block.Variant[_stateVariant];
+            // lit — тот же собранный генератор, только со светом. Иначе ExchangeBlock гасит IsFormed.
+            return state == _formedState || state == "lit";
         }
     }
 

@@ -314,7 +314,9 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
         }
         
         Block = Api.World.BlockAccessor.GetBlock(Pos);
-        MarkDirty(true);
+        // Вода и уголь не меняют сетку. MarkDirty(true) пересобирает чанк,
+        // сбрасывает work-on на кадр 0 и заново считает свет.
+        MarkDirty();
         Api.World.BlockAccessor.GetChunkAtBlockPos(Pos)?.MarkModified();
         
         // Обновляем GUI при изменении слота (как в прессе)
@@ -373,7 +375,29 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
             _clientDialog.Update(GenTemp, GetFuelBurnTime(), WaterAmount, IsCurrentLiquidAllowed, CurrentConsumptionRate);
         }
     
+        UpdateWorkLight(_fuelBurnTime > 0f && !WaterSlot.Empty && IsCurrentLiquidAllowed && StructureComplete);
         MarkDirty();
+    }
+
+    /// <summary>
+    /// Свет только на время работы: вариант lit. Один ExchangeBlock при включении и при выключении.
+    /// </summary>
+    private void UpdateWorkLight(bool shouldEmit)
+    {
+        if (Api?.Side != EnumAppSide.Server)
+            return;
+
+        var state = Block?.Variant?["state"];
+        if (state != "formed" && state != "lit")
+            return;
+        if (shouldEmit == (state == "lit"))
+            return;
+
+        var next = Api.World.GetBlock(Block.CodeWithVariant("state", shouldEmit ? "lit" : "formed"));
+        if (next == null)
+            return;
+
+        Api.World.BlockAccessor.ExchangeBlock(next.BlockId, Pos);
     }
     
     private float GetWaterAmount()
@@ -477,7 +501,7 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
             
             currentStack.StackSize += movedItems;
             WaterSlot.MarkDirty();
-            MarkDirty(true);
+            MarkDirty();
             
             return movedItems;
         }
@@ -519,7 +543,6 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
         
         if (!AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
         {
-            Block.LightHsv = new byte[] { 0, 0, 14 };
             AnimUtil.StartAnimation(new AnimationMetaData()
             {
                 Animation = "work-on",
@@ -536,10 +559,7 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
         if (Api?.Side != EnumAppSide.Client || AnimUtil == null) return;
         
         if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
-        {
-            Block.LightHsv = new byte[] { 0, 0, 0 };
             AnimUtil.StopAnimation("work-on");
-        }
     }
     
     // === Методы работы с топливом ===

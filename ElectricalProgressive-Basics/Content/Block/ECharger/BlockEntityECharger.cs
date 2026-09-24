@@ -363,12 +363,15 @@ public class BlockEntityECharger : BlockEntityContainer, ITexPositionSource
     /// <summary>
     /// Обновляет все meshы в инвентаре
     /// </summary>
+    private string? _inventoryVisualKey;
+
     public void UpdateMeshes()
     {
         for (var i = 0; i < this._inventory.Count; i++)
             UpdateMesh(i);
 
-        MarkDirty(true);
+        if (InventoryVisual.Changed(ref _inventoryVisualKey, _inventory))
+            MarkDirty(true);
     }
 
     internal bool OnPlayerInteract(IPlayer byPlayer, Vec3d _)
@@ -503,10 +506,7 @@ public class BlockEntityECharger : BlockEntityContainer, ITexPositionSource
         }
 
         if (Api is ICoreClientAPI)
-        {
-            UpdateMeshes(); // обновляем меши при загрузке
-            Api.World.BlockAccessor.MarkBlockDirty(Pos);
-        }
+            UpdateMeshes();
     }
 
     public override void ToTreeAttributes(ITreeAttribute tree)

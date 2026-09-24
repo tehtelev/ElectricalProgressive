@@ -180,7 +180,7 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
             RecipeProgress = 0f;
             SetForging(false);
             UpdateState(RecipeProgress);
-            MarkDirty(true);
+            MarkDirty();
             return;
         }
 
@@ -209,7 +209,7 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
         if (AccumulatedEnergy >= EnergyOperation)
             ProcessCompletedCraft();
 
-        MarkDirty(true);
+        MarkDirty();
     }
 
     public float GetInputTemperature()
@@ -671,7 +671,7 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
             }
 
             UpdateState(RecipeProgress);
-            MarkDirty(true);
+            MarkDirty();
         }
         catch (Exception ex)
         {
@@ -766,7 +766,7 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
     {
         if (Api != null && Api.Side == EnumAppSide.Client && _clientDialog != null && _clientDialog.IsOpened())
             _clientDialog.Update(recipeProgress, CurrentRecipeName);
-        MarkDirty(true);
+        MarkDirty();
     }
 
     public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)

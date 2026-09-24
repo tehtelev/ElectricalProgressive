@@ -162,7 +162,7 @@ namespace ElectricalProgressive.Content.Block.ECrusher
                 }
             }
     
-            MarkDirty(true);
+            MarkDirty();
         }
 
         public override void Initialize(ICoreAPI api)
@@ -459,12 +459,15 @@ namespace ElectricalProgressive.Content.Block.ECrusher
             return meshData;
         }
 
+        private string? _inventoryVisualKey;
+
         public void UpdateMeshes()
         {
             for (var i = 0; i < this.inventory.Count; i++)
                 UpdateMesh(i);
 
-            MarkDirty(true);
+            if (InventoryVisual.Changed(ref _inventoryVisualKey, inventory))
+                MarkDirty(true);
         }
 
         #region Логика рецептов
@@ -694,7 +697,7 @@ namespace ElectricalProgressive.Content.Block.ECrusher
             if (Api?.Side == EnumAppSide.Client && _clientDialog?.IsOpened() == true)
                 _clientDialog.Update(progress);
 
-            MarkDirty(true);
+            MarkDirty();
         }
 
         #endregion

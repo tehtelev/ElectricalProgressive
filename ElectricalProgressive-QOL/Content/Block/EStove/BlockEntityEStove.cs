@@ -494,20 +494,23 @@ public class BlockEntityEStove : BlockEntityContainer, IHeatSource, ITexPosition
     /// <summary>
     /// Обновляет меши для всех слотов
     /// </summary>
+    private string? _inventoryVisualKey;
+
     public void UpdateMeshes()
     {
         for (var i = 0; i < inventory.Count - 1; i++)
         {
             UpdateMesh(i);
         }
-        
-        MarkDirty(true);
+
+        if (InventoryVisual.Changed(ref _inventoryVisualKey, inventory))
+            MarkDirty(true);
     }
 
     private void OnSlotModifid(int slotid)
     {
         Block = Api.World.BlockAccessor.GetBlock(Pos);
-        MarkDirty(Api.Side == EnumAppSide.Server);
+        MarkDirty();
         if (Api is ICoreClientAPI && _clientDialog != null)
             SetDialogValues(_clientDialog.Attributes);
         Api.World.BlockAccessor.GetChunkAtBlockPos(Pos).MarkModified();

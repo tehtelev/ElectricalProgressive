@@ -436,7 +436,7 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
                 {
                     currentStack.StackSize += movedItems;
                     LiquidSlot.MarkDirty();
-                    MarkDirty(true);
+                    MarkDirty();
                     UpdateState();
 
                     return movedItems;
@@ -519,7 +519,7 @@ public class BlockEntityEAquaAccum : BlockEntityGenericTypedContainer
         {
             _clientDialog.Update(PumpProgress, LiquidAmount, LiquidCapacity, GetCondensationStatus());
         }
-        MarkDirty(true);
+        MarkDirty();
     }
 
     private void UpdateCondenser(float dt)

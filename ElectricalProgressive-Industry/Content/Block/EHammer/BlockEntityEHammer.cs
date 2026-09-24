@@ -139,7 +139,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             RecipeProgress = 0f;
             SetForging(false);
             UpdateState(RecipeProgress);
-            MarkDirty(true);
+            MarkDirty();
             return;
         }
 
@@ -167,7 +167,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             ProcessCompletedCraft();
         }
 
-        MarkDirty(true);
+        MarkDirty();
     }
 
     public float GetInputTemperature()
@@ -566,12 +566,15 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         return meshData;
     }
 
+    private string? _inventoryVisualKey;
+
     public void UpdateMeshes()
     {
         for (var i = 0; i < this.inventory.Count; i++)
             UpdateMesh(i);
 
-        MarkDirty(true);
+        if (InventoryVisual.Changed(ref _inventoryVisualKey, inventory))
+            MarkDirty(true);
     }
 
     private void OnSlotModifid(int slotid)
@@ -606,7 +609,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         if (Api?.Side == EnumAppSide.Server)
         {
             FindMatchingRecipe(ref CurrentRecipe, ref CurrentRecipeName, inventory[0]);
-            MarkDirty(true);
+            MarkDirty();
         }
     }
 
@@ -749,7 +752,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             }
             
             UpdateState(RecipeProgress);
-            MarkDirty(true);
+            MarkDirty();
         }
         catch (Exception ex)
         {
@@ -834,7 +837,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         {
             _clientDialog.Update(recipeProgress);
         }
-        MarkDirty(true);
+        MarkDirty();
     }
 
     public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)

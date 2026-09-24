@@ -80,7 +80,7 @@ public class BlockEAquaAccum : BlockEBase, ILiquidSink, ILiquidSource, IMultiBlo
         if (stack.StackSize <= 0) be.LiquidSlot.Itemstack = null;
 
         be.LiquidSlot.MarkDirty();
-        be.MarkDirty(true);
+        be.MarkDirty();
         return takenStack;
     }
 
@@ -183,7 +183,7 @@ public class BlockEAquaAccum : BlockEBase, ILiquidSink, ILiquidSource, IMultiBlo
         }
 
         be.Inventory[GetContainerSlotId(pos)].MarkDirty();
-        be.MarkDirty(true);
+        be.MarkDirty();
     }
 
     /// <summary>

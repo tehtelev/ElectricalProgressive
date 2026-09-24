@@ -148,7 +148,7 @@ namespace ElectricalProgressive.Content.Block.ESieve
                 }
             }
     
-            MarkDirty(true);
+            MarkDirty();
         }
 
         public override void Initialize(ICoreAPI api)
@@ -651,7 +651,7 @@ namespace ElectricalProgressive.Content.Block.ESieve
             if (Api?.Side == EnumAppSide.Client && _clientDialog?.IsOpened() == true)
                 _clientDialog.Update(progress);
 
-            MarkDirty(true);
+            MarkDirty();
         }
 
         #endregion

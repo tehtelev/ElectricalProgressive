@@ -567,12 +567,15 @@ class BlockEntityEFreezer : ContainerEFreezer, ITexPositionSource
     /// <summary>
     /// Обновляет все meshы в инвентаре
     /// </summary>
+    private string? _inventoryVisualKey;
+
     public void UpdateMeshes()
     {
         for (var i = 0; i < _inventory.Count; i++)
             UpdateMesh(i);
 
-        MarkDirty(true);
+        if (InventoryVisual.Changed(ref _inventoryVisualKey, _inventory))
+            MarkDirty(true);
     }
 
     /// <summary>

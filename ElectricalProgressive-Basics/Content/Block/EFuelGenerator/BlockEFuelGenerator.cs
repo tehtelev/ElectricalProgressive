@@ -97,7 +97,7 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource, IMult
         if (stack.StackSize <= 0) be.WaterSlot.Itemstack = null;
         
         be.WaterSlot.MarkDirty();
-        be.MarkDirty(true);
+        be.MarkDirty();
         return takenStack;
     }
     
@@ -180,7 +180,7 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource, IMult
         }
     
         be.Inventory[GetContainerSlotId(pos)].MarkDirty();
-        be.MarkDirty(true);
+        be.MarkDirty();
     }
     
     private void DoLiquidMovedEffects(IPlayer player, ItemStack contentStack, int moved, BlockLiquidContainerBase.EnumLiquidDirection dir)

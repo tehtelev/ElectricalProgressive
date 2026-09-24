@@ -17,6 +17,7 @@ public class BlockEntityEAcidAccum : BlockEntityGenericTypedContainer
     private GuiDialogEAcidAccum? _clientDialog;
     private MeshData? _liquidMesh;
     private string? _liquidMeshKey;
+    private int _liquidVisualStep = int.MinValue;
 
     public override InventoryBase Inventory => _inventory;
     public override string DialogTitle => Lang.Get("electricalprogressivebasics:eacidaccum-title-gui");
@@ -73,11 +74,31 @@ public class BlockEntityEAcidAccum : BlockEntityGenericTypedContainer
         }
     }
 
+    private int LiquidVisualStep()
+    {
+        if (LiquidSlot == null || LiquidSlot.Empty || !InventoryEAcidAccum.IsSulfuricAcid(LiquidStack))
+            return 0;
+
+        var fill = LiquidCapacity > 0 ? LiquidAmount / LiquidCapacity : 0f;
+        if (fill < 0.02f)
+            return 0;
+
+        return 1 + (int)(fill * 40f);
+    }
+
     public BlockEntityEAcidAccum()
     {
         _inventory = new InventoryEAcidAccum();
         _inventory.SlotModified += _ =>
         {
+            var step = LiquidVisualStep();
+            if (step == _liquidVisualStep)
+            {
+                MarkDirty();
+                return;
+            }
+
+            _liquidVisualStep = step;
             _liquidMesh = null;
             MarkDirty(true);
         };
@@ -154,7 +175,6 @@ public class BlockEntityEAcidAccum : BlockEntityGenericTypedContainer
             var placed = liquidStack.Clone();
             placed.StackSize = movedItems;
             LiquidStack = placed;
-            MarkDirty(true);
             return movedItems;
         }
 
@@ -167,7 +187,6 @@ public class BlockEntityEAcidAccum : BlockEntityGenericTypedContainer
             return 0;
         currentStack.StackSize += moved;
         LiquidSlot.MarkDirty();
-        MarkDirty(true);
         return moved;
     }
 
