@@ -1,0 +1,32 @@
+{
+  "code": "estoragepattern",
+  "class": "ItemEStoragePattern",
+  "maxstacksize": 64,
+  "shape": { "base": "item/pattern" },
+  "creativeinventory": {
+    "general": [ "*" ],
+    "items": [ "*" ],
+    "estorage": [ "*" ]
+  },
+  "guiTransform": {
+    "translation": { "x": 0, "y": 2, "z": 0 },
+    "rotation": { "x": -70, "y": 20, "z": 0 },
+    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
+    "scale": 2.2
+  },
+  "fpHandTransform": {
+    "rotation": { "x": 20, "y": 90, "z": 0 },
+    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
+    "scale": 1.6
+  },
+  "tpHandTransform": {
+    "translation": { "x": -0.8, "y": -0.4, "z": -0.6 },
+    "rotation": { "x": 0, "y": 20, "z": 90 },
+    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
+    "scale": 0.7
+  },
+  "groundTransform": {
+    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
+    "scale": 3
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "code": "estoragefiber",
+  "class": "BlockEStorageCable",
+  "entityClass": "BlockEntityEStorageCable",
+  "attributes": {
+    "channels": 256,
+    "handbook": {
+      "groupBy": [ "estoragefiber" ],
+      "extraSections": [ { "title": "electricalprogressivestorage:block-handbooktitle-estoragefiber", "text": "electricalprogressivestorage:block-handbooktext-estoragefiber" } ]
+    }
+  },
+  "creativeinventory": { "general": [ "*" ], "estorage": [ "*" ] },
+  "shape": { "base": "block/cable" },
+  "shapeInventory": { "base": "electricalprogressivebasics:block/ecable/ecable-single/ecable-32v-single-block" },
+  "textures": {
+    "cable": { "base": "block/estoragefiber" },
+    "material": { "base": "block/estoragefiber" },
+    "gear": { "base": "block/estoragefiber" }
+  },
+  "guiTransform": {
+    "origin": { "x": 0.5, "y": 0.05, "z": 0.5 },
+    "scale": 2.0
+  },
+  "blockmaterial": "Metal",
+  "resistance": 1.5,
+  "lightAbsorption": 0,
+  "sideopaque": { "all": false },
+  "sidesolid": { "all": false },
+  "collisionbox": { "x1": 0.35, "y1": 0.35, "z1": 0.35, "x2": 0.65, "y2": 0.65, "z2": 0.65 },
+  "selectionbox": { "x1": 0.25, "y1": 0.25, "z1": 0.25, "x2": 0.75, "y2": 0.75, "z2": 0.75 },
+  "sounds": { "place": "game:block/anvil", "walk": "game:walk/metal", "hit": "game:block/metal", "break": "game:block/metal" }
+}

@@ -1,0 +1,53 @@
+{
+  "code": "estorageliquidterminal",
+  "class": "BlockEStorageTerminal",
+  "entityClass": "BlockEntityEStorageLiquidTerminal",
+  "attributes": {
+    "handbook": {
+      "groupBy": [ "estorageliquidterminal" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivestorage:block-handbooktitle-estorageliquidterminal",
+          "text": "electricalprogressivestorage:block-handbooktext-estorageliquidterminal"
+        }
+      ]
+    }
+  },
+  "creativeinventory": {
+    "general": [ "*" ],
+    "estorage": [ "*" ]
+  },
+  "shape": { "base": "block/estorageliquidterminal" },
+  "textures": {
+    "iron": { "base": "block/liquidplate" },
+    "quartzglass": { "base": "block/liquidglass" },
+    "emeral": { "base": "block/liquidglass" },
+    "topaz": { "base": "block/liquidglass" }
+  },
+  "blockmaterial": "Metal",
+  "resistance": 3.5,
+  "lightAbsorption": 0,
+  "faceCullMode": "NeverCull",
+  "renderPass": "OpaqueNoCull",
+  "emitSideAo": { "all": false },
+  "sideAo": { "all": true },
+  "sidesolid": { "all": false },
+  "sideopaque": { "all": false },
+  "collisionbox": { "x1": 0, "y1": 0, "z1": 0, "x2": 1, "y2": 0.25, "z2": 1 },
+  "selectionbox": { "x1": 0, "y1": 0, "z1": 0, "x2": 1, "y2": 0.25, "z2": 1 },
+  "guiTransform": {
+    "translation": { "x": 0, "y": 3, "z": 0 },
+    "rotation": { "x": -51, "y": -63, "z": 0 },
+    "origin": { "x": 0.5, "y": 0, "z": 0.5 }
+  },
+  "groundTransform": {
+    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
+    "scale": 2
+  },
+  "sounds": {
+    "place": "game:block/anvil",
+    "walk": "game:walk/metal",
+    "hit": "game:block/metal",
+    "break": "game:block/metal"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "editor": { "allAngles": false, "entityTextureMode": false },
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textures": {},
+  "elements": [
+    {
+      "name": "X",
+      "from": [ 0, 6, 6 ],
+      "to": [ 16, 10, 10 ],
+      "faces": {
+        "north": { "texture": "#cable", "uv": [ 6, 6, 10, 10 ] },
+        "east": { "texture": "#cable", "uv": [ 6, 6, 10, 10 ] },
+        "south": { "texture": "#cable", "uv": [ 6, 6, 10, 10 ] },
+        "west": { "texture": "#cable", "uv": [ 6, 6, 10, 10 ] },
+        "up": { "texture": "#cable", "uv": [ 0, 6, 16, 10 ] },
+        "down": { "texture": "#cable", "uv": [ 0, 6, 16, 10 ] }
+      }
+    },
+    {
+      "name": "Y",
+      "from": [ 6, 0, 6 ],
+      "to": [ 10, 16, 10 ],
+      "faces": {
+        "north": { "texture": "#cable", "uv": [ 6, 0, 10, 16 ] },
+        "east": { "texture": "#cable", "uv": [ 6, 0, 10, 16 ] },
+        "south": { "texture": "#cable", "uv": [ 6, 0, 10, 16 ] },
+        "west": { "texture": "#cable", "uv": [ 6, 0, 10, 16 ] },
+        "up": { "texture": "#cable", "uv": [ 6, 6, 10, 10 ] },
+        "down": { "texture": "#cable", "uv": [ 6, 6, 10, 10 ] }
+      }
+    },
+    {
+      "name": "Z",
+      "from": [ 6, 6, 0 ],
+      "to": [ 10, 10, 16 ],
+      "faces": {
+        "north": { "texture": "#cable", "uv": [ 6, 6, 10, 10 ] },
+        "east": { "texture": "#cable", "uv": [ 0, 6, 16, 10 ] },
+        "south": { "texture": "#cable", "uv": [ 6, 6, 10, 10 ] },
+        "west": { "texture": "#cable", "uv": [ 0, 6, 16, 10 ] },
+        "up": { "texture": "#cable", "uv": [ 6, 0, 10, 16 ] },
+        "down": { "texture": "#cable", "uv": [ 6, 0, 10, 16 ] }
+      }
+    }
+  ]
+}

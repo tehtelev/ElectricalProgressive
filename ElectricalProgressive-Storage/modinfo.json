@@ -1,0 +1,16 @@
+{
+  "type": "code",
+  "modid": "electricalprogressivestorage",
+  "name": "Electrical Progressive: Storage",
+  "authors": [
+    "Tehtelev",
+    "Kotl"
+  ],
+  "description": "Network storage: controller, drive, disks and terminal.",
+  "Version": "1.0.0",
+  "dependencies": {
+    "game": "1.22.0",
+    "electricalprogressivecore": "3.3.0",
+    "electricalprogressivebasics": "3.3.0"
+  }
+}

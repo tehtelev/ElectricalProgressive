@@ -1,0 +1,32 @@
+{
+  "code": "estoragedrive",
+  "class": "BlockEStorageDrive",
+  "entityClass": "BlockEntityEStorageDrive",
+  "attributes": {
+    "handbook": {
+      "groupBy": [ "estoragedrive" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivestorage:block-handbooktitle-estoragedrive",
+          "text": "electricalprogressivestorage:block-handbooktext-estoragedrive"
+        }
+      ]
+    }
+  },
+  "creativeinventory": {
+    "general": [ "*" ],
+    "estorage": [ "*" ]
+  },
+  "shape": { "base": "block/cube" },
+  "textures": {
+    "all": { "base": "block/estoragedrive" }
+  },
+  "blockmaterial": "Metal",
+  "resistance": 3.5,
+  "sounds": {
+    "place": "game:block/anvil",
+    "walk": "game:walk/metal",
+    "hit": "game:block/metal",
+    "break": "game:block/metal"
+  }
+}

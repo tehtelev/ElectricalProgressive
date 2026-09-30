@@ -1,0 +1,20 @@
+{
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "elements": [
+    {
+      "name": "Cube",
+      "from": [ 7.5, -0.5, -0.5 ],
+      "to": [ 8.5, 0.5, 7.5 ],
+      "rotationOrigin": [ 8.0, 8.0, 8.0 ],
+      "faces": {
+        "north": { "texture": "#cable", "uv": [ 9.0, 5.5, 10.0, 6.5 ], "enabled": false },
+        "east": { "texture": "#cable", "uv": [ 5.5, 6.0, 13.5, 7.0 ] },
+        "south": { "texture": "#cable", "uv": [ 11.0, 9.0, 12.0, 10.0 ], "enabled": false },
+        "west": { "texture": "#cable", "uv": [ 6.5, 10.5, 14.5, 11.5 ] },
+        "up": { "texture": "#cable", "uv": [ 4.5, 2.0, 5.5, 10.0 ] },
+        "down": { "texture": "#cable", "uv": [ 11.0, 3.0, 12.0, 11.0 ] }
+      }
+    }
+  ]
+}

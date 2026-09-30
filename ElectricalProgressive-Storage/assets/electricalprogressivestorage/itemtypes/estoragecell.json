@@ -1,0 +1,52 @@
+{
+  "code": "estoragecell",
+  "class": "ItemEStorageCell",
+  "maxstacksize": 1,
+  "variantgroups": [
+    { "code": "tier", "states": [ "1k", "4k", "16k", "64k" ] }
+  ],
+  "attributesByType": {
+    "*-1k": { "bytes": 1024 },
+    "*-4k": { "bytes": 4096 },
+    "*-16k": { "bytes": 16384 },
+    "*-64k": { "bytes": 65536 }
+  },
+  "attributes": {
+    "handbook": {
+      "groupBy": [ "estoragecell-*" ]
+    }
+  },
+  "shape": { "base": "item/gear-cell" },
+  "texturesByType": {
+    "*-1k": { "temporal": { "base": "item/gear-cell-1k" } },
+    "*-4k": { "temporal": { "base": "item/gear-cell-4k" } },
+    "*-16k": { "temporal": { "base": "item/gear-cell-16k" } },
+    "*-64k": { "temporal": { "base": "item/gear-cell-64k" } }
+  },
+  "creativeinventory": {
+    "general": [ "*" ],
+    "items": [ "*" ],
+    "estorage": [ "*" ]
+  },
+  "guiTransform": {
+    "translation": { "x": 3, "y": 1, "z": 0 },
+    "rotation": { "x": 145, "y": -12, "z": 0 },
+    "origin": { "x": 0.5, "y": 0.0625, "z": 0.5 },
+    "scale": 2.5
+  },
+  "fpHandTransform": {
+    "rotation": { "x": 0, "y": 0, "z": 5 },
+    "origin": { "x": 0.5, "y": 0.0625, "z": 0.5 },
+    "scale": 1.4
+  },
+  "tpHandTransform": {
+    "translation": { "x": -0.95, "y": -0.11, "z": -0.85 },
+    "rotation": { "x": 0, "y": -89, "z": 5 },
+    "origin": { "x": 0.5, "y": 0.0625, "z": 0.5 },
+    "scale": 0.61
+  },
+  "groundTransform": {
+    "origin": { "x": 0.39, "y": 0, "z": 0.47 },
+    "scale": 3.76
+  }
+}

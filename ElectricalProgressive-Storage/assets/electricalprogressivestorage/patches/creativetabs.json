@@ -1,0 +1,8 @@
+[
+  {
+    "file": "game:config/creativetabs.json",
+    "op": "add",
+    "path": "/tabConfigs/-",
+    "value": { "code": "estorage", "listOrder": 1.05 }
+  }
+]

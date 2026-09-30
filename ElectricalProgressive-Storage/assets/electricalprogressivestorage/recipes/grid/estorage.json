@@ -1,0 +1,236 @@
+[
+  {
+    "ingredientPattern": "CG",
+    "width": 2,
+    "height": 1,
+    "ingredients": {
+      "C": { "type": "item", "code": "game:metalplate-copper" },
+      "G": { "type": "block", "code": "game:glass-plain" }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivestorage:estoragecable",
+      "quantity": 8
+    }
+  },
+  {
+    "ingredientPattern": "G,C",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "G": { "type": "block", "code": "game:glass-plain" },
+      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" }
+    },
+    "output": { "type": "block", "code": "electricalprogressivestorage:estoragefiber", "quantity": 4 }
+  },
+  {
+    "ingredientPattern": "CCC,LSL,PPP",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
+      "L": { "type": "item", "code": "electricalprogressivebasics:coil" },
+      "S": { "type": "item", "code": "game:metalplate-steel" },
+      "P": { "type": "item", "code": "game:metalplate-copper" }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivestorage:estoragecontroller-offline"
+    }
+  },
+  {
+    "ingredientPattern": "PCP,CBC,PCP",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "P": { "type": "item", "code": "game:metalplate-iron" },
+      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
+      "B": { "type": "block", "code": "game:chest-*" }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivestorage:estoragedrive"
+    }
+  },
+  {
+    "ingredientPattern": "GGG,CPC,PPP",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "G": { "type": "block", "code": "game:glass-plain" },
+      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
+      "P": { "type": "item", "code": "game:metalplate-copper" }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivestorage:estorageterminal"
+    }
+  },
+  {
+    "ingredientPattern": "T,G",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "T": { "type": "item", "code": "game:metalplate-tinbronze" },
+      "G": { "type": "block", "code": "game:glass-plain" }
+    },
+    "output": {
+      "type": "item",
+      "code": "electricalprogressivestorage:estoragedisk-1k"
+    }
+  },
+  {
+    "ingredientPattern": "TT,GG",
+    "width": 2,
+    "height": 2,
+    "ingredients": {
+      "T": { "type": "item", "code": "game:metalplate-tinbronze" },
+      "G": { "type": "block", "code": "game:glass-plain" }
+    },
+    "output": {
+      "type": "item",
+      "code": "electricalprogressivestorage:estoragedisk-4k"
+    }
+  },
+  {
+    "ingredientPattern": "IP,GG",
+    "width": 2,
+    "height": 2,
+    "ingredients": {
+      "I": { "type": "item", "code": "game:metalplate-iron" },
+      "P": { "type": "item", "code": "game:metalplate-copper" },
+      "G": { "type": "block", "code": "game:glass-plain" }
+    },
+    "output": {
+      "type": "item",
+      "code": "electricalprogressivestorage:estoragedisk-16k"
+    }
+  },
+  {
+    "ingredientPattern": "SP,GG",
+    "width": 2,
+    "height": 2,
+    "ingredients": {
+      "S": { "type": "item", "code": "game:metalplate-steel" },
+      "P": { "type": "item", "code": "game:metalplate-tinbronze" },
+      "G": { "type": "block", "code": "game:glass-plain" }
+    },
+    "output": {
+      "type": "item",
+      "code": "electricalprogressivestorage:estoragedisk-64k"
+    }
+  },
+  {
+    "ingredientPattern": "GBG,CPC,PPP",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "G": { "type": "block", "code": "game:glass-plain" },
+      "B": { "type": "block", "code": "game:woodbucket" },
+      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
+      "P": { "type": "item", "code": "game:metalplate-copper" }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivestorage:estorageliquidterminal"
+    }
+  },
+  {
+    "ingredientPattern": "B,T,G",
+    "width": 1,
+    "height": 3,
+    "ingredients": {
+      "B": { "type": "block", "code": "game:woodbucket" },
+      "T": { "type": "item", "code": "game:metalplate-tinbronze" },
+      "G": { "type": "block", "code": "game:glass-plain" }
+    },
+    "output": {
+      "type": "item",
+      "code": "electricalprogressivestorage:estoragecell-1k"
+    }
+  },
+  {
+    "ingredientPattern": "BT,GG",
+    "width": 2,
+    "height": 2,
+    "ingredients": {
+      "B": { "type": "block", "code": "game:woodbucket" },
+      "T": { "type": "item", "code": "game:metalplate-tinbronze" },
+      "G": { "type": "block", "code": "game:glass-plain" }
+    },
+    "output": {
+      "type": "item",
+      "code": "electricalprogressivestorage:estoragecell-4k"
+    }
+  },
+  {
+    "ingredientPattern": "BI,GG",
+    "width": 2,
+    "height": 2,
+    "ingredients": {
+      "B": { "type": "block", "code": "game:woodbucket" },
+      "I": { "type": "item", "code": "game:metalplate-iron" },
+      "G": { "type": "block", "code": "game:glass-plain" }
+    },
+    "output": {
+      "type": "item",
+      "code": "electricalprogressivestorage:estoragecell-16k"
+    }
+  },
+  {
+    "ingredientPattern": "BS,GG",
+    "width": 2,
+    "height": 2,
+    "ingredients": {
+      "B": { "type": "block", "code": "game:woodbucket" },
+      "S": { "type": "item", "code": "game:metalplate-steel" },
+      "G": { "type": "block", "code": "game:glass-plain" }
+    },
+    "output": {
+      "type": "item",
+      "code": "electricalprogressivestorage:estoragecell-64k"
+    }
+  },
+  {
+    "ingredientPattern": "P,C",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "P": { "type": "item", "code": "game:paper-parchment" },
+      "C": { "type": "item", "code": "game:metalplate-copper" }
+    },
+    "output": {
+      "type": "item",
+      "code": "electricalprogressivestorage:estoragepattern",
+      "quantity": 2
+    }
+  },
+  {
+    "ingredientPattern": "T,P",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "T": { "type": "block", "code": "electricalprogressivestorage:estorageterminal" },
+      "P": { "type": "item", "code": "electricalprogressivestorage:estoragepattern" }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivestorage:estoragepatternterminal"
+    }
+  },
+  {
+    "ingredientPattern": "IGI,CCC,PPP",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "I": { "type": "item", "code": "game:metalplate-iron" },
+      "G": { "type": "block", "code": "game:glass-plain" },
+      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
+      "P": { "type": "item", "code": "game:metalplate-copper" }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivestorage:estorageinterface"
+    }
+  }
+]
