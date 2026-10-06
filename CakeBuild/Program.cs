@@ -11,8 +11,12 @@ using Cake.Json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace CakeBuild
 {
@@ -28,6 +32,7 @@ namespace CakeBuild
 
     public class BuildContext : FrostingContext
     {
+        // ВАЖНО: порядок = порядок зависимостей (Core первым)
         public List<string> ProjectNames =
         [
             "ElectricalProgressive-Core",
@@ -37,147 +42,205 @@ namespace CakeBuild
             "ElectricalProgressive-Industry",
             "ElectricalProgressive-Transport",
             "ElectricalProgressive-Storage"
-            // Add other project names here
         ];
+
+        // Проекты, которые успешно собрались (нужны для Package при ContinueOnError)
+        public List<string> BuiltProjects { get; } = new();
 
         public BuildContext(ICakeContext context) : base(context)
         {
-            this.BuildConfiguration = context.Argument("configuration", "Release");
-            this.SkipJsonValidation = context.Argument("skipJsonValidation", false);
-            // Optionally allow continuing on error; default false to fail fast
-            this.ContinueOnError = context.Argument("continueOnError", false);
+            BuildConfiguration = context.Argument("configuration", "Release");
+            SkipJsonValidation = context.Argument("skipJsonValidation", false);
+            ContinueOnError = context.Argument("continueOnError", false);
+            Clean = context.Argument("clean", true); // можно отключить: --clean=false
+
+            // Выборочная сборка: --project=ElectricalProgressive-QOL
+            var only = context.Argument("project", "");
+            if (!string.IsNullOrWhiteSpace(only))
+                ProjectNames = ProjectNames.Where(p => p == only).ToList();
         }
 
         public string BuildConfiguration { get; set; }
         public bool SkipJsonValidation { get; set; }
         public bool ContinueOnError { get; set; }
+        public bool Clean { get; set; }
     }
 
-    [TaskName("PerProject")]
-    public sealed class PerProjectTask : FrostingTask<BuildContext>
+    [TaskName("CleanReleases")]
+    public sealed class CleanReleasesTask : FrostingTask<BuildContext>
     {
         public override void Run(BuildContext context)
         {
-            // Ensure releases directory exists and is clean only once before the per-project loop
             context.EnsureDirectoryExists("../Releases");
             context.CleanDirectory("../Releases");
+        }
+    }
 
-            foreach (var projectName in context.ProjectNames)
+    [TaskName("ValidateJson")]
+    [IsDependentOn(typeof(CleanReleasesTask))]
+    public sealed class ValidateJsonTask : FrostingTask<BuildContext>
+    {
+        public override bool ShouldRun(BuildContext context) => !context.SkipJsonValidation;
+
+        public override void Run(BuildContext context)
+        {
+            var files = context.ProjectNames
+                .SelectMany(p => context.GetFiles($"../{p}/assets/**/*.json"))
+                .Select(f => f.FullPath)
+                .ToList();
+
+            var errors = new ConcurrentBag<string>();
+
+            Parallel.ForEach(files, path =>
             {
-                context.Information("=== Processing project: {0} ===", projectName);
-
                 try
                 {
-                    // 1) Validate JSON for this project (unless skipped)
-                    if (!context.SkipJsonValidation)
-                    {
-                        var jsonFiles = context.GetFiles($"../{projectName}/assets/**/*.json");
-                        foreach (var file in jsonFiles)
-                        {
-                            try
-                            {
-                                var json = File.ReadAllText(file.FullPath);
-                                JToken.Parse(json);
-                            }
-                            catch (JsonException ex)
-                            {
-                                throw new Exception($"Validation failed for JSON file in project {projectName}: {file.FullPath}{Environment.NewLine}{ex.Message}", ex);
-                            }
-                        }
-                        context.Information("JSON validation passed for {0}", projectName);
-                    }
-                    else
-                    {
-                        context.Information("Skipping JSON validation for {0}", projectName);
-                    }
+                    JToken.Parse(File.ReadAllText(path));
+                }
+                catch (JsonException ex)
+                {
+                    errors.Add($"{path}: {ex.Message}");
+                }
+            });
 
-                    // 2) Clean and publish this project
+            context.Information("Checked {0} JSON files", files.Count);
+
+            if (!errors.IsEmpty)
+            {
+                throw new Exception("JSON validation failed:" + Environment.NewLine +
+                                    string.Join(Environment.NewLine, errors.OrderBy(e => e)));
+            }
+        }
+    }
+
+    [TaskName("Build")]
+    [IsDependentOn(typeof(ValidateJsonTask))]
+    public sealed class BuildTask : FrostingTask<BuildContext>
+    {
+        public override void Run(BuildContext context)
+        {
+            // Строго последовательно: следующие проекты ссылаются на dll предыдущих
+            foreach (var projectName in context.ProjectNames)
+            {
+                try
+                {
                     var csprojPath = $"../{projectName}/{projectName}.csproj";
-                    context.Information("Cleaning project {0}", projectName);
-                    context.DotNetClean(csprojPath, new DotNetCleanSettings
-                    {
-                        Configuration = context.BuildConfiguration
-                    });
 
-                    context.Information("Publishing project {0}", projectName);
+                    if (context.Clean)
+                    {
+                        context.Information("Cleaning {0}", projectName);
+                        context.DotNetClean(csprojPath, new DotNetCleanSettings
+                        {
+                            Configuration = context.BuildConfiguration
+                        });
+                    }
+
+                    context.Information("Publishing {0}", projectName);
                     context.DotNetPublish(csprojPath, new DotNetPublishSettings
                     {
                         Configuration = context.BuildConfiguration,
+                        NoLogo = true,
                         MSBuildSettings = new DotNetMSBuildSettings()
                             .WithProperty("WarningLevel", "0")
                             .WithProperty("TreatWarningsAsErrors", "false")
                     });
 
-                    // 3) Package this project into Releases/{ModID}_{version}.zip
-                    // Read modinfo.json for version and mod id
-                    var modInfoPath = $"../{projectName}/modinfo.json";
-                    if (!File.Exists(modInfoPath))
-                    {
-                        throw new FileNotFoundException($"modinfo.json not found for project {projectName}", modInfoPath);
-                    }
-
-                    var modInfo = context.DeserializeJsonFromFile<ModInfo>(modInfoPath);
-                    var version = modInfo.Version;
-                    var name = modInfo.ModID;
-
-                    var releaseDir = $"../Releases/{name}";
-                    context.EnsureDirectoryExists(releaseDir);
-
-                    // Copy published files
-                    var flatPublishDir = $"../{projectName}/bin/{context.BuildConfiguration}/Mods/publish";
-                    var nestedPublishDir = $"../{projectName}/bin/{context.BuildConfiguration}/Mods/mod/publish";
-                    var publishDir = Directory.Exists(flatPublishDir) ? flatPublishDir : nestedPublishDir;
-                    var publishSource = $"{publishDir}/*";
-                    context.Information("Copying published files from {0} to {1}", publishSource, releaseDir);
-                    context.CopyFiles(publishSource, releaseDir);
-
-                    // Copy assets and metadata
-                    context.CopyDirectory($"../{projectName}/assets", $"{releaseDir}/assets");
-                    context.CopyFile($"../{projectName}/modinfo.json", $"{releaseDir}/modinfo.json");
-
-                    var iconPath = $"../{projectName}/modicon.png";
-                    if (File.Exists(iconPath))
-                    {
-                        context.CopyFile(iconPath, $"{releaseDir}/modicon.png");
-                    }
-                    else
-                    {
-                        context.Warning("modicon.png not found for project {0}, skipping icon copy.", projectName);
-                    }
-
-                    // Zip the release folder
-                    var zipName = $"../Releases/{name}_{version}.zip";
-                    context.Information("Zipping {0} -> {1}", releaseDir, zipName);
-                    context.Zip(releaseDir, zipName);
-
-                    context.Information("Project {0} processed successfully.\n", projectName);
+                    context.BuiltProjects.Add(projectName);
                 }
                 catch (Exception ex)
                 {
-                    context.Error("Error processing project {0}: {1}", projectName, ex.Message);
-                    if (!context.ContinueOnError)
-                    {
-                        // Fail fast: rethrow to stop the build host
-                        throw;
-                    }
-                    else
-                    {
-                        // Log and continue with next project
-                        context.Warning("ContinueOnError is true — continuing to next project.");
-                    }
+                    context.Error("Error building {0}: {1}", projectName, ex.Message);
+                    if (!context.ContinueOnError) throw;
+                    context.Warning("ContinueOnError is true — continuing to next project.");
                 }
             }
         }
     }
 
+    [TaskName("Package")]
+    [IsDependentOn(typeof(BuildTask))]
+    public sealed class PackageTask : FrostingTask<BuildContext>
+    {
+        public override void Run(BuildContext context)
+        {
+            var errors = new ConcurrentBag<string>();
+
+            // Используем System.IO вместо Cake-алиасов — потокобезопаснее
+            Parallel.ForEach(context.BuiltProjects, projectName =>
+            {
+                try
+                {
+                    PackProject(context, projectName);
+                }
+                catch (Exception ex)
+                {
+                    errors.Add($"{projectName}: {ex.Message}");
+                }
+            });
+
+            if (!errors.IsEmpty)
+            {
+                var msg = "Packaging failed:" + Environment.NewLine +
+                          string.Join(Environment.NewLine, errors);
+                if (context.ContinueOnError) context.Error(msg);
+                else throw new Exception(msg);
+            }
+        }
+
+        private static void PackProject(BuildContext context, string projectName)
+        {
+            var modInfoPath = $"../{projectName}/modinfo.json";
+            if (!File.Exists(modInfoPath))
+                throw new FileNotFoundException($"modinfo.json not found for {projectName}", modInfoPath);
+
+            var modInfo = JsonConvert.DeserializeObject<ModInfo>(File.ReadAllText(modInfoPath))
+                          ?? throw new Exception("modinfo.json is empty");
+
+            var releaseDir = Path.GetFullPath($"../Releases/{modInfo.ModID}");
+            Directory.CreateDirectory(releaseDir);
+
+            var flat = $"../{projectName}/bin/{context.BuildConfiguration}/Mods/publish";
+            var nested = $"../{projectName}/bin/{context.BuildConfiguration}/Mods/mod/publish";
+            var publishDir = Directory.Exists(flat) ? flat : nested;
+
+            // Файлы из publish (как CopyFiles "publish/*" — только верхний уровень)
+            foreach (var file in Directory.GetFiles(publishDir))
+                File.Copy(file, Path.Combine(releaseDir, Path.GetFileName(file)), true);
+
+            CopyDirectory($"../{projectName}/assets", Path.Combine(releaseDir, "assets"));
+            File.Copy(modInfoPath, Path.Combine(releaseDir, "modinfo.json"), true);
+
+            var iconPath = $"../{projectName}/modicon.png";
+            if (File.Exists(iconPath))
+                File.Copy(iconPath, Path.Combine(releaseDir, "modicon.png"), true);
+            else
+                context.Warning("modicon.png not found for {0}", projectName);
+
+            var zipPath = Path.GetFullPath($"../Releases/{modInfo.ModID}_{modInfo.Version}.zip");
+            if (File.Exists(zipPath)) File.Delete(zipPath);
+            ZipFile.CreateFromDirectory(releaseDir, zipPath, CompressionLevel.Optimal, false);
+
+            context.Information("Packed {0} -> {1}", projectName, Path.GetFileName(zipPath));
+        }
+
+        private static void CopyDirectory(string source, string target)
+        {
+            foreach (var dir in Directory.GetDirectories(source, "*", SearchOption.AllDirectories))
+                Directory.CreateDirectory(dir.Replace(source, target));
+
+            Directory.CreateDirectory(target);
+
+            foreach (var file in Directory.GetFiles(source, "*", SearchOption.AllDirectories))
+                File.Copy(file, file.Replace(source, target), true);
+        }
+    }
+
     [TaskName("Default")]
-    [IsDependentOn(typeof(PerProjectTask))]
+    [IsDependentOn(typeof(PackageTask))]
     public class DefaultTask : FrostingTask
     {
     }
 
-// Note: ModInfo class must be present somewhere in the codebase (same as before).
-// If not, define a minimal class here:
     public class ModInfo
     {
         public string ModID { get; set; }
