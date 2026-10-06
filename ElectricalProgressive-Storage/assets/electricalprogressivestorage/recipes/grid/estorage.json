@@ -232,5 +232,73 @@
       "type": "block",
       "code": "electricalprogressivestorage:estorageinterface"
     }
+  },
+  {
+    "ingredientPattern": "C,P,G",
+    "width": 1,
+    "height": 3,
+    "ingredients": {
+      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
+      "P": { "type": "item", "code": "game:metalplate-copper" },
+      "G": { "type": "block", "code": "game:glass-plain" }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivestorage:estorageprocessor-1k"
+    }
+  },
+  {
+    "ingredientPattern": "D,P",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "D": { "type": "item", "code": "electricalprogressivestorage:estoragedisk-4k" },
+      "P": { "type": "block", "code": "electricalprogressivestorage:estorageprocessor-1k" }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivestorage:estorageprocessor-4k"
+    }
+  },
+  {
+    "ingredientPattern": "D,P",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "D": { "type": "item", "code": "electricalprogressivestorage:estoragedisk-16k" },
+      "P": { "type": "block", "code": "electricalprogressivestorage:estorageprocessor-4k" }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivestorage:estorageprocessor-16k"
+    }
+  },
+  {
+    "ingredientPattern": "D,P",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "D": { "type": "item", "code": "electricalprogressivestorage:estoragedisk-64k" },
+      "P": { "type": "block", "code": "electricalprogressivestorage:estorageprocessor-16k" }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivestorage:estorageprocessor-64k"
+    }
+  },
+  {
+    "ingredientPattern": "CIC,PGP,CIC",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
+      "I": { "type": "item", "code": "game:metalplate-iron" },
+      "P": { "type": "item", "code": "game:metalplate-copper" },
+      "G": { "type": "block", "code": "game:glass-plain" }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivestorage:estorageassembler"
+    }
   }
 ]

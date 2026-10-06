@@ -21,6 +21,9 @@
   "textures": {
     "iron": { "base": "block/liquidplate" },
     "quartzglass": { "base": "block/liquidglass" },
+    "brass": { "base": "game:block/metal/plate/brass" },
+    "steel": { "base": "game:block/metal/plate/steel" },
+    "bronze": { "base": "game:block/metal/plate/bismuthbronze" },
     "emeral": { "base": "block/liquidglass" },
     "topaz": { "base": "block/liquidglass" }
   },

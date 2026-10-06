@@ -457,8 +457,21 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
             tree.SetInt("jobWant" + i, job.Wanted);
             tree.SetInt("jobGot" + i, job.Got);
             tree.SetInt("jobFed" + i, job.Fed);
+            tree.SetInt("jobPaid" + i, job.Prepaid);
             tree.SetInt("jobAt" + i, job.Index);
             tree.SetInt("jobPut" + i, job.Pushed);
+            tree.SetDouble("jobSince" + i, job.Since);
+            if (job.Cpu == null)
+                tree.SetInt("jobCpu" + i, 0);
+            else
+            {
+                tree.SetInt("jobCpu" + i, 1);
+                tree.SetInt("jobCpuX" + i, job.Cpu.X);
+                tree.SetInt("jobCpuY" + i, job.Cpu.Y);
+                tree.SetInt("jobCpuZ" + i, job.Cpu.Z);
+                tree.SetInt("jobCpuD" + i, job.Cpu.dimension);
+            }
+
             if (job.Result == null)
                 tree.RemoveAttribute("jobOut" + i);
             else
@@ -534,9 +547,14 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
                 Wanted = Math.Clamp(tree.GetInt("jobWant" + i), 1, 100000),
                 Got = Math.Max(0, tree.GetInt("jobGot" + i)),
                 Fed = Math.Max(0, tree.GetInt("jobFed" + i)),
+                Prepaid = Math.Max(0, tree.GetInt("jobPaid" + i)),
                 Index = Math.Max(0, tree.GetInt("jobAt" + i)),
                 Pushed = Math.Max(0, tree.GetInt("jobPut" + i)),
-                Result = result
+                Since = tree.HasAttribute("jobSince" + i)
+                    ? tree.GetDouble("jobSince" + i)
+                    : worldAccessForResolve.Calendar.ElapsedSeconds,
+                Result = result,
+                Cpu = ReadCpu(tree, i)
             });
         }
     }
@@ -567,6 +585,13 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
 
     public override void OnBlockBroken(IPlayer? byPlayer = null)
     {
+        if (Api?.Side == EnumAppSide.Server)
+        {
+            for (var i = _jobs.Count - 1; i >= 0; i--)
+                ReleaseJob(_jobs[i]);
+            _jobs.Clear();
+        }
+
         for (var i = ItemSlotInterface.ConfigAt; i < _inventory.Count; i++)
             _inventory[i].Itemstack = null;
 
@@ -617,37 +642,266 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
 
     public bool TryOrder(ItemStack proto, int count)
     {
-        if (Api?.World == null || proto.Collectible == null || count <= 0)
+        var world = Api?.World;
+        if (world == null || proto.Collectible == null || count <= 0)
             return false;
-        if (StorageAccess.Link(Api.World, Pos) != StorageLink.Online)
+        if (StorageAccess.Link(world, Pos) != StorageLink.Online)
             return false;
 
         count = Math.Min(count, 100000);
         for (var i = ItemSlotInterface.PatternAt; i < ItemSlotInterface.ConfigAt; i++)
         {
-            var pattern = _inventory[i].Itemstack;
-            if (!ItemEStoragePattern.IsEncoded(pattern))
-                continue;
+            if (TryOrderSlot(i, proto, count) >= 0)
+                return true;
+        }
 
-            var output = ItemEStoragePattern.Primary(Api.World, pattern!);
-            if (output == null || !StorageAccess.Same(Api.World, output, proto))
-                continue;
+        return false;
+    }
 
-            var job = _jobs.Find(entry => entry.Slot == i);
-            if (job == null)
+    /// <summary>
+    /// Сколько результатов реально добавлено в заказ этого слота. −1, если слот не подошёл или нет свободного процессора.
+    /// </summary>
+    public int TryOrderSlot(int slot, ItemStack proto, int count, BlockPos? share = null)
+    {
+        var world = Api?.World;
+        if (world == null || proto.Collectible == null || count <= 0)
+            return -1;
+        if (StorageAccess.Link(world, Pos) != StorageLink.Online)
+            return -1;
+        if (slot < ItemSlotInterface.PatternAt || slot >= ItemSlotInterface.ConfigAt)
+            return -1;
+
+        count = Math.Min(count, 100000);
+        var pattern = _inventory[slot].Itemstack;
+        if (!ItemEStoragePattern.IsEncoded(pattern))
+            return -1;
+
+        var output = ItemEStoragePattern.Primary(world, pattern!);
+        if (output == null || !StorageAccess.Same(world, output, proto))
+            return -1;
+
+        var job = _jobs.Find(entry => entry.Slot == slot);
+        var created = false;
+        if (job == null)
+        {
+            var result = output.Clone();
+            result.StackSize = 1;
+            job = new CraftJob { Slot = slot, Result = result, Since = world.Calendar.ElapsedSeconds };
+            _jobs.Add(job);
+            created = true;
+        }
+
+        if (!AttachCpu(job, pattern!, count, share))
+        {
+            if (created)
+                _jobs.Remove(job);
+            return -1;
+        }
+
+        var before = job.Wanted;
+        job.Wanted = Math.Min(100000, job.Wanted + count);
+        if (job.Cpu != null)
+            Stock(job, pattern!);
+        MarkDirty();
+        return job.Wanted - before;
+    }
+
+    public void UndoOrder(int slot, int count)
+    {
+        if (count <= 0)
+            return;
+
+        var job = _jobs.Find(entry => entry.Slot == slot);
+        if (job == null)
+            return;
+
+        job.Wanted -= count;
+        if (job.Wanted < job.Got)
+            job.Wanted = job.Got;
+        if (job.Wanted <= job.Got)
+        {
+            ReleaseJob(job);
+            _jobs.Remove(job);
+        }
+
+        MarkDirty();
+    }
+
+    public bool OwnsJob(int slot)
+    {
+        foreach (var job in _jobs)
+        {
+            if (job.Slot == slot && job.Got < job.Wanted)
+                return true;
+        }
+
+        return false;
+    }
+
+    public long IngredientOwed(int slot, ItemStack proto)
+    {
+        var world = Api?.World;
+        if (world == null || proto.Collectible == null)
+            return 0;
+
+        CraftJob? job = null;
+        foreach (var entry in _jobs)
+        {
+            if (entry.Slot != slot || entry.Got >= entry.Wanted)
+                continue;
+            job = entry;
+            break;
+        }
+
+        if (job == null)
+            return 0;
+
+        var pattern = _inventory[slot].Itemstack;
+        if (!ItemEStoragePattern.IsEncoded(pattern))
+            return 0;
+
+        long sum = 0;
+        foreach (var (item, extra) in IngredientPlan(world, job, pattern!, job.Wanted))
+        {
+            if (StorageAccess.Same(world, item, proto))
+                sum += extra;
+        }
+
+        return sum;
+    }
+
+    public BlockPos? CpuOf(int slot)
+    {
+        foreach (var job in _jobs)
+        {
+            if (job.Slot == slot && job.Got < job.Wanted)
+                return job.Cpu?.Copy();
+        }
+
+        return null;
+    }
+
+    public void AttachCpu(BlockPos cpu, int slot)
+    {
+        var world = Api?.World;
+        if (world == null)
+            return;
+
+        foreach (var job in _jobs)
+        {
+            if (job.Slot != slot || job.Got >= job.Wanted)
+                continue;
+            if (job.Cpu != null && !ProcessorCluster.SamePos(job.Cpu, cpu))
             {
-                var result = output.Clone();
-                result.StackSize = 1;
-                job = new CraftJob { Slot = i, Result = result };
-                _jobs.Add(job);
+                if (world.BlockAccessor.GetBlockEntity(job.Cpu) is BlockEntityEStorageProcessor other && other.Claims(Pos, slot))
+                    return;
             }
 
-            job.Wanted = Math.Min(100000, job.Wanted + count);
+            if (job.Cpu != null && ProcessorCluster.SamePos(job.Cpu, cpu))
+                return;
+
+            job.Cpu = cpu.Copy();
+            MarkDirty();
+        }
+    }
+
+    /// <summary>
+    /// Сборщик закончил один крафт. Заказ уменьшается сразу, не дожидаясь забора из выходного слота.
+    /// </summary>
+    public bool NoteAssemblerCraft(ItemStack? product, ItemStack? pattern = null)
+    {
+        var world = Api?.World;
+        if (world == null || product?.Collectible == null)
+            return false;
+
+        ItemStack? crafted = null;
+        if (ItemEStoragePattern.IsEncoded(pattern))
+            crafted = ItemEStoragePattern.Primary(world, pattern!);
+
+        foreach (var job in _jobs)
+        {
+            if (job.Got >= job.Wanted || job.Result == null)
+                continue;
+
+            var byProduct = StorageAccess.Same(world, job.Result, product);
+            var byPattern = crafted != null && StorageAccess.Same(world, job.Result, crafted);
+            if (!byProduct && !byPattern)
+                continue;
+
+            var slot = _inventory[job.Slot].Itemstack;
+            if (!ItemEStoragePattern.IsEncoded(slot))
+                continue;
+
+            var per = ItemEStoragePattern.PerCraft(world, slot!);
+            var crafts = (job.Wanted + per - 1) / per;
+            if (job.Fed >= crafts)
+                continue;
+
+            job.Fed++;
+            job.Index = 0;
+            job.Pushed = 0;
+            var gain = Math.Min(per, job.Wanted - job.Got);
+            if (gain > 0)
+            {
+                job.Got += gain;
+                if (byProduct)
+                    job.Prepaid += gain;
+            }
+
             MarkDirty();
             return true;
         }
 
         return false;
+    }
+
+    public bool TryJob(int slot, out ItemStack? result, out int left, out double since)
+    {
+        result = null;
+        left = 0;
+        since = 0;
+        foreach (var job in _jobs)
+        {
+            if (job.Slot != slot || job.Got >= job.Wanted || job.Result?.Collectible == null)
+                continue;
+
+            var copy = job.Result.Clone();
+            copy.StackSize = 1;
+            result = copy;
+            left = Math.Max(1, job.Wanted - job.Got);
+            since = job.Since;
+            return true;
+        }
+
+        return false;
+    }
+
+    public void CancelJob(int slot)
+    {
+        if (Api?.Side != EnumAppSide.Server)
+            return;
+
+        for (var i = _jobs.Count - 1; i >= 0; i--)
+        {
+            if (_jobs[i].Slot != slot)
+                continue;
+
+            ReleaseJob(_jobs[i]);
+            _jobs.RemoveAt(i);
+            MarkDirty();
+            return;
+        }
+    }
+
+    public void DetachCpu(BlockPos cpu, int slot)
+    {
+        foreach (var job in _jobs)
+        {
+            if (job.Slot != slot || job.Cpu == null || !ProcessorCluster.SamePos(job.Cpu, cpu))
+                continue;
+            job.Cpu = null;
+            MarkDirty();
+        }
     }
 
     private void OnSlot(int index)
@@ -658,7 +912,18 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
             return;
 
         var stack = slot.Itemstack;
-        if (_jobs.RemoveAll(job => job.Slot == index && !PatternMatches(job, stack)) > 0)
+        var changed = false;
+        for (var i = _jobs.Count - 1; i >= 0; i--)
+        {
+            var job = _jobs[i];
+            if (job.Slot != index || PatternMatches(job, stack))
+                continue;
+            ReleaseJob(job);
+            _jobs.RemoveAt(i);
+            changed = true;
+        }
+
+        if (changed)
             MarkDirty();
         StorageAccess.TouchContents();
     }
@@ -762,7 +1027,8 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
             }
 
             var have = slot.Empty || slot.Itemstack == null ? 0 : slot.Itemstack.StackSize;
-            var target = Math.Min(Math.Max(goal.StackSize, 0), Math.Max(1, goal.Collectible.MaxStackSize));
+            var cap = Math.Max(1, goal.Collectible.MaxStackSize);
+            var target = Math.Clamp(WantInBuffer(goal), 0, cap);
             if (have > target)
                 Push(slot, have - target);
             else if (have < target)
@@ -800,16 +1066,15 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
 
     private void RunJobs()
     {
-        if (!TryMount(out var target, out var face))
-            return;
-
-        var changed = PullOutputs(target, face);
+        var mounted = TryMount(out var target, out var face);
+        var changed = mounted && PullOutputs(target, face);
         for (var i = _jobs.Count - 1; i >= 0; i--)
         {
             var job = _jobs[i];
             var pattern = _inventory[job.Slot].Itemstack;
             if (!PatternMatches(job, pattern))
             {
+                ReleaseJob(job);
                 _jobs.RemoveAt(i);
                 changed = true;
                 continue;
@@ -817,12 +1082,26 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
 
             if (job.Got >= job.Wanted)
             {
+                if (OutputPending(job))
+                    continue;
+                ReleaseJob(job);
                 _jobs.RemoveAt(i);
                 changed = true;
                 continue;
             }
 
-            if (PushIngredient(job, pattern!, target, face))
+            if (!AttachCpu(job, pattern!, 0))
+                continue;
+
+            if (Stock(job, pattern!))
+                changed = true;
+            var assembler = mounted ? FindAssembler() : null;
+            if (assembler != null)
+            {
+                if (!ItemEStoragePattern.IsProcessing(pattern) && PushCraft(job, pattern!, assembler))
+                    changed = true;
+            }
+            else if (mounted && PushIngredient(job, pattern!, target, face))
                 changed = true;
         }
 
@@ -868,6 +1147,20 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
         return changed;
     }
 
+    /// <summary>
+    /// Готовый предмет ещё лежит в сборщике. Заказ уже уменьшен, процессор отпускаем после забора в сеть.
+    /// </summary>
+    private bool OutputPending(CraftJob job)
+    {
+        var world = Api?.World;
+        var assembler = FindAssembler();
+        if (world == null || assembler == null || job.Result == null)
+            return false;
+
+        var stack = assembler.Inventory[InventoryEStorageAssembler.Output].Itemstack;
+        return stack != null && StorageAccess.Same(world, job.Result, stack);
+    }
+
     private bool TakeOutput(ItemSlot slot)
     {
         var stack = slot.Itemstack;
@@ -888,14 +1181,28 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
 
     private void Credit(ItemStack stack, int moved)
     {
+        var world = Api?.World;
+        if (world == null)
+            return;
+
         var left = moved;
         foreach (var job in _jobs)
         {
             if (left <= 0)
                 break;
-            if (job.Fed <= 0 || job.Result == null || Api?.World == null)
+            if (job.Prepaid <= 0 || job.Result == null || !StorageAccess.Same(world, job.Result, stack))
                 continue;
-            if (!StorageAccess.Same(Api.World, job.Result, stack))
+
+            var take = Math.Min(job.Prepaid, left);
+            job.Prepaid -= take;
+            left -= take;
+        }
+
+        foreach (var job in _jobs)
+        {
+            if (left <= 0)
+                break;
+            if (job.Fed <= 0 || job.Result == null || !StorageAccess.Same(world, job.Result, stack))
                 continue;
 
             var need = job.Wanted - job.Got;
@@ -944,6 +1251,259 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
         return null;
     }
 
+    private BlockEntityEStorageAssembler? FindAssembler()
+    {
+        var mount = MountedOn();
+        if (mount == null || Api?.World == null)
+            return null;
+        return Api.World.BlockAccessor.GetBlockEntity(mount) as BlockEntityEStorageAssembler;
+    }
+
+    public BlockPos? MountedOn()
+    {
+        if (Facing == Facing.None || Pos == null)
+            return null;
+
+        BlockFacing? toward = null;
+        foreach (var side in FacingHelper.Faces(Facing))
+        {
+            toward = side;
+            break;
+        }
+
+        return toward == null ? null : Pos.AddCopy(toward);
+    }
+
+    public bool FeedsAssembler()
+    {
+        if (Api?.World == null)
+            return false;
+
+        foreach (var job in _jobs)
+        {
+            if (job.Got >= job.Wanted)
+                continue;
+            var pattern = _inventory[job.Slot].Itemstack;
+            if (ItemEStoragePattern.IsEncoded(pattern) && !ItemEStoragePattern.IsProcessing(pattern))
+                return true;
+        }
+
+        return false;
+    }
+
+    private bool PushCraft(CraftJob job, ItemStack pattern, BlockEntityEStorageAssembler assembler)
+    {
+        var world = Api?.World;
+        if (world == null || assembler.Working)
+            return false;
+
+        var served = LiquidCraft.Mask(world, pattern, LiquidCraft.Player(world, assembler.Pos));
+        var changed = false;
+        for (var i = 0; i < 9; i++)
+        {
+            if (!served[i])
+                continue;
+            var occupied = assembler.CraftSlot(i);
+            if (occupied.Empty)
+                continue;
+            if (ReturnToNetwork(occupied))
+                changed = true;
+        }
+
+        if (!assembler.ReadyFor(world, pattern))
+            return changed;
+
+        var per = ItemEStoragePattern.PerCraft(world, pattern);
+        var crafts = (job.Wanted + per - 1) / per;
+        if (job.Fed >= crafts)
+            return changed;
+        if (FindCpu(job) is not { } cpu)
+            return changed;
+
+        // В сетку уходит сразу набор на один крафт. Один шпагат из четырёх сборщик не занимает.
+        if (!assembler.CraftReady(world, pattern) && !SetAvailable(world, cpu, assembler, pattern, served))
+        {
+            if (ReclaimPartial(world, cpu, assembler))
+                changed = true;
+            return changed;
+        }
+
+        if (CraftGridEmpty(assembler))
+        {
+            job.Index = 0;
+            job.Pushed = 0;
+        }
+
+        for (var guard = 0; guard < 12 && job.Fed < crafts; guard++)
+        {
+            if (assembler.CraftReady(world, pattern))
+            {
+                var made = ItemEStoragePattern.Primary(world, pattern);
+                if (!assembler.Begin(world, made, pattern, cpu, Pos))
+                    return changed;
+                return true;
+            }
+
+            if (job.Index >= 9)
+                job.Index = 0;
+
+            while (job.Index < 9)
+            {
+                var cell = ItemEStoragePattern.Cell(world, pattern, job.Index);
+                if (cell == null || served[job.Index])
+                {
+                    var slot = assembler.CraftSlot(job.Index);
+                    if (served[job.Index] && !slot.Empty && ReturnToNetwork(slot))
+                        changed = true;
+                    job.Index++;
+                    job.Pushed = 0;
+                    continue;
+                }
+
+                var size = Math.Max(1, cell.StackSize);
+                var dest = assembler.CraftSlot(job.Index);
+                var have = dest.Empty || dest.Itemstack == null || !StorageAccess.Same(world, dest.Itemstack, cell)
+                    ? 0
+                    : dest.Itemstack.StackSize;
+                if (have == 0 && !dest.Empty)
+                    return changed;
+                if (have >= size)
+                {
+                    job.Index++;
+                    job.Pushed = 0;
+                    continue;
+                }
+
+                var room = FreeInSlot(dest, cell);
+                var take = Math.Min(size - have, room);
+                if (take <= 0)
+                    return changed;
+
+                var got = cpu.Take(world, cell, take);
+                if (got == null || got.StackSize <= 0)
+                    return changed;
+
+                var holder = new DummySlot(got);
+                var op = new ItemStackMoveOperation(world, EnumMouseButton.Left, 0, EnumMergePriority.DirectMerge, got.StackSize);
+                var moved = holder.TryPutInto(dest, ref op);
+                var remain = holder.Itemstack?.StackSize ?? 0;
+                if (remain > 0 && holder.Itemstack != null)
+                {
+                    var kept = cpu.Insert(world, holder.Itemstack, remain, ProcessorCluster.At(world, cpu.Pos).Bytes);
+                    remain -= kept;
+                    if (remain > 0)
+                        GiveBack(holder.Itemstack, remain);
+                }
+
+                if (moved <= 0)
+                    return changed;
+
+                changed = true;
+                if (have + moved < size)
+                    return changed;
+
+                job.Index++;
+                job.Pushed = 0;
+            }
+
+            if (job.Index < 9)
+                return changed;
+        }
+
+        return changed;
+    }
+
+    private static bool CraftGridEmpty(BlockEntityEStorageAssembler assembler)
+    {
+        for (var i = 0; i < 9; i++)
+        {
+            if (!assembler.CraftSlot(i).Empty)
+                return false;
+        }
+
+        return true;
+    }
+
+    private static bool SetAvailable(IWorldAccessor world, BlockEntityEStorageProcessor cpu, BlockEntityEStorageAssembler assembler, ItemStack pattern, bool[] served)
+    {
+        for (var i = 0; i < 9; i++)
+        {
+            if (served[i])
+                continue;
+
+            var cell = ItemEStoragePattern.Cell(world, pattern, i);
+            if (cell == null)
+                continue;
+
+            var size = Math.Max(1, cell.StackSize);
+            long have = cpu.CountOf(world, cell);
+            for (var slot = 0; slot < 9; slot++)
+            {
+                var stack = assembler.CraftSlot(slot).Itemstack;
+                if (stack != null && StorageAccess.Same(world, stack, cell))
+                    have += stack.StackSize;
+            }
+
+            if (have < size)
+                return false;
+
+            for (var later = i + 1; later < 9; later++)
+            {
+                if (served[later])
+                    continue;
+                var other = ItemEStoragePattern.Cell(world, pattern, later);
+                if (other != null && StorageAccess.Same(world, other, cell))
+                    size += Math.Max(1, other.StackSize);
+            }
+
+            if (have < size)
+                return false;
+        }
+
+        return true;
+    }
+
+    private bool ReturnToNetwork(ItemSlot slot)
+    {
+        var world = Api?.World;
+        var stack = slot.Itemstack;
+        if (world == null || stack == null || stack.StackSize <= 0)
+            return false;
+
+        var moved = StorageAccess.Insert(world, Pos, stack, stack.StackSize);
+        stack.StackSize -= moved;
+        if (stack.StackSize > 0)
+            world.SpawnItemEntity(stack.Clone(), Pos.ToVec3d().Add(0.5, 0.5, 0.5));
+        slot.Itemstack = null;
+        slot.MarkDirty();
+        return true;
+    }
+
+    private static bool ReclaimPartial(IWorldAccessor world, BlockEntityEStorageProcessor cpu, BlockEntityEStorageAssembler assembler)
+    {
+        var bytes = ProcessorCluster.At(world, cpu.Pos).Bytes;
+        var moved = false;
+        for (var i = 0; i < 9; i++)
+        {
+            var slot = assembler.CraftSlot(i);
+            if (slot.Empty || slot.Itemstack == null)
+                continue;
+
+            var stack = slot.Itemstack;
+            var kept = cpu.Insert(world, stack, stack.StackSize, bytes);
+            if (kept <= 0)
+                continue;
+
+            stack.StackSize -= kept;
+            if (stack.StackSize <= 0)
+                slot.Itemstack = null;
+            slot.MarkDirty();
+            moved = true;
+        }
+
+        return moved;
+    }
+
     private bool PushIngredient(CraftJob job, ItemStack pattern, InventoryBase target, BlockFacing face)
     {
         var world = Api?.World;
@@ -959,67 +1519,136 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
         if (job.Fed >= crafts)
             return false;
 
-        if (job.Index == 0 && job.Pushed == 0 && job.Fed > job.Got / per)
+        if (FindCpu(job) is not { } cpu)
             return false;
 
-        while (job.Index < _inputs.Count && job.Pushed >= _inputs[job.Index].StackSize)
+        var changed = false;
+        for (var step = 0; step < 32 && job.Fed < crafts; step++)
         {
-            job.Index++;
-            job.Pushed = 0;
-        }
+            while (job.Index < _inputs.Count && job.Pushed >= Math.Max(1, _inputs[job.Index].StackSize))
+            {
+                job.Index++;
+                job.Pushed = 0;
+            }
 
-        if (job.Index >= _inputs.Count)
-        {
-            job.Fed++;
-            job.Index = 0;
-            job.Pushed = 0;
-            return true;
-        }
-
-        var need = _inputs[job.Index];
-        var holder = new DummySlot(need.Clone());
-        var dest = target.GetAutoPushIntoSlot(face, holder);
-        if (dest == null)
-            return false;
-        if (!dest.Empty && dest.Itemstack != null && !StorageAccess.Same(world, dest.Itemstack, need))
-            return false;
-
-        var room = dest.GetRemainingSlotSpace(need);
-        if (room <= 0 && dest.Empty)
-            room = Math.Max(1, need.Collectible?.MaxStackSize ?? 1);
-        if (room <= 0)
-            return false;
-
-        var take = Math.Min(need.StackSize - job.Pushed, room);
-        if (take <= 0)
-            return false;
-
-        var got = StorageAccess.Extract(world, Pos, need, take);
-        if (got == null || got.StackSize <= 0)
-            return false;
-
-        holder = new DummySlot(got);
-        var op = new ItemStackMoveOperation(world, EnumMouseButton.Left, 0, EnumMergePriority.DirectMerge, got.StackSize);
-        var moved = holder.TryPutInto(dest, ref op);
-        var remain = holder.Itemstack?.StackSize ?? 0;
-        if (remain > 0 && holder.Itemstack != null)
-            GiveBack(holder.Itemstack, remain);
-        if (moved <= 0)
-            return false;
-
-        job.Pushed += moved;
-        if (job.Pushed >= need.StackSize)
-        {
-            job.Index++;
-            job.Pushed = 0;
             if (job.Index >= _inputs.Count)
             {
                 job.Fed++;
                 job.Index = 0;
+                job.Pushed = 0;
+                changed = true;
+                continue;
+            }
+
+            var need = _inputs[job.Index];
+            var size = Math.Max(1, need.StackSize);
+            var holder = new DummySlot(need.Clone());
+            var dest = target.GetAutoPushIntoSlot(face, holder);
+            if (dest == null)
+                break;
+            if (!dest.Empty && dest.Itemstack != null && !StorageAccess.Same(world, dest.Itemstack, need))
+                break;
+
+            var room = FreeInSlot(dest, need);
+            if (room <= 0)
+                break;
+
+            var owed = (crafts - job.Fed) * size - job.Pushed;
+            if (_inputs.Count > 1)
+                owed = Math.Min(owed, size - job.Pushed);
+            var take = Math.Min(Math.Max(owed, 0), room);
+            if (take <= 0)
+                break;
+
+            var got = cpu.Take(world, need, take);
+            if (got == null || got.StackSize <= 0)
+                break;
+
+            holder = new DummySlot(got);
+            var op = new ItemStackMoveOperation(world, EnumMouseButton.Left, 0, EnumMergePriority.DirectMerge, got.StackSize);
+            var moved = holder.TryPutInto(dest, ref op);
+            var remain = holder.Itemstack?.StackSize ?? 0;
+            if (remain > 0 && holder.Itemstack != null)
+            {
+                var kept = cpu.Insert(world, holder.Itemstack, remain, ProcessorCluster.At(world, cpu.Pos).Bytes);
+                remain -= kept;
+                if (remain > 0)
+                    GiveBack(holder.Itemstack, remain);
+            }
+            if (moved <= 0)
+                break;
+
+            changed = true;
+            job.Pushed += moved;
+            while (job.Pushed >= size)
+            {
+                job.Pushed -= size;
+                job.Index++;
+                if (job.Index >= _inputs.Count)
+                {
+                    job.Fed++;
+                    job.Index = 0;
+                }
+
+                if (_inputs.Count > 1)
+                    break;
+            }
+
+            if (moved < take || room - moved <= 0)
+                break;
+        }
+
+        return changed;
+    }
+
+    /// <summary>
+    /// Сколько ещё влезет во вход машины. Без машины остаётся заданное в образце число.
+    /// </summary>
+    private int WantInBuffer(ItemStack goal)
+    {
+        if (!TryMount(out var inventory, out var face))
+            return Math.Max(goal.StackSize, 0);
+
+        var dest = inventory.GetAutoPushIntoSlot(face, new DummySlot(goal));
+        if (dest == null || Api?.World == null)
+            return 0;
+        if (!dest.Empty && dest.Itemstack != null && !StorageAccess.Same(Api.World, dest.Itemstack, goal))
+            return 0;
+
+        return FreeInSlot(dest, goal);
+    }
+
+    /// <summary>
+    /// Слот машины по умолчанию вмещает 999999. Реальный предел — размер стака предмета.
+    /// Лишнее возвращается в сеть.
+    /// </summary>
+    private int FreeInSlot(ItemSlot dest, ItemStack sample)
+    {
+        var max = StackCap(dest, sample);
+        if (Api?.World != null && !dest.Empty && dest.Itemstack != null && StorageAccess.Same(Api.World, dest.Itemstack, sample))
+        {
+            var extra = dest.Itemstack.StackSize - max;
+            if (extra > 0)
+            {
+                var back = StorageAccess.Insert(Api.World, Pos, dest.Itemstack, extra);
+                dest.Itemstack.StackSize -= back;
+                if (dest.Itemstack.StackSize <= 0)
+                    dest.Itemstack = null;
+                dest.MarkDirty();
             }
         }
 
-        return true;
+        var have = dest.Empty || dest.Itemstack == null ? 0 : dest.Itemstack.StackSize;
+        return Math.Max(0, max - have);
+    }
+
+    private static int StackCap(ItemSlot dest, ItemStack sample)
+    {
+        var max = Math.Max(1, sample.Collectible?.MaxStackSize ?? 1);
+        var slotMax = dest.MaxSlotStackSize;
+        if (slotMax > 0 && slotMax < max)
+            max = slotMax;
+        return max;
     }
 
     private void GiveBack(ItemStack stack, int count)
@@ -1081,8 +1710,14 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
         var dest = target.GetAutoPushIntoSlot(face, slot);
         if (dest == null || !dest.CanHold(slot))
             return;
+        if (!dest.Empty && dest.Itemstack != null && !StorageAccess.Same(Api.World, dest.Itemstack, slot.Itemstack))
+            return;
 
-        var op = new ItemStackMoveOperation(Api.World, EnumMouseButton.Left, 0, EnumMergePriority.DirectMerge, slot.Itemstack.StackSize);
+        var room = FreeInSlot(dest, slot.Itemstack);
+        if (room <= 0)
+            return;
+
+        var op = new ItemStackMoveOperation(Api.World, EnumMouseButton.Left, 0, EnumMergePriority.DirectMerge, Math.Min(slot.Itemstack.StackSize, room));
         _busy = true;
         try
         {
@@ -1137,14 +1772,301 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
         slot.MarkDirty();
     }
 
+    private static BlockPos? ReadCpu(ITreeAttribute tree, int index)
+    {
+        if (tree.GetInt("jobCpu" + index) == 0)
+            return null;
+
+        var pos = new BlockPos(tree.GetInt("jobCpuX" + index), tree.GetInt("jobCpuY" + index), tree.GetInt("jobCpuZ" + index));
+        pos.dimension = tree.GetInt("jobCpuD" + index);
+        return pos;
+    }
+
+    private bool AttachCpu(CraftJob job, ItemStack pattern, int extra, BlockPos? share = null)
+    {
+        var world = Api?.World;
+        if (world == null)
+            return false;
+        if (FindCpu(job) != null)
+            return true;
+
+        if (share != null)
+        {
+            var view = ProcessorCluster.At(world, share);
+            if (ProcessorCluster.Entity(world, view.Anchor) is not BlockEntityEStorageProcessor holder)
+                return false;
+            if (!holder.Join(Pos, job.Slot))
+                return false;
+
+            job.Cpu = holder.Pos.Copy();
+            return true;
+        }
+
+        if (!Reserve(job, pattern, extra, out var cpuPos) || cpuPos == null)
+            return false;
+
+        if (world.BlockAccessor.GetBlockEntity(cpuPos) is not BlockEntityEStorageProcessor processor)
+            return false;
+        if (!processor.Claims(Pos, job.Slot) && !processor.Claim(Pos, job.Slot))
+            return false;
+
+        job.Cpu = cpuPos.Copy();
+        return true;
+    }
+
+    private bool Reserve(CraftJob? job, ItemStack pattern, int count, out BlockPos? cpu)
+    {
+        cpu = null;
+        var world = Api?.World;
+        if (world == null)
+            return false;
+
+        if (job != null && FindCpu(job) is { } bound)
+        {
+            cpu = bound.Pos.Copy();
+            return true;
+        }
+
+        var scan = StorageAccess.GetScan(world, Pos);
+        if (scan.Processors.Count == 0)
+            return false;
+
+        var wanted = Math.Min(100000, (job?.Wanted ?? 0) + Math.Max(count, 0));
+        var plan = IngredientPlan(world, job, pattern, Math.Max(wanted, 1));
+        BlockEntityEStorageProcessor? fit = null;
+        var fitBytes = 0;
+        BlockEntityEStorageProcessor? roomy = null;
+        var roomyBytes = -1;
+        foreach (var pos in scan.Processors)
+        {
+            var view = ProcessorCluster.At(world, pos);
+            if (view.Merged && !ProcessorCluster.SamePos(view.Anchor, pos))
+                continue;
+            if (world.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEStorageProcessor processor || processor.HasClaim)
+                continue;
+
+            if (roomy == null || view.Bytes > roomyBytes || (view.Bytes == roomyBytes && StorageScan.Earlier(pos, roomy.Pos)))
+            {
+                roomy = processor;
+                roomyBytes = view.Bytes;
+            }
+
+            var local = new List<(ItemStack Proto, long Extra)>(plan);
+            ApplyStored(world, local, processor);
+            if (!ProcessorCluster.CanHold(world, view.Bytes, processor.Contents, local))
+                continue;
+            if (fit != null && (view.Bytes > fitBytes || (view.Bytes == fitBytes && !StorageScan.Earlier(pos, fit.Pos))))
+                continue;
+
+            fit = processor;
+            fitBytes = view.Bytes;
+        }
+
+        var pick = fit ?? roomy;
+        if (pick == null)
+            return false;
+
+        cpu = pick.Pos.Copy();
+        return true;
+    }
+
+    private BlockEntityEStorageProcessor? FindCpu(CraftJob job)
+    {
+        var world = Api?.World;
+        if (world == null)
+            return null;
+
+        if (job.Cpu != null && world.BlockAccessor.GetBlockEntity(job.Cpu) is BlockEntityEStorageProcessor direct && direct.Claims(Pos, job.Slot))
+            return direct;
+
+        foreach (var pos in StorageAccess.GetScan(world, Pos).Processors)
+        {
+            if (world.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEStorageProcessor processor || !processor.Claims(Pos, job.Slot))
+                continue;
+            job.Cpu = processor.Pos.Copy();
+            return processor;
+        }
+
+        return null;
+    }
+
+    private void ReturnAssembler(CraftJob job)
+    {
+        var world = Api?.World;
+        var assembler = FindAssembler();
+        if (world == null || assembler == null)
+            return;
+
+        var current = job.Slot >= 0 && job.Slot < _inventory.Count ? _inventory[job.Slot].Itemstack : null;
+        if (current != null && assembler.Holding(world, current))
+        {
+            assembler.GiveAll(world, Pos);
+            return;
+        }
+
+        foreach (var other in _jobs)
+        {
+            if (other == job || other.Got >= other.Wanted)
+                continue;
+            var pattern = _inventory[other.Slot].Itemstack;
+            if (pattern != null && assembler.Holding(world, pattern))
+                return;
+        }
+
+        if (assembler.BusyGrid())
+            assembler.GiveAll(world, Pos);
+    }
+
+    private void ReleaseJob(CraftJob job)
+    {
+        ReturnAssembler(job);
+        var cpu = FindCpu(job);
+        if (cpu != null && Api?.World != null)
+            cpu.Unlink(Api.World, Pos, job.Slot);
+        job.Cpu = null;
+    }
+
+    private bool Stock(CraftJob job, ItemStack pattern)
+    {
+        var world = Api?.World;
+        if (world == null)
+            return false;
+
+        var cpu = FindCpu(job);
+        if (cpu == null)
+            return false;
+
+        var view = ProcessorCluster.At(world, cpu.Pos);
+        var plan = IngredientPlan(world, job, pattern, job.Wanted);
+        var changed = false;
+        foreach (var (proto, extra) in plan)
+        {
+            if (extra <= 0)
+                continue;
+
+            var others = cpu.OwedByOthers(world, proto, Pos, job.Slot);
+            var pool = (long)cpu.CountOf(world, proto);
+            var shortfall = extra + others - pool;
+            if (shortfall < 0)
+                shortfall = 0;
+            var want = Math.Min(extra, shortfall);
+            var room = StorageAccess.RoomForAdditional(view.Bytes, cpu.TypeCount, cpu.ItemCount, !cpu.Contains(world, proto));
+            var pull = (int)Math.Min(want, (long)room);
+            if (pull <= 0)
+                continue;
+
+            var liquid = StorageAccess.LiquidProps(proto) != null;
+            var got = liquid
+                ? StorageAccess.ExtractLiquid(world, Pos, proto, pull)
+                : StorageAccess.Extract(world, Pos, proto, pull);
+            if (got == null || got.StackSize <= 0)
+                continue;
+
+            var kept = cpu.Insert(world, got, got.StackSize, view.Bytes);
+            var left = got.StackSize - kept;
+            if (left > 0)
+            {
+                if (liquid)
+                    StorageAccess.InsertLiquid(world, Pos, got, left);
+                else
+                    GiveBack(got, left);
+            }
+            if (kept > 0)
+                changed = true;
+        }
+
+        return changed;
+    }
+
+    private List<(ItemStack Proto, long Extra)> IngredientPlan(IWorldAccessor world, CraftJob? job, ItemStack pattern, int wanted)
+    {
+        var plan = new List<(ItemStack Proto, long Extra)>();
+        if (wanted <= 0)
+            return plan;
+
+        var per = ItemEStoragePattern.PerCraft(world, pattern);
+        var crafts = (wanted + per - 1) / per;
+        var liquids = FindAssembler() != null
+            ? LiquidCraft.Collect(world, pattern, LiquidCraft.Player(world, Pos))
+            : new List<LiquidNeed>();
+        var served = new bool[9];
+        foreach (var need in liquids)
+        {
+            served[need.Cell] = true;
+            var size = need.Portions;
+            long delivered = job == null ? 0 : (long)job.Fed * size;
+            var owed = (long)crafts * size - delivered;
+            if (owed < 0)
+                owed = 0;
+            Merge(plan, need.Liquid, owed);
+        }
+
+        var i = 0;
+        for (var cell = 0; cell < 9; cell++)
+        {
+            var input = ItemEStoragePattern.Cell(world, pattern, cell);
+            if (input == null)
+                continue;
+            if (served[cell])
+                continue;
+
+            var size = Math.Max(1, input.StackSize);
+            long delivered = 0;
+            if (job != null)
+            {
+                long sets = job.Fed;
+                if (i < job.Index)
+                    sets++;
+                var partial = i == job.Index ? job.Pushed : 0;
+                delivered = sets * size + partial;
+            }
+
+            var owed = (long)crafts * size - delivered;
+            if (owed < 0)
+                owed = 0;
+
+            Merge(plan, input, owed);
+            i++;
+        }
+
+        return plan;
+
+        void Merge(List<(ItemStack Proto, long Extra)> into, ItemStack proto, long extra)
+        {
+            for (var k = 0; k < into.Count; k++)
+            {
+                if (!StorageAccess.Same(world, into[k].Proto, proto))
+                    continue;
+                into[k] = (into[k].Proto, into[k].Extra + extra);
+                return;
+            }
+
+            into.Add((proto, extra));
+        }
+    }
+
+    private static void ApplyStored(IWorldAccessor world, List<(ItemStack Proto, long Extra)> plan, BlockEntityEStorageProcessor cpu)
+    {
+        for (var i = 0; i < plan.Count; i++)
+        {
+            var left = plan[i].Extra - cpu.CountOf(world, plan[i].Proto);
+            if (left < 0)
+                left = 0;
+            plan[i] = (plan[i].Proto, left);
+        }
+    }
+
     private sealed class CraftJob
     {
         public int Slot;
         public int Wanted;
         public int Got;
         public int Fed;
+        public int Prepaid;
         public int Index;
         public int Pushed;
         public ItemStack? Result;
+        public BlockPos? Cpu;
+        public double Since;
     }
 }

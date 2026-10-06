@@ -1,0 +1,42 @@
+{
+  "code": "estorageassembler",
+  "class": "BlockEStorageAssembler",
+  "entityClass": "BlockEntityEStorageAssembler",
+  "attributes": {
+    "handbook": {
+      "groupBy": [ "estorageassembler" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivestorage:block-handbooktitle-estorageassembler",
+          "text": "electricalprogressivestorage:block-handbooktext-estorageassembler"
+        }
+      ]
+    }
+  },
+  "creativeinventory": {
+    "general": [ "*" ],
+    "estorage": [ "*" ]
+  },
+  "shape": { "base": "block/estorageassembler" },
+  "lightAbsorption": 0,
+  "faceCullMode": "NeverCull",
+  "renderPass": "OpaqueNoCull",
+  "emitSideAo": { "all": false },
+  "sideAo": { "all": true },
+  "sideopaque": { "all": false },
+  "textures": {
+    "side": { "base": "game:block/metal/plate/iron" },
+    "top": { "base": "game:block/metal/plate/copper" },
+    "brass": { "base": "game:block/metal/plate/brass" },
+    "steel": { "base": "game:block/metal/plate/steel" },
+    "bronze": { "base": "game:block/metal/plate/bismuthbronze" }
+  },
+  "blockmaterial": "Metal",
+  "resistance": 3.5,
+  "sounds": {
+    "place": "game:block/anvil",
+    "walk": "game:walk/metal",
+    "hit": "game:block/metal",
+    "break": "game:block/metal"
+  }
+}

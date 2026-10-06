@@ -53,6 +53,7 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
     private bool _suppressScroll;
     private string _search = "";
     private bool _searchLock;
+    private bool _setupQueued;
     private string _signature = "";
     private SortMode _sort = SortMode.Count;
     private long _meterAt = -1000;
@@ -72,7 +73,7 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
     private bool _drag;
     private int _dragX;
     private int _dragY;
-    private GuiDialog? _order;
+    private EStorageOrderPane? _pane;
 
     public GuiDialogEStorageTerminal(string dialogTitle, InventoryBase inventory, BlockPos pos, ICoreClientAPI capi, bool liquid = false, bool pattern = false)
         : base(dialogTitle, inventory, pos, capi)
@@ -90,8 +91,7 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
 
     public override void OnGuiClosed()
     {
-        _order?.TryClose();
-        _order = null;
+        DetachOrder();
         if (_pattern && BlockEntityPosition != null &&
             capi.World.BlockAccessor.GetBlockEntity(BlockEntityPosition) is BlockEntityEStoragePatternTerminal bench)
             capi.World.Player.InventoryManager.CloseInventory(bench.Bench);
@@ -102,16 +102,26 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
     {
         // Пакет слотов после заливки подменяет уже открытый список одной жидкостью.
         // Пока окно открыто, вид заново собирается из ячеек.
-        RefreshLiquidView();
-        if (Signature() != _signature)
-            SetupDialog();
+        if (_pane == null)
+        {
+            RefreshLiquidView();
+            if (Signature() != _signature)
+                SetupDialog();
+        }
 
         base.OnRenderGUI(deltaTime);
-        TouchMeters(false);
+        if (_pane == null)
+            TouchMeters(false);
     }
 
     public override void OnMouseWheel(MouseWheelEventArgs args)
     {
+        if (_pane != null)
+        {
+            _pane.OnWheel(args);
+            return;
+        }
+
         var mouse = capi.World.Player.InventoryManager.MouseItemSlot;
         var inside = SingleComposer != null && SingleComposer.Bounds.PointInside(capi.Input.MouseX, capi.Input.MouseY);
         if (!args.IsHandled && inside && _maxScrollRow > 0 && (mouse == null || mouse.Empty))
@@ -132,12 +142,31 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
 
     public override void OnMouseDown(MouseEvent args)
     {
+        if (_pane != null)
+        {
+            if (CloseHit())
+            {
+                args.Handled = true;
+                CloseOrder();
+                return;
+            }
+
+            base.OnMouseDown(args);
+            if (!args.Handled && OnFrame())
+                BeginDrag();
+            return;
+        }
+
         if (CloseHit())
         {
             args.Handled = true;
             CloseIconPressed();
             return;
         }
+
+        var hitSearch = SearchContains();
+        if (!hitSearch)
+            SingleComposer?.UnfocusOwnElements();
 
         if (TryOrder(args))
             return;
@@ -146,7 +175,9 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
             return;
 
         base.OnMouseDown(args);
-        if (!args.Handled && OnFrame() && !SearchContains())
+        if (hitSearch)
+            FocusSearch();
+        if (!args.Handled && OnFrame() && !hitSearch)
             BeginDrag();
     }
 
@@ -220,6 +251,17 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
         return search != null && search.Bounds.PointInside(capi.Input.MouseX, capi.Input.MouseY);
     }
 
+    private void FocusSearch()
+    {
+        var typed = SingleComposer?.GetTextInput("search");
+        if (typed == null || SingleComposer == null || SingleComposer.CurrentTabIndexElement == typed)
+            return;
+
+        var caret = SearchCaret.GetValue(typed) is int at ? at : _search.Length;
+        SingleComposer.FocusElement(typed.TabIndex);
+        typed.SetCaretPos(Math.Min(caret, _search.Length), 0);
+    }
+
     private bool TryOrder(MouseEvent args)
     {
         if (_liquid || _pattern || args.Button != EnumMouseButton.Left || BlockEntityPosition == null)
@@ -238,20 +280,21 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
         proto.Attributes.RemoveAttribute(StorageAccess.CraftGhostKey);
         proto.Attributes.RemoveAttribute(StorageAccess.OrderKey);
         proto.StackSize = 1;
-        _order?.TryClose();
-        _order = new GuiDialogEStorageOrder(capi, proto.GetName(), count => SendOrder(proto, count));
-        _order.TryOpen();
+        DetachOrder();
+        _pane = new EStorageOrderPane(capi, proto.GetName(), (count, start) => SendOrder(proto, count, start), CloseOrder, SetupDialog);
+        SetupDialog();
         args.Handled = true;
         return true;
     }
 
-    private void SendOrder(ItemStack proto, int count)
+    private void SendOrder(ItemStack proto, int count, bool start)
     {
         if (BlockEntityPosition == null || count <= 0)
             return;
 
         var tree = new TreeAttribute();
         tree.SetInt("count", count);
+        tree.SetBool("start", start);
         tree["out"] = new ItemstackAttribute(proto.Clone());
         capi.Network.SendBlockEntityPacket(BlockEntityPosition, StorageAccess.OrderPacketId, tree.ToBytes());
     }
@@ -335,8 +378,34 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
         return -1;
     }
 
+    private void CloseOrder()
+    {
+        DetachOrder();
+        if (IsOpened())
+            SetupDialog();
+    }
+
+    private void DetachOrder()
+    {
+        if (EStorageOrderSync.Current == _pane)
+            EStorageOrderSync.Current = null;
+        _pane = null;
+    }
+
     private void SetupDialog()
     {
+        if (_pane != null)
+        {
+            var leaving = capi.World.Player.InventoryManager.CurrentHoveredSlot;
+            if (leaving != null && leaving.Inventory == Inventory)
+                capi.Input.TriggerOnMouseLeaveSlot(leaving);
+            SingleComposer = _pane.Compose();
+            _close = _pane.Close;
+            _winW = _pane.WinW;
+            _winH = _pane.WinH;
+            return;
+        }
+
         var resumeCaret = -1;
         var oldSearch = SingleComposer?.GetTextInput("search");
         if (oldSearch != null && SingleComposer!.CurrentTabIndexElement == oldSearch)
@@ -352,44 +421,64 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
         var gridMeasure = ElementStdBounds.SlotGrid(EnumDialogArea.None, 0, 0, Cols, rows);
         var gridW = gridMeasure.fixedWidth;
         var gridH = gridMeasure.fixedHeight;
-        _rowStride = gridH / VisibleRows;
+        _rowStride = gridH / rows;
         _btn = GuiElementPassiveItemSlot.unscaledSlotSize;
         var rail = _btn;
-        var contentW = rail + 6 + gridW + ScrollGap + ScrollW;
+        var pad = TermChrome.Pad;
+        var gutter = TermChrome.Gutter;
+        var sideW = pad + rail + pad;
+        var storeW = pad + gridW + ScrollGap + ScrollW + pad;
+        var blockW = sideW + gutter + storeW;
         var edge = GuiElementTermFrame.Inset;
         var originX = edge;
         var originY = edge;
         var craftMeasure = ElementStdBounds.SlotGrid(EnumDialogArea.None, 0, 0, 3, 3);
-        var craftOut = ElementStdBounds.SlotGrid(EnumDialogArea.None, 0, 0, 1, 1);
-        var patternH = _pattern ? 8 + craftMeasure.fixedHeight + 8 + craftOut.fixedHeight : 0;
-        var contentH = SearchH + 8 + MeterH + 6 + gridH + patternH;
-        var dialogW = edge + contentW + edge;
+        var benchH = craftMeasure.fixedHeight;
+        var headerH = pad + SearchH + pad;
+        var meterBlockH = pad + MeterH + pad;
+        var storeBlockH = pad + gridH + pad;
+        var benchBlockH = pad + benchH + pad;
+        var contentH = headerH + gutter + meterBlockH + gutter + storeBlockH + (_pattern ? gutter + benchBlockH : 0);
+        var dialogW = edge + blockW + edge;
         var dialogH = edge + contentH + edge;
         _winW = dialogW;
         _winH = dialogH;
 
-        var titleX = originX;
+        var titleX = originX + pad;
         var titleW = _pattern ? 210.0 : 118.0;
+        var searchY = originY + pad;
+        var closeX = originX + blockW - CloseS;
+        var closeY = searchY + (SearchH - CloseS) / 2.0;
         var searchX = titleX + titleW + 8;
-        var searchY = originY;
-        var closeX = originX + contentW - CloseS;
-        var closeY = originY + (SearchH - CloseS) / 2.0;
         var searchW = Math.Max(80, closeX - 8 - searchX);
         var search = ElementBounds.Fixed(searchX, searchY, searchW, SearchH);
         var icon = SearchH - 6;
         var glass = ElementBounds.Fixed(searchX + searchW - icon - 3, searchY + 3, icon, icon);
         _close = ElementBounds.Fixed(closeX, closeY, CloseS, CloseS);
         var title = ElementBounds.Fixed(titleX, searchY, titleW, SearchH);
+        var header = ElementBounds.Fixed(originX, originY, closeX - 8 - originX, headerH);
 
-        var meterY = originY + SearchH + 8;
-        var gridY = meterY + MeterH + 6;
-        var grid = ElementBounds.Fixed(originX + rail + 6, gridY, gridW, gridH);
-        var scroll = ElementBounds.Fixed(originX + rail + 6 + gridW + ScrollGap, gridY, ScrollW, gridH);
+        var meterTop = originY + headerH + gutter;
+        var meterY = meterTop + pad;
+        var meterX = originX + pad;
+        var meterRowW = blockW - pad * 2;
+        var storeTop = meterTop + meterBlockH + gutter;
+        var bodyX = originX + sideW + gutter;
+        var gridY = storeTop + pad;
+        var gridX = bodyX + pad;
+        var grid = ElementBounds.Fixed(gridX, gridY, gridW, gridH);
+        var scroll = ElementBounds.Fixed(bodyX + storeW - pad - ScrollW, gridY, ScrollW, gridH);
+        var metersTray = ElementBounds.Fixed(originX, meterTop, blockW, meterBlockH);
+        var benchTop = storeTop + storeBlockH + gutter;
+        var bodyBottom = originY + contentH;
+        var sideTray = ElementBounds.Fixed(originX, storeTop, sideW, bodyBottom - storeTop);
+        var storeTray = ElementBounds.Fixed(bodyX, storeTop, storeW, storeBlockH);
+        var benchTray = ElementBounds.Fixed(bodyX, benchTop, storeW, benchBlockH);
 
-        var meterW = (contentW - 3 * MeterGap) / 4.0;
+        var meterW = (meterRowW - 3 * MeterGap) / 4.0;
         var meters = new ElementBounds[4];
         for (var i = 0; i < 4; i++)
-            meters[i] = ElementBounds.Fixed(originX + i * (meterW + MeterGap), meterY, meterW, MeterH);
+            meters[i] = ElementBounds.Fixed(meterX + i * (meterW + MeterGap), meterY, meterW, MeterH);
 
         var frame = ElementBounds.Fixed(0, 0, dialogW, dialogH);
         var bg = ElementBounds.Fill.WithFixedPadding(0);
@@ -410,8 +499,13 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
             .CreateCompo(compoName, dialog)
             .BeginChildElements(bg)
             .AddStaticElement(new GuiElementTermFrame(capi, frame, closeX, closeY, CloseS))
+            .AddStaticElement(new GuiElementTermPanel(capi, header))
+            .AddStaticElement(new GuiElementTermPanel(capi, metersTray))
+            .AddStaticElement(new GuiElementTermPanel(capi, sideTray))
+            .AddStaticElement(new GuiElementTermPanel(capi, storeTray))
             .AddStaticText(DialogTitle, CairoFont.WhiteDetailText().WithFontSize(18), title);
 
+        compo.AddStaticElement(new GuiElementTermWell(capi, search));
         compo.AddTextInput(search, OnSearch, CairoFont.WhiteDetailText(), "search");
         SearchRightSpace.SetValue(compo.GetTextInput("search"), (icon + 4) * RuntimeEnv.GUIScale);
         compo.AddInteractiveElement(new GuiElementTermIcon(capi, glass, TermIcon.Search, false, false, null, true), "searchIcon");
@@ -424,12 +518,12 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
             AddMeter(compo, meters[2], TermIcon.Items, ItemColor, "it", "estorage-terminal-items");
         AddMeter(compo, meters[3], TermIcon.Types, TypeColor, "ty", "estorage-terminal-kinds");
 
-        var railX = originX;
-        AddRail(compo, TermIcon.Mod, _sort == SortMode.Mod, railX, gridY, "estorage-terminal-sort-mod", () => SelectSort(SortMode.Mod));
-        AddRail(compo, TermIcon.Name, _sort == SortMode.Name, railX, gridY + _rowStride, "estorage-terminal-sort-name", () => SelectSort(SortMode.Name));
-        AddRail(compo, TermIcon.Count, _sort == SortMode.Count, railX, gridY + 2 * _rowStride, "estorage-terminal-sort-count", () => SelectSort(SortMode.Count));
-        if (!_pattern)
-            AddRail(compo, TermIcon.Clear, false, railX, gridY + (rows - 1) * _rowStride, "estorage-terminal-clear", ClearQuery);
+        var sortX = originX + pad;
+        var sortY = storeTop + pad;
+        var sortStep = rail + 6;
+        AddRail(compo, TermIcon.Mod, _sort == SortMode.Mod, sortX, sortY, "estorage-terminal-sort-mod", () => SelectSort(SortMode.Mod));
+        AddRail(compo, TermIcon.Name, _sort == SortMode.Name, sortX, sortY + sortStep, "estorage-terminal-sort-name", () => SelectSort(SortMode.Name));
+        AddRail(compo, TermIcon.Count, _sort == SortMode.Count, sortX, sortY + 2 * sortStep, "estorage-terminal-sort-count", () => SelectSort(SortMode.Count));
 
         if (filled.Count > 0)
         {
@@ -443,10 +537,13 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
         }
 
         if (_pattern)
-            AddPatternBench(compo, originX, gridY + gridH + 8);
+        {
+            compo.AddStaticElement(new GuiElementTermPanel(capi, benchTray));
+            AddPatternBench(compo, gridX, benchTop + pad, gridW + ScrollGap + ScrollW);
+        }
 
         compo.AddVerticalScrollbar(OnScroll, scroll, "storedScroll");
-        SingleComposer = compo.EndChildElements().Compose();
+        SingleComposer = compo.EndChildElements().Compose(false);
 
         var typed = SingleComposer.GetTextInput("search");
         _searchLock = true;
@@ -454,8 +551,8 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
         _searchLock = false;
         if (resumeCaret >= 0)
         {
-            typed.SetCaretPos(Math.Min(resumeCaret, _search.Length), 0);
             SingleComposer.FocusElement(typed.TabIndex);
+            typed.SetCaretPos(Math.Min(resumeCaret, _search.Length), 0);
         }
         _signature = SignatureOf(filled);
         _ch = _pw = _it = _ty = "";
@@ -474,7 +571,7 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
             ? null
             : capi.World.BlockAccessor.GetBlockEntity(BlockEntityPosition) as BlockEntityEStoragePatternTerminal;
 
-    private void AddPatternBench(GuiComposer compo, double x, double y)
+    private void AddPatternBench(GuiComposer compo, double x, double y, double innerW)
     {
         var entity = PatternEntity;
         var inv = entity?.Bench;
@@ -483,9 +580,17 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
 
         var processing = entity!.Processing;
         var grid = ElementStdBounds.SlotGrid(EnumDialogArea.None, x, y, 3, 3);
+        var slot = ElementStdBounds.SlotGrid(EnumDialogArea.None, 0, 0, 1, 1);
+        var mark = 40.0;
+        var arrowX = x + grid.fixedWidth + 8;
+        var arrowY = y + (grid.fixedHeight - mark) / 2.0;
+        var outX = arrowX + mark + 8;
+        var flow = ElementBounds.Fixed(arrowX, arrowY, mark, mark);
+        _rail.Add(flow);
+        compo.AddStaticElement(new GuiElementTermIcon(capi, flow, TermIcon.Arrow, false, false, null, false, true));
         var output = processing
-            ? ElementStdBounds.SlotGrid(EnumDialogArea.None, x + grid.fixedWidth + 8, y, 1, 3)
-            : ElementStdBounds.SlotGrid(EnumDialogArea.None, x + grid.fixedWidth + 8, y, 1, 1);
+            ? ElementStdBounds.SlotGrid(EnumDialogArea.None, outX, y, 1, 3)
+            : ElementStdBounds.SlotGrid(EnumDialogArea.None, outX, y, 1, 1);
         if (!processing)
             output.fixedY += (grid.fixedHeight - output.fixedHeight) / 2.0;
 
@@ -506,25 +611,25 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
                 : "electricalprogressivestorage:estorage-pattern-result"),
             CairoFont.WhiteSmallText(), 240, output.FlatCopy(), "craftouttip");
 
-        var icon = 22.0;
-        var modeX = output.fixedX + output.fixedWidth + 8;
-        var stack = icon * 3 + 8;
-        var modeY = y + (grid.fixedHeight - stack) / 2.0;
-        AddMode(compo, modeX, modeY, icon, icon, TermIcon.Craft, !processing, 3, 0, "estorage-pattern-craft");
-        AddMode(compo, modeX, modeY + icon + 4, icon, icon, TermIcon.Process, processing, 3, 1, "estorage-pattern-process");
-        AddMode(compo, modeX, modeY + (icon + 4) * 2, icon, icon, TermIcon.Substitute, entity.Substitute, 4, 0, "estorage-pattern-substitute");
+        var gap = 6.0;
+        var clusterW = slot.fixedWidth * 3 + gap * 2;
+        var clusterH = slot.fixedHeight * 2 + 8;
+        var clusterX = Math.Max(output.fixedX + output.fixedWidth + 12, x + innerW - clusterW);
+        var clusterY = y + Math.Max(0, (grid.fixedHeight - clusterH) / 2.0);
+        AddMode(compo, clusterX, clusterY, slot.fixedWidth, slot.fixedHeight, TermIcon.Craft, !processing, 3, 0, "estorage-pattern-craft");
+        AddMode(compo, clusterX + slot.fixedWidth + gap, clusterY, slot.fixedWidth, slot.fixedHeight, TermIcon.Process, processing, 3, 1, "estorage-pattern-process");
+        AddMode(compo, clusterX + (slot.fixedWidth + gap) * 2, clusterY, slot.fixedWidth, slot.fixedHeight, TermIcon.Substitute, entity.Substitute, 4, 0, "estorage-pattern-substitute");
 
-        var rowY = y + grid.fixedHeight + 8;
-        var blank = ElementStdBounds.SlotGrid(EnumDialogArea.None, x, rowY, 1, 1);
-        var arrowX = x + blank.fixedWidth + 6;
-        var encoded = ElementStdBounds.SlotGrid(EnumDialogArea.None, arrowX + blank.fixedWidth + 6, rowY, 1, 1);
+        var rowY = clusterY + slot.fixedHeight + 8;
+        var blank = ElementStdBounds.SlotGrid(EnumDialogArea.None, clusterX, rowY, 1, 1);
+        var encoded = ElementStdBounds.SlotGrid(EnumDialogArea.None, clusterX + (slot.fixedWidth + gap) * 2, rowY, 1, 1);
         compo.AddItemSlotGrid(inv, SendBench, 1, [BlockEntityEStoragePatternTerminal.BlankSlot], blank, "blank");
         compo.AddItemSlotGrid(inv, SendBench, 1, [BlockEntityEStoragePatternTerminal.EncodedSlot], encoded, "encoded");
         _rail.Add(blank);
         _rail.Add(encoded);
         compo.AddHoverText(Lang.Get("electricalprogressivestorage:estorage-pattern-blank"), CairoFont.WhiteSmallText(), 240, blank.FlatCopy(), "blanktip");
         compo.AddHoverText(Lang.Get("electricalprogressivestorage:estorage-pattern-out"), CairoFont.WhiteSmallText(), 240, encoded.FlatCopy(), "encodedtip");
-        AddMode(compo, arrowX, rowY, blank.fixedWidth, blank.fixedHeight, TermIcon.Arrow, false, 5, 0, "estorage-pattern-write");
+        AddMode(compo, clusterX + slot.fixedWidth + gap, rowY, blank.fixedWidth, blank.fixedHeight, TermIcon.Arrow, false, 5, 0, "estorage-pattern-write");
     }
 
     private void SendBench(object packet)
@@ -585,7 +690,7 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
         var text = ElementBounds.Fixed(colX, cell.fixedY + MeterPad, colW, 20);
         var bar = ElementBounds.Fixed(colX, cell.fixedY + MeterH - MeterPad - BarH, colW, BarH);
         var index = key switch { "ch" => 0, "pw" => 1, "it" => 2, _ => 3 };
-        compo.AddStaticElement(new GuiElementTermIcon(capi, iconBounds, icon, false, false, null), key + "Icon");
+        compo.AddInteractiveElement(new GuiElementTermIcon(capi, iconBounds, icon, false, false, null), key + "Icon");
         compo.AddDynamicCustomDraw(bar, (ctx, _, bounds) => DrawMeter(ctx, bounds, index, color), key + "Draw");
         compo.AddDynamicText("", CairoFont.WhiteDetailText().WithFontSize(16).WithOrientation(EnumTextOrientation.Right), text, key + "Text");
         compo.AddHoverText(Lang.Get("electricalprogressivestorage:" + langKey), CairoFont.WhiteSmallText(), 220, cell.FlatCopy(), key + "Tip");
@@ -595,22 +700,11 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
     {
         var w = bounds.InnerWidth;
         var h = bounds.InnerHeight;
-        ctx.SetSourceRGBA(0.08, 0.06, 0.045, 1);
-        ctx.Rectangle(0, 0, w, h);
-        ctx.Fill();
+        TermChrome.Inset(ctx, 0, 0, w, h, 0.08, 0.06, 0.045);
         var limit = Math.Max(_meterMax[index], 1f);
         var frac = Math.Clamp(_meterShown[index] / limit, 0f, 1f);
-        if (frac > 0 && w >= 1)
-        {
-            ctx.SetSourceRGBA(color[0], color[1], color[2], 1);
-            ctx.Rectangle(0, 0, Math.Max(1, w * frac), h);
-            ctx.Fill();
-        }
-
-        ctx.SetSourceRGBA(0.55, 0.42, 0.26, 1);
-        ctx.LineWidth = 1;
-        ctx.Rectangle(0.5, 0.5, Math.Max(1, w - 1), Math.Max(1, h - 1));
-        ctx.Stroke();
+        if (frac > 0 && w > 2 && h > 2)
+            TermChrome.Gloss(ctx, 1, 1, Math.Max(1, (w - 2) * frac), h - 2, color[0], color[1], color[2]);
     }
 
     private void AddRail(GuiComposer compo, TermIcon icon, bool pressed, double x, double y, string langKey, Action click)
@@ -630,19 +724,14 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
         QueueSetup();
     }
 
-    private void ClearQuery()
-    {
-        if (_search.Length == 0 && _scrollRow == 0)
-            return;
-        _search = "";
-        _scrollRow = 0;
-        QueueSetup();
-    }
-
     private void QueueSetup()
     {
+        if (_setupQueued)
+            return;
+        _setupQueued = true;
         capi.Event.EnqueueMainThreadTask(() =>
         {
+            _setupQueued = false;
             if (IsOpened())
                 SetupDialog();
         }, "estorage-terminal");
@@ -777,7 +866,7 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
             return;
         _search = text;
         _scrollRow = 0;
-        SetupDialog();
+        QueueSetup();
     }
 
     private void TouchMeters(bool force)

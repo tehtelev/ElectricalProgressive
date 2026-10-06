@@ -311,7 +311,7 @@ public class BlockEntityEStorageTerminal : BlockEntityOpenableContainer
     {
         if (!Liquid && !Pattern && packetid == StorageAccess.OrderPacketId && Api.Side == EnumAppSide.Server && data is { Length: > 0 })
         {
-            Order(data);
+            Order(fromPlayer, data);
             return;
         }
 
@@ -336,10 +336,25 @@ public class BlockEntityEStorageTerminal : BlockEntityOpenableContainer
         base.OnReceivedClientPacket(fromPlayer, packetid, data);
     }
 
-    private void Order(byte[] data)
+    private void Order(IPlayer player, byte[] data)
     {
-        if (Api.World == null || StorageAccess.Link(Api.World, Pos) != StorageLink.Online)
+        var reply = new EStorageOrderReply();
+        if (Api.World == null)
+        {
+            reply.Failed = true;
+            reply.Text = Lang.Get("electricalprogressivestorage:estorage-order-none");
+            EStorageOrderSync.Send(player, reply);
             return;
+        }
+
+        var link = StorageAccess.Link(Api.World, Pos);
+        if (link != StorageLink.Online)
+        {
+            reply.Failed = true;
+            reply.Text = Lang.Get(BlockEStorageTerminal.LinkKey(link));
+            EStorageOrderSync.Send(player, reply);
+            return;
+        }
 
         var tree = new TreeAttribute();
         try
@@ -348,28 +363,46 @@ public class BlockEntityEStorageTerminal : BlockEntityOpenableContainer
         }
         catch
         {
+            reply.Failed = true;
+            EStorageOrderSync.Send(player, reply);
             return;
         }
 
         var count = tree.GetInt("count");
         if (count <= 0 || tree["out"] is not ItemstackAttribute { value: { } proto })
+        {
+            reply.Failed = true;
+            reply.Text = Lang.Get("electricalprogressivestorage:estorage-order-none");
+            EStorageOrderSync.Send(player, reply);
             return;
+        }
 
         proto.ResolveBlockOrItem(Api.World);
         proto.Attributes.RemoveAttribute(StorageAccess.CraftGhostKey);
         proto.Attributes.RemoveAttribute(StorageAccess.OrderKey);
         if (proto.Collectible == null)
-            return;
-
-        var scan = StorageAccess.GetScan(Api.World, Pos);
-        if (scan.Conflict)
-            return;
-
-        foreach (var pos in scan.Interfaces)
         {
-            if (Api.World.BlockAccessor.GetBlockEntity(pos) is BlockEntityEStorageInterface panel && panel.TryOrder(proto, count))
-                return;
+            reply.Failed = true;
+            reply.Text = Lang.Get("electricalprogressivestorage:estorage-order-none");
+            EStorageOrderSync.Send(player, reply);
+            return;
         }
+
+        var plan = CraftPlan.Build(Api.World, Pos, proto, count, player);
+        reply.Text = plan.Text;
+        reply.Bytes = plan.Bytes;
+        reply.Cells = plan.Cells ?? [];
+        reply.NoCpu = plan.NoCpu;
+        reply.Failed = plan.Failed;
+        if (tree.GetBool("start") && !plan.Failed && !plan.NoCpu)
+        {
+            if (CraftPlan.Place(Api.World, plan))
+                reply.Started = true;
+            else
+                reply.NoCpu = true;
+        }
+
+        EStorageOrderSync.Send(player, reply);
     }
 
     public override void OnBlockBroken(IPlayer? byPlayer = null)

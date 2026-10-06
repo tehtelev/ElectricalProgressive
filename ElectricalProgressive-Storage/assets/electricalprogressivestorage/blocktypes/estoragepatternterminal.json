@@ -17,7 +17,7 @@
     "general": [ "*" ],
     "estorage": [ "*" ]
   },
-  "shape": { "base": "block/estorageterminal" },
+  "shape": { "base": "block/estoragepatternterminal" },
   "blockmaterial": "Metal",
   "resistance": 3.5,
   "lightAbsorption": 0,

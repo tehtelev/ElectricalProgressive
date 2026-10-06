@@ -40,9 +40,7 @@ public sealed class GuiElementTermFrame : GuiElement
         var y = Bounds.drawY;
         var w = Bounds.OuterWidth;
         var h = Bounds.OuterHeight;
-        ctx.SetSourceRGBA(23 / 255.0, 23 / 255.0, 23 / 255.0, 1);
-        ctx.Rectangle(x, y, w, h);
-        ctx.Fill();
+        TermChrome.Field(ctx, x, y, w, h);
 
         var img = getImageSurfaceFromAsset(api, FrameTex, 255) ?? getImageSurfaceFromAsset(api, FrameTexFull, 255);
         if (img != null)
@@ -56,25 +54,31 @@ public sealed class GuiElementTermFrame : GuiElement
             var border = scaled(Border);
             var cornerX = border * srcCornerX / srcBorderX;
             var cornerY = border * srcCornerY / srcBorderY;
+            var armX = Math.Min(srcCornerX - 1, srcBorderX + Math.Max(1, (int)Math.Round(4 * kx)));
+            var armY = Math.Min(srcCornerY - 1, srcBorderY + Math.Max(1, (int)Math.Round(4 * ky)));
 
             TileX(ctx, img, srcCornerX, 0, img.Width - 2 * srcCornerX, srcBorderY, x + cornerX, y, w - 2 * cornerX, border);
             TileX(ctx, img, srcCornerX, img.Height - srcBorderY, img.Width - 2 * srcCornerX, srcBorderY, x + cornerX, y + h - border, w - 2 * cornerX, border);
             TileY(ctx, img, 0, srcCornerY, srcBorderX, img.Height - 2 * srcCornerY, x, y + cornerY, border, h - 2 * cornerY);
             TileY(ctx, img, img.Width - srcBorderX, srcCornerY, srcBorderX, img.Height - 2 * srcCornerY, x + w - border, y + cornerY, border, h - 2 * cornerY);
 
-            Blit(ctx, img, 0, 0, srcCornerX, srcCornerY, x, y, cornerX, cornerY);
-            Blit(ctx, img, img.Width - srcCornerX, 0, srcCornerX, srcCornerY, x + w - cornerX, y, cornerX, cornerY);
-            Blit(ctx, img, 0, img.Height - srcCornerY, srcCornerX, srcCornerY, x, y + h - cornerY, cornerX, cornerY);
-            Blit(ctx, img, img.Width - srcCornerX, img.Height - srcCornerY, srcCornerX, srcCornerY, x + w - cornerX, y + h - cornerY, cornerX, cornerY);
+            // Угловой тайл шире скобы и тащит за собой квадрат плоской заливки.
+            BlitL(ctx, img, 0, 0, srcCornerX, srcCornerY, x, y, cornerX, cornerY, armX, armY, false, false);
+            BlitL(ctx, img, img.Width - srcCornerX, 0, srcCornerX, srcCornerY, x + w - cornerX, y, cornerX, cornerY, armX, armY, true, false);
+            BlitL(ctx, img, 0, img.Height - srcCornerY, srcCornerX, srcCornerY, x, y + h - cornerY, cornerX, cornerY, armX, armY, false, true);
+            BlitL(ctx, img, img.Width - srcCornerX, img.Height - srcCornerY, srcCornerX, srcCornerY, x + w - cornerX, y + h - cornerY, cornerX, cornerY, armX, armY, true, true);
             img.Dispose();
         }
+
+        TermChrome.Recess(ctx, x, y, w, h, scaled(Border));
 
         var cx = x + scaled(_closeX);
         var cy = y + scaled(_closeY);
         var pad = scaled(3);
         var size = scaled(_closeS);
-        ctx.SetSourceRGBA(0.86, 0.84, 0.8, 1);
-        ctx.LineWidth = Math.Max(1.6, scaled(1.7));
+        TermChrome.Steel(ctx, cx, cy, size, size);
+        ctx.SetSourceRGBA(0.14, 0.12, 0.10, 1);
+        ctx.LineWidth = Math.Max(1.6, scaled(1.6));
         ctx.MoveTo(cx + pad, cy + pad);
         ctx.LineTo(cx + size - pad, cy + size - pad);
         ctx.MoveTo(cx + size - pad, cy + pad);
@@ -110,6 +114,21 @@ public sealed class GuiElementTermFrame : GuiElement
             Blit(ctx, img, sx, sy, sw, Math.Max(1, (int)Math.Round(sh * piece / tileH)), dx, y, dw, piece);
             y += piece;
         }
+    }
+
+    private static void BlitL(Context ctx, ImageSurface img, int sx, int sy, int sw, int sh, double dx, double dy, double dw, double dh, int armX, int armY, bool fromRight, bool fromBottom)
+    {
+        var sxScale = dw / sw;
+        var syScale = dh / sh;
+        var hy = fromBottom ? sy + sh - armY : sy;
+        var dyH = fromBottom ? dy + dh - armY * syScale : dy;
+        Blit(ctx, img, sx, hy, sw, armY, dx, dyH, dw, armY * syScale);
+
+        var vx = fromRight ? sx + sw - armX : sx;
+        var dxV = fromRight ? dx + dw - armX * sxScale : dx;
+        var vy = fromBottom ? sy : sy + armY;
+        var dyV = fromBottom ? dy : dy + armY * syScale;
+        Blit(ctx, img, vx, vy, armX, sh - armY, dxV, dyV, armX * sxScale, (sh - armY) * syScale);
     }
 
     private static void Blit(Context ctx, ImageSurface img, int sx, int sy, int sw, int sh, double dx, double dy, double dw, double dh)

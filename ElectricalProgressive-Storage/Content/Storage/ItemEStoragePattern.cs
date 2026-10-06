@@ -36,6 +36,10 @@ public class ItemEStoragePattern : Vintagestory.API.Common.Item
         if (target != EnumItemRenderTarget.Gui || _iconDepth > 0 || !IsEncoded(itemstack))
             return;
 
+        // В ряду шаблонов интерфейса выход виден всегда. В остальных слотах — только пока зажата кнопка красться.
+        if (renderinfo.InSlot is not ItemSlotInterface { Row: InterfaceRow.Pattern } && !SneakDown(capi))
+            return;
+
         var output = Primary(capi.World, itemstack);
         if (output == null)
             return;
@@ -93,6 +97,21 @@ public class ItemEStoragePattern : Vintagestory.API.Common.Item
             dsc.AppendLine(Lang.Get("electricalprogressivestorage:estorage-pattern-makes", single.GetName(), single.StackSize));
     }
 
+    private static bool SneakDown(ICoreClientAPI capi)
+    {
+        var map = capi.Input.GetHotKeyByCode("sneak")?.CurrentMapping;
+        var raw = capi.Input.KeyboardKeyStateRaw;
+        if (map == null || raw == null)
+            return capi.World.Player?.Entity?.Controls.Sneak == true;
+
+        if (!Held(raw, map.KeyCode))
+            return false;
+        return map.SecondKeyCode is not int second || second <= 0 || Held(raw, second);
+    }
+
+    private static bool Held(bool[] raw, int code)
+        => code > 0 && code < raw.Length && raw[code];
+
     public static ItemStack? Primary(IWorldAccessor world, ItemStack stack)
     {
         for (var i = 0; i < 3; i++)
@@ -106,8 +125,24 @@ public class ItemEStoragePattern : Vintagestory.API.Common.Item
         return null;
     }
 
+    public static bool IsProcessing(ItemStack? stack)
+        => IsEncoded(stack) && stack!.Attributes.GetInt(ModeKey) != 0;
+
     public static int PerCraft(IWorldAccessor world, ItemStack stack)
         => Math.Max(1, Primary(world, stack)?.StackSize ?? 1);
+
+    public static ItemStack? Cell(IWorldAccessor world, ItemStack stack, int index)
+    {
+        if (index < 0 || index > 8)
+            return null;
+        if (stack.Attributes["in" + index] is not ItemstackAttribute { value: { } sample } || !Ready(world, sample))
+            return null;
+
+        var copy = sample.Clone();
+        if (copy.StackSize < 1)
+            copy.StackSize = 1;
+        return copy;
+    }
 
     public static void Inputs(IWorldAccessor world, ItemStack stack, List<ItemStack> into)
     {

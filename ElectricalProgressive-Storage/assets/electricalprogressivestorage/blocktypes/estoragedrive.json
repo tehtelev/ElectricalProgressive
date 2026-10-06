@@ -17,10 +17,13 @@
     "general": [ "*" ],
     "estorage": [ "*" ]
   },
-  "shape": { "base": "block/cube" },
-  "textures": {
-    "all": { "base": "block/estoragedrive" }
-  },
+  "shape": { "base": "block/estoragedrive" },
+  "lightAbsorption": 0,
+  "faceCullMode": "NeverCull",
+  "renderPass": "OpaqueNoCull",
+  "emitSideAo": { "all": false },
+  "sideAo": { "all": true },
+  "sideopaque": { "all": false },
   "blockmaterial": "Metal",
   "resistance": 3.5,
   "sounds": {

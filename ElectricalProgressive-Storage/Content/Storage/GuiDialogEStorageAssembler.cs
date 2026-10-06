@@ -1,3 +1,5 @@
+using System;
+using Cairo;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -5,9 +7,8 @@ using Vintagestory.API.MathTools;
 
 namespace ElectricalProgressive.Content.Storage;
 
-public class GuiDialogEStorageInterface : GuiDialogBlockEntity
+public class GuiDialogEStorageAssembler : GuiDialogBlockEntity
 {
-    private const int Cols = 9;
     private const double TitleH = 22;
     private const double CloseS = 16;
 
@@ -17,10 +18,13 @@ public class GuiDialogEStorageInterface : GuiDialogBlockEntity
     private bool _drag;
     private int _dragX;
     private int _dragY;
+    private float _fill;
+    private readonly BlockEntityEStorageAssembler _assembler;
 
-    public GuiDialogEStorageInterface(string dialogTitle, InventoryBase inventory, BlockPos pos, ICoreClientAPI capi)
+    public GuiDialogEStorageAssembler(string dialogTitle, InventoryBase inventory, BlockPos pos, ICoreClientAPI capi, BlockEntityEStorageAssembler assembler)
         : base(dialogTitle, inventory, pos, capi)
     {
+        _assembler = assembler;
         if (IsDuplicate)
             return;
 
@@ -88,6 +92,18 @@ public class GuiDialogEStorageInterface : GuiDialogBlockEntity
         bounds.CalcWorldBounds();
     }
 
+    public override void OnRenderGUI(float deltaTime)
+    {
+        var fill = _assembler.Progress;
+        if (Math.Abs(fill - _fill) > 0.001f)
+        {
+            _fill = fill;
+            SingleComposer?.GetCustomDraw("work")?.Redraw();
+        }
+
+        base.OnRenderGUI(deltaTime);
+    }
+
     private bool OnFrame()
     {
         var bounds = SingleComposer?.Bounds;
@@ -103,17 +119,22 @@ public class GuiDialogEStorageInterface : GuiDialogBlockEntity
 
     private void SetupDialog()
     {
-        const double labelH = 16;
-        var gridMeasure = ElementStdBounds.SlotGrid(EnumDialogArea.None, 0, 0, Cols, 1);
+        _fill = _assembler.Progress;
+
+        var gridMeasure = ElementStdBounds.SlotGrid(EnumDialogArea.None, 0, 0, 3, 3);
+        var one = ElementStdBounds.SlotGrid(EnumDialogArea.None, 0, 0, 1, 1);
         var gridW = gridMeasure.fixedWidth;
         var gridH = gridMeasure.fixedHeight;
         var edge = GuiElementTermFrame.Inset;
         var pad = TermChrome.Pad;
         var gutter = TermChrome.Gutter;
-        var blockW = gridW + pad * 2;
+        var gap = 22.0;
+        var barW = 8.0;
+        var barH = 36.0;
+        var blockW = pad + gridW + gap + one.fixedWidth + pad;
         var headerH = pad + TitleH + pad;
-        var rowH = pad + labelH + gridH + pad;
-        var contentH = headerH + gutter + rowH * 3 + gutter * 2;
+        var craftBlockH = pad + gridH + pad;
+        var contentH = headerH + gutter + craftBlockH;
         _winW = edge + blockW + edge;
         _winH = edge + contentH + edge;
 
@@ -122,41 +143,47 @@ public class GuiDialogEStorageInterface : GuiDialogBlockEntity
         var title = ElementBounds.Fixed(edge + pad, edge + pad, closeX - 8 - (edge + pad), TitleH);
         var header = ElementBounds.Fixed(edge, edge, closeX - 8 - edge, headerH);
         _close = ElementBounds.Fixed(closeX, closeY, CloseS, CloseS);
+        var craftTop = edge + headerH + gutter;
+        var gridY = craftTop + pad;
+        var gridX = edge + pad;
+        var grid = ElementBounds.Fixed(gridX, gridY, gridW, gridH);
+        var output = ElementBounds.Fixed(gridX + gridW + gap, gridY + (gridH - one.fixedHeight) / 2.0, one.fixedWidth, one.fixedHeight);
+        var bar = ElementBounds.Fixed(gridX + gridW + (gap - barW) / 2.0, gridY + (gridH - barH) / 2.0, barW, barH);
+        var craftTray = ElementBounds.Fixed(edge, craftTop, blockW, craftBlockH);
         var frame = ElementBounds.Fixed(0, 0, _winW, _winH);
         var bg = ElementBounds.Fill.WithFixedPadding(0);
         bg.BothSizing = ElementSizing.FitToChildren;
-        bg.WithChildren(frame, _close);
+        bg.WithChildren(frame, _close, bar);
 
         var dialog = ElementStdBounds.AutosizedMainDialog
             .WithAlignment(EnumDialogArea.RightMiddle)
             .WithFixedAlignmentOffset(-GuiStyle.DialogToScreenPadding, 0);
 
-        var font = CairoFont.WhiteDetailText().WithFontSize(14);
         ClearComposers();
-        var compo = capi.Gui
-            .CreateCompo("estorageinterface" + BlockEntityPosition, dialog)
+        SingleComposer = capi.Gui
+            .CreateCompo("estorageassembler" + BlockEntityPosition, dialog)
             .BeginChildElements(bg)
             .AddStaticElement(new GuiElementTermFrame(capi, frame, closeX, closeY, CloseS))
             .AddStaticElement(new GuiElementTermPanel(capi, header))
-            .AddStaticText(DialogTitle, CairoFont.WhiteDetailText().WithFontSize(18), title);
-
-        var y = edge + headerH + gutter;
-        AddRow(compo, font, "electricalprogressivestorage:estorage-interface-place", ItemSlotInterface.ExportAt, edge, ref y, gridW, gridH, labelH, "place");
-        AddRow(compo, font, "electricalprogressivestorage:estorage-interface-patterns", ItemSlotInterface.PatternAt, edge, ref y, gridW, gridH, labelH, "patterns");
-        AddRow(compo, font, "electricalprogressivestorage:estorage-interface-config", ItemSlotInterface.ConfigAt, edge, ref y, gridW, gridH, labelH, "config");
-        SingleComposer = compo.EndChildElements().Compose();
+            .AddStaticElement(new GuiElementTermPanel(capi, craftTray))
+            .AddStaticText(DialogTitle, CairoFont.WhiteDetailText().WithFontSize(18), title)
+            .AddItemSlotGrid(Inventory, DoSendPacket, 3, [0, 1, 2, 3, 4, 5, 6, 7, 8], grid, "craft")
+            .AddItemSlotGrid(Inventory, DoSendPacket, 1, [InventoryEStorageAssembler.Output], output, "out")
+            .AddDynamicCustomDraw(bar, DrawWork, "work")
+            .EndChildElements()
+            .Compose();
     }
 
-    private void AddRow(GuiComposer compo, CairoFont font, string label, int start, double x, ref double y, double gridW, double gridH, double labelH, string key)
+    private void DrawWork(Context ctx, ImageSurface _, ElementBounds bounds)
     {
-        var pad = TermChrome.Pad;
-        var rowH = pad + labelH + gridH + pad;
-        compo.AddStaticElement(new GuiElementTermPanel(capi, ElementBounds.Fixed(x, y, gridW + pad * 2, rowH)));
-        compo.AddStaticText(Lang.Get(label), font, ElementBounds.Fixed(x + pad, y + pad, gridW, labelH));
-        var ids = new int[Cols];
-        for (var i = 0; i < Cols; i++)
-            ids[i] = start + i;
-        compo.AddItemSlotGrid(Inventory, DoSendPacket, Cols, ids, ElementBounds.Fixed(x + pad, y + pad + labelH, gridW, gridH), key);
-        y += rowH + TermChrome.Gutter;
+        var w = bounds.InnerWidth;
+        var h = bounds.InnerHeight;
+        TermChrome.Inset(ctx, 0, 0, w, h, 0.07, 0.07, 0.07);
+        var frac = Math.Clamp(_fill, 0f, 1f);
+        if (frac > 0 && h > 2 && w > 2)
+        {
+            var fillH = Math.Max(1, (h - 2) * frac);
+            TermChrome.Gloss(ctx, 1, h - 1 - fillH, w - 2, fillH, 0.45, 0.66, 0.82);
+        }
     }
 }

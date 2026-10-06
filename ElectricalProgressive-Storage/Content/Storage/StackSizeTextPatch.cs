@@ -41,6 +41,15 @@ public static class StackSizeTextPatch
         }
     }
 
+    public static string Count(long amount)
+    {
+        if (amount < 1000)
+            return amount.ToString();
+        if (amount > int.MaxValue)
+            amount = int.MaxValue;
+        return Format((int)amount);
+    }
+
     public static string Format(int stackSize)
     {
         if (stackSize >= 1_000_000)

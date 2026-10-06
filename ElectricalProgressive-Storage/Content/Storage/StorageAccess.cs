@@ -27,6 +27,7 @@ public sealed class StorageScan
     public List<BlockPos> Drives { get; } = new();
     public List<BlockPos> Terminals { get; } = new();
     public List<BlockPos> Interfaces { get; } = new();
+    public List<BlockPos> Processors { get; } = new();
 
     // Соседние клетки, чанк которых ещё не загружен. Пока они пустые, обход сети неполный.
     public List<BlockPos> Pending { get; } = new();
@@ -103,7 +104,8 @@ public static class StorageAccess
 
         return block.FirstCodePart() is "estoragecable" or "estoragefiber"
             or "estoragedrive" or "estorageterminal" or "estorageliquidterminal"
-            or "estoragepatternterminal" or "estorageinterface" or "estoragecontroller";
+            or "estoragepatternterminal" or "estorageinterface" or "estorageprocessor"
+            or "estoragecontroller";
     }
 
     public static bool IsCable(Vintagestory.API.Common.Block? block)
@@ -424,6 +426,9 @@ public static class StorageAccess
                 case "estorageinterface":
                     scan.Interfaces.Add(pos.Copy());
                     break;
+                case "estorageprocessor":
+                    scan.Processors.Add(pos.Copy());
+                    break;
             }
 
             foreach (var link in CollectLinks(world, pos, node.Mask))
@@ -447,6 +452,7 @@ public static class StorageAccess
             KeepChanneled(scan.Drives, scan);
             KeepChanneled(scan.Terminals, scan);
             KeepChanneled(scan.Interfaces, scan);
+            KeepChanneled(scan.Processors, scan);
             return;
         }
 
@@ -480,9 +486,14 @@ public static class StorageAccess
             pool -= Serve(world, next.Pos, next.Mask, give, from, Facing.None, source, fedBy, scan);
         }
 
+        // Процессор в этой сети участвует в крафте, даже если на него не хватило канала.
+        foreach (var pos in scan.Processors)
+            scan.Active.Add(Key(pos));
+
         KeepChanneled(scan.Drives, scan);
         KeepChanneled(scan.Terminals, scan);
         KeepChanneled(scan.Interfaces, scan);
+        KeepChanneled(scan.Processors, scan);
     }
 
     // Контроллеры гранью к грани — один мультиблок. Через кабель это уже второй контроллер.
@@ -541,6 +552,14 @@ public static class StorageAccess
         var cable = mask != Facing.None || IsCable(block);
         if (!cable)
         {
+            // Чужой блок прямоугольника канал не ест и кабель не режет: пропускает входящие дальше.
+            if (block.FirstCodePart() == "estorageprocessor" && !ProcessorCluster.IsAnchor(world, pos))
+            {
+                if (!scan.Active.Add(key))
+                    return 0;
+                return Forward(world, pos, mask, incoming, from, fromMask, source, fedBy, scan);
+            }
+
             if (!scan.Active.Add(key))
                 return 0;
             scan.ChannelUsed++;
@@ -657,7 +676,32 @@ public static class StorageAccess
         foreach (var pos in scan.Drives)
             disks += CountDisks(world, pos);
 
-        return 8f + scan.Drives.Count * 10f + (scan.Terminals.Count + scan.Interfaces.Count) * 6f + disks * 2f;
+        return 8f + scan.Drives.Count * 10f + (scan.Terminals.Count + scan.Interfaces.Count) * 6f
+            + scan.Processors.Count * 4f + AssemblerWatts(world, scan) + disks * 2f;
+    }
+
+    private static float AssemblerWatts(IWorldAccessor world, StorageScan scan)
+    {
+        var seen = new HashSet<string>();
+        float watts = 0f;
+        foreach (var pos in scan.Interfaces)
+        {
+            if (world.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEStorageInterface panel)
+                continue;
+
+            var mount = panel.MountedOn();
+            if (mount == null || world.BlockAccessor.GetBlock(mount).FirstCodePart() != "estorageassembler")
+                continue;
+
+            if (!seen.Add(mount.X + "," + mount.Y + "," + mount.Z + "," + mount.dimension))
+                continue;
+
+            watts += 8f;
+            if (world.BlockAccessor.GetBlockEntity(mount) is BlockEntityEStorageAssembler { Working: true })
+                watts += BlockEntityEStorageAssembler.WorkWatts;
+        }
+
+        return watts;
     }
 
     public static int CountDisks(IWorldAccessor world, BlockPos drivePos)
@@ -1143,6 +1187,27 @@ public static class StorageAccess
         if (left != count)
             TouchContents();
         return count - left;
+    }
+
+    public static int CountLiquid(IWorldAccessor world, BlockPos from, ItemStack proto)
+    {
+        if (Link(world, from) != StorageLink.Online || LiquidProps(proto) == null)
+            return 0;
+
+        long have = 0;
+        foreach (var cell in EnumerateCells(world, from))
+        {
+            foreach (var entry in ReadCell(world, cell.Stack))
+            {
+                if (entry.StackSize <= 0 || !Same(world, entry, proto))
+                    continue;
+                have += entry.StackSize;
+                if (have >= int.MaxValue)
+                    return int.MaxValue;
+            }
+        }
+
+        return (int)have;
     }
 
     public static ItemStack? ExtractLiquid(IWorldAccessor world, BlockPos from, ItemStack proto, int count)

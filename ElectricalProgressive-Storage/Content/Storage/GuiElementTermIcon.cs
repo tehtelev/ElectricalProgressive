@@ -10,7 +10,6 @@ public enum TermIcon
     Mod,
     Name,
     Count,
-    Clear,
     Channels,
     Power,
     Items,
@@ -23,18 +22,23 @@ public enum TermIcon
 }
 
 /// <summary>
-/// Иконка терминала. У кнопок рейки своя квадратная подложка, у шкал общая прямоугольная.
+/// Линейная иконка в том же приёме, что значки редактора квестов: круглая обводка, тонкий штрих.
+/// У кнопок рейки своя квадратная подложка, у шкал общая прямоугольная.
 /// </summary>
 public sealed class GuiElementTermIcon : GuiElement
 {
+    private static readonly double[] Ink = [0.86, 0.82, 0.74];
+    private static readonly double[] InkHot = [0.98, 0.90, 0.62];
+
     private readonly TermIcon _icon;
     private readonly bool _plate;
     private readonly bool _pressed;
     private readonly bool _overlay;
+    private readonly bool _solid;
     private readonly Action? _onClick;
     private LoadedTexture? _glass;
 
-    public GuiElementTermIcon(ICoreClientAPI capi, ElementBounds bounds, TermIcon icon, bool plate, bool pressed, Action? onClick, bool overlay = false)
+    public GuiElementTermIcon(ICoreClientAPI capi, ElementBounds bounds, TermIcon icon, bool plate, bool pressed, Action? onClick, bool overlay = false, bool solid = false)
         : base(capi, bounds)
     {
         _icon = icon;
@@ -42,6 +46,7 @@ public sealed class GuiElementTermIcon : GuiElement
         _pressed = pressed;
         _onClick = onClick;
         _overlay = overlay;
+        _solid = solid;
     }
 
     public override void ComposeElements(Context ctx, ImageSurface surface)
@@ -54,9 +59,9 @@ public sealed class GuiElementTermIcon : GuiElement
         }
 
         if (_plate)
-            PaintPlate(ctx);
+            TermChrome.Raised(ctx, Bounds.drawX, Bounds.drawY, Bounds.InnerWidth, Bounds.InnerHeight, _pressed);
 
-        PaintIcon(ctx, Bounds.drawX, Bounds.drawY, Bounds.InnerWidth, Bounds.InnerHeight);
+        Paint(ctx, Bounds.drawX, Bounds.drawY, Math.Min(Bounds.InnerWidth, Bounds.InnerHeight));
     }
 
     public override void RenderInteractiveElements(float deltaTime)
@@ -64,58 +69,8 @@ public sealed class GuiElementTermIcon : GuiElement
         if (_glass == null || _glass.TextureId <= 0)
             return;
 
-        Bounds.CalcWorldBounds();
-        api.Render.Render2DTexturePremultipliedAlpha(_glass.TextureId, Bounds.renderX, Bounds.renderY, Bounds.OuterWidth, Bounds.OuterHeight, 80f);
-    }
-
-    public override void Dispose()
-    {
-        _glass?.Dispose();
-        _glass = null;
-        base.Dispose();
-    }
-
-    private void BuildOverlay()
-    {
-        var w = Math.Max(1, (int)Math.Round(Bounds.OuterWidth));
-        var h = Math.Max(1, (int)Math.Round(Bounds.OuterHeight));
-        var surface = new ImageSurface(Format.Argb32, w, h);
-        var ctx = new Context(surface);
-        PaintIcon(ctx, 0, 0, w, h);
-        var tex = _glass ?? new LoadedTexture(api);
-        generateTexture(surface, ref tex, false);
-        _glass = tex;
-        ctx.Dispose();
-        surface.Dispose();
-    }
-
-    private void PaintPlate(Context ctx)
-    {
-        var x = Bounds.drawX;
-        var y = Bounds.drawY;
-        var w = Bounds.InnerWidth;
-        var h = Bounds.InnerHeight;
-        ctx.SetSourceRGBA(_pressed ? 0.48 : 0.23, _pressed ? 0.35 : 0.16, _pressed ? 0.22 : 0.11, 1);
-        ctx.Rectangle(x, y, w, h);
-        ctx.Fill();
-        ctx.SetSourceRGBA(0.62, 0.48, 0.30, _pressed ? 1 : 0.8);
-        ctx.LineWidth = 1;
-        ctx.Rectangle(x + 0.5, y + 0.5, Math.Max(1, w - 1), Math.Max(1, h - 1));
-        ctx.Stroke();
-    }
-
-    private void PaintIcon(Context ctx, double x, double y, double w, double h)
-    {
-        if (w < 1 || h < 1)
-            return;
-
-        ctx.Save();
-        ctx.NewPath();
-        ctx.Antialias = Antialias.Default;
-        ctx.LineCap = LineCap.Round;
-        ctx.LineJoin = LineJoin.Round;
-        Draw(ctx, _icon, x, y, w, h);
-        ctx.Restore();
+        api.Render.Render2DTexturePremultipliedAlpha(
+            _glass.TextureId, Bounds.renderX, Bounds.renderY, Bounds.OuterWidth, Bounds.OuterHeight, 80f);
     }
 
     public override void OnMouseDown(ICoreClientAPI api, MouseEvent args)
@@ -127,357 +82,252 @@ public sealed class GuiElementTermIcon : GuiElement
         _onClick();
     }
 
-    private static void Draw(Context ctx, TermIcon icon, double x, double y, double w, double h)
+    public override void Dispose()
     {
-        if (icon == TermIcon.Arrow)
+        _glass?.Dispose();
+        _glass = null;
+        base.Dispose();
+    }
+
+    private void BuildOverlay()
+    {
+        var w = Math.Max(1, (int)Math.Ceiling(Bounds.OuterWidth));
+        var h = Math.Max(1, (int)Math.Ceiling(Bounds.OuterHeight));
+        var surface = new ImageSurface(Format.Argb32, w, h);
+        var ctx = new Context(surface);
+        Paint(ctx, 0, 0, Math.Min(w, h));
+        ctx.Dispose();
+        var tex = new LoadedTexture(api);
+        generateTexture(surface, ref tex, true);
+        _glass = tex;
+        surface.Dispose();
+    }
+
+    private void Paint(Context ctx, double x, double y, double side)
+    {
+        if (side < 4)
+            return;
+
+        if (_solid && _icon == TermIcon.Arrow)
         {
-            DrawRightArrow(ctx, x, y, w, h);
+            DrawSolidArrow(ctx, x, y, side);
             return;
         }
 
-        var s = Math.Min(w, h) * 0.86;
-        var box = new Box(x + (w - s) / 2, y + (h - s) / 2, s);
-        ctx.LineWidth = Math.Max(1.15, s * 0.09);
+        var color = _pressed ? InkHot : Ink;
+        ctx.Save();
+        ctx.Antialias = Antialias.Default;
+        ctx.Translate(x + side * 0.12, y + side * 0.12);
+        ctx.Scale(side * 0.76 / 24.0, side * 0.76 / 24.0);
+        ctx.LineWidth = 1.7;
+        ctx.LineCap = LineCap.Round;
+        ctx.LineJoin = LineJoin.Round;
+        ctx.SetSourceRGBA(color[0], color[1], color[2], 1);
+        Draw(_icon, ctx, color);
+        ctx.Restore();
+    }
+
+    private static void DrawSolidArrow(Context ctx, double x, double y, double side)
+    {
+        ctx.Save();
+        ctx.Antialias = Antialias.Default;
+        var pad = side * 0.06;
+        var w = side - pad * 2;
+        var h = side - pad * 2;
+        var mid = h * 0.5;
+        var shaft = h * 0.46;
+        var head = w * 0.48;
+        ctx.Translate(x + pad, y + pad);
+        ctx.MoveTo(0, mid - shaft * 0.5);
+        ctx.LineTo(w - head, mid - shaft * 0.5);
+        ctx.LineTo(w - head, mid - h * 0.48);
+        ctx.LineTo(w, mid);
+        ctx.LineTo(w - head, mid + h * 0.48);
+        ctx.LineTo(w - head, mid + shaft * 0.5);
+        ctx.LineTo(0, mid + shaft * 0.5);
+        ctx.ClosePath();
+        ctx.SetSourceRGBA(Ink[0], Ink[1], Ink[2], 1);
+        ctx.Fill();
+        ctx.Restore();
+    }
+
+    private static void Draw(TermIcon icon, Context ctx, double[] color)
+    {
         switch (icon)
         {
             case TermIcon.Search:
-                Ink(ctx, 0.86, 0.8, 0.68);
-                ctx.Arc(box.Px(0.4), box.Py(0.4), s * 0.24, 0, Math.PI * 2);
+                ctx.Arc(10, 10, 5.4, 0, Math.PI * 2);
                 ctx.Stroke();
-                ctx.MoveTo(box.Px(0.58), box.Py(0.58));
-                ctx.LineTo(box.Px(0.86), box.Py(0.86));
+                ctx.MoveTo(14.2, 14.2);
+                ctx.LineTo(20.6, 20.6);
                 ctx.Stroke();
                 break;
             case TermIcon.Mod:
-                Card(ctx, box, 0.28, 0.08);
-                Card(ctx, box, 0.16, 0.26);
-                Card(ctx, box, 0.04, 0.44);
+                ctx.Arc(12, 12, 4.1, 0, Math.PI * 2);
+                ctx.Stroke();
+                ctx.Arc(12, 12, 1.5, 0, Math.PI * 2);
+                ctx.Stroke();
+                for (var i = 0; i < 8; i++)
+                {
+                    var a = i * Math.PI / 4.0;
+                    var c = Math.Cos(a);
+                    var s = Math.Sin(a);
+                    ctx.MoveTo(12 + c * 5.5, 12 + s * 5.5);
+                    ctx.LineTo(12 + c * 8.4, 12 + s * 8.4);
+                }
+
+                ctx.Stroke();
                 break;
             case TermIcon.Name:
-                Ink(ctx, 0.9, 0.84, 0.7);
-                RoundRect(ctx, box.Px(0.12), box.Py(0.06), s * 0.76, s * 0.88, s * 0.08);
+                Round(ctx, 4, 4, 16, 16, 1.6);
                 ctx.Stroke();
-                ctx.LineWidth = Math.Max(1.0, s * 0.07);
-                for (var i = 0; i < 3; i++)
-                {
-                    var ly = box.Py(0.32 + i * 0.2);
-                    ctx.MoveTo(box.Px(0.26), ly);
-                    ctx.LineTo(box.Px(i == 2 ? 0.58 : 0.74), ly);
-                    ctx.Stroke();
-                }
+                ctx.MoveTo(12, 5.2);
+                ctx.LineTo(12, 18.8);
+                ctx.MoveTo(6.4, 8.2);
+                ctx.LineTo(9.6, 8.2);
+                ctx.MoveTo(6.4, 11.2);
+                ctx.LineTo(9.6, 11.2);
+                ctx.MoveTo(14.4, 8.2);
+                ctx.LineTo(17.6, 8.2);
+                ctx.MoveTo(14.4, 11.2);
+                ctx.LineTo(17.6, 11.2);
+                ctx.Stroke();
                 break;
             case TermIcon.Count:
-                Ink(ctx, 0.9, 0.84, 0.7);
-                Bar(ctx, box, 0.08, 0.62, 0.22);
-                Bar(ctx, box, 0.38, 0.38, 0.22);
-                Bar(ctx, box, 0.68, 0.12, 0.22);
-                break;
-            case TermIcon.Clear:
-                Ink(ctx, 0.75, 0.28, 0.22);
-                ctx.LineWidth = Math.Max(1.6, s * 0.14);
-                ctx.MoveTo(box.Px(0.22), box.Py(0.22));
-                ctx.LineTo(box.Px(0.78), box.Py(0.78));
-                ctx.MoveTo(box.Px(0.78), box.Py(0.22));
-                ctx.LineTo(box.Px(0.22), box.Py(0.78));
+                ctx.Rectangle(4, 14, 4.2, 6);
+                ctx.Rectangle(9.9, 9, 4.2, 11);
+                ctx.Rectangle(15.8, 4, 4.2, 16);
                 ctx.Stroke();
                 break;
             case TermIcon.Channels:
-                DrawChannels(ctx, box, s);
+                ctx.MoveTo(6, 4.5);
+                ctx.LineTo(6, 19.5);
+                ctx.MoveTo(6, 6.5);
+                ctx.LineTo(16, 6.5);
+                ctx.MoveTo(6, 12);
+                ctx.LineTo(14, 12);
+                ctx.MoveTo(6, 17.5);
+                ctx.LineTo(12, 17.5);
+                ctx.Stroke();
+                Dot(ctx, color, 6, 4.5, 1.7);
+                Dot(ctx, color, 17.2, 6.5, 1.7);
+                Dot(ctx, color, 15.2, 12, 1.7);
+                Dot(ctx, color, 13.2, 17.5, 1.7);
                 break;
             case TermIcon.Power:
-                DrawPower(ctx, box, s);
+                ctx.MoveTo(13.5, 2.5);
+                ctx.LineTo(7.5, 12);
+                ctx.LineTo(11.6, 12);
+                ctx.LineTo(9.2, 21.5);
+                ctx.LineTo(17.4, 10.2);
+                ctx.LineTo(13.2, 10.2);
+                ctx.ClosePath();
+                ctx.Stroke();
                 break;
             case TermIcon.Items:
-                DrawItems(ctx, box, s);
+                Round(ctx, 4, 8.5, 16, 11.5, 1.5);
+                ctx.Stroke();
+                ctx.MoveTo(4.4, 13.2);
+                ctx.LineTo(19.6, 13.2);
+                ctx.Stroke();
+                Round(ctx, 10.4, 11.4, 3.2, 3.4, 0.6);
+                ctx.Stroke();
                 break;
             case TermIcon.Liquid:
-                DrawLiquid(ctx, box, s);
+                ctx.MoveTo(8.2, 3.2);
+                ctx.LineTo(15.8, 3.2);
+                ctx.MoveTo(9.4, 3.2);
+                ctx.LineTo(9.4, 7.2);
+                ctx.MoveTo(14.6, 3.2);
+                ctx.LineTo(14.6, 7.2);
+                ctx.MoveTo(9.4, 7.4);
+                ctx.CurveTo(4.2, 9.2, 3.2, 13, 4.4, 16.4);
+                ctx.CurveTo(5.6, 20.2, 8.4, 21.4, 12, 21.4);
+                ctx.CurveTo(15.6, 21.4, 18.4, 20.2, 19.6, 16.4);
+                ctx.CurveTo(20.8, 13, 19.8, 9.2, 14.6, 7.4);
+                ctx.MoveTo(7.2, 16.2);
+                ctx.CurveTo(9.4, 17.6, 14.2, 14.8, 16.8, 16.2);
+                ctx.Stroke();
                 break;
             case TermIcon.Types:
-                DrawTypes(ctx, box, s);
+                ctx.Arc(6.2, 6.2, 2.5, 0, Math.PI * 2);
+                ctx.Rectangle(15.2, 3.6, 5.2, 5.2);
+                ctx.MoveTo(6.2, 14.6);
+                ctx.LineTo(9.4, 20.4);
+                ctx.LineTo(3, 20.4);
+                ctx.ClosePath();
+                ctx.MoveTo(18, 14.8);
+                ctx.LineTo(21.6, 18.4);
+                ctx.LineTo(18, 22);
+                ctx.LineTo(14.4, 18.4);
+                ctx.ClosePath();
+                ctx.Stroke();
                 break;
             case TermIcon.Craft:
-                DrawCraft(ctx, box, s);
+                Round(ctx, 3, 5, 15, 5.2, 1.2);
+                ctx.Stroke();
+                ctx.MoveTo(10.4, 10.2);
+                ctx.LineTo(10.4, 20.4);
+                ctx.Stroke();
                 break;
             case TermIcon.Process:
-                DrawProcess(ctx, box, s);
+                const double end = 5.4;
+                ctx.Arc(12, 12, 6.6, 0.9, end);
+                ctx.Stroke();
+                var px = 12 + Math.Cos(end) * 6.6;
+                var py = 12 + Math.Sin(end) * 6.6;
+                var tx = -Math.Sin(end);
+                var ty = Math.Cos(end);
+                ctx.MoveTo(px - tx * 3.4 + Math.Cos(end) * 2.1, py - ty * 3.4 + Math.Sin(end) * 2.1);
+                ctx.LineTo(px, py);
+                ctx.LineTo(px - tx * 3.4 - Math.Cos(end) * 2.1, py - ty * 3.4 - Math.Sin(end) * 2.1);
+                ctx.Stroke();
                 break;
             case TermIcon.Substitute:
-                DrawSubstitute(ctx, box, s);
-                break;
-        }
-    }
-
-    private readonly struct Box(double x, double y, double s)
-    {
-        public double Px(double u) => x + s * u;
-        public double Py(double v) => y + s * v;
-    }
-
-    private static void Ink(Context ctx, double r, double g, double b) => ctx.SetSourceRGBA(r, g, b, 1);
-
-    private static void Card(Context ctx, Box box, double x, double y)
-    {
-        Ink(ctx, 0.9, 0.84, 0.7);
-        var s = box.Px(1) - box.Px(0);
-        RoundRect(ctx, box.Px(x), box.Py(y), s * 0.62, s * 0.42, s * 0.04);
-        ctx.Stroke();
-    }
-
-    private static void Bar(Context ctx, Box box, double x, double y, double w)
-    {
-        var s = box.Px(1) - box.Px(0);
-        ctx.Rectangle(box.Px(x), box.Py(y), s * w, box.Py(0.96) - box.Py(y));
-        ctx.Fill();
-    }
-
-    private static void Node(Context ctx, Box box, double x, double y, double radius)
-    {
-        var s = box.Px(1) - box.Px(0);
-        ctx.Arc(box.Px(x), box.Py(y), Math.Max(1.1, s * radius), 0, Math.PI * 2);
-        ctx.Fill();
-    }
-
-    private static void DrawChannels(Context ctx, Box box, double s)
-    {
-        Ink(ctx, 0.42, 0.26, 0.1);
-        RoundRect(ctx, box.Px(0.4), box.Py(0.08), s * 0.2, s * 0.84, s * 0.06);
-        ctx.Fill();
-        RoundRect(ctx, box.Px(0.08), box.Py(0.4), s * 0.84, s * 0.2, s * 0.06);
-        ctx.Fill();
-        Ink(ctx, 0.86, 0.58, 0.24);
-        RoundRect(ctx, box.Px(0.44), box.Py(0.14), s * 0.12, s * 0.72, s * 0.04);
-        ctx.Fill();
-        RoundRect(ctx, box.Px(0.14), box.Py(0.44), s * 0.72, s * 0.12, s * 0.04);
-        ctx.Fill();
-        Ink(ctx, 0.96, 0.78, 0.46);
-        ctx.Rectangle(box.Px(0.47), box.Py(0.2), s * 0.035, s * 0.22);
-        ctx.Fill();
-        ctx.Rectangle(box.Px(0.2), box.Py(0.47), s * 0.22, s * 0.035);
-        ctx.Fill();
-        Ink(ctx, 0.55, 0.32, 0.12);
-        Node(ctx, box, 0.5, 0.5, 0.13);
-        Ink(ctx, 0.98, 0.82, 0.5);
-        Node(ctx, box, 0.5, 0.5, 0.07);
-        Ink(ctx, 0.95, 0.7, 0.32);
-        Node(ctx, box, 0.5, 0.1, 0.08);
-        Node(ctx, box, 0.5, 0.9, 0.08);
-        Node(ctx, box, 0.1, 0.5, 0.08);
-        Node(ctx, box, 0.9, 0.5, 0.08);
-        Ink(ctx, 0.35, 0.2, 0.08);
-        Node(ctx, box, 0.5, 0.1, 0.035);
-        Node(ctx, box, 0.5, 0.9, 0.035);
-        Node(ctx, box, 0.1, 0.5, 0.035);
-        Node(ctx, box, 0.9, 0.5, 0.035);
-    }
-
-    private static void DrawPower(Context ctx, Box box, double s)
-    {
-        Ink(ctx, 0.16, 0.24, 0.12);
-        ctx.Arc(box.Px(0.5), box.Py(0.52), s * 0.42, 0, Math.PI * 2);
-        ctx.Fill();
-        Ink(ctx, 0.28, 0.46, 0.2);
-        ctx.LineWidth = Math.Max(1.2, s * 0.06);
-        ctx.Arc(box.Px(0.5), box.Py(0.52), s * 0.34, 0, Math.PI * 2);
-        ctx.Stroke();
-        Ink(ctx, 0.12, 0.22, 0.08);
-        Bolt(ctx, box, 0.03, 0.03);
-        ctx.Fill();
-        Ink(ctx, 0.55, 0.82, 0.32);
-        Bolt(ctx, box, 0, 0);
-        ctx.Fill();
-        Ink(ctx, 0.86, 0.96, 0.62);
-        ctx.MoveTo(box.Px(0.52), box.Py(0.2));
-        ctx.LineTo(box.Px(0.36), box.Py(0.48));
-        ctx.LineTo(box.Px(0.48), box.Py(0.48));
-        ctx.LineTo(box.Px(0.42), box.Py(0.68));
-        ctx.LineTo(box.Px(0.6), box.Py(0.36));
-        ctx.LineTo(box.Px(0.48), box.Py(0.36));
-        ctx.ClosePath();
-        ctx.Fill();
-    }
-
-    private static void Bolt(Context ctx, Box box, double dx, double dy)
-    {
-        ctx.MoveTo(box.Px(0.58 + dx), box.Py(0.1 + dy));
-        ctx.LineTo(box.Px(0.3 + dx), box.Py(0.5 + dy));
-        ctx.LineTo(box.Px(0.48 + dx), box.Py(0.5 + dy));
-        ctx.LineTo(box.Px(0.38 + dx), box.Py(0.9 + dy));
-        ctx.LineTo(box.Px(0.76 + dx), box.Py(0.4 + dy));
-        ctx.LineTo(box.Px(0.54 + dx), box.Py(0.4 + dy));
-        ctx.ClosePath();
-    }
-
-    private static void DrawLiquid(Context ctx, Box box, double s)
-    {
-        Ink(ctx, 0.1, 0.28, 0.42);
-        ctx.MoveTo(box.Px(0.5), box.Py(0.06));
-        ctx.CurveTo(box.Px(0.78), box.Py(0.28), box.Px(0.92), box.Py(0.48), box.Px(0.5), box.Py(0.94));
-        ctx.CurveTo(box.Px(0.08), box.Py(0.48), box.Px(0.22), box.Py(0.28), box.Px(0.5), box.Py(0.06));
-        ctx.ClosePath();
-        ctx.Fill();
-        Ink(ctx, 0.28, 0.62, 0.82);
-        ctx.MoveTo(box.Px(0.5), box.Py(0.16));
-        ctx.CurveTo(box.Px(0.7), box.Py(0.32), box.Px(0.8), box.Py(0.48), box.Px(0.5), box.Py(0.82));
-        ctx.CurveTo(box.Px(0.2), box.Py(0.48), box.Px(0.3), box.Py(0.32), box.Px(0.5), box.Py(0.16));
-        ctx.ClosePath();
-        ctx.Fill();
-        Ink(ctx, 0.82, 0.94, 1);
-        ctx.MoveTo(box.Px(0.4), box.Py(0.28));
-        ctx.CurveTo(box.Px(0.34), box.Py(0.4), box.Px(0.36), box.Py(0.52), box.Px(0.42), box.Py(0.58));
-        ctx.CurveTo(box.Px(0.34), box.Py(0.46), box.Px(0.32), box.Py(0.36), box.Px(0.4), box.Py(0.28));
-        ctx.ClosePath();
-        ctx.Fill();
-    }
-
-    private static void DrawItems(Context ctx, Box box, double s)
-    {
-        Ink(ctx, 0.18, 0.28, 0.36);
-        RoundRect(ctx, box.Px(0.12), box.Py(0.4), s * 0.76, s * 0.5, s * 0.06);
-        ctx.Fill();
-        Ink(ctx, 0.36, 0.54, 0.66);
-        RoundRect(ctx, box.Px(0.16), box.Py(0.44), s * 0.68, s * 0.4, s * 0.04);
-        ctx.Fill();
-        Ink(ctx, 0.22, 0.36, 0.48);
-        RoundRect(ctx, box.Px(0.1), box.Py(0.16), s * 0.8, s * 0.28, s * 0.06);
-        ctx.Fill();
-        Ink(ctx, 0.55, 0.74, 0.84);
-        RoundRect(ctx, box.Px(0.14), box.Py(0.2), s * 0.72, s * 0.16, s * 0.04);
-        ctx.Fill();
-        Ink(ctx, 0.72, 0.58, 0.28);
-        ctx.Rectangle(box.Px(0.22), box.Py(0.18), s * 0.07, s * 0.64);
-        ctx.Fill();
-        ctx.Rectangle(box.Px(0.71), box.Py(0.18), s * 0.07, s * 0.64);
-        ctx.Fill();
-        Ink(ctx, 0.95, 0.82, 0.42);
-        RoundRect(ctx, box.Px(0.4), box.Py(0.46), s * 0.2, s * 0.18, s * 0.03);
-        ctx.Fill();
-        Ink(ctx, 0.28, 0.18, 0.08);
-        ctx.Arc(box.Px(0.5), box.Py(0.56), Math.Max(1.1, s * 0.035), 0, Math.PI * 2);
-        ctx.Fill();
-        Ink(ctx, 0.9, 0.95, 0.98);
-        ctx.Rectangle(box.Px(0.22), box.Py(0.24), s * 0.4, Math.Max(1, s * 0.035));
-        ctx.Fill();
-    }
-
-    private static void DrawTypes(Context ctx, Box box, double s)
-    {
-        Chip(ctx, box, s, 0.08, 0.08, 0.82, 0.48, 0.22, 0);
-        Chip(ctx, box, s, 0.52, 0.08, 0.36, 0.58, 0.74, 1);
-        Chip(ctx, box, s, 0.08, 0.52, 0.42, 0.7, 0.32, 2);
-        Chip(ctx, box, s, 0.52, 0.52, 0.72, 0.4, 0.58, 3);
-    }
-
-    private static void DrawRightArrow(Context ctx, double x, double y, double w, double h)
-    {
-        Ink(ctx, 0.9, 0.78, 0.4);
-        var head = w * 0.42;
-        var shaftH = Math.Max(3, Math.Min(w, h) * 0.16);
-        var shaftLeft = x + w * 0.12;
-        var neck = x + w - head;
-        ctx.Rectangle(shaftLeft, y + (h - shaftH) / 2.0, Math.Max(1, neck - shaftLeft), shaftH);
-        ctx.Fill();
-        ctx.MoveTo(neck, y + h * 0.2);
-        ctx.LineTo(x + w * 0.88, y + h * 0.5);
-        ctx.LineTo(neck, y + h * 0.8);
-        ctx.ClosePath();
-        ctx.Fill();
-    }
-
-    private static void DrawCraft(Context ctx, Box box, double s)
-    {
-        Ink(ctx, 0.86, 0.8, 0.68);
-        for (var row = 0; row < 3; row++)
-        {
-            for (var col = 0; col < 3; col++)
-            {
-                ctx.Rectangle(box.Px(0.12 + col * 0.28), box.Py(0.12 + row * 0.28), s * 0.2, s * 0.2);
+                ctx.MoveTo(3.2, 8);
+                ctx.LineTo(15.2, 8);
+                ctx.MoveTo(15.2, 8);
+                ctx.LineTo(11.4, 4.8);
+                ctx.MoveTo(15.2, 8);
+                ctx.LineTo(11.4, 11.2);
+                ctx.MoveTo(20.8, 16);
+                ctx.LineTo(8.8, 16);
+                ctx.MoveTo(8.8, 16);
+                ctx.LineTo(12.6, 12.8);
+                ctx.MoveTo(8.8, 16);
+                ctx.LineTo(12.6, 19.2);
                 ctx.Stroke();
-            }
-        }
-    }
-
-    private static void DrawProcess(Context ctx, Box box, double s)
-    {
-        Ink(ctx, 0.55, 0.72, 0.84);
-        ctx.Rectangle(box.Px(0.1), box.Py(0.28), s * 0.28, s * 0.44);
-        ctx.Fill();
-        Ink(ctx, 0.9, 0.78, 0.4);
-        ctx.MoveTo(box.Px(0.46), box.Py(0.28));
-        ctx.LineTo(box.Px(0.7), box.Py(0.5));
-        ctx.LineTo(box.Px(0.46), box.Py(0.72));
-        ctx.ClosePath();
-        ctx.Fill();
-        Ink(ctx, 0.46, 0.78, 0.42);
-        ctx.Rectangle(box.Px(0.72), box.Py(0.28), s * 0.18, s * 0.44);
-        ctx.Fill();
-    }
-
-    private static void DrawSubstitute(Context ctx, Box box, double s)
-    {
-        Ink(ctx, 0.9, 0.72, 0.36);
-        ctx.LineWidth = Math.Max(1.4, s * 0.1);
-        ctx.MoveTo(box.Px(0.18), box.Py(0.32));
-        ctx.LineTo(box.Px(0.78), box.Py(0.32));
-        ctx.Stroke();
-        ctx.MoveTo(box.Px(0.62), box.Py(0.16));
-        ctx.LineTo(box.Px(0.82), box.Py(0.32));
-        ctx.LineTo(box.Px(0.62), box.Py(0.48));
-        ctx.Stroke();
-        ctx.MoveTo(box.Px(0.82), box.Py(0.68));
-        ctx.LineTo(box.Px(0.22), box.Py(0.68));
-        ctx.Stroke();
-        ctx.MoveTo(box.Px(0.38), box.Py(0.52));
-        ctx.LineTo(box.Px(0.18), box.Py(0.68));
-        ctx.LineTo(box.Px(0.38), box.Py(0.84));
-        ctx.Stroke();
-    }
-
-    private static void Chip(Context ctx, Box box, double s, double x, double y, double r, double g, double b, int mark)
-    {
-        Ink(ctx, r * 0.45, g * 0.45, b * 0.45);
-        RoundRect(ctx, box.Px(x), box.Py(y), s * 0.4, s * 0.4, s * 0.06);
-        ctx.Fill();
-        Ink(ctx, r, g, b);
-        RoundRect(ctx, box.Px(x + 0.04), box.Py(y + 0.04), s * 0.32, s * 0.32, s * 0.05);
-        ctx.Fill();
-        Ink(ctx, Math.Min(1, r + 0.28), Math.Min(1, g + 0.28), Math.Min(1, b + 0.28));
-        var cx = x + 0.2;
-        var cy = y + 0.2;
-        switch (mark)
-        {
-            case 0:
-                ctx.MoveTo(box.Px(cx), box.Py(cy - 0.08));
-                ctx.LineTo(box.Px(cx + 0.07), box.Py(cy + 0.06));
-                ctx.LineTo(box.Px(cx - 0.07), box.Py(cy + 0.06));
-                ctx.ClosePath();
-                ctx.Fill();
-                break;
-            case 1:
-                ctx.Arc(box.Px(cx), box.Py(cy), s * 0.07, 0, Math.PI * 2);
-                ctx.Fill();
-                break;
-            case 2:
-                ctx.Rectangle(box.Px(cx - 0.08), box.Py(cy - 0.025), s * 0.16, s * 0.05);
-                ctx.Fill();
-                ctx.Rectangle(box.Px(cx - 0.025), box.Py(cy - 0.08), s * 0.05, s * 0.16);
-                ctx.Fill();
                 break;
             default:
-                ctx.Rectangle(box.Px(cx - 0.07), box.Py(cy - 0.07), s * 0.14, s * 0.14);
-                ctx.Fill();
+                ctx.MoveTo(4, 12);
+                ctx.LineTo(14, 12);
+                ctx.MoveTo(10, 7);
+                ctx.LineTo(17, 12);
+                ctx.LineTo(10, 17);
+                ctx.Stroke();
                 break;
         }
     }
 
-    private static void RoundRect(Context ctx, double x, double y, double w, double h, double r)
+    private static void Round(Context ctx, double x, double y, double w, double h, double r)
     {
+        r = Math.Min(r, Math.Min(w, h) / 2);
+        var right = x + w;
+        var bottom = y + h;
         ctx.NewPath();
-        ctx.Arc(x + r, y + r, r, Math.PI, Math.PI * 1.5);
-        ctx.Arc(x + w - r, y + r, r, Math.PI * 1.5, 0);
-        ctx.Arc(x + w - r, y + h - r, r, 0, Math.PI * 0.5);
-        ctx.Arc(x + r, y + h - r, r, Math.PI * 0.5, Math.PI);
+        ctx.MoveTo(x + r, y);
+        ctx.Arc(right - r, y + r, r, -Math.PI / 2, 0);
+        ctx.Arc(right - r, bottom - r, r, 0, Math.PI / 2);
+        ctx.Arc(x + r, bottom - r, r, Math.PI / 2, Math.PI);
+        ctx.Arc(x + r, y + r, r, Math.PI, 3 * Math.PI / 2);
         ctx.ClosePath();
+    }
+
+    private static void Dot(Context ctx, double[] color, double x, double y, double r)
+    {
+        ctx.SetSourceRGBA(color[0], color[1], color[2], 1);
+        ctx.Arc(x, y, r, 0, Math.PI * 2);
+        ctx.Fill();
     }
 }
 
@@ -494,16 +344,6 @@ public sealed class GuiElementMeterPlate : GuiElement
     public override void ComposeElements(Context ctx, ImageSurface surface)
     {
         Bounds.CalcWorldBounds();
-        var x = Bounds.drawX;
-        var y = Bounds.drawY;
-        var w = Bounds.InnerWidth;
-        var h = Bounds.InnerHeight;
-        ctx.SetSourceRGBA(0.23, 0.16, 0.11, 1);
-        ctx.Rectangle(x, y, w, h);
-        ctx.Fill();
-        ctx.SetSourceRGBA(0.62, 0.48, 0.30, 1);
-        ctx.LineWidth = Math.Max(1, scaled(1));
-        ctx.Rectangle(x + 0.5, y + 0.5, Math.Max(1, w - 1), Math.Max(1, h - 1));
-        ctx.Stroke();
+        TermChrome.Raised(ctx, Bounds.drawX, Bounds.drawY, Bounds.InnerWidth, Bounds.InnerHeight, false);
     }
 }

@@ -1,0 +1,81 @@
+{
+  "code": "estorageprocessor",
+  "class": "BlockEStorageProcessor",
+  "entityClass": "BlockEntityEStorageProcessor",
+  "variantgroups": [
+    { "code": "tier", "states": [ "1k", "4k", "16k", "64k" ] }
+  ],
+  "attributesByType": {
+    "*-1k": { "bytes": 1024 },
+    "*-4k": { "bytes": 4096 },
+    "*-16k": { "bytes": 16384 },
+    "*-64k": { "bytes": 65536 }
+  },
+  "attributes": {
+    "handbook": {
+      "groupBy": [ "estorageprocessor-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivestorage:block-handbooktitle-estorageprocessor",
+          "text": "electricalprogressivestorage:block-handbooktext-estorageprocessor"
+        }
+      ]
+    }
+  },
+  "creativeinventory": {
+    "general": [ "*" ],
+    "estorage": [ "*" ]
+  },
+  "shape": { "base": "block/estorageprocessor" },
+  "lightAbsorption": 0,
+  "faceCullMode": "NeverCull",
+  "renderPass": "OpaqueNoCull",
+  "emitSideAo": { "all": false },
+  "sideAo": { "all": true },
+  "sideopaque": { "all": false },
+  "textures": {
+    "metal": { "base": "game:block/metal/plate/copper" },
+    "iron": { "base": "game:block/metal/plate/iron" },
+    "brass": { "base": "game:block/metal/plate/brass" },
+    "steel": { "base": "game:block/metal/plate/steel" },
+    "bronze": { "base": "game:block/metal/plate/bismuthbronze" }
+  },
+  "texturesByType": {
+    "*-1k": {
+      "metal": { "base": "game:block/metal/plate/copper" },
+      "iron": { "base": "game:block/metal/plate/iron" },
+      "brass": { "base": "game:block/metal/plate/brass" },
+      "steel": { "base": "game:block/metal/plate/steel" },
+      "bronze": { "base": "game:block/metal/plate/bismuthbronze" }
+    },
+    "*-4k": {
+      "metal": { "base": "game:block/metal/plate/tinbronze" },
+      "iron": { "base": "game:block/metal/plate/iron" },
+      "brass": { "base": "game:block/metal/plate/brass" },
+      "steel": { "base": "game:block/metal/plate/steel" },
+      "bronze": { "base": "game:block/metal/plate/bismuthbronze" }
+    },
+    "*-16k": {
+      "metal": { "base": "game:block/metal/plate/iron" },
+      "iron": { "base": "game:block/metal/plate/iron" },
+      "brass": { "base": "game:block/metal/plate/brass" },
+      "steel": { "base": "game:block/metal/plate/steel" },
+      "bronze": { "base": "game:block/metal/plate/bismuthbronze" }
+    },
+    "*-64k": {
+      "metal": { "base": "game:block/metal/plate/steel" },
+      "iron": { "base": "game:block/metal/plate/iron" },
+      "brass": { "base": "game:block/metal/plate/brass" },
+      "steel": { "base": "game:block/metal/plate/steel" },
+      "bronze": { "base": "game:block/metal/plate/bismuthbronze" }
+    }
+  },
+  "blockmaterial": "Metal",
+  "resistance": 3.5,
+  "sounds": {
+    "place": "game:block/anvil",
+    "walk": "game:walk/metal",
+    "hit": "game:block/metal",
+    "break": "game:block/metal"
+  }
+}

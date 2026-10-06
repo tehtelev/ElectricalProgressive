@@ -109,16 +109,23 @@ public class GuiDialogEStorageDrive : GuiDialogBlockEntity
         var gridW = gridMeasure.fixedWidth;
         var gridH = gridMeasure.fixedHeight;
         var edge = GuiElementTermFrame.Inset;
-        var contentW = Math.Max(gridW, 210);
-        var contentH = TitleH + 8 + gridH;
-        _winW = edge + contentW + edge;
+        var pad = TermChrome.Pad;
+        var gutter = TermChrome.Gutter;
+        var blockW = Math.Max(gridW + pad * 2, 230);
+        var headerH = pad + TitleH + pad;
+        var gridBlockH = pad + gridH + pad;
+        var contentH = headerH + gutter + gridBlockH;
+        _winW = edge + blockW + edge;
         _winH = edge + contentH + edge;
 
-        var closeX = edge + contentW - CloseS;
-        var closeY = edge + (TitleH - CloseS) / 2.0;
-        var title = ElementBounds.Fixed(edge, edge, closeX - 8 - edge, TitleH);
+        var closeX = edge + blockW - CloseS;
+        var closeY = edge + pad + (TitleH - CloseS) / 2.0;
+        var title = ElementBounds.Fixed(edge + pad, edge + pad, closeX - 8 - (edge + pad), TitleH);
+        var header = ElementBounds.Fixed(edge, edge, closeX - 8 - edge, headerH);
         _close = ElementBounds.Fixed(closeX, closeY, CloseS, CloseS);
-        var grid = ElementBounds.Fixed(edge + (contentW - gridW) / 2.0, edge + TitleH + 8, gridW, gridH);
+        var gridTop = edge + headerH + gutter;
+        var grid = ElementBounds.Fixed(edge + (blockW - gridW) / 2.0, gridTop + pad, gridW, gridH);
+        var gridTray = ElementBounds.Fixed(edge, gridTop, blockW, gridBlockH);
         var frame = ElementBounds.Fixed(0, 0, _winW, _winH);
         var bg = ElementBounds.Fill.WithFixedPadding(0);
         bg.BothSizing = ElementSizing.FitToChildren;
@@ -133,6 +140,8 @@ public class GuiDialogEStorageDrive : GuiDialogBlockEntity
             .CreateCompo("estoragedrive" + BlockEntityPosition, dialog)
             .BeginChildElements(bg)
             .AddStaticElement(new GuiElementTermFrame(capi, frame, closeX, closeY, CloseS))
+            .AddStaticElement(new GuiElementTermPanel(capi, header))
+            .AddStaticElement(new GuiElementTermPanel(capi, gridTray))
             .AddStaticText(DialogTitle, CairoFont.WhiteDetailText().WithFontSize(18), title)
             .AddItemSlotGrid(Inventory, DoSendPacket, Cols, [0, 1, 2, 3, 4, 5, 6, 7], grid, "disks")
             .EndChildElements()
