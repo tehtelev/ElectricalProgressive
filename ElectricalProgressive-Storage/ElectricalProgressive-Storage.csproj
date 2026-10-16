@@ -6,6 +6,22 @@
         <Nullable>enable</Nullable>
         <RootNamespace>ElectricalProgressive</RootNamespace>
     </PropertyGroup>
+    <!-- Папки машин видят типы друг друга. ImplicitUsings не включаем: System подключается в файле, где он нужен. -->
+    <ItemGroup>
+        <Using Include="ElectricalProgressive.Content.Storage" />
+        <Using Include="ElectricalProgressive.Content.Storage.Assembler" />
+        <Using Include="ElectricalProgressive.Content.Storage.Bus" />
+        <Using Include="ElectricalProgressive.Content.Storage.Cable" />
+        <Using Include="ElectricalProgressive.Content.Storage.Controller" />
+        <Using Include="ElectricalProgressive.Content.Storage.Craft" />
+        <Using Include="ElectricalProgressive.Content.Storage.Drive" />
+        <Using Include="ElectricalProgressive.Content.Storage.Gui" />
+        <Using Include="ElectricalProgressive.Content.Storage.Interface" />
+        <Using Include="ElectricalProgressive.Content.Storage.Patch" />
+        <Using Include="ElectricalProgressive.Content.Storage.Pattern" />
+        <Using Include="ElectricalProgressive.Content.Storage.Processor" />
+        <Using Include="ElectricalProgressive.Content.Storage.Terminal" />
+    </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\ElectricalProgressive-Core\ElectricalProgressive-Core.csproj">
         <Private>false</Private>

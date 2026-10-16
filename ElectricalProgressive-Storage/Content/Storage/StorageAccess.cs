@@ -12,6 +12,9 @@ using Vintagestory.GameContent;
 
 namespace ElectricalProgressive.Content.Storage;
 
+/// <summary>
+/// Связь клетки с сетью: онлайн, нет контроллера, конфликт, нет питания или нет канала.
+/// </summary>
 public enum StorageLink
 {
     Online,
@@ -21,6 +24,9 @@ public enum StorageLink
     NoChannel
 }
 
+/// <summary>
+/// Устройства одной сети, занятые каналы и чанки, которые ещё не загружены.
+/// </summary>
 public sealed class StorageScan
 {
     public List<BlockPos> Controllers { get; } = new();
@@ -130,7 +136,8 @@ public static class StorageAccess
             var hosted = host != null ? CableChannels(host) : 8;
             if (host == null || host.FirstCodePart() == "estoragefiber" || mask == Facing.None)
                 return hosted;
-            return hosted * HostLines(panel.CableLines, mask);
+            // У интерфейса и шины толстая грань угла уже проводит свои каналы.
+            return hosted * HostLines(panel.CableLines, mask, StrandsCarry(block));
         }
 
         var per = CableChannels(block);
@@ -141,9 +148,9 @@ public static class StorageAccess
         return per * entity.LinesOf(mask);
     }
 
-    private static int HostLines(int[] lines, Facing mask)
+    private static int HostLines(int[] lines, Facing mask, bool widest = false)
     {
-        var min = BlockEntityEStorageCable.MaxLines;
+        var pick = widest ? 0 : BlockEntityEStorageCable.MaxLines;
         var any = false;
         foreach (var face in FacingHelper.Faces(mask))
         {
@@ -153,27 +160,165 @@ public static class StorageAccess
                 count = 1;
             if (count > BlockEntityEStorageCable.MaxLines)
                 count = BlockEntityEStorageCable.MaxLines;
-            if (count < min)
-                min = count;
+            if (widest)
+            {
+                if (count > pick)
+                    pick = count;
+            }
+            else if (count < pick)
+                pick = count;
         }
 
-        return any ? min : 1;
+        if (!any || pick < 1)
+            return 1;
+        return pick;
+    }
+
+    // Интерфейс и шина проводят каналы по жилам. Терминал остаётся на восьми.
+    private static bool StrandsCarry(Vintagestory.API.Common.Block? block)
+        => block?.FirstCodePart() is "estorageinterface" or "estorageimport" or "estorageexport";
+
+    /// <summary>Сколько жил уже есть у провода, в который входит эта грань.</summary>
+    public static int HostWireFloor(Facing connection, int[] lines, BlockFacing face)
+    {
+        var best = 1;
+        foreach (var component in Components(connection))
+        {
+            if (!HasFace(component, face))
+                continue;
+            foreach (var other in FacingHelper.Faces(component))
+            {
+                var count = LineAt(lines, other.Index);
+                if (count > best)
+                    best = count;
+            }
+
+            break;
+        }
+
+        return best;
+    }
+
+    /// <summary>Поднимает все грани одного провода до floor, чтобы угол не резал каналы тонкой гранью.</summary>
+    public static void LiftHostWire(Facing connection, int[] lines, BlockFacing face, int floor)
+    {
+        if (face == null || lines == null)
+            return;
+        if (floor < 1)
+            floor = 1;
+        if (floor > BlockEntityEStorageCable.MaxLines)
+            floor = BlockEntityEStorageCable.MaxLines;
+
+        var found = false;
+        foreach (var component in Components(connection))
+        {
+            if (!HasFace(component, face))
+                continue;
+            found = true;
+            foreach (var other in FacingHelper.Faces(component))
+            {
+                var index = other.Index;
+                if ((uint)index >= (uint)lines.Length)
+                    continue;
+                if (lines[index] < floor)
+                    lines[index] = floor;
+            }
+
+            break;
+        }
+
+        if (!found && (uint)face.Index < (uint)lines.Length && lines[face.Index] < floor)
+            lines[face.Index] = floor;
+    }
+
+    /// <summary>
+    /// Снимает одну жилу с провода под прицелом. 0 — на этой грани жила уже одна, её снимает слом отрезка.
+    /// </summary>
+    public static int LowerHostWire(Facing connection, int[] lines, Facing hit)
+    {
+        BlockFacing? face = null;
+        foreach (var candidate in FacingHelper.Faces(hit))
+        {
+            face = candidate;
+            break;
+        }
+
+        if (face == null || lines == null || LineAt(lines, face.Index) <= 1)
+            return 0;
+
+        var dropped = 0;
+        var found = false;
+        foreach (var component in Components(connection))
+        {
+            if (!HasFace(component, face))
+                continue;
+            found = true;
+            dropped += LowerFaces(component, lines);
+            break;
+        }
+
+        if (!found)
+            dropped += LowerFaces(connection & FacingHelper.FromFace(face), lines);
+        return dropped;
+    }
+
+    private static int LowerFaces(Facing mask, int[] lines)
+    {
+        var dropped = 0;
+        foreach (var other in FacingHelper.Faces(mask))
+        {
+            var index = other.Index;
+            if ((uint)index >= (uint)lines.Length || lines[index] <= 1)
+                continue;
+            var onFace = mask & FacingHelper.FromFace(other);
+            dropped += FacingHelper.Count(onFace);
+            lines[index]--;
+        }
+
+        return dropped;
+    }
+
+    private static bool HasFace(Facing mask, BlockFacing face)
+    {
+        foreach (var other in FacingHelper.Faces(mask))
+        {
+            if (other == face)
+                return true;
+        }
+
+        return false;
+    }
+
+    private static int LineAt(int[] lines, int index)
+    {
+        if (lines == null || (uint)index >= (uint)lines.Length)
+            return 1;
+        var count = lines[index];
+        if (count < 1)
+            return 1;
+        return count > BlockEntityEStorageCable.MaxLines ? BlockEntityEStorageCable.MaxLines : count;
     }
 
     /// <summary>
     /// По каждому проводу в клетке: сколько каналов занято и сколько провод пропускает.
-    /// На углу берётся более тонкая грань.
+    /// На углу голого кабеля берётся тонкая грань, под интерфейсом и шиной — толстая.
     /// </summary>
     public static List<(int Used, int Capacity)> CableLoads(IWorldAccessor world, BlockPos pos)
     {
         var loads = new List<(int Used, int Capacity)>();
-        if (world.BlockAccessor.GetBlock(pos) is not Vintagestory.API.Common.Block block || !IsCable(block))
+        var block = world.BlockAccessor.GetBlock(pos);
+        Facing connection;
+        if (IsCable(block) && world.BlockAccessor.GetBlockEntity(pos) is BlockEntityEStorageCable entity)
+            connection = entity.Connection;
+        else if (world.BlockAccessor.GetBlockEntity(pos) is IPanelHost panel)
+            connection = panel.Cable;
+        else
             return loads;
-        if (world.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEStorageCable entity || entity.Connection == Facing.None)
+        if (connection == Facing.None || block == null)
             return loads;
 
         var scan = GetScan(world, pos);
-        foreach (var component in Components(entity.Connection))
+        foreach (var component in Components(connection))
         {
             var capacity = CableChannels(world, pos, block, component);
             scan.CableUsed.TryGetValue(Key(pos) + ":" + (int)component, out var used);
@@ -691,7 +836,8 @@ public static class StorageAccess
             if (incoming < cost || !scan.Active.Add(key))
                 return 0;
             scan.ChannelUsed += cost;
-            var through = Math.Min(Math.Max(0, incoming - cost), DeviceChannels);
+            // Жилы под интерфейсом и шиной проводят свои каналы. Сама панель по-прежнему ест свой.
+            var through = Math.Min(Math.Max(0, incoming - cost), CarryOf(world, pos));
             return cost + Forward(world, pos, mask, through, from, fromMask, source, fedBy, scan);
         }
 
@@ -732,10 +878,25 @@ public static class StorageAccess
         }
 
         var used = 0;
+        // Панель на этом проводе берёт свой канал раньше приборов дальше по линии.
         foreach (var child in devices)
         {
+            if (!SamePlace(child.Pos, pos))
+                continue;
             if (used >= budget)
                 break;
+            used += Serve(world, child.Pos, child.Mask, budget - used, pos, mask, source, fedBy, scan);
+        }
+
+        foreach (var child in devices)
+        {
+            if (SamePlace(child.Pos, pos))
+                continue;
+            if (used >= budget)
+                break;
+            // Жилы интерфейса сами примут бюджет. Отдельный заход панели съел бы его по восьмёрке.
+            if (CableFeedsPanel(world, child, cables, source, fedBy))
+                continue;
             used += Serve(world, child.Pos, child.Mask, budget - used, pos, mask, source, fedBy, scan);
         }
 
@@ -747,6 +908,27 @@ public static class StorageAccess
         }
 
         return used;
+    }
+
+    // Соседний кабель уже ведёт в жилу этой панели. Канал панели снимет сама жила.
+    private static bool CableFeedsPanel(IWorldAccessor world, NetNode device, List<NetNode> cables, string source, Dictionary<string, HashSet<string>> fedBy)
+    {
+        if (!StrandsCarry(world.BlockAccessor.GetBlock(device.Pos)))
+            return false;
+
+        foreach (var cable in cables)
+        {
+            if (!SamePlace(cable.Pos, device.Pos) || cable.Mask == Facing.None)
+                continue;
+            if (!PanelMeets(world, cable.Pos, cable.Mask, cable.Pos))
+                continue;
+            var feedKey = Key(cable.Pos) + ":" + (int)cable.Mask;
+            if (fedBy.TryGetValue(feedKey, out var sources) && sources.Contains(source))
+                continue;
+            return true;
+        }
+
+        return false;
     }
 
     private static void KeepChanneled(List<BlockPos> list, StorageScan scan)
@@ -809,6 +991,22 @@ public static class StorageAccess
         return 8f + scan.Drives.Count * 10f + PanelDemand(world, scan)
             + BusWatts(world, scan)
             + scan.Processors.Count * 4f + AssemblerWatts(world, scan) + disks * 2f;
+    }
+
+    private static int CarryOf(IWorldAccessor world, BlockPos pos)
+    {
+        if (world.BlockAccessor.GetBlockEntity(pos) is not IPanelHost panel || panel.Cable == Facing.None)
+            return DeviceChannels;
+        if (!StrandsCarry(world.BlockAccessor.GetBlock(pos)))
+            return DeviceChannels;
+        var host = BlockEStorageCable.HostBlock(world, panel.CableCode);
+        var per = host != null ? CableChannels(host) : 8;
+        if (host == null || host.FirstCodePart() == "estoragefiber")
+            return per;
+        var sum = 0;
+        foreach (var component in Components(panel.Cable))
+            sum += per * HostLines(panel.CableLines, component, true);
+        return sum > 0 ? sum : per;
     }
 
     private static int PanelCost(IWorldAccessor world, BlockPos pos, Vintagestory.API.Common.Block block)

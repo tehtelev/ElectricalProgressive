@@ -3,6 +3,9 @@ using Vintagestory.API.MathTools;
 
 namespace ElectricalProgressive.Content.Storage;
 
+/// <summary>
+/// База блоков сети. Установка и слом заново обходят сеть.
+/// </summary>
 public class BlockEStoragePart : Vintagestory.API.Common.Block
 {
     public override void OnBlockPlaced(IWorldAccessor world, BlockPos blockPos, ItemStack? byItemStack = null)

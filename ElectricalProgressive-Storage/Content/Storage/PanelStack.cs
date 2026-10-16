@@ -17,6 +17,9 @@ public interface IPanelStack
     bool Holds(string inventoryId);
 }
 
+/// <summary>
+/// Гостевые панели той же клетки. В чанке зарегистрирована только первая.
+/// </summary>
 public sealed class PanelStack
 {
     private readonly List<BlockEntity> _guests = [];
@@ -270,11 +273,26 @@ public sealed class PanelStack
     {
         foreach (var face in FacingHelper.Faces(cableFacing))
         {
-            if (Occupied(host, face))
-                return true;
+            var on = OnFace(host, face);
+            if (on == null || on is BlockEntityEStorageInterface or BlockEntityEStorageBus)
+                continue;
+            return true;
         }
 
         return false;
+    }
+
+    private static BlockEntity? OnFace(IPanelStack host, BlockFacing face)
+    {
+        if (host is BlockEntity entity && Support(FacingOf(entity)) == face)
+            return entity;
+        foreach (var guest in host.Stack.Guests)
+        {
+            if (Support(FacingOf(guest)) == face)
+                return guest;
+        }
+
+        return null;
     }
 
     public static bool MountedAny(IWorldAccessor world, BlockPos pos, BlockFacing face)
@@ -378,6 +396,43 @@ public sealed class PanelStack
         }
 
         return encoded;
+    }
+
+    /// <summary>
+    /// Грань клетки. Слот шаблона у интерфейсов одной клетки общий, без грани читается чужой шаблон.
+    /// </summary>
+    public static BlockEntityEStorageInterface? Interface(IWorldAccessor world, BlockPos pos, int slot, string seat)
+    {
+        BlockEntityEStorageInterface? seated = null;
+        foreach (var face in Interfaces(world, pos))
+        {
+            if (face.Seat != (seat ?? ""))
+                continue;
+            seated = face;
+            if (face.OwnsJob(slot))
+                return face;
+        }
+
+        // Старая ссылка без грани писалась как хозяин клетки. Если заказ один, это он.
+        if ((seat ?? "") == "")
+        {
+            BlockEntityEStorageInterface? only = null;
+            var owners = 0;
+            foreach (var face in Interfaces(world, pos))
+            {
+                if (!face.OwnsJob(slot))
+                    continue;
+                owners++;
+                only = face;
+            }
+
+            if (owners == 1 && (seated == null || !seated.OwnsJob(slot)))
+                return only;
+        }
+
+        if (seated != null && Encoded(seated, slot))
+            return seated;
+        return seated ?? Interface(world, pos, slot);
     }
 
     public static BlockEntityEStorageInterface? Feeding(IWorldAccessor world, BlockPos panelPos, BlockPos assembler)
