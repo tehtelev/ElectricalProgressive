@@ -9,12 +9,12 @@
       "rotationOrigin": [ 8.0, 8.0, 8.0 ],
       "renderPass": 1,
       "faces": {
-        "north": { "texture": "#gear", "uv": [ 8.0, 6.0, 9.0, 7.0 ] },
-        "east": { "texture": "#gear", "uv": [ 4.0, 7.0, 5.0, 8.0 ] },
-        "south": { "texture": "#gear", "uv": [ 12.0, 8.5, 13.0, 9.5 ] },
-        "west": { "texture": "#gear", "uv": [ 6.5, 8.0, 7.5, 9.0 ] },
-        "up": { "texture": "#gear", "uv": [ 13.5, 5.5, 14.5, 6.5 ] },
-        "down": { "texture": "#gear", "uv": [ 5.0, 6.0, 6.0, 7.0 ] }
+        "north": { "texture": "#gear", "uv": [ 8.0, 6.0, 9.0, 7.0 ], "glow": 32 },
+        "east": { "texture": "#gear", "uv": [ 4.0, 7.0, 5.0, 8.0 ], "glow": 32 },
+        "south": { "texture": "#gear", "uv": [ 12.0, 8.5, 13.0, 9.5 ], "glow": 32 },
+        "west": { "texture": "#gear", "uv": [ 6.5, 8.0, 7.5, 9.0 ], "glow": 32 },
+        "up": { "texture": "#gear", "uv": [ 13.5, 5.5, 14.5, 6.5 ], "glow": 32 },
+        "down": { "texture": "#gear", "uv": [ 5.0, 6.0, 6.0, 7.0 ], "glow": 32 }
       }
     }
   ]
