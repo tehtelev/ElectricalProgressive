@@ -14,6 +14,7 @@ public class ItemEStoragePattern : Vintagestory.API.Common.Item
     public const string ModeKey = "mode";
     public const string SubKey = "sub";
     public const string OutKey = "out";
+    public const string JobKey = "estorageJob";
 
     private static int _iconDepth;
 
@@ -22,6 +23,21 @@ public class ItemEStoragePattern : Vintagestory.API.Common.Item
     public static bool IsEncoded(ItemStack? stack) => IsPattern(stack) && stack!.Attributes.GetBool(EncodedKey);
 
     public static bool IsBlank(ItemStack? stack) => IsPattern(stack) && !stack!.Attributes.GetBool(EncodedKey);
+
+    public static long JobId(ItemStack? stack)
+    {
+        if (!IsEncoded(stack) || !stack!.Attributes.HasAttribute(JobKey))
+            return 0;
+        return stack.Attributes.GetLong(JobKey);
+    }
+
+    public static void SetJobId(ItemStack stack, long id)
+    {
+        if (id == 0)
+            stack.Attributes.RemoveAttribute(JobKey);
+        else
+            stack.Attributes.SetLong(JobKey, id);
+    }
 
     public override string GetHeldItemName(ItemStack itemStack)
     {

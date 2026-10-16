@@ -18,7 +18,9 @@ public enum TermIcon
     Craft,
     Process,
     Substitute,
-    Arrow
+    Arrow,
+    Stored,
+    Craftable
 }
 
 /// <summary>
@@ -35,10 +37,11 @@ public sealed class GuiElementTermIcon : GuiElement
     private readonly bool _pressed;
     private readonly bool _overlay;
     private readonly bool _solid;
+    private readonly bool _onLight;
     private readonly Action? _onClick;
     private LoadedTexture? _glass;
 
-    public GuiElementTermIcon(ICoreClientAPI capi, ElementBounds bounds, TermIcon icon, bool plate, bool pressed, Action? onClick, bool overlay = false, bool solid = false)
+    public GuiElementTermIcon(ICoreClientAPI capi, ElementBounds bounds, TermIcon icon, bool plate, bool pressed, Action? onClick, bool overlay = false, bool solid = false, bool onLight = false)
         : base(capi, bounds)
     {
         _icon = icon;
@@ -47,6 +50,7 @@ public sealed class GuiElementTermIcon : GuiElement
         _onClick = onClick;
         _overlay = overlay;
         _solid = solid;
+        _onLight = onLight;
     }
 
     public override void ComposeElements(Context ctx, ImageSurface surface)
@@ -60,6 +64,8 @@ public sealed class GuiElementTermIcon : GuiElement
 
         if (_plate)
             TermChrome.Raised(ctx, Bounds.drawX, Bounds.drawY, Bounds.InnerWidth, Bounds.InnerHeight, _pressed);
+        else if (_onLight)
+            Ae2Gui.Plate(ctx, Bounds.drawX, Bounds.drawY, Bounds.InnerWidth, Bounds.InnerHeight, _pressed);
 
         Paint(ctx, Bounds.drawX, Bounds.drawY, Math.Min(Bounds.InnerWidth, Bounds.InnerHeight));
     }
@@ -114,7 +120,7 @@ public sealed class GuiElementTermIcon : GuiElement
             return;
         }
 
-        var color = _pressed ? InkHot : Ink;
+        var color = _pressed ? InkHot : _onLight ? Ae2Gui.Ink : Ink;
         ctx.Save();
         ctx.Antialias = Antialias.Default;
         ctx.Translate(x + side * 0.12, y + side * 0.12);
@@ -146,7 +152,7 @@ public sealed class GuiElementTermIcon : GuiElement
         ctx.LineTo(w - head, mid + shaft * 0.5);
         ctx.LineTo(0, mid + shaft * 0.5);
         ctx.ClosePath();
-        ctx.SetSourceRGBA(Ink[0], Ink[1], Ink[2], 1);
+        ctx.SetSourceRGBA(Ae2Gui.Ink[0], Ae2Gui.Ink[1], Ae2Gui.Ink[2], 1);
         ctx.Fill();
         ctx.Restore();
     }
@@ -283,6 +289,14 @@ public sealed class GuiElementTermIcon : GuiElement
                 ctx.LineTo(px - tx * 3.4 - Math.Cos(end) * 2.1, py - ty * 3.4 - Math.Sin(end) * 2.1);
                 ctx.Stroke();
                 break;
+            case TermIcon.Arrow:
+                ctx.MoveTo(12, 4);
+                ctx.LineTo(12, 15);
+                ctx.MoveTo(6.5, 10.5);
+                ctx.LineTo(12, 17);
+                ctx.LineTo(17.5, 10.5);
+                ctx.Stroke();
+                break;
             case TermIcon.Substitute:
                 ctx.MoveTo(3.2, 8);
                 ctx.LineTo(15.2, 8);
@@ -296,6 +310,26 @@ public sealed class GuiElementTermIcon : GuiElement
                 ctx.LineTo(12.6, 12.8);
                 ctx.MoveTo(8.8, 16);
                 ctx.LineTo(12.6, 19.2);
+                ctx.Stroke();
+                break;
+            case TermIcon.Stored:
+                Round(ctx, 3.2, 3.2, 17.6, 17.6, 2);
+                ctx.Stroke();
+                ctx.MoveTo(6.4, 9);
+                ctx.LineTo(17.6, 9);
+                ctx.MoveTo(6.4, 13.4);
+                ctx.LineTo(17.6, 13.4);
+                ctx.MoveTo(7, 6.2);
+                ctx.LineTo(10.6, 6.2);
+                ctx.Stroke();
+                break;
+            case TermIcon.Craftable:
+                for (var row = 0; row < 3; row++)
+                {
+                    for (var col = 0; col < 3; col++)
+                        ctx.Rectangle(3.4 + col * 6.2, 3.4 + row * 6.2, 4.4, 4.4);
+                }
+
                 ctx.Stroke();
                 break;
             default:

@@ -27,6 +27,7 @@ public sealed class StorageScan
     public List<BlockPos> Drives { get; } = new();
     public List<BlockPos> Terminals { get; } = new();
     public List<BlockPos> Interfaces { get; } = new();
+    public List<BlockPos> Buses { get; } = new();
     public List<BlockPos> Processors { get; } = new();
 
     // Соседние клетки, чанк которых ещё не загружен. Пока они пустые, обход сети неполный.
@@ -104,7 +105,8 @@ public static class StorageAccess
 
         return block.FirstCodePart() is "estoragecable" or "estoragefiber"
             or "estoragedrive" or "estorageterminal" or "estorageliquidterminal"
-            or "estoragepatternterminal" or "estorageinterface" or "estorageprocessor"
+            or "estoragepatternterminal" or "estoragecraftterminal" or "estorageinterface"
+            or "estorageimport" or "estorageexport" or "estorageprocessor"
             or "estoragecontroller";
     }
 
@@ -122,12 +124,40 @@ public static class StorageAccess
 
     public static int CableChannels(IWorldAccessor world, BlockPos pos, Vintagestory.API.Common.Block block, Facing mask)
     {
+        if (world.BlockAccessor.GetBlockEntity(pos) is IPanelHost panel && panel.Cable != Facing.None)
+        {
+            var host = BlockEStorageCable.HostBlock(world, panel.CableCode);
+            var hosted = host != null ? CableChannels(host) : 8;
+            if (host == null || host.FirstCodePart() == "estoragefiber" || mask == Facing.None)
+                return hosted;
+            return hosted * HostLines(panel.CableLines, mask);
+        }
+
         var per = CableChannels(block);
         if (block.FirstCodePart() == "estoragefiber" || mask == Facing.None)
             return per;
         if (world.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEStorageCable entity)
             return per;
         return per * entity.LinesOf(mask);
+    }
+
+    private static int HostLines(int[] lines, Facing mask)
+    {
+        var min = BlockEntityEStorageCable.MaxLines;
+        var any = false;
+        foreach (var face in FacingHelper.Faces(mask))
+        {
+            any = true;
+            var count = face.Index >= 0 && face.Index < lines.Length ? lines[face.Index] : 1;
+            if (count < 1)
+                count = 1;
+            if (count > BlockEntityEStorageCable.MaxLines)
+                count = BlockEntityEStorageCable.MaxLines;
+            if (count < min)
+                min = count;
+        }
+
+        return any ? min : 1;
     }
 
     /// <summary>
@@ -195,8 +225,19 @@ public static class StorageAccess
     {
         if (world.BlockAccessor.GetChunkAtBlockPos(start) != null && TryFaced(world, start, out var connection))
         {
+            var panel = world.BlockAccessor.GetBlockEntity(start) as IPanelHost;
+            var queuedCable = false;
             foreach (var mask in Components(connection))
+            {
+                // Жила на другой грани той же клетки к панели не относится.
+                if (panel != null && !PanelStack.Meets(world, start, mask, start))
+                    continue;
                 queue.Enqueue(new NetNode(start.Copy(), mask));
+                queuedCable = true;
+            }
+
+            if (panel != null || !queuedCable)
+                queue.Enqueue(new NetNode(start.Copy(), Facing.None));
             return;
         }
 
@@ -206,17 +247,31 @@ public static class StorageAccess
     private static bool TryFaced(IWorldAccessor world, BlockPos pos, out Facing connection)
     {
         connection = Facing.None;
-        if (world.BlockAccessor.GetBlock(pos) is not BlockEStorageCable)
-            return false;
-        if (world.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEStorageCable entity || entity.Connection == Facing.None)
-            return false;
-        connection = entity.Connection;
-        return true;
+        switch (world.BlockAccessor.GetBlockEntity(pos))
+        {
+            case BlockEntityEStorageCable entity when entity.Connection != Facing.None
+                && world.BlockAccessor.GetBlock(pos) is BlockEStorageCable:
+                connection = entity.Connection;
+                return true;
+            case IPanelHost panel when panel.Cable != Facing.None:
+                connection = panel.Cable;
+                return true;
+            default:
+                return false;
+        }
     }
 
     private static bool CableTouches(Facing connection, BlockFacing toward)
         => (connection & FacingHelper.FromFace(toward)) != 0
            || (connection & FacingHelper.FromDirection(toward)) != 0;
+
+    private static bool IsPanel(Vintagestory.API.Common.Block block)
+        => block.FirstCodePart() is "estorageterminal" or "estorageliquidterminal"
+            or "estoragepatternterminal" or "estoragecraftterminal"
+            or "estorageinterface" or "estorageimport" or "estorageexport";
+
+    private static bool PanelMeets(IWorldAccessor world, BlockPos cablePos, Facing component, BlockPos panelPos)
+        => component != Facing.None && PanelStack.Meets(world, cablePos, component, panelPos);
 
     private static bool SamePlace(BlockPos a, BlockPos b)
         => a.X == b.X && a.Y == b.Y && a.Z == b.Z && a.dimension == b.dimension;
@@ -278,6 +333,17 @@ public static class StorageAccess
                 list.Add(new NetNode(next, nextMask));
         }
 
+        // Панель, интерфейс и шина стыкуются только опорной гранью.
+        bool PartsTouch(BlockFacing face, Vintagestory.API.Common.Block neighbor, BlockPos neighborPos)
+        {
+            var here = world.BlockAccessor.GetBlock(pos);
+            if (IsPanel(here) && world.BlockAccessor.GetBlockEntity(pos) is IPanelStack && !PanelStack.MountedAny(world, pos, face))
+                return false;
+            if (!IsPanel(neighbor))
+                return true;
+            return PanelStack.MountedAny(world, neighborPos, face.Opposite);
+        }
+
         void Consider(BlockPos next, Facing any)
         {
             if (!TryFaced(world, next, out var connection))
@@ -302,9 +368,20 @@ public static class StorageAccess
                     continue;
                 var next = pos.AddCopy(face);
                 var block = world.BlockAccessor.GetBlock(next);
-                if (!IsPart(block) || TryFaced(world, next, out _))
+                if (!IsPart(block) || IsPanel(block))
+                    continue;
+                if (TryFaced(world, next, out _))
                     continue;
                 Add(next, Facing.None);
+            }
+
+            if (PanelMeets(world, pos, mask, pos))
+                Add(pos.Copy(), Facing.None);
+            foreach (var face in BlockFacing.ALLFACES)
+            {
+                var next = pos.AddCopy(face);
+                if (PanelMeets(world, pos, mask, next))
+                    Add(next, Facing.None);
             }
 
             foreach (var direction in FacingHelper.Directions(mask))
@@ -324,6 +401,15 @@ public static class StorageAccess
             return list;
         }
 
+        if (world.BlockAccessor.GetBlockEntity(pos) is IPanelHost here && here.Cable != Facing.None)
+        {
+            foreach (var component in Components(here.Cable))
+            {
+                if (PanelStack.Meets(world, pos, component, pos))
+                    Add(pos.Copy(), component);
+            }
+        }
+
         foreach (var face in BlockFacing.ALLFACES)
         {
             var next = pos.AddCopy(face);
@@ -332,14 +418,27 @@ public static class StorageAccess
                 continue;
             if (TryFaced(world, next, out var connection))
             {
+                var ours = IsPanel(world.BlockAccessor.GetBlock(pos))
+                    && world.BlockAccessor.GetBlockEntity(pos) is IPanelStack;
+                var theirs = world.BlockAccessor.GetBlockEntity(next) as IPanelHost;
                 foreach (var component in Components(connection))
                 {
-                    if (CableTouches(component, face.Opposite))
-                        Add(next, component);
+                    var hit = ours
+                        ? PanelStack.Meets(world, next, component, pos)
+                        : CableTouches(component, face.Opposite);
+                    if (!hit)
+                        continue;
+                    Add(next, component);
                 }
 
+                // Панель стыкуется с соседом только своей опорной гранью, не всей клеткой.
+                if (theirs != null && PartsTouch(face, block, next))
+                    Add(next, Facing.None);
                 continue;
             }
+
+            if (!PartsTouch(face, block, next))
+                continue;
 
             Add(next, Facing.None);
         }
@@ -421,10 +520,36 @@ public static class StorageAccess
                 case "estorageterminal":
                 case "estorageliquidterminal":
                 case "estoragepatternterminal":
-                    scan.Terminals.Add(pos.Copy());
-                    break;
+                case "estoragecraftterminal":
                 case "estorageinterface":
-                    scan.Interfaces.Add(pos.Copy());
+                case "estorageimport":
+                case "estorageexport":
+                    var terminals = PanelStack.Kind(world, pos, false);
+                    var interfaces = PanelStack.Kind(world, pos, true);
+                    var buses = PanelStack.Buses(world, pos);
+                    if (terminals == 0 && interfaces == 0 && buses == 0)
+                    {
+                        switch (block.FirstCodePart())
+                        {
+                            case "estorageinterface":
+                                interfaces = 1;
+                                break;
+                            case "estorageimport":
+                            case "estorageexport":
+                                buses = 1;
+                                break;
+                            default:
+                                terminals = 1;
+                                break;
+                        }
+                    }
+
+                    if (terminals > 0)
+                        scan.Terminals.Add(pos.Copy());
+                    if (interfaces > 0)
+                        scan.Interfaces.Add(pos.Copy());
+                    if (buses > 0)
+                        scan.Buses.Add(pos.Copy());
                     break;
                 case "estorageprocessor":
                     scan.Processors.Add(pos.Copy());
@@ -452,6 +577,7 @@ public static class StorageAccess
             KeepChanneled(scan.Drives, scan);
             KeepChanneled(scan.Terminals, scan);
             KeepChanneled(scan.Interfaces, scan);
+            KeepChanneled(scan.Buses, scan);
             KeepChanneled(scan.Processors, scan);
             return;
         }
@@ -493,6 +619,7 @@ public static class StorageAccess
         KeepChanneled(scan.Drives, scan);
         KeepChanneled(scan.Terminals, scan);
         KeepChanneled(scan.Interfaces, scan);
+        KeepChanneled(scan.Buses, scan);
         KeepChanneled(scan.Processors, scan);
     }
 
@@ -560,11 +687,12 @@ public static class StorageAccess
                 return Forward(world, pos, mask, incoming, from, fromMask, source, fedBy, scan);
             }
 
-            if (!scan.Active.Add(key))
+            var cost = PanelCost(world, pos, block);
+            if (incoming < cost || !scan.Active.Add(key))
                 return 0;
-            scan.ChannelUsed++;
-            var through = Math.Min(Math.Max(0, incoming - 1), DeviceChannels);
-            return 1 + Forward(world, pos, mask, through, from, fromMask, source, fedBy, scan);
+            scan.ChannelUsed += cost;
+            var through = Math.Min(Math.Max(0, incoming - cost), DeviceChannels);
+            return cost + Forward(world, pos, mask, through, from, fromMask, source, fedBy, scan);
         }
 
         var feedKey = mask == Facing.None ? key : key + ":" + (int)mask;
@@ -573,7 +701,9 @@ public static class StorageAccess
         if (!sources.Add(source))
             return 0;
 
-        scan.Active.Add(key);
+        // Кабель в клетке панели не включает саму панель: она занимает канал отдельным заходом.
+        if (!IsPanel(block))
+            scan.Active.Add(key);
         var capacity = CableChannels(world, pos, block, mask);
         var left = Math.Min(incoming, capacity);
         var carried = Forward(world, pos, mask, left, from, fromMask, source, fedBy, scan);
@@ -676,8 +806,47 @@ public static class StorageAccess
         foreach (var pos in scan.Drives)
             disks += CountDisks(world, pos);
 
-        return 8f + scan.Drives.Count * 10f + (scan.Terminals.Count + scan.Interfaces.Count) * 6f
+        return 8f + scan.Drives.Count * 10f + PanelDemand(world, scan)
+            + BusWatts(world, scan)
             + scan.Processors.Count * 4f + AssemblerWatts(world, scan) + disks * 2f;
+    }
+
+    private static int PanelCost(IWorldAccessor world, BlockPos pos, Vintagestory.API.Common.Block block)
+    {
+        if (!IsPanel(block))
+            return 1;
+        var count = PanelStack.Kind(world, pos, false) + PanelStack.Kind(world, pos, true) + PanelStack.Buses(world, pos);
+        return count < 1 ? 1 : count;
+    }
+
+    private static float BusWatts(IWorldAccessor world, StorageScan scan)
+    {
+        var watts = 0f;
+        foreach (var pos in scan.Buses)
+        {
+            var count = PanelStack.Buses(world, pos);
+            watts += (count < 1 ? 1 : count) * 4f;
+        }
+
+        return watts;
+    }
+
+    private static float PanelDemand(IWorldAccessor world, StorageScan scan)
+    {
+        var count = 0;
+        foreach (var pos in scan.Terminals)
+        {
+            var kind = PanelStack.Kind(world, pos, false);
+            count += kind < 1 ? 1 : kind;
+        }
+
+        foreach (var pos in scan.Interfaces)
+        {
+            var kind = PanelStack.Kind(world, pos, true);
+            count += kind < 1 ? 1 : kind;
+        }
+
+        return count * 6f;
     }
 
     private static float AssemblerWatts(IWorldAccessor world, StorageScan scan)
@@ -686,19 +855,26 @@ public static class StorageAccess
         float watts = 0f;
         foreach (var pos in scan.Interfaces)
         {
-            if (world.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEStorageInterface panel)
-                continue;
+            foreach (var panel in PanelStack.Interfaces(world, pos))
+            {
+                if (panel.Pos == null)
+                    continue;
 
-            var mount = panel.MountedOn();
-            if (mount == null || world.BlockAccessor.GetBlock(mount).FirstCodePart() != "estorageassembler")
-                continue;
+                foreach (var side in BlockFacing.ALLFACES)
+                {
+                    var neighbor = panel.Pos.AddCopy(side);
+                    if (!panel.Feeds(world, neighbor))
+                        continue;
+                    if (world.BlockAccessor.GetBlock(neighbor).FirstCodePart() != "estorageassembler")
+                        continue;
+                    if (!seen.Add(neighbor.X + "," + neighbor.Y + "," + neighbor.Z + "," + neighbor.dimension))
+                        continue;
 
-            if (!seen.Add(mount.X + "," + mount.Y + "," + mount.Z + "," + mount.dimension))
-                continue;
-
-            watts += 8f;
-            if (world.BlockAccessor.GetBlockEntity(mount) is BlockEntityEStorageAssembler { Working: true })
-                watts += BlockEntityEStorageAssembler.WorkWatts;
+                    watts += 8f;
+                    if (world.BlockAccessor.GetBlockEntity(neighbor) is BlockEntityEStorageAssembler { Working: true })
+                        watts += BlockEntityEStorageAssembler.WorkWatts;
+                }
+            }
         }
 
         return watts;

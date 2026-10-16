@@ -2,21 +2,20 @@
   "editor": { "allAngles": false, "entityTextureMode": false },
   "textureWidth": 16,
   "textureHeight": 16,
-  "textures": {
-    "pattern": "item/estoragepattern"
-  },
+  "textures": { "pattern": "item/estoragepattern" },
   "elements": [
     {
       "name": "card",
-      "from": [ 3.0, 0.0, 2.0 ],
-      "to": [ 13.0, 1.0, 14.0 ],
+      "from": [2.5, 1.5, 7.25],
+      "to": [13.5, 14.5, 8.75],
+      "shade": true,
       "faces": {
-        "north": { "texture": "#pattern", "uv": [ 0.0, 0.0, 16.0, 16.0 ] },
-        "east": { "texture": "#pattern", "uv": [ 0.0, 0.0, 2.0, 16.0 ] },
-        "south": { "texture": "#pattern", "uv": [ 0.0, 0.0, 16.0, 16.0 ] },
-        "west": { "texture": "#pattern", "uv": [ 0.0, 0.0, 2.0, 16.0 ] },
-        "up": { "texture": "#pattern", "uv": [ 0.0, 0.0, 16.0, 16.0 ] },
-        "down": { "texture": "#pattern", "uv": [ 0.0, 0.0, 16.0, 16.0 ] }
+        "north": { "texture": "#pattern", "uv": [16, 0, 0, 16] },
+        "south": { "texture": "#pattern", "uv": [0, 0, 16, 16] },
+        "east": { "texture": "#pattern", "uv": [0, 0, 1, 1] },
+        "west": { "texture": "#pattern", "uv": [0, 0, 1, 1] },
+        "up": { "texture": "#pattern", "uv": [0, 0, 1, 1] },
+        "down": { "texture": "#pattern", "uv": [0, 0, 1, 1] }
       }
     }
   ]

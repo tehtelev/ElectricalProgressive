@@ -16,12 +16,12 @@
       "groupBy": [ "estoragedisk-*" ]
     }
   },
-  "shape": { "base": "item/gear-temporal" },
+  "shape": { "base": "item/estorage-disk" },
   "texturesByType": {
-    "*-1k": { "temporal": { "base": "item/gear-1k" } },
-    "*-4k": { "temporal": { "base": "item/gear-4k" } },
-    "*-16k": { "temporal": { "base": "item/gear-16k" } },
-    "*-64k": { "temporal": { "base": "item/gear-64k" } }
+    "*-1k": { "cell": { "base": "item/ae2/disk-1k" } },
+    "*-4k": { "cell": { "base": "item/ae2/disk-4k" } },
+    "*-16k": { "cell": { "base": "item/ae2/disk-16k" } },
+    "*-64k": { "cell": { "base": "item/ae2/disk-64k" } }
   },
   "creativeinventory": {
     "general": [ "*" ],
@@ -29,24 +29,30 @@
     "estorage": [ "*" ]
   },
   "guiTransform": {
-    "translation": { "x": 3, "y": 1, "z": 0 },
-    "rotation": { "x": 145, "y": -12, "z": 0 },
-    "origin": { "x": 0.5, "y": 0.0625, "z": 0.5 },
-    "scale": 2.5
+    "translation": { "x": 1.02, "y": 0.02, "z": 0 },
+    "rotation": { "x": -27, "y": -26, "z": -2 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.21 },
+    "scale": 1.2,
+    "rotate": false
   },
   "fpHandTransform": {
-    "rotation": { "x": 0, "y": 0, "z": 5 },
-    "origin": { "x": 0.5, "y": 0.0625, "z": 0.5 },
-    "scale": 1.4
+    "translation": { "x": 1.02, "y": 0.02, "z": 0 },
+    "rotation": { "x": -27, "y": -26, "z": -2 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.21 },
+    "scale": 1.2,
+    "rotate": false
   },
   "tpHandTransform": {
-    "translation": { "x": -0.95, "y": -0.11, "z": -0.85 },
-    "rotation": { "x": 0, "y": -89, "z": 5 },
-    "origin": { "x": 0.5, "y": 0.0625, "z": 0.5 },
-    "scale": 0.61
+    "translation": { "x": 1.02, "y": 0.02, "z": 0 },
+    "rotation": { "x": -27, "y": -26, "z": -2 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.21 },
+    "scale": 1.2,
+    "rotate": false
   },
   "groundTransform": {
-    "origin": { "x": 0.39, "y": 0, "z": 0.47 },
-    "scale": 3.76
+    "rotation": { "x": 90, "y": 0, "z": 0 },
+    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
+    "scale": 2.2,
+    "rotate": false
   }
 }

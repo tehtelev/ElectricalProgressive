@@ -4,7 +4,7 @@
   "entityClass": "BlockEntityEStorageDrive",
   "attributes": {
     "handbook": {
-      "groupBy": [ "estoragedrive" ],
+      "groupBy": [ "estoragedrive-*" ],
       "extraSections": [
         {
           "title": "electricalprogressivestorage:block-handbooktitle-estoragedrive",
@@ -13,17 +13,35 @@
       ]
     }
   },
+  "behaviors": [
+    {
+      "name": "HorizontalOrientable",
+      "properties": { "dropBlockFace": "south" }
+    }
+  ],
+  "variantgroups": [
+    {
+      "code": "side",
+      "loadFromProperties": "abstract/horizontalorientation"
+    }
+  ],
   "creativeinventory": {
-    "general": [ "*" ],
-    "estorage": [ "*" ]
+    "general": [ "estoragedrive-south" ],
+    "estorage": [ "estoragedrive-south" ]
   },
-  "shape": { "base": "block/estoragedrive" },
+  "shapebytype": {
+    "*-north": { "base": "block/estoragedrive", "rotateY": 180 },
+    "*-east": { "base": "block/estoragedrive", "rotateY": 90 },
+    "*-south": { "base": "block/estoragedrive", "rotateY": 0 },
+    "*-west": { "base": "block/estoragedrive", "rotateY": 270 }
+  },
   "lightAbsorption": 0,
   "faceCullMode": "NeverCull",
-  "renderPass": "OpaqueNoCull",
+  "renderPass": "Opaque",
   "emitSideAo": { "all": false },
   "sideAo": { "all": true },
-  "sideopaque": { "all": false },
+  "sideopaque": { "all": true },
+  "sidesolid": { "all": true },
   "blockmaterial": "Metal",
   "resistance": 3.5,
   "sounds": {

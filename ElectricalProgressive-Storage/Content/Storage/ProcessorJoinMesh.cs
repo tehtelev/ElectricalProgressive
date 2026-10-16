@@ -1,14 +1,14 @@
+using System;
 using System.Collections.Generic;
 using Vintagestory.API.Client;
-using Vintagestory.API.Client.Tesselation;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 
 namespace ElectricalProgressive.Content.Storage;
 
 /// <summary>
-/// Одиночный процессор — шина из estorageprocessor.json.
-/// Сосед дотягивает тело до границы клетки. Угловые стойки остаются только снаружи.
+/// Оболочка крафт-куба. Прямая линия по одной оси — одна оболочка.
+/// Угол L и блок, который в этот угол упирается, рисуются целым одиночным кубом.
 /// </summary>
 internal static class ProcessorJoinMesh
 {
@@ -18,58 +18,142 @@ internal static class ProcessorJoinMesh
     private const int West = 1 << 3;
     private const int Up = 1 << 4;
     private const int Down = 1 << 5;
-    private const int Sides = North | East | South | West;
-    private const double Past = 16.06;
-    private const double Before = -0.06;
-    private const double ShoeLo = 1.4;
-    private const double ShoeHi = 14.6;
-    private const double ShoeY1 = 1.15;
-    private const double StepLo = 2.2;
-    private const double StepHi = 13.8;
-    private const double StepY0 = 1.05;
-    private const double StepY1 = 2.35;
-    private const double CoreLo = 2.6;
-    private const double CoreHi = 13.4;
-    private const double CoreY0 = 2.2;
-    private const double CoreY1 = 11.6;
-    private const double FluteW = 0.62;
-    private const double FluteY0 = 2.7;
-    private const double FluteY1 = 11.3;
-    private const double FluteNear0 = 2.25;
-    private const double FluteNear1 = 2.8;
-    private const double FluteFar0 = 13.2;
-    private const double FluteFar1 = 13.75;
-    private const double BandNear0 = 1.9;
-    private const double BandNear1 = 2.45;
-    private const double BandFar0 = 13.55;
-    private const double BandFar1 = 14.1;
-    private const double RibLo = 1.14;
-    private const double RibHi = 1.76;
-    private const double RibFarLo = 14.24;
-    private const double RibFarHi = 14.86;
-    private const double PostY0 = 0.9;
-    private const double PostY1 = 12.15;
+    private const int Ext = 34;
+    private const double Frame = 3;
 
-    private static readonly double[] FluteAt = { 3.84, 6.44, 9.04, 11.64 };
-    private static readonly double[] BandY0 = { 4.85, 8.45 };
-    private static readonly double[] BandY1 = { 5.5, 9.1 };
+    private static readonly string[] Dirs = { "north", "east", "south", "west", "up", "down" };
+
+    private static readonly (string Y, string X, string Z)[] Corners =
+    {
+        ("up", "east", "north"),
+        ("up", "east", "south"),
+        ("up", "west", "north"),
+        ("up", "west", "south"),
+        ("down", "east", "north"),
+        ("down", "east", "south"),
+        ("down", "west", "north"),
+        ("down", "west", "south")
+    };
+
+    private static readonly (string Axis, string A, string B)[] Edges =
+    {
+        ("x", "down", "north"),
+        ("x", "down", "south"),
+        ("x", "up", "north"),
+        ("x", "up", "south"),
+        ("y", "west", "north"),
+        ("y", "east", "north"),
+        ("y", "west", "south"),
+        ("y", "east", "south"),
+        ("z", "west", "down"),
+        ("z", "east", "down"),
+        ("z", "west", "up"),
+        ("z", "east", "up")
+    };
+
     private static readonly object Gate = new();
     private static readonly Dictionary<long, MeshData> Cache = new();
-    private static Shape? _shape;
 
-    public static int Mask(Vintagestory.API.Common.Block[] blocks, int index)
+    public static int Mask(Vintagestory.API.Common.Block[] blocks, int index, IBlockAccessor world, BlockPos pos)
     {
-        var mask = 0;
-        foreach (var face in BlockFacing.ALLFACES)
+        var raw = 0;
+        var axis = -1;
+        for (var face = 0; face < 6; face++)
         {
-            var at = index + TileSideEnum.MoveIndex[face.Index];
-            if ((uint)at >= (uint)blocks.Length)
+            if (!IsProcessor(blocks, world, pos, index, face))
                 continue;
-            if (ProcessorCluster.IsProcessor(blocks[at]))
-                mask |= 1 << face.Index;
+            var a = Axis(face);
+            if (axis >= 0 && a != axis)
+                return 0;
+            axis = a;
+            raw |= 1 << face;
+        }
+
+        if (raw == 0)
+            return 0;
+
+        var mask = 0;
+        for (var face = 0; face < 6; face++)
+        {
+            if ((raw & (1 << face)) == 0)
+                continue;
+            if (NeighborTurns(blocks, world, pos, index, face, axis))
+                continue;
+            mask |= 1 << face;
         }
 
         return mask;
+    }
+
+    /// <summary>Север/юг — 0, восток/запад — 1, верх/низ — 2.</summary>
+    private static int Axis(int face)
+    {
+        return face switch
+        {
+            0 or 2 => 0,
+            1 or 3 => 1,
+            _ => 2
+        };
+    }
+
+    private static bool NeighborTurns(Vintagestory.API.Common.Block[] blocks, IBlockAccessor world, BlockPos pos, int index, int face, int axis)
+    {
+        var npos = pos.AddCopy(BlockFacing.ALLFACES[face]);
+        if (!TryStep(index, face, out var neighbor))
+            return TurnsInWorld(world, npos, axis);
+
+        for (var other = 0; other < 6; other++)
+        {
+            if (Axis(other) == axis)
+                continue;
+            if (IsProcessor(blocks, world, npos, neighbor, other))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool TurnsInWorld(IBlockAccessor world, BlockPos pos, int axis)
+    {
+        if (world == null || pos == null)
+            return false;
+        for (var other = 0; other < 6; other++)
+        {
+            if (Axis(other) == axis)
+                continue;
+            if (ProcessorCluster.IsProcessor(world.GetBlock(pos.AddCopy(BlockFacing.ALLFACES[other]))))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool IsProcessor(Vintagestory.API.Common.Block[] blocks, IBlockAccessor world, BlockPos pos, int index, int face)
+    {
+        if (TryStep(index, face, out var at))
+            return (uint)at < (uint)blocks.Length && ProcessorCluster.IsProcessor(blocks[at]);
+        if (world == null || pos == null)
+            return false;
+        return ProcessorCluster.IsProcessor(world.GetBlock(pos.AddCopy(BlockFacing.ALLFACES[face])));
+    }
+
+    private static bool TryStep(int index, int face, out int at)
+    {
+        var x = index % Ext;
+        var z = (index / Ext) % Ext;
+        var y = index / (Ext * Ext);
+        var n = BlockFacing.ALLFACES[face].Normali;
+        x += n.X;
+        y += n.Y;
+        z += n.Z;
+        if ((uint)x >= Ext || (uint)y >= Ext || (uint)z >= Ext)
+        {
+            at = 0;
+            return false;
+        }
+
+        at = x + Ext * (z + Ext * y);
+        return true;
     }
 
     public static MeshData? For(ICoreClientAPI capi, Vintagestory.API.Common.Block block, int mask)
@@ -89,25 +173,56 @@ internal static class ProcessorJoinMesh
         return mesh;
     }
 
+    private static int Bit(string dir)
+    {
+        return dir switch
+        {
+            "north" => North,
+            "east" => East,
+            "south" => South,
+            "west" => West,
+            "up" => Up,
+            _ => Down
+        };
+    }
+
+    private static string Opposite(string dir)
+    {
+        return dir switch
+        {
+            "north" => "south",
+            "south" => "north",
+            "east" => "west",
+            "west" => "east",
+            "up" => "down",
+            _ => "up"
+        };
+    }
+
+    private static bool On(int mask, string dir)
+    {
+        return (mask & Bit(dir)) != 0;
+    }
+
     private static MeshData? Build(ICoreClientAPI capi, Vintagestory.API.Common.Block block, int mask)
     {
-        _shape ??= Shape.TryGet(capi, "electricalprogressivestorage:shapes/block/estorageprocessor.json");
-        if (_shape?.Elements == null)
-            return null;
+        var kept = new List<ShapeElement>();
+        AddCorners(kept, mask);
+        AddEdges(kept, mask);
+        var open = AddPanels(kept, mask);
+        if (open)
+            AddCore(kept);
 
-        var shape = _shape.Clone();
-        var kept = new List<ShapeElement>(shape.Elements.Length);
-        foreach (var element in shape.Elements)
+        if (kept.Count == 0)
+            return new MeshData();
+
+        var shape = new Shape
         {
-            if (element?.From == null || element.To == null || element.Name == null)
-                continue;
-            if (!Keep(element.Name, mask))
-                continue;
-            kept.Add(element);
-        }
-
-        AddJoints(kept, mask);
-        shape.Elements = kept.ToArray();
+            TextureWidth = 16,
+            TextureHeight = 16,
+            Textures = new Dictionary<string, AssetLocation>(),
+            Elements = kept.ToArray()
+        };
         try
         {
             capi.Tesselator.TesselateShape(block, shape, out var mesh);
@@ -120,237 +235,199 @@ internal static class ProcessorJoinMesh
         }
     }
 
-    private static bool Keep(string name, int mask)
+    private static void AddCorners(List<ShapeElement> kept, int mask)
     {
-        if (name is "shoe" or "step")
-            return (mask & Down) == 0;
-        if (name == "core")
-            return true;
-        if (name.StartsWith("fluteN") || name.StartsWith("bandN"))
-            return (mask & North) == 0;
-        if (name.StartsWith("fluteE") || name.StartsWith("bandE"))
-            return (mask & East) == 0;
-        if (name.StartsWith("fluteS") || name.StartsWith("bandS"))
-            return (mask & South) == 0;
-        if (name.StartsWith("fluteW") || name.StartsWith("bandW"))
-            return (mask & West) == 0;
-        if (name.StartsWith("postNW"))
-            return (mask & (North | West)) == 0;
-        if (name.StartsWith("postNE"))
-            return (mask & (North | East)) == 0;
-        if (name.StartsWith("postSW"))
-            return (mask & (South | West)) == 0;
-        if (name.StartsWith("postSE"))
-            return (mask & (South | East)) == 0;
-        if (name is "collar" or "button")
-            return (mask & (Sides | Up)) == 0;
-        return true;
+        foreach (var (y, x, z) in Corners)
+        {
+            if (Links(mask, y, x, z) != 0)
+                continue;
+
+            double x1 = 0, y1 = 0, z1 = 0, x2 = 16, y2 = 16, z2 = 16;
+            FrameSlab(x, ref x1, ref y1, ref z1, ref x2, ref y2, ref z2);
+            FrameSlab(y, ref x1, ref y1, ref z1, ref x2, ref y2, ref z2);
+            FrameSlab(z, ref x1, ref y1, ref z1, ref x2, ref y2, ref z2);
+            AddElement(kept, "corner", x1, y1, z1, x2, y2, z2, true,
+                (y, "#ring", 0),
+                (x, "#ring", 0),
+                (z, "#ring", 0));
+        }
     }
 
-    private static void AddJoints(List<ShapeElement> kept, int mask)
+    private static void AddEdges(List<ShapeElement> kept, int mask)
     {
-        if (mask == 0)
+        foreach (var (axis, a, b) in Edges)
+        {
+            var aOn = On(mask, a);
+            var bOn = On(mask, b);
+
+            double x1 = 0, y1 = 0, z1 = 0, x2 = 16, y2 = 16, z2 = 16;
+            FrameSlab(a, ref x1, ref y1, ref z1, ref x2, ref y2, ref z2);
+            FrameSlab(b, ref x1, ref y1, ref z1, ref x2, ref y2, ref z2);
+            var paintA = Stripe(a, b);
+            var paintB = Stripe(b, a);
+            if (aOn && bOn)
+            {
+                SpanFull(axis, ref x1, ref y1, ref z1, ref x2, ref y2, ref z2);
+                AddPost(kept, axis, a, b, mask, x1, y1, z1, x2, y2, z2, paintA, paintB);
+                continue;
+            }
+
+            if (aOn || bOn)
+                continue;
+
+            Span(axis, ref x1, ref y1, ref z1, ref x2, ref y2, ref z2);
+            Reach(axis, mask, ref x1, ref y1, ref z1, ref x2, ref y2, ref z2);
+            AddElement(kept, "edge", x1, y1, z1, x2, y2, z2, true,
+                (a, paintA, 0),
+                (b, paintB, 0),
+                (Opposite(a), paintA, 0),
+                (Opposite(b), paintB, 0));
+        }
+    }
+
+    private static void AddPost(List<ShapeElement> kept, string axis, string a, string b, int mask, double x1, double y1, double z1, double x2, double y2, double z2, string paintA, string paintB)
+    {
+        var faces = new List<(string Face, string Texture, int Glow)>
+        {
+            (Opposite(a), paintA, 0),
+            (Opposite(b), paintB, 0)
+        };
+        var low = axis switch
+        {
+            "x" => "west",
+            "y" => "down",
+            _ => "north"
+        };
+        var high = axis switch
+        {
+            "x" => "east",
+            "y" => "up",
+            _ => "south"
+        };
+        if (!On(mask, low))
+            faces.Add((low, "#ring", 0));
+        if (!On(mask, high))
+            faces.Add((high, "#ring", 0));
+        AddElement(kept, "post", x1, y1, z1, x2, y2, z2, true, faces.ToArray());
+    }
+
+    private static bool AddPanels(List<ShapeElement> kept, int mask)
+    {
+        var open = false;
+        foreach (var side in Dirs)
+        {
+            if (On(mask, side))
+                continue;
+            open = true;
+            var x1 = On(mask, "west") ? 0d : Frame;
+            var x2 = On(mask, "east") ? 16d : 16 - Frame;
+            var y1 = On(mask, "down") ? 0d : Frame;
+            var y2 = On(mask, "up") ? 16d : 16 - Frame;
+            var z1 = On(mask, "north") ? 0d : Frame;
+            var z2 = On(mask, "south") ? 16d : 16 - Frame;
+            PanelSlab(side, ref x1, ref y1, ref z1, ref x2, ref y2, ref z2);
+            AddElement(kept, "inner", x1, y1, z1, x2, y2, z2, false, (side, "#metal", 255));
+        }
+
+        return open;
+    }
+
+    private static void AddCore(List<ShapeElement> kept)
+    {
+        AddElement(kept, "core", Frame, Frame, Frame, 16 - Frame, 16 - Frame, 16 - Frame, true,
+            ("north", "#metal", 0),
+            ("east", "#metal", 0),
+            ("south", "#metal", 0),
+            ("west", "#metal", 0),
+            ("up", "#metal", 0),
+            ("down", "#metal", 0));
+    }
+
+    private static string Stripe(string side, string edge)
+    {
+        var ver = side is not ("up" or "down") && edge is "north" or "east" or "west" or "south"
+            || side is "up" or "down" && edge is "east" or "west";
+        return ver ? "#ver" : "#hor";
+    }
+
+    private static void FrameSlab(string dir, ref double x1, ref double y1, ref double z1, ref double x2, ref double y2, ref double z2)
+    {
+        switch (dir)
+        {
+            case "west": x1 = 0; x2 = Frame; break;
+            case "east": x1 = 16 - Frame; x2 = 16; break;
+            case "down": y1 = 0; y2 = Frame; break;
+            case "up": y1 = 16 - Frame; y2 = 16; break;
+            case "north": z1 = 0; z2 = Frame; break;
+            default: z1 = 16 - Frame; z2 = 16; break;
+        }
+    }
+
+    private static int Links(int mask, string a, string b, string c)
+        => (On(mask, a) ? 1 : 0) + (On(mask, b) ? 1 : 0) + (On(mask, c) ? 1 : 0);
+
+    private static void SpanFull(string axis, ref double x1, ref double y1, ref double z1, ref double x2, ref double y2, ref double z2)
+    {
+        switch (axis)
+        {
+            case "x": x1 = 0; x2 = 16; break;
+            case "y": y1 = 0; y2 = 16; break;
+            default: z1 = 0; z2 = 16; break;
+        }
+    }
+
+    private static void Reach(string axis, int mask, ref double x1, ref double y1, ref double z1, ref double x2, ref double y2, ref double z2)
+    {
+        switch (axis)
+        {
+            case "x":
+                if (On(mask, "west")) x1 = 0;
+                if (On(mask, "east")) x2 = 16;
+                break;
+            case "y":
+                if (On(mask, "down")) y1 = 0;
+                if (On(mask, "up")) y2 = 16;
+                break;
+            default:
+                if (On(mask, "north")) z1 = 0;
+                if (On(mask, "south")) z2 = 16;
+                break;
+        }
+    }
+
+    private static void Span(string axis, ref double x1, ref double y1, ref double z1, ref double x2, ref double y2, ref double z2)
+    {
+        switch (axis)
+        {
+            case "x": x1 = Frame; x2 = 16 - Frame; break;
+            case "y": y1 = Frame; y2 = 16 - Frame; break;
+            default: z1 = Frame; z2 = 16 - Frame; break;
+        }
+    }
+
+    private static void PanelSlab(string side, ref double x1, ref double y1, ref double z1, ref double x2, ref double y2, ref double z2)
+    {
+        switch (side)
+        {
+            case "north": z1 = 1; z2 = Frame; break;
+            case "south": z1 = 16 - Frame; z2 = 15; break;
+            case "west": x1 = 1; x2 = Frame; break;
+            case "east": x1 = 16 - Frame; x2 = 15; break;
+            case "down": y1 = 1; y2 = Frame; break;
+            default: y1 = 16 - Frame; y2 = 15; break;
+        }
+    }
+
+    private static void AddElement(List<ShapeElement> kept, string name, double x1, double y1, double z1, double x2, double y2, double z2, bool shade, params (string Face, string Texture, int Glow)[] faces)
+    {
+        if (faces.Length == 0 || x2 - x1 <= 0.001 || y2 - y1 <= 0.001 || z2 - z1 <= 0.001)
             return;
-
-        if ((mask & East) != 0)
-            ExtendEast(kept, mask);
-        if ((mask & West) != 0)
-            ExtendWest(kept, mask);
-        if ((mask & South) != 0)
-            ExtendSouth(kept, mask);
-        if ((mask & North) != 0)
-            ExtendNorth(kept, mask);
-        if ((mask & Up) != 0)
-            ExtendUp(kept, mask);
-        if ((mask & Down) != 0)
-            ExtendDown(kept, mask);
-    }
-
-    private static void ExtendEast(List<ShapeElement> kept, int mask)
-    {
-        kept.Add(Box(CoreHi, CoreY0, CoreLo, Past, CoreY1, CoreHi, "#metal"));
-        if ((mask & Down) == 0)
-        {
-            kept.Add(Box(ShoeHi, 0, ShoeLo, Past, ShoeY1, ShoeHi, "#steel"));
-            kept.Add(Box(StepHi, StepY0, StepLo, Past, StepY1, StepHi, "#steel"));
-        }
-
-        if ((mask & North) == 0)
-            SideX(kept, RibFarLo, RibFarHi, CoreHi, Past, FluteNear0, FluteNear1, BandNear0, BandNear1);
-        if ((mask & South) == 0)
-            SideX(kept, RibFarLo, RibFarHi, CoreHi, Past, FluteFar0, FluteFar1, BandFar0, BandFar1);
-    }
-
-    private static void ExtendWest(List<ShapeElement> kept, int mask)
-    {
-        kept.Add(Box(Before, CoreY0, CoreLo, CoreLo, CoreY1, CoreHi, "#metal"));
-        if ((mask & Down) == 0)
-        {
-            kept.Add(Box(Before, 0, ShoeLo, ShoeLo, ShoeY1, ShoeHi, "#steel"));
-            kept.Add(Box(Before, StepY0, StepLo, StepLo, StepY1, StepHi, "#steel"));
-        }
-
-        if ((mask & North) == 0)
-            SideX(kept, RibLo, RibHi, Before, CoreLo, FluteNear0, FluteNear1, BandNear0, BandNear1);
-        if ((mask & South) == 0)
-            SideX(kept, RibLo, RibHi, Before, CoreLo, FluteFar0, FluteFar1, BandFar0, BandFar1);
-    }
-
-    private static void ExtendSouth(List<ShapeElement> kept, int mask)
-    {
-        var x0 = (mask & West) != 0 ? Before : CoreLo;
-        var x1 = (mask & East) != 0 ? Past : CoreHi;
-        kept.Add(Box(x0, CoreY0, CoreHi, x1, CoreY1, Past, "#metal"));
-        if ((mask & Down) == 0)
-        {
-            var sx0 = (mask & West) != 0 ? Before : ShoeLo;
-            var sx1 = (mask & East) != 0 ? Past : ShoeHi;
-            var tx0 = (mask & West) != 0 ? Before : StepLo;
-            var tx1 = (mask & East) != 0 ? Past : StepHi;
-            kept.Add(Box(sx0, 0, ShoeHi, sx1, ShoeY1, Past, "#steel"));
-            kept.Add(Box(tx0, StepY0, StepHi, tx1, StepY1, Past, "#steel"));
-        }
-
-        if ((mask & East) == 0)
-            SideZ(kept, FluteFar0, FluteFar1, BandFar0, BandFar1, RibFarLo, RibFarHi, CoreHi, Past);
-        if ((mask & West) == 0)
-            SideZ(kept, FluteNear0, FluteNear1, BandNear0, BandNear1, RibFarLo, RibFarHi, CoreHi, Past);
-    }
-
-    private static void ExtendNorth(List<ShapeElement> kept, int mask)
-    {
-        var x0 = (mask & West) != 0 ? Before : CoreLo;
-        var x1 = (mask & East) != 0 ? Past : CoreHi;
-        kept.Add(Box(x0, CoreY0, Before, x1, CoreY1, CoreLo, "#metal"));
-        if ((mask & Down) == 0)
-        {
-            var sx0 = (mask & West) != 0 ? Before : ShoeLo;
-            var sx1 = (mask & East) != 0 ? Past : ShoeHi;
-            var tx0 = (mask & West) != 0 ? Before : StepLo;
-            var tx1 = (mask & East) != 0 ? Past : StepHi;
-            kept.Add(Box(sx0, 0, Before, sx1, ShoeY1, ShoeLo, "#steel"));
-            kept.Add(Box(tx0, StepY0, Before, tx1, StepY1, StepLo, "#steel"));
-        }
-
-        if ((mask & East) == 0)
-            SideZ(kept, FluteFar0, FluteFar1, BandFar0, BandFar1, RibLo, RibHi, Before, CoreLo);
-        if ((mask & West) == 0)
-            SideZ(kept, FluteNear0, FluteNear1, BandNear0, BandNear1, RibLo, RibHi, Before, CoreLo);
-    }
-
-    private static void SideX(List<ShapeElement> kept, double ribX0, double ribX1, double bandX0, double bandX1, double z0, double z1, double bandZ0, double bandZ1)
-    {
-        kept.Add(Box(ribX0, FluteY0, z0, ribX1, FluteY1, z1, "#steel"));
-        for (var i = 0; i < BandY0.Length; i++)
-            kept.Add(Box(bandX0, BandY0[i], bandZ0, bandX1, BandY1[i], bandZ1, "#brass"));
-    }
-
-    private static void SideZ(List<ShapeElement> kept, double x0, double x1, double bandX0, double bandX1, double ribZ0, double ribZ1, double bandZ0, double bandZ1)
-    {
-        kept.Add(Box(x0, FluteY0, ribZ0, x1, FluteY1, ribZ1, "#steel"));
-        for (var i = 0; i < BandY0.Length; i++)
-            kept.Add(Box(bandX0, BandY0[i], bandZ0, bandX1, BandY1[i], bandZ1, "#brass"));
-    }
-
-    private static void ExtendUp(List<ShapeElement> kept, int mask)
-    {
-        var x0 = (mask & West) != 0 ? Before : CoreLo;
-        var x1 = (mask & East) != 0 ? Past : CoreHi;
-        var z0 = (mask & North) != 0 ? Before : CoreLo;
-        var z1 = (mask & South) != 0 ? Past : CoreHi;
-        kept.Add(Box(x0, CoreY1, z0, x1, Past, z1, "#metal"));
-        FlutesY(kept, mask, FluteY1, Past);
-        Posts(kept, mask, PostY1, Past);
-    }
-
-    private static void ExtendDown(List<ShapeElement> kept, int mask)
-    {
-        var x0 = (mask & West) != 0 ? Before : CoreLo;
-        var x1 = (mask & East) != 0 ? Past : CoreHi;
-        var z0 = (mask & North) != 0 ? Before : CoreLo;
-        var z1 = (mask & South) != 0 ? Past : CoreHi;
-        kept.Add(Box(x0, Before, z0, x1, CoreY0, z1, "#metal"));
-        FlutesY(kept, mask, Before, FluteY0);
-        Posts(kept, mask, Before, PostY0);
-    }
-
-    private static void FlutesY(List<ShapeElement> kept, int mask, double y0, double y1)
-    {
-        if ((mask & North) == 0)
-        {
-            foreach (var x in FluteAt)
-                kept.Add(Box(x, y0, FluteNear0, x + FluteW, y1, FluteNear1, "#steel"));
-            if ((mask & East) != 0)
-                kept.Add(Box(RibFarLo, y0, FluteNear0, RibFarHi, y1, FluteNear1, "#steel"));
-            if ((mask & West) != 0)
-                kept.Add(Box(RibLo, y0, FluteNear0, RibHi, y1, FluteNear1, "#steel"));
-        }
-
-        if ((mask & South) == 0)
-        {
-            foreach (var x in FluteAt)
-                kept.Add(Box(x, y0, FluteFar0, x + FluteW, y1, FluteFar1, "#steel"));
-            if ((mask & East) != 0)
-                kept.Add(Box(RibFarLo, y0, FluteFar0, RibFarHi, y1, FluteFar1, "#steel"));
-            if ((mask & West) != 0)
-                kept.Add(Box(RibLo, y0, FluteFar0, RibHi, y1, FluteFar1, "#steel"));
-        }
-
-        if ((mask & West) == 0)
-        {
-            foreach (var z in FluteAt)
-                kept.Add(Box(FluteNear0, y0, z, FluteNear1, y1, z + FluteW, "#steel"));
-            if ((mask & South) != 0)
-                kept.Add(Box(FluteNear0, y0, RibFarLo, FluteNear1, y1, RibFarHi, "#steel"));
-            if ((mask & North) != 0)
-                kept.Add(Box(FluteNear0, y0, RibLo, FluteNear1, y1, RibHi, "#steel"));
-        }
-
-        if ((mask & East) == 0)
-        {
-            foreach (var z in FluteAt)
-                kept.Add(Box(FluteFar0, y0, z, FluteFar1, y1, z + FluteW, "#steel"));
-            if ((mask & South) != 0)
-                kept.Add(Box(FluteFar0, y0, RibFarLo, FluteFar1, y1, RibFarHi, "#steel"));
-            if ((mask & North) != 0)
-                kept.Add(Box(FluteFar0, y0, RibLo, FluteFar1, y1, RibHi, "#steel"));
-        }
-    }
-
-    private static void Posts(List<ShapeElement> kept, int mask, double y0, double y1)
-    {
-        if ((mask & (North | West)) == 0)
-            kept.Add(Box(1.35, y0, 1.35, 2.75, y1, 2.75, "#steel"));
-        if ((mask & (North | East)) == 0)
-            kept.Add(Box(13.25, y0, 1.35, 14.65, y1, 2.75, "#steel"));
-        if ((mask & (South | West)) == 0)
-            kept.Add(Box(1.35, y0, 13.25, 2.75, y1, 14.65, "#steel"));
-        if ((mask & (South | East)) == 0)
-            kept.Add(Box(13.25, y0, 13.25, 14.65, y1, 14.65, "#steel"));
-    }
-
-    private static ShapeElement Box(double x0, double y0, double z0, double x1, double y1, double z1, string texture)
-    {
-        var hide = 0;
-        if (x0 <= 0)
-            hide |= West;
-        if (x1 >= 16)
-            hide |= East;
-        if (z0 <= 0)
-            hide |= North;
-        if (z1 >= 16)
-            hide |= South;
-        if (y0 <= 0)
-            hide |= Down;
-        if (y1 >= 16)
-            hide |= Up;
-
         var element = new ShapeElement
         {
-            Name = "join",
-            From = new[] { x0, y0, z0 },
-            To = new[] { x1, y1, z1 },
-            Shade = true,
+            Name = name,
+            From = new[] { Math.Round(x1, 4), Math.Round(y1, 4), Math.Round(z1, 4) },
+            To = new[] { Math.Round(x2, 4), Math.Round(y2, 4), Math.Round(z2, 4) },
+            Shade = shade,
 #pragma warning disable CS0618
             Faces = new Dictionary<string, ShapeElementFace>(),
 #pragma warning restore CS0618
@@ -359,32 +436,33 @@ internal static class ProcessorJoinMesh
         element.ScaleX = 1;
         element.ScaleY = 1;
         element.ScaleZ = 1;
-        var dx = (float)(x1 - x0);
-        var dy = (float)(y1 - y0);
-        var dz = (float)(z1 - z0);
-        AddFace(element, "north", North, dx, dy, hide, texture);
-        AddFace(element, "east", East, dz, dy, hide, texture);
-        AddFace(element, "south", South, dx, dy, hide, texture);
-        AddFace(element, "west", West, dz, dy, hide, texture);
-        AddFace(element, "up", Up, dx, dz, hide, texture);
-        AddFace(element, "down", Down, dx, dz, hide, texture);
+#pragma warning disable CS0618
+        foreach (var (face, texture, glow) in faces)
+        {
+            element.Faces![face] = new ShapeElementFace
+            {
+                Texture = texture,
+                Uv = Uv(face, x1, y1, z1, x2, y2, z2),
+                Enabled = true,
+                Glow = glow,
+                ReflectiveMode = (EnumReflectiveMode)0
+            };
+        }
+#pragma warning restore CS0618
         element.TrimTextureNamesAndResolveFaces();
-        return element;
+        kept.Add(element);
     }
 
-    private static void AddFace(ShapeElement element, string code, int bit, float u, float v, int hide, string texture)
+    private static float[] Uv(string face, double x1, double y1, double z1, double x2, double y2, double z2)
     {
-#pragma warning disable CS0618
-        if ((hide & bit) != 0 || u <= 0 || v <= 0 || element.Faces == null)
-            return;
-
-        element.Faces[code] = new ShapeElementFace
+        return face switch
         {
-            Texture = texture,
-            Uv = new[] { 4f, 4f, 4f + u, 4f + v },
-            Enabled = true,
-            ReflectiveMode = texture is "#brass" or "#bronze" ? (EnumReflectiveMode)3 : (EnumReflectiveMode)0
+            "north" => new[] { (float)(16 - x2), (float)(16 - y2), (float)(16 - x1), (float)(16 - y1) },
+            "south" => new[] { (float)x1, (float)(16 - y2), (float)x2, (float)(16 - y1) },
+            "east" => new[] { (float)(16 - z2), (float)(16 - y2), (float)(16 - z1), (float)(16 - y1) },
+            "west" => new[] { (float)z1, (float)(16 - y2), (float)z2, (float)(16 - y1) },
+            "up" => new[] { (float)x1, (float)z1, (float)x2, (float)z2 },
+            _ => new[] { (float)x1, (float)(16 - z2), (float)x2, (float)(16 - z1) }
         };
-#pragma warning restore CS0618
     }
 }

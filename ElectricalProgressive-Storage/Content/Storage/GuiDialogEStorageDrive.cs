@@ -9,13 +9,12 @@ namespace ElectricalProgressive.Content.Storage;
 public class GuiDialogEStorageDrive : GuiDialogBlockEntity
 {
     private const int Cols = 2;
-    private const int Rows = 4;
-    private const double TitleH = 22;
-    private const double CloseS = 16;
+    private const int Rows = 5;
 
     private ElementBounds? _close;
     private double _winW;
     private double _winH;
+    private double _head;
     private bool _drag;
     private int _dragX;
     private int _dragY;
@@ -99,52 +98,34 @@ public class GuiDialogEStorageDrive : GuiDialogBlockEntity
         var scale = RuntimeEnv.GUIScale;
         var x = (capi.Input.MouseX - bounds.renderX) / scale;
         var y = (capi.Input.MouseY - bounds.renderY) / scale;
-        var edge = GuiElementTermFrame.Inset;
-        return x < edge || y < edge || x > _winW - edge || y > _winH - edge;
+        return y >= 0 && y < _head && x >= 0 && x <= _winW;
     }
 
     private void SetupDialog()
     {
-        var gridMeasure = ElementStdBounds.SlotGrid(EnumDialogArea.None, 0, 0, Cols, Rows);
-        var gridW = gridMeasure.fixedWidth;
-        var gridH = gridMeasure.fixedHeight;
-        var edge = GuiElementTermFrame.Inset;
-        var pad = TermChrome.Pad;
-        var gutter = TermChrome.Gutter;
-        var blockW = Math.Max(gridW + pad * 2, 230);
-        var headerH = pad + TitleH + pad;
-        var gridBlockH = pad + gridH + pad;
-        var contentH = headerH + gutter + gridBlockH;
-        _winW = edge + blockW + edge;
-        _winH = edge + contentH + edge;
-
-        var closeX = edge + blockW - CloseS;
-        var closeY = edge + pad + (TitleH - CloseS) / 2.0;
-        var title = ElementBounds.Fixed(edge + pad, edge + pad, closeX - 8 - (edge + pad), TitleH);
-        var header = ElementBounds.Fixed(edge, edge, closeX - 8 - edge, headerH);
-        _close = ElementBounds.Fixed(closeX, closeY, CloseS, CloseS);
-        var gridTop = edge + headerH + gutter;
-        var grid = ElementBounds.Fixed(edge + (blockW - gridW) / 2.0, gridTop + pad, gridW, gridH);
-        var gridTray = ElementBounds.Fixed(edge, gridTop, blockW, gridBlockH);
+        var cell = Ae2Gui.Slots(0, 0, Cols, Rows);
+        _winW = Math.Max(240, cell.fixedWidth + Ae2Gui.Margin * 2 + 40);
+        _winH = Ae2Gui.Header + Ae2Gui.Gap + cell.fixedHeight + Ae2Gui.Margin;
+        _head = Ae2Gui.Header;
+        _close = Ae2Gui.Box(_winW - Ae2Gui.Margin - 20, 11, 20, 20);
+        var title = Ae2Gui.Box(Ae2Gui.Margin + 2, 8, _winW - 70, 26);
+        var grid = Ae2Gui.Slots((_winW - cell.fixedWidth) / 2, Ae2Gui.Header + Ae2Gui.Gap, Cols, Rows);
         var frame = ElementBounds.Fixed(0, 0, _winW, _winH);
         var bg = ElementBounds.Fill.WithFixedPadding(0);
         bg.BothSizing = ElementSizing.FitToChildren;
         bg.WithChildren(frame, _close);
 
-        var dialog = ElementStdBounds.AutosizedMainDialog
-            .WithAlignment(EnumDialogArea.RightMiddle)
-            .WithFixedAlignmentOffset(-GuiStyle.DialogToScreenPadding, 0);
+        var sheet = Ae2Gui.Window(capi, frame, _close.fixedX, _close.fixedY, _close.fixedWidth);
 
         ClearComposers();
-        SingleComposer = capi.Gui
-            .CreateCompo("estoragedrive" + BlockEntityPosition, dialog)
+        var compo = capi.Gui
+            .CreateCompo("estoragedrive" + BlockEntityPosition, Ae2Gui.Dialog())
             .BeginChildElements(bg)
-            .AddStaticElement(new GuiElementTermFrame(capi, frame, closeX, closeY, CloseS))
-            .AddStaticElement(new GuiElementTermPanel(capi, header))
-            .AddStaticElement(new GuiElementTermPanel(capi, gridTray))
-            .AddStaticText(DialogTitle, CairoFont.WhiteDetailText().WithFontSize(18), title)
-            .AddItemSlotGrid(Inventory, DoSendPacket, Cols, [0, 1, 2, 3, 4, 5, 6, 7], grid, "disks")
+            .AddStaticElement(sheet)
+            .AddStaticText(DialogTitle, Ae2Gui.Title(), title)
+            .AddSlots(capi, Inventory, DoSendPacket, Cols, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], grid, "disks")
             .EndChildElements()
             .Compose();
+        SingleComposer = compo;
     }
 }

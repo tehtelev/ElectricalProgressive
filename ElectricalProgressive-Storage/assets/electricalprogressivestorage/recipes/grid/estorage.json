@@ -49,7 +49,7 @@
     },
     "output": {
       "type": "block",
-      "code": "electricalprogressivestorage:estoragedrive"
+      "code": "electricalprogressivestorage:estoragedrive-south"
     }
   },
   {
@@ -219,6 +219,19 @@
     }
   },
   {
+    "ingredientPattern": "T,I",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "T": { "type": "block", "code": "electricalprogressivestorage:estorageterminal" },
+      "I": { "type": "item", "code": "game:metalplate-iron" }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivestorage:estoragecraftterminal"
+    }
+  },
+  {
     "ingredientPattern": "IGI,CCC,PPP",
     "width": 3,
     "height": 3,
@@ -299,6 +312,32 @@
     "output": {
       "type": "block",
       "code": "electricalprogressivestorage:estorageassembler"
+    }
+  },
+  {
+    "ingredientPattern": "C,I",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
+      "I": { "type": "item", "code": "game:metalplate-iron" }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivestorage:estorageimport"
+    }
+  },
+  {
+    "ingredientPattern": "C,P",
+    "width": 1,
+    "height": 2,
+    "ingredients": {
+      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
+      "P": { "type": "item", "code": "game:metalplate-copper" }
+    },
+    "output": {
+      "type": "block",
+      "code": "electricalprogressivestorage:estorageexport"
     }
   }
 ]

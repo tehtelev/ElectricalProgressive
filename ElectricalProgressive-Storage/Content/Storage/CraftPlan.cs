@@ -51,7 +51,8 @@ public static class CraftPlan
             {
                 if (!order.Bound)
                     continue;
-                if (world.BlockAccessor.GetBlockEntity(order.Panel) is not BlockEntityEStorageInterface bound)
+                var bound = PanelStack.Interface(world, order.Panel, order.Slot);
+                if (bound == null)
                     continue;
                 share = bound.CpuOf(order.Slot);
                 if (share != null)
@@ -61,7 +62,8 @@ public static class CraftPlan
 
         foreach (var order in plan.Orders)
         {
-            if (world.BlockAccessor.GetBlockEntity(order.Panel) is not BlockEntityEStorageInterface panel)
+            var panel = PanelStack.Interface(world, order.Panel, order.Slot);
+            if (panel == null)
             {
                 Undo(world, done);
                 return false;
@@ -86,8 +88,7 @@ public static class CraftPlan
     {
         for (var i = done.Count - 1; i >= 0; i--)
         {
-            if (world.BlockAccessor.GetBlockEntity(done[i].Order.Panel) is BlockEntityEStorageInterface panel)
-                panel.UndoOrder(done[i].Order.Slot, done[i].Added);
+            PanelStack.Interface(world, done[i].Order.Panel, done[i].Order.Slot)?.UndoOrder(done[i].Order.Slot, done[i].Added);
         }
     }
 
@@ -436,7 +437,8 @@ public static class CraftPlan
                     continue;
                 if (!StorageAccess.Same(_world, order.Output, proto))
                     continue;
-                if (_world.BlockAccessor.GetBlockEntity(order.Panel) is not BlockEntityEStorageInterface have)
+                var have = PanelStack.Interface(_world, order.Panel, order.Slot);
+                if (have == null)
                     continue;
 
                 var held = have.Inventory[order.Slot].Itemstack;
@@ -451,9 +453,8 @@ public static class CraftPlan
 
             foreach (var pos in _scan.Interfaces)
             {
-                if (_world.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEStorageInterface have)
-                    continue;
-
+                foreach (var have in PanelStack.Interfaces(_world, pos))
+                {
                 for (var i = ItemSlotInterface.PatternAt; i < ItemSlotInterface.ConfigAt; i++)
                 {
                     if (_stack.Contains(Key(have.Pos, i)))
@@ -471,6 +472,7 @@ public static class CraftPlan
                     slot = i;
                     pattern = held!;
                     return true;
+                }
                 }
             }
 

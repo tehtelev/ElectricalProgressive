@@ -94,8 +94,15 @@ public class BEBehaviorEStorageController : BlockEntityBehavior, IElectricConsum
         dsc.AppendLine(Lang.Get("electricalprogressivestorage:estorage-channels", scan.ChannelUsed, scan.ChannelSupply));
         dsc.AppendLine(Lang.Get("electricalprogressivestorage:estorage-power",
             (int)Math.Round(Received), (int)Math.Round(Demand)));
+        var terminals = 0;
+        foreach (var pos in scan.Terminals)
+        {
+            var kind = PanelStack.Kind(Api.World, pos, false);
+            terminals += kind < 1 ? 1 : kind;
+        }
+
         dsc.AppendLine(Lang.Get("electricalprogressivestorage:estorage-devices",
-            scan.Drives.Count, scan.Terminals.Count));
+            scan.Drives.Count, terminals));
     }
 
     public float Consume_request()

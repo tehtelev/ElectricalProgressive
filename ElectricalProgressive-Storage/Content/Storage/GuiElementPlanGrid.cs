@@ -20,10 +20,11 @@ public sealed class PlanRow
 /// </summary>
 public sealed class GuiElementPlanGrid : GuiElement
 {
-    public const double CellW = 176;
-    public const double Gap = 4;
+    public const double CellW = 156;
+    public const double CellH = 48;
+    public const double Gap = 0;
     public const int Cols = 3;
-    public const int VisRows = 5;
+    public const int VisRows = 6;
 
     private readonly List<DummySlot> _slots = new();
 
@@ -38,21 +39,30 @@ public sealed class GuiElementPlanGrid : GuiElement
         }
     }
 
-    public static double CellH => GuiElementPassiveItemSlot.unscaledSlotSize;
-
     public override void ComposeElements(Context ctx, ImageSurface surface)
     {
         Bounds.CalcWorldBounds();
-        var scale = RuntimeEnv.GUIScale;
-        var cellW = CellW * scale;
-        var cellH = CellH * scale;
-        var gap = Gap * scale;
-        for (var i = 0; i < _slots.Count; i++)
+        var cellW = scaled(CellW);
+        var cellH = scaled(CellH);
+        var edge = Math.Max(1, scaled(1));
+        var prev = ctx.Antialias;
+        ctx.Antialias = Antialias.None;
+        for (var i = 0; i < Cols * VisRows; i++)
         {
-            var x = Bounds.drawX + (i % Cols) * (cellW + gap);
-            var y = Bounds.drawY + (i / Cols) * (cellH + gap);
-            TermChrome.Inset(ctx, x, y, cellW, cellH, 0.09, 0.075, 0.06);
+            var x = Bounds.drawX + (i % Cols) * cellW;
+            var y = Bounds.drawY + (i / Cols) * cellH;
+            ctx.SetSourceRGB(Ae2Gui.Well[0], Ae2Gui.Well[1], Ae2Gui.Well[2]);
+            ctx.Rectangle(x, y, cellW, cellH);
+            ctx.Fill();
+            ctx.SetSourceRGBA(Ae2Gui.Ink[0], Ae2Gui.Ink[1], Ae2Gui.Ink[2], 0.55);
+            ctx.Rectangle(x, y, cellW, edge);
+            ctx.Rectangle(x, y + cellH - edge, cellW, edge);
+            ctx.Rectangle(x, y, edge, cellH);
+            ctx.Rectangle(x + cellW - edge, y, edge, cellH);
+            ctx.Fill();
         }
+
+        ctx.Antialias = prev;
     }
 
     public override void RenderInteractiveElements(float deltaTime)
@@ -65,11 +75,11 @@ public sealed class GuiElementPlanGrid : GuiElement
         var strideX = (CellW + Gap) * scale;
         var strideY = (CellH + Gap) * scale;
         var icon = (float)scaled(GuiElementPassiveItemSlot.unscaledItemSize);
-        var half = scaled(CellH) * 0.5;
+        var halfY = scaled(CellH) * 0.5;
         for (var i = 0; i < _slots.Count; i++)
         {
-            var cx = Bounds.renderX + (i % Cols) * strideX + CellW * scale - half;
-            var cy = Bounds.renderY + (i / Cols) * strideY + half;
+            var cx = Bounds.renderX + (i % Cols) * strideX + scaled(CellW - 8) - icon * 0.5;
+            var cy = Bounds.renderY + (i / Cols) * strideY + halfY;
             // 90, как у слота инвентаря: выше подложки (50) и внутри слоя диалога (ZSize 150).
             api.Render.RenderItemstackToGui(
                 _slots[i],

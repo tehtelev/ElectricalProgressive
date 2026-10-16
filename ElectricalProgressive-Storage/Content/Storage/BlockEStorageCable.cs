@@ -101,13 +101,16 @@ public class BlockEntityEStorageCable : BlockEntity
 
 public class BlockEStorageCable : BlockEStoragePart
 {
-    private readonly record struct CableKey(int BlockId, int Connection, int Lines);
+    private readonly record struct CableKey(int BlockId, int Connection, int Lines, int Reach);
+    private readonly record struct PanelBox(float MinX, float MinY, float MinZ, float MaxX, float MaxY, float MaxZ);
 
     private static readonly object Gate = new();
     private static readonly Dictionary<int, MeshData?[]> Parts = new();
+    private static readonly Dictionary<int, MeshData?[]> DecalParts = new();
     private static readonly Dictionary<CableKey, MeshData?> Meshes = new();
     private static readonly Dictionary<CableKey, Dictionary<Facing, Cuboidf[]>> Hits = new();
     private static readonly Dictionary<CableKey, Cuboidf[]> Flats = new();
+    private static readonly Dictionary<(int BlockId, int Facing), PanelBox> PanelBoxes = new();
 
     private static readonly (float X, float Y, bool Half)[][] Strands =
     [
@@ -117,10 +120,34 @@ public class BlockEStorageCable : BlockEStoragePart
         [(0.6f / 16f, 0f, false), (-0.6f / 16f, 0f, false), (0.6f / 16f, 0.95f / 16f, true), (-0.6f / 16f, 0.95f / 16f, true)]
     ];
 
-    private static readonly Cuboidf PartBox = new(0.4625f, 0f, 0f, 0.5375f, 0.0375f, 0.46875f);
-    private static readonly Cuboidf FixBox = new(0.45625f, 0f, 0.45625f, 0.54375f, 0.04375f, 0.534375f);
+    // Жила и шестерня сидят на плоскости грани и наполовину выходят в соседнюю клетку.
+    private static readonly Cuboidf PartBox = new(0.4625f, -0.05f, -0.05f, 0.5375f, 0.05f, 0.46875f);
+    private static readonly Cuboidf FixBox = new(0.45625f, -0.05f, 0.45625f, 0.54375f, 0.05f, 0.54375f);
     private static readonly Vec3d BoxOrigin = new(0.5, 0.5, 0.5);
     private static readonly Vec3f MeshOrigin = new(0.5f, 0.5f, 0.5f);
+
+    // Высота задней стороны в локальной оси панели: 1 интерфейс, 2 импорт, 3 экспорт.
+    private readonly record struct HugBand(float Z0, float Z1, float Lift);
+    private static readonly HugBand[] NoBands = [];
+    private static readonly HugBand[] InterfaceBands =
+    [
+        new(-1f, 0.125f, 0f),
+        new(0.125f, 0.25f, 2f / 16f),
+        new(0.25f, 1f, 3f / 16f)
+    ];
+    private static readonly HugBand[] ImportBands =
+    [
+        new(-1f, 0.25f, 0f),
+        new(0.25f, 0.3125f, 2f / 16f),
+        new(0.3125f, 0.375f, 3f / 16f),
+        new(0.375f, 1f, 5f / 16f)
+    ];
+    private static readonly HugBand[] ExportBands =
+    [
+        new(-1f, 0.25f, 0f),
+        new(0.25f, 0.375f, 4f / 16f),
+        new(0.375f, 1f, 5f / 16f)
+    ];
 
     private readonly record struct Seg(Facing Bit, float Rx, float Ry, float Rz, float Tx, float Ty, float Tz);
 
@@ -179,6 +206,7 @@ public class BlockEStorageCable : BlockEStoragePart
             Meshes.Clear();
             Hits.Clear();
             Flats.Clear();
+            PanelBoxes.Clear();
         }
     }
 
@@ -194,7 +222,7 @@ public class BlockEStorageCable : BlockEStoragePart
         if (facing == Facing.None)
             return false;
 
-        var solid = MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSel.Position, facing);
+        var solid = Supported(world.BlockAccessor, blockSel.Position, facing);
         var here = world.BlockAccessor.GetBlock(blockSel.Position);
         if (here is BlockEStorageCable)
         {
@@ -241,11 +269,16 @@ public class BlockEStorageCable : BlockEStoragePart
             return true;
         }
 
-        if (world.BlockAccessor.GetBlockEntity(blockSel.Position) is BlockEntityEStorageInterface panel)
+        if (world.BlockAccessor.GetBlockEntity(blockSel.Position) is IPanelHost panel and BlockEntity host)
         {
-            if (!solid || SharesSupport(panel.Facing, facing))
+            if (here is BlockEStorageTerminal panelBlock && !panelBlock.Stacks)
                 return false;
-            return AttachTo(panel, facing, byPlayer, byItemStack);
+            var blocked = host is IPanelStack stack
+                ? PanelStack.BlocksCable(stack, facing)
+                : SharesSupport(panel.Facing, facing);
+            if (!solid || blocked)
+                return false;
+            return AttachTo(host, panel, facing, byPlayer, byItemStack);
         }
 
         if (!solid)
@@ -315,7 +348,10 @@ public class BlockEStorageCable : BlockEStoragePart
     {
         base.OnNeighbourBlockChange(world, pos, neibpos);
         if (world.Side != EnumAppSide.Server)
+        {
+            world.BlockAccessor.MarkBlockDirty(pos);
             return;
+        }
         if (world.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEStorageCable entity || entity.Connection == Facing.None)
             return;
 
@@ -324,7 +360,7 @@ public class BlockEStorageCable : BlockEStoragePart
             return;
 
         var mask = FacingHelper.FromFace(face);
-        if (MyMiniLib.CheckSolidFace(world.BlockAccessor, pos, mask))
+        if (Supported(world.BlockAccessor, pos, mask))
             return;
 
         var removed = entity.Connection & mask;
@@ -352,30 +388,56 @@ public class BlockEStorageCable : BlockEStoragePart
     public override Cuboidf[] GetCollisionBoxes(IBlockAccessor blockAccessor, BlockPos pos)
         => Boxes(blockAccessor, pos) ?? base.GetCollisionBoxes(blockAccessor, pos);
 
+    public override void GetDecal(IWorldAccessor world, BlockPos pos, ITexPositionSource decalTexSource, ref MeshData decalModelData, ref MeshData blockModelData)
+    {
+        base.GetDecal(world, pos, decalTexSource, ref decalModelData, ref blockModelData);
+        if (world.Api is not ICoreClientAPI capi
+            || capi.World.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEStorageCable entity
+            || entity.Connection == Facing.None)
+        {
+            // Форма блока — жила вдоль Z. Без подмены трещина лежит поперёк поставленного провода.
+            decalModelData = decalModelData.EmptyClone();
+            return;
+        }
+
+        var decal = BuildMesh(capi, pos, entity.Connection, entity.Lines, DecalPartsFor(capi, decalTexSource));
+        var solid = HostMesh(capi, pos, entity.Connection, entity.Lines);
+        if (decal == null || solid == null || decal.VerticesCount == 0 || decal.VerticesCount != solid.VerticesCount)
+        {
+            decalModelData = decalModelData.EmptyClone();
+            return;
+        }
+
+        decalModelData = decal;
+        blockModelData = solid;
+    }
+
     public override void OnJsonTesselation(ref MeshData sourceMesh, ref int[] lightRgbsByCorner, BlockPos pos, Vintagestory.API.Common.Block[] chunkExtBlocks, int extIndex3d)
     {
         if (api is not ICoreClientAPI capi
             || capi.World.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEStorageCable entity
             || entity.Connection == Facing.None)
         {
-            base.OnJsonTesselation(ref sourceMesh, ref lightRgbsByCorner, pos, chunkExtBlocks, extIndex3d);
+            // Входной меш — общий кэш формы блока. Clear() на нём гасит модель у всех проводов.
+            sourceMesh = sourceMesh.EmptyClone();
             return;
         }
 
-        var key = new CableKey(Id, (int)entity.Connection, entity.PackedLines());
+        var reach = ReachOf(capi, pos, entity.Connection);
+        var key = new CableKey(Id, (int)entity.Connection, entity.PackedLines(), reach);
         MeshData? mesh;
         lock (Gate)
         {
             if (!Meshes.TryGetValue(key, out mesh))
             {
-                mesh = BuildMesh(capi, entity.Connection, entity.Lines);
+                mesh = BuildMesh(capi, pos, entity.Connection, entity.Lines);
                 Meshes[key] = mesh;
             }
         }
 
         if (mesh == null || mesh.VerticesCount == 0)
         {
-            base.OnJsonTesselation(ref sourceMesh, ref lightRgbsByCorner, pos, chunkExtBlocks, extIndex3d);
+            sourceMesh = sourceMesh.EmptyClone();
             return;
         }
 
@@ -391,9 +453,10 @@ public class BlockEStorageCable : BlockEStoragePart
         return BoxesFor(blockAccessor.GetBlock(pos).Id, entity.Connection, entity.Lines);
     }
 
-    private Cuboidf[] BoxesFor(int blockId, Facing connection, int[] lines)
+    private Cuboidf[] BoxesFor(int blockId, Facing connection, int[] lines, int seats = 0)
     {
-        var key = new CableKey(blockId, (int)connection, Pack(lines));
+        // У хитбоксов четвёртое поле — маска панелей. У меша там другой хэш, словари разные.
+        var key = new CableKey(blockId, (int)connection, Pack(lines), seats);
         lock (Gate)
         {
             if (Flats.TryGetValue(key, out var cached))
@@ -408,10 +471,10 @@ public class BlockEStorageCable : BlockEStoragePart
         }
     }
 
-    private static Facing Hit(Facing connection, int[] lines, int blockId, Vec3d hit)
+    private static Facing Hit(Facing connection, int[] lines, int blockId, Vec3d hit, int seats = 0)
     {
         var selected = Facing.None;
-        foreach (var pair in HitMap(new CableKey(blockId, (int)connection, Pack(lines)), connection, lines))
+        foreach (var pair in HitMap(new CableKey(blockId, (int)connection, Pack(lines), seats), connection, lines))
         {
             foreach (var box in pair.Value)
             {
@@ -432,19 +495,30 @@ public class BlockEStorageCable : BlockEStoragePart
         }
 
         var map = new Dictionary<Facing, Cuboidf[]>();
+        var seats = key.Reach;
         foreach (var (all, fx, fy, fz, segs) in Layout)
         {
             if ((connection & all) == 0)
                 continue;
 
             var count = LinesOn(all, lines);
-            AddBox(map, all, FixBoxFor(count).RotatedCopy(fx, fy, fz, BoxOrigin));
+            var face = FaceOf(all);
+            var kind = face == null ? 0 : KindOn(seats, face.Index);
+            var joint = FixBoxFor(count);
+            if (kind != 0)
+            {
+                var rear = RearOf(kind);
+                joint.Y1 += rear;
+                joint.Y2 += rear;
+            }
+
+            AddBox(map, all, joint.RotatedCopy(fx, fy, fz, BoxOrigin));
             var part = PartBoxFor(count);
             foreach (var seg in segs)
             {
                 if ((connection & seg.Bit) == 0)
                     continue;
-                AddBox(map, seg.Bit, part.Clone().RotatedCopy(seg.Rx, seg.Ry, seg.Rz, BoxOrigin));
+                AddStrandBoxes(map, seg.Bit, part, kind, seg.Rx, seg.Ry, seg.Rz);
             }
         }
 
@@ -467,9 +541,9 @@ public class BlockEStorageCable : BlockEStoragePart
         map[key] = [box];
     }
 
-    private MeshData? BuildMesh(ICoreClientAPI capi, Facing connection, int[] lines)
+    private MeshData? BuildMesh(ICoreClientAPI capi, BlockPos pos, Facing connection, int[] lines, MeshData?[]? parts = null)
     {
-        var parts = PartsFor(capi);
+        parts ??= PartsFor(capi);
         var part = parts[0];
         var dot = parts[1];
         var fix = parts[2];
@@ -477,6 +551,7 @@ public class BlockEStorageCable : BlockEStoragePart
             return null;
 
         MeshData? built = null;
+        var seats = SeatPack(capi.World, pos);
         foreach (var (all, fx, fy, fz, segs) in Layout)
         {
             if ((connection & all) == 0)
@@ -484,19 +559,26 @@ public class BlockEStorageCable : BlockEStoragePart
 
             var count = LinesOn(all, lines);
             var strands = Strands[count - 1];
+            var face = FaceOf(all);
+            var kind = face == null ? 0 : KindOn(seats, face.Index);
+            var before = built?.VerticesCount ?? 0;
             if (fix != null)
-                AddJoint(ref built, fix, count, fx, fy, fz, 0f, 0f, 0f);
+                AddJoint(ref built, fix, count, fx, fy, fz, 0f, 0f, 0f, RearOf(kind));
 
             foreach (var seg in segs)
             {
                 if ((connection & seg.Bit) == 0)
                     continue;
 
+                var extra = ExtraToPanel(capi, pos, seg);
                 foreach (var strand in strands)
-                    AddStrand(ref built, part, strand.X, strand.Y, strand.Half, seg.Rx, seg.Ry, seg.Rz, 0f, 0f, 0f);
+                    AddStrand(ref built, part, strand.X, strand.Y, strand.Half, seg.Rx, seg.Ry, seg.Rz, 0f, 0f, 0f, extra, kind);
                 if (dot != null)
-                    AddJoint(ref built, dot, count, seg.Rx, seg.Ry, seg.Rz, seg.Tx, seg.Ty, seg.Tz);
+                    AddJoint(ref built, dot, count, seg.Rx, seg.Ry, seg.Rz, Push(seg.Tx, extra), Push(seg.Ty, extra), Push(seg.Tz, extra), 0f);
             }
+
+            if (face != null && built != null && NeighborPull(capi, pos, face))
+                PullInside(built, before, face);
         }
 
         return built;
@@ -524,6 +606,37 @@ public class BlockEStorageCable : BlockEStoragePart
             return null;
 
         capi.Tesselator.TesselateShape(this, shape, out var mesh);
+        capi.TesselatorManager.ThreadDispose();
+        return mesh;
+    }
+
+    private MeshData?[] DecalPartsFor(ICoreClientAPI capi, ITexPositionSource tex)
+    {
+        lock (Gate)
+        {
+            if (DecalParts.TryGetValue(Id, out var found))
+                return found;
+        }
+
+        var loaded = new MeshData?[]
+        {
+            LoadDecalShape(capi, tex, "part"),
+            LoadDecalShape(capi, tex, "dot"),
+            LoadDecalShape(capi, tex, "fix")
+        };
+        lock (Gate)
+            DecalParts[Id] = loaded;
+        return loaded;
+    }
+
+    private static MeshData? LoadDecalShape(ICoreClientAPI capi, ITexPositionSource tex, string name)
+    {
+        var shape = Vintagestory.API.Common.Shape.TryGet(capi, "electricalprogressivestorage:shapes/block/estoragecable/" + name + ".json");
+        if (shape == null)
+            return null;
+
+        // decalTexSource уже с isDecalUv: координаты трещины, не атлас кварца.
+        capi.Tesselator.TesselateShape("estoragecable", shape, out var mesh, tex);
         capi.TesselatorManager.ThreadDispose();
         return mesh;
     }
@@ -622,25 +735,202 @@ public class BlockEStorageCable : BlockEStoragePart
     {
         if (lines <= 1)
             return PartBox.Clone();
-        var y2 = lines >= 3 ? 0.08125f : 0.0375f;
-        return new Cuboidf(0.425f, 0f, 0f, 0.575f, y2, 0.46875f);
+        var y2 = lines >= 3 ? 0.09f : 0.05f;
+        return new Cuboidf(0.425f, -0.05f, -0.05f, 0.575f, y2, 0.46875f);
     }
 
     private static Cuboidf FixBoxFor(int lines)
     {
         if (lines <= 1)
             return FixBox.Clone();
-        var y2 = lines >= 3 ? 0.0875f : 0.04375f;
-        return new Cuboidf(0.41875f, 0f, 0.41875f, 0.58125f, y2, 0.58125f);
+        var y2 = lines >= 3 ? 0.095f : 0.05f;
+        return new Cuboidf(0.41875f, -0.05f, 0.41875f, 0.58125f, y2, 0.58125f);
     }
 
-    private static void AddStrand(ref MeshData? built, MeshData piece, float ox, float oy, bool half, float rx, float ry, float rz, float tx, float ty, float tz)
+    /// <summary>
+    /// На сколько удлинить жилу за грань клетки, чтобы она дошла до края панели.
+    /// Клетка с панелью на другой грани жилу не удлиняет: конец должен попасть в саму панель.
+    /// </summary>
+    private static float ExtraToPanel(ICoreClientAPI capi, BlockPos pos, Seg seg)
     {
-        var mesh = piece.Clone();
-        if (half)
-            mesh.Scale(new Vec3f(0.5f, 0f, 0.5f), 1f, 0.5f, 1f);
-        if (ox != 0f || oy != 0f)
-            mesh.Translate(ox, oy, 0f);
+        var dx = seg.Tx > 0.1f ? 1 : seg.Tx < -0.1f ? -1 : 0;
+        var dy = seg.Ty > 0.1f ? 1 : seg.Ty < -0.1f ? -1 : 0;
+        var dz = seg.Tz > 0.1f ? 1 : seg.Tz < -0.1f ? -1 : 0;
+        if ((dx == 0 && dy == 0 && dz == 0) || !StrandEnd(seg, out var x, out var y, out var z))
+            return 0f;
+
+        var neighbor = pos.AddCopy(dx, dy, dz);
+        var toward = BlockFacing.FromVector(-dx, -dy, -dz);
+        if (toward == null)
+            return 0f;
+        var panel = PanelStack.OnSupport(capi.World, neighbor, toward);
+        if (panel?.Block == null)
+            return 0f;
+
+        var box = PanelOf(capi, panel.Block, PanelStack.FacingOf(panel));
+        var inset = dx > 0 ? box.MinX
+            : dx < 0 ? 1f - box.MaxX
+            : dy > 0 ? box.MinY
+            : dy < 0 ? 1f - box.MaxY
+            : dz > 0 ? box.MinZ
+            : 1f - box.MaxZ;
+        if (inset < 0.02f || inset > 0.22f)
+            return 0f;
+
+        var hx = x - dx;
+        var hy = y - dy;
+        var hz = z - dz;
+        const float slack = 0.05f;
+        var hits = dx != 0
+            ? InPanel(hy, box.MinY, box.MaxY, slack) && InPanel(hz, box.MinZ, box.MaxZ, slack)
+            : dy != 0
+                ? InPanel(hx, box.MinX, box.MaxX, slack) && InPanel(hz, box.MinZ, box.MaxZ, slack)
+                : InPanel(hx, box.MinX, box.MaxX, slack) && InPanel(hy, box.MinY, box.MaxY, slack);
+        if (!hits)
+            return 0f;
+        return inset + 0.01f;
+    }
+
+    private static bool InPanel(float value, float min, float max, float slack)
+        => value >= min - slack && value <= max + slack;
+
+    private static int ReachOf(ICoreClientAPI capi, BlockPos pos, Facing connection)
+    {
+        var hash = 0;
+        var n = 0;
+        foreach (var (all, _, _, _, segs) in Layout)
+        {
+            var pull = false;
+            var face = FaceOf(all);
+            if (face != null)
+                pull = NeighborPull(capi, pos, face);
+            foreach (var seg in segs)
+            {
+                if ((connection & seg.Bit) == 0)
+                    continue;
+                var extra = ExtraToPanel(capi, pos, seg);
+                if (extra > 0f)
+                    hash ^= (int)(extra * 512f) * (n + 3);
+                if (pull)
+                    hash ^= 17 * (n + 5);
+                n++;
+            }
+        }
+
+        // Панель в этой клетке меняет изгиб жилы. Иначе голый провод и провод под шиной делят один меш.
+        hash ^= SeatPack(capi.World, pos) << 12;
+        return hash;
+    }
+
+    private static bool NeighborPull(ICoreClientAPI capi, BlockPos pos, BlockFacing face)
+    {
+        var at = pos.AddCopy(face);
+        var neighbor = capi.World.BlockAccessor.GetBlock(at);
+        if (neighbor is BlockEStorageDrive)
+            return true;
+        return neighbor is BlockEStorageController && ControllerMesh.InsetShell(capi.World.BlockAccessor, at);
+    }
+
+    /// <summary>
+    /// Жила наполовину уходит в соседнюю клетку. Окно привода и утопленная панель
+    /// контроллера эту половину не закрывают, поэтому грань сдвигается целиком.
+    /// </summary>
+    private static void PullInside(MeshData mesh, int fromVertex, BlockFacing face)
+    {
+        var xyz = mesh.xyz;
+        if (xyz == null || fromVertex >= mesh.VerticesCount)
+            return;
+        var start = fromVertex * 3;
+        var count = mesh.VerticesCount * 3;
+        if (count > xyz.Length)
+            count = xyz.Length;
+        var x = face.Normali.X;
+        var y = face.Normali.Y;
+        var z = face.Normali.Z;
+        var axis = x != 0 ? 0 : y != 0 ? 1 : 2;
+        var sign = x + y + z;
+        const float keep = 0.02f;
+        var limit = sign > 0 ? 1f - keep : keep;
+        var over = 0f;
+        for (var i = start + axis; i + 2 < count; i += 3)
+        {
+            var past = sign > 0 ? xyz[i] - limit : limit - xyz[i];
+            if (past > over)
+                over = past;
+        }
+
+        if (over <= 0f)
+            return;
+        var shift = sign * over;
+        for (var i = start + axis; i + 2 < count; i += 3)
+            xyz[i] -= shift;
+    }
+
+    private static PanelBox PanelOf(ICoreClientAPI capi, Vintagestory.API.Common.Block block, Facing facing)
+    {
+        if (facing == Facing.None)
+            facing = Facing.UpNorth;
+
+        var key = (block.Id, (int)facing);
+        lock (Gate)
+        {
+            if (PanelBoxes.TryGetValue(key, out var cached))
+                return cached;
+        }
+
+        var mesh = capi.TesselatorManager.GetDefaultBlockMesh(block)?.Clone();
+        if (mesh?.xyz == null || mesh.VerticesCount == 0)
+            return default;
+
+        FacingRotations.ApplyRotations(mesh, facing);
+        var minX = float.MaxValue;
+        var minY = float.MaxValue;
+        var minZ = float.MaxValue;
+        var maxX = float.MinValue;
+        var maxY = float.MinValue;
+        var maxZ = float.MinValue;
+        var count = mesh.VerticesCount * 3;
+        if (count > mesh.xyz.Length)
+            count = mesh.xyz.Length;
+        for (var i = 0; i + 2 < count; i += 3)
+        {
+            var x = mesh.xyz[i];
+            var y = mesh.xyz[i + 1];
+            var z = mesh.xyz[i + 2];
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (z < minZ) minZ = z;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+            if (z > maxZ) maxZ = z;
+        }
+
+        var box = new PanelBox(minX, minY, minZ, maxX, maxY, maxZ);
+        lock (Gate)
+            PanelBoxes[key] = box;
+        return box;
+    }
+
+    private static float Push(float value, float extra)
+    {
+        if (extra <= 0f)
+            return value;
+        if (value > 0.1f)
+            return value + extra;
+        if (value < -0.1f)
+            return value - extra;
+        return value;
+    }
+
+    private static void AddStrand(ref MeshData? built, MeshData piece, float ox, float oy, bool half, float rx, float ry, float rz, float tx, float ty, float tz, float extra, int kind)
+    {
+        if (kind != 0)
+        {
+            AddHugged(ref built, piece, ox, oy, half, rx, ry, rz, extra, kind);
+            return;
+        }
+
+        var mesh = Prepared(piece, ox, oy, half, extra);
         var deg = GameMath.DEG2RAD;
         mesh.Rotate(MeshOrigin, rx * deg, ry * deg, rz * deg);
         if (tx != 0f || ty != 0f || tz != 0f)
@@ -648,7 +938,117 @@ public class BlockEStorageCable : BlockEStoragePart
         AddMesh(ref built, mesh);
     }
 
-    private static void AddJoint(ref MeshData? built, MeshData piece, int lines, float rx, float ry, float rz, float tx, float ty, float tz)
+    /// <summary>
+    /// Жила снаружи панели лежит на грани, по силуэту поднимается на заднюю сторону и доходит до центра воротника.
+    /// </summary>
+    private static void AddHugged(ref MeshData? built, MeshData piece, float ox, float oy, bool half, float rx, float ry, float rz, float extra, int kind)
+    {
+        var prevLift = 0f;
+        var have = false;
+        foreach (var band in Bands(kind))
+        {
+            var mesh = Prepared(piece, ox, oy, half, extra);
+            if (!FitStrand(mesh, band.Z0, band.Z1, band.Lift))
+                continue;
+            Finish(ref built, mesh, rx, ry, rz);
+            if (have && band.Lift > prevLift + 0.01f)
+                AddRiser(ref built, piece, ox, oy, half, rx, ry, rz, band.Z0, prevLift, band.Lift);
+            prevLift = band.Lift;
+            have = true;
+        }
+    }
+
+    private static void AddRiser(ref MeshData? built, MeshData piece, float ox, float oy, bool half, float rx, float ry, float rz, float zCut, float y0, float y1)
+    {
+        if (y1 - y0 < 0.01f)
+            return;
+        var mesh = piece.Clone();
+        if (half)
+            mesh.Scale(new Vec3f(0.5f, 0f, 0.5f), 1f, 0.5f, 1f);
+        var deg = GameMath.DEG2RAD;
+        mesh.Rotate(MeshOrigin, 90f * deg, 0f, 0f);
+        if (!Bounds(mesh, out _, out var yLo, out var zLo, out _, out var yHi, out var zHi))
+            return;
+        var ySpan = yHi - yLo;
+        var zSpan = zHi - zLo;
+        if (ySpan < 0.0001f || zSpan < 0.0001f)
+            return;
+        var thick = half ? 0.5f / 16f : 1f / 16f;
+        mesh.Scale(new Vec3f(0.5f, yLo, zLo), 1f, (y1 - y0) / ySpan, thick / zSpan);
+        mesh.Translate(ox, y0 - yLo + oy, zCut - thick * 0.5f - zLo);
+        Finish(ref built, mesh, rx, ry, rz);
+    }
+
+    private static MeshData Prepared(MeshData piece, float ox, float oy, bool half, float extra)
+    {
+        var mesh = piece.Clone();
+        if (half)
+            mesh.Scale(new Vec3f(0.5f, 0f, 0.5f), 1f, 0.5f, 1f);
+        if (ox != 0f || oy != 0f)
+            mesh.Translate(ox, oy, 0f);
+        if (extra > 0f)
+            mesh.Scale(new Vec3f(0.5f, 0f, 7.5f / 16f), 1f, 1f, 1f + extra * 2f);
+        return mesh;
+    }
+
+    private static bool FitStrand(MeshData mesh, float z0, float z1, float lift)
+    {
+        if (!RangeZ(mesh, out var zLo, out var zHi))
+            return false;
+        var a = z0 > zLo ? z0 : zLo;
+        var b = z1 < zHi ? z1 : zHi;
+        var span = zHi - zLo;
+        if (b - a < 0.01f || span < 0.0001f)
+            return false;
+        mesh.Scale(new Vec3f(0.5f, 0f, zLo), 1f, 1f, (b - a) / span);
+        if (lift != 0f || a != zLo)
+            mesh.Translate(0f, lift, a - zLo);
+        return true;
+    }
+
+    private static void Finish(ref MeshData? built, MeshData mesh, float rx, float ry, float rz)
+    {
+        var deg = GameMath.DEG2RAD;
+        mesh.Rotate(MeshOrigin, rx * deg, ry * deg, rz * deg);
+        AddMesh(ref built, mesh);
+    }
+
+    private static bool RangeZ(MeshData mesh, out float zLo, out float zHi)
+    {
+        zLo = float.MaxValue;
+        zHi = float.MinValue;
+        if (!Bounds(mesh, out _, out _, out zLo, out _, out _, out zHi))
+            return false;
+        return zHi > zLo + 0.0001f;
+    }
+
+    private static bool Bounds(MeshData mesh, out float xLo, out float yLo, out float zLo, out float xHi, out float yHi, out float zHi)
+    {
+        xLo = yLo = zLo = float.MaxValue;
+        xHi = yHi = zHi = float.MinValue;
+        var xyz = mesh.xyz;
+        if (xyz == null || mesh.VerticesCount == 0)
+            return false;
+        var count = mesh.VerticesCount * 3;
+        if (count > xyz.Length)
+            count = xyz.Length;
+        for (var i = 0; i + 2 < count; i += 3)
+        {
+            var x = xyz[i];
+            var y = xyz[i + 1];
+            var z = xyz[i + 2];
+            if (x < xLo) xLo = x;
+            if (y < yLo) yLo = y;
+            if (z < zLo) zLo = z;
+            if (x > xHi) xHi = x;
+            if (y > yHi) yHi = y;
+            if (z > zHi) zHi = z;
+        }
+
+        return xHi > xLo && yHi > yLo && zHi > zLo;
+    }
+
+    private static void AddJoint(ref MeshData? built, MeshData piece, int lines, float rx, float ry, float rz, float tx, float ty, float tz, float lift)
     {
         var mesh = piece.Clone();
         if (lines >= 2)
@@ -660,6 +1060,8 @@ public class BlockEStorageCable : BlockEStoragePart
                 mesh.Translate(0f, 0.35f / 16f, 0f);
         }
 
+        if (lift != 0f)
+            mesh.Translate(0f, lift, 0f);
         var deg = GameMath.DEG2RAD;
         mesh.Rotate(MeshOrigin, rx * deg, ry * deg, rz * deg);
         if (tx != 0f || ty != 0f || tz != 0f)
@@ -667,16 +1069,102 @@ public class BlockEStorageCable : BlockEStoragePart
         AddMesh(ref built, mesh);
     }
 
+    private static HugBand[] Bands(int kind) => kind switch
+    {
+        1 => InterfaceBands,
+        2 => ImportBands,
+        3 => ExportBands,
+        _ => NoBands
+    };
+
+    private static float RearOf(int kind) => kind switch
+    {
+        1 => 3f / 16f,
+        2 or 3 => 5f / 16f,
+        _ => 0f
+    };
+
+    private static int KindOn(int seats, int faceIndex)
+    {
+        if ((uint)faceIndex >= 6)
+            return 0;
+        return (seats >> (faceIndex * 2)) & 3;
+    }
+
+    private static int SeatPack(IWorldAccessor world, BlockPos pos)
+    {
+        if (world.BlockAccessor.GetBlockEntity(pos) is not IPanelStack stack || stack is not BlockEntity host)
+            return 0;
+        var pack = PackSeat(host);
+        foreach (var guest in stack.Stack.Guests)
+            pack |= PackSeat(guest);
+        return pack;
+    }
+
+    private static int PackSeat(BlockEntity entity)
+    {
+        var kind = entity.Block?.FirstCodePart() switch
+        {
+            "estorageinterface" => 1,
+            "estorageimport" => 2,
+            "estorageexport" => 3,
+            _ => 0
+        };
+        if (kind == 0)
+            return 0;
+        var face = PanelStack.Support(PanelStack.FacingOf(entity));
+        if (face == null)
+            return 0;
+        return kind << (face.Index * 2);
+    }
+
+    private static void AddStrandBoxes(Dictionary<Facing, Cuboidf[]> map, Facing bit, Cuboidf part, int kind, float rx, float ry, float rz)
+    {
+        if (kind == 0)
+        {
+            AddBox(map, bit, part.Clone().RotatedCopy(rx, ry, rz, BoxOrigin));
+            return;
+        }
+
+        var prevLift = 0f;
+        var have = false;
+        foreach (var band in Bands(kind))
+        {
+            var a = band.Z0 < part.Z1 ? part.Z1 : band.Z0;
+            var b = band.Z1 > part.Z2 ? part.Z2 : band.Z1;
+            if (b - a < 0.01f)
+                continue;
+            var box = part.Clone();
+            box.Z1 = a;
+            box.Z2 = b;
+            box.Y1 += band.Lift;
+            box.Y2 += band.Lift;
+            AddBox(map, bit, box.RotatedCopy(rx, ry, rz, BoxOrigin));
+            if (have && band.Lift > prevLift + 0.01f)
+            {
+                var riser = part.Clone();
+                riser.Z1 = band.Z0 - 0.04f;
+                riser.Z2 = band.Z0 + 0.04f;
+                riser.Y1 = part.Y1 + prevLift;
+                riser.Y2 = part.Y2 + band.Lift;
+                AddBox(map, bit, riser.RotatedCopy(rx, ry, rz, BoxOrigin));
+            }
+
+            prevLift = band.Lift;
+            have = true;
+        }
+    }
+
     /// <summary>
-    /// Жила в той же клетке, что и интерфейс: блок не меняется, рисуется кабель.
+    /// Жила в той же клетке, что и панель: блок не меняется, рисуется кабель.
     /// </summary>
-    public static void Append(ICoreClientAPI capi, BlockEntityEStorageInterface panel, ref MeshData sourceMesh)
+    public static void Append(ICoreClientAPI capi, BlockPos pos, IPanelHost panel, ref MeshData sourceMesh)
     {
         if (panel.Cable == Facing.None || sourceMesh == null)
             return;
 
         var cable = HostBlock(capi.World, panel.CableCode);
-        var mesh = cable?.HostMesh(capi, panel.Cable, panel.CableLines);
+        var mesh = cable?.HostMesh(capi, pos, panel.Cable, panel.CableLines);
         if (mesh == null || mesh.VerticesCount == 0)
             return;
 
@@ -685,18 +1173,19 @@ public class BlockEStorageCable : BlockEStoragePart
         sourceMesh = combined;
     }
 
-    public MeshData? HostMesh(ICoreClientAPI capi, Facing connection, int[] lines)
+    public MeshData? HostMesh(ICoreClientAPI capi, BlockPos pos, Facing connection, int[] lines)
     {
-        if (connection == Facing.None)
+        if (connection == Facing.None || pos == null)
             return null;
 
-        var key = new CableKey(Id, (int)connection, Pack(lines));
+        var reach = ReachOf(capi, pos, connection);
+        var key = new CableKey(Id, (int)connection, Pack(lines), reach);
         MeshData? mesh;
         lock (Gate)
         {
             if (!Meshes.TryGetValue(key, out mesh))
             {
-                mesh = BuildMesh(capi, connection, lines);
+                mesh = BuildMesh(capi, pos, connection, lines);
                 Meshes[key] = mesh;
             }
         }
@@ -712,21 +1201,29 @@ public class BlockEStorageCable : BlockEStoragePart
         return packed;
     }
 
-    public static Cuboidf[] HostBoxes(IWorldAccessor world, BlockEntityEStorageInterface panel)
+    public static Cuboidf[] HostBoxes(IWorldAccessor world, IPanelHost panel)
     {
         var cable = HostBlock(world, panel.CableCode);
         if (cable == null || panel.Cable == Facing.None)
             return [];
-        return cable.BoxesFor(cable.Id, panel.Cable, panel.CableLines);
+        var seats = panel is BlockEntity entity ? SeatPack(world, entity.Pos) : 0;
+        return cable.BoxesFor(cable.Id, panel.Cable, panel.CableLines, seats);
     }
 
-    public static Facing HostHit(IWorldAccessor world, BlockEntityEStorageInterface panel, Vec3d hit)
+    public static Facing HostHit(IWorldAccessor world, IPanelHost panel, Vec3d hit)
     {
         var cable = HostBlock(world, panel.CableCode);
         if (cable == null || panel.Cable == Facing.None)
             return Facing.None;
-        return Hit(panel.Cable, panel.CableLines, cable.Id, hit);
+        var seats = panel is BlockEntity entity ? SeatPack(world, entity.Pos) : 0;
+        return Hit(panel.Cable, panel.CableLines, cable.Id, hit, seats);
     }
+
+    /// <summary>Жила под прицелом. Ключ центра — маска грани, её надо сузить до одного бита.</summary>
+    public static Facing StrandHit(BlockEStorageCable cable, Facing connection, int[] lines, Vec3d hit)
+        => cable == null || hit == null || connection == Facing.None
+            ? Facing.None
+            : Hit(connection, lines, cable.Id, hit);
 
     public static int HostStrands(Facing bits, int[] lines) => StrandCount(bits, lines);
 
@@ -746,7 +1243,7 @@ public class BlockEStorageCable : BlockEStoragePart
         return world.GetBlock(new AssetLocation("electricalprogressivestorage:" + code)) as BlockEStorageCable;
     }
 
-    private bool AttachTo(BlockEntityEStorageInterface panel, Facing facing, IPlayer byPlayer, ItemStack byItemStack)
+    private bool AttachTo(BlockEntity host, IPanelHost panel, Facing facing, IPlayer byPlayer, ItemStack byItemStack)
     {
         var code = FirstCodePart();
         if (panel.Cable != Facing.None && panel.CableCode != code)
@@ -785,15 +1282,33 @@ public class BlockEStorageCable : BlockEStoragePart
 
         if (string.IsNullOrEmpty(panel.CableCode))
             panel.CableCode = code;
-        panel.MarkDirty(true);
+        host.MarkDirty(true);
         StorageAccess.DirtyTopology();
         return true;
     }
 
     private static bool SharesSupport(Facing panelFacing, Facing cableFacing)
     {
+        var support = SupportOf(panelFacing);
+        if (support == null)
+            return false;
+
+        foreach (var face in FacingHelper.Faces(cableFacing))
+            return face == support;
+
+        return false;
+    }
+
+    /// <summary>
+    /// Сплошная грань или коллизия соседа, которая доходит до этой грани. Жернова держатся вторым путём.
+    /// </summary>
+    internal static bool Supported(IBlockAccessor accessor, BlockPos pos, Facing facing)
+    {
+        if (MyMiniLib.CheckSolidFace(accessor, pos, facing))
+            return true;
+
         BlockFacing? support = null;
-        foreach (var face in FacingHelper.Faces(panelFacing))
+        foreach (var face in FacingHelper.Faces(facing))
         {
             support = face;
             break;
@@ -802,9 +1317,155 @@ public class BlockEStorageCable : BlockEStoragePart
         if (support == null)
             return false;
 
-        foreach (var face in FacingHelper.Faces(cableFacing))
-            return face == support;
+        var neighborPos = pos.AddCopy(support);
+        var boxes = accessor.GetBlock(neighborPos)?.GetCollisionBoxes(accessor, neighborPos);
+        if (boxes == null)
+            return false;
+
+        var touched = support.Opposite;
+        const float edge = 0.001f;
+        foreach (var box in boxes)
+        {
+            if (box != null && Reaches(box, touched, edge))
+                return true;
+        }
 
         return false;
+    }
+
+    private static bool Reaches(Cuboidf box, BlockFacing side, float edge)
+    {
+        var overlapsX = box.X2 > edge && box.X1 < 1f - edge;
+        var overlapsY = box.Y2 > edge && box.Y1 < 1f - edge;
+        var overlapsZ = box.Z2 > edge && box.Z1 < 1f - edge;
+        if (side == BlockFacing.UP)
+            return box.Y2 >= 1f - edge && overlapsX && overlapsZ;
+        if (side == BlockFacing.DOWN)
+            return box.Y1 <= edge && overlapsX && overlapsZ;
+        if (side == BlockFacing.NORTH)
+            return box.Z1 <= edge && overlapsX && overlapsY;
+        if (side == BlockFacing.SOUTH)
+            return box.Z2 >= 1f - edge && overlapsX && overlapsY;
+        if (side == BlockFacing.EAST)
+            return box.X2 >= 1f - edge && overlapsY && overlapsZ;
+        if (side == BlockFacing.WEST)
+            return box.X1 <= edge && overlapsY && overlapsZ;
+        return false;
+    }
+
+    /// <summary>
+    /// Конец жилы лежит на опорной грани панели. Жила, которая только смотрит в клетку, панель не касается.
+    /// </summary>
+    public static bool MeetsPanel(BlockPos cablePos, Facing component, BlockPos panelPos, Facing panelFacing)
+    {
+        if (component == Facing.None || cablePos == null || panelPos == null || cablePos.dimension != panelPos.dimension)
+            return false;
+
+        var support = SupportOf(panelFacing);
+        if (support == null)
+            return false;
+
+        foreach (var (_, _, _, _, segs) in Layout)
+        {
+            foreach (var seg in segs)
+            {
+                if ((component & seg.Bit) == 0)
+                    continue;
+                if (EndOnPanel(cablePos, seg, support, panelPos))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static BlockFacing? SupportOf(Facing panelFacing)
+    {
+        foreach (var face in FacingHelper.Faces(panelFacing))
+            return face;
+        return null;
+    }
+
+    public static bool MountedOn(Facing panelFacing, BlockFacing face)
+    {
+        var support = SupportOf(panelFacing);
+        return support != null && face != null && support == face;
+    }
+
+    private static bool StrandEnd(Seg seg, out float x, out float y, out float z)
+    {
+        x = 0.5f;
+        y = 0.5f;
+        z = 0.5f;
+        if (FaceOf(seg.Bit) is not { } face)
+            return false;
+
+        if (face == BlockFacing.NORTH)
+            z = 0f;
+        else if (face == BlockFacing.SOUTH)
+            z = 1f;
+        else if (face == BlockFacing.EAST)
+            x = 1f;
+        else if (face == BlockFacing.WEST)
+            x = 0f;
+        else if (face == BlockFacing.UP)
+            y = 1f;
+        else
+            y = 0f;
+
+        x += seg.Tx;
+        y += seg.Ty;
+        z += seg.Tz;
+        return true;
+    }
+
+    private static bool EndOnPanel(BlockPos cablePos, Seg seg, BlockFacing support, BlockPos panelPos)
+    {
+        if (!StrandEnd(seg, out var x, out var y, out var z))
+            return false;
+
+        var wx = cablePos.X + x;
+        var wy = cablePos.Y + y;
+        var wz = cablePos.Z + z;
+        const float slack = 0.02f;
+        float along, u, v;
+        if (support == BlockFacing.NORTH)
+        {
+            along = wz - panelPos.Z;
+            u = wx - panelPos.X;
+            v = wy - panelPos.Y;
+        }
+        else if (support == BlockFacing.SOUTH)
+        {
+            along = wz - (panelPos.Z + 1);
+            u = wx - panelPos.X;
+            v = wy - panelPos.Y;
+        }
+        else if (support == BlockFacing.EAST)
+        {
+            along = wx - (panelPos.X + 1);
+            u = wy - panelPos.Y;
+            v = wz - panelPos.Z;
+        }
+        else if (support == BlockFacing.WEST)
+        {
+            along = wx - panelPos.X;
+            u = wy - panelPos.Y;
+            v = wz - panelPos.Z;
+        }
+        else if (support == BlockFacing.UP)
+        {
+            along = wy - (panelPos.Y + 1);
+            u = wx - panelPos.X;
+            v = wz - panelPos.Z;
+        }
+        else
+        {
+            along = wy - panelPos.Y;
+            u = wx - panelPos.X;
+            v = wz - panelPos.Z;
+        }
+
+        return along <= slack && along >= -slack && u >= -slack && u <= 1f + slack && v >= -slack && v <= 1f + slack;
     }
 }

@@ -16,19 +16,16 @@ public sealed class CraftStatusLine
 }
 
 /// <summary>
-/// Статус крафта процессора. Рамка та же, что у интерфейса.
+/// Статус крафта процессора. Своя панель: три колонки ячеек и отмена справа снизу.
 /// </summary>
 public sealed class GuiDialogEStorageProcessor : GuiDialogBlockEntity
 {
-    private const double TitleH = 22;
-    private const double CloseS = 16;
-    private const double ScrollW = 16;
-
     private readonly List<CraftStatusLine> _jobs = new();
     private ElementBounds? _close;
     private ElementBounds? _grid;
     private double _winW;
     private double _winH;
+    private double _head;
     private double _elapsed;
     private long _stamp;
     private long _asked;
@@ -275,49 +272,34 @@ public sealed class GuiDialogEStorageProcessor : GuiDialogBlockEntity
 
     private void SetupDialog()
     {
-        var edge = GuiElementTermFrame.Inset;
-        var pad = TermChrome.Pad;
-        var gutter = TermChrome.Gutter;
-        var gridW = GuiElementCraftGrid.CellW * GuiElementCraftGrid.Cols;
-        var gridH = GuiElementCraftGrid.CellH * GuiElementCraftGrid.VisRows;
-        var blockW = pad + gridW + 8 + ScrollW + pad;
-        var headerH = pad + TitleH + pad;
-        var gridBlockH = pad + gridH + pad;
-        var gridTop = edge + headerH + gutter;
-        var gridY = gridTop + pad;
-        var btnY = gridTop + gridBlockH + gutter;
-        var contentH = btnY + 28 - edge;
-        _winW = edge + blockW + edge;
-        _winH = edge + contentH + edge;
-        var closeX = edge + blockW - CloseS;
-        var closeY = edge + pad + (TitleH - CloseS) / 2.0;
-        var title = ElementBounds.Fixed(edge + pad, edge + pad, closeX - 8 - (edge + pad), TitleH);
-        var header = ElementBounds.Fixed(edge, edge, closeX - 8 - edge, headerH);
-        _close = ElementBounds.Fixed(closeX, closeY, CloseS, CloseS);
-        _grid = ElementBounds.Fixed(edge + pad, gridY, gridW, gridH);
-        var scroll = ElementBounds.Fixed(edge + pad + gridW + 8, gridY, ScrollW, gridH);
-        var jobsTray = ElementBounds.Fixed(edge, gridTop, blockW, gridBlockH);
-        var cancel = ElementBounds.Fixed(edge + blockW - 120, btnY, 120, 28);
+        var gridW = GuiElementCraftGrid.Cols * GuiElementCraftGrid.CellW;
+        var gridH = GuiElementCraftGrid.VisRows * GuiElementCraftGrid.CellH;
+        var top = Ae2Gui.Header + Ae2Gui.Gap;
+        _grid = Ae2Gui.Box(Ae2Gui.Margin, top, gridW, gridH);
+        var scroll = Ae2Gui.Box(_grid.fixedX + gridW + 8, top, Ae2Gui.ScrollW, gridH);
+        _winW = scroll.fixedX + scroll.fixedWidth + Ae2Gui.Margin;
+        _winH = top + gridH + 8 + 32 + Ae2Gui.Margin;
+        _head = Ae2Gui.Header;
+        _close = Ae2Gui.Box(_winW - Ae2Gui.Margin - 20, 11, 20, 20);
+        var title = Ae2Gui.Box(Ae2Gui.Margin + 2, 8, _winW - 80, 26);
+        var cancel = Ae2Gui.Box(_winW - Ae2Gui.Margin - 130, top + gridH + 8, 130, 32);
         var frame = ElementBounds.Fixed(0, 0, _winW, _winH);
         var bg = ElementBounds.Fill.WithFixedPadding(0);
         bg.BothSizing = ElementSizing.FitToChildren;
         bg.WithChildren(frame, _close, title, _grid, scroll, cancel);
 
         _clock = ClockText();
-        var dialog = ElementStdBounds.AutosizedMainDialog
-            .WithAlignment(EnumDialogArea.RightMiddle)
-            .WithFixedAlignmentOffset(-GuiStyle.DialogToScreenPadding, 0);
+        var sheet = Ae2Gui.Window(capi, frame, _close.fixedX, _close.fixedY, _close.fixedWidth);
+        sheet.Fill(scroll.fixedX, scroll.fixedY, scroll.fixedWidth, scroll.fixedHeight, Ae2Gui.Muted[0], Ae2Gui.Muted[1], Ae2Gui.Muted[2]);
 
         ClearComposers();
         var compo = capi.Gui
-            .CreateCompo("estorageprocessor" + BlockEntityPosition, dialog)
+            .CreateCompo("estorageprocessor" + BlockEntityPosition, Ae2Gui.Dialog())
             .BeginChildElements(bg)
-            .AddStaticElement(new GuiElementTermFrame(capi, frame, closeX, closeY, CloseS))
-            .AddStaticElement(new GuiElementTermPanel(capi, header))
-            .AddStaticElement(new GuiElementTermPanel(capi, jobsTray))
-            .AddDynamicText(_clock, CairoFont.WhiteDetailText().WithFontSize(16), title, "clock")
+            .AddStaticElement(sheet)
+            .AddDynamicText(_clock, Ae2Gui.Title(), title, "clock")
             .AddInteractiveElement(new GuiElementCraftGrid(capi, _grid, _jobs, _scroll, _selected))
-            .AddVerticalScrollbar(OnScroll, scroll, "cpuScroll");
+            .AddScroll(OnScroll, scroll, "cpuScroll");
 
         var first = _scroll * GuiElementCraftGrid.Cols;
         var shown = Math.Min(_jobs.Count - first, GuiElementCraftGrid.Cols * GuiElementCraftGrid.VisRows);
@@ -329,19 +311,20 @@ public sealed class GuiDialogEStorageProcessor : GuiDialogBlockEntity
             var col = i % GuiElementCraftGrid.Cols;
             var row = i / GuiElementCraftGrid.Cols;
             var x = _grid.fixedX + col * GuiElementCraftGrid.CellW;
-            var y = gridY + row * GuiElementCraftGrid.CellH;
+            var y = _grid.fixedY + row * GuiElementCraftGrid.CellH;
             compo.AddStaticText(
                 Lang.Get("electricalprogressivestorage:estorage-cpu-craft", StackSizeTextPatch.Count(line.Count)),
-                CairoFont.WhiteDetailText().WithFontSize(15),
-                ElementBounds.Fixed(x + 8, y + 8, 100, GuiElementCraftGrid.CellH - 12));
+                Ae2Gui.Label(),
+                ElementBounds.Fixed(x + 8, y + 8, GuiElementCraftGrid.CellW - 64, GuiElementCraftGrid.CellH - 16));
         }
 
-        compo.AddSmallButton(Lang.Get("electricalprogressivestorage:estorage-order-cancel"), Cancel, cancel, EnumButtonStyle.Normal, "cancel");
-        var composed = compo.EndChildElements().Compose();
+        compo.AddInteractiveElement(new GuiElementAe2Button(capi, cancel, Lang.Get("electricalprogressivestorage:estorage-order-cancel"), () => Cancel()), "cancel");
+        var composed = compo.EndChildElements().Compose(false);
         _suppress = true;
         var bar = composed.GetScrollbar("cpuScroll");
-        var total = Math.Max(gridH, RowsOf(_jobs.Count) * GuiElementCraftGrid.CellH);
-        bar?.SetHeights((float)gridH, (float)total);
+        var viewH = _grid.fixedHeight;
+        var total = Math.Max(viewH, RowsOf(_jobs.Count) * GuiElementCraftGrid.CellH);
+        bar?.SetHeights((float)viewH, (float)total);
         bar?.SetScrollbarPosition((int)(_scroll * GuiElementCraftGrid.CellH));
         _suppress = false;
         SingleComposer = composed;
@@ -421,8 +404,7 @@ public sealed class GuiDialogEStorageProcessor : GuiDialogBlockEntity
         var scale = RuntimeEnv.GUIScale;
         var x = (capi.Input.MouseX - bounds.renderX) / scale;
         var y = (capi.Input.MouseY - bounds.renderY) / scale;
-        var edge = GuiElementTermFrame.Inset;
-        return x < edge || y < edge || x > _winW - edge || y > _winH - edge;
+        return y >= 0 && y < _head && x >= 0 && x <= _winW;
     }
 
 }
@@ -432,10 +414,10 @@ public sealed class GuiDialogEStorageProcessor : GuiDialogBlockEntity
 /// </summary>
 public sealed class GuiElementCraftGrid : GuiElement
 {
-    public const double CellW = 168;
-    public const double CellH = 36;
-    public const int Cols = 2;
-    public const int VisRows = 7;
+    public const double CellW = 156;
+    public const double CellH = 48;
+    public const int Cols = 3;
+    public const int VisRows = 6;
 
     private readonly List<DummySlot?> _slots = new();
     private readonly int _localSelected;
@@ -463,31 +445,40 @@ public sealed class GuiElementCraftGrid : GuiElement
     public override void ComposeElements(Context ctx, ImageSurface surface)
     {
         Bounds.CalcWorldBounds();
-        var scale = RuntimeEnv.GUIScale;
-        var cellW = CellW * scale;
-        var cellH = CellH * scale;
+        var cellW = scaled(CellW);
+        var cellH = scaled(CellH);
+        var edge = Math.Max(1, scaled(1));
+        var prev = ctx.Antialias;
+        ctx.Antialias = Antialias.None;
         for (var i = 0; i < _slots.Count; i++)
         {
             var x = Bounds.drawX + (i % Cols) * cellW;
             var y = Bounds.drawY + (i / Cols) * cellH;
-            var green = i == _localSelected && _slots[i] != null;
-            if (green)
-            {
-                TermChrome.Raised(ctx, x, y, cellW, cellH, false);
-                ctx.SetSourceRGBA(0.30, 0.62, 0.32, 0.38);
-                ctx.Rectangle(x + 3, y + 3, Math.Max(1, cellW - 6), Math.Max(1, cellH - 6));
-                ctx.Fill();
-            }
-            else
-                TermChrome.Inset(ctx, x, y, cellW, cellH, 0.07, 0.06, 0.05);
+            ctx.SetSourceRGB(Ae2Gui.Well[0], Ae2Gui.Well[1], Ae2Gui.Well[2]);
+            ctx.Rectangle(x, y, cellW, cellH);
+            ctx.Fill();
+            ctx.SetSourceRGBA(Ae2Gui.Ink[0], Ae2Gui.Ink[1], Ae2Gui.Ink[2], 0.55);
+            ctx.Rectangle(x, y, cellW, edge);
+            ctx.Rectangle(x, y + cellH - edge, cellW, edge);
+            ctx.Rectangle(x, y, edge, cellH);
+            ctx.Rectangle(x + cellW - edge, y, edge, cellH);
+            ctx.Fill();
+            if (i != _localSelected || _slots[i] == null)
+                continue;
+
+            ctx.SetSourceRGBA(0.67, 0.91, 1, 0.45);
+            ctx.Rectangle(x + edge, y + edge, Math.Max(1, cellW - 2 * edge), Math.Max(1, cellH - 2 * edge));
+            ctx.Fill();
         }
+
+        ctx.Antialias = prev;
     }
 
     public override void RenderInteractiveElements(float deltaTime)
     {
         Bounds.CalcWorldBounds();
         var scale = RuntimeEnv.GUIScale;
-        var icon = (float)scaled(28);
+        var icon = (float)scaled(GuiElementPassiveItemSlot.unscaledItemSize);
         var half = scaled(CellH) * 0.5;
         for (var i = 0; i < _slots.Count; i++)
         {
@@ -495,7 +486,7 @@ public sealed class GuiElementCraftGrid : GuiElement
             if (slot == null)
                 continue;
 
-            var cx = Bounds.renderX + (i % Cols) * CellW * scale + scaled(128);
+            var cx = Bounds.renderX + (i % Cols) * CellW * scale + scaled(CellW - 8) - icon * 0.5;
             var cy = Bounds.renderY + (i / Cols) * CellH * scale + half;
             // 90, как у слота инвентаря: выше подложки (50) и внутри слоя диалога (ZSize 150).
             api.Render.RenderItemstackToGui(slot, cx, cy, 90, icon, ColorUtil.WhiteArgb, true, false, false);

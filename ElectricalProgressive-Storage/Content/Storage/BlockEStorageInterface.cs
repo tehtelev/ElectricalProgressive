@@ -12,187 +12,15 @@ using Vintagestory.GameContent;
 namespace ElectricalProgressive.Content.Storage;
 
 /// <summary>
-/// Плоский интерфейс сети. Три ряда: кладёт в машину, шаблоны, образец что держать.
+/// Плоский интерфейс на уже проложенном кабеле. Под жилой — сундук, бочка или машина.
 /// </summary>
 public class BlockEStorageInterface : BlockEStorageTerminal
 {
+    protected override bool MountsOn(IWorldAccessor world, BlockPos pos, Facing facing)
+        => ContainerMount(world, pos, facing);
+
     protected override bool CanStay(IWorldAccessor world, BlockPos pos, Facing facing)
-        => base.CanStay(world, pos, facing) || CollidesWithFace(world.BlockAccessor, pos, facing);
-
-    /// <summary>
-    /// Жернова и другие машины часто без SideSolid, но коллизия грани есть.
-    /// </summary>
-    private static bool CollidesWithFace(IBlockAccessor accessor, BlockPos pos, Facing facing)
-    {
-        BlockFacing? support = null;
-        foreach (var face in FacingHelper.Faces(facing))
-        {
-            support = face;
-            break;
-        }
-
-        if (support == null)
-            return false;
-
-        var neighborPos = pos.AddCopy(support);
-        var block = accessor.GetBlock(neighborPos);
-        var boxes = block?.GetCollisionBoxes(accessor, neighborPos);
-        if (boxes == null)
-            return false;
-
-        var touched = support.Opposite;
-        const float edge = 0.001f;
-        foreach (var box in boxes)
-        {
-            if (box != null && Reaches(box, touched, edge))
-                return true;
-        }
-
-        return false;
-    }
-
-    private static bool Reaches(Cuboidf box, BlockFacing side, float edge)
-    {
-        var overlapsX = box.X2 > edge && box.X1 < 1f - edge;
-        var overlapsY = box.Y2 > edge && box.Y1 < 1f - edge;
-        var overlapsZ = box.Z2 > edge && box.Z1 < 1f - edge;
-        if (side == BlockFacing.UP)
-            return box.Y2 >= 1f - edge && overlapsX && overlapsZ;
-        if (side == BlockFacing.DOWN)
-            return box.Y1 <= edge && overlapsX && overlapsZ;
-        if (side == BlockFacing.NORTH)
-            return box.Z1 <= edge && overlapsX && overlapsY;
-        if (side == BlockFacing.SOUTH)
-            return box.Z2 >= 1f - edge && overlapsX && overlapsY;
-        if (side == BlockFacing.EAST)
-            return box.X2 >= 1f - edge && overlapsY && overlapsZ;
-        if (side == BlockFacing.WEST)
-            return box.X1 <= edge && overlapsY && overlapsZ;
-        return false;
-    }
-
-    public override bool OnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel)
-    {
-        if (blockSel == null || !world.Claims.TryAccess(byPlayer, blockSel.Position, EnumBlockAccessFlags.Use))
-            return false;
-
-        if (world.BlockAccessor.GetBlockEntity(blockSel.Position) is BlockEntityEStorageInterface panel)
-            return panel.OnPlayerRightClick(byPlayer, blockSel);
-
-        return false;
-    }
-
-    public override bool IsReplacableBy(Vintagestory.API.Common.Block block)
-        => block is BlockEStorageCable;
-
-    public override Cuboidf[] GetSelectionBoxes(IBlockAccessor blockAccessor, BlockPos pos)
-    {
-        var boxes = base.GetSelectionBoxes(blockAccessor, pos);
-        if (api?.World == null
-            || blockAccessor.GetBlockEntity(pos) is not BlockEntityEStorageInterface panel
-            || panel.Cable == Facing.None)
-            return boxes;
-
-        var extra = BlockEStorageCable.HostBoxes(api.World, panel);
-        if (extra.Length == 0)
-            return boxes;
-
-        var merged = new Cuboidf[boxes.Length + extra.Length];
-        Array.Copy(boxes, merged, boxes.Length);
-        Array.Copy(extra, 0, merged, boxes.Length, extra.Length);
-        return merged;
-    }
-
-    public override void OnNeighbourBlockChange(IWorldAccessor world, BlockPos pos, BlockPos neibpos)
-    {
-        base.OnNeighbourBlockChange(world, pos, neibpos);
-        if (world.Side != EnumAppSide.Server)
-            return;
-        if (world.BlockAccessor.GetBlock(pos) is not BlockEStorageInterface)
-            return;
-        if (world.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEStorageInterface panel || panel.Cable == Facing.None)
-            return;
-
-        var face = BlockFacing.FromVector(neibpos.X - pos.X, neibpos.Y - pos.Y, neibpos.Z - pos.Z);
-        if (face == null)
-            return;
-
-        var mask = FacingHelper.FromFace(face);
-        if ((panel.Cable & mask) == Facing.None)
-            return;
-        if (MyMiniLib.CheckSolidFace(world.BlockAccessor, pos, mask) || SupportFace(panel.Facing) == face)
-            return;
-
-        DropCable(world, pos, panel, mask);
-    }
-
-    public override void OnBlockBroken(IWorldAccessor world, BlockPos pos, IPlayer byPlayer, float dropQuantityMultiplier = 1)
-    {
-        if (world.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEStorageInterface panel || panel.Cable == Facing.None)
-        {
-            base.OnBlockBroken(world, pos, byPlayer, dropQuantityMultiplier);
-            return;
-        }
-
-        if (api is ICoreClientAPI)
-            return;
-
-        var selected = Facing.None;
-        if (byPlayer?.CurrentBlockSelection is { } sel && sel.Position != null && sel.Position.Equals(pos) && sel.HitPosition != null)
-            selected = BlockEStorageCable.HostHit(world, panel, sel.HitPosition);
-
-        if (selected == Facing.None)
-        {
-            base.OnBlockBroken(world, pos, byPlayer, dropQuantityMultiplier);
-            return;
-        }
-
-        DropCable(world, pos, panel, selected);
-    }
-
-    public override ItemStack[] GetDrops(IWorldAccessor world, BlockPos pos, IPlayer byPlayer, float dropQuantityMultiplier = 1)
-    {
-        var drops = base.GetDrops(world, pos, byPlayer, dropQuantityMultiplier);
-        if (world.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEStorageInterface panel || panel.Cable == Facing.None)
-            return drops;
-
-        var count = BlockEStorageCable.HostStrands(panel.Cable, panel.CableLines);
-        var cable = BlockEStorageCable.HostBlock(world, panel.CableCode);
-        if (count <= 0 || cable == null)
-            return drops;
-
-        var merged = new ItemStack[(drops?.Length ?? 0) + 1];
-        if (drops != null)
-            Array.Copy(drops, merged, drops.Length);
-        merged[^1] = new ItemStack(cable, count);
-        return merged;
-    }
-
-    private static void DropCable(IWorldAccessor world, BlockPos pos, BlockEntityEStorageInterface panel, Facing bits)
-    {
-        var removed = panel.Cable & bits;
-        if (removed == Facing.None)
-            return;
-
-        var code = panel.CableCode;
-        var count = BlockEStorageCable.HostStrands(removed, panel.CableLines);
-        panel.Cable &= ~bits;
-        BlockEStorageCable.ClearHostFaces(panel.Cable, panel.CableLines, removed);
-        if (panel.Cable == Facing.None)
-            panel.CableCode = "";
-        panel.MarkDirty(true);
-        StorageAccess.DirtyTopology();
-        var cable = BlockEStorageCable.HostBlock(world, code);
-        if (count > 0 && cable != null)
-            world.SpawnItemEntity(new ItemStack(cable, count), pos.ToVec3d().Add(0.5, 0.5, 0.5));
-    }
-
-    private static BlockFacing? SupportFace(Facing facing)
-    {
-        foreach (var face in FacingHelper.Faces(facing))
-            return face;
-        return null;
-    }
+        => ContainerMount(world, pos, facing) && base.CanStay(world, pos, facing);
 }
 
 public enum InterfaceRow
@@ -398,11 +226,12 @@ public class InventoryEStorageInterface : InventoryGeneric
     }
 }
 
-public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
+public class BlockEntityEStorageInterface : BlockEntityOpenableContainer, IPanelHost, IPanelStack
 {
     private readonly InventoryEStorageInterface _inventory;
     private readonly List<CraftJob> _jobs = [];
     private readonly List<ItemStack> _inputs = [];
+    private static long _jobSerial;
     private bool _ready;
     private bool _busy;
     private bool _ejectBuffer;
@@ -410,6 +239,13 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
     public Facing Cable = Facing.None;
     public readonly int[] CableLines = new int[6];
     public string CableCode = "";
+    public PanelStack Stack { get; } = new();
+    public string Seat { get; set; } = "";
+
+    Facing IPanelHost.Facing { get => Facing; set => Facing = value; }
+    Facing IPanelHost.Cable { get => Cable; set => Cable = value; }
+    int[] IPanelHost.CableLines => CableLines;
+    string IPanelHost.CableCode { get => CableCode; set => CableCode = value; }
 
     public BlockEntityEStorageInterface()
     {
@@ -421,13 +257,19 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
 
     public override string InventoryClassName => "estorageinterface";
 
+    public bool Holds(string inventoryId) => inventoryId == _inventory.InventoryID;
+
     public override void Initialize(ICoreAPI api)
     {
         base.Initialize(api);
-        _inventory.LateInitialize("estorageinterface-" + Pos.X + "/" + Pos.Y + "/" + Pos.Z, api);
+        PanelStack.ClaimPromote(this);
+        BlockEStorageTerminal.ClaimStick(this);
+        _inventory.LateInitialize("estorageinterface-" + Pos.X + "/" + Pos.Y + "/" + Pos.Z + Seat, api);
+        Stack.SpawnPending(api.World, Pos);
         _ready = true;
         if (api.Side == EnumAppSide.Server)
         {
+            BindLoaded();
             EjectLegacyBuffer();
             StorageAccess.DirtyTopology();
             if (HasPattern())
@@ -443,6 +285,7 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
         tree.SetInt("cable", (int)Cable);
         tree.SetInt("cableLines", BlockEStorageCable.Pack(CableLines));
         tree.SetString("cableCode", CableCode ?? "");
+        Stack.Write(tree);
         for (var i = 0; i < ItemSlotInterface.Columns; i++)
         {
             tree.RemoveAttribute("keep" + i);
@@ -461,6 +304,7 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
             tree.SetInt("jobAt" + i, job.Index);
             tree.SetInt("jobPut" + i, job.Pushed);
             tree.SetDouble("jobSince" + i, job.Since);
+            tree.SetLong("jobId" + i, job.Id);
             if (job.Cpu == null)
                 tree.SetInt("jobCpu" + i, 0);
             else
@@ -491,6 +335,7 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
         CableCode = tree.GetString("cableCode", "");
         if (Cable != Facing.None && string.IsNullOrEmpty(CableCode))
             CableCode = "estoragecable";
+        Stack.Read(tree, worldAccessForResolve, this);
         _ejectBuffer = false;
         for (var i = 0; i < ItemSlotInterface.Columns; i++)
         {
@@ -554,23 +399,58 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
                     ? tree.GetDouble("jobSince" + i)
                     : worldAccessForResolve.Calendar.ElapsedSeconds,
                 Result = result,
-                Cpu = ReadCpu(tree, i)
+                Cpu = ReadCpu(tree, i),
+                Id = tree.GetLong("jobId" + i)
             });
+            if (_jobs[^1].Id == 0 && worldAccessForResolve.Side == EnumAppSide.Server)
+                _jobs[^1].Id = NewJobId();
         }
+    }
+
+    public override void OnReceivedClientPacket(IPlayer fromPlayer, int packetid, byte[] data)
+    {
+        if (Stack.Forward(this, fromPlayer, ref packetid, data))
+            return;
+        base.OnReceivedClientPacket(fromPlayer, packetid, data);
     }
 
     public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
     {
-        if (Api.Side == EnumAppSide.Client)
+        if (Api.Side == EnumAppSide.Server)
         {
-            toggleInventoryDialogClient(byPlayer, () =>
-                new GuiDialogEStorageInterface(
-                    Lang.Get("electricalprogressivestorage:estorage-interface-title"),
-                    Inventory,
-                    Pos,
-                    (ICoreClientAPI)Api));
+            byPlayer.InventoryManager.OpenInventory(Inventory);
+            return true;
         }
 
+        if (Api is not ICoreClientAPI capi)
+            return true;
+
+        if (invDialog != null)
+        {
+            invDialog.TryClose();
+            return true;
+        }
+
+        var dialog = new GuiDialogEStorageInterface(
+            Lang.Get("electricalprogressivestorage:estorage-interface-title"),
+            Inventory,
+            Pos,
+            capi,
+            Facing);
+        dialog.OnClosed += () =>
+        {
+            if (ReferenceEquals(invDialog, dialog))
+                invDialog = null;
+        };
+        invDialog = dialog;
+        if (dialog.IsDuplicate || !dialog.TryOpen())
+        {
+            invDialog = null;
+            return true;
+        }
+
+        capi.Network.SendPacketClient(Inventory.Open(byPlayer));
+        capi.Network.SendBlockEntityPacket(Pos, PanelStack.FacePacket(Facing, (int)EnumBlockEntityPacketId.Open));
         return true;
     }
 
@@ -585,6 +465,7 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
 
     public override void OnBlockBroken(IPlayer? byPlayer = null)
     {
+        Stack.ReleaseContents(byPlayer);
         if (Api?.Side == EnumAppSide.Server)
         {
             for (var i = _jobs.Count - 1; i >= 0; i--)
@@ -600,6 +481,8 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
 
     public override void OnBlockRemoved()
     {
+        if (!Stack.Keep)
+            Stack.Discard();
         base.OnBlockRemoved();
         StorageAccess.DirtyTopology();
     }
@@ -681,12 +564,30 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
             return -1;
 
         var job = _jobs.Find(entry => entry.Slot == slot);
+        if (job != null && ItemEStoragePattern.JobId(pattern) == 0 && OutputMatches(job, pattern))
+            Bind(job, pattern!, true);
+        // Чужой шаблон не продолжает и не увеличивает уже стоящий заказ.
+        if (job != null && !PatternMatches(job, pattern))
+            return -1;
+
         var created = false;
         if (job == null)
         {
+            var stamped = ItemEStoragePattern.JobId(pattern);
+            if (stamped != 0 && NetworkHasJob(stamped))
+                return -1;
+            if (stamped != 0)
+                ItemEStoragePattern.SetJobId(pattern!, 0);
+
             var result = output.Clone();
             result.StackSize = 1;
-            job = new CraftJob { Slot = slot, Result = result, Since = world.Calendar.ElapsedSeconds };
+            job = new CraftJob
+            {
+                Slot = slot,
+                Result = result,
+                Since = world.Calendar.ElapsedSeconds,
+                Id = NewJobId()
+            };
             _jobs.Add(job);
             created = true;
         }
@@ -697,6 +598,8 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
                 _jobs.Remove(job);
             return -1;
         }
+
+        Bind(job, pattern!, true);
 
         var before = job.Wanted;
         job.Wanted = Math.Min(100000, job.Wanted + count);
@@ -732,6 +635,20 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
         foreach (var job in _jobs)
         {
             if (job.Slot == slot && job.Got < job.Wanted)
+                return true;
+        }
+
+        return false;
+    }
+
+    public bool OwnsCraft(long id)
+    {
+        if (id == 0)
+            return false;
+
+        foreach (var job in _jobs)
+        {
+            if (job.Id == id && job.Got < job.Wanted)
                 return true;
         }
 
@@ -828,11 +745,16 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
             if (!byProduct && !byPattern)
                 continue;
 
-            var slot = _inventory[job.Slot].Itemstack;
-            if (!ItemEStoragePattern.IsEncoded(slot))
+            var craftId = ItemEStoragePattern.JobId(pattern);
+            if (craftId != 0 && job.Id != 0 && job.Id != craftId)
                 continue;
 
-            var per = ItemEStoragePattern.PerCraft(world, slot!);
+            var live = _inventory[job.Slot].Itemstack;
+            var counted = ItemEStoragePattern.IsEncoded(pattern) ? pattern : live;
+            if (!ItemEStoragePattern.IsEncoded(counted))
+                continue;
+
+            var per = ItemEStoragePattern.PerCraft(world, counted!);
             var crafts = (job.Wanted + per - 1) / per;
             if (job.Fed >= crafts)
                 continue;
@@ -911,30 +833,296 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
         if (_inventory[index] is not ItemSlotInterface slot || slot.Row != InterfaceRow.Pattern)
             return;
 
-        var stack = slot.Itemstack;
-        var changed = false;
-        for (var i = _jobs.Count - 1; i >= 0; i--)
+        // Пустой слот заказ не снимает. Шаблон с номером заказа переносит его на эту панель.
+        if (ItemEStoragePattern.IsEncoded(slot.Itemstack))
+            Follow(index, slot.Itemstack!);
+
+        StorageAccess.TouchContents();
+    }
+
+    private void Follow(int index, ItemStack stack)
+    {
+        var id = ItemEStoragePattern.JobId(stack);
+        if (id == 0)
         {
-            var job = _jobs[i];
-            if (job.Slot != index || PatternMatches(job, stack))
-                continue;
-            ReleaseJob(job);
-            _jobs.RemoveAt(i);
-            changed = true;
+            var local = _jobs.Find(job => job.Slot == index);
+            if (local != null && OutputMatches(local, stack))
+                Bind(local, stack, true);
+            return;
         }
 
-        if (changed)
-            MarkDirty();
-        StorageAccess.TouchContents();
+        var mine = _jobs.Find(job => job.Id == id);
+        if (mine != null)
+        {
+            if (mine.Slot != index && !_jobs.Exists(job => job.Slot == index && job.Id != id) && !SlotTaken(index, null))
+                RetargetOwnSlot(mine, index);
+            return;
+        }
+
+        if (_jobs.Exists(job => job.Slot == index) || Api?.World == null)
+            return;
+
+        var scan = StorageAccess.GetScan(Api.World, Pos);
+        foreach (var cell in scan.Interfaces)
+        {
+            foreach (var face in PanelStack.Interfaces(Api.World, cell))
+            {
+                if (ReferenceEquals(face, this))
+                    continue;
+                if (face.TryGiveJob(id, this, index, stack, out var present))
+                    return;
+                if (present)
+                    return;
+            }
+        }
+
+        if (scan.Pending.Count == 0)
+        {
+            ItemEStoragePattern.SetJobId(stack, 0);
+            _inventory[index].MarkDirty();
+        }
+    }
+
+    /// <summary>
+    /// Заказ уходит на другую панель той же сети. Буфер процессора остаётся.
+    /// </summary>
+    public bool TryGiveJob(long id, BlockEntityEStorageInterface dest, int destSlot, ItemStack stack, out bool present)
+    {
+        present = false;
+        var job = _jobs.Find(entry => entry.Id == id);
+        if (job == null || dest.Pos == null || Pos == null || Api?.World == null)
+            return false;
+
+        present = true;
+        var sitting = _inventory[job.Slot].Itemstack;
+        if (sitting != null && ItemEStoragePattern.JobId(sitting) == id)
+            return false;
+
+        var oldSlot = job.Slot;
+        var sameCell = ProcessorCluster.SamePos(Pos, dest.Pos);
+        var sameSlot = oldSlot == destSlot;
+        if (dest.SlotTaken(destSlot, sameCell && sameSlot ? this : null))
+            return false;
+
+        var cpu = FindCpu(job);
+        var world = Api.World;
+        if (sameCell && sameSlot)
+        {
+            _jobs.Remove(job);
+            job.Slot = destSlot;
+            dest.ReceiveJob(job);
+        }
+        else
+        {
+            var saved = job.Slot;
+            job.Slot = destSlot;
+            dest.ReceiveJob(job);
+            if (cpu != null && !cpu.Retarget(Pos, oldSlot, dest.Pos, destSlot))
+            {
+                dest.ReleaseReceived(job);
+                job.Slot = saved;
+                return false;
+            }
+
+            _jobs.Remove(job);
+        }
+
+        var home = AssemblerFor(world, stack);
+        if (home != null && !GridClaimedByOther(world, job, home))
+            dest.RehomeFrom(world, home, job);
+        MarkDirty();
+        dest.MarkDirty();
+        return true;
+    }
+
+    public bool SlotTaken(int slot, BlockEntityEStorageInterface? ignore)
+    {
+        var world = Api?.World;
+        if (world == null || Pos == null)
+            return false;
+
+        foreach (var face in PanelStack.Interfaces(world, Pos))
+        {
+            if (ignore != null && ReferenceEquals(face, ignore))
+                continue;
+            if (face.OwnsJob(slot))
+                return true;
+        }
+
+        return false;
+    }
+
+    private BlockEntityEStorageAssembler? AssemblerFor(IWorldAccessor world, ItemStack pattern)
+    {
+        if (Pos == null)
+            return null;
+
+        BlockEntityEStorageAssembler? partial = null;
+        foreach (var face in BlockFacing.ALLFACES)
+        {
+            var neighbor = Pos.AddCopy(face);
+            if (world.BlockAccessor.GetBlockEntity(neighbor) is not BlockEntityEStorageAssembler assembler)
+                continue;
+            if (!Feeds(world, assembler.Pos) || !assembler.ForPanel(world, pattern, Pos))
+                continue;
+            if (assembler.Serves(Pos))
+                return assembler;
+            partial ??= assembler;
+        }
+
+        return partial;
+    }
+
+    private void ReceiveJob(CraftJob job) => _jobs.Add(job);
+
+    private void ReleaseReceived(CraftJob job) => _jobs.Remove(job);
+
+    private bool RetargetOwnSlot(CraftJob job, int destSlot)
+    {
+        var old = job.Slot;
+        var cpu = FindCpu(job);
+        job.Slot = destSlot;
+        if (cpu != null && Pos != null && !cpu.Retarget(Pos, old, Pos, destSlot))
+        {
+            job.Slot = old;
+            return false;
+        }
+
+        MarkDirty();
+        return true;
+    }
+
+    private void RehomeFrom(IWorldAccessor world, BlockEntityEStorageAssembler assembler, CraftJob job)
+    {
+        var output = assembler.Inventory[InventoryEStorageAssembler.Output];
+        if (output != null && !output.Empty && output.Itemstack != null && job.Result != null
+            && StorageAccess.Same(world, job.Result, output.Itemstack))
+            TakeAssemblerOutput(output);
+
+        if (Feeds(world, assembler.Pos))
+        {
+            assembler.PointOwner(Pos);
+            return;
+        }
+
+        assembler.RefundGrid(world, FindCpu(job));
+        assembler.ReturnCraftSlots(world, Pos);
+        job.Index = 0;
+        job.Pushed = 0;
+    }
+
+    private bool GridClaimedByOther(IWorldAccessor world, CraftJob job, BlockEntityEStorageAssembler assembler)
+    {
+
+        foreach (var other in _jobs)
+        {
+            if (other.Id == job.Id || other.Got >= other.Wanted)
+                continue;
+            var stack = _inventory[other.Slot].Itemstack;
+            if (ItemEStoragePattern.IsEncoded(stack) && assembler.Holding(world, stack!))
+                return true;
+        }
+
+        return false;
+    }
+
+    private bool NetworkHasJob(long id)
+    {
+        var world = Api?.World;
+        if (world == null || Pos == null || id == 0)
+            return false;
+
+        foreach (var cell in StorageAccess.GetScan(world, Pos).Interfaces)
+        {
+            foreach (var face in PanelStack.Interfaces(world, cell))
+            {
+                if (face.OwnsCraft(id))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void BindLoaded()
+    {
+        foreach (var job in _jobs)
+        {
+            if (job.Id == 0)
+                job.Id = NewJobId();
+            var stack = job.Slot >= 0 && job.Slot < _inventory.Count ? _inventory[job.Slot].Itemstack : null;
+            if (OutputMatches(job, stack))
+                Bind(job, stack!, false);
+        }
+    }
+
+    private void ClaimArrivals()
+    {
+        if (Api?.World == null)
+            return;
+
+        for (var i = ItemSlotInterface.PatternAt; i < ItemSlotInterface.ConfigAt; i++)
+        {
+            var stack = _inventory[i].Itemstack;
+            if (!ItemEStoragePattern.IsEncoded(stack))
+                continue;
+            var id = ItemEStoragePattern.JobId(stack);
+            if (id == 0 || _jobs.Exists(job => job.Id == id))
+                continue;
+            Follow(i, stack!);
+        }
+    }
+
+    private void Bind(CraftJob job, ItemStack stack, bool sync)
+    {
+        if (job.Id == 0)
+            job.Id = NewJobId();
+        if (ItemEStoragePattern.JobId(stack) != 0)
+            return;
+
+        ItemEStoragePattern.SetJobId(stack, job.Id);
+        if (sync && job.Slot >= 0 && job.Slot < _inventory.Count)
+            _inventory[job.Slot].MarkDirty();
+    }
+
+    private long NewJobId()
+    {
+        _jobSerial++;
+        long id = _jobSerial;
+        if (Pos != null)
+        {
+            id ^= ((long)Pos.X & 0xFFFFF) << 20;
+            id ^= ((long)Pos.Y & 0xFFF) << 8;
+            id ^= Pos.Z & 0xFFFFF;
+            id ^= (long)Pos.dimension << 40;
+        }
+
+        var elapsed = Api?.World?.ElapsedMilliseconds ?? 0;
+        id ^= elapsed << 1;
+        if (id == 0)
+            id = _jobSerial;
+        return id;
+    }
+
+    private bool OutputMatches(CraftJob job, ItemStack? stack)
+    {
+        var world = Api?.World;
+        if (world == null || job.Result == null || !ItemEStoragePattern.IsEncoded(stack))
+            return false;
+
+        var output = ItemEStoragePattern.Primary(world, stack!);
+        return output != null && StorageAccess.Same(world, output, job.Result);
     }
 
     private bool PatternMatches(CraftJob job, ItemStack? stack)
     {
-        if (Api?.World == null || job.Result == null || !ItemEStoragePattern.IsEncoded(stack))
+        if (!OutputMatches(job, stack) || stack == null)
             return false;
 
-        var output = ItemEStoragePattern.Primary(Api.World, stack!);
-        return output != null && StorageAccess.Same(Api.World, output, job.Result);
+        var id = ItemEStoragePattern.JobId(stack);
+        if (job.Id == 0 || id == 0)
+            return true;
+        return id == job.Id;
     }
 
     private bool HasPattern()
@@ -969,6 +1157,7 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
         if (StorageAccess.Link(Api.World, Pos) != StorageLink.Online)
             return;
 
+        ClaimArrivals();
         if (_jobs.Count > 0)
         {
             ReturnExports();
@@ -978,6 +1167,77 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
 
         ReconcileExports();
         FeedExports();
+        PullAssemblerOutput();
+    }
+
+    /// <summary>
+    /// Ручной крафт не создаёт заказ, но готовый предмет всё равно уходит в сеть.
+    /// Сетка при этом остаётся в сборщике.
+    /// </summary>
+    private void PullAssemblerOutput()
+    {
+        var assembler = FindAssembler();
+        if (assembler != null && PullCraftOutput(assembler))
+            MarkDirty();
+    }
+
+    private bool PullCraftOutput(BlockEntityEStorageAssembler assembler)
+    {
+        var slot = assembler.Inventory[InventoryEStorageAssembler.Output];
+        if (slot == null || slot.Empty)
+            return false;
+        return TakeAssemblerOutput(slot);
+    }
+
+    /// <summary>
+    /// Готовый предмет из сборщика уходит в сеть. Ручной крафт заказа не имеет, но выход забирается так же.
+    /// </summary>
+    public bool TakeAssemblerOutput(ItemSlot slot)
+    {
+        var world = Api?.World;
+        var stack = slot.Itemstack;
+        if (world == null || stack == null || stack.StackSize <= 0)
+            return false;
+
+        var origin = StorageOrigin(world);
+        if (origin == null)
+            return false;
+
+        var moved = StorageAccess.Insert(world, origin, stack, stack.StackSize);
+        if (moved <= 0)
+            return false;
+
+        Credit(stack, moved);
+        stack.StackSize -= moved;
+        if (stack.StackSize <= 0)
+            slot.Itemstack = null;
+        slot.MarkDirty();
+        return true;
+    }
+
+    /// <summary>
+    /// Своя клетка, если интерфейс в сети. Иначе контроллер той же сети: сборщик уже питается от неё.
+    /// </summary>
+    private BlockPos? StorageOrigin(IWorldAccessor world)
+    {
+        if (Pos == null)
+            return null;
+        if (StorageAccess.Link(world, Pos) == StorageLink.Online)
+            return Pos;
+
+        var scan = StorageAccess.GetScan(world, Pos);
+        if (scan.Conflict || !StorageAccess.HasPower(world, scan))
+            return null;
+        if (scan.Controller != null && scan.Serves(scan.Controller))
+            return scan.Controller;
+
+        foreach (var drive in scan.Drives)
+        {
+            if (scan.Serves(drive))
+                return drive;
+        }
+
+        return null;
     }
 
     private void ReturnExports()
@@ -1068,18 +1328,12 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
     {
         var mounted = TryMount(out var target, out var face);
         var changed = mounted && PullOutputs(target, face);
+        var assembler = FindAssembler();
+        if (assembler != null && PullCraftOutput(assembler))
+            changed = true;
         for (var i = _jobs.Count - 1; i >= 0; i--)
         {
             var job = _jobs[i];
-            var pattern = _inventory[job.Slot].Itemstack;
-            if (!PatternMatches(job, pattern))
-            {
-                ReleaseJob(job);
-                _jobs.RemoveAt(i);
-                changed = true;
-                continue;
-            }
-
             if (job.Got >= job.Wanted)
             {
                 if (OutputPending(job))
@@ -1090,12 +1344,17 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
                 continue;
             }
 
+            var pattern = _inventory[job.Slot].Itemstack;
+            if (OutputMatches(job, pattern) && pattern != null && ItemEStoragePattern.JobId(pattern) == 0)
+                Bind(job, pattern, true);
+            if (!PatternMatches(job, pattern))
+                continue;
+
             if (!AttachCpu(job, pattern!, 0))
                 continue;
 
             if (Stock(job, pattern!))
                 changed = true;
-            var assembler = mounted ? FindAssembler() : null;
             if (assembler != null)
             {
                 if (!ItemEStoragePattern.IsProcessing(pattern) && PushCraft(job, pattern!, assembler))
@@ -1253,10 +1512,24 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
 
     private BlockEntityEStorageAssembler? FindAssembler()
     {
-        var mount = MountedOn();
-        if (mount == null || Api?.World == null)
+        var world = Api?.World;
+        if (world == null || Pos == null)
             return null;
-        return Api.World.BlockAccessor.GetBlockEntity(mount) as BlockEntityEStorageAssembler;
+
+        BlockEntityEStorageAssembler? first = null;
+        foreach (var face in BlockFacing.ALLFACES)
+        {
+            var neighbor = Pos.AddCopy(face);
+            if (world.BlockAccessor.GetBlockEntity(neighbor) is not BlockEntityEStorageAssembler assembler)
+                continue;
+            if (!Feeds(world, assembler.Pos))
+                continue;
+            if (assembler.Serves(Pos))
+                return assembler;
+            first ??= assembler;
+        }
+
+        return first;
     }
 
     public BlockPos? MountedOn()
@@ -1274,9 +1547,34 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
         return toward == null ? null : Pos.AddCopy(toward);
     }
 
-    public bool FeedsAssembler()
+    /// <summary>
+    /// Полный блок кормит соседний сборщик с любой грани, если лицевая сторона не смотрит в другую машину.
+    /// Жернова и сундук по-прежнему только с грани, куда поставлен интерфейс.
+    /// </summary>
+    public bool Feeds(IWorldAccessor world, BlockPos machine)
     {
-        if (Api?.World == null)
+        if (Pos == null)
+            return false;
+
+        var mount = MountedOn();
+        if (mount != null && ProcessorCluster.SamePos(mount, machine))
+            return true;
+        if (world.BlockAccessor.GetBlock(machine).FirstCodePart() != "estorageassembler")
+            return false;
+        if (!NextTo(Pos, machine))
+            return false;
+        if (mount != null && MachineAt(world, mount))
+            return false;
+
+        return true;
+    }
+
+    /// <summary>
+    /// Сетка уже собрана под живой заказ с процессором. Ручной крафт её не перехватывает.
+    /// </summary>
+    public bool OwnsReadyCraft(IWorldAccessor world, BlockEntityEStorageAssembler assembler)
+    {
+        if (StorageAccess.Link(world, Pos) != StorageLink.Online)
             return false;
 
         foreach (var job in _jobs)
@@ -1284,11 +1582,40 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
             if (job.Got >= job.Wanted)
                 continue;
             var pattern = _inventory[job.Slot].Itemstack;
-            if (ItemEStoragePattern.IsEncoded(pattern) && !ItemEStoragePattern.IsProcessing(pattern))
+            if (!ItemEStoragePattern.IsEncoded(pattern) || ItemEStoragePattern.IsProcessing(pattern))
+                continue;
+            if (FindCpu(job) == null)
+                continue;
+            if (assembler.CraftReady(world, pattern!))
                 return true;
         }
 
         return false;
+    }
+
+    private static bool NextTo(BlockPos a, BlockPos b)
+    {
+        if (a.dimension != b.dimension)
+            return false;
+
+        var dx = a.X - b.X;
+        var dy = a.Y - b.Y;
+        var dz = a.Z - b.Z;
+        if (dx < 0)
+            dx = -dx;
+        if (dy < 0)
+            dy = -dy;
+        if (dz < 0)
+            dz = -dz;
+        return dx + dy + dz == 1;
+    }
+
+    private static bool MachineAt(IWorldAccessor world, BlockPos pos)
+    {
+        var entity = world.BlockAccessor.GetBlockEntity(pos);
+        if (entity is BlockEntityContainer or IBlockEntityContainer)
+            return true;
+        return world.BlockAccessor.GetBlock(pos).FirstCodePart() == "estorageassembler";
     }
 
     private bool PushCraft(CraftJob job, ItemStack pattern, BlockEntityEStorageAssembler assembler)
@@ -1920,10 +2247,20 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
     private void ReleaseJob(CraftJob job)
     {
         ReturnAssembler(job);
+        ClearStamp(job);
         var cpu = FindCpu(job);
         if (cpu != null && Api?.World != null)
             cpu.Unlink(Api.World, Pos, job.Slot);
         job.Cpu = null;
+    }
+
+    private void ClearStamp(CraftJob job)
+    {
+        if (job.Slot < 0 || job.Slot >= _inventory.Count)
+            return;
+        var stack = _inventory[job.Slot].Itemstack;
+        if (stack != null && ItemEStoragePattern.JobId(stack) == job.Id)
+            ItemEStoragePattern.SetJobId(stack, 0);
     }
 
     private bool Stock(CraftJob job, ItemStack pattern)
@@ -2068,5 +2405,6 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer
         public ItemStack? Result;
         public BlockPos? Cpu;
         public double Since;
+        public long Id;
     }
 }

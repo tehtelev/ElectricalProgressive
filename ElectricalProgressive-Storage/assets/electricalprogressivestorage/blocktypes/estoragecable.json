@@ -17,7 +17,7 @@
     "general": [ "*" ],
     "estorage": [ "*" ]
   },
-  "shape": { "base": "block/cable" },
+  "shape": { "base": "block/estoragecable/part" },
   "shapeInventory": { "base": "electricalprogressivebasics:block/ecable/ecable-single/ecable-32v-single-block" },
   "textures": {
     "cable": { "base": "game:item/resource/ungraded/clearquartz" },
@@ -31,6 +31,9 @@
   "blockmaterial": "Metal",
   "resistance": 1.5,
   "lightAbsorption": 0,
+  "renderPass": "Transparent",
+  "faceCullMode": "NeverCull",
+  "vertexFlags": { "zOffset": 2 },
   "sideopaque": { "all": false },
   "sidesolid": { "all": false },
   "collisionbox": { "x1": 0.35, "y1": 0.35, "z1": 0.35, "x2": 0.65, "y2": 0.65, "z2": 0.65 },

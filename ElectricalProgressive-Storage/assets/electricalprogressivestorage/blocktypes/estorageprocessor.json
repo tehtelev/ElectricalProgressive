@@ -27,47 +27,36 @@
     "estorage": [ "*" ]
   },
   "shape": { "base": "block/estorageprocessor" },
-  "lightAbsorption": 0,
-  "faceCullMode": "NeverCull",
-  "renderPass": "OpaqueNoCull",
-  "emitSideAo": { "all": false },
-  "sideAo": { "all": true },
-  "sideopaque": { "all": false },
   "textures": {
-    "metal": { "base": "game:block/metal/plate/copper" },
-    "iron": { "base": "game:block/metal/plate/iron" },
-    "brass": { "base": "game:block/metal/plate/brass" },
-    "steel": { "base": "game:block/metal/plate/steel" },
-    "bronze": { "base": "game:block/metal/plate/bismuthbronze" }
+    "metal": { "base": "block/ae2/cpu_1k" },
+    "ring": { "base": "block/ae2/ring_corner" },
+    "hor": { "base": "block/ae2/ring_side_hor" },
+    "ver": { "base": "block/ae2/ring_side_ver" }
   },
   "texturesByType": {
     "*-1k": {
-      "metal": { "base": "game:block/metal/plate/copper" },
-      "iron": { "base": "game:block/metal/plate/iron" },
-      "brass": { "base": "game:block/metal/plate/brass" },
-      "steel": { "base": "game:block/metal/plate/steel" },
-      "bronze": { "base": "game:block/metal/plate/bismuthbronze" }
+      "metal": { "base": "block/ae2/cpu_1k" },
+      "ring": { "base": "block/ae2/ring_corner" },
+      "hor": { "base": "block/ae2/ring_side_hor" },
+      "ver": { "base": "block/ae2/ring_side_ver" }
     },
     "*-4k": {
-      "metal": { "base": "game:block/metal/plate/tinbronze" },
-      "iron": { "base": "game:block/metal/plate/iron" },
-      "brass": { "base": "game:block/metal/plate/brass" },
-      "steel": { "base": "game:block/metal/plate/steel" },
-      "bronze": { "base": "game:block/metal/plate/bismuthbronze" }
+      "metal": { "base": "block/ae2/cpu_4k" },
+      "ring": { "base": "block/ae2/ring_corner" },
+      "hor": { "base": "block/ae2/ring_side_hor" },
+      "ver": { "base": "block/ae2/ring_side_ver" }
     },
     "*-16k": {
-      "metal": { "base": "game:block/metal/plate/iron" },
-      "iron": { "base": "game:block/metal/plate/iron" },
-      "brass": { "base": "game:block/metal/plate/brass" },
-      "steel": { "base": "game:block/metal/plate/steel" },
-      "bronze": { "base": "game:block/metal/plate/bismuthbronze" }
+      "metal": { "base": "block/ae2/cpu_16k" },
+      "ring": { "base": "block/ae2/ring_corner" },
+      "hor": { "base": "block/ae2/ring_side_hor" },
+      "ver": { "base": "block/ae2/ring_side_ver" }
     },
     "*-64k": {
-      "metal": { "base": "game:block/metal/plate/steel" },
-      "iron": { "base": "game:block/metal/plate/iron" },
-      "brass": { "base": "game:block/metal/plate/brass" },
-      "steel": { "base": "game:block/metal/plate/steel" },
-      "bronze": { "base": "game:block/metal/plate/bismuthbronze" }
+      "metal": { "base": "block/ae2/cpu_64k" },
+      "ring": { "base": "block/ae2/ring_corner" },
+      "hor": { "base": "block/ae2/ring_side_hor" },
+      "ver": { "base": "block/ae2/ring_side_ver" }
     }
   },
   "blockmaterial": "Metal",

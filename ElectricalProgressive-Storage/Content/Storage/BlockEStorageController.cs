@@ -1,5 +1,7 @@
+using System;
 using ElectricalProgressive.Content.Block;
 using ElectricalProgressive.Utils;
+using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 
@@ -23,5 +25,49 @@ public class BlockEStorageController : BlockEBase
     {
         base.OnBlockRemoved(world, pos);
         StorageAccess.DirtyTopology();
+    }
+
+    public override void OnNeighbourBlockChange(IWorldAccessor world, BlockPos pos, BlockPos neibpos)
+    {
+        base.OnNeighbourBlockChange(world, pos, neibpos);
+        world.BlockAccessor.MarkBlockDirty(pos);
+        foreach (var face in BlockFacing.ALLFACES)
+            world.BlockAccessor.MarkBlockDirty(pos.AddCopy(face));
+    }
+
+    public override void OnJsonTesselation(ref MeshData sourceMesh, ref int[] lightRgbsByCorner, BlockPos pos, Vintagestory.API.Common.Block[] chunkExtBlocks, int extIndex3d)
+    {
+        if (api is not ICoreClientAPI capi || chunkExtBlocks == null)
+        {
+            base.OnJsonTesselation(ref sourceMesh, ref lightRgbsByCorner, pos, chunkExtBlocks, extIndex3d);
+            return;
+        }
+
+        var mask = ControllerMesh.Mask(chunkExtBlocks, extIndex3d);
+        var drives = ControllerMesh.DriveMask(chunkExtBlocks, extIndex3d);
+        var custom = false;
+        if (mask != 0)
+        {
+            var parity = (Math.Abs(pos.X) + Math.Abs(pos.Y) + Math.Abs(pos.Z)) & 1;
+            var mesh = ControllerMesh.For(capi, this, mask, drives, parity);
+            if (mesh != null)
+            {
+                sourceMesh = mesh.Clone();
+                custom = true;
+            }
+        }
+
+        if (!custom && drives != 0 && sourceMesh != null)
+        {
+            var cover = ControllerMesh.ShellCover(capi, this, drives);
+            if (cover != null)
+            {
+                var copy = sourceMesh.Clone();
+                copy.AddMeshData(cover);
+                sourceMesh = copy;
+            }
+        }
+
+        base.OnJsonTesselation(ref sourceMesh, ref lightRgbsByCorner, pos, chunkExtBlocks, extIndex3d);
     }
 }

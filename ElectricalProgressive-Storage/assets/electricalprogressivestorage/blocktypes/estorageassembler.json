@@ -25,11 +25,8 @@
   "sideAo": { "all": true },
   "sideopaque": { "all": false },
   "textures": {
-    "side": { "base": "game:block/metal/plate/iron" },
-    "top": { "base": "game:block/metal/plate/copper" },
-    "brass": { "base": "game:block/metal/plate/brass" },
-    "steel": { "base": "game:block/metal/plate/steel" },
-    "bronze": { "base": "game:block/metal/plate/bismuthbronze" }
+    "base": { "base": "block/ae2/molecular_assembler" },
+    "all": { "base": "block/ae2/molecular_assembler_lights" }
   },
   "blockmaterial": "Metal",
   "resistance": 3.5,

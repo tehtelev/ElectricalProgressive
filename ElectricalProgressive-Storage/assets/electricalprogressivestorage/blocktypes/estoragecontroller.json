@@ -32,34 +32,27 @@
     { "code": "state", "states": [ "offline", "online" ] }
   ],
   "shape": { "base": "block/estoragecontroller" },
+  "shapeByType": {
+    "*-online": { "base": "block/estoragecontroller-on" }
+  },
   "texturesByType": {
     "*-offline": {
-      "iron": { "base": "game:block/metal/plate/iron" },
-      "brass": { "base": "game:block/metal/plate/brass" },
-      "steel": { "base": "game:block/metal/plate/steel" },
-      "copper": { "base": "game:block/metal/plate/copper" },
-      "bronze": { "base": "game:block/metal/plate/bismuthbronze" },
-      "face": { "base": "block/estoragecontroller-top" }
+      "face": { "base": "block/ae2/controller" },
+      "column": { "base": "block/ae2/controller_column" },
+      "insidea": { "base": "block/ae2/controller_inside_a" },
+      "insideb": { "base": "block/ae2/controller_inside_b" }
     },
     "*-online": {
-      "iron": { "base": "game:block/metal/plate/iron" },
-      "brass": { "base": "game:block/metal/plate/brass" },
-      "steel": { "base": "game:block/metal/plate/steel" },
-      "copper": { "base": "game:block/metal/plate/copper" },
-      "bronze": { "base": "game:block/metal/plate/bismuthbronze" },
-      "face": { "base": "block/estoragecontroller-top-on" }
+      "face": { "base": "block/ae2/controller_powered" },
+      "column": { "base": "block/ae2/controller_column_powered" },
+      "insidea": { "base": "block/ae2/controller_inside_a" },
+      "insideb": { "base": "block/ae2/controller_inside_b" }
     }
   },
   "lightHsvByType": {
     "*-offline": [ 0, 0, 0 ],
     "*-online": [ 40, 6, 14 ]
   },
-  "lightAbsorption": 0,
-  "faceCullMode": "NeverCull",
-  "renderPass": "OpaqueNoCull",
-  "emitSideAo": { "all": false },
-  "sideAo": { "all": true },
-  "sideopaque": { "all": false },
   "blockmaterial": "Metal",
   "resistance": 3.5,
   "sounds": {

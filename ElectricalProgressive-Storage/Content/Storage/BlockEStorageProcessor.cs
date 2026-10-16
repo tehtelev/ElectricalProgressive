@@ -32,6 +32,13 @@ public class BlockEStorageProcessor : BlockEStoragePart
     {
         base.OnNeighbourBlockChange(world, pos, neibpos);
         world.BlockAccessor.MarkBlockDirty(pos);
+        foreach (var face in BlockFacing.ALLFACES)
+        {
+            var at = pos.AddCopy(face);
+            if (ProcessorCluster.IsProcessor(world.BlockAccessor.GetBlock(at)))
+                world.BlockAccessor.MarkBlockDirty(at);
+        }
+
         if (world.Side != EnumAppSide.Server)
             return;
         if (world.BlockAccessor.GetBlockEntity(pos) is BlockEntityEStorageProcessor processor)
@@ -46,13 +53,7 @@ public class BlockEStorageProcessor : BlockEStoragePart
             return;
         }
 
-        var mask = ProcessorJoinMesh.Mask(chunkExtBlocks, extIndex3d);
-        if (mask == 0)
-        {
-            base.OnJsonTesselation(ref sourceMesh, ref lightRgbsByCorner, pos, chunkExtBlocks, extIndex3d);
-            return;
-        }
-
+        var mask = ProcessorJoinMesh.Mask(chunkExtBlocks, extIndex3d, capi.World.BlockAccessor, pos);
         var mesh = ProcessorJoinMesh.For(capi, this, mask);
         if (mesh == null)
         {
@@ -260,7 +261,8 @@ public class BlockEntityEStorageProcessor : BlockEntity
         var haveTime = false;
         for (var i = 0; i < _linkPos.Count && n < 64; i++)
         {
-            if (world.BlockAccessor.GetBlockEntity(_linkPos[i]) is not BlockEntityEStorageInterface panel)
+            var panel = PanelStack.Interface(world, _linkPos[i], _linkSlot[i]);
+            if (panel == null)
                 continue;
             if (!panel.TryJob(_linkSlot[i], out var result, out var left, out var since) || result == null)
                 continue;
@@ -293,8 +295,7 @@ public class BlockEntityEStorageProcessor : BlockEntity
         var slots = _linkSlot.ToArray();
         for (var i = 0; i < panels.Length; i++)
         {
-            if (world.BlockAccessor.GetBlockEntity(panels[i]) is BlockEntityEStorageInterface panel)
-                panel.CancelJob(slots[i]);
+            PanelStack.Interface(world, panels[i], slots[i])?.CancelJob(slots[i]);
         }
     }
 
@@ -365,8 +366,7 @@ public class BlockEntityEStorageProcessor : BlockEntity
         if (!RemoveLink(panel, slot))
             return;
 
-        if (world.BlockAccessor.GetBlockEntity(panel) is BlockEntityEStorageInterface face)
-            face.DetachCpu(Pos, slot);
+        PanelStack.Interface(world, panel, slot)?.DetachCpu(Pos, slot);
         if (_linkPos.Count == 0)
         {
             SpillAll(world);
@@ -376,6 +376,45 @@ public class BlockEntityEStorageProcessor : BlockEntity
         }
 
         MarkDirty();
+    }
+
+    /// <summary>
+    /// Тот же буфер, другая панель. Ссылка переписывается на месте, без слива в сеть.
+    /// </summary>
+    public bool Retarget(BlockPos from, int fromSlot, BlockPos to, int toSlot)
+    {
+        var index = -1;
+        for (var i = 0; i < _linkPos.Count; i++)
+        {
+            if (_linkSlot[i] != fromSlot || !ProcessorCluster.SamePos(_linkPos[i], from))
+                continue;
+            index = i;
+            break;
+        }
+
+        if (index < 0)
+            return fromSlot == toSlot && ProcessorCluster.SamePos(from, to);
+
+        if (fromSlot == toSlot && ProcessorCluster.SamePos(from, to))
+            return true;
+
+        for (var i = 0; i < _linkPos.Count; i++)
+        {
+            if (i == index)
+                continue;
+            if (_linkSlot[i] != toSlot || !ProcessorCluster.SamePos(_linkPos[i], to))
+                continue;
+
+            _linkPos.RemoveAt(index);
+            _linkSlot.RemoveAt(index);
+            MarkDirty();
+            return true;
+        }
+
+        _linkPos[index] = to.Copy();
+        _linkSlot[index] = toSlot;
+        MarkDirty();
+        return true;
     }
 
     public void GiveLinks(IWorldAccessor world, BlockEntityEStorageProcessor heir)
@@ -388,8 +427,7 @@ public class BlockEntityEStorageProcessor : BlockEntity
         {
             if (!heir.Join(panels[i], slots[i]))
                 continue;
-            if (world.BlockAccessor.GetBlockEntity(panels[i]) is BlockEntityEStorageInterface face)
-                face.AttachCpu(heir.Pos, slots[i]);
+            PanelStack.Interface(world, panels[i], slots[i])?.AttachCpu(heir.Pos, slots[i]);
         }
 
         MarkDirty();
@@ -402,7 +440,8 @@ public class BlockEntityEStorageProcessor : BlockEntity
         {
             if (_linkSlot[i] == slot && ProcessorCluster.SamePos(_linkPos[i], panel))
                 continue;
-            if (world.BlockAccessor.GetBlockEntity(_linkPos[i]) is not BlockEntityEStorageInterface face)
+            var face = PanelStack.Interface(world, _linkPos[i], _linkSlot[i]);
+            if (face == null)
                 continue;
             sum += face.IngredientOwed(_linkSlot[i], proto);
         }
@@ -436,8 +475,7 @@ public class BlockEntityEStorageProcessor : BlockEntity
     {
         for (var i = 0; i < _linkPos.Count; i++)
         {
-            if (world.BlockAccessor.GetBlockEntity(_linkPos[i]) is BlockEntityEStorageInterface face)
-                face.DetachCpu(Pos, _linkSlot[i]);
+            PanelStack.Interface(world, _linkPos[i], _linkSlot[i])?.DetachCpu(Pos, _linkSlot[i]);
         }
     }
 
@@ -689,7 +727,8 @@ public class BlockEntityEStorageProcessor : BlockEntity
         {
             var panelPos = _linkPos[i];
             var slot = _linkSlot[i];
-            if (world.BlockAccessor.GetBlockEntity(panelPos) is not BlockEntityEStorageInterface panel)
+            var panel = PanelStack.Interface(world, panelPos, slot);
+            if (panel == null)
             {
                 _linkPos.RemoveAt(i);
                 _linkSlot.RemoveAt(i);

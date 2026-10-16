@@ -12,14 +12,12 @@ namespace ElectricalProgressive.Content.Storage;
 /// </summary>
 public sealed class EStorageOrderPane
 {
-    private const double TitleH = 22;
-    private const double CloseS = 16;
-
     private readonly ICoreClientAPI _capi;
     private readonly Action<int, bool> _send;
     private readonly Action _closePane;
     private readonly Action _rebuild;
     private readonly string _title;
+    private readonly ItemStack _stack;
     private readonly List<PlanRow> _rows = new();
     private int _count = 1;
     private int _page;
@@ -33,10 +31,11 @@ public sealed class EStorageOrderPane
     private ElementBounds? _grid;
     private GuiComposer? _compo;
 
-    public EStorageOrderPane(ICoreClientAPI capi, string title, Action<int, bool> send, Action closePane, Action rebuild)
+    public EStorageOrderPane(ICoreClientAPI capi, string title, ItemStack stack, Action<int, bool> send, Action closePane, Action rebuild)
     {
         _capi = capi;
         _title = title;
+        _stack = stack;
         _send = send;
         _closePane = closePane;
         _rebuild = rebuild;
@@ -94,51 +93,41 @@ public sealed class EStorageOrderPane
 
     private GuiComposer ComposeAmount()
     {
-        var edge = GuiElementTermFrame.Inset;
-        var pad = TermChrome.Pad;
-        var gutter = TermChrome.Gutter;
-        var blockW = 280.0;
-        var headerH = pad + TitleH + pad;
-        var qtyH = pad + 30 + pad;
-        var qtyTop = edge + headerH + gutter;
-        var btnY = qtyTop + qtyH + gutter;
-        var contentH = btnY + 28 + 8 + 36 - edge;
-        WinW = edge + blockW + edge;
-        WinH = edge + contentH + edge;
-        var closeX = edge + blockW - CloseS;
-        var closeY = edge + pad + (TitleH - CloseS) / 2.0;
-        Close = ElementBounds.Fixed(closeX, closeY, CloseS, CloseS);
-        var title = ElementBounds.Fixed(edge + pad, edge + pad, closeX - 8 - (edge + pad), TitleH);
-        var header = ElementBounds.Fixed(edge, edge, closeX - 8 - edge, headerH);
-        var qtyY = qtyTop + pad;
-        var minus = ElementBounds.Fixed(edge + pad, qtyY, 36, 30);
-        var field = ElementBounds.Fixed(edge + pad + 44, qtyY, 140, 30);
-        var plus = ElementBounds.Fixed(edge + pad + 192, qtyY, 36, 30);
-        var qtyTray = ElementBounds.Fixed(edge, qtyTop, blockW, qtyH);
-        var ok = ElementBounds.Fixed(edge + pad, btnY, 128, 28);
-        var cancel = ElementBounds.Fixed(edge + pad + 136, btnY, 110, 28);
-        var hint = ElementBounds.Fixed(edge + pad, btnY + 36, blockW - pad * 2, 36);
+        WinW = 380;
+        WinH = 174;
+        Close = Ae2Gui.Box(WinW - Ae2Gui.Margin - 20, 11, 20, 20);
+        var title = Ae2Gui.Box(Ae2Gui.Margin + 2, 8, 280, 26);
+        var hint = Ae2Gui.Box(Ae2Gui.Margin, Ae2Gui.Header + Ae2Gui.Gap, WinW - Ae2Gui.Margin * 2, 22);
+        var minus = Ae2Gui.Box(Ae2Gui.Margin, 92, 40, 36);
+        var plus = Ae2Gui.Box(Ae2Gui.Margin + 48, 92, 40, 36);
+        var icon = Ae2Gui.Box(Ae2Gui.Margin + 102, 86, 48, 48);
+        var field = Ae2Gui.Box(Ae2Gui.Margin + 162, 98, 90, 28);
+        var next = Ae2Gui.Box(WinW - Ae2Gui.Margin - 100, 92, 100, 36);
         var frame = ElementBounds.Fixed(0, 0, WinW, WinH);
         var bg = ElementBounds.Fill.WithFixedPadding(0);
         bg.BothSizing = ElementSizing.FitToChildren;
-        bg.WithChildren(frame, Close);
+        bg.WithChildren(frame, Close, field, next);
+
+        var sheet = Ae2Gui.Window(_capi, frame, Close.fixedX, Close.fixedY, Close.fixedWidth);
+        sheet.Fill(icon.fixedX - 1, icon.fixedY - 1, icon.fixedWidth + 2, icon.fixedHeight + 2, Ae2Gui.Ink[0], Ae2Gui.Ink[1], Ae2Gui.Ink[2]);
+        sheet.Fill(icon.fixedX, icon.fixedY, icon.fixedWidth, icon.fixedHeight, Ae2Gui.Well[0], Ae2Gui.Well[1], Ae2Gui.Well[2]);
+        var fieldSheet = new GuiElementAe2Sheet(_capi, frame);
+        fieldSheet.Fill(field.fixedX - 2, field.fixedY - 2, field.fixedWidth + 4, field.fixedHeight + 4, Ae2Gui.FieldInk[0], Ae2Gui.FieldInk[1], Ae2Gui.FieldInk[2]);
 
         var compo = _capi.Gui
             .CreateCompo("estorageorder", DialogBounds())
             .BeginChildElements(bg)
-            .AddStaticElement(new GuiElementTermFrame(_capi, frame, closeX, closeY, CloseS))
-            .AddStaticElement(new GuiElementTermPanel(_capi, header))
-            .AddStaticElement(new GuiElementTermPanel(_capi, qtyTray))
-            .AddStaticText(_title, CairoFont.WhiteDetailText().WithFontSize(16), title)
-            .AddSmallButton("−", () => Bump(-1), minus, EnumButtonStyle.Normal, "minus")
-            .AddStaticElement(new GuiElementTermWell(_capi, field))
-            .AddTextInput(field, OnQty, CairoFont.WhiteDetailText(), "qty")
-            .AddSmallButton("+", () => Bump(1), plus, EnumButtonStyle.Normal, "plus")
-            .AddSmallButton(Lang.Get("electricalprogressivestorage:estorage-order-next"), Ask, ok, EnumButtonStyle.Normal, "ok")
-            .AddSmallButton(Lang.Get("electricalprogressivestorage:estorage-order-cancel"), () => { _closePane(); return true; }, cancel, EnumButtonStyle.Normal, "cancel")
-            .AddDynamicText(_busy ? Lang.Get("electricalprogressivestorage:estorage-order-wait") : Lang.Get("electricalprogressivestorage:estorage-order-hint"), CairoFont.WhiteDetailText(), hint, "hint")
+            .AddStaticElement(sheet)
+            .AddStaticText(_title, Ae2Gui.Title(), title)
+            .AddDynamicText(_busy ? Lang.Get("electricalprogressivestorage:estorage-order-wait") : Lang.Get("electricalprogressivestorage:estorage-order-hint"), Ae2Gui.Label(), hint, "hint")
+            .AddInteractiveElement(new GuiElementAe2Button(_capi, minus, "−", () => Bump(-1)), "minus")
+            .AddInteractiveElement(new GuiElementAe2Button(_capi, plus, "+", () => Bump(1)), "plus")
+            .AddTextInput(field, OnQty, Ae2Gui.FieldFont(), "qty")
+            .AddStaticElement(fieldSheet)
+            .AddInteractiveElement(new GuiElementAe2Stack(_capi, icon, _stack))
+            .AddInteractiveElement(new GuiElementAe2Button(_capi, next, Lang.Get("electricalprogressivestorage:estorage-order-next"), () => Ask()), "ok")
             .EndChildElements()
-            .Compose();
+            .Compose(false);
 
         compo.GetTextInput("qty").SetValue(_count.ToString(), false);
         _compo = compo;
@@ -147,47 +136,33 @@ public sealed class EStorageOrderPane
 
     private GuiComposer ComposePlan()
     {
-        var edge = GuiElementTermFrame.Inset;
-        var pad = TermChrome.Pad;
-        var gutter = TermChrome.Gutter;
-        var gridW = GuiElementPlanGrid.Cols * GuiElementPlanGrid.CellW + (GuiElementPlanGrid.Cols - 1) * GuiElementPlanGrid.Gap;
+        var gridW = GuiElementPlanGrid.Cols * GuiElementPlanGrid.CellW;
         var gridH = VisibleHeight();
-        var scrollW = 14.0;
-        var blockW = Math.Max(280, gridW + 8 + scrollW + pad * 2);
         var showGrid = _rows.Count > 0 && !_failed;
-        var headerH = pad + TitleH + pad;
-        var bodyInner = showGrid ? gridH : 72;
-        var bodyH = pad + bodyInner + pad;
-        var bodyTop = edge + headerH + gutter;
-        var gridY = bodyTop + pad;
-        var cpuY = bodyTop + bodyH + gutter;
-        var simY = cpuY + 26;
-        var btnY = simY + 22;
-        var contentH = btnY + 28 - edge;
-        WinW = edge + blockW + edge;
-        WinH = edge + contentH + edge;
-        var closeX = edge + blockW - CloseS;
-        var closeY = edge + pad + (TitleH - CloseS) / 2.0;
-        Close = ElementBounds.Fixed(closeX, closeY, CloseS, CloseS);
-        var title = ElementBounds.Fixed(edge + pad, edge + pad, closeX - 8 - (edge + pad), TitleH);
-        var header = ElementBounds.Fixed(edge, edge, closeX - 8 - edge, headerH);
-        _grid = ElementBounds.Fixed(edge + pad, gridY, gridW, gridH);
-        var scroll = ElementBounds.Fixed(edge + pad + gridW + 8, gridY, scrollW, gridH);
-        var bodyTray = ElementBounds.Fixed(edge, bodyTop, blockW, bodyH);
-        var cpu = ElementBounds.Fixed(edge + pad, cpuY, blockW - pad * 2, 22);
-        var sim = ElementBounds.Fixed(edge + pad, simY, blockW - pad * 2, 18);
-        var cancel = ElementBounds.Fixed(edge + pad, btnY, 120, 28);
+        var scrollX = Ae2Gui.Margin + gridW + 8;
+        WinW = scrollX + Ae2Gui.ScrollW + Ae2Gui.Margin;
+        var top = Ae2Gui.Header + Ae2Gui.Gap;
+        WinH = top + gridH + 8 + 32 + Ae2Gui.Margin;
+        Close = Ae2Gui.Box(WinW - Ae2Gui.Margin - 20, 11, 20, 20);
+        var title = Ae2Gui.Box(Ae2Gui.Margin + 2, 8, WinW - 80, 26);
+        var gridBounds = showGrid ? Ae2Gui.Box(Ae2Gui.Margin, top, gridW, gridH) : null;
+        _grid = gridBounds;
+        var scroll = Ae2Gui.Box(scrollX, top, Ae2Gui.ScrollW, gridH);
+        var note = Ae2Gui.Box(Ae2Gui.Margin, top + 12, WinW - Ae2Gui.Margin * 2, 120);
+        var foot = top + gridH + 8;
+        var cancel = Ae2Gui.Box(Ae2Gui.Margin, foot, 130, 32);
         ElementBounds? start = null;
         if (!_noCpu && !_failed)
-            start = ElementBounds.Fixed(edge + blockW - pad - 120, btnY, 120, 28);
-        var note = ElementBounds.Fixed(edge + pad, bodyTop + pad, blockW - pad * 2, 64);
+            start = Ae2Gui.Box(WinW - Ae2Gui.Margin - 130, foot, 130, 32);
+        var cpuRight = start != null ? start.fixedX - 8 : WinW - Ae2Gui.Margin;
+        var cpu = Ae2Gui.Box(Ae2Gui.Margin + 138, foot, Math.Max(40, cpuRight - (Ae2Gui.Margin + 138)), 32);
         var frame = ElementBounds.Fixed(0, 0, WinW, WinH);
         var bg = ElementBounds.Fill.WithFixedPadding(0);
         bg.BothSizing = ElementSizing.FitToChildren;
-        var kids = new List<ElementBounds> { frame, Close, title, cpu, sim, cancel };
-        if (showGrid)
+        var kids = new List<ElementBounds> { frame, Close, title, cpu, cancel };
+        if (gridBounds != null)
         {
-            kids.Add(_grid);
+            kids.Add(gridBounds);
             kids.Add(scroll);
         }
         else
@@ -199,41 +174,38 @@ public sealed class EStorageOrderPane
         var heading = Lang.Get("electricalprogressivestorage:estorage-order-plan", Group(_bytes));
         var cpuText = _noCpu
             ? Lang.Get("electricalprogressivestorage:estorage-order-nocpu")
-            : Lang.Get("electricalprogressivestorage:estorage-order-cpu");
+            : Lang.Get("electricalprogressivestorage:estorage-order-sim");
         var cpuFont = _noCpu
-            ? CairoFont.WhiteDetailText().WithOrientation(EnumTextOrientation.Center).WithColor([0.92, 0.38, 0.32, 1])
-            : CairoFont.WhiteDetailText().WithOrientation(EnumTextOrientation.Center);
+            ? Ae2Gui.Label().WithOrientation(EnumTextOrientation.Center).WithColor(Ae2Gui.Warn)
+            : Ae2Gui.Label().WithOrientation(EnumTextOrientation.Center);
+
+        var sheet = Ae2Gui.Window(_capi, frame, Close.fixedX, Close.fixedY, Close.fixedWidth);
+        if (gridBounds != null)
+            sheet.Fill(scroll.fixedX, scroll.fixedY, scroll.fixedWidth, scroll.fixedHeight, Ae2Gui.Muted[0], Ae2Gui.Muted[1], Ae2Gui.Muted[2]);
 
         var compo = _capi.Gui
             .CreateCompo("estorageorder", DialogBounds())
             .BeginChildElements(bg)
-            .AddStaticElement(new GuiElementTermFrame(_capi, frame, closeX, closeY, CloseS))
-            .AddStaticElement(new GuiElementTermPanel(_capi, header))
-            .AddStaticElement(new GuiElementTermPanel(_capi, bodyTray))
-            .AddStaticText(heading, CairoFont.WhiteDetailText().WithFontSize(16), title);
+            .AddStaticElement(sheet)
+            .AddStaticText(heading, Ae2Gui.Title(), title);
 
-        if (showGrid)
+        if (gridBounds != null)
         {
             var visible = VisibleRows();
-            compo.AddInteractiveElement(new GuiElementPlanGrid(_capi, _grid, visible));
-            AddLabels(compo, _grid.fixedX, gridY, visible);
-            compo.AddVerticalScrollbar(OnPlanScroll, scroll, "planScroll");
+            compo.AddInteractiveElement(new GuiElementPlanGrid(_capi, gridBounds, visible));
+            AddLabels(compo, gridBounds.fixedX, gridBounds.fixedY, visible);
+            compo.AddScroll(OnPlanScroll, scroll, "planScroll");
         }
         else
-            compo.AddStaticText(string.IsNullOrEmpty(_note) ? cpuText : _note, CairoFont.WhiteDetailText(), note);
+            compo.AddStaticText(string.IsNullOrEmpty(_note) ? cpuText : _note, Ae2Gui.Label(), note);
 
-        compo.AddStaticElement(new GuiElementSolid(_capi, cpu, 0.06, 0.06, 0.06));
         compo.AddStaticText(cpuText, cpuFont, cpu);
-        compo.AddStaticText(
-            Lang.Get("electricalprogressivestorage:estorage-order-sim"),
-            CairoFont.WhiteDetailText().WithOrientation(EnumTextOrientation.Center),
-            sim);
-        compo.AddSmallButton(Lang.Get("electricalprogressivestorage:estorage-order-cancel"), () => { _closePane(); return true; }, cancel, EnumButtonStyle.Normal, "cancel");
+        compo.AddInteractiveElement(new GuiElementAe2Button(_capi, cancel, Lang.Get("electricalprogressivestorage:estorage-order-cancel"), () => _closePane()), "cancel");
         if (start != null)
-            compo.AddSmallButton(Lang.Get("electricalprogressivestorage:estorage-order-start"), Confirm, start, EnumButtonStyle.Normal, "ok");
+            compo.AddInteractiveElement(new GuiElementAe2Button(_capi, start, Lang.Get("electricalprogressivestorage:estorage-order-start"), () => Confirm()), "ok");
 
-        var composed = compo.EndChildElements().Compose();
-        if (!showGrid)
+        var composed = compo.EndChildElements().Compose(false);
+        if (gridBounds == null)
             return composed;
 
         _suppress = true;
@@ -248,7 +220,7 @@ public sealed class EStorageOrderPane
 
     private void AddLabels(GuiComposer compo, double edge, double gridY, List<PlanRow> visible)
     {
-        var textW = GuiElementPlanGrid.CellW - GuiElementPlanGrid.CellH - 8;
+        var textW = GuiElementPlanGrid.CellW - 64;
         for (var i = 0; i < visible.Count; i++)
         {
             var row = visible[i];
@@ -258,32 +230,32 @@ public sealed class EStorageOrderPane
             if (row.Kind == 1)
             {
                 text = Lang.Get("electricalprogressivestorage:estorage-order-make") + " " + count;
-                font = CairoFont.WhiteDetailText().WithFontSize(14);
+                font = Ae2Gui.Label();
             }
             else if (row.Kind == 2)
             {
                 text = Lang.Get("electricalprogressivestorage:estorage-order-miss", count);
-                font = CairoFont.WhiteDetailText().WithFontSize(14).WithColor([0.92, 0.38, 0.32, 1]);
+                font = Ae2Gui.Label().WithColor(Ae2Gui.Warn);
             }
             else if (row.Kind == 3)
             {
                 text = Lang.Get("electricalprogressivestorage:estorage-order-liquid-have", LiquidCraft.LitresText(row.Count));
-                font = CairoFont.WhiteDetailText().WithFontSize(14);
+                font = Ae2Gui.Label();
             }
             else if (row.Kind == 4)
             {
                 text = Lang.Get("electricalprogressivestorage:estorage-order-liquid-miss", LiquidCraft.LitresText(row.Count));
-                font = CairoFont.WhiteDetailText().WithFontSize(14).WithColor([0.92, 0.38, 0.32, 1]);
+                font = Ae2Gui.Label().WithColor(Ae2Gui.Warn);
             }
             else
             {
                 text = Lang.Get("electricalprogressivestorage:estorage-order-have", count);
-                font = CairoFont.WhiteDetailText().WithFontSize(14);
+                font = Ae2Gui.Label();
             }
 
             var x = edge + (i % GuiElementPlanGrid.Cols) * (GuiElementPlanGrid.CellW + GuiElementPlanGrid.Gap);
             var y = gridY + (i / GuiElementPlanGrid.Cols) * RowStride();
-            compo.AddStaticText(text, font, ElementBounds.Fixed(x + 6, y + 6, textW, GuiElementPlanGrid.CellH - 8));
+            compo.AddStaticText(text, font, ElementBounds.Fixed(x + 8, y + 8, textW, GuiElementPlanGrid.CellH - 16));
         }
     }
 

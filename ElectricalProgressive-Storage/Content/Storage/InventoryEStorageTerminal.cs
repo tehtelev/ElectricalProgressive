@@ -463,8 +463,12 @@ public class InventoryEStorageTerminal : InventoryGeneric
         {
             if (stacks.Count >= Count)
                 return;
-            if (Api.World.BlockAccessor.GetBlockEntity(pos) is BlockEntityEStorageInterface panel)
+            foreach (var panel in PanelStack.Interfaces(Api.World, pos))
+            {
+                if (stacks.Count >= Count)
+                    return;
                 panel.CollectOutputs(stacks, Count);
+            }
         }
     }
 

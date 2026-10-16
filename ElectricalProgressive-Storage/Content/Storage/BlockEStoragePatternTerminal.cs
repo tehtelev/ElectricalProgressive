@@ -42,6 +42,56 @@ public class ItemSlotPatternOut : ItemSlot
 }
 
 /// <summary>
+/// Клетка рецепта. Клик кладёт копию стопки с курсора и саму стопку не забирает.
+/// </summary>
+public class ItemSlotPatternSample : ItemSlot
+{
+    public const string SampleKey = "estorageSample";
+
+    public ItemSlotPatternSample(InventoryBase inventory) : base(inventory)
+    {
+    }
+
+    public static bool IsSample(ItemStack? stack) => stack?.Attributes.GetBool(SampleKey) == true;
+
+    public override bool CanHold(ItemSlot sourceSlot) => false;
+
+    public override bool CanTakeFrom(ItemSlot sourceSlot, EnumMergePriority priority = EnumMergePriority.AutoMerge) => false;
+
+    public override bool CanTake() => Itemstack != null && !IsSample(Itemstack);
+
+    public override void ActivateSlot(ItemSlot sourceSlot, ref ItemStackMoveOperation op)
+    {
+        if (Itemstack != null && !IsSample(Itemstack))
+        {
+            base.ActivateSlot(sourceSlot, ref op);
+            return;
+        }
+
+        var held = sourceSlot.Itemstack;
+        if (held == null || sourceSlot.Empty)
+        {
+            if (Itemstack == null)
+                return;
+            Itemstack = null;
+            MarkDirty();
+            return;
+        }
+
+        var copy = held.Clone();
+        var size = op.MouseButton == EnumMouseButton.Right ? 1 : held.StackSize;
+        if (size < 1)
+            size = 1;
+        if (size > 999)
+            size = 999;
+        copy.StackSize = size;
+        copy.Attributes.SetBool(SampleKey, true);
+        Itemstack = copy;
+        MarkDirty();
+    }
+}
+
+/// <summary>
 /// Выход крафта только показывает рецепт верстака. Забрать его нельзя.
 /// </summary>
 public class ItemSlotPatternPreview : ItemSlot
@@ -89,7 +139,7 @@ public class BlockEntityEStoragePatternTerminal : BlockEntityEStorageTerminal
     public override void Initialize(ICoreAPI api)
     {
         base.Initialize(api);
-        _bench.LateInitialize("estoragepatternbench-" + Pos.X + "/" + Pos.Y + "/" + Pos.Z, api);
+        _bench.LateInitialize("estoragepatternbench-" + Pos.X + "/" + Pos.Y + "/" + Pos.Z + Seat, api);
         if (_migrated && api.Side == EnumAppSide.Server)
             MarkDirty(true);
     }
@@ -130,6 +180,9 @@ public class BlockEntityEStoragePatternTerminal : BlockEntityEStorageTerminal
 
     public override void OnReceivedClientPacket(IPlayer fromPlayer, int packetid, byte[] data)
     {
+        if (Stack.Forward(this, fromPlayer, ref packetid, data))
+            return;
+
         if (packetid == PacketId && Api.Side == EnumAppSide.Server && data is { Length: >= 4 })
         {
             if (data[0] == 10 && data.Length >= 21)
@@ -142,6 +195,9 @@ public class BlockEntityEStoragePatternTerminal : BlockEntityEStorageTerminal
         base.OnReceivedClientPacket(fromPlayer, packetid, data);
     }
 
+    public override bool Holds(string inventoryId)
+        => base.Holds(inventoryId) || inventoryId == _bench.InventoryID;
+
     public override void OnBlockBroken(IPlayer? byPlayer = null)
     {
         if (Api.World != null)
@@ -151,7 +207,7 @@ public class BlockEntityEStoragePatternTerminal : BlockEntityEStorageTerminal
                 if (i == CraftOutSlot)
                     continue;
                 var stack = _bench[i].Itemstack;
-                if (stack == null || _bench[i].Empty)
+                if (stack == null || _bench[i].Empty || ItemSlotPatternSample.IsSample(stack))
                     continue;
                 Api.World.SpawnItemEntity(stack.Clone(), Pos.ToVec3d().Add(0.5, 0.5, 0.5));
                 _bench[i].Itemstack = null;
@@ -203,7 +259,11 @@ public class BlockEntityEStoragePatternTerminal : BlockEntityEStorageTerminal
             WheelDir = BitConverter.ToInt32(data, 17),
             ActingPlayer = player
         };
-        _bench.ActivateSlot(slot, mouse, ref op);
+        var target = _bench[slot];
+        if (target is ItemSlotPatternSample)
+            target.ActivateSlot(mouse, ref op);
+        else
+            _bench.ActivateSlot(slot, mouse, ref op);
         RefreshCraft(player);
         MarkDirty(true);
     }
@@ -266,7 +326,7 @@ public class BlockEntityEStoragePatternTerminal : BlockEntityEStorageTerminal
     {
         var grid = new ItemStack?[9];
         for (var i = 0; i < 9; i++)
-            grid[i] = _bench[GridSlot + i].Itemstack?.Clone();
+            grid[i] = RecipeCopy(_bench[GridSlot + i].Itemstack);
         return grid;
     }
 
@@ -274,7 +334,7 @@ public class BlockEntityEStoragePatternTerminal : BlockEntityEStorageTerminal
     {
         var outputs = new ItemStack?[3];
         for (var i = 0; i < 3; i++)
-            outputs[i] = _bench[ProcessSlot + i].Itemstack?.Clone();
+            outputs[i] = RecipeCopy(_bench[ProcessSlot + i].Itemstack);
         return outputs;
     }
 
@@ -325,7 +385,18 @@ public class BlockEntityEStoragePatternTerminal : BlockEntityEStorageTerminal
             return new ItemSlotPatternOut(inventory);
         if (index == CraftOutSlot)
             return new ItemSlotPatternPreview(inventory);
+        if ((index >= GridSlot && index < GridSlot + 9) || (index >= ProcessSlot && index < ProcessSlot + 3))
+            return new ItemSlotPatternSample(inventory);
         return new ItemSlot(inventory);
+    }
+
+    private static ItemStack? RecipeCopy(ItemStack? stack)
+    {
+        if (stack == null)
+            return null;
+        var copy = stack.Clone();
+        copy.Attributes.RemoveAttribute(ItemSlotPatternSample.SampleKey);
+        return copy;
     }
 
     private static ItemStack? ReadStack(IAttribute? attribute, IWorldAccessor world)

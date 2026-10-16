@@ -9,24 +9,29 @@
     "estorage": [ "*" ]
   },
   "guiTransform": {
-    "translation": { "x": 0, "y": 2, "z": 0 },
-    "rotation": { "x": -70, "y": 20, "z": 0 },
-    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
-    "scale": 2.2
+    "rotation": { "x": 14, "y": -28, "z": 0 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.5 },
+    "scale": 1.15,
+    "rotate": false
   },
   "fpHandTransform": {
-    "rotation": { "x": 20, "y": 90, "z": 0 },
-    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
-    "scale": 1.6
+    "translation": { "x": 0, "y": -0.12, "z": 0.05 },
+    "rotation": { "x": 12, "y": -24, "z": 4 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.5 },
+    "scale": 1.35,
+    "rotate": false
   },
   "tpHandTransform": {
-    "translation": { "x": -0.8, "y": -0.4, "z": -0.6 },
-    "rotation": { "x": 0, "y": 20, "z": 90 },
-    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
-    "scale": 0.7
+    "translation": { "x": -0.42, "y": -0.18, "z": -0.32 },
+    "rotation": { "x": 8, "y": 16, "z": 0 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.5 },
+    "scale": 0.5,
+    "rotate": false
   },
   "groundTransform": {
-    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
-    "scale": 3
+    "rotation": { "x": 0, "y": 20, "z": 0 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.5 },
+    "scale": 2.1,
+    "rotate": false
   }
 }

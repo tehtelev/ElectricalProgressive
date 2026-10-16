@@ -1,0 +1,13 @@
+Applied Energistics 2 textures and models
+Copyright (c) 2020 Ridanisaurus Rid
+Copyright (c) 2013-2020 AlgorithmX2 and contributors
+
+These textures and models are licensed under the Creative Commons
+Attribution-NonCommercial-ShareAlike 3.0 Unported License (CC BY-NC-SA 3.0).
+https://creativecommons.org/licenses/by-nc-sa/3.0/
+
+They were copied, at the request of this mod's author, from
+https://github.com/AppliedEnergistics/Applied-Energistics-2
+and translated from Minecraft model JSON into Vintage Story shape JSON.
+The geometry, UV coordinates and PNG files are the AE2 assets.
+Non-commercial use only. Share-alike applies to these assets.

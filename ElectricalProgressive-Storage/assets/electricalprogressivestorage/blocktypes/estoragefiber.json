@@ -10,7 +10,7 @@
     }
   },
   "creativeinventory": { "general": [ "*" ], "estorage": [ "*" ] },
-  "shape": { "base": "block/cable" },
+  "shape": { "base": "block/estoragecable/part" },
   "shapeInventory": { "base": "electricalprogressivebasics:block/ecable/ecable-single/ecable-32v-single-block" },
   "textures": {
     "cable": { "base": "block/estoragefiber" },

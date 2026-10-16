@@ -10,7 +10,7 @@ using Vintagestory.API.Common;
     "Electrical Progressive: Storage",
     "electricalprogressivestorage",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
-    Description = "Network storage: controller, drive, disks, liquid cells, terminals, a pattern encoder, an interface, an assembler and crafting processors.",
+    Description = "Network storage: controller, drive, disks, liquid cells, terminals, a crafting terminal, a pattern encoder, an interface, an assembler, import and export buses, and crafting processors.",
     Version = "1.0.0",
     Authors = ["Tehtelev", "Kotl"]
 )]
@@ -42,6 +42,7 @@ public class ElectricalProgressiveStorage : ModSystem
         api.RegisterBlockClass("BlockEStorageDrive", typeof(BlockEStorageDrive));
         api.RegisterBlockClass("BlockEStorageTerminal", typeof(BlockEStorageTerminal));
         api.RegisterBlockClass("BlockEStorageInterface", typeof(BlockEStorageInterface));
+        api.RegisterBlockClass("BlockEStorageBus", typeof(BlockEStorageBus));
         api.RegisterBlockClass("BlockEStorageProcessor", typeof(BlockEStorageProcessor));
         api.RegisterBlockClass("BlockEStorageAssembler", typeof(BlockEStorageAssembler));
 
@@ -51,7 +52,9 @@ public class ElectricalProgressiveStorage : ModSystem
         api.RegisterBlockEntityClass("BlockEntityEStorageTerminal", typeof(BlockEntityEStorageTerminal));
         api.RegisterBlockEntityClass("BlockEntityEStorageLiquidTerminal", typeof(BlockEntityEStorageLiquidTerminal));
         api.RegisterBlockEntityClass("BlockEntityEStoragePatternTerminal", typeof(BlockEntityEStoragePatternTerminal));
+        api.RegisterBlockEntityClass("BlockEntityEStorageCraftTerminal", typeof(BlockEntityEStorageCraftTerminal));
         api.RegisterBlockEntityClass("BlockEntityEStorageInterface", typeof(BlockEntityEStorageInterface));
+        api.RegisterBlockEntityClass("BlockEntityEStorageBus", typeof(BlockEntityEStorageBus));
         api.RegisterBlockEntityClass("BlockEntityEStorageProcessor", typeof(BlockEntityEStorageProcessor));
         api.RegisterBlockEntityClass("BlockEntityEStorageAssembler", typeof(BlockEntityEStorageAssembler));
 
