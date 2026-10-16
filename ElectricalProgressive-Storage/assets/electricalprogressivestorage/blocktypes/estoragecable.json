@@ -20,8 +20,8 @@
   "shape": { "base": "block/estoragecable/part" },
   "shapeInventory": { "base": "electricalprogressivebasics:block/ecable/ecable-single/ecable-32v-single-block" },
   "textures": {
-    "cable": { "base": "game:item/resource/ungraded/clearquartz" },
-    "material": { "base": "game:item/resource/ungraded/clearquartz" },
+    "cable": { "base": "block/estoragecableglass" },
+    "material": { "base": "block/estoragecableglass" },
     "gear": { "base": "game:item/resource/temporalgear" }
   },
   "guiTransform": {

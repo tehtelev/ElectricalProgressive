@@ -126,29 +126,6 @@ public class BlockEStorageCable : BlockEStoragePart
     private static readonly Vec3d BoxOrigin = new(0.5, 0.5, 0.5);
     private static readonly Vec3f MeshOrigin = new(0.5f, 0.5f, 0.5f);
 
-    // Высота задней стороны в локальной оси панели: 1 интерфейс, 2 импорт, 3 экспорт.
-    private readonly record struct HugBand(float Z0, float Z1, float Lift);
-    private static readonly HugBand[] NoBands = [];
-    private static readonly HugBand[] InterfaceBands =
-    [
-        new(-1f, 0.125f, 0f),
-        new(0.125f, 0.25f, 2f / 16f),
-        new(0.25f, 1f, 3f / 16f)
-    ];
-    private static readonly HugBand[] ImportBands =
-    [
-        new(-1f, 0.25f, 0f),
-        new(0.25f, 0.3125f, 2f / 16f),
-        new(0.3125f, 0.375f, 3f / 16f),
-        new(0.375f, 1f, 5f / 16f)
-    ];
-    private static readonly HugBand[] ExportBands =
-    [
-        new(-1f, 0.25f, 0f),
-        new(0.25f, 0.375f, 4f / 16f),
-        new(0.375f, 1f, 5f / 16f)
-    ];
-
     private readonly record struct Seg(Facing Bit, float Rx, float Ry, float Rz, float Tx, float Ty, float Tz);
 
     private static readonly (Facing All, float Fx, float Fy, float Fz, Seg[] Segs)[] Layout =
@@ -504,21 +481,17 @@ public class BlockEStorageCable : BlockEStoragePart
             var count = LinesOn(all, lines);
             var face = FaceOf(all);
             var kind = face == null ? 0 : KindOn(seats, face.Index);
-            var joint = FixBoxFor(count);
+            // Жила на шине и интерфейсе без своей обводки: наведение показывает только панель.
             if (kind != 0)
-            {
-                var rear = RearOf(kind);
-                joint.Y1 += rear;
-                joint.Y2 += rear;
-            }
+                continue;
 
-            AddBox(map, all, joint.RotatedCopy(fx, fy, fz, BoxOrigin));
+            AddBox(map, all, FixBoxFor(count).RotatedCopy(fx, fy, fz, BoxOrigin));
             var part = PartBoxFor(count);
             foreach (var seg in segs)
             {
                 if ((connection & seg.Bit) == 0)
                     continue;
-                AddStrandBoxes(map, seg.Bit, part, kind, seg.Rx, seg.Ry, seg.Rz);
+                AddStrandBoxes(map, seg.Bit, part, seg.Rx, seg.Ry, seg.Rz);
             }
         }
 
@@ -939,44 +912,106 @@ public class BlockEStorageCable : BlockEStoragePart
     }
 
     /// <summary>
-    /// Жила снаружи панели лежит на грани, по силуэту поднимается на заднюю сторону и доходит до центра воротника.
+    /// Шина: один прямой кусок до воротника. Интерфейс тонкий и широкий, поэтому
+    /// жила поднимается снаружи плиты и дальше идёт по её задней стороне.
     /// </summary>
     private static void AddHugged(ref MeshData? built, MeshData piece, float ox, float oy, bool half, float rx, float ry, float rz, float extra, int kind)
     {
-        var prevLift = 0f;
-        var have = false;
-        foreach (var band in Bands(kind))
+        if (kind != 1)
         {
             var mesh = Prepared(piece, ox, oy, half, extra);
-            if (!FitStrand(mesh, band.Z0, band.Z1, band.Lift))
-                continue;
+            LiftToRear(mesh, RearOf(kind));
             Finish(ref built, mesh, rx, ry, rz);
-            if (have && band.Lift > prevLift + 0.01f)
-                AddRiser(ref built, piece, ox, oy, half, rx, ry, rz, band.Z0, prevLift, band.Lift);
-            prevLift = band.Lift;
-            have = true;
+            return;
         }
+
+        var outer = Prepared(piece, ox, oy, half, extra);
+        if (!StrandZ(outer, out var zLo, out var zHi))
+            return;
+        const float rim = 0.125f;
+        const float slab = 2f / 16f;
+        const float collar = 3f / 16f;
+        if (rim <= zLo + 0.02f || rim >= zHi - 0.02f)
+        {
+            LiftToRear(outer, collar);
+            Finish(ref built, outer, rx, ry, rz);
+            return;
+        }
+
+        var inner = Prepared(piece, ox, oy, half, extra);
+        ClipLift(outer, zLo, rim, 0f, slab);
+        ClipLift(inner, rim, zHi, slab, collar);
+        Finish(ref built, outer, rx, ry, rz);
+        Finish(ref built, inner, rx, ry, rz);
     }
 
-    private static void AddRiser(ref MeshData? built, MeshData piece, float ox, float oy, bool half, float rx, float ry, float rz, float zCut, float y0, float y1)
+    private static void ClipLift(MeshData mesh, float z0, float z1, float y0, float y1)
     {
-        if (y1 - y0 < 0.01f)
+        if (!StrandZ(mesh, out var zLo, out var zHi))
             return;
-        var mesh = piece.Clone();
-        if (half)
-            mesh.Scale(new Vec3f(0.5f, 0f, 0.5f), 1f, 0.5f, 1f);
-        var deg = GameMath.DEG2RAD;
-        mesh.Rotate(MeshOrigin, 90f * deg, 0f, 0f);
-        if (!Bounds(mesh, out _, out var yLo, out var zLo, out _, out var yHi, out var zHi))
+        var span = zHi - zLo;
+        if (span < 0.0001f || z1 - z0 < 0.01f)
             return;
-        var ySpan = yHi - yLo;
-        var zSpan = zHi - zLo;
-        if (ySpan < 0.0001f || zSpan < 0.0001f)
+        mesh.Scale(new Vec3f(0.5f, 0f, zLo), 1f, 1f, (z1 - z0) / span);
+        if (z0 != zLo)
+            mesh.Translate(0f, 0f, z0 - zLo);
+        var xyz = mesh.xyz;
+        if (xyz == null)
             return;
-        var thick = half ? 0.5f / 16f : 1f / 16f;
-        mesh.Scale(new Vec3f(0.5f, yLo, zLo), 1f, (y1 - y0) / ySpan, thick / zSpan);
-        mesh.Translate(ox, y0 - yLo + oy, zCut - thick * 0.5f - zLo);
-        Finish(ref built, mesh, rx, ry, rz);
+        var count = mesh.VerticesCount * 3;
+        if (count > xyz.Length)
+            count = xyz.Length;
+        var rise = z1 - z0;
+        for (var i = 0; i + 2 < count; i += 3)
+            xyz[i + 1] += y0 + (y1 - y0) * (xyz[i + 2] - z0) / rise;
+    }
+
+    private static bool StrandZ(MeshData mesh, out float zLo, out float zHi)
+    {
+        zLo = float.MaxValue;
+        zHi = float.MinValue;
+        var xyz = mesh.xyz;
+        if (xyz == null || mesh.VerticesCount == 0)
+            return false;
+        var count = mesh.VerticesCount * 3;
+        if (count > xyz.Length)
+            count = xyz.Length;
+        for (var i = 2; i < count; i += 3)
+        {
+            var z = xyz[i];
+            if (z < zLo)
+                zLo = z;
+            if (z > zHi)
+                zHi = z;
+        }
+
+        return zHi > zLo + 0.0001f;
+    }
+
+    private static void LiftToRear(MeshData mesh, float rear)
+    {
+        var xyz = mesh.xyz;
+        if (xyz == null || rear == 0f || mesh.VerticesCount == 0)
+            return;
+        var count = mesh.VerticesCount * 3;
+        if (count > xyz.Length)
+            count = xyz.Length;
+        var zLo = float.MaxValue;
+        var zHi = float.MinValue;
+        for (var i = 2; i < count; i += 3)
+        {
+            var z = xyz[i];
+            if (z < zLo)
+                zLo = z;
+            if (z > zHi)
+                zHi = z;
+        }
+
+        var span = zHi - zLo;
+        if (span < 0.0001f)
+            return;
+        for (var i = 0; i + 2 < count; i += 3)
+            xyz[i + 1] += rear * (xyz[i + 2] - zLo) / span;
     }
 
     private static MeshData Prepared(MeshData piece, float ox, float oy, bool half, float extra)
@@ -991,61 +1026,11 @@ public class BlockEStorageCable : BlockEStoragePart
         return mesh;
     }
 
-    private static bool FitStrand(MeshData mesh, float z0, float z1, float lift)
-    {
-        if (!RangeZ(mesh, out var zLo, out var zHi))
-            return false;
-        var a = z0 > zLo ? z0 : zLo;
-        var b = z1 < zHi ? z1 : zHi;
-        var span = zHi - zLo;
-        if (b - a < 0.01f || span < 0.0001f)
-            return false;
-        mesh.Scale(new Vec3f(0.5f, 0f, zLo), 1f, 1f, (b - a) / span);
-        if (lift != 0f || a != zLo)
-            mesh.Translate(0f, lift, a - zLo);
-        return true;
-    }
-
     private static void Finish(ref MeshData? built, MeshData mesh, float rx, float ry, float rz)
     {
         var deg = GameMath.DEG2RAD;
         mesh.Rotate(MeshOrigin, rx * deg, ry * deg, rz * deg);
         AddMesh(ref built, mesh);
-    }
-
-    private static bool RangeZ(MeshData mesh, out float zLo, out float zHi)
-    {
-        zLo = float.MaxValue;
-        zHi = float.MinValue;
-        if (!Bounds(mesh, out _, out _, out zLo, out _, out _, out zHi))
-            return false;
-        return zHi > zLo + 0.0001f;
-    }
-
-    private static bool Bounds(MeshData mesh, out float xLo, out float yLo, out float zLo, out float xHi, out float yHi, out float zHi)
-    {
-        xLo = yLo = zLo = float.MaxValue;
-        xHi = yHi = zHi = float.MinValue;
-        var xyz = mesh.xyz;
-        if (xyz == null || mesh.VerticesCount == 0)
-            return false;
-        var count = mesh.VerticesCount * 3;
-        if (count > xyz.Length)
-            count = xyz.Length;
-        for (var i = 0; i + 2 < count; i += 3)
-        {
-            var x = xyz[i];
-            var y = xyz[i + 1];
-            var z = xyz[i + 2];
-            if (x < xLo) xLo = x;
-            if (y < yLo) yLo = y;
-            if (z < zLo) zLo = z;
-            if (x > xHi) xHi = x;
-            if (y > yHi) yHi = y;
-            if (z > zHi) zHi = z;
-        }
-
-        return xHi > xLo && yHi > yLo && zHi > zLo;
     }
 
     private static void AddJoint(ref MeshData? built, MeshData piece, int lines, float rx, float ry, float rz, float tx, float ty, float tz, float lift)
@@ -1068,14 +1053,6 @@ public class BlockEStorageCable : BlockEStoragePart
             mesh.Translate(tx, ty, tz);
         AddMesh(ref built, mesh);
     }
-
-    private static HugBand[] Bands(int kind) => kind switch
-    {
-        1 => InterfaceBands,
-        2 => ImportBands,
-        3 => ExportBands,
-        _ => NoBands
-    };
 
     private static float RearOf(int kind) => kind switch
     {
@@ -1118,42 +1095,8 @@ public class BlockEStorageCable : BlockEStoragePart
         return kind << (face.Index * 2);
     }
 
-    private static void AddStrandBoxes(Dictionary<Facing, Cuboidf[]> map, Facing bit, Cuboidf part, int kind, float rx, float ry, float rz)
-    {
-        if (kind == 0)
-        {
-            AddBox(map, bit, part.Clone().RotatedCopy(rx, ry, rz, BoxOrigin));
-            return;
-        }
-
-        var prevLift = 0f;
-        var have = false;
-        foreach (var band in Bands(kind))
-        {
-            var a = band.Z0 < part.Z1 ? part.Z1 : band.Z0;
-            var b = band.Z1 > part.Z2 ? part.Z2 : band.Z1;
-            if (b - a < 0.01f)
-                continue;
-            var box = part.Clone();
-            box.Z1 = a;
-            box.Z2 = b;
-            box.Y1 += band.Lift;
-            box.Y2 += band.Lift;
-            AddBox(map, bit, box.RotatedCopy(rx, ry, rz, BoxOrigin));
-            if (have && band.Lift > prevLift + 0.01f)
-            {
-                var riser = part.Clone();
-                riser.Z1 = band.Z0 - 0.04f;
-                riser.Z2 = band.Z0 + 0.04f;
-                riser.Y1 = part.Y1 + prevLift;
-                riser.Y2 = part.Y2 + band.Lift;
-                AddBox(map, bit, riser.RotatedCopy(rx, ry, rz, BoxOrigin));
-            }
-
-            prevLift = band.Lift;
-            have = true;
-        }
-    }
+    private static void AddStrandBoxes(Dictionary<Facing, Cuboidf[]> map, Facing bit, Cuboidf part, float rx, float ry, float rz)
+        => AddBox(map, bit, part.Clone().RotatedCopy(rx, ry, rz, BoxOrigin));
 
     /// <summary>
     /// Жила в той же клетке, что и панель: блок не меняется, рисуется кабель.
