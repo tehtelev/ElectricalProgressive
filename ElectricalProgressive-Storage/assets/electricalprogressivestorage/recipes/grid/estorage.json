@@ -1,343 +1,432 @@
 [
   {
-    "ingredientPattern": "CG",
-    "width": 2,
-    "height": 1,
-    "ingredients": {
-      "C": { "type": "item", "code": "game:metalplate-copper" },
-      "G": { "type": "block", "code": "game:glass-plain" }
-    },
-    "output": {
-      "type": "block",
-      "code": "electricalprogressivestorage:estoragecable",
-      "quantity": 8
-    }
-  },
-  {
-    "ingredientPattern": "G,C",
-    "width": 1,
+    "ingredientPattern": "WQW,L_L",
+    "width": 3,
     "height": 2,
     "ingredients": {
-      "G": { "type": "block", "code": "game:glass-plain" },
-      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" }
+      "W": { "type": "block", "code": "electricalprogressivebasics:ecable-32v-copper-single-part" },
+      "Q": { "type": "item", "code": "game:clearquartz" },
+      "L": { "type": "item", "code": "electricalprogressivebasics:coil" }
     },
-    "output": { "type": "block", "code": "electricalprogressivestorage:estoragefiber", "quantity": 4 }
+    "output": { "type": "block", "code": "electricalprogressivestorage:estoragecable", "quantity": 4 }
   },
   {
-    "ingredientPattern": "CCC,LSL,PPP",
+    "ingredientPattern": "RQR,ATA,VSV",
     "width": 3,
     "height": 3,
     "ingredients": {
-      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
-      "L": { "type": "item", "code": "electricalprogressivebasics:coil" },
-      "S": { "type": "item", "code": "game:metalplate-steel" },
-      "P": { "type": "item", "code": "game:metalplate-copper" }
+      "R": { "type": "item", "code": "electricalprogressivebasics:eresistor" },
+      "Q": { "type": "item", "code": "game:clearquartz" },
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" },
+      "T": { "type": "item", "code": "game:gear-temporal" },
+      "V": { "type": "block", "code": "electricalprogressivebasics:ecable-128v-copper-single-part" },
+      "S": { "type": "item", "code": "electricalprogressivebasics:eschematic" }
     },
-    "output": {
-      "type": "block",
-      "code": "electricalprogressivestorage:estoragecontroller-offline"
-    }
+    "output": { "type": "block", "code": "electricalprogressivestorage:estoragecontroller-offline" }
   },
   {
-    "ingredientPattern": "PCP,CBC,PCP",
+    "ingredientPattern": "QCQ,ASA,RLR",
     "width": 3,
     "height": 3,
     "ingredients": {
-      "P": { "type": "item", "code": "game:metalplate-iron" },
+      "Q": { "type": "item", "code": "game:clearquartz" },
       "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
-      "B": { "type": "block", "code": "game:chest-*" }
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" },
+      "S": { "type": "item", "code": "electricalprogressivebasics:eschematic" },
+      "R": { "type": "item", "code": "electricalprogressivebasics:eresistor" },
+      "L": { "type": "item", "code": "electricalprogressivebasics:coil" }
     },
-    "output": {
-      "type": "block",
-      "code": "electricalprogressivestorage:estoragedrive-south"
-    }
+    "output": { "type": "block", "code": "electricalprogressivestorage:estoragedrive-south" }
   },
   {
-    "ingredientPattern": "GGG,CPC,PPP",
+    "ingredientPattern": "_G_,RCR,AQA",
     "width": 3,
     "height": 3,
     "ingredients": {
-      "G": { "type": "block", "code": "game:glass-plain" },
+      "G": { "type": "block", "code": "game:glass-quartz" },
+      "R": { "type": "item", "code": "electricalprogressivebasics:eresistor" },
       "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
-      "P": { "type": "item", "code": "game:metalplate-copper" }
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" },
+      "Q": { "type": "item", "code": "game:clearquartz" }
     },
-    "output": {
-      "type": "block",
-      "code": "electricalprogressivestorage:estorageterminal"
-    }
+    "output": { "type": "block", "code": "electricalprogressivestorage:estorageterminal" }
   },
   {
-    "ingredientPattern": "T,G",
-    "width": 1,
-    "height": 2,
-    "ingredients": {
-      "T": { "type": "item", "code": "game:metalplate-tinbronze" },
-      "G": { "type": "block", "code": "game:glass-plain" }
-    },
-    "output": {
-      "type": "item",
-      "code": "electricalprogressivestorage:estoragedisk-1k"
-    }
-  },
-  {
-    "ingredientPattern": "TT,GG",
-    "width": 2,
-    "height": 2,
-    "ingredients": {
-      "T": { "type": "item", "code": "game:metalplate-tinbronze" },
-      "G": { "type": "block", "code": "game:glass-plain" }
-    },
-    "output": {
-      "type": "item",
-      "code": "electricalprogressivestorage:estoragedisk-4k"
-    }
-  },
-  {
-    "ingredientPattern": "IP,GG",
-    "width": 2,
-    "height": 2,
-    "ingredients": {
-      "I": { "type": "item", "code": "game:metalplate-iron" },
-      "P": { "type": "item", "code": "game:metalplate-copper" },
-      "G": { "type": "block", "code": "game:glass-plain" }
-    },
-    "output": {
-      "type": "item",
-      "code": "electricalprogressivestorage:estoragedisk-16k"
-    }
-  },
-  {
-    "ingredientPattern": "SP,GG",
-    "width": 2,
-    "height": 2,
-    "ingredients": {
-      "S": { "type": "item", "code": "game:metalplate-steel" },
-      "P": { "type": "item", "code": "game:metalplate-tinbronze" },
-      "G": { "type": "block", "code": "game:glass-plain" }
-    },
-    "output": {
-      "type": "item",
-      "code": "electricalprogressivestorage:estoragedisk-64k"
-    }
-  },
-  {
-    "ingredientPattern": "GBG,CPC,PPP",
+    "ingredientPattern": "QBQ,ATA,RRR",
     "width": 3,
     "height": 3,
     "ingredients": {
-      "G": { "type": "block", "code": "game:glass-plain" },
+      "Q": { "type": "item", "code": "game:clearquartz" },
       "B": { "type": "block", "code": "game:woodbucket" },
-      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
-      "P": { "type": "item", "code": "game:metalplate-copper" }
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" },
+      "T": { "type": "block", "code": "electricalprogressivestorage:estorageterminal" },
+      "R": { "type": "item", "code": "electricalprogressivebasics:eresistor" }
     },
-    "output": {
-      "type": "block",
-      "code": "electricalprogressivestorage:estorageliquidterminal"
-    }
+    "output": { "type": "block", "code": "electricalprogressivestorage:estorageliquidterminal" }
   },
   {
-    "ingredientPattern": "B,T,G",
-    "width": 1,
+    "ingredientPattern": "_R_,QPQ,_A_",
+    "width": 3,
     "height": 3,
     "ingredients": {
-      "B": { "type": "block", "code": "game:woodbucket" },
-      "T": { "type": "item", "code": "game:metalplate-tinbronze" },
-      "G": { "type": "block", "code": "game:glass-plain" }
-    },
-    "output": {
-      "type": "item",
-      "code": "electricalprogressivestorage:estoragecell-1k"
-    }
-  },
-  {
-    "ingredientPattern": "BT,GG",
-    "width": 2,
-    "height": 2,
-    "ingredients": {
-      "B": { "type": "block", "code": "game:woodbucket" },
-      "T": { "type": "item", "code": "game:metalplate-tinbronze" },
-      "G": { "type": "block", "code": "game:glass-plain" }
-    },
-    "output": {
-      "type": "item",
-      "code": "electricalprogressivestorage:estoragecell-4k"
-    }
-  },
-  {
-    "ingredientPattern": "BI,GG",
-    "width": 2,
-    "height": 2,
-    "ingredients": {
-      "B": { "type": "block", "code": "game:woodbucket" },
-      "I": { "type": "item", "code": "game:metalplate-iron" },
-      "G": { "type": "block", "code": "game:glass-plain" }
-    },
-    "output": {
-      "type": "item",
-      "code": "electricalprogressivestorage:estoragecell-16k"
-    }
-  },
-  {
-    "ingredientPattern": "BS,GG",
-    "width": 2,
-    "height": 2,
-    "ingredients": {
-      "B": { "type": "block", "code": "game:woodbucket" },
-      "S": { "type": "item", "code": "game:metalplate-steel" },
-      "G": { "type": "block", "code": "game:glass-plain" }
-    },
-    "output": {
-      "type": "item",
-      "code": "electricalprogressivestorage:estoragecell-64k"
-    }
-  },
-  {
-    "ingredientPattern": "P,C",
-    "width": 1,
-    "height": 2,
-    "ingredients": {
+      "R": { "type": "item", "code": "electricalprogressivebasics:eresistor" },
+      "Q": { "type": "item", "code": "game:clearquartz" },
       "P": { "type": "item", "code": "game:paper-parchment" },
-      "C": { "type": "item", "code": "game:metalplate-copper" }
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" }
     },
-    "output": {
-      "type": "item",
-      "code": "electricalprogressivestorage:estoragepattern",
-      "quantity": 2
-    }
+    "output": { "type": "item", "code": "electricalprogressivestorage:estoragepattern", "quantity": 2 }
   },
   {
-    "ingredientPattern": "T,P",
-    "width": 1,
-    "height": 2,
-    "ingredients": {
-      "T": { "type": "block", "code": "electricalprogressivestorage:estorageterminal" },
-      "P": { "type": "item", "code": "electricalprogressivestorage:estoragepattern" }
-    },
-    "output": {
-      "type": "block",
-      "code": "electricalprogressivestorage:estoragepatternterminal"
-    }
-  },
-  {
-    "ingredientPattern": "T,I",
-    "width": 1,
-    "height": 2,
-    "ingredients": {
-      "T": { "type": "block", "code": "electricalprogressivestorage:estorageterminal" },
-      "I": { "type": "item", "code": "game:metalplate-iron" }
-    },
-    "output": {
-      "type": "block",
-      "code": "electricalprogressivestorage:estoragecraftterminal"
-    }
-  },
-  {
-    "ingredientPattern": "IGI,CCC,PPP",
+    "ingredientPattern": "PQP,RTR,_S_",
     "width": 3,
     "height": 3,
     "ingredients": {
-      "I": { "type": "item", "code": "game:metalplate-iron" },
-      "G": { "type": "block", "code": "game:glass-plain" },
-      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
-      "P": { "type": "item", "code": "game:metalplate-copper" }
+      "P": { "type": "item", "code": "electricalprogressivestorage:estoragepattern" },
+      "Q": { "type": "item", "code": "game:clearquartz" },
+      "R": { "type": "item", "code": "electricalprogressivebasics:eresistor" },
+      "T": { "type": "block", "code": "electricalprogressivestorage:estorageterminal" },
+      "S": { "type": "item", "code": "electricalprogressivebasics:eschematic" }
     },
-    "output": {
-      "type": "block",
-      "code": "electricalprogressivestorage:estorageinterface"
-    }
+    "output": { "type": "block", "code": "electricalprogressivestorage:estoragepatternterminal" }
   },
   {
-    "ingredientPattern": "C,P,G",
-    "width": 1,
+    "ingredientPattern": "QAQ,RTR,_S_",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "Q": { "type": "item", "code": "game:clearquartz" },
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" },
+      "R": { "type": "item", "code": "electricalprogressivebasics:eresistor" },
+      "T": { "type": "block", "code": "electricalprogressivestorage:estorageterminal" },
+      "S": { "type": "item", "code": "electricalprogressivebasics:eschematic" }
+    },
+    "output": { "type": "block", "code": "electricalprogressivestorage:estoragecraftterminal" }
+  },
+  {
+    "ingredientPattern": "AQA,CSC,RRR",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" },
+      "Q": { "type": "item", "code": "game:clearquartz" },
+      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
+      "S": { "type": "item", "code": "electricalprogressivebasics:eschematic" },
+      "R": { "type": "item", "code": "electricalprogressivebasics:eresistor" }
+    },
+    "output": { "type": "block", "code": "electricalprogressivestorage:estorageinterface" }
+  },
+  {
+    "ingredientPattern": "CRC,QLQ,A_A",
+    "width": 3,
     "height": 3,
     "ingredients": {
       "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
-      "P": { "type": "item", "code": "game:metalplate-copper" },
-      "G": { "type": "block", "code": "game:glass-plain" }
+      "R": { "type": "item", "code": "electricalprogressivebasics:eresistor" },
+      "Q": { "type": "item", "code": "game:clearquartz" },
+      "L": { "type": "item", "code": "electricalprogressivebasics:coil" },
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" }
     },
-    "output": {
-      "type": "block",
-      "code": "electricalprogressivestorage:estorageprocessor-1k"
-    }
+    "output": { "type": "block", "code": "electricalprogressivestorage:estorageimport" }
   },
   {
-    "ingredientPattern": "D,P",
-    "width": 1,
+    "ingredientPattern": "CAC,QLQ,R_R",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" },
+      "Q": { "type": "item", "code": "game:clearquartz" },
+      "L": { "type": "item", "code": "electricalprogressivebasics:coil" },
+      "R": { "type": "item", "code": "electricalprogressivebasics:eresistor" }
+    },
+    "output": { "type": "block", "code": "electricalprogressivestorage:estorageexport" }
+  },
+  {
+    "ingredientPattern": "CQC,ASA,LLL",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
+      "Q": { "type": "item", "code": "game:clearquartz" },
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" },
+      "S": { "type": "item", "code": "electricalprogressivebasics:eschematic" },
+      "L": { "type": "item", "code": "electricalprogressivebasics:coil" }
+    },
+    "output": { "type": "block", "code": "electricalprogressivestorage:estorageassembler" }
+  },
+  {
+    "ingredientPattern": "GCG,CSC,AHA",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "G": { "type": "block", "code": "game:glass-quartz" },
+      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
+      "S": { "type": "item", "code": "electricalprogressivebasics:eschematic" },
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" },
+      "H": { "type": "item", "code": "electricalprogressivestorage:estoragediskhousing" }
+    },
+    "output": { "type": "block", "code": "electricalprogressivestorage:estorageioport-south" }
+  },
+  {
+    "ingredientPattern": "CAC,QSQ,RLR",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" },
+      "Q": { "type": "item", "code": "game:clearquartz" },
+      "S": { "type": "item", "code": "electricalprogressivebasics:eschematic" },
+      "R": { "type": "item", "code": "electricalprogressivebasics:eresistor" },
+      "L": { "type": "item", "code": "electricalprogressivebasics:coil" }
+    },
+    "output": { "type": "block", "code": "electricalprogressivestorage:estorageprocessor-1k" }
+  },
+  {
+    "ingredientPattern": "QDQ,APA",
+    "width": 3,
     "height": 2,
     "ingredients": {
+      "Q": { "type": "item", "code": "game:smokyquartz" },
       "D": { "type": "item", "code": "electricalprogressivestorage:estoragedisk-4k" },
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" },
       "P": { "type": "block", "code": "electricalprogressivestorage:estorageprocessor-1k" }
     },
-    "output": {
-      "type": "block",
-      "code": "electricalprogressivestorage:estorageprocessor-4k"
-    }
+    "output": { "type": "block", "code": "electricalprogressivestorage:estorageprocessor-4k" }
   },
   {
-    "ingredientPattern": "D,P",
-    "width": 1,
+    "ingredientPattern": "QDQ,APA",
+    "width": 3,
     "height": 2,
     "ingredients": {
+      "Q": { "type": "item", "code": "game:rosequartz" },
       "D": { "type": "item", "code": "electricalprogressivestorage:estoragedisk-16k" },
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" },
       "P": { "type": "block", "code": "electricalprogressivestorage:estorageprocessor-4k" }
     },
-    "output": {
-      "type": "block",
-      "code": "electricalprogressivestorage:estorageprocessor-16k"
-    }
+    "output": { "type": "block", "code": "electricalprogressivestorage:estorageprocessor-16k" }
   },
   {
-    "ingredientPattern": "D,P",
-    "width": 1,
+    "ingredientPattern": "QDQ,GPG",
+    "width": 3,
     "height": 2,
     "ingredients": {
+      "Q": { "type": "item", "code": "game:amethyst" },
       "D": { "type": "item", "code": "electricalprogressivestorage:estoragedisk-64k" },
+      "G": { "type": "item", "code": "game:gear-temporal" },
       "P": { "type": "block", "code": "electricalprogressivestorage:estorageprocessor-16k" }
     },
-    "output": {
-      "type": "block",
-      "code": "electricalprogressivestorage:estorageprocessor-64k"
-    }
+    "output": { "type": "block", "code": "electricalprogressivestorage:estorageprocessor-64k" }
   },
   {
-    "ingredientPattern": "CIC,PGP,CIC",
+    "ingredientPattern": "QCQ,C_C,RAR",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "Q": { "type": "item", "code": "game:clearquartz" },
+      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
+      "R": { "type": "item", "code": "electricalprogressivebasics:eresistor" },
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" }
+    },
+    "output": { "type": "item", "code": "electricalprogressivestorage:estoragediskhousing" }
+  },
+  {
+    "ingredientPattern": "GCG,C_C,ABA",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "G": { "type": "block", "code": "game:glass-quartz" },
+      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" },
+      "B": { "type": "block", "code": "game:woodbucket" }
+    },
+    "output": { "type": "item", "code": "electricalprogressivestorage:estoragecellhousing" }
+  },
+  {
+    "ingredientPattern": "CQC,RAR,CQC",
     "width": 3,
     "height": 3,
     "ingredients": {
       "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
-      "I": { "type": "item", "code": "game:metalplate-iron" },
-      "P": { "type": "item", "code": "game:metalplate-copper" },
-      "G": { "type": "block", "code": "game:glass-plain" }
+      "Q": { "type": "item", "code": "game:clearquartz" },
+      "R": { "type": "item", "code": "electricalprogressivebasics:eresistor" },
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" }
     },
-    "output": {
-      "type": "block",
-      "code": "electricalprogressivestorage:estorageassembler"
-    }
+    "output": { "type": "item", "code": "electricalprogressivestorage:estoragecomponent-1k" }
   },
   {
-    "ingredientPattern": "C,I",
-    "width": 1,
-    "height": 2,
+    "ingredientPattern": "CKC,QKQ,CKC",
+    "width": 3,
+    "height": 3,
     "ingredients": {
       "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
-      "I": { "type": "item", "code": "game:metalplate-iron" }
+      "K": { "type": "item", "code": "electricalprogressivestorage:estoragecomponent-1k" },
+      "Q": { "type": "item", "code": "game:smokyquartz" }
     },
-    "output": {
-      "type": "block",
-      "code": "electricalprogressivestorage:estorageimport"
-    }
+    "output": { "type": "item", "code": "electricalprogressivestorage:estoragecomponent-4k" }
   },
   {
-    "ingredientPattern": "C,P",
-    "width": 1,
-    "height": 2,
+    "ingredientPattern": "CKC,QKQ,CKC",
+    "width": 3,
+    "height": 3,
     "ingredients": {
       "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
-      "P": { "type": "item", "code": "game:metalplate-copper" }
+      "K": { "type": "item", "code": "electricalprogressivestorage:estoragecomponent-4k" },
+      "Q": { "type": "item", "code": "game:rosequartz" }
     },
-    "output": {
-      "type": "block",
-      "code": "electricalprogressivestorage:estorageexport"
-    }
+    "output": { "type": "item", "code": "electricalprogressivestorage:estoragecomponent-16k" }
+  },
+  {
+    "ingredientPattern": "CKC,QKQ,CKC",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
+      "K": { "type": "item", "code": "electricalprogressivestorage:estoragecomponent-16k" },
+      "Q": { "type": "item", "code": "game:amethyst" }
+    },
+    "output": { "type": "item", "code": "electricalprogressivestorage:estoragecomponent-64k" }
+  },
+  {
+    "ingredientPattern": "AQA,RBR,AQA",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" },
+      "Q": { "type": "item", "code": "game:clearquartz" },
+      "R": { "type": "item", "code": "electricalprogressivebasics:eresistor" },
+      "B": { "type": "block", "code": "game:woodbucket" }
+    },
+    "output": { "type": "item", "code": "electricalprogressivestorage:estoragecellcomponent-1k" }
+  },
+  {
+    "ingredientPattern": "AKA,QKQ,AKA",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" },
+      "K": { "type": "item", "code": "electricalprogressivestorage:estoragecellcomponent-1k" },
+      "Q": { "type": "item", "code": "game:smokyquartz" }
+    },
+    "output": { "type": "item", "code": "electricalprogressivestorage:estoragecellcomponent-4k" }
+  },
+  {
+    "ingredientPattern": "AKA,QKQ,AKA",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" },
+      "K": { "type": "item", "code": "electricalprogressivestorage:estoragecellcomponent-4k" },
+      "Q": { "type": "item", "code": "game:rosequartz" }
+    },
+    "output": { "type": "item", "code": "electricalprogressivestorage:estoragecellcomponent-16k" }
+  },
+  {
+    "ingredientPattern": "AKA,QKQ,AKA",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" },
+      "K": { "type": "item", "code": "electricalprogressivestorage:estoragecellcomponent-16k" },
+      "Q": { "type": "item", "code": "game:amethyst" }
+    },
+    "output": { "type": "item", "code": "electricalprogressivestorage:estoragecellcomponent-64k" }
+  },
+  {
+    "ingredientPattern": "QCQ,CKC,RAR",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "Q": { "type": "item", "code": "game:clearquartz" },
+      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
+      "R": { "type": "item", "code": "electricalprogressivebasics:eresistor" },
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" },
+      "K": {
+        "type": "item",
+        "code": "electricalprogressivestorage:estoragecomponent-*",
+        "name": "tier",
+        "allowedVariants": [ "1k", "4k", "16k", "64k" ]
+      }
+    },
+    "output": { "type": "item", "code": "electricalprogressivestorage:estoragedisk-{tier}" }
+  },
+  {
+    "ingredientPattern": "HK",
+    "width": 2,
+    "height": 1,
+    "shapeless": true,
+    "ingredients": {
+      "H": { "type": "item", "code": "electricalprogressivestorage:estoragediskhousing" },
+      "K": {
+        "type": "item",
+        "code": "electricalprogressivestorage:estoragecomponent-*",
+        "name": "tier",
+        "allowedVariants": [ "1k", "4k", "16k", "64k" ]
+      }
+    },
+    "output": { "type": "item", "code": "electricalprogressivestorage:estoragedisk-{tier}" }
+  },
+  {
+    "ingredientPattern": "GCG,CKC,ABA",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "G": { "type": "block", "code": "game:glass-quartz" },
+      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" },
+      "B": { "type": "block", "code": "game:woodbucket" },
+      "K": {
+        "type": "item",
+        "code": "electricalprogressivestorage:estoragecellcomponent-*",
+        "name": "tier",
+        "allowedVariants": [ "1k", "4k", "16k", "64k" ]
+      }
+    },
+    "output": { "type": "item", "code": "electricalprogressivestorage:estoragecell-{tier}" }
+  },
+  {
+    "ingredientPattern": "HK",
+    "width": 2,
+    "height": 1,
+    "shapeless": true,
+    "ingredients": {
+      "H": { "type": "item", "code": "electricalprogressivestorage:estoragecellhousing" },
+      "K": {
+        "type": "item",
+        "code": "electricalprogressivestorage:estoragecellcomponent-*",
+        "name": "tier",
+        "allowedVariants": [ "1k", "4k", "16k", "64k" ]
+      }
+    },
+    "output": { "type": "item", "code": "electricalprogressivestorage:estoragecell-{tier}" }
+  },
+  {
+    "ingredientPattern": "D",
+    "width": 1,
+    "height": 1,
+    "ingredients": {
+      "D": {
+        "type": "item",
+        "code": "electricalprogressivestorage:estoragedisk-*",
+        "name": "split",
+        "allowedVariants": [ "1k", "4k", "16k", "64k" ],
+        "returnedStack": { "type": "item", "code": "electricalprogressivestorage:estoragecomponent-{split}" }
+      }
+    },
+    "output": { "type": "item", "code": "electricalprogressivestorage:estoragediskhousing" }
+  },
+  {
+    "ingredientPattern": "C",
+    "width": 1,
+    "height": 1,
+    "ingredients": {
+      "C": {
+        "type": "item",
+        "code": "electricalprogressivestorage:estoragecell-*",
+        "name": "split",
+        "allowedVariants": [ "1k", "4k", "16k", "64k" ],
+        "returnedStack": { "type": "item", "code": "electricalprogressivestorage:estoragecellcomponent-{split}" }
+      }
+    },
+    "output": { "type": "item", "code": "electricalprogressivestorage:estoragecellhousing" }
   }
 ]

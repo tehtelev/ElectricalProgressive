@@ -10,7 +10,7 @@ using Vintagestory.API.Common;
     "Electrical Progressive: Storage",
     "electricalprogressivestorage",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
-    Description = "Network storage: controller, drive, disks, liquid cells, terminals, a crafting terminal, a pattern encoder, an interface, an assembler, import and export buses, and crafting processors.",
+    Description = "Network storage: controller, drive, disks, liquid cells, terminals, a crafting terminal, a pattern encoder, an interface, an assembler, import and export buses, an exchange port, and crafting processors.",
     Version = "1.0.0",
     Authors = ["Tehtelev", "Kotl"]
 )]
@@ -45,6 +45,7 @@ public class ElectricalProgressiveStorage : ModSystem
         api.RegisterBlockClass("BlockEStorageBus", typeof(BlockEStorageBus));
         api.RegisterBlockClass("BlockEStorageProcessor", typeof(BlockEStorageProcessor));
         api.RegisterBlockClass("BlockEStorageAssembler", typeof(BlockEStorageAssembler));
+        api.RegisterBlockClass("BlockEStorageIoPort", typeof(BlockEStorageIoPort));
 
         api.RegisterBlockEntityClass("BlockEntityEStorageCable", typeof(BlockEntityEStorageCable));
         api.RegisterBlockEntityClass("BlockEntityEStorageController", typeof(BlockEntityEStorageController));
@@ -57,6 +58,7 @@ public class ElectricalProgressiveStorage : ModSystem
         api.RegisterBlockEntityClass("BlockEntityEStorageBus", typeof(BlockEntityEStorageBus));
         api.RegisterBlockEntityClass("BlockEntityEStorageProcessor", typeof(BlockEntityEStorageProcessor));
         api.RegisterBlockEntityClass("BlockEntityEStorageAssembler", typeof(BlockEntityEStorageAssembler));
+        api.RegisterBlockEntityClass("BlockEntityEStorageIoPort", typeof(BlockEntityEStorageIoPort));
 
         api.RegisterBlockEntityBehaviorClass("BEBehaviorEStorageController", typeof(BEBehaviorEStorageController));
         api.RegisterItemClass("ItemEStorageDisk", typeof(ItemEStorageDisk));

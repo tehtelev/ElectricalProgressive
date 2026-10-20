@@ -16,6 +16,17 @@ public class ItemEStorageCell : Vintagestory.API.Common.Item
             return;
 
         dsc.AppendLine(Lang.Get("electricalprogressivestorage:estorage-cell-hint"));
+        dsc.AppendLine(Lang.Get("electricalprogressivestorage:estorage-part-split"));
         StorageAccess.DescribeCell(inSlot.Itemstack, world, dsc);
+    }
+
+    public override void OnHeldInteractStart(ItemSlot slot, EntityAgent byEntity, BlockSelection blockSel, EntitySelection entitySel, bool firstEvent, ref EnumHandHandling handling)
+        => EmptyHousingSplit.OnHeld(slot, byEntity, firstEvent, ref handling, true);
+
+    public override bool MatchesForCrafting(ItemStack inputStack, IRecipeBase recipe, IRecipeIngredient ingredient)
+    {
+        if (!EmptyHousingSplit.CanCraft(inputStack, ingredient, true))
+            return false;
+        return base.MatchesForCrafting(inputStack, recipe, ingredient);
     }
 }

@@ -16,6 +16,17 @@ public class ItemEStorageDisk : Vintagestory.API.Common.Item
             return;
 
         dsc.AppendLine(Lang.Get("electricalprogressivestorage:estorage-disk-hint"));
+        dsc.AppendLine(Lang.Get("electricalprogressivestorage:estorage-part-split"));
         StorageAccess.DescribeDisk(inSlot.Itemstack, world, dsc);
+    }
+
+    public override void OnHeldInteractStart(ItemSlot slot, EntityAgent byEntity, BlockSelection blockSel, EntitySelection entitySel, bool firstEvent, ref EnumHandHandling handling)
+        => EmptyHousingSplit.OnHeld(slot, byEntity, firstEvent, ref handling, false);
+
+    public override bool MatchesForCrafting(ItemStack inputStack, IRecipeBase recipe, IRecipeIngredient ingredient)
+    {
+        if (!EmptyHousingSplit.CanCraft(inputStack, ingredient, false))
+            return false;
+        return base.MatchesForCrafting(inputStack, recipe, ingredient);
     }
 }

@@ -6,7 +6,7 @@
     "Tehtelev",
     "Kotl"
   ],
-  "description": "Network storage: controller, drive, disks, terminals, interface, assembler, and import and export buses. Device models and textures from Applied Energistics 2, CC BY-NC-SA 3.0, © 2020 Ridanisaurus Rid, © 2013-2020 AlgorithmX2.",
+  "description": "Network storage: controller, drive, disks, liquid cells, terminals, a crafting terminal, a pattern encoder, an interface, an assembler, import and export buses, an exchange port, and crafting processors. Device models and textures from Applied Energistics 2, CC BY-NC-SA 3.0, © 2020 Ridanisaurus Rid, © 2013-2020 AlgorithmX2.",
   "Version": "1.0.0",
   "dependencies": {
     "game": "1.22.0",

@@ -1,0 +1,53 @@
+{
+  "code": "estorageioport",
+  "class": "BlockEStorageIoPort",
+  "entityClass": "BlockEntityEStorageIoPort",
+  "attributes": {
+    "handbook": {
+      "groupBy": [ "estorageioport-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivestorage:block-handbooktitle-estorageioport",
+          "text": "electricalprogressivestorage:block-handbooktext-estorageioport"
+        }
+      ]
+    }
+  },
+  "behaviors": [
+    {
+      "name": "HorizontalOrientable",
+      "properties": { "dropBlockFace": "south" }
+    }
+  ],
+  "variantgroups": [
+    {
+      "code": "side",
+      "loadFromProperties": "abstract/horizontalorientation"
+    }
+  ],
+  "creativeinventory": {
+    "general": [ "estorageioport-south" ],
+    "estorage": [ "estorageioport-south" ]
+  },
+  "shapebytype": {
+    "*-north": { "base": "block/estorageioport", "rotateY": 0 },
+    "*-east": { "base": "block/estorageioport", "rotateY": 270 },
+    "*-south": { "base": "block/estorageioport", "rotateY": 180 },
+    "*-west": { "base": "block/estorageioport", "rotateY": 90 }
+  },
+  "lightAbsorption": 0,
+  "faceCullMode": "NeverCull",
+  "renderPass": "Opaque",
+  "emitSideAo": { "all": false },
+  "sideAo": { "all": true },
+  "sideopaque": { "all": true },
+  "sidesolid": { "all": true },
+  "blockmaterial": "Metal",
+  "resistance": 3.5,
+  "sounds": {
+    "place": "game:block/anvil",
+    "walk": "game:walk/metal",
+    "hit": "game:block/metal",
+    "break": "game:block/metal"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "code": "estoragecomponent",
+  "maxstacksize": 64,
+  "variantgroups": [
+    { "code": "tier", "states": [ "1k", "4k", "16k", "64k" ] }
+  ],
+  "shape": { "base": "item/estorage-disk-component" },
+  "texturesByType": {
+    "*-1k": { "cell": { "base": "item/ae2/disk-1k" } },
+    "*-4k": { "cell": { "base": "item/ae2/disk-4k" } },
+    "*-16k": { "cell": { "base": "item/ae2/disk-16k" } },
+    "*-64k": { "cell": { "base": "item/ae2/disk-64k" } }
+  },
+  "attributes": {
+    "handbook": {
+      "groupBy": [ "estoragecomponent-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivestorage:item-handbooktitle-estoragepart",
+          "text": "electricalprogressivestorage:item-handbooktext-estoragecomponent"
+        }
+      ]
+    }
+  },
+  "creativeinventory": {
+    "general": [ "*" ],
+    "items": [ "*" ],
+    "estorage": [ "*" ]
+  },
+  "guiTransform": {
+    "rotation": { "x": -27, "y": -26, "z": -2 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.5 },
+    "scale": 1.8,
+    "rotate": false
+  },
+  "fpHandTransform": {
+    "translation": { "x": 0, "y": 0.05, "z": 0.1 },
+    "rotation": { "x": -27, "y": -26, "z": -2 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.5 },
+    "scale": 1.5,
+    "rotate": false
+  },
+  "tpHandTransform": {
+    "translation": { "x": -0.35, "y": -0.15, "z": -0.25 },
+    "rotation": { "x": -20, "y": 16, "z": 0 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.5 },
+    "scale": 0.9,
+    "rotate": false
+  },
+  "groundTransform": {
+    "rotation": { "x": 90, "y": 0, "z": 0 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.5 },
+    "scale": 2.4,
+    "rotate": false
+  }
+}

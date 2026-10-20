@@ -2,6 +2,7 @@ using ElectricalProgressive.Content.Storage;
 using ElectricalProgressive.Content.Storage.Assembler;
 using ElectricalProgressive.Content.Storage.Cable;
 using ElectricalProgressive.Content.Storage.Craft;
+using ElectricalProgressive.Content.Storage.IoPort;
 using ElectricalProgressive.Content.Storage.Patch;
 using ElectricalProgressive.Content.Storage.Pattern;
 using ElectricalProgressive.Content.Storage.Processor;
@@ -121,7 +122,8 @@ public class PanelSeatTests
             BlockEntityEStorageCraftTerminal.PacketId,
             BlockEntityEStorageProcessor.StatusPacket,
             BlockEntityEStorageProcessor.CancelPacket,
-            BlockEntityEStorageAssembler.ProgressPacket
+            BlockEntityEStorageAssembler.ProgressPacket,
+            BlockEntityEStorageIoPort.TogglePacket
         ];
 
         Assert.Equal(20000, PanelStack.FacePacketBase);

@@ -2,6 +2,7 @@
   "code": "estoragecell",
   "class": "ItemEStorageCell",
   "maxstacksize": 1,
+  "heldPriorityInteract": true,
   "variantgroups": [
     { "code": "tier", "states": [ "1k", "4k", "16k", "64k" ] }
   ],
@@ -13,15 +14,33 @@
   },
   "attributes": {
     "handbook": {
-      "groupBy": [ "estoragecell-*" ]
+      "groupBy": [ "estoragecell-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivestorage:item-handbooktitle-estoragepart",
+          "text": "electricalprogressivestorage:item-handbooktext-estoragecell"
+        }
+      ]
     }
   },
   "shape": { "base": "item/estorage-cell" },
   "texturesByType": {
-    "*-1k": { "cell": { "base": "item/ae2/disk-1k" } },
-    "*-4k": { "cell": { "base": "item/ae2/disk-4k" } },
-    "*-16k": { "cell": { "base": "item/ae2/disk-16k" } },
-    "*-64k": { "cell": { "base": "item/ae2/disk-64k" } }
+    "*-1k": {
+      "case": { "base": "item/ae2/cell-case" },
+      "fluid": { "base": "item/ae2/cell-fluid-1k" }
+    },
+    "*-4k": {
+      "case": { "base": "item/ae2/cell-case" },
+      "fluid": { "base": "item/ae2/cell-fluid-4k" }
+    },
+    "*-16k": {
+      "case": { "base": "item/ae2/cell-case" },
+      "fluid": { "base": "item/ae2/cell-fluid-16k" }
+    },
+    "*-64k": {
+      "case": { "base": "item/ae2/cell-case" },
+      "fluid": { "base": "item/ae2/cell-fluid-64k" }
+    }
   },
   "creativeinventory": {
     "general": [ "*" ],

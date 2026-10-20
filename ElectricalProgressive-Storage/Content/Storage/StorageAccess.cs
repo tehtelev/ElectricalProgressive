@@ -35,6 +35,7 @@ public sealed class StorageScan
     public List<BlockPos> Interfaces { get; } = new();
     public List<BlockPos> Buses { get; } = new();
     public List<BlockPos> Processors { get; } = new();
+    public List<BlockPos> Ports { get; } = new();
 
     // Соседние клетки, чанк которых ещё не загружен. Пока они пустые, обход сети неполный.
     public List<BlockPos> Pending { get; } = new();
@@ -109,23 +110,22 @@ public static class StorageAccess
         if (block?.Code == null || block.Code.Domain != "electricalprogressivestorage")
             return false;
 
-        return block.FirstCodePart() is "estoragecable" or "estoragefiber"
+        return block.FirstCodePart() is "estoragecable"
             or "estoragedrive" or "estorageterminal" or "estorageliquidterminal"
             or "estoragepatternterminal" or "estoragecraftterminal" or "estorageinterface"
             or "estorageimport" or "estorageexport" or "estorageprocessor"
-            or "estoragecontroller";
+            or "estorageioport" or "estoragecontroller";
     }
 
     public static bool IsCable(Vintagestory.API.Common.Block? block)
-        => block?.FirstCodePart() is "estoragecable" or "estoragefiber";
+        => block?.FirstCodePart() is "estoragecable";
 
     // Сколько каналов привод или терминал пропускает дальше, сверх своего собственного.
     private const int DeviceChannels = 8;
 
     public static int CableChannels(Vintagestory.API.Common.Block block)
     {
-        var fallback = block.FirstCodePart() == "estoragefiber" ? 256 : 8;
-        return block.Attributes?["channels"].AsInt(fallback) ?? fallback;
+        return block.Attributes?["channels"].AsInt(8) ?? 8;
     }
 
     public static int CableChannels(IWorldAccessor world, BlockPos pos, Vintagestory.API.Common.Block block, Facing mask)
@@ -134,14 +134,14 @@ public static class StorageAccess
         {
             var host = BlockEStorageCable.HostBlock(world, panel.CableCode);
             var hosted = host != null ? CableChannels(host) : 8;
-            if (host == null || host.FirstCodePart() == "estoragefiber" || mask == Facing.None)
+            if (host == null || mask == Facing.None)
                 return hosted;
             // У интерфейса и шины толстая грань угла уже проводит свои каналы.
             return hosted * HostLines(panel.CableLines, mask, StrandsCarry(block));
         }
 
         var per = CableChannels(block);
-        if (block.FirstCodePart() == "estoragefiber" || mask == Facing.None)
+        if (mask == Facing.None)
             return per;
         if (world.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEStorageCable entity)
             return per;
@@ -699,6 +699,9 @@ public static class StorageAccess
                 case "estorageprocessor":
                     scan.Processors.Add(pos.Copy());
                     break;
+                case "estorageioport":
+                    scan.Ports.Add(pos.Copy());
+                    break;
             }
 
             foreach (var link in CollectLinks(world, pos, node.Mask))
@@ -724,6 +727,7 @@ public static class StorageAccess
             KeepChanneled(scan.Interfaces, scan);
             KeepChanneled(scan.Buses, scan);
             KeepChanneled(scan.Processors, scan);
+            KeepChanneled(scan.Ports, scan);
             return;
         }
 
@@ -766,6 +770,7 @@ public static class StorageAccess
         KeepChanneled(scan.Interfaces, scan);
         KeepChanneled(scan.Buses, scan);
         KeepChanneled(scan.Processors, scan);
+        KeepChanneled(scan.Ports, scan);
     }
 
     // Контроллеры гранью к грани — один мультиблок. Через кабель это уже второй контроллер.
@@ -990,7 +995,8 @@ public static class StorageAccess
 
         return 8f + scan.Drives.Count * 10f + PanelDemand(world, scan)
             + BusWatts(world, scan)
-            + scan.Processors.Count * 4f + AssemblerWatts(world, scan) + disks * 2f;
+            + scan.Processors.Count * 4f + AssemblerWatts(world, scan) + disks * 2f
+            + scan.Ports.Count * BlockEntityEStorageIoPort.Watts;
     }
 
     private static int CarryOf(IWorldAccessor world, BlockPos pos)
@@ -1001,7 +1007,7 @@ public static class StorageAccess
             return DeviceChannels;
         var host = BlockEStorageCable.HostBlock(world, panel.CableCode);
         var per = host != null ? CableChannels(host) : 8;
-        if (host == null || host.FirstCodePart() == "estoragefiber")
+        if (host == null)
             return per;
         var sum = 0;
         foreach (var component in Components(panel.Cable))
@@ -1400,6 +1406,39 @@ public static class StorageAccess
         return result;
     }
 
+    public static List<ItemStack> AggregateLiquid(IWorldAccessor world, BlockPos from)
+    {
+        var result = new List<ItemStack>();
+        if (Link(world, from) != StorageLink.Online)
+            return result;
+
+        foreach (var cell in EnumerateCells(world, from))
+        {
+            foreach (var entry in ReadCell(world, cell.Stack))
+            {
+                if (LiquidProps(entry) == null)
+                    continue;
+
+                var found = false;
+                foreach (var have in result)
+                {
+                    if (!Same(world, have, entry))
+                        continue;
+                    var sum = (long)have.StackSize + entry.StackSize;
+                    have.StackSize = sum > int.MaxValue ? int.MaxValue : (int)sum;
+                    found = true;
+                    break;
+                }
+
+                if (!found)
+                    result.Add(entry.Clone());
+            }
+        }
+
+        result.Sort((a, b) => string.Compare(SortName(a), SortName(b), StringComparison.OrdinalIgnoreCase));
+        return result;
+    }
+
     private static string SortName(ItemStack stack)
         => stack.Collectible == null ? "" : stack.GetName() ?? "";
 
@@ -1624,37 +1663,6 @@ public static class StorageAccess
 
         TouchContents();
         return taken;
-    }
-
-    public static List<ItemStack> AggregateLiquid(IWorldAccessor world, BlockPos from)
-    {
-        var result = new List<ItemStack>();
-        if (Link(world, from) != StorageLink.Online)
-            return result;
-
-        foreach (var cell in EnumerateCells(world, from))
-        {
-            foreach (var entry in ReadCell(world, cell.Stack))
-            {
-                var found = false;
-                foreach (var have in result)
-                {
-                    if (!Same(world, have, entry))
-                        continue;
-
-                    var sum = (long)have.StackSize + entry.StackSize;
-                    have.StackSize = sum > int.MaxValue ? int.MaxValue : (int)sum;
-                    found = true;
-                    break;
-                }
-
-                if (!found)
-                    result.Add(entry.Clone());
-            }
-        }
-
-        result.Sort((a, b) => string.Compare(SortName(a), SortName(b), StringComparison.OrdinalIgnoreCase));
-        return result;
     }
 
     /// <summary>

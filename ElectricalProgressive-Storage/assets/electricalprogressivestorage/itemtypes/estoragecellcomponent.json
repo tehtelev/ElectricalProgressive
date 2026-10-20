@@ -1,0 +1,68 @@
+{
+  "code": "estoragecellcomponent",
+  "maxstacksize": 64,
+  "variantgroups": [
+    { "code": "tier", "states": [ "1k", "4k", "16k", "64k" ] }
+  ],
+  "shape": { "base": "item/estorage-cell-component" },
+  "texturesByType": {
+    "*-1k": {
+      "case": { "base": "item/ae2/cell-case" },
+      "fluid": { "base": "item/ae2/cell-fluid-1k" }
+    },
+    "*-4k": {
+      "case": { "base": "item/ae2/cell-case" },
+      "fluid": { "base": "item/ae2/cell-fluid-4k" }
+    },
+    "*-16k": {
+      "case": { "base": "item/ae2/cell-case" },
+      "fluid": { "base": "item/ae2/cell-fluid-16k" }
+    },
+    "*-64k": {
+      "case": { "base": "item/ae2/cell-case" },
+      "fluid": { "base": "item/ae2/cell-fluid-64k" }
+    }
+  },
+  "attributes": {
+    "handbook": {
+      "groupBy": [ "estoragecellcomponent-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivestorage:item-handbooktitle-estoragepart",
+          "text": "electricalprogressivestorage:item-handbooktext-estoragecellcomponent"
+        }
+      ]
+    }
+  },
+  "creativeinventory": {
+    "general": [ "*" ],
+    "items": [ "*" ],
+    "estorage": [ "*" ]
+  },
+  "guiTransform": {
+    "rotation": { "x": -27, "y": -26, "z": -2 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.5 },
+    "scale": 1.6,
+    "rotate": false
+  },
+  "fpHandTransform": {
+    "translation": { "x": 0, "y": 0.02, "z": 0.08 },
+    "rotation": { "x": -27, "y": -26, "z": -2 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.5 },
+    "scale": 1.6,
+    "rotate": false
+  },
+  "tpHandTransform": {
+    "translation": { "x": -0.35, "y": -0.15, "z": -0.25 },
+    "rotation": { "x": -20, "y": 16, "z": 0 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.5 },
+    "scale": 0.7,
+    "rotate": false
+  },
+  "groundTransform": {
+    "rotation": { "x": 0, "y": 20, "z": 0 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.5 },
+    "scale": 2.2,
+    "rotate": false
+  }
+}

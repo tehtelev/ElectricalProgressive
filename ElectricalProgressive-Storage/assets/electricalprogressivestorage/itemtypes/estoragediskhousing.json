@@ -1,0 +1,48 @@
+{
+  "code": "estoragediskhousing",
+  "maxstacksize": 64,
+  "shape": { "base": "item/estorage-disk-housing" },
+  "textures": { "cell": { "base": "item/ae2/disk-1k" } },
+  "attributes": {
+    "handbook": {
+      "extraSections": [
+        {
+          "title": "electricalprogressivestorage:item-handbooktitle-estoragepart",
+          "text": "electricalprogressivestorage:item-handbooktext-estoragediskhousing"
+        }
+      ]
+    }
+  },
+  "creativeinventory": {
+    "general": [ "*" ],
+    "items": [ "*" ],
+    "estorage": [ "*" ]
+  },
+  "guiTransform": {
+    "translation": { "x": 1.02, "y": 0.02, "z": 0 },
+    "rotation": { "x": -27, "y": -26, "z": -2 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.21 },
+    "scale": 1.2,
+    "rotate": false
+  },
+  "fpHandTransform": {
+    "translation": { "x": 1.02, "y": 0.02, "z": 0 },
+    "rotation": { "x": -27, "y": -26, "z": -2 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.21 },
+    "scale": 1.2,
+    "rotate": false
+  },
+  "tpHandTransform": {
+    "translation": { "x": 1.02, "y": 0.02, "z": 0 },
+    "rotation": { "x": -27, "y": -26, "z": -2 },
+    "origin": { "x": 0.5, "y": 0.5, "z": 0.21 },
+    "scale": 1.2,
+    "rotate": false
+  },
+  "groundTransform": {
+    "rotation": { "x": 90, "y": 0, "z": 0 },
+    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
+    "scale": 2.2,
+    "rotate": false
+  }
+}

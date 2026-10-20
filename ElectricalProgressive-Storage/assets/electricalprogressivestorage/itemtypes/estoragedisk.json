@@ -2,6 +2,7 @@
   "code": "estoragedisk",
   "class": "ItemEStorageDisk",
   "maxstacksize": 1,
+  "heldPriorityInteract": true,
   "variantgroups": [
     { "code": "tier", "states": [ "1k", "4k", "16k", "64k" ] }
   ],
@@ -13,7 +14,13 @@
   },
   "attributes": {
     "handbook": {
-      "groupBy": [ "estoragedisk-*" ]
+      "groupBy": [ "estoragedisk-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivestorage:item-handbooktitle-estoragepart",
+          "text": "electricalprogressivestorage:item-handbooktext-estoragedisk"
+        }
+      ]
     }
   },
   "shape": { "base": "item/estorage-disk" },
