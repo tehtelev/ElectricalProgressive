@@ -8,7 +8,7 @@ using Vintagestory.API.Datastructures;
 namespace ElectricalProgressive.Content.Storage.Craft;
 
 /// <summary>
-/// Количество и план заказа. Рисуется внутри уже открытого терминала, не отдельным окном.
+/// Количество и план заказа. Окно терминала под ним не закрывается.
 /// </summary>
 public sealed class EStorageOrderPane
 {
@@ -386,5 +386,170 @@ public sealed class EStorageOrderPane
         var text = _compo?.GetTextInput("qty")?.GetText() ?? "";
         if (int.TryParse(text.Trim(), out var count))
             _count = Math.Clamp(count, 1, 100000);
+    }
+}
+
+/// <summary>
+/// Модальное окно заказа по центру уже открытого терминала.
+/// </summary>
+public sealed class GuiDialogEStorageOrder : GuiDialog
+{
+    private readonly EStorageOrderPane _pane;
+    private readonly System.Func<ElementBounds?> _host;
+    private readonly Action _close;
+
+    public GuiDialogEStorageOrder(ICoreClientAPI capi, EStorageOrderPane pane, System.Func<ElementBounds?> host, Action close)
+        : base(capi)
+    {
+        _pane = pane;
+        _host = host;
+        _close = close;
+    }
+
+    private bool _registering;
+
+    public override string ToggleKeyCombinationCode => null!;
+
+    public override double DrawOrder => 0.45;
+
+    public override double InputOrder => 0.05;
+
+    public override bool UnregisterOnClose => true;
+
+    public override bool OnEscapePressed()
+    {
+        _close();
+        return true;
+    }
+
+    public override void OnGuiClosed()
+    {
+        ClearComposers();
+        _close();
+    }
+
+    public void Open()
+    {
+        EnsureRegistered();
+        Recompose();
+        TryOpen();
+    }
+
+    protected override void OnFocusChanged(bool on)
+    {
+        if (on)
+            EnsureRegistered();
+        base.OnFocusChanged(on);
+    }
+
+    private void EnsureRegistered()
+    {
+        if (_registering || Listed())
+            return;
+
+        _registering = true;
+        capi.Gui.RegisterDialog(this);
+        _registering = false;
+    }
+
+    private bool Listed()
+    {
+        foreach (var dialog in capi.Gui.LoadedGuis)
+        {
+            if (ReferenceEquals(dialog, this))
+                return true;
+        }
+
+        return false;
+    }
+
+    public void Recompose()
+    {
+        ClearComposers();
+        SingleComposer = _pane.Compose();
+        Place();
+    }
+
+    public override void OnRenderGUI(float deltaTime)
+    {
+        Place();
+        base.OnRenderGUI(deltaTime);
+    }
+
+    public override void OnMouseDown(MouseEvent args)
+    {
+        if (args.Handled || !OverModal(args.X, args.Y))
+            return;
+
+        if (_pane.Close != null && _pane.Close.PointInside(args.X, args.Y))
+        {
+            args.Handled = true;
+            _close();
+            return;
+        }
+
+        if (OverOrder(args.X, args.Y))
+            base.OnMouseDown(args);
+        args.Handled = true;
+    }
+
+    public override void OnMouseUp(MouseEvent args)
+    {
+        if (args.Handled || !OverModal(args.X, args.Y))
+            return;
+
+        if (OverOrder(args.X, args.Y))
+            base.OnMouseUp(args);
+        args.Handled = true;
+    }
+
+    public override void OnMouseMove(MouseEvent args)
+    {
+        if (args.Handled || !OverModal(args.X, args.Y))
+            return;
+
+        if (OverOrder(args.X, args.Y))
+            base.OnMouseMove(args);
+        args.Handled = true;
+    }
+
+    public override void OnMouseWheel(MouseWheelEventArgs args)
+    {
+        if (args.IsHandled || !OverModal(capi.Input.MouseX, capi.Input.MouseY))
+            return;
+
+        if (OverOrder(capi.Input.MouseX, capi.Input.MouseY))
+            _pane.OnWheel(args);
+        args.SetHandled();
+    }
+
+    private bool OverOrder(double x, double y)
+        => SingleComposer != null && SingleComposer.Bounds.PointInside(x, y);
+
+    private bool OverModal(double x, double y)
+    {
+        if (OverOrder(x, y))
+            return true;
+
+        var host = _host();
+        return host != null && host.PointInside(x, y);
+    }
+
+    private void Place()
+    {
+        var order = SingleComposer?.Bounds;
+        var host = _host();
+        if (order == null || host == null)
+            return;
+
+        host.CalcWorldBounds();
+        order.ParentBounds = host;
+        order.Alignment = EnumDialogArea.CenterMiddle;
+        order.fixedX = 0;
+        order.fixedY = 0;
+        order.fixedOffsetX = 0;
+        order.fixedOffsetY = 0;
+        order.MarkDirtyRecursive();
+        order.CalcWorldBounds();
     }
 }

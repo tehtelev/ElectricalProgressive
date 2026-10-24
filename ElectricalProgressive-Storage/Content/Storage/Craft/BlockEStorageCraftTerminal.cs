@@ -27,7 +27,8 @@ public sealed class ItemSlotCraftPreview : ItemSlot
 }
 
 /// <summary>
-/// Крафтовый терминал: держит один готовый крафт и выдаёт его без процессора.
+/// Крафтовый терминал без процессора. Последний рецепт запоминается,
+/// и каждый следующий крафт добирает полную порцию из сети, если она там есть.
 /// </summary>
 public class BlockEntityEStorageCraftTerminal : BlockEntityEStorageTerminal
 {
@@ -35,9 +36,12 @@ public class BlockEntityEStorageCraftTerminal : BlockEntityEStorageTerminal
     public const int GridSlots = 9;
     public const int OutSlot = 9;
     public const int BenchSlots = 10;
+    private const int CraftCap = 64;
 
     private readonly InventoryGeneric _grid;
     private readonly InventoryGeneric _reserve;
+    private readonly ItemStack?[] _template = new ItemStack?[GridSlots];
+    private readonly int[] _templateNeed = new int[GridSlots];
     private string _who = "";
     private bool _stocking;
 
@@ -77,6 +81,15 @@ public class BlockEntityEStorageCraftTerminal : BlockEntityEStorageTerminal
         _reserve.ToTreeAttributes(reserve);
         tree["craftReserve"] = reserve;
         tree.SetString("craftWho", _who);
+        var template = new TreeAttribute();
+        for (var i = 0; i < GridSlots; i++)
+        {
+            template.SetInt("n" + i, _templateNeed[i]);
+            if (_template[i] != null)
+                template["s" + i] = new ItemstackAttribute(_template[i]!.Clone());
+        }
+
+        tree["craftTemplate"] = template;
     }
 
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
@@ -87,6 +100,22 @@ public class BlockEntityEStorageCraftTerminal : BlockEntityEStorageTerminal
         if (tree["craftReserve"] is ITreeAttribute reserve)
             _reserve.FromTreeAttributes(reserve);
         _who = tree.GetString("craftWho", "");
+        ClearTemplate();
+        if (tree["craftTemplate"] is ITreeAttribute template)
+        {
+            for (var i = 0; i < GridSlots; i++)
+            {
+                if (template["s" + i] is not ItemstackAttribute { value: { } saved }
+                    || !saved.ResolveBlockOrItem(worldAccessForResolve))
+                    continue;
+
+                saved.StackSize = 1;
+                saved.Attributes?.RemoveAttribute(ItemSlotPatternSample.SampleKey);
+                _template[i] = saved;
+                _templateNeed[i] = Math.Max(1, template.GetInt("n" + i));
+            }
+        }
+
         for (var i = 0; i < _grid.Count; i++)
             Resolve(_grid[i], worldAccessForResolve);
         for (var i = 0; i < _reserve.Count; i++)
@@ -183,69 +212,75 @@ public class BlockEntityEStorageCraftTerminal : BlockEntityEStorageTerminal
         if (world == null || mouse == null || _stocking)
             return;
 
-        var source = ReadGrid();
-        var recipe = Match(world, player, source);
-        if (recipe == null)
-        {
-            Fail(player, "electricalprogressivestorage:estorage-craft-norecipe");
-            return;
-        }
-
-        var need = Needs(recipe, source);
-        if (!Paid(source, need))
-        {
-            Fail(player, "electricalprogressivestorage:estorage-craft-missing");
-            return;
-        }
-
-        var made = ItemEStoragePattern.ResolveCraft(world, player, source);
-        if (made == null || made.StackSize < 1)
-        {
-            Fail(player, "electricalprogressivestorage:estorage-craft-norecipe");
-            return;
-        }
-
-        if (!shift && !MouseFits(world, mouse, made))
-        {
-            Fail(player, "electricalprogressivestorage:estorage-craft-hands");
-            return;
-        }
-
-        var temp = new ItemSlot[GridSlots];
-        for (var i = 0; i < GridSlots; i++)
-            temp[i] = new DummySlot(source[i]?.Clone());
-        if (!recipe.ConsumeInput(player, temp, 3))
-        {
-            Fail(player, "electricalprogressivestorage:estorage-craft-missing");
-            return;
-        }
-
+        _who = player.PlayerUID;
         _stocking = true;
+        var crafted = 0;
         try
         {
-            for (var i = 0; i < GridSlots; i++)
+            while (crafted < (shift ? CraftCap : 1))
             {
-                _grid[i].Itemstack = temp[i].Itemstack;
-                _grid[i].MarkDirty();
+                var known = Match(world, player, ReadGrid()) != null || (HasTemplate() && !Conflicts(world, ReadGrid()));
+                if (!Stock(world, player))
+                {
+                    if (crafted == 0)
+                    {
+                        Fail(
+                            player,
+                            !known
+                                ? "electricalprogressivestorage:estorage-craft-norecipe"
+                                : StorageAccess.Link(world, Pos) != StorageLink.Online
+                                    ? "electricalprogressivestorage:estorage-craft-offline"
+                                    : "electricalprogressivestorage:estorage-craft-missing");
+                    }
+
+                    break;
+                }
+
+                var source = ReadGrid();
+                var mass = Mass(source);
+                var recipe = Match(world, player, source);
+                var made = recipe == null ? null : ItemEStoragePattern.ResolveCraft(world, player, source);
+                if (recipe == null || made == null || made.StackSize < 1)
+                {
+                    if (crafted == 0)
+                        Fail(player, "electricalprogressivestorage:estorage-craft-norecipe");
+                    break;
+                }
+
+                if (!shift && !MouseFits(world, mouse, made))
+                {
+                    if (crafted == 0)
+                        Fail(player, "electricalprogressivestorage:estorage-craft-hands");
+                    break;
+                }
+
+                var temp = new ItemSlot[GridSlots];
+                for (var i = 0; i < GridSlots; i++)
+                    temp[i] = new DummySlot(source[i]?.Clone());
+                if (!recipe.ConsumeInput(player, temp, 3))
+                {
+                    if (crafted == 0)
+                        Fail(player, "electricalprogressivestorage:estorage-craft-missing");
+                    break;
+                }
+
+                for (var i = 0; i < GridSlots; i++)
+                {
+                    _grid[i].Itemstack = temp[i].Itemstack;
+                    _grid[i].MarkDirty();
+                }
+
+                RememberConsumed(world, source, temp);
+                if (!Give(world, player, mouse, made, shift))
+                    break;
+
+                crafted++;
+                if (!shift || Mass(ReadGrid()) >= mass)
+                    break;
             }
 
-            if (!shift)
-            {
-                if (mouse.Empty)
-                    mouse.Itemstack = made;
-                else if (mouse.Itemstack != null)
-                    mouse.Itemstack.StackSize += made.StackSize;
-                mouse.MarkDirty();
-            }
-            else
-            {
-                var give = made.Clone();
-                player.InventoryManager.TryGiveItemstack(give, true);
-                if (give.StackSize > 0)
-                    ReturnStack(world, give);
-            }
-
-            Refill(world, source, need);
+            if (crafted > 0)
+                Stock(world, player);
             Paint(player);
         }
         finally
@@ -260,6 +295,8 @@ public class BlockEntityEStorageCraftTerminal : BlockEntityEStorageTerminal
     {
         if (_stocking || slotId == OutSlot || Api?.Side != EnumAppSide.Server)
             return;
+        if (GridEmpty())
+            ClearTemplate();
         Refresh(null);
     }
 
@@ -292,55 +329,311 @@ public class BlockEntityEStorageCraftTerminal : BlockEntityEStorageTerminal
 
         var source = ReadGrid();
         var recipe = Match(world, player, source);
-        ItemStack? result = null;
-        if (recipe != null && Paid(source, Needs(recipe, source)))
-            result = ItemEStoragePattern.ResolveCraft(world, player, source);
-        return Show(result);
+        ItemStack?[] want;
+        int[] need;
+        if (recipe != null)
+        {
+            var guessed = Needs(recipe, source);
+            if (!SameRecipe(world, source, guessed))
+                Learn(source, guessed);
+            need = CopyNeed();
+            want = source;
+        }
+        else if (HasTemplate() && !Conflicts(world, source))
+        {
+            want = Overlay(source);
+            recipe = Match(world, player, want);
+            need = CopyNeed();
+        }
+        else
+            return Show(null);
+
+        if (recipe == null || (!Paid(source, need) && !Supply(world, want, need)))
+            return Show(null);
+
+        var shown = Paid(source, need) ? source : want;
+        return Show(ItemEStoragePattern.ResolveCraft(world, player, shown));
     }
 
     /// <summary>
-    /// Добирает из сети только то, чего после крафта не хватает до порции.
-    /// Повреждённый инструмент в клетке не заменяется и не выталкивается.
+    /// Кладёт в сетку ровно одну порцию. Из сети забирает только когда там хватает на все пустые клетки сразу.
+    /// Чужой или повреждённый предмет в клетке не заменяется.
     /// </summary>
-    private void Refill(IWorldAccessor world, ItemStack?[] source, int[] need)
+    private bool Refill(IWorldAccessor world, ItemStack?[] want, int[] need)
     {
-        if (StorageAccess.Link(world, Pos) != StorageLink.Online)
-            return;
+        if (!Supply(world, want, need))
+            return Paid(ReadGrid(), need);
 
         for (var i = 0; i < GridSlots; i++)
         {
-            var want = source[i];
-            if (need[i] <= 0 || want == null)
+            var sample = want[i];
+            if (need[i] <= 0 || sample == null)
                 continue;
 
-            var have = _grid[i].Itemstack;
-            var haveCount = 0;
-            if (have != null && !_grid[i].Empty)
-            {
-                if (!StorageAccess.Same(world, have, want))
-                    continue;
-                haveCount = have.StackSize;
-            }
-
-            var cap = Math.Max(1, want.Collectible?.MaxStackSize ?? 1);
+            var haveCount = GridCount(world, i, sample);
+            var cap = Math.Max(1, sample.Collectible?.MaxStackSize ?? 1);
             var missing = Math.Min(need[i] - haveCount, cap - haveCount);
             if (missing <= 0)
                 continue;
 
-            var proto = want.Clone();
-            proto.Attributes.RemoveAttribute(ItemSlotPatternSample.SampleKey);
+            var proto = sample.Clone();
+            proto.StackSize = 1;
+            proto.Attributes?.RemoveAttribute(ItemSlotPatternSample.SampleKey);
             var taken = StorageAccess.Extract(world, Pos, proto, missing);
             if (taken == null || taken.StackSize <= 0)
                 continue;
 
             var slot = _grid[i];
             var stack = slot.Itemstack;
-            if (haveCount == 0 || stack == null)
+            if (haveCount == 0 || stack == null || slot.Empty)
                 slot.Itemstack = taken;
             else
                 stack.StackSize += taken.StackSize;
             slot.MarkDirty();
         }
+
+        return Paid(ReadGrid(), need);
+    }
+
+    private bool Stock(IWorldAccessor world, IPlayer player)
+    {
+        var source = ReadGrid();
+        var recipe = Match(world, player, source);
+        if (recipe != null)
+        {
+            var guessed = Needs(recipe, source);
+            if (!SameRecipe(world, source, guessed))
+                Learn(source, guessed);
+            if (Paid(source, _templateNeed) || Refill(world, _template, _templateNeed))
+                return Paid(ReadGrid(), _templateNeed);
+            return false;
+        }
+
+        if (!HasTemplate() || Conflicts(world, source) || !Refill(world, _template, _templateNeed))
+            return false;
+
+        source = ReadGrid();
+        recipe = Match(world, player, source);
+        return recipe != null && Paid(source, _templateNeed);
+    }
+
+    private bool SameRecipe(IWorldAccessor world, ItemStack?[] source, int[] need)
+    {
+        if (!HasTemplate())
+            return false;
+
+        for (var i = 0; i < GridSlots; i++)
+        {
+            var sample = _template[i];
+            var have = source[i];
+            if (sample == null || _templateNeed[i] <= 0)
+            {
+                if (have != null && need[i] > 0)
+                    return false;
+                continue;
+            }
+
+            if (have == null || !StorageAccess.Same(world, have, sample))
+                return false;
+        }
+
+        return true;
+    }
+
+    private int[] CopyNeed()
+    {
+        var copy = new int[GridSlots];
+        for (var i = 0; i < GridSlots; i++)
+            copy[i] = _templateNeed[i];
+        return copy;
+    }
+
+    private bool Supply(IWorldAccessor world, ItemStack?[] want, int[] need)
+    {
+        if (StorageAccess.Link(world, Pos) != StorageLink.Online)
+            return false;
+
+        var protos = new List<ItemStack>();
+        var totals = new List<int>();
+        for (var i = 0; i < GridSlots; i++)
+        {
+            var sample = want[i];
+            if (need[i] <= 0 || sample == null)
+                continue;
+
+            var missing = need[i] - GridCount(world, i, sample);
+            if (missing <= 0)
+                continue;
+
+            var found = -1;
+            for (var k = 0; k < protos.Count; k++)
+            {
+                if (!StorageAccess.Same(world, protos[k], sample))
+                    continue;
+                found = k;
+                break;
+            }
+
+            if (found < 0)
+            {
+                protos.Add(sample);
+                totals.Add(missing);
+            }
+            else
+                totals[found] += missing;
+        }
+
+        for (var k = 0; k < protos.Count; k++)
+        {
+            if (StorageAccess.Count(world, Pos, protos[k]) < totals[k])
+                return false;
+        }
+
+        return true;
+    }
+
+    private void RememberConsumed(IWorldAccessor world, ItemStack?[] before, ItemSlot[] after)
+    {
+        for (var i = 0; i < GridSlots; i++)
+        {
+            var had = before[i];
+            if (had == null)
+                continue;
+
+            var left = after[i].Itemstack;
+            var used = had.StackSize;
+            if (left != null && !after[i].Empty && StorageAccess.Same(world, left, had))
+                used = had.StackSize - left.StackSize;
+            if (used <= 0)
+                continue;
+
+            var copy = had.Clone();
+            copy.StackSize = 1;
+            copy.Attributes?.RemoveAttribute(ItemSlotPatternSample.SampleKey);
+            _template[i] = copy;
+            _templateNeed[i] = used;
+        }
+    }
+
+    private void Learn(ItemStack?[] source, int[] need)
+    {
+        for (var i = 0; i < GridSlots; i++)
+        {
+            if (source[i] == null || need[i] <= 0)
+            {
+                _template[i] = null;
+                _templateNeed[i] = 0;
+                continue;
+            }
+
+            var copy = source[i]!.Clone();
+            copy.StackSize = 1;
+            copy.Attributes?.RemoveAttribute(ItemSlotPatternSample.SampleKey);
+            _template[i] = copy;
+            _templateNeed[i] = need[i];
+        }
+    }
+
+    private ItemStack?[] Overlay(ItemStack?[] source)
+    {
+        var view = new ItemStack?[GridSlots];
+        for (var i = 0; i < GridSlots; i++)
+        {
+            if (source[i] != null)
+                view[i] = source[i];
+            else if (_template[i] != null && _templateNeed[i] > 0)
+                view[i] = _template[i];
+        }
+
+        return view;
+    }
+
+    private bool Conflicts(IWorldAccessor world, ItemStack?[] source)
+    {
+        for (var i = 0; i < GridSlots; i++)
+        {
+            var have = source[i];
+            if (have == null)
+                continue;
+            var sample = _template[i];
+            if (sample == null || _templateNeed[i] <= 0 || !StorageAccess.Same(world, have, sample))
+                return true;
+        }
+
+        return false;
+    }
+
+    private bool HasTemplate()
+    {
+        for (var i = 0; i < GridSlots; i++)
+        {
+            if (_template[i] != null && _templateNeed[i] > 0)
+                return true;
+        }
+
+        return false;
+    }
+
+    private void ClearTemplate()
+    {
+        for (var i = 0; i < GridSlots; i++)
+        {
+            _template[i] = null;
+            _templateNeed[i] = 0;
+        }
+    }
+
+    private bool GridEmpty()
+    {
+        for (var i = 0; i < GridSlots; i++)
+        {
+            if (!_grid[i].Empty && !IsSample(_grid[i].Itemstack))
+                return false;
+        }
+
+        return true;
+    }
+
+    private int GridCount(IWorldAccessor world, int index, ItemStack want)
+    {
+        var slot = _grid[index];
+        var have = slot.Itemstack;
+        if (have == null || slot.Empty || IsSample(have) || !StorageAccess.Same(world, have, want))
+            return 0;
+        return have.StackSize;
+    }
+
+    private bool Give(IWorldAccessor world, IPlayer player, ItemSlot mouse, ItemStack made, bool shift)
+    {
+        if (!shift)
+        {
+            if (mouse.Empty)
+                mouse.Itemstack = made;
+            else if (mouse.Itemstack != null)
+                mouse.Itemstack.StackSize += made.StackSize;
+            mouse.MarkDirty();
+            return true;
+        }
+
+        var give = made.Clone();
+        player.InventoryManager.TryGiveItemstack(give, true);
+        if (give.StackSize <= 0)
+            return true;
+
+        ReturnStack(world, give);
+        return false;
+    }
+
+    private static int Mass(ItemStack?[] grid)
+    {
+        var mass = 0;
+        for (var i = 0; i < GridSlots; i++)
+        {
+            if (grid[i] != null)
+                mass += grid[i]!.StackSize;
+        }
+
+        return mass;
     }
 
     private void AdoptReserve()

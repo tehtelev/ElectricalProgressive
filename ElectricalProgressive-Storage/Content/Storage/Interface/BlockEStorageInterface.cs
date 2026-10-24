@@ -499,6 +499,9 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer, IPanel
         for (var i = ItemSlotInterface.ConfigAt; i < _inventory.Count; i++)
             _inventory[i].Itemstack = null;
 
+        if (Api?.Side == EnumAppSide.Server && Pos != null)
+            Inventory.DropAll(Pos.ToVec3d().Add(0.5, 0.5, 0.5));
+
         base.OnBlockBroken(byPlayer);
     }
 
@@ -524,26 +527,59 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer, IPanel
             if (!ItemEStoragePattern.IsEncoded(stack))
                 continue;
 
-            var output = ItemEStoragePattern.Primary(Api.World, stack!);
-            if (output?.Collectible == null)
-                continue;
-
-            var ghost = output.Clone();
-            ghost.StackSize = 1;
-            ghost.Attributes.SetBool(StorageAccess.CraftGhostKey, true);
-            var seen = false;
-            foreach (var have in into)
+            var outputs = new List<ItemStack>(3);
+            ItemEStoragePattern.CopyOutputs(Api.World, stack!, outputs);
+            foreach (var output in outputs)
             {
-                if (have.Attributes.GetBool(StorageAccess.CraftGhostKey) && StorageAccess.Same(Api.World, have, ghost))
+                if (output.Collectible == null)
+                    continue;
+                if (into.Count >= limit)
+                    return;
+
+                var ghost = output.Clone();
+                ghost.StackSize = 1;
+                ghost.Attributes.RemoveAttribute(StorageAccess.OrderKey);
+                ghost.Attributes.RemoveAttribute(StorageAccess.CraftGhostKey);
+                var seen = false;
+                foreach (var have in into)
                 {
-                    seen = true;
-                    break;
+                    if (!SameOutput(have, ghost))
+                        continue;
+                    if (have.Attributes.GetBool(StorageAccess.CraftGhostKey))
+                    {
+                        seen = true;
+                        continue;
+                    }
+
+                    have.Attributes.SetBool(StorageAccess.OrderKey, true);
+                }
+
+                if (!seen)
+                {
+                    ghost.Attributes.SetBool(StorageAccess.CraftGhostKey, true);
+                    into.Add(ghost);
                 }
             }
-
-            if (!seen)
-                into.Add(ghost);
         }
+    }
+
+    /// <summary>
+    /// Сравнение без флагов списка: иначе лежащий предмет не совпадёт с призраком.
+    /// </summary>
+    private bool SameOutput(ItemStack have, ItemStack proto)
+    {
+        var craft = have.Attributes.GetBool(StorageAccess.CraftGhostKey);
+        var order = have.Attributes.GetBool(StorageAccess.OrderKey);
+        if (craft)
+            have.Attributes.RemoveAttribute(StorageAccess.CraftGhostKey);
+        if (order)
+            have.Attributes.RemoveAttribute(StorageAccess.OrderKey);
+        var match = StorageAccess.Same(Api!.World, have, proto);
+        if (craft)
+            have.Attributes.SetBool(StorageAccess.CraftGhostKey, true);
+        if (order)
+            have.Attributes.SetBool(StorageAccess.OrderKey, true);
+        return match;
     }
 
     public bool TryOrder(ItemStack proto, int count)
@@ -582,8 +618,8 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer, IPanel
         if (!ItemEStoragePattern.IsEncoded(pattern))
             return -1;
 
-        var output = ItemEStoragePattern.Primary(world, pattern!);
-        if (output == null || !StorageAccess.Same(world, output, proto))
+        var output = ItemEStoragePattern.Matching(world, pattern!, proto);
+        if (output == null)
             return -1;
 
         var job = _jobs.Find(entry => entry.Slot == slot);
@@ -1171,8 +1207,7 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer, IPanel
         if (world == null || job.Result == null || !ItemEStoragePattern.IsEncoded(stack))
             return false;
 
-        var output = ItemEStoragePattern.Primary(world, stack!);
-        return output != null && StorageAccess.Same(world, output, job.Result);
+        return ItemEStoragePattern.Matching(world, stack!, job.Result) != null;
     }
 
     private bool PatternMatches(CraftJob job, ItemStack? stack)
@@ -1416,9 +1451,14 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer, IPanel
 
             if (Stock(job, pattern!))
                 changed = true;
-            if (assembler != null)
+            if (ItemEStoragePattern.IsProcessing(pattern))
             {
-                if (!ItemEStoragePattern.IsProcessing(pattern) && PushCraft(job, pattern!, assembler))
+                if (mounted && PushIngredient(job, pattern!, target, face))
+                    changed = true;
+            }
+            else if (assembler != null)
+            {
+                if (PushCraft(job, pattern!, assembler))
                     changed = true;
             }
             else if (mounted && PushIngredient(job, pattern!, target, face))
@@ -1902,7 +1942,7 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer, IPanel
         if (_inputs.Count == 0)
             return false;
 
-        var per = ItemEStoragePattern.PerCraft(world, pattern);
+        var per = ItemEStoragePattern.Yield(world, pattern, job.Result);
         var crafts = (job.Wanted + per - 1) / per;
         if (job.Fed >= crafts)
             return false;
@@ -2404,7 +2444,15 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer, IPanel
             if (left > 0)
             {
                 if (liquid)
-                    StorageAccess.InsertLiquid(world, Pos, got, left);
+                {
+                    left -= StorageAccess.InsertLiquid(world, Pos, got, left);
+                    if (left > 0)
+                    {
+                        var drop = got.Clone();
+                        drop.StackSize = left;
+                        world.SpawnItemEntity(drop, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
+                    }
+                }
                 else
                     GiveBack(got, left);
             }
@@ -2421,7 +2469,9 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer, IPanel
         if (wanted <= 0)
             return plan;
 
-        var per = ItemEStoragePattern.PerCraft(world, pattern);
+        var per = job?.Result != null
+            ? ItemEStoragePattern.Yield(world, pattern, job.Result)
+            : ItemEStoragePattern.PerCraft(world, pattern);
         var crafts = (wanted + per - 1) / per;
         var liquids = FindAssembler() != null
             ? LiquidCraft.Collect(world, pattern, LiquidCraft.Player(world, Pos))

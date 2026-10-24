@@ -339,11 +339,11 @@ public class BlockEStorageCable : BlockEStoragePart
             return;
 
         var face = BlockFacing.FromVector(neibpos.X - pos.X, neibpos.Y - pos.Y, neibpos.Z - pos.Z);
-        if (face == null)
+        if (face == null || !NeighborReady(world, neibpos))
             return;
 
         var mask = FacingHelper.FromFace(face);
-        if (Supported(world.BlockAccessor, pos, mask))
+        if (Supported(world.BlockAccessor, pos, mask) || Continues(world, pos, face))
             return;
 
         var removed = entity.Connection & mask;
@@ -1290,6 +1290,39 @@ public class BlockEStorageCable : BlockEStoragePart
             return face == support;
 
         return false;
+    }
+
+    /// <summary>
+    /// Чанк соседа ещё не в мире, или блок с сущностью ещё без неё. Воздух в загруженном чанке сюда не входит.
+    /// </summary>
+    internal static bool NeighborReady(IWorldAccessor world, BlockPos pos)
+    {
+        var chunk = world.BlockAccessor.GetChunkAtBlockPos(pos);
+        if (chunk == null || chunk.Disposed)
+            return false;
+
+        var block = world.BlockAccessor.GetBlock(pos);
+        if (block == null || block.Id == 0 || string.IsNullOrEmpty(block.EntityClass))
+            return true;
+
+        return world.BlockAccessor.GetBlockEntity(pos) != null;
+    }
+
+    /// <summary>
+    /// Жила упирается в кабель или панель с ответной жилой. Коллизия кабеля до грани не достаёт.
+    /// </summary>
+    internal static bool Continues(IWorldAccessor world, BlockPos pos, BlockFacing face)
+    {
+        var back = FacingHelper.FromFace(face.Opposite);
+        switch (world.BlockAccessor.GetBlockEntity(pos.AddCopy(face)))
+        {
+            case BlockEntityEStorageCable cable:
+                return (cable.Connection & back) != Facing.None;
+            case IPanelHost panel:
+                return (panel.Cable & back) != Facing.None;
+            default:
+                return false;
+        }
     }
 
     /// <summary>

@@ -22,7 +22,10 @@ public class ItemSlotNetwork : ItemSlot
 
     public bool CraftOnly => Itemstack?.Attributes.GetBool(StorageAccess.CraftGhostKey) == true;
 
-    public bool CanOrder => CraftOnly || Itemstack?.Attributes.GetBool(StorageAccess.OrderKey) == true;
+    /// <summary>В сети лежит такой предмет, и для него есть шаблон. На саму стопку флаг не пишется.</summary>
+    public bool Orderable;
+
+    public bool CanOrder => CraftOnly || Orderable;
 
     public override bool CanTake() => !CraftOnly && base.CanTake();
 
@@ -371,7 +374,16 @@ public class InventoryEStorageTerminal : InventoryGeneric
         if (!op.ActingPlayer.InventoryManager.TryGiveItemstack(taken, true) && taken.StackSize > 0)
         {
             if (Api?.Side == EnumAppSide.Server && Api.World != null)
-                Push(taken, taken.StackSize);
+            {
+                var moved = Push(taken, taken.StackSize);
+                var left = taken.StackSize - moved;
+                if (left > 0)
+                {
+                    var drop = taken.Clone();
+                    drop.StackSize = left;
+                    Api.World.SpawnItemEntity(drop, Origin.ToVec3d().Add(0.5, 0.5, 0.5));
+                }
+            }
             else if (net.Itemstack == null)
                 net.Itemstack = taken;
             else
@@ -432,6 +444,9 @@ public class InventoryEStorageTerminal : InventoryGeneric
             var prevSize = slot.Itemstack?.StackSize ?? 0;
             var nextSize = next?.StackSize ?? 0;
             var nextCraft = next?.Attributes.GetBool(StorageAccess.CraftGhostKey) == true;
+            var nextOrder = next != null && !nextCraft && next.Attributes.GetBool(StorageAccess.OrderKey) == true;
+            if (nextOrder)
+                next!.Attributes.RemoveAttribute(StorageAccess.OrderKey);
             var sameKind = next != null && slot.Itemstack != null
                 && StorageAccess.Same(Api.World, slot.Itemstack, next)
                 && prevSize == nextSize
@@ -443,6 +458,7 @@ public class InventoryEStorageTerminal : InventoryGeneric
                 changed = true;
             }
 
+            slot.Orderable = nextOrder;
             slot.PublishedSize = slot.Itemstack?.StackSize ?? 0;
         }
 
@@ -454,8 +470,6 @@ public class InventoryEStorageTerminal : InventoryGeneric
 
     private void AppendCrafts(System.Collections.Generic.List<ItemStack> stacks)
     {
-        if (this is InventoryEStorageLiquid or InventoryEStoragePattern)
-            return;
         if (Api?.World == null || stacks.Count >= Count)
             return;
         if (StorageAccess.Link(Api.World, Origin) != StorageLink.Online)

@@ -311,6 +311,13 @@ public class BlockEntityEStorageDrive : BlockEntityOpenableContainer, ITexPositi
         return true;
     }
 
+    public override void OnBlockBroken(IPlayer? byPlayer = null)
+    {
+        if (Api?.Side == EnumAppSide.Server && Pos != null)
+            Inventory.DropAll(Pos.ToVec3d().Add(0.5, 0.5, 0.5));
+        base.OnBlockBroken(byPlayer);
+    }
+
     public override void OnBlockRemoved()
     {
         base.OnBlockRemoved();

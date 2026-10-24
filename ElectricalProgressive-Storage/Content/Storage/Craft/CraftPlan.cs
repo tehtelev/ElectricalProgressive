@@ -126,8 +126,7 @@ public static class CraftPlan
         var held = face.Inventory[order.Slot].Itemstack;
         if (!ItemEStoragePattern.IsEncoded(held))
             return false;
-        var output = ItemEStoragePattern.Primary(world, held!);
-        return output != null && StorageAccess.Same(world, output, order.Output);
+        return ItemEStoragePattern.Matching(world, held!, order.Output) != null;
     }
 
     private static void Undo(IWorldAccessor world, List<(CraftOrder Order, int Added)> done)
@@ -234,7 +233,7 @@ public static class CraftPlan
 
             Line(depth, Lang.Get("electricalprogressivestorage:estorage-order-item", Name(proto), Qty(amount)));
 
-            var per = ItemEStoragePattern.PerCraft(_world, pattern);
+            var per = ItemEStoragePattern.Yield(_world, pattern, proto);
             var crafts = (amount + (long)per - 1) / per;
             if (crafts < 1)
                 crafts = 1;
@@ -527,8 +526,7 @@ public static class CraftPlan
                     if (!ItemEStoragePattern.IsEncoded(held))
                         continue;
 
-                    var output = ItemEStoragePattern.Primary(_world, held!);
-                    if (output == null || !StorageAccess.Same(_world, output, proto))
+                    if (ItemEStoragePattern.Matching(_world, held!, proto) == null)
                         continue;
 
                     panel = have;

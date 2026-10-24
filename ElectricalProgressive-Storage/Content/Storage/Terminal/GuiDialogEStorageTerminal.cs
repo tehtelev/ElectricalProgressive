@@ -75,6 +75,8 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
     private int _dragX;
     private int _dragY;
     private EStorageOrderPane? _pane;
+    private GuiDialogEStorageOrder? _order;
+    private bool _holdEscape;
 
     public GuiDialogEStorageTerminal(string dialogTitle, InventoryBase inventory, BlockPos pos, ICoreClientAPI capi, bool liquid = false, bool pattern = false, bool craft = false)
         : base(dialogTitle, inventory, pos, capi)
@@ -94,9 +96,27 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
         SetupDialog();
     }
 
+    public override bool OnEscapePressed()
+    {
+        if (_pane != null || _order != null)
+        {
+            CloseOrder();
+            _holdEscape = false;
+            return true;
+        }
+
+        if (_holdEscape)
+        {
+            _holdEscape = false;
+            return true;
+        }
+
+        return base.OnEscapePressed();
+    }
+
     public override void OnGuiClosed()
     {
-        DetachOrder();
+        CloseOrder();
         var entity = PanelStack.View(capi.World, BlockEntityPosition, Inventory);
         if (_pattern && entity is BlockEntityEStoragePatternTerminal bench)
             capi.World.Player.InventoryManager.CloseInventory(bench.Bench);
@@ -109,6 +129,7 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
     {
         // Пакет слотов после заливки подменяет уже открытый список одной жидкостью.
         // Пока окно открыто, вид заново собирается из ячеек.
+        _holdEscape = false;
         if (_pane == null)
         {
             RefreshLiquidView();
@@ -123,11 +144,8 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
 
     public override void OnMouseWheel(MouseWheelEventArgs args)
     {
-        if (_pane != null)
-        {
-            _pane.OnWheel(args);
+        if (args.IsHandled || _pane != null)
             return;
-        }
 
         var mouse = capi.World.Player.InventoryManager.MouseItemSlot;
         var inside = SingleComposer != null && SingleComposer.Bounds.PointInside(capi.Input.MouseX, capi.Input.MouseY);
@@ -149,20 +167,8 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
 
     public override void OnMouseDown(MouseEvent args)
     {
-        if (_pane != null)
-        {
-            if (CloseHit())
-            {
-                args.Handled = true;
-                CloseOrder();
-                return;
-            }
-
-            base.OnMouseDown(args);
-            if (!args.Handled && OnFrame())
-                BeginDrag();
+        if (args.Handled || _pane != null)
             return;
-        }
 
         if (CloseHit())
         {
@@ -190,6 +196,9 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
 
     public override void OnMouseMove(MouseEvent args)
     {
+        if (args.Handled || _pane != null)
+            return;
+
         if (_drag && SingleComposer != null)
         {
             var bounds = SingleComposer.Bounds;
@@ -205,6 +214,12 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
 
     public override void OnMouseUp(MouseEvent args)
     {
+        if (_pane != null)
+        {
+            _drag = false;
+            return;
+        }
+
         if (_drag && SingleComposer != null)
             capi.Gui.SetDialogPosition(SingleComposer.DialogName, new Vec2i((int)SingleComposer.Bounds.fixedX, (int)SingleComposer.Bounds.fixedY));
         _drag = false;
@@ -270,25 +285,40 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
 
     private bool TryOrder(MouseEvent args)
     {
-        if (_liquid || _pattern || args.Button != EnumMouseButton.Left || BlockEntityPosition == null)
+        if (BlockEntityPosition == null)
             return false;
 
-        var mouse = capi.World.Player.InventoryManager.MouseItemSlot;
-        if (mouse != null && !mouse.Empty)
+        var wheel = args.Button == EnumMouseButton.Middle;
+        var ghost = args.Button == EnumMouseButton.Left;
+        if (!wheel && !ghost)
             return false;
 
-        if (capi.World.Player.InventoryManager.CurrentHoveredSlot is not ItemSlotNetwork { CraftOnly: true, Itemstack: { } stack } slot)
+        if (ghost)
+        {
+            var mouse = capi.World.Player.InventoryManager.MouseItemSlot;
+            if (mouse != null && !mouse.Empty)
+                return false;
+        }
+
+        if (capi.World.Player.InventoryManager.CurrentHoveredSlot is not ItemSlotNetwork { Itemstack: { } stack } slot)
             return false;
-        if (slot.Inventory != Inventory)
+        if (slot.Inventory != Inventory || !slot.CanOrder)
+            return false;
+        if (ghost && !slot.CraftOnly)
             return false;
 
         var proto = stack.Clone();
         proto.Attributes.RemoveAttribute(StorageAccess.CraftGhostKey);
         proto.Attributes.RemoveAttribute(StorageAccess.OrderKey);
         proto.StackSize = 1;
-        DetachOrder();
-        _pane = new EStorageOrderPane(capi, proto.GetName(), proto, (count, start) => SendOrder(proto, count, start), CloseOrder, SetupDialog);
-        SetupDialog();
+        CloseOrder();
+        var leaving = capi.World.Player.InventoryManager.CurrentHoveredSlot;
+        if (leaving != null && leaving.Inventory == Inventory)
+            capi.Input.TriggerOnMouseLeaveSlot(leaving);
+        SingleComposer?.UnfocusOwnElements();
+        _pane = new EStorageOrderPane(capi, proto.GetName(), proto, (count, start) => SendOrder(proto, count, start), CloseOrder, RefreshOrder);
+        _order = new GuiDialogEStorageOrder(capi, _pane, () => SingleComposer?.Bounds, CloseOrder);
+        _order.Open();
         args.Handled = true;
         return true;
     }
@@ -386,9 +416,23 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
 
     private void CloseOrder()
     {
+        if (_pane == null && _order == null)
+            return;
+
+        var order = _order;
+        _order = null;
+        _holdEscape = true;
         DetachOrder();
+        if (order != null && order.IsOpened())
+            order.TryClose();
         if (IsOpened())
-            SetupDialog();
+            capi.Gui.RequestFocus(this);
+    }
+
+    private void RefreshOrder()
+    {
+        if (_order != null && _order.IsOpened())
+            _order.Recompose();
     }
 
     private void DetachOrder()
@@ -400,18 +444,6 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
 
     private void SetupDialog()
     {
-        if (_pane != null)
-        {
-            var leaving = capi.World.Player.InventoryManager.CurrentHoveredSlot;
-            if (leaving != null && leaving.Inventory == Inventory)
-                capi.Input.TriggerOnMouseLeaveSlot(leaving);
-            SingleComposer = _pane.Compose();
-            _close = _pane.Close;
-            _winW = _pane.WinW;
-            _winH = _pane.WinH;
-            return;
-        }
-
         var resumeCaret = -1;
         var oldSearch = SingleComposer?.GetTextInput("search");
         if (oldSearch != null && SingleComposer!.CurrentTabIndexElement == oldSearch)
@@ -471,8 +503,7 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
         AddRail(compo, TermIcon.Mod, _sort == SortMode.Mod, sortX, sortY, "estorage-terminal-sort-mod", () => SelectSort(SortMode.Mod));
         AddRail(compo, TermIcon.Name, _sort == SortMode.Name, sortX, sortY + sortStep, "estorage-terminal-sort-name", () => SelectSort(SortMode.Name));
         AddRail(compo, TermIcon.Count, _sort == SortMode.Count, sortX, sortY + 2 * sortStep, "estorage-terminal-sort-count", () => SelectSort(SortMode.Count));
-        if (!_liquid && !_pattern)
-            AddRail(compo, _craftView ? TermIcon.Craftable : TermIcon.Stored, _craftView, sortX, sortY + 3 * sortStep, _craftView ? "estorage-terminal-craftable" : "estorage-terminal-stored", ToggleCraftView);
+        AddRail(compo, _craftView ? TermIcon.Craftable : TermIcon.Stored, _craftView, sortX, sortY + 3 * sortStep, _craftView ? "estorage-terminal-craftable" : "estorage-terminal-stored", ToggleCraftView);
 
         if (filled.Count > 0)
         {

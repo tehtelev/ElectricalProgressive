@@ -91,6 +91,13 @@ public class BlockEntityEStorageAssembler : BlockEntityOpenableContainer, ITexPo
 
     public override InventoryBase Inventory => _inventory;
 
+    public override void OnBlockBroken(IPlayer? byPlayer = null)
+    {
+        if (Api?.Side == EnumAppSide.Server && Pos != null)
+            Inventory.DropAll(Pos.ToVec3d().Add(0.5, 0.5, 0.5));
+        base.OnBlockBroken(byPlayer);
+    }
+
     public override string InventoryClassName => "estorageassembler";
 
     public ItemSlot CraftSlot(int index) => _inventory[index];
@@ -152,13 +159,27 @@ public class BlockEntityEStorageAssembler : BlockEntityOpenableContainer, ITexPo
     {
         base.ToTreeAttributes(tree);
         tree.SetFloat("craft", Progress);
+        if (_busy && _expect?.Collectible != null)
+            tree["show"] = new ItemstackAttribute(_expect.Clone());
+        else
+            tree.RemoveAttribute("show");
     }
 
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
     {
         base.FromTreeAttributes(tree, worldAccessForResolve);
+        _expect = null;
+        if (tree["show"] is ItemstackAttribute { value: { } shown })
+        {
+            var copy = shown.Clone();
+            if (copy.ResolveBlockOrItem(worldAccessForResolve) && copy.Collectible != null)
+                _expect = copy;
+        }
+
         _progress = tree.GetFloat("craft");
-        _busy = _progress > 0f;
+        _busy = _progress > 0f || _expect != null;
+        if (worldAccessForResolve.Side == EnumAppSide.Client)
+            RefreshCenter();
     }
 
     /// <summary>
@@ -173,11 +194,20 @@ public class BlockEntityEStorageAssembler : BlockEntityOpenableContainer, ITexPo
         var player = Nearest(world);
         if (pattern != null && !LiquidCraft.Available(world, reserve, pattern, player))
             return false;
-        if (MatchRecipe(world, out _, pattern) == null)
+
+        var matched = MatchRecipe(world, out _, pattern);
+        var ingredient = matched?.Output;
+        var resolved = ingredient?.ResolvedItemStack;
+        if (ingredient == null || resolved == null)
             return false;
 
         _expect = expect?.Clone();
-        if (_expect != null && _expect.StackSize < 1)
+        if (_expect == null)
+        {
+            _expect = resolved.Clone();
+            _expect.StackSize = Math.Max(1, ingredient.StackSize);
+        }
+        else if (_expect.StackSize < 1)
             _expect.StackSize = 1;
         _pattern = pattern?.Clone();
         _reserve = reserve?.Pos.Copy();
@@ -194,7 +224,7 @@ public class BlockEntityEStorageAssembler : BlockEntityOpenableContainer, ITexPo
         if (packetid == ProgressPacket && data is { Length: >= 4 })
         {
             _progress = Math.Clamp(BitConverter.ToSingle(data, 0), 0f, 1f);
-            _busy = _progress > 0f;
+            _busy = _progress > 0f || _expect != null;
             RefreshCenter();
             return;
         }
@@ -770,6 +800,8 @@ public class BlockEntityEStorageAssembler : BlockEntityOpenableContainer, ITexPo
             return waiting;
         if (!_busy)
             return null;
+        if (_expect?.Collectible != null)
+            return _expect;
         return Preview(world);
     }
 

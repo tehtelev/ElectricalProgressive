@@ -177,7 +177,15 @@ public static class LiquidCraft
         }
 
         if (left > 0 && network != null)
-            StorageAccess.InsertLiquid(world, network, proto, left);
+            left -= StorageAccess.InsertLiquid(world, network, proto, left);
+        if (left <= 0)
+            return;
+
+        var drop = proto.Clone();
+        drop.StackSize = left;
+        var at = cpu?.Pos ?? network;
+        if (at != null)
+            world.SpawnItemEntity(drop, at.ToVec3d().Add(0.5, 0.5, 0.5));
     }
 
     public static List<LiquidNeed> Collect(IWorldAccessor world, ItemStack pattern, IPlayer? player)

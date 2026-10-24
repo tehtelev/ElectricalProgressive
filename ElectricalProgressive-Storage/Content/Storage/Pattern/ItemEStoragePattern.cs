@@ -150,6 +150,46 @@ public class ItemEStoragePattern : Vintagestory.API.Common.Item
     public static int PerCraft(IWorldAccessor world, ItemStack stack)
         => Math.Max(1, Primary(world, stack)?.StackSize ?? 1);
 
+    /// <summary>Выход шаблона, который совпал с заказанным предметом. Не только первый.</summary>
+    public static ItemStack? Matching(IWorldAccessor world, ItemStack pattern, ItemStack proto)
+    {
+        for (var i = 0; i < 3; i++)
+        {
+            if (pattern.Attributes["out" + i] is not ItemstackAttribute { value: { } output } || !Ready(world, output))
+                continue;
+            if (StorageAccess.Same(world, output, proto))
+                return output;
+        }
+
+        if (pattern.Attributes[OutKey] is ItemstackAttribute { value: { } single } && Ready(world, single)
+            && StorageAccess.Same(world, single, proto))
+            return single;
+        return null;
+    }
+
+    public static int Yield(IWorldAccessor world, ItemStack pattern, ItemStack? proto)
+    {
+        var match = proto == null ? null : Matching(world, pattern, proto);
+        var size = match?.StackSize ?? Primary(world, pattern)?.StackSize ?? 1;
+        return Math.Max(1, size);
+    }
+
+    public static void CopyOutputs(IWorldAccessor world, ItemStack stack, List<ItemStack> into)
+    {
+        into.Clear();
+        var any = false;
+        for (var i = 0; i < 3; i++)
+        {
+            if (stack.Attributes["out" + i] is not ItemstackAttribute { value: { } output } || !Ready(world, output))
+                continue;
+            any = true;
+            into.Add(output);
+        }
+
+        if (!any && stack.Attributes[OutKey] is ItemstackAttribute { value: { } single } && Ready(world, single))
+            into.Add(single);
+    }
+
     public static ItemStack? Cell(IWorldAccessor world, ItemStack stack, int index)
     {
         if (index < 0 || index > 8)

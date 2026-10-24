@@ -49,7 +49,7 @@ public class BlockEStorageTerminal : BlockEStoragePart
             return false;
 
         // Клик по кабелю сажает панель в его клетку. Соседний воздух тут не проверяем: игрок стоит как раз в нём.
-        if (Stacks && CableCell(world, blockSel, out var cablePos, out _, out _))
+        if (Stacks && CableCell(world, blockSel, out var cablePos, out _, out _, out _))
         {
             if (byPlayer != null && !world.Claims.TryAccess(byPlayer, cablePos, EnumBlockAccessFlags.BuildOrBreak))
             {
@@ -89,7 +89,7 @@ public class BlockEStorageTerminal : BlockEStoragePart
 
     public override bool DoPlaceBlock(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel, ItemStack byItemStack)
     {
-        if (Stacks && CableCell(world, blockSel, out _, out _, out _))
+        if (Stacks && CableCell(world, blockSel, out _, out _, out _, out _))
             return TryStickOnCable(world, byPlayer, blockSel, byItemStack);
 
         var selection = new Selection(blockSel);
@@ -142,7 +142,7 @@ public class BlockEStorageTerminal : BlockEStoragePart
             if (!TryReadFacing(host, out var facing))
                 return;
 
-            if (!hostBlock.CanOccupy(world, pos, facing))
+            if (!hostBlock.CanOccupy(world, pos, facing) && MountReady(world, pos, facing))
             {
                 if (stack.Stack.Count > 1)
                 {
@@ -160,7 +160,8 @@ public class BlockEStorageTerminal : BlockEStoragePart
             {
                 if (guests[i].Block is not BlockEStorageTerminal guestBlock)
                     continue;
-                if (guestBlock.CanOccupy(world, pos, PanelStack.FacingOf(guests[i])))
+                var guestFacing = PanelStack.FacingOf(guests[i]);
+                if (guestBlock.CanOccupy(world, pos, guestFacing) || !MountReady(world, pos, guestFacing))
                     continue;
                 stack.Stack.RemoveAt(world, pos, i, 1f);
                 removed = true;
@@ -176,16 +177,27 @@ public class BlockEStorageTerminal : BlockEStoragePart
             return;
 
         var face = BlockFacing.FromVector(neibpos.X - pos.X, neibpos.Y - pos.Y, neibpos.Z - pos.Z);
-        if (face == null)
+        if (face == null || !BlockEStorageCable.NeighborReady(world, neibpos))
             return;
 
         var mask = FacingHelper.FromFace(face);
         if ((panel.Cable & mask) == Facing.None)
             return;
-        if (BlockEStorageCable.Supported(world.BlockAccessor, pos, mask) || PanelStack.MountedAny(world, pos, face))
+        if (BlockEStorageCable.Supported(world.BlockAccessor, pos, mask)
+            || PanelStack.MountedAny(world, pos, face)
+            || BlockEStorageCable.Continues(world, pos, face))
             return;
 
         DropHostCable(world, pos, stayed, panel, mask);
+    }
+
+    // Опора на границе чанка ещё без блока или без сущности. Снимать панель по такому ответу нельзя.
+    private static bool MountReady(IWorldAccessor world, BlockPos pos, Facing facing)
+    {
+        var support = PanelStack.Support(facing);
+        if (support == null)
+            return true;
+        return BlockEStorageCable.NeighborReady(world, pos.AddCopy(support));
     }
 
     public override void OnBlockBroken(IWorldAccessor world, BlockPos pos, IPlayer byPlayer, float dropQuantityMultiplier = 1)
@@ -546,21 +558,47 @@ public class BlockEStorageTerminal : BlockEStoragePart
     private static string StickKey(BlockPos pos, EnumAppSide side)
         => pos.X + "/" + pos.Y + "/" + pos.Z + "/" + pos.dimension + "/" + (int)side;
 
-    private static bool CableCell(IWorldAccessor world, BlockSelection blockSel, out BlockPos pos, out BlockEntityEStorageCable entity, out BlockEStorageCable cable)
+    private static bool CableCell(IWorldAccessor world, BlockSelection blockSel, out BlockPos pos, out BlockEntityEStorageCable entity, out BlockEStorageCable cable, out Facing prefer)
     {
         pos = null!;
         entity = null!;
         cable = null!;
+        prefer = Facing.None;
         if (blockSel?.Position == null || blockSel.Face == null)
             return false;
 
+        // Клик по самой жиле. HitPosition относится к этой клетке, грань выберет StrandHit.
         var aimed = blockSel.DidOffset ? blockSel.Position.AddCopy(blockSel.Face.Opposite) : blockSel.Position.Copy();
-        if (world.BlockAccessor.GetBlock(aimed) is not BlockEStorageCable block)
+        if (ReadCable(world, aimed, out pos, out entity, out cable))
+            return true;
+
+        // Клик по опоре. Жернова replaceable 600, поэтому прицел остаётся на них, а кабель лежит в соседней клетке.
+        // У сплошного сундука прицел уже смещён в клетку кабеля, и первая проверка смотрит обратно на сундук.
+        var cell = blockSel.DidOffset ? blockSel.Position.Copy() : blockSel.Position.AddCopy(blockSel.Face);
+        var toward = FacingHelper.FromFace(blockSel.Face.Opposite);
+        if (!ReadCable(world, cell, out pos, out entity, out cable) || (entity.Connection & toward) == Facing.None)
+        {
+            pos = null!;
+            entity = null!;
+            cable = null!;
             return false;
-        if (world.BlockAccessor.GetBlockEntity(aimed) is not BlockEntityEStorageCable found || found.Connection == Facing.None)
+        }
+
+        prefer = toward;
+        return true;
+    }
+
+    private static bool ReadCable(IWorldAccessor world, BlockPos pos, out BlockPos cablePos, out BlockEntityEStorageCable entity, out BlockEStorageCable cable)
+    {
+        cablePos = null!;
+        entity = null!;
+        cable = null!;
+        if (world.BlockAccessor.GetBlock(pos) is not BlockEStorageCable block)
+            return false;
+        if (world.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEStorageCable found || found.Connection == Facing.None)
             return false;
 
-        pos = aimed;
+        cablePos = pos;
         entity = found;
         cable = block;
         return true;
@@ -672,16 +710,21 @@ public class BlockEStorageTerminal : BlockEStoragePart
     /// </summary>
     private bool TryStickOnCable(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel, ItemStack byItemStack)
     {
-        if (!Stacks || !CableCell(world, blockSel, out var cablePos, out var entity, out var cable))
+        if (!Stacks || !CableCell(world, blockSel, out var cablePos, out var entity, out var cable, out var prefer))
             return false;
         if (byPlayer != null && !world.Claims.TryAccess(byPlayer, cablePos, EnumBlockAccessFlags.BuildOrBreak))
             return false;
 
-        var hit = blockSel.HitPosition == null
-            ? Facing.None
-            : BlockEStorageCable.StrandHit(cable, entity.Connection, entity.Lines, blockSel.HitPosition);
+        var hit = prefer != Facing.None
+            ? prefer
+            : blockSel.HitPosition == null
+                ? Facing.None
+                : BlockEStorageCable.StrandHit(cable, entity.Connection, entity.Lines, blockSel.HitPosition);
         var mount = MountOf(world, cablePos, entity.Connection, hit);
         if (mount == Facing.None)
+            return false;
+        // Клик по жерновам сажает только жилу этой грани, а не другую жилу той же клетки.
+        if (prefer != Facing.None && (mount & prefer) == Facing.None)
             return false;
 
         var key = StickKey(cablePos, world.Side);
@@ -965,7 +1008,7 @@ public class BlockEntityEStorageTerminal : BlockEntityOpenableContainer, IPanelH
         if (Stack.Forward(this, fromPlayer, ref packetid, data))
             return;
 
-        if (!Liquid && !Pattern && packetid == StorageAccess.OrderPacketId && Api.Side == EnumAppSide.Server && data is { Length: > 0 })
+        if (packetid == StorageAccess.OrderPacketId && Api.Side == EnumAppSide.Server && data is { Length: > 0 })
         {
             Order(fromPlayer, data);
             return;

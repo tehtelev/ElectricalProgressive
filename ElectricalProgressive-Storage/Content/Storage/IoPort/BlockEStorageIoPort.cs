@@ -129,6 +129,13 @@ public class BlockEntityEStorageIoPort : BlockEntityOpenableContainer, ITexPosit
         base.OnReceivedClientPacket(fromPlayer, packetid, data);
     }
 
+    public override void OnBlockBroken(IPlayer? byPlayer = null)
+    {
+        if (Api?.Side == EnumAppSide.Server && Pos != null)
+            Inventory.DropAll(Pos.ToVec3d().Add(0.5, 0.5, 0.5));
+        base.OnBlockBroken(byPlayer);
+    }
+
     public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
     {
         if (Api.Side == EnumAppSide.Client)
