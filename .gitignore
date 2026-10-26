@@ -495,7 +495,7 @@ fabric.properties
 ### VisualStudio ###
 
 # User-specific files
-
+AGENTS.md
 # User-specific files (MonoDevelop/Xamarin Studio)
 
 # Mono auto generated files
