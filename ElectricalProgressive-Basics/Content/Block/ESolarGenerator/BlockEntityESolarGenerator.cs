@@ -86,12 +86,12 @@ public class BlockEntityESolarGenerator : BlockEntityEFacingBase
 		this.ElectricalProgressive
 			?.OnBlockUnloaded(); // вызываем метод OnBlockUnloaded у BEBehaviorElectricalProgressive
 
-		// отключаем слушатель тика горения топлива
+		// отключаем слушатель тика генерации
 		UnregisterGameTickListener(_listenerId);
 	}
 
 	/// <summary>
-	/// Обработчик тика горения топлива
+	/// Обработчик тика генерации солнечной энергии
 	/// </summary>
 	/// <param name="deltatime"></param>
 	private void OnSunTick(float deltatime)
@@ -194,7 +194,7 @@ public class BlockEntityESolarGenerator : BlockEntityEFacingBase
 			electricity.Connection = Facing.None;
 		}
 
-		// отключаем слушатель тика горения топлива
+		// отключаем слушатель тика генерации
 		UnregisterGameTickListener(_listenerId);
 
 	}

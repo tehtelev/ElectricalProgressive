@@ -1,9 +1,7 @@
 ﻿using ElectricalProgressive.Utils;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Vintagestory.API.Common;
-using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 
@@ -23,7 +21,7 @@ public class BlockESolarGenerator : BlockEBase
 	public override bool TryPlaceBlock(IWorldAccessor world, IPlayer byPlayer, ItemStack itemstack,
 	   BlockSelection blockSel, ref string failureCode)
 	{
-		//неваляжка - только вертикально
+		// неваляжка - только вертикально
 		// целая ли грань, на которую ставим
 		if (!MyMiniLib.CheckSolidFace(world.BlockAccessor, blockSel.Position, Facing.DownAll))
 		{
