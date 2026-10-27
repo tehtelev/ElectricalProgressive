@@ -135,7 +135,8 @@ public class ElectricalProgressiveQOL : ModSystem
         // xskills интеграция через рефлексию
         if (api.ModLoader.IsModEnabled("xskillsrabite")
             || api.ModLoader.IsModEnabled("xskills")
-            || api.ModLoader.IsModEnabled("xskillsfork"))
+            || api.ModLoader.IsModEnabled("xskillsfork")
+            || api.ModLoader.IsModEnabled("xskillsforkfork"))
         {
             try
             {

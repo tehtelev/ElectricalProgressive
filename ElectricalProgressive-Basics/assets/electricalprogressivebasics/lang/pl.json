@@ -148,7 +148,7 @@
   // ==================== Generator słoneczny ====================
   "block-esolargenerator-*": "Generator paneli słonecznych",
   "block-handbooktitle-esolargenerator": "Zastosowanie",
-  "block-handbooktext-esolargenerator": "Przekształca światło w energię elektryczną! Im więcej światła słonecznego pada na panel słoneczny, tym więcej energii może on wyprodukować. Bloki umieszczone nad panelem słonecznym zmniejszą jego wydajność. Późną jesienią i zimą ilość światła słonecznego maleje, co prowadzi do zmniejszenia wydajności.",
+  "block-handbooktext-esolargenerator": "Przekształca światło w energię elektryczną! Im więcej światła słonecznego pada na panel słoneczny, tym więcej energii może on wyprodukować. Późną jesienią i zimą ilość światła słonecznego maleje, co prowadzi do zmniejszenia wydajności.",
 
   // ==================== Stacja ładowania ====================
   "block-charger-*": "Stacja ładowania",

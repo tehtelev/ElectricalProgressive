@@ -148,7 +148,7 @@
   // ==================== Générateur solaire ====================
   "block-esolargenerator-*": "Générateur à panneaux solaires",
   "block-handbooktitle-esolargenerator": "Utilisation",
-  "block-handbooktext-esolargenerator": "Convertit la lumière en énergie électrique ! Plus la lumière du soleil frappe le panneau solaire, plus il peut produire d'énergie. Les blocs placés au-dessus du panneau solaire réduiront son efficacité. À la fin de l'automne et en hiver, la lumière du soleil diminue, ce qui entraîne une réduction de l'efficacité.",
+  "block-handbooktext-esolargenerator": "Convertit la lumière en énergie électrique ! Plus la lumière du soleil frappe le panneau solaire, plus il peut produire d'énergie. À la fin de l'automne et en hiver, la lumière du soleil diminue, ce qui entraîne une réduction de l'efficacité.",
 
   // ==================== Station de charge ====================
   "block-charger-*": "Station de charge",

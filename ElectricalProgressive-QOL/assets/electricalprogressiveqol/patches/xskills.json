@@ -1,7 +1,62 @@
-﻿[
+[
+  {
+    "dependsOn": [ { "modid": "xskillsrabite" } ],
+    "file": "electricalprogressiveqol:blocktypes/estove",
+    "op": "addmerge",
+    "path": "/entityBehaviors",
+    "value": [
+      {
+        "name": "electricityXskillsOwnable"
+      }
+    ]
+  },
   {
     "dependsOn": [ { "modid": "xskills" } ],
     "file": "electricalprogressiveqol:blocktypes/estove",
+    "op": "addmerge",
+    "path": "/entityBehaviors",
+    "value": [
+      {
+        "name": "electricityXskillsOwnable"
+      }
+    ]
+  },
+  {
+    "dependsOn": [ { "modid": "xskillsfork" } ],
+    "file": "electricalprogressiveqol:blocktypes/estove",
+    "op": "addmerge",
+    "path": "/entityBehaviors",
+    "value": [
+      {
+        "name": "electricityXskillsOwnable"
+      }
+    ]
+  },
+  {
+    "dependsOn": [ { "modid": "xskillsforkfork" } ],
+    "file": "electricalprogressiveqol:blocktypes/estove",
+    "op": "addmerge",
+    "path": "/entityBehaviors",
+    "value": [
+      {
+        "name": "electricityXskillsOwnable"
+      }
+    ]
+  },
+  {
+    "dependsOn": [ { "modid": "xskillsrabite" } ],
+    "file": "electricalprogressiveqol:blocktypes/eoven",
+    "op": "addmerge",
+    "path": "/entityBehaviors",
+    "value": [
+      {
+        "name": "electricityXskillsOwnable"
+      }
+    ]
+  },
+  {
+    "dependsOn": [ { "modid": "xskills" } ],
+    "file": "electricalprogressiveqol:blocktypes/eoven",
     "op": "addmerge",
     "path": "/entityBehaviors",
     "value": [
@@ -22,44 +77,7 @@
     ]
   },
   {
-    "dependsOn": [ { "modid": "xskillsfork" } ],
-    "file": "electricalprogressiveqol:blocktypes/estove",
-    "op": "addmerge",
-    "path": "/entityBehaviors",
-    "value": [
-      {
-        "name": "electricityXskillsOwnable"
-      }
-    ]
-  },
-  {
-    "dependsOn": [ { "modid": "xskills" } ],
-    "file": "electricalprogressiveqol:blocktypes/eoven",
-    "op": "addmerge",
-    "path": "/entityBehaviors",
-    "value": [
-      {
-        "name": "electricityXskillsOwnable"
-      }
-    ]
-  },
-
-
-
-
-  {
-    "dependsOn": [ { "modid": "xskillsrabite" } ],
-    "file": "electricalprogressiveqol:blocktypes/estove",
-    "op": "addmerge",
-    "path": "/entityBehaviors",
-    "value": [
-      {
-        "name": "electricityXskillsOwnable"
-      }
-    ]
-  },
-  {
-    "dependsOn": [ { "modid": "xskillsrabite" } ],
+    "dependsOn": [ { "modid": "xskillsforkfork" } ],
     "file": "electricalprogressiveqol:blocktypes/eoven",
     "op": "addmerge",
     "path": "/entityBehaviors",
@@ -69,5 +87,4 @@
       }
     ]
   }
-
 ]
