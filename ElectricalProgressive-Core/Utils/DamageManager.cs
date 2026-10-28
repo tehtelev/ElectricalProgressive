@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using Vintagestory.API.Common;
@@ -162,6 +162,10 @@ namespace ElectricalProgressive.Utils
             if (SystemEP == null) // Если система ElectricalProgressive не инициализирована, ничего не делаем
                 return;
 
+            // Защита от IndexOutOfRangeException: AllEparams должен покрывать все 6 граней
+            if (AllEparams == null || AllEparams.Length < 6)
+                return;
+
             var doDamage = false;
             var voltage = 0;
             NetworkInformation networkInformation;
@@ -217,7 +221,11 @@ namespace ElectricalProgressive.Utils
                     Type = EnumDamageType.Electricity,
                     SourcePos = pos.ToVec3d()
                 };
-                entity.ReceiveDamage(dmg, ((specifiedDamage>0.0f)? specifiedDamage: DamageAmount[voltage]));
+                // Вольтаж не распознан словарем DamageAmount (например, 0 на только что загруженной сети)
+                // -> дефолтный урон 0, без KeyNotFoundException
+                float damage = specifiedDamage > 0f ? specifiedDamage
+                    : (DamageAmount.TryGetValue(voltage, out float tierDmg) ? tierDmg : 0f);
+                entity.ReceiveDamage(dmg, damage);
 
                 // 2) Вычисляем вектор от блока к сущности и отталкиваем
                 var center = pos.ToVec3d().Add(0.5, 0.5, 0.5);
