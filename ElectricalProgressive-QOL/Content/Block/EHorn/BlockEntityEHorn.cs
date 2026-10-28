@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using ElectricalProgressive.Utils;
@@ -298,8 +298,6 @@ public class BlockEntityEHorn : BlockEntityContainer, IHeatSource
         this._renderer = null;
         this._ambientSound?.Dispose();
         this._ambientSound = null;
-        this._weatherSystem?.Dispose();
-        this._weatherSystem = null;
     }
     /// <summary>
     /// Вызывается при разрушении блока игроком
@@ -311,8 +309,6 @@ public class BlockEntityEHorn : BlockEntityContainer, IHeatSource
             this.Api.World.SpawnItemEntity(this.Contents, this.Pos.ToVec3d().Add(0.5, 0.5, 0.5));
         this._ambientSound?.Dispose();
         this._ambientSound = null;
-        this._weatherSystem?.Dispose();
-        this._weatherSystem = null;
         this._renderer?.Dispose();
         this._renderer = null;
     }
@@ -406,8 +402,6 @@ public class BlockEntityEHorn : BlockEntityContainer, IHeatSource
         this._renderer = null;
         this._ambientSound?.Dispose();
         this._ambientSound = null;
-        _weatherSystem?.Dispose();
-        _weatherSystem = null;
         // отписываемся от тиков
         UnregisterGameTickListener(_listenerId);
     }
