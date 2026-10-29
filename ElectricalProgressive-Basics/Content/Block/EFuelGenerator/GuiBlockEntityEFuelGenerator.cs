@@ -1,4 +1,4 @@
-﻿using Cairo;
+using Cairo;
 using System;
 using System.Security.Cryptography;
 using Vintagestory.API.Client;
@@ -299,8 +299,9 @@ public class GuiBlockEntityEFuelGenerator : GuiDialogBlockEntity
         
         float capacity = _betestgen?.WaterCapacity ?? 100f;
         var config = _betestgen?.GetLiquidConfig();
-        
-        string newText = $" {_gentemp:F0} °C\n" + 
+        var celsius = Lang.Get("electricalprogressivebasics:unit-celsius");
+
+        string newText = $" {_gentemp:F0}{celsius}\n" + 
                         $" {_fuelBurntime:F0} " + Lang.Get("electricalprogressivebasics:gui-word-seconds") + "\n" +
                         $" {_waterAmount:F1}/{capacity:F0} "+ Lang.Get("electricalprogressivebasics:litres");
         

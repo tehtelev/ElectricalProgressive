@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Cairo;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -131,7 +131,8 @@ public class GuiBlockEntityETermoGenerator : GuiDialogBlockEntity
             return;
 
         _gentemp = gentemp;
-        var newText = (int)gentemp+" °C"+System.Environment.NewLine+(int)burntime+" "+Lang.Get("electricalprogressivebasics:gui-word-seconds") +System.Environment.NewLine;
+        var celsius = Lang.Get("electricalprogressivebasics:unit-celsius");
+        var newText = (int)gentemp+celsius+System.Environment.NewLine+(int)burntime+" "+Lang.Get("electricalprogressivebasics:gui-word-seconds") +System.Environment.NewLine;
         if (this.SingleComposer != null)
         {
             base.SingleComposer.GetDynamicText("outputText").SetNewText(newText);

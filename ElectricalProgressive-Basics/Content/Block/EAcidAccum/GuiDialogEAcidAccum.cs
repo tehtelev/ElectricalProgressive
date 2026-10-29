@@ -222,20 +222,22 @@ public class GuiDialogEAcidAccum : GuiDialogBlockEntity
 
     private static string FormatLitres(float amount)
     {
+        string litre = Lang.Get("electricalprogressivebasics:unit-litre");
         if (amount >= 100)
-            return $"{amount:F0}L";
+            return $"{amount:F0}{litre}";
         if (amount > 0)
-            return $"{amount:F1}L";
-        return "0L";
+            return $"{amount:F1}{litre}";
+        return $"0{litre}";
     }
 
     private static string FormatEnergy(float energy)
     {
+        string joule = Lang.Get("electricalprogressivebasics:J");
         if (energy >= 1000000)
-            return $"{energy / 1000000f:F1}MJ";
+            return $"{energy / 1000000f:F1}{Lang.Get("electricalprogressivebasics:unit-mjoule")}";
         if (energy >= 1000)
-            return $"{energy / 1000f:F0}kJ";
-        return $"{(int)energy}J";
+            return $"{energy / 1000f:F0}{Lang.Get("electricalprogressivebasics:unit-kjoule")}";
+        return $"{(int)energy}{joule}";
     }
 
     private void OnTitleBarClose() => TryClose();
