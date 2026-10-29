@@ -62,9 +62,7 @@ public class BEBehaviorEMetalForming : BlockEntityBehavior, IElectricConsumer
 
         if (!entity.StructureComplete)
         {
-            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-incomplete"));
-            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-hint"));
-            stringBuilder.AppendLine();
+
             return;
         }
 

@@ -1,4 +1,4 @@
-﻿﻿using ElectricalProgressive.Interface;
+﻿using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
 using System.Text;
 using Vintagestory.API.Common;
@@ -64,9 +64,7 @@ public class BEBehaviorEAquaAccum : BlockEntityBehavior, IElectricConsumer
 
         if (!entity.StructureComplete)
         {
-            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-incomplete"));
-            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-hint"));
-            stringBuilder.AppendLine();
+
             return;
         }
 

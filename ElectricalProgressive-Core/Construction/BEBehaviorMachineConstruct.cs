@@ -900,14 +900,14 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
             return;
 
         dsc.AppendLine(Lang.Get("electricalprogressivecore:construction-incomplete"));
-        dsc.AppendLine(Lang.Get("electricalprogressivecore:construction-blueprint-hint"));
+        dsc.AppendLine(Lang.Get("electricalprogressivecore:construction-hint"));
         if (_rcc?.Stages is { Length: > 0 })
         {
             var stage = RenderStageIndex;
-            dsc.AppendLine($"Build: {stage + 1}/{_rcc.Stages.Length}");
-            var shape = GetStageShapePath();
-            if (!string.IsNullOrEmpty(shape))
-                dsc.AppendLine(shape);
+            dsc.AppendLine(Lang.Get("electricalprogressivecore:construction-progress", stage + 1, _rcc.Stages.Length));
+            //var shape = GetStageShapePath();
+            //if (!string.IsNullOrEmpty(shape))
+            //    dsc.AppendLine(shape);
         }
     }
 }

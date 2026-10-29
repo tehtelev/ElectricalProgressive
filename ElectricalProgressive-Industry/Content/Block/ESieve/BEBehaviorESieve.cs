@@ -1,4 +1,4 @@
-﻿// BEBehaviorESieve.cs
+// BEBehaviorESieve.cs
 using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
 using System.Linq;
@@ -69,9 +69,7 @@ public class BEBehaviorESieve : BlockEntityBehavior, IElectricConsumer
 
         if (!entity.StructureComplete)
         {
-            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-incomplete"));
-            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-hint"));
-            stringBuilder.AppendLine();
+
             return;
         }
 

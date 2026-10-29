@@ -1,4 +1,4 @@
-﻿﻿using ElectricalProgressive.Interface;
+﻿using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
 using System;
 using System.Linq;
@@ -91,9 +91,7 @@ public class BEBehaviorEHammer : BlockEntityBehavior, IElectricConsumer
 
         if (!entity.StructureComplete)
         {
-            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-incomplete"));
-            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-hint"));
-            stringBuilder.AppendLine();
+     
             return;
         }
 

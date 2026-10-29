@@ -563,6 +563,7 @@ public class BEBehaviorElectricalProgressive : BlockEntityBehavior
         var selectedFacing = Facing.None;
 
         var entity = this.Api.World.BlockAccessor.GetBlockEntity(this.Blockentity.Pos); // получаем блок-энитити, чтобы получить информацию о нем
+
         var methodForInformation = ""; //метод получения информации о сети, в зависимости от типа блока-энитити
 
         //если это кабель, то мы можем вывести только информацию о сети на одной грани

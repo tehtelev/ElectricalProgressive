@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Interface;
+using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
 using System;
 using System.Text;
@@ -158,9 +158,6 @@ public class BEBehaviorTermoEGenerator : BlockEntityBehavior, IElectricProducer
 
         if (!entity.StructureComplete)
         {
-            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-incomplete"));
-            stringBuilder.AppendLine(Lang.Get("electricalprogressivecore:construction-hint"));
-            stringBuilder.AppendLine();
             return;
         }
 
