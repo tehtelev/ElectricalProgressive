@@ -17,11 +17,33 @@ public class BlockEStorageTerminal : BlockEStoragePart
 {
     private static readonly Dictionary<(Facing, string, int), MeshData> MeshCache = [];
     private static readonly Dictionary<(int, int), MeshData> GuestMeshes = [];
+    private static readonly Dictionary<int, (MeshData Solid, MeshData Decal)> GuestDecals = [];
     private static readonly Dictionary<(Facing, string), Cuboidf[]> SelectionBoxesCache = [];
     private static readonly Dictionary<(Facing, string), Cuboidf[]> CollisionBoxesCache = [];
 
     /// <summary>Панель, интерфейс и шина делят клетку: по одной на грань.</summary>
     public virtual bool Stacks => true;
+
+    private static readonly WorldInteraction[] HeldClip =
+    [
+        new()
+        {
+            ActionLangCode = "electricalprogressivestorage:estorage-clip-held",
+            MouseButton = EnumMouseButton.Right
+        }
+    ];
+
+    public override WorldInteraction[] GetHeldInteractionHelp(ItemSlot inSlot)
+    {
+        var inherited = base.GetHeldInteractionHelp(inSlot);
+        if (inherited == null || inherited.Length == 0)
+            return HeldClip;
+
+        var merged = new WorldInteraction[HeldClip.Length + inherited.Length];
+        HeldClip.CopyTo(merged, 0);
+        inherited.CopyTo(merged, HeldClip.Length);
+        return merged;
+    }
 
     private static readonly Facing[] StrandBits =
     [
@@ -462,6 +484,71 @@ public class BlockEStorageTerminal : BlockEStoragePart
         return boxes;
     }
 
+    public override void GetDecal(IWorldAccessor world, BlockPos pos, ITexPositionSource decalTexSource, ref MeshData decalModelData, ref MeshData blockModelData)
+    {
+        // Форма панели лежит горизонтально. Без того же поворота, что у модели, трещина остаётся на горизонтали.
+        var facing = Facing.UpNorth;
+        var entity = world.BlockAccessor.GetBlockEntity(pos);
+        if (TryReadFacing(entity, out var read))
+            facing = read;
+
+        if (decalModelData != null)
+            FacingRotations.ApplyRotations(decalModelData, facing);
+        if (blockModelData != null)
+        {
+            blockModelData = blockModelData.Clone();
+            FacingRotations.ApplyRotations(blockModelData, facing);
+        }
+
+        if (entity is not IPanelStack stack || world.Api is not ICoreClientAPI capi || decalModelData == null || blockModelData == null)
+            return;
+
+        foreach (var guest in stack.Stack.Guests)
+        {
+            if (guest.Block is not BlockEStorageTerminal)
+                continue;
+            if (!GuestDecal(capi, guest.Block, decalTexSource, out var solid, out var decal))
+                continue;
+
+            var guestFacing = PanelStack.FacingOf(guest);
+            FacingRotations.ApplyRotations(solid, guestFacing);
+            FacingRotations.ApplyRotations(decal, guestFacing);
+            blockModelData.AddMeshData(solid);
+            decalModelData.AddMeshData(decal);
+        }
+    }
+
+    private static bool GuestDecal(ICoreClientAPI capi, Vintagestory.API.Common.Block block, ITexPositionSource tex, out MeshData solid, out MeshData decal)
+    {
+        solid = null!;
+        decal = null!;
+        if (block.Shape == null)
+            return false;
+
+        if (!GuestDecals.TryGetValue(block.Id, out var cached))
+        {
+            var body = capi.TesselatorManager.GetDefaultBlockMesh(block);
+            try
+            {
+                capi.Tesselator.TesselateShape("estoragepanel", block.Code, block.Shape, out MeshData cracked, tex);
+                capi.TesselatorManager.ThreadDispose();
+                if (body == null || cracked == null || body.VerticesCount == 0 || body.VerticesCount != cracked.VerticesCount)
+                    return false;
+                cached = (body, cracked);
+                GuestDecals[block.Id] = cached;
+            }
+            catch (Exception)
+            {
+                capi.TesselatorManager.ThreadDispose();
+                return false;
+            }
+        }
+
+        solid = cached.Solid.Clone();
+        decal = cached.Decal.Clone();
+        return solid.VerticesCount > 0 && solid.VerticesCount == decal.VerticesCount;
+    }
+
     public override void OnJsonTesselation(ref MeshData sourceMesh, ref int[] lightRgbsByCorner, BlockPos pos, Vintagestory.API.Common.Block[] chunkExtBlocks, int extIndex3d)
     {
         base.OnJsonTesselation(ref sourceMesh, ref lightRgbsByCorner, pos, chunkExtBlocks, extIndex3d);
@@ -523,6 +610,7 @@ public class BlockEStorageTerminal : BlockEStoragePart
         base.OnUnloaded(api);
         MeshCache.Clear();
         GuestMeshes.Clear();
+        GuestDecals.Clear();
         SelectionBoxesCache.Clear();
         CollisionBoxesCache.Clear();
     }

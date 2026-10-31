@@ -46,8 +46,8 @@
   "resistance": 3.5,
   "sounds": {
     "place": "game:block/anvil",
-    "walk": "game:walk/metal",
-    "hit": "game:block/metal",
-    "break": "game:block/metal"
+    "walk": "game:wearable/plate*",
+    "hit": "game:block/heavymetal-hit*",
+    "break": "game:block/heavymetal-hit*"
   }
 }

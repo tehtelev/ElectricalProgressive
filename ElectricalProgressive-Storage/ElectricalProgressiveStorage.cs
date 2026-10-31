@@ -26,6 +26,7 @@ public class ElectricalProgressiveStorage : ModSystem
     {
         _harmony = new Harmony(HarmonyId);
         StackSizeTextPatch.Apply(_harmony);
+        EStorageScheme.Register(api);
         api.Network.GetChannel(EStorageOrderSync.Channel)
             .SetMessageHandler<EStorageOrderReply>(EStorageOrderSync.Handle);
     }

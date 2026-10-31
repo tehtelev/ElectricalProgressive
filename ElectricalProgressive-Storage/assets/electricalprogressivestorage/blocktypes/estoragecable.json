@@ -40,8 +40,8 @@
   "selectionbox": { "x1": 0.25, "y1": 0.25, "z1": 0.25, "x2": 0.75, "y2": 0.75, "z2": 0.75 },
   "sounds": {
     "place": "game:block/anvil",
-    "walk": "game:walk/metal",
-    "hit": "game:block/metal",
-    "break": "game:block/metal"
+    "walk": "game:wearable/plate*",
+    "hit": "game:block/heavymetal-hit*",
+    "break": "game:block/heavymetal-hit*"
   }
 }

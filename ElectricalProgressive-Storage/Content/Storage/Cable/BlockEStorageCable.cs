@@ -6,6 +6,7 @@ using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
+using Vintagestory.API.Util;
 
 namespace ElectricalProgressive.Content.Storage.Cable;
 
@@ -632,20 +633,65 @@ public class BlockEStorageCable : BlockEStoragePart
             target.AddMeshData(piece);
     }
 
+    private static readonly string[] ClipCodes =
+    [
+        "estorageinterface",
+        "estorageimport",
+        "estorageexport",
+        "estorageterminal",
+        "estorageliquidterminal",
+        "estoragepatternterminal",
+        "estoragecraftterminal"
+    ];
+
+    private WorldInteraction[] _clip = [];
+
+    public override void OnLoaded(ICoreAPI api)
+    {
+        base.OnLoaded(api);
+        if (api.Side != EnumAppSide.Client || FirstCodePart() != "estoragecable")
+            return;
+
+        _clip = ObjectCacheUtil.GetOrCreate(api, "estorageCableClip", () =>
+        {
+            var stacks = new List<ItemStack>();
+            foreach (var code in ClipCodes)
+            {
+                var block = api.World.GetBlock(new AssetLocation("electricalprogressivestorage", code));
+                if (block == null || block.Id == 0)
+                    continue;
+                stacks.Add(new ItemStack(block));
+            }
+
+            if (stacks.Count == 0)
+                return [];
+
+            return new WorldInteraction[]
+            {
+                new()
+                {
+                    ActionLangCode = "electricalprogressivestorage:estorage-clip",
+                    MouseButton = EnumMouseButton.Right,
+                    Itemstacks = stacks.ToArray()
+                }
+            };
+        });
+    }
+
     public override WorldInteraction[] GetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection selection, IPlayer forPlayer)
     {
         if (FirstCodePart() != "estoragecable")
             return base.GetPlacedBlockInteractionHelp(world, selection, forPlayer);
 
-        var list = new List<WorldInteraction>
+        var list = new List<WorldInteraction>();
+        if (_clip.Length > 0)
+            list.AddRange(_clip);
+        list.Add(new WorldInteraction
         {
-            new()
-            {
-                ActionLangCode = "electricalprogressivestorage:estorage-thicken",
-                HotKeyCode = "shift",
-                MouseButton = EnumMouseButton.Right
-            }
-        };
+            ActionLangCode = "electricalprogressivestorage:estorage-thicken",
+            HotKeyCode = "shift",
+            MouseButton = EnumMouseButton.Right
+        });
         var inherited = base.GetPlacedBlockInteractionHelp(world, selection, forPlayer);
         if (inherited != null)
             list.AddRange(inherited);
