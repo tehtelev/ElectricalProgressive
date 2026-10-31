@@ -143,9 +143,6 @@
   "etermogenerator-structure-incomplete": "Thermogenerator is not assembled",
   "etermogenerator-structure-hint": "Right-click with materials to assemble (see stages).",
   "etermogenerator-handbook-place-controller": "Place the controller",
-  "etermogenerator-construct-frame": "Stage 2",
-  "etermogenerator-construct-core": "Stage 3",
-  "etermogenerator-construct-finish": "Finish",
 
   "termoplastini": "Thermoelectric Plates",
   "block-termoplastini-*": "Thermoelectric Plates",
@@ -156,8 +153,6 @@
   "termoplastini-structure-incomplete": "Thermoelectric plates are not assembled",
   "termoplastini-structure-hint": "Place on the generator, then add materials with RMB",
   "termoplastini-handbook-place-controller": "Place the plate frame",
-  "termoplastini-construct-frame": "Install iron plates (×4) and riveted copper block",
-  "termoplastini-construct-finish": "Zinc, copper plates and 32V cables",
 
   // ==================== Solar Generator ====================
   "block-esolargenerator-*": "Solar Panel Generator",
@@ -249,9 +244,6 @@
   "eacidaccum-structure-incomplete": "Accumulator is not assembled",
   "eacidaccum-structure-hint": "Place with the schematic book, then RMB: 6 steel plates and 8 coils → PCB and floor insulator → 128 V accumulator. Fill with sulfuric acid.",
   "eacidaccum-handbook-place-controller": "Place the blueprint",
-  "eacidaccum-construct-frame": "Frame: 6 steel plates and 8 coils",
-  "eacidaccum-construct-board": "Board and floor insulator: PCB and floor insulator",
-  "eacidaccum-construct-finish": "Accumulator (128V)",
 
   "block-hvstreetlamp-*": "Street Light",
   "block-handbooktitle-hvstreetlamp": "Usage",
@@ -450,9 +442,6 @@
   "efuelgenerator-structure-incomplete": "Generator is not assembled",
   "efuelgenerator-structure-hint": "RMB: 8 iron + 4 copper plates → 4 coils + 2 rotors → tier3 stator + 16 copper 128 V wires.",
   "efuelgenerator-handbook-place-controller": "Place the controller",
-  "efuelgenerator-construct-frame": "Plating: 8 iron + 4 copper plates",
-  "efuelgenerator-construct-core": "Mechanics: 4 coils + 2 rotors",
-  "efuelgenerator-construct-finish": "Finish: tier3 stator + 16 copper 128 V wires",
 
   "electricalprogressivebasics:empty": "Empty",
   "electricalprogressivebasics:liquid": "Liquid: ",

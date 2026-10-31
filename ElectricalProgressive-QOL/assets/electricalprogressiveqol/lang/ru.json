@@ -1,4 +1,4 @@
-﻿{
+{
   // ==================== Кухонное оборудование ====================
 
   "block-estove-*": "Электрическая плита",
@@ -127,8 +127,6 @@
   "efruitpress-structure-incomplete": "Пресс не собран",
   "efruitpress-structure-hint": "Поставьте книгой чертежей, затем ПКМ: 4 железные пластины → 2 медные.",
   "efruitpress-handbook-place-controller": "Поставить blueprint",
-  "efruitpress-construct-frame": "Каркас: 4 железные пластины",
-  "efruitpress-construct-finish": "Отделка: 2 медные пластины",
   "efruitpress-title-gui": "Электрический пресс для фруктов",
   "efruitpress-slot-fruit": "Фрукты",
   "efruitpress-slot-mash": "Жмых"

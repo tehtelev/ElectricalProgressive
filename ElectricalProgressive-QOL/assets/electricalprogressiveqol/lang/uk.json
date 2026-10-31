@@ -1,4 +1,4 @@
-﻿{
+{
   "block-estove-*": "Електрична плита",
   "block-estove-burned-south": "Електрична плита (згоріла)",
   "block-handbooktitle-estove": "Використання",
@@ -91,8 +91,6 @@
   "efruitpress-structure-incomplete": "Прес не зібрано",
   "efruitpress-structure-hint": "Поставте книгою креслень, потім ПКМ: 4 залізні пластини → 2 мідні.",
   "efruitpress-handbook-place-controller": "Поставити blueprint",
-  "efruitpress-construct-frame": "Каркас: 4 залізні пластини",
-  "efruitpress-construct-finish": "Оздоблення: 2 мідні пластини",
   "efruitpress-title-gui": "Електричний прес для фруктів",
   "efruitpress-slot-fruit": "Фрукти",
   "efruitpress-slot-mash": "Жмих"

@@ -1,4 +1,4 @@
-﻿{
+{
   "block-estove-*": "Cuisinière électrique",
   "block-estove-burned-south": "Cuisinière électrique (brûlée)",
   "block-handbooktitle-estove": "Utilisation",
@@ -91,8 +91,6 @@
   "efruitpress-structure-incomplete": "Fruit press is not assembled",
   "efruitpress-structure-hint": "Place with the schematic book, then RMB: 4 iron plates → 2 copper plates.",
   "efruitpress-handbook-place-controller": "Place the blueprint",
-  "efruitpress-construct-frame": "Frame: 4 iron plates",
-  "efruitpress-construct-finish": "Finish: 2 copper plates",
   "efruitpress-title-gui": "Pressoir électrique",
   "efruitpress-slot-fruit": "Fruits",
   "efruitpress-slot-mash": "Marc"

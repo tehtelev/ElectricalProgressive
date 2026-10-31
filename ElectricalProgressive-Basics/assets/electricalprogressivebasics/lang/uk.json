@@ -1,4 +1,4 @@
-﻿{
+{
   // ==================== Електричні машини та пристрої ====================
 
   // ----- Двигуни -----
@@ -234,9 +234,6 @@
   "eacidaccum-structure-incomplete": "Акумулятор не зібрано",
   "eacidaccum-structure-hint": "Поставте книгою креслень, потім ПКМ: 6 сталевих пластин і 8 котушок → друкована плата і ізолятор (підлога) → акумулятор 128 В. Залийте сірчаною кислотою.",
   "eacidaccum-handbook-place-controller": "Поставити blueprint",
-  "eacidaccum-construct-frame": "Каркас: 6 сталевих пластин і 8 котушок",
-  "eacidaccum-construct-board": "Плата і ізолятор (підлога): друкована плата і ізолятор (підлога)",
-  "eacidaccum-construct-finish": "Акумулятор (128В)",
 
   "block-hvstreetlamp-*": "Вуличне освітлення",
   "block-handbooktitle-hvstreetlamp": "Використання",

@@ -1,4 +1,4 @@
-﻿{
+{
   // ==================== Электрические машины и устройства ====================
 
   // ----- Двигатели -----
@@ -143,9 +143,6 @@
   "etermogenerator-structure-incomplete": "Термогенератор не собран",
   "etermogenerator-structure-hint": "Собирается ПКМ ресурсами по этапам.",
   "etermogenerator-handbook-place-controller": "Поставить контроллер",
-  "etermogenerator-construct-frame": "Этап 2",
-  "etermogenerator-construct-core": "Этап 3",
-  "etermogenerator-construct-finish": "Финал",
 
   "termoplastini": "Термоэлектрические пластины",
   "block-termoplastini-*": "Термоэлектрические пластины",
@@ -156,8 +153,6 @@
   "termoplastini-structure-incomplete": "Термоэлектрические пластины не собраны",
   "termoplastini-structure-hint": "Поставь на генератор, затем добавляй ресурсы ПКМ",
   "termoplastini-handbook-place-controller": "Установить каркас пластин",
-  "termoplastini-construct-frame": "Установить железные пластины (×4) и клёпаный медный блок",
-  "termoplastini-construct-finish": "Цинк, медь и кабели 32В",
 
   // ==================== Солнечный генератор ====================
   "block-esolargenerator-*": "Генератор на солнечных батареях",
@@ -249,9 +244,6 @@
   "eacidaccum-structure-incomplete": "Аккумулятор не собран",
   "eacidaccum-structure-hint": "Поставьте книгой чертежей, затем ПКМ: 6 стальных пластин и 8 катушек → печатная плата и изолятор (пол) → аккумулятор 128 В. Залейте серной кислотой.",
   "eacidaccum-handbook-place-controller": "Поставить blueprint",
-  "eacidaccum-construct-frame": "Каркас: 6 стальных пластин и 8 катушек",
-  "eacidaccum-construct-board": "Плата и изолятор (пол): печатная плата и изолятор (пол)",
-  "eacidaccum-construct-finish": "Аккумулятор (128В)",
 
   "block-hvstreetlamp-*": "Уличное освещение",
   "block-handbooktitle-hvstreetlamp": "Использование",
@@ -449,9 +441,6 @@
   "efuelgenerator-structure-incomplete": "Генератор не собран",
   "efuelgenerator-structure-hint": "ПКМ: 8 железных + 4 медных пластины → 4 катушки + 2 ротора → статор tier3 + 16 проводов 128 В.",
   "efuelgenerator-handbook-place-controller": "Поставить контроллер",
-  "efuelgenerator-construct-frame": "Обшивка: 8 железных + 4 медных пластины",
-  "efuelgenerator-construct-core": "Механика: 4 катушки + 2 ротора",
-  "efuelgenerator-construct-finish": "Финал: статор tier3 + 16 медных проводов 128 В",
 
   "electricalprogressivebasics:empty": "Пусто",
   "electricalprogressivebasics:liquid": "Жидкость: ",
