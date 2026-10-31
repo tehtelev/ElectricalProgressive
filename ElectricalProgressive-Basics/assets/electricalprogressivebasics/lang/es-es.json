@@ -434,7 +434,7 @@
   "electricalprogressivebasics:Liquid_capacity": "Capacidad: {0} l",
   "electricalprogressivebasics:Accepts_any_liquid": "Acepta cualquier líquido",
   "electricalprogressivebasics:wrong_type": "Tipo incorrecto",
-  "electricalprogressivebasics:blockhelp-watergen-fillliquid": "Abrir interfaz del generador",
+  "electricalprogressivebasics:blockhelp-open-gui": "Abrir interfaz del generador",
 
   "resistance_moment": "Resistencia del eje: {0} kN",
   "torque_moment": "Par motor: {0} kN"

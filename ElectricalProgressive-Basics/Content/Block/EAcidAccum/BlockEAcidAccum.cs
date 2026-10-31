@@ -39,7 +39,7 @@ public class BlockEAcidAccum : ImmersiveWireBlock, ILiquidSink, ILiquidSource, I
             {
                 new()
                 {
-                    ActionLangCode = "blockhelp-barrel-fill",
+                    ActionLangCode = "electricalprogressivebasics:blockhelp-open-gui",
                     MouseButton = EnumMouseButton.Right
                 }
             };

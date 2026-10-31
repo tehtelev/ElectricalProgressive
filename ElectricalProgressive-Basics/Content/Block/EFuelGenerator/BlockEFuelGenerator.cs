@@ -58,9 +58,8 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource, IMult
                 },
                 new()
                     {
-                        ActionLangCode = "electricalprogressivebasics:blockhelp-watergen-fillliquid",
+                        ActionLangCode = "electricalprogressivebasics:blockhelp-open-gui",
                         MouseButton = EnumMouseButton.Right
-
                     }
             };
         });

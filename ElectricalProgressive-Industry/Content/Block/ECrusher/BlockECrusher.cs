@@ -4,6 +4,7 @@ using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
+using Vintagestory.API.Util;
 using Vintagestory.GameContent;
 using MachineConstruct = global::ElectricalProgressive.Construction.BEBehaviorMachineConstruct;
 using MachineConstructAccess = global::ElectricalProgressive.Construction.MachineConstructAccess;
@@ -17,6 +18,8 @@ public class BlockECrusher : Vintagestory.API.Common.Block, IMultiBlockInteract
 {
     public bool IsFormed => Variant["state"] == "formed";
     public bool IsIncomplete => Variant["state"] == "incomplete";
+
+    private WorldInteraction[] _interactions = [];
 
     public override bool OnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection? blockSel)
     {
@@ -116,6 +119,36 @@ public class BlockECrusher : Vintagestory.API.Common.Block, IMultiBlockInteract
                            : Lang.Get("electricalprogressivebasics:No")));
         dsc.AppendLine();
         dsc.AppendLine(Lang.Get("electricalprogressiveindustry:ecrusher-structure-hint"));
+    }
+
+    public override void OnLoaded(ICoreAPI coreApi)
+    {
+        base.OnLoaded(coreApi);
+
+        _interactions = ObjectCacheUtil.GetOrCreate(coreApi, "BlockECrusherInteractions", () =>
+        {
+            return new WorldInteraction[]
+            {
+                new()
+                {
+                    ActionLangCode = "electricalprogressivebasics:blockhelp-open-gui",
+                    MouseButton = EnumMouseButton.Right
+                }
+            };
+        });
+    }
+
+    public override WorldInteraction[] GetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection selection, IPlayer forPlayer)
+    {
+        var beh = MachineConstructAccess.GetBehavior(world, selection.Position);
+        if (beh != null && beh.HasConstruction && !beh.IsReady)
+        {
+            var help = beh.GetInteractionHelp(world, forPlayer);
+            if (help is { Length: > 0 })
+                return help;
+        }
+
+        return _interactions;
     }
 
     #region IMultiBlockInteract

@@ -436,7 +436,7 @@
   "electricalprogressivebasics:Liquid_capacity": "Pojemność: {0} l",
   "electricalprogressivebasics:Accepts_any_liquid": "Akceptuje dowolny płyn",
   "electricalprogressivebasics:wrong_type": "Nieprawidłowy typ",
-  "electricalprogressivebasics:blockhelp-watergen-fillliquid": "Otwórz interfejs generatora",
+  "electricalprogressivebasics:blockhelp-open-gui": "Otwórz interfejs generatora",
 
   "resistance_moment": "Opór wału: {0} kN",
   "torque_moment": "Moment obrotowy: {0} kN"

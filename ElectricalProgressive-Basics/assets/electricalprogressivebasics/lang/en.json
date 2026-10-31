@@ -462,7 +462,7 @@
   "electricalprogressivebasics:Liquid_capacity": "Capacity: {0} l",
   "electricalprogressivebasics:Accepts_any_liquid": "Accepts any liquid",
   "electricalprogressivebasics:wrong_type": "Wrong type",
-  "electricalprogressivebasics:blockhelp-watergen-fillliquid": "Open generator interface",
+  "electricalprogressivebasics:blockhelp-open-gui": "Open generator interface",
 
 
   "resistance_moment": "Shaft resistance: {0} kN",

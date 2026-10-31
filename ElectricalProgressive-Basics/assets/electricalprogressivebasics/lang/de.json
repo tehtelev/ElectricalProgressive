@@ -433,7 +433,7 @@
   "electricalprogressivebasics:Liquid_capacity": "Fassungsvermögen: {0} l",
   "electricalprogressivebasics:Accepts_any_liquid": "Akzeptiert jede Flüssigkeit",
   "electricalprogressivebasics:wrong_type": "Falscher Typ",
-  "electricalprogressivebasics:blockhelp-watergen-fillliquid": "Generator-Schnittstelle öffnen",
+  "electricalprogressivebasics:blockhelp-open-gui": "Generator-Schnittstelle öffnen",
 
 
   "resistance_moment": "Wellenwiderstand: {0} kN",

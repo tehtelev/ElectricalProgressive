@@ -461,7 +461,7 @@
   "electricalprogressivebasics:Liquid_capacity": "Ёмкость: {0} л",
   "electricalprogressivebasics:Accepts_any_liquid": "Поддерживает любую жидкость",
   "electricalprogressivebasics:wrong_type": "Неправильный тип",
-  "electricalprogressivebasics:blockhelp-watergen-fillliquid": "Открыть интерфейс генератора",
+  "electricalprogressivebasics:blockhelp-open-gui": "Открыть интерфейс",
 
 
   "resistance_moment": "Сопротивление вала: {0} кН",

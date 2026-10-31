@@ -46,7 +46,7 @@ public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource, IMultiBl
                 },
                 new()
                 {
-                    ActionLangCode = "blockhelp-watergen-fillliquid",
+                    ActionLangCode = "electricalprogressivebasics:blockhelp-open-gui",
                     MouseButton = EnumMouseButton.Right
                 }
             };

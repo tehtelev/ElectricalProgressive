@@ -45,7 +45,7 @@ public class BlockEAquaAccum : BlockEBase, ILiquidSink, ILiquidSource, IMultiBlo
             {
                 new()
                 {
-                    ActionLangCode = "blockhelp-watergen-fillliquid",
+                    ActionLangCode = "electricalprogressivebasics:blockhelp-open-gui",
                     MouseButton = EnumMouseButton.Right
                 }
             };

@@ -7,6 +7,7 @@ using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
+using Vintagestory.API.Util;
 using Vintagestory.GameContent;
 using MachineConstruct = global::ElectricalProgressive.Construction.BEBehaviorMachineConstruct;
 using MachineConstructAccess = global::ElectricalProgressive.Construction.MachineConstructAccess;
@@ -20,6 +21,8 @@ public class BlockEBlastFurnace : ImmersiveWireBlock, IMultiBlockInteract, IMult
 {
     public bool IsFormed => Variant["state"] == "formed";
     public bool IsIncomplete => Variant["state"] == "incomplete";
+
+    private WorldInteraction[] _interactions = [];
 
     public override bool OnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection? blockSel)
     {
@@ -130,6 +133,31 @@ public class BlockEBlastFurnace : ImmersiveWireBlock, IMultiBlockInteract, IMult
     {
         base.OnLoaded(coreApi);
         _skipNonCenterCollisions = true;
+
+        _interactions = ObjectCacheUtil.GetOrCreate(coreApi, "BlockEBlastFurnaceInteractions", () =>
+        {
+            return new WorldInteraction[]
+            {
+                new()
+                {
+                    ActionLangCode = "electricalprogressivebasics:blockhelp-open-gui",
+                    MouseButton = EnumMouseButton.Right
+                }
+            };
+        });
+    }
+
+    public override WorldInteraction[] GetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection selection, IPlayer forPlayer)
+    {
+        var beh = MachineConstructAccess.GetBehavior(world, selection.Position);
+        if (beh != null && beh.HasConstruction && !beh.IsReady)
+        {
+            var help = beh.GetInteractionHelp(world, forPlayer);
+            if (help is { Length: > 0 })
+                return help;
+        }
+
+        return _interactions;
     }
 
     public override bool DoPartialSelection(IWorldAccessor world, BlockPos pos) => IsEKitMode();

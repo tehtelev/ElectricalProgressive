@@ -434,7 +434,7 @@
   "electricalprogressivebasics:Liquid_capacity": "Kapacita: {0} l",
   "electricalprogressivebasics:Accepts_any_liquid": "Přijímá jakoukoli kapalinu",
   "electricalprogressivebasics:wrong_type": "Špatný typ",
-  "electricalprogressivebasics:blockhelp-watergen-fillliquid": "Otevřít rozhraní generátoru",
+  "electricalprogressivebasics:blockhelp-open-gui": "Otevřít rozhraní generátoru",
 
   "resistance_moment": "Odpor hřídele: {0} kN",
   "torque_moment": "Točivý moment: {0} kN"

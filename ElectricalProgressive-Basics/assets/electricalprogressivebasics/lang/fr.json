@@ -435,7 +435,7 @@
   "electricalprogressivebasics:Liquid_capacity": "Capacité : {0} l",
   "electricalprogressivebasics:Accepts_any_liquid": "Accepte tout liquide",
   "electricalprogressivebasics:wrong_type": "Mauvais type",
-  "electricalprogressivebasics:blockhelp-watergen-fillliquid": "Ouvrir l'interface du générateur",
+  "electricalprogressivebasics:blockhelp-open-gui": "Ouvrir l'interface du générateur",
 
 
   "resistance_moment": "Résistance de l'arbre : {0} kN",
