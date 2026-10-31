@@ -42,11 +42,11 @@
       "levels": [
         {
           "shape": "block/eblastfurnace/eblastfurnace_base",
-          "actionLangCode": "electricalprogressiveindustry:eblastfurnace-handbook-place-controller"
+          "actionLangCode": "game:rollers-construct"
         },
         {
           "shape": "block/eblastfurnace/eblastfurnace_base",
-          "actionLangCode": "electricalprogressiveindustry:eblastfurnace-construct-frame",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -57,7 +57,7 @@
         },
         {
           "shape": "block/eblastfurnace/eblastfurnace_base2",
-          "actionLangCode": "electricalprogressiveindustry:eblastfurnace-construct-coils",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -68,7 +68,7 @@
         },
         {
           "shape": "block/eblastfurnace/eblastfurnace_base3",
-          "actionLangCode": "electricalprogressiveindustry:eblastfurnace-construct-lining",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -79,7 +79,7 @@
         },
         {
           "shape": "block/eblastfurnace/eblastfurnace",
-          "actionLangCode": "electricalprogressiveindustry:eblastfurnace-construct-finish",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -298,3 +298,4 @@
     "scale": 0.4
   }
 }
+

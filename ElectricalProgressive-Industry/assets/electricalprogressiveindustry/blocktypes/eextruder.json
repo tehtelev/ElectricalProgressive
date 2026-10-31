@@ -30,11 +30,11 @@
       "levels": [
         {
           "shape": "block/eextruder/eextruder_base",
-          "actionLangCode": "electricalprogressiveindustry:eextruder-handbook-place-controller"
+          "actionLangCode": "game:rollers-construct"
         },
         {
           "shape": "block/eextruder/eextruder_base",
-          "actionLangCode": "electricalprogressiveindustry:eextruder-construct-frame",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -45,7 +45,7 @@
         },
         {
           "shape": "block/eextruder/eextruder_base2",
-          "actionLangCode": "electricalprogressiveindustry:eextruder-construct-coils",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -56,7 +56,7 @@
         },
         {
           "shape": "block/eextruder/eextruder_base3",
-          "actionLangCode": "electricalprogressiveindustry:eextruder-construct-housing",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -67,7 +67,7 @@
         },
         {
           "shape": "block/eextruder/eextruder",
-          "actionLangCode": "electricalprogressiveindustry:eextruder-construct-finish",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -271,3 +271,4 @@
     "scale": 0.4
   }
 }
+

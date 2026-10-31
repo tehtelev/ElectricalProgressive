@@ -36,11 +36,11 @@
       "levels": [
         {
           "shape": "block/eacidaccum/eacidaccum_base",
-          "actionLangCode": "electricalprogressivebasics:eacidaccum-handbook-place-controller"
+          "actionLangCode": "game:rollers-construct"
         },
         {
           "shape": "block/eacidaccum/eacidaccum_base2",
-          "actionLangCode": "electricalprogressivebasics:eacidaccum-construct-frame",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -56,7 +56,7 @@
         },
         {
           "shape": "block/eacidaccum/eacidaccum_base3",
-          "actionLangCode": "electricalprogressivebasics:eacidaccum-construct-board",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -72,7 +72,7 @@
         },
         {
           "shape": "block/eacidaccum/eacidaccum",
-          "actionLangCode": "electricalprogressivebasics:eacidaccum-construct-finish",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "block",
@@ -201,3 +201,4 @@
     "scale": 0.22
   }
 }
+

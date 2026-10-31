@@ -91,11 +91,11 @@
       "levels": [
         {
           "shape": "block/fuelgenerator/fuelgenerator_core",
-          "actionLangCode": "electricalprogressivebasics:efuelgenerator-handbook-place-controller"
+          "actionLangCode": "game:rollers-construct"
         },
         {
           "shape": "block/fuelgenerator/fuelgenerator_core2",
-          "actionLangCode": "electricalprogressivebasics:efuelgenerator-construct-frame",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -111,7 +111,7 @@
         },
         {
           "shape": "block/fuelgenerator/fuelgenerator_core3",
-          "actionLangCode": "electricalprogressivebasics:efuelgenerator-construct-core",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -127,7 +127,7 @@
         },
         {
           "shape": "block/fuelgenerator/fuelgenerator",
-          "actionLangCode": "electricalprogressivebasics:efuelgenerator-construct-finish",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "block",
@@ -286,3 +286,4 @@
     "scale": 0.38
   }
 }
+

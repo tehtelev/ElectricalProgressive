@@ -32,11 +32,11 @@
       "levels": [
         {
           "shape": "block/eaquaaccum/eaquaaccum_base",
-          "actionLangCode": "electricalprogressiveindustry:eaquaaccum-handbook-place-controller"
+          "actionLangCode": "game:rollers-construct"
         },
         {
           "shape": "block/eaquaaccum/eaquaaccum_base",
-          "actionLangCode": "electricalprogressiveindustry:eaquaaccum-construct-frame",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -47,7 +47,7 @@
         },
         {
           "shape": "block/eaquaaccum/eaquaaccum_base2",
-          "actionLangCode": "electricalprogressiveindustry:eaquaaccum-construct-coils",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -58,7 +58,7 @@
         },
         {
           "shape": "block/eaquaaccum/eaquaaccum_base3",
-          "actionLangCode": "electricalprogressiveindustry:eaquaaccum-construct-tank",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -69,7 +69,7 @@
         },
         {
           "shape": "block/eaquaaccum/eaquaaccum",
-          "actionLangCode": "electricalprogressiveindustry:eaquaaccum-construct-finish",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -261,3 +261,4 @@
     "scale": 0.4
   }
 }
+

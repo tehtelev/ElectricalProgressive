@@ -32,11 +32,11 @@
       "levels": [
         {
           "shape": "block/ehammer/ehammer_base",
-          "actionLangCode": "electricalprogressiveindustry:ehammer-handbook-place-controller"
+          "actionLangCode": "game:rollers-construct"
         },
         {
           "shape": "block/ehammer/ehammer_base",
-          "actionLangCode": "electricalprogressiveindustry:ehammer-construct-frame",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -47,7 +47,7 @@
         },
         {
           "shape": "block/ehammer/ehammer_base2",
-          "actionLangCode": "electricalprogressiveindustry:ehammer-construct-coils",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -58,7 +58,7 @@
         },
         {
           "shape": "block/ehammer/ehammer_base3",
-          "actionLangCode": "electricalprogressiveindustry:ehammer-construct-housing",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -69,7 +69,7 @@
         },
         {
           "shape": "block/ehammer/ehammer",
-          "actionLangCode": "electricalprogressiveindustry:ehammer-construct-finish",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -273,3 +273,4 @@
     "scale": 0.4
   }
 }
+

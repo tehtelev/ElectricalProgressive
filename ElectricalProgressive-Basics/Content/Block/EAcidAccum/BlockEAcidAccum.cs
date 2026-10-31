@@ -26,10 +26,24 @@ public class BlockEAcidAccum : ImmersiveWireBlock, ILiquidSink, ILiquidSource, I
     public static int GetContainerSlotId(BlockPos pos) => ContainerSlotId;
     public static int GetContainerSlotId(ItemStack containerStack) => ContainerSlotId;
 
+    private WorldInteraction[] _interactions = [];
+
     public override void OnLoaded(ICoreAPI coreApi)
     {
         base.OnLoaded(coreApi);
         _skipNonCenterCollisions = true;
+
+        _interactions = ObjectCacheUtil.GetOrCreate(coreApi, "BlockEAcidAccumInteractions", () =>
+        {
+            return new WorldInteraction[]
+            {
+                new()
+                {
+                    ActionLangCode = "blockhelp-barrel-fill",
+                    MouseButton = EnumMouseButton.Right
+                }
+            };
+        });
     }
 
     private BlockEntityEAcidAccum? GetBlockEntity(BlockPos pos)
@@ -406,13 +420,14 @@ public class BlockEAcidAccum : ImmersiveWireBlock, ILiquidSink, ILiquidSource, I
 
     public override WorldInteraction[] GetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection selection, IPlayer forPlayer)
     {
-        return new WorldInteraction[]
+        var beh = MachineConstructAccess.GetBehavior(world, selection.Position);
+        if (beh != null && beh.HasConstruction && !beh.IsReady)
         {
-            new()
-            {
-                ActionLangCode = "blockhelp-barrel-fill",
-                MouseButton = EnumMouseButton.Right
-            }
-        }.Append(base.GetPlacedBlockInteractionHelp(world, selection, forPlayer));
+            var help = beh.GetInteractionHelp(world, forPlayer);
+            if (help is { Length: > 0 })
+                return help;
+        }
+
+        return _interactions.Append(base.GetPlacedBlockInteractionHelp(world, selection, forPlayer));
     }
 }

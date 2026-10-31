@@ -113,11 +113,11 @@
       "levels": [
         {
           "shape": "block/termoplastini/termoplastini_base",
-          "actionLangCode": "electricalprogressivebasics:termoplastini-handbook-place-controller"
+          "actionLangCode": "game:rollers-construct"
         },
         {
           "shape": "block/termoplastini/termoplastini_base",
-          "actionLangCode": "electricalprogressivebasics:termoplastini-construct-frame",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -133,7 +133,7 @@
         },
         {
           "shape": "block/termoplastini/termoplastini",
-          "actionLangCode": "electricalprogressivebasics:termoplastini-construct-finish",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -200,3 +200,4 @@
     }
   ]
 }
+

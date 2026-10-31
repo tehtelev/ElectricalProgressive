@@ -1,4 +1,4 @@
-﻿{
+{
   "code": "etermogenerator",
   "class": "BlockETermoGenerator",
   "entityClass": "BlockEntityETermoGenerator",
@@ -73,11 +73,11 @@
       "levels": [
         {
           "shape": "block/termogenerator/termogenerator_base",
-          "actionLangCode": "electricalprogressivebasics:etermogenerator-handbook-place-controller"
+          "actionLangCode": "game:rollers-construct"
         },
         {
           "shape": "block/termogenerator/termogenerator_base2",
-          "actionLangCode": "electricalprogressivebasics:etermogenerator-construct-frame",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -93,7 +93,7 @@
         },
         {
           "shape": "block/termogenerator/termogenerator_base3",
-          "actionLangCode": "electricalprogressivebasics:etermogenerator-construct-core",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -109,7 +109,7 @@
         },
         {
           "shape": "block/termogenerator/termogenerator",
-          "actionLangCode": "electricalprogressivebasics:etermogenerator-construct-finish",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "block",
@@ -241,3 +241,4 @@
     }
   }
 }
+

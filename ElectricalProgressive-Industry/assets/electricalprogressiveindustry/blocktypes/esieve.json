@@ -30,11 +30,11 @@
       "levels": [
         {
           "shape": "block/esieve/esieve_base",
-          "actionLangCode": "electricalprogressiveindustry:esieve-handbook-place-controller"
+          "actionLangCode": "game:rollers-construct"
         },
         {
           "shape": "block/esieve/esieve_base",
-          "actionLangCode": "electricalprogressiveindustry:esieve-construct-frame",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -45,7 +45,7 @@
         },
         {
           "shape": "block/esieve/esieve_base2",
-          "actionLangCode": "electricalprogressiveindustry:esieve-construct-coils",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -56,7 +56,7 @@
         },
         {
           "shape": "block/esieve/esieve_base3",
-          "actionLangCode": "electricalprogressiveindustry:esieve-construct-housing",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -67,7 +67,7 @@
         },
         {
           "shape": "block/esieve/esieve",
-          "actionLangCode": "electricalprogressiveindustry:esieve-construct-finish",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -249,3 +249,4 @@
     "scale": 0.4
   }
 }
+

@@ -27,11 +27,11 @@
       "levels": [
         {
           "shape": "block/efruitpress/efruitpress_base",
-          "actionLangCode": "electricalprogressiveqol:efruitpress-handbook-place-controller"
+          "actionLangCode": "game:rollers-construct"
         },
         {
           "shape": "block/efruitpress/efruitpress_base",
-          "actionLangCode": "electricalprogressiveqol:efruitpress-construct-frame",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -42,7 +42,7 @@
         },
         {
           "shape": "block/efruitpress/efruitpress",
-          "actionLangCode": "electricalprogressiveqol:efruitpress-construct-finish",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -241,3 +241,4 @@
     "scale": 0.25
   }
 }
+

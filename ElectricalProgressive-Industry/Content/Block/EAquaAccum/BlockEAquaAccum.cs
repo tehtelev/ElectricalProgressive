@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Content.Block;
+using ElectricalProgressive.Content.Block;
 using ElectricalProgressive.Utils;
 using System;
 using System.Collections.Generic;
@@ -32,6 +32,25 @@ public class BlockEAquaAccum : BlockEBase, ILiquidSink, ILiquidSource, IMultiBlo
     public bool AllowHeldLiquidTransfer => true;
     public static int ContainerSlotId => 0;
     public float TransferSizeLitres => 1f;
+
+    private WorldInteraction[] _interactions = [];
+
+    public override void OnLoaded(ICoreAPI api)
+    {
+        base.OnLoaded(api);
+
+        _interactions = ObjectCacheUtil.GetOrCreate(api, "BlockEAquaAccumInteractions", () =>
+        {
+            return new WorldInteraction[]
+            {
+                new()
+                {
+                    ActionLangCode = "blockhelp-watergen-fillliquid",
+                    MouseButton = EnumMouseButton.Right
+                }
+            };
+        });
+    }
 
     // === Реализация интерфейса ILiquidSource/ILiquidSink для BlockPos ===
 
@@ -518,14 +537,15 @@ public class BlockEAquaAccum : BlockEBase, ILiquidSink, ILiquidSource, IMultiBlo
 
     public override WorldInteraction[] GetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection selection, IPlayer forPlayer)
     {
-        return new WorldInteraction[]
+        var beh = MachineConstructAccess.GetBehavior(world, selection.Position);
+        if (beh != null && beh.HasConstruction && !beh.IsReady)
         {
-            new()
-            {
-                ActionLangCode = "blockhelp-watergen-fillliquid",
-                MouseButton = EnumMouseButton.Right
-            }
-        }.Append(base.GetPlacedBlockInteractionHelp(world, selection, forPlayer));
+            var help = beh.GetInteractionHelp(world, forPlayer);
+            if (help is { Length: > 0 })
+                return help;
+        }
+
+        return _interactions.Append(base.GetPlacedBlockInteractionHelp(world, selection, forPlayer));
     }
 
     public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)

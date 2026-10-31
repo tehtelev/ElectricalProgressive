@@ -26,11 +26,11 @@
       "levels": [
         {
           "shape": "block/emetalforming/emetalforming",
-          "actionLangCode": "electricalprogressiveindustry:emetalforming-handbook-place-controller"
+          "actionLangCode": "game:rollers-construct"
         },
         {
           "shape": "block/emetalforming/emetalforming",
-          "actionLangCode": "electricalprogressiveindustry:emetalforming-construct-frame",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -41,7 +41,7 @@
         },
         {
           "shape": "block/emetalforming/emetalforming",
-          "actionLangCode": "electricalprogressiveindustry:emetalforming-construct-coils",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -52,7 +52,7 @@
         },
         {
           "shape": "block/emetalforming/emetalforming",
-          "actionLangCode": "electricalprogressiveindustry:emetalforming-construct-housing",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -63,7 +63,7 @@
         },
         {
           "shape": "block/emetalforming/emetalforming",
-          "actionLangCode": "electricalprogressiveindustry:emetalforming-construct-finish",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -258,3 +258,4 @@
     "scale": 0.35
   }
 }
+

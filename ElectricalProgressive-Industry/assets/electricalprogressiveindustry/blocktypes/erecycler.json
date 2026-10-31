@@ -25,11 +25,11 @@
       "levels": [
         {
           "shape": "block/erecycler/eRecycler_base",
-          "actionLangCode": "electricalprogressiveindustry:erecycler-handbook-place-controller"
+          "actionLangCode": "game:rollers-construct"
         },
         {
           "shape": "block/erecycler/eRecycler_base2",
-          "actionLangCode": "electricalprogressiveindustry:erecycler-construct-frame",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -45,7 +45,7 @@
         },
         {
           "shape": "block/erecycler/eRecycler_base3",
-          "actionLangCode": "electricalprogressiveindustry:erecycler-construct-coils",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "block",
@@ -61,7 +61,7 @@
         },
         {
           "shape": "block/erecycler/eRecycler",
-          "actionLangCode": "electricalprogressiveindustry:erecycler-construct-rotors",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -259,3 +259,4 @@
     "scale": 0.4
   }
 }
+

@@ -29,11 +29,11 @@
       "levels": [
         {
           "shape": "block/ecrusher/ecrusher_base",
-          "actionLangCode": "electricalprogressiveindustry:ecrusher-handbook-place-controller"
+          "actionLangCode": "game:rollers-construct"
         },
         {
           "shape": "block/ecrusher/ecrusher_base2",
-          "actionLangCode": "electricalprogressiveindustry:ecrusher-construct-frame",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -44,7 +44,7 @@
         },
         {
           "shape": "block/ecrusher/ecrusher",
-          "actionLangCode": "electricalprogressiveindustry:ecrusher-construct-rollers",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -251,3 +251,4 @@
     "scale": 0.4
   }
 }
+

@@ -30,11 +30,11 @@
       "levels": [
         {
           "shape": "block/epress/epress_base",
-          "actionLangCode": "electricalprogressiveindustry:epress-handbook-place-controller"
+          "actionLangCode": "game:rollers-construct"
         },
         {
           "shape": "block/epress/epress_base",
-          "actionLangCode": "electricalprogressiveindustry:epress-construct-frame",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -45,7 +45,7 @@
         },
         {
           "shape": "block/epress/epress_base2",
-          "actionLangCode": "electricalprogressiveindustry:epress-construct-coils",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -56,7 +56,7 @@
         },
         {
           "shape": "block/epress/epress_base3",
-          "actionLangCode": "electricalprogressiveindustry:epress-construct-housing",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -67,7 +67,7 @@
         },
         {
           "shape": "block/epress/epress",
-          "actionLangCode": "electricalprogressiveindustry:epress-construct-finish",
+          "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
@@ -255,3 +255,4 @@
     "scale": 0.4
   }
 }
+
