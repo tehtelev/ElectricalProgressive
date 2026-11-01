@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Interface;
+using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
 using System.Text;
 using Vintagestory.API.Common;
@@ -143,3 +143,4 @@ public class BEBehaviorETransformator : BlockEntityBehavior, IElectricTransforma
         _power = tree.GetFloat(PowerKey);
     }
 }
+

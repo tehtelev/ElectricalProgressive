@@ -450,7 +450,7 @@ public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource, IMultiBl
             if (world.Api is ICoreClientAPI capi)
             {
                 capi.TriggerIngameError(this, "incomplete",
-                    Lang.Get("electricalprogressiveqol:efruitpress-structure-incomplete"));
+                    Lang.Get("electricalprogressivebasics:structure-incomplete"));
             }
 
             return true;
@@ -608,7 +608,6 @@ public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource, IMultiBl
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + (MyMiniLib.GetAttributeBool(block, "isolatedEnvironment", false) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:Liquid capacity") + ": 100 L");
         dsc.AppendLine();
-        dsc.AppendLine(Lang.Get("electricalprogressiveqol:efruitpress-structure-hint"));
     }
 
     #endregion

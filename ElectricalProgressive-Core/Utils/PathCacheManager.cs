@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
@@ -165,3 +165,4 @@ namespace ElectricalProgressive.Utils
 
     }
 }
+

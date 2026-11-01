@@ -262,3 +262,4 @@ public class GuiDialogConstructionBook : GuiDialog
         return bounds;
     }
 }
+

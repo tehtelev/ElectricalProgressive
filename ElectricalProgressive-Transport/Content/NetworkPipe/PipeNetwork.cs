@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Content.ItemInsertionPipe;
+using ElectricalProgressive.Content.ItemInsertionPipe;
 using ElectricalProgressive.Content.LiquidInsertionPipe;
 using ElectricalProgressive.Content.NormalPipe;
 using System.Collections.Generic;
@@ -225,3 +225,4 @@ public readonly struct PipeEndpoint
         FacingFromPipe = facingFromPipe;
     }
 }
+

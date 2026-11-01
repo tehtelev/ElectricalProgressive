@@ -1,4 +1,4 @@
-﻿using Vintagestory.API.MathTools;
+using Vintagestory.API.MathTools;
 
 namespace ElectricalProgressive.Interface;
 
@@ -36,3 +36,4 @@ public interface IEImmersiveProducer
     /// </summary>
     public void Update();
 }
+

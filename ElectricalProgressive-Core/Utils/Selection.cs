@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 
@@ -173,3 +173,4 @@ public class Selection
         return mapping[0]; // или другое значение по умолчанию
     }
 }
+

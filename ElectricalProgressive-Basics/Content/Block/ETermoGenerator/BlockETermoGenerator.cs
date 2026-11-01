@@ -119,23 +119,13 @@ public class BlockETermoGenerator : BlockEBase, IMultiBlockInteract
 
         var bef = world.BlockAccessor.GetBlockEntity(controllerPos) as BlockEntityETermoGenerator;
         var construct = bef?.GetBehavior<MachineConstruct>();
-        if (construct != null && construct.HasConstruction && !construct.IsReady)
+        if ((construct != null && construct.HasConstruction && !construct.IsReady) ||
+            (bef != null && !bef.StructureComplete))
         {
             if (world.Api is ICoreClientAPI capi)
             {
                 capi.TriggerIngameError(this, "incomplete",
-                    Lang.Get("electricalprogressivebasics:etermogenerator-structure-incomplete"));
-            }
-
-            return true;
-        }
-
-        if (bef != null && !bef.StructureComplete)
-        {
-            if (world.Api is ICoreClientAPI capi)
-            {
-                capi.TriggerIngameError(this, "incomplete",
-                    Lang.Get("electricalprogressivebasics:etermogenerator-structure-incomplete"));
+                    Lang.Get("electricalprogressivebasics:structure-incomplete"));
             }
 
             return true;
@@ -228,7 +218,6 @@ public class BlockETermoGenerator : BlockEBase, IMultiBlockInteract
                            ? Lang.Get("electricalprogressivebasics:Yes")
                            : Lang.Get("electricalprogressivebasics:No")));
         dsc.AppendLine();
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:etermogenerator-structure-hint"));
     }
 
     #region IMultiBlockInteract
@@ -275,3 +264,4 @@ public class BlockETermoGenerator : BlockEBase, IMultiBlockInteract
 
     #endregion
 }
+

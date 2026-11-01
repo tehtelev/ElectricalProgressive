@@ -1,4 +1,4 @@
-﻿{
+{
   "game:tabname-electricalprogressivetransport": "Tuyaux de transport",
 
   "block-pipe-normal": "Tuyau de transport",
@@ -61,3 +61,4 @@
   "block-handbooktitle-pipe-liquid-insertion": "Utilisation",
   "block-handbooktext-pipe-liquid-insertion": "Permet d'insérer des fluides dans les conteneurs voisins. Ouvrez l'interface et cliquez les fluides de la liste pour définir les filtres. Si le filtre reste vide, tous les fluides seront transférés sans filtrage."
 }
+

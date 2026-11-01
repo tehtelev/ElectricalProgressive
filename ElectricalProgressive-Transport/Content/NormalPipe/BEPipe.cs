@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Content;
+using ElectricalProgressive.Content;
 using ElectricalProgressive.Content.ItemInsertionPipe;
 using ElectricalProgressive.Content.LiquidInsertionPipe;
 using System.Collections.Generic;
@@ -162,3 +162,4 @@ public class BEPipe : BlockEntity, IPipeRenderState
         _pipeConnection?.GetBlockInfo(dsc);
     }
 }
+

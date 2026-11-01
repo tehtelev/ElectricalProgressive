@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Utils;
+using ElectricalProgressive.Utils;
 using System.Text;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
@@ -58,3 +58,4 @@ public class ItemEGlider : Item, IWearableShapeSupplier
         dsc.AppendLine(energy + "/" + maxEnergy + " " + Lang.Get("electricalprogressivebasics:J"));
     }
 }
+

@@ -969,3 +969,4 @@ public class GuiDialogEStorageTerminal : GuiDialogBlockEntity
         return StackSizeTextPatch.Format((int)value);
     }
 }
+

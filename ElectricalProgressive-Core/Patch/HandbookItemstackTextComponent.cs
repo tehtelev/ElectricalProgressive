@@ -84,3 +84,4 @@ public class HandbookItemstackTextComponent : ItemstackTextComponent
         return true;
     }
 }
+

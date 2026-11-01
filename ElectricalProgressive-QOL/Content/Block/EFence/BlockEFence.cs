@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Utils;
+using ElectricalProgressive.Utils;
 using System.Collections.Generic;
 using System.Text;
 using Vintagestory.API.Client;
@@ -306,3 +306,4 @@ public class BlockEFence : BlockEBase
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + ((MyMiniLib.GetAttributeBool(block, "isolatedEnvironment", false)) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
     }
 }
+

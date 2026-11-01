@@ -1,4 +1,4 @@
-﻿using Cairo;
+using Cairo;
 using ElectricalProgressive.RecipeSystem;
 using ElectricalProgressive.RecipeSystem.Recipe;
 using HarmonyLib;

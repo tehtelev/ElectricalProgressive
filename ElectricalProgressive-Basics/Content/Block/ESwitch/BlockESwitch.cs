@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Content.Block.ECable;
+using ElectricalProgressive.Content.Block.ECable;
 using ElectricalProgressive.Utils;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
@@ -47,3 +47,4 @@ public class BlockESwitch : BlockEBase
 
     }
 }
+

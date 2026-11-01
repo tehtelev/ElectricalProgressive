@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Utils;
+using ElectricalProgressive.Utils;
 using Vintagestory.API.Common;
 
 namespace ElectricalProgressive.Content.Block.HVSFonar
@@ -32,4 +32,5 @@ namespace ElectricalProgressive.Content.Block.HVSFonar
 
     }
 }
+
 

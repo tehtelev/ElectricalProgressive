@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.RecipeSystem.Recipe;
+using ElectricalProgressive.RecipeSystem.Recipe;
 
 namespace ElectricalProgressive.RecipeSystem.Recipe;
 

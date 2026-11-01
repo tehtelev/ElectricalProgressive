@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Utils;
+using ElectricalProgressive.Utils;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -314,3 +314,4 @@ namespace ElectricalProgressive.Content.Block.ESFonar
 
     }
 }
+

@@ -82,3 +82,4 @@ internal static class EmptyHousingSplit
         world.SpawnItemEntity(stack, player.Entity.Pos.XYZ);
     }
 }
+

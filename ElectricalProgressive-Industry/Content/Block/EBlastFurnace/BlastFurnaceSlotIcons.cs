@@ -85,3 +85,4 @@ public static class BlastFurnaceSlotIcons
         cr.Restore();
     }
 }
+

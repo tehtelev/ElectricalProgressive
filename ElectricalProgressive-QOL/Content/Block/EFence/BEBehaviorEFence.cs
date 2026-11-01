@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Interface;
+using ElectricalProgressive.Interface;
 using System;
 using System.Text;
 using Vintagestory.API.Common;
@@ -40,4 +40,5 @@ public class BEBehaviorEFence : BlockEntityBehavior, IElectricConductor
 
 
 }
+
 

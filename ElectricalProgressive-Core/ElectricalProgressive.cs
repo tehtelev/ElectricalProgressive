@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Construction;
+using ElectricalProgressive.Construction;
 using ElectricalProgressive.Interface;
 using ElectricalProgressive.Patch;
 using ElectricalProgressive.Utils;

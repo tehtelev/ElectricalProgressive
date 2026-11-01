@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Content.NetworkPipe;
+using ElectricalProgressive.Content.NetworkPipe;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -433,3 +433,4 @@ namespace ElectricalProgressive.Content
         }
     }
 }
+

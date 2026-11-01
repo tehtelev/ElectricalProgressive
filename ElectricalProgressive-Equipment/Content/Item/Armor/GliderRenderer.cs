@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Net;
+using ElectricalProgressive.Net;
 using System;
 using System.Runtime.CompilerServices;
 using Vintagestory.API.Client;

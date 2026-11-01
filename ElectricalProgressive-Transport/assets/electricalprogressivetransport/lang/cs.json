@@ -1,4 +1,4 @@
-﻿{
+{
   "game:tabname-electricalprogressivetransport": "Dopravní trubky",
 
   "block-pipe-normal": "Dopravní trubka",
@@ -61,3 +61,4 @@
   "block-handbooktitle-pipe-liquid-insertion": "Použití",
   "block-handbooktext-pipe-liquid-insertion": "Umožňuje vkládat kapaliny do sousedních kontejnerů. Otevřete GUI a klikněte na kapaliny v seznamu pro nastavení filtru. Pokud filtr zůstane prázdný, přesouvají se všechny kapaliny."
 }
+

@@ -57,23 +57,13 @@ public class BlockECrusher : Vintagestory.API.Common.Block, IMultiBlockInteract
             return true;
 
         var construct = blockEntity.GetBehavior<MachineConstruct>();
-        if (construct != null && construct.HasConstruction && !construct.IsReady)
+        if ((construct != null && construct.HasConstruction && !construct.IsReady) ||
+            (blockEntity is BlockEntityECrusher crusher && !crusher.StructureComplete))
         {
             if (world.Api is ICoreClientAPI capi)
             {
                 capi.TriggerIngameError(this, "incomplete",
-                    Lang.Get("electricalprogressiveindustry:ecrusher-structure-incomplete"));
-            }
-
-            return true;
-        }
-
-        if (blockEntity is BlockEntityECrusher crusher && !crusher.StructureComplete)
-        {
-            if (world.Api is ICoreClientAPI capi)
-            {
-                capi.TriggerIngameError(this, "incomplete",
-                    Lang.Get("electricalprogressiveindustry:ecrusher-structure-incomplete"));
+                    Lang.Get("electricalprogressivebasics:structure-incomplete"));
             }
 
             return true;
@@ -118,7 +108,6 @@ public class BlockECrusher : Vintagestory.API.Common.Block, IMultiBlockInteract
                            ? Lang.Get("electricalprogressivebasics:Yes")
                            : Lang.Get("electricalprogressivebasics:No")));
         dsc.AppendLine();
-        dsc.AppendLine(Lang.Get("electricalprogressiveindustry:ecrusher-structure-hint"));
     }
 
     public override void OnLoaded(ICoreAPI coreApi)
@@ -196,3 +185,4 @@ public class BlockECrusher : Vintagestory.API.Common.Block, IMultiBlockInteract
 
     #endregion
 }
+

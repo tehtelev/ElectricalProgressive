@@ -158,3 +158,4 @@ public class GuiDialogMetalFormingRecipes : GuiDialogGeneric
         base.OnRenderGUI(deltaTime);
     }
 }
+

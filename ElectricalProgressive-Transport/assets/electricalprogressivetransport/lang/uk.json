@@ -1,4 +1,4 @@
-﻿{
+{
   "game:tabname-electricalprogressivetransport": "Транспортні труби",
 
   "block-pipe-normal": "Транспортна труба",
@@ -61,3 +61,4 @@
   "block-handbooktitle-pipe-liquid-insertion": "Використання",
   "block-handbooktext-pipe-liquid-insertion": "Дозволяє вкладати рідини у сусідні контейнери. Відкрийте GUI і клікайте по рідинах у списку, щоб додати їх у фільтр. Якщо фільтр порожній — переміщуються всі рідини."
 }
+

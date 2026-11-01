@@ -1,4 +1,4 @@
-﻿using Vintagestory.API.Common;
+using Vintagestory.API.Common;
 using ElectricalProgressive.Content.Item.Armor;
 using ElectricalProgressive.Content.Item.Weapon;
 using Vintagestory.API.Server;

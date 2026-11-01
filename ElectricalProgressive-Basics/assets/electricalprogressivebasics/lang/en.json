@@ -140,8 +140,6 @@
   "block-handbooktitle-etermogenerator": "Usage",
   "block-handbooktext-etermogenerator": "Multiblock thermoelectric generator (3×3×3), 32 V. Converts heat to electricity; needs <a href=\"handbook://block-electricalprogressivebasics:termoplastini-south\">thermoelectric plates</a> at the back (up to 10). Fuel manually or via hoppers.",
 
-  "etermogenerator-structure-incomplete": "Thermogenerator is not assembled",
-  "etermogenerator-structure-hint": "Right-click with materials to assemble (see stages).",
   "etermogenerator-handbook-place-controller": "Place the controller",
 
   "termoplastini": "Thermoelectric Plates",
@@ -150,8 +148,6 @@
   "block-termoplastini-formed-*": "Thermoelectric Plates",
   "block-handbooktitle-termoplastini": "Usage",
   "block-handbooktext-termoplastini": "Thermoelectric plates convert heat to electricity for the <a href=\"handbook://block-electricalprogressivebasics:etermogenerator-incomplete-south\">thermoelectric generator</a>. Craft the incomplete frame, place it on the copper pad behind the generator, then assemble with RMB: 4 iron plates + riveted copper block, then 2 zinc + 2 copper plates + 4× 32V copper cables.<br><br>Up to 10 sections. Only attach to the heat-exchanger copper pad. Each extra section adds less power; 10 plates ≈ 100%. Two generators can share one plate stack.",
-  "termoplastini-structure-incomplete": "Thermoelectric plates are not assembled",
-  "termoplastini-structure-hint": "Place on the generator, then add materials with RMB",
   "termoplastini-handbook-place-controller": "Place the plate frame",
 
   // ==================== Solar Generator ====================
@@ -241,8 +237,6 @@
   "eacidaccum-acid": "Sulfuric acid",
   "eacidaccum-no-acid": "No sulfuric acid — cannot charge or discharge",
   "eacidaccum-tank": "Tank",
-  "eacidaccum-structure-incomplete": "Accumulator is not assembled",
-  "eacidaccum-structure-hint": "Place with the schematic book, then RMB: 6 steel plates and 8 coils → PCB and floor insulator → 128 V accumulator. Fill with sulfuric acid.",
   "eacidaccum-handbook-place-controller": "Place the blueprint",
 
   "block-hvstreetlamp-*": "Street Light",
@@ -439,8 +433,6 @@
   "block-handbooktitle-efuelgenerator": "Usage",
   "block-handbooktext-efuelgenerator": "Multiblock steam generator (2×2×3), 128 V. Generates power from burning fuel; needs water. Fill manually or via liquid pipes.",
 
-  "efuelgenerator-structure-incomplete": "Generator is not assembled",
-  "efuelgenerator-structure-hint": "RMB: 8 iron + 4 copper plates → 4 coils + 2 rotors → tier3 stator + 16 copper 128 V wires.",
   "efuelgenerator-handbook-place-controller": "Place the controller",
 
   "electricalprogressivebasics:empty": "Empty",
@@ -457,3 +449,5 @@
   "resistance_moment": "Shaft resistance: {0} kN",
   "torque_moment": "Torque: {0} kN"
 }
+
+

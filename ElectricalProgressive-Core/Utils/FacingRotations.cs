@@ -1,4 +1,4 @@
-﻿using Cairo.Freetype;
+using Cairo.Freetype;
 using System.Collections.Generic;
 using System.Linq;
 using Vintagestory.API.Client;
@@ -94,3 +94,4 @@ public static class FacingRotations
 
     }
 }
+

@@ -131,7 +131,7 @@ public class BlockTermoplastini : BlockEBase, IMultiBlockInteract
             if (world.Api is ICoreClientAPI capi)
             {
                 capi.TriggerIngameError(this, "incomplete",
-                    Lang.Get("electricalprogressivebasics:termoplastini-structure-incomplete"));
+                    Lang.Get("electricalprogressivebasics:structure-incomplete"));
             }
 
             return true;
@@ -144,7 +144,6 @@ public class BlockTermoplastini : BlockEBase, IMultiBlockInteract
     {
         base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
         dsc.AppendLine();
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:termoplastini-structure-hint"));
     }
 
     #region IMultiBlockInteract
@@ -192,3 +191,4 @@ public class BlockTermoplastini : BlockEBase, IMultiBlockInteract
 
     #endregion
 }
+

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -309,3 +309,4 @@ internal static class PipeNeighborMeshClipper
         return true;
     }
 }
+

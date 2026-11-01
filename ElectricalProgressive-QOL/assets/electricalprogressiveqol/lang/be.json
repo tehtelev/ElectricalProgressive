@@ -88,8 +88,6 @@
   "block-efruitpress-*": "Электрычны прэс для садавіны",
   "block-handbooktitle-efruitpress": "Выкарыстанне",
   "block-handbooktext-efruitpress": "Электрычны прэс, 32 В, 2×2×2. Blueprint ставіцца кнігай чарцяжоў.",
-  "efruitpress-structure-incomplete": "Прэс не сабраны",
-  "efruitpress-structure-hint": "Пастаўце кнігай чарцяжоў, затым ПКМ: 4 жалезныя пласціны → 2 медныя.",
   "efruitpress-handbook-place-controller": "Паставіць blueprint",
   "efruitpress-title-gui": "Электрычны прэс для садавіны",
   "efruitpress-slot-fruit": "Садавіна",

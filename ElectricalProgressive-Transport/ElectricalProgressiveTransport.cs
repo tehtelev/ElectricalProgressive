@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using ElectricalProgressive.Content;
 using ElectricalProgressive.Content.ItemInsertionPipe;
 using ElectricalProgressive.Content.LiquidInsertionPipe;
@@ -124,3 +124,4 @@ public class ElectricalProgressiveTransport : ModSystem
     }
 }
     
+

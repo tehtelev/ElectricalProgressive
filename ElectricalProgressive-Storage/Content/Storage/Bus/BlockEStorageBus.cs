@@ -490,3 +490,4 @@ public class BlockEntityEStorageBus : BlockEntityOpenableContainer, IPanelHost, 
         world.SpawnItemEntity(drop, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
     }
 }
+

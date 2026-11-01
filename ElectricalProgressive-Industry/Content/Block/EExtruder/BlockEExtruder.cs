@@ -55,23 +55,13 @@ public class BlockEExtruder : Vintagestory.API.Common.Block, IMultiBlockInteract
             return true;
 
         var construct = blockEntity.GetBehavior<MachineConstruct>();
-        if (construct != null && construct.HasConstruction && !construct.IsReady)
+        if ((construct != null && construct.HasConstruction && !construct.IsReady) ||
+            (blockEntity is BlockEntityEExtruder extruder && !extruder.StructureComplete))
         {
             if (world.Api is ICoreClientAPI capi)
             {
                 capi.TriggerIngameError(this, "incomplete",
-                    Lang.Get("electricalprogressiveindustry:eextruder-structure-incomplete"));
-            }
-
-            return true;
-        }
-
-        if (blockEntity is BlockEntityEExtruder extruder && !extruder.StructureComplete)
-        {
-            if (world.Api is ICoreClientAPI capi)
-            {
-                capi.TriggerIngameError(this, "incomplete",
-                    Lang.Get("electricalprogressiveindustry:eextruder-structure-incomplete"));
+                    Lang.Get("electricalprogressivebasics:structure-incomplete"));
             }
 
             return true;
@@ -116,7 +106,6 @@ public class BlockEExtruder : Vintagestory.API.Common.Block, IMultiBlockInteract
                            ? Lang.Get("electricalprogressivebasics:Yes")
                            : Lang.Get("electricalprogressivebasics:No")));
         dsc.AppendLine();
-        dsc.AppendLine(Lang.Get("electricalprogressiveindustry:eextruder-structure-hint"));
     }
 
     public override void OnLoaded(ICoreAPI coreApi)
@@ -193,3 +182,4 @@ public class BlockEExtruder : Vintagestory.API.Common.Block, IMultiBlockInteract
 
     #endregion
 }
+

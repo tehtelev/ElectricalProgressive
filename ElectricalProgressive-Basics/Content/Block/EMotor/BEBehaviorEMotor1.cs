@@ -1,4 +1,4 @@
-﻿// запаска пример использования с иммерсивными проводами
+// запаска пример использования с иммерсивными проводами
 using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
 using System;

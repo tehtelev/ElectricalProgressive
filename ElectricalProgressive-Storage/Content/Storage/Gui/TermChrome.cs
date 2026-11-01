@@ -170,3 +170,4 @@ internal sealed class GuiElementTermWell : GuiElement
         TermChrome.Inset(ctx, Bounds.drawX, Bounds.drawY, Bounds.InnerWidth, Bounds.InnerHeight, 0.10, 0.075, 0.05);
     }
 }
+

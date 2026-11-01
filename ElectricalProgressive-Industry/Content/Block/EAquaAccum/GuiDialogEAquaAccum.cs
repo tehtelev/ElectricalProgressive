@@ -1,4 +1,4 @@
-﻿using Cairo;
+using Cairo;
 using System;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Cairo;
 
 namespace ElectricalProgressive.Utils;
@@ -583,4 +583,5 @@ public class IconStorage
         cr.Restore();
     }
 }
+
 

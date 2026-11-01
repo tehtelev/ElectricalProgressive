@@ -1,4 +1,4 @@
-﻿{
+{
   "game:tabname-electricalprogressivetransport": "Transportrohre",
 
   "block-pipe-normal": "Transportrohr",
@@ -61,3 +61,4 @@
   "block-handbooktitle-pipe-liquid-insertion": "Verwendung",
   "block-handbooktext-pipe-liquid-insertion": "Ermöglicht das Einfügen von Flüssigkeiten in benachbarte Container. Öffnen Sie das GUI und klicken Sie Flüssigkeiten in der Liste an, um Filter zu setzen. Wenn der Filter leer bleibt, werden alle Flüssigkeiten ohne Filterung transferiert."
 }
+

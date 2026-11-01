@@ -216,3 +216,4 @@ public class GuiDialogMetalForming : GuiDialogBlockEntity
         base.OnGuiClosed();
     }
 }
+

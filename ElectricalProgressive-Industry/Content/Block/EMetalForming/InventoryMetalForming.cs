@@ -71,3 +71,4 @@ public class InventoryMetalForming : InventoryGeneric
     public ItemSlot OutputSlot => this[1];
     public ItemSlot BitsSlot => this[2];
 }
+

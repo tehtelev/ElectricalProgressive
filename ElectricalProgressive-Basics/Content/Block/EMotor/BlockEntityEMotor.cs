@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Utils;
+using ElectricalProgressive.Utils;
 
 namespace ElectricalProgressive.Content.Block.EMotor;
 
@@ -11,3 +11,4 @@ public class BlockEntityEMotor : BlockEntityEFacingBase
 
    
 }
+

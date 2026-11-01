@@ -54,3 +54,4 @@ public class ItemSlotBlastFurnaceMold : ItemSlot
     public override bool CanTakeFrom(ItemSlot sourceSlot, EnumMergePriority priority = EnumMergePriority.AutoMerge)
         => BlastFurnaceSlotUtil.IsIngotMold(sourceSlot?.Itemstack) && base.CanTakeFrom(sourceSlot, priority);
 }
+

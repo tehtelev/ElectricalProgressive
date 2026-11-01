@@ -544,3 +544,4 @@ public class InventoryEStorageLiquid : InventoryEStorageTerminal
     public override List<ItemStack> Collect()
         => Api?.World == null ? new List<ItemStack>() : StorageAccess.AggregateLiquid(Api.World, Origin);
 }
+

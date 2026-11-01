@@ -55,23 +55,13 @@ public class BlockESieve : Vintagestory.API.Common.Block, IMultiBlockInteract
             return true;
 
         var construct = blockEntity.GetBehavior<MachineConstruct>();
-        if (construct != null && construct.HasConstruction && !construct.IsReady)
+        if ((construct != null && construct.HasConstruction && !construct.IsReady) ||
+            (blockEntity is BlockEntityESieve sieve && !sieve.StructureComplete))
         {
             if (world.Api is ICoreClientAPI capi)
             {
                 capi.TriggerIngameError(this, "incomplete",
-                    Lang.Get("electricalprogressiveindustry:esieve-structure-incomplete"));
-            }
-
-            return true;
-        }
-
-        if (blockEntity is BlockEntityESieve sieve && !sieve.StructureComplete)
-        {
-            if (world.Api is ICoreClientAPI capi)
-            {
-                capi.TriggerIngameError(this, "incomplete",
-                    Lang.Get("electricalprogressiveindustry:esieve-structure-incomplete"));
+                    Lang.Get("electricalprogressivebasics:structure-incomplete"));
             }
 
             return true;
@@ -119,7 +109,6 @@ public class BlockESieve : Vintagestory.API.Common.Block, IMultiBlockInteract
                            ? Lang.Get("electricalprogressivebasics:Yes")
                            : Lang.Get("electricalprogressivebasics:No")));
         dsc.AppendLine();
-        dsc.AppendLine(Lang.Get("electricalprogressiveindustry:esieve-structure-hint"));
     }
 
     public override void OnLoaded(ICoreAPI coreApi)
@@ -196,3 +185,4 @@ public class BlockESieve : Vintagestory.API.Common.Block, IMultiBlockInteract
 
     #endregion
 }
+

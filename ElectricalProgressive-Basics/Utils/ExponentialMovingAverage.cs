@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace ElectricalProgressive.Utils
 {
@@ -47,3 +47,4 @@ namespace ElectricalProgressive.Utils
         public double CurrentValue => _currentValue;
     }
 }
+

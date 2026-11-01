@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using Vintagestory.API.Common;
 using Newtonsoft.Json;
 using System;

@@ -63,23 +63,13 @@ public class BlockEBlastFurnace : ImmersiveWireBlock, IMultiBlockInteract, IMult
             return true;
 
         var construct = blockEntity.GetBehavior<MachineConstruct>();
-        if (construct != null && construct.HasConstruction && !construct.IsReady)
+        if ((construct != null && construct.HasConstruction && !construct.IsReady) ||
+            (blockEntity is BlockEntityEBlastFurnace furnace && !furnace.StructureComplete))
         {
             if (world.Api is ICoreClientAPI capi)
             {
                 capi.TriggerIngameError(this, "incomplete",
-                    Lang.Get("electricalprogressiveindustry:eblastfurnace-structure-incomplete"));
-            }
-
-            return true;
-        }
-
-        if (blockEntity is BlockEntityEBlastFurnace furnace && !furnace.StructureComplete)
-        {
-            if (world.Api is ICoreClientAPI capi)
-            {
-                capi.TriggerIngameError(this, "incomplete",
-                    Lang.Get("electricalprogressiveindustry:eblastfurnace-structure-incomplete"));
+                    Lang.Get("electricalprogressivebasics:structure-incomplete"));
             }
 
             return true;
@@ -124,7 +114,6 @@ public class BlockEBlastFurnace : ImmersiveWireBlock, IMultiBlockInteract, IMult
                            ? Lang.Get("electricalprogressivebasics:Yes")
                            : Lang.Get("electricalprogressivebasics:No")));
         dsc.AppendLine();
-        dsc.AppendLine(Lang.Get("electricalprogressiveindustry:eblastfurnace-structure-hint"));
     }
 
     #region IMultiBlockInteract
@@ -265,3 +254,4 @@ public class BlockEBlastFurnace : ImmersiveWireBlock, IMultiBlockInteract, IMult
 
     #endregion
 }
+

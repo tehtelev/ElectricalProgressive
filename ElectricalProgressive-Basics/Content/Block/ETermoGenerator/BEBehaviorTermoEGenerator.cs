@@ -195,3 +195,4 @@ public class BEBehaviorTermoEGenerator : BlockEntityBehavior, IElectricProducer
         _powerGive = tree.GetFloat(PowerGiveKey);
     }
 }
+

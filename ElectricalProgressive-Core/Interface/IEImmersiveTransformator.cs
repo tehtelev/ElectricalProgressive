@@ -1,6 +1,7 @@
-﻿namespace ElectricalProgressive.Interface;
+namespace ElectricalProgressive.Interface;
 
 public interface IEImmersiveTransformator : IElectricTransformator
 {
    
 }
+

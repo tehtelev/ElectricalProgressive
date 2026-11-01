@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Vintagestory.API.MathTools;
@@ -21,3 +21,4 @@ namespace ElectricalProgressive.Utils
         public Vec3d NeighborNodeLocalPos { get; set; } // хранение локальной позиции соседнего нода
     }
 }
+

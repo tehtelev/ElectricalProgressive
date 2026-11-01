@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Cairo;
 using Vintagestory.API.Client;
 
@@ -116,3 +116,4 @@ public static class PipeFilterGuiStyle
     public static CairoFont CountFont()
         => CairoFont.WhiteDetailText().WithColor(TextOk);
 }
+

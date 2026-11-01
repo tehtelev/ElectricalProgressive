@@ -74,3 +74,4 @@ public class ElectricalProgressiveStorage : ModSystem
         _harmony.Patch(merge, prefix: new HarmonyMethod(typeof(InventoryEStorageTerminal), nameof(InventoryEStorageTerminal.MergeIntoTerminal)));
     }
 }
+

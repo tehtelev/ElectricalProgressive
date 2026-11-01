@@ -55,23 +55,13 @@ public class BlockEPress : Vintagestory.API.Common.Block, IMultiBlockInteract
             return true;
 
         var construct = blockEntity.GetBehavior<MachineConstruct>();
-        if (construct != null && construct.HasConstruction && !construct.IsReady)
+        if ((construct != null && construct.HasConstruction && !construct.IsReady) ||
+            (blockEntity is BlockEntityEPress press && !press.StructureComplete))
         {
             if (world.Api is ICoreClientAPI capi)
             {
                 capi.TriggerIngameError(this, "incomplete",
-                    Lang.Get("electricalprogressiveindustry:epress-structure-incomplete"));
-            }
-
-            return true;
-        }
-
-        if (blockEntity is BlockEntityEPress press && !press.StructureComplete)
-        {
-            if (world.Api is ICoreClientAPI capi)
-            {
-                capi.TriggerIngameError(this, "incomplete",
-                    Lang.Get("electricalprogressiveindustry:epress-structure-incomplete"));
+                    Lang.Get("electricalprogressivebasics:structure-incomplete"));
             }
 
             return true;
@@ -116,7 +106,6 @@ public class BlockEPress : Vintagestory.API.Common.Block, IMultiBlockInteract
                            ? Lang.Get("electricalprogressivebasics:Yes")
                            : Lang.Get("electricalprogressivebasics:No")));
         dsc.AppendLine();
-        dsc.AppendLine(Lang.Get("electricalprogressiveindustry:epress-structure-hint"));
     }
 
     public override void OnLoaded(ICoreAPI coreApi)
@@ -193,3 +182,4 @@ public class BlockEPress : Vintagestory.API.Common.Block, IMultiBlockInteract
 
     #endregion
 }
+

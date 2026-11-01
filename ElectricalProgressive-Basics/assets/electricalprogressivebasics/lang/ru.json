@@ -140,8 +140,7 @@
   "block-handbooktitle-etermogenerator": "Использование",
   "block-handbooktext-etermogenerator": "Многоблочный термогенератор (3×3×3), 32 В. Преобразует тепло в электричество; сзади — <a href=\"handbook://block-electricalprogressivebasics:termoplastini-south\">термоэлектрические пластины</a> (до 10). Топливо — вручную или желобами.",
 
-  "etermogenerator-structure-incomplete": "Термогенератор не собран",
-  "etermogenerator-structure-hint": "Собирается ПКМ ресурсами по этапам.",
+  "structure-incomplete": "Устройство не собрано",
   "etermogenerator-handbook-place-controller": "Поставить контроллер",
 
   "termoplastini": "Термоэлектрические пластины",
@@ -150,8 +149,6 @@
   "block-termoplastini-formed-*": "Термоэлектрические пластины",
   "block-handbooktitle-termoplastini": "Использование",
   "block-handbooktext-termoplastini": "Пластины преобразуют тепло в электричество для <a href=\"handbook://block-electricalprogressivebasics:etermogenerator-incomplete-south\">термогенератора</a>. Скрафть incomplete-каркас, поставь на медную площадку сзади генератора, затем дособери ПКМ: 4 железные пластины + клёпаный медный блок, затем 2 цинковые + 2 медные + 4 кабеля 32В.<br><br>До 10 секций. Только к медной площадке теплообменника. Каждая следующая секция даёт меньший прирост; 10 пластин ≈ 100%. Два генератора могут работать на одном наборе пластин.",
-  "termoplastini-structure-incomplete": "Термоэлектрические пластины не собраны",
-  "termoplastini-structure-hint": "Поставь на генератор, затем добавляй ресурсы ПКМ",
   "termoplastini-handbook-place-controller": "Установить каркас пластин",
 
   // ==================== Солнечный генератор ====================
@@ -241,8 +238,6 @@
   "eacidaccum-acid": "Серная кислота",
   "eacidaccum-no-acid": "Нет серной кислоты — заряд и разряд невозможны",
   "eacidaccum-tank": "Бак",
-  "eacidaccum-structure-incomplete": "Аккумулятор не собран",
-  "eacidaccum-structure-hint": "Поставьте книгой чертежей, затем ПКМ: 6 стальных пластин и 8 катушек → печатная плата и изолятор (пол) → аккумулятор 128 В. Залейте серной кислотой.",
   "eacidaccum-handbook-place-controller": "Поставить blueprint",
 
   "block-hvstreetlamp-*": "Уличное освещение",
@@ -438,8 +433,6 @@
   "block-handbooktitle-efuelgenerator": "Использование",
   "block-handbooktext-efuelgenerator": "Многоблочный паровой генератор (2×2×3), 128 В. Вырабатывает электричество от сжигания топлива; нужна вода. Заливка вручную или трубами.",
 
-  "efuelgenerator-structure-incomplete": "Генератор не собран",
-  "efuelgenerator-structure-hint": "ПКМ: 8 железных + 4 медных пластины → 4 катушки + 2 ротора → статор tier3 + 16 проводов 128 В.",
   "efuelgenerator-handbook-place-controller": "Поставить контроллер",
 
   "electricalprogressivebasics:empty": "Пусто",

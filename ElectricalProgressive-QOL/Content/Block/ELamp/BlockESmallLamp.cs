@@ -1,4 +1,4 @@
-﻿using Cairo.Freetype;
+using Cairo.Freetype;
 using ElectricalProgressive.Utils;
 using System;
 using System.Collections.Generic;
@@ -215,3 +215,4 @@ namespace ElectricalProgressive.Content.Block.ELamp
         }
     }
 }
+

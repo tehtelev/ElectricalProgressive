@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Content;
+using ElectricalProgressive.Content;
 using ElectricalProgressive.Content.ItemInsertionPipe;
 using ElectricalProgressive.Content.LiquidInsertionPipe;
 using ElectricalProgressive.Content.NetworkPipe;
@@ -283,3 +283,4 @@ public abstract class BlockEntityPipeBase : BlockEntity, IPipeRenderState
     public virtual string GetBaseBlockCode()
         => Block?.Code?.ToString();
 }
+

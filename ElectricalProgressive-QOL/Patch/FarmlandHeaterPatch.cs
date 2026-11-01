@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Content.Block.EHeatCannon;
+using ElectricalProgressive.Content.Block.EHeatCannon;
 using ElectricalProgressive.Content.Block.EHeater;
 using HarmonyLib;
 using System;

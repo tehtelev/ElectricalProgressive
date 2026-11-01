@@ -137,3 +137,4 @@ public class GuiDialogEStorageBus : GuiDialogEStoragePanel
             .Compose(false);
     }
 }
+

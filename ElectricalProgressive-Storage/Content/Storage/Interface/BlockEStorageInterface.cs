@@ -2559,3 +2559,4 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer, IPanel
         public long Batch;
     }
 }
+

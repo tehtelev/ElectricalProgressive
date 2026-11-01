@@ -149,3 +149,4 @@ public static class ConstructionCatalog
         return block;
     }
 }
+

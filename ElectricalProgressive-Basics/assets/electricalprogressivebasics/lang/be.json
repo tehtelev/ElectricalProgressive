@@ -232,8 +232,6 @@
   "eacidaccum-acid": "Серная кіслата",
   "eacidaccum-no-acid": "Няма сернай кіслаты — зарад і разрад немагчымыя",
   "eacidaccum-tank": "Бак",
-  "eacidaccum-structure-incomplete": "Акумулятар не сабраны",
-  "eacidaccum-structure-hint": "Пастаўце кнігай чарцяжоў, затым ПКМ: 6 сталёвых пласцін і 8 шпулек → друкаваная плата і ізалятар (падлога) → акумулятар 128 В.",
   "eacidaccum-handbook-place-controller": "Паставіць blueprint",
 
   "block-hvstreetlamp-*": "Вулічнае асвятленне",

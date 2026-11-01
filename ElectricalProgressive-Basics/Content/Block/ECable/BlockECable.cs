@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Content.Block.ESwitch;
+using ElectricalProgressive.Content.Block.ESwitch;
 using ElectricalProgressive.Utils;
 using HarmonyLib;
 using System;
@@ -1180,3 +1180,4 @@ namespace ElectricalProgressive.Content.Block.ECable
         }
     }
 }
+

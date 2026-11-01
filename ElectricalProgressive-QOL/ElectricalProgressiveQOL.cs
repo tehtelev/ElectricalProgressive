@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Content.Block.EFence;
+using ElectricalProgressive.Content.Block.EFence;
 using ElectricalProgressive.Content.Block.EFonar;
 using ElectricalProgressive.Content.Block.EFreezer;
 using ElectricalProgressive.Content.Block.EFridge;
@@ -338,6 +338,7 @@ public class ElectricalProgressiveQOL : ModSystem
         }
     }
 }
+
 
 
 

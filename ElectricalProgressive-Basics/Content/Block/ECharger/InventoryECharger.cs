@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Interface;
+using ElectricalProgressive.Interface;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 
@@ -102,3 +102,4 @@ public class InventoryECharger : InventoryGeneric
     }
 
 }
+

@@ -400,3 +400,4 @@ public class MachineConstructPlacementPreview : ModSystem, IRenderer
         public TextureAtlasPosition this[string textureCode] => _flat;
     }
 }
+

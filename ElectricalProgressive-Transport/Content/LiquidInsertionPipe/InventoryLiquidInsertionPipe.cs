@@ -1,4 +1,4 @@
-﻿// InventoryLiquidInsertionPipe.cs
+// InventoryLiquidInsertionPipe.cs
 // ================================================
 // Инвентарь для фильтрации жидкостей в трубе
 // Содержит слоты, принимающие только жидкости
@@ -446,3 +446,4 @@ public class LiquidFilterSlot : ItemSlot
         base.OnItemSlotModified(extractedStack);
     }
 }
+

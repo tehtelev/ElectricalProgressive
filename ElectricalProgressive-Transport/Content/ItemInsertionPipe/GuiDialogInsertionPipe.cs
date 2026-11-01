@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using ElectricalProgressive.Content;
@@ -493,3 +493,4 @@ public class GuiDialogInsertionPipe : GuiDialogBlockEntity
         browserInventory.DiscardAll();
     }
 }
+

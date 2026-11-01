@@ -1,4 +1,4 @@
-﻿﻿using ElectricalProgressive.Content.Block;
+﻿using ElectricalProgressive.Content.Block;
 using ElectricalProgressive.RecipeSystem;
 using ElectricalProgressive.RecipeSystem.Recipe;
 using ElectricalProgressive.Utils;

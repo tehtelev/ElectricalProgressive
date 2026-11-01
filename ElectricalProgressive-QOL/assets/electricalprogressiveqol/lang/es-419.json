@@ -88,8 +88,6 @@
   "block-efruitpress-*": "Prensa de fruta eléctrica",
   "block-handbooktitle-efruitpress": "Usage",
   "block-handbooktext-efruitpress": "Electric fruit press, 32 V, 2×2×2. Place with the schematic book, then assemble with 4 iron plates and 2 copper plates.",
-  "efruitpress-structure-incomplete": "Fruit press is not assembled",
-  "efruitpress-structure-hint": "Place with the schematic book, then RMB: 4 iron plates → 2 copper plates.",
   "efruitpress-handbook-place-controller": "Place the blueprint",
   "efruitpress-title-gui": "Prensa de fruta eléctrica",
   "efruitpress-slot-fruit": "Fruta",

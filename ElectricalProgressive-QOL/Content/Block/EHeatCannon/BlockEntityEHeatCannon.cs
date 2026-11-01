@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Utils;
+using ElectricalProgressive.Utils;
 using System;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -270,3 +270,4 @@ namespace ElectricalProgressive.Content.Block.EHeatCannon
         }
     }
 }
+

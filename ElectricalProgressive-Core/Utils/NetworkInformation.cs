@@ -1,4 +1,4 @@
-﻿namespace ElectricalProgressive.Utils
+namespace ElectricalProgressive.Utils
 {
     /// <summary>
     /// Сборщик информации о сети

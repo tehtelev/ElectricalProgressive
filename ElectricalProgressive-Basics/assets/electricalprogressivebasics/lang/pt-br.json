@@ -232,8 +232,6 @@
   "eacidaccum-acid": "Sulfuric acid",
   "eacidaccum-no-acid": "No sulfuric acid — cannot charge or discharge",
   "eacidaccum-tank": "Tank",
-  "eacidaccum-structure-incomplete": "Accumulator is not assembled",
-  "eacidaccum-structure-hint": "Place with the schematic book, then RMB: 6 steel plates and 8 coils → PCB and floor insulator → 128 V accumulator. Fill with sulfuric acid.",
   "eacidaccum-handbook-place-controller": "Place the blueprint",
 
   "block-hvstreetlamp-*": "Iluminação Pública",

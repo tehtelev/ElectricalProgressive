@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Utils;
+using ElectricalProgressive.Utils;
 
 namespace ElectricalProgressive.Content.Block.EGenerator;
 
@@ -12,3 +12,4 @@ public class BlockEntityEGenerator : BlockEntityEFacingBase
 
 
 }
+

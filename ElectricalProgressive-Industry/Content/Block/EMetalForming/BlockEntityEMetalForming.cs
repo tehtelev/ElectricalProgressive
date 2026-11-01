@@ -1123,3 +1123,4 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
         _crateRenderer = null;
     }
 }
+

@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Content.Block;
+using ElectricalProgressive.Content.Block;
 using ElectricalProgressive.Content.Block.EAccumulator;
 using ElectricalProgressive.Content.Block.ECable;
 using ElectricalProgressive.Content.Block.ECharger;

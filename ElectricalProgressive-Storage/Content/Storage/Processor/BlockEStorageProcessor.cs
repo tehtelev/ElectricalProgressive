@@ -1080,3 +1080,4 @@ public sealed class ClusterView
     public bool Merged;
     public bool Incomplete;
 }
+

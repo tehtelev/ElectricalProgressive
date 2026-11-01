@@ -121,3 +121,4 @@ public sealed class GuiElementSolid : GuiElement
         TermChrome.Inset(ctx, Bounds.drawX, Bounds.drawY, Bounds.OuterWidth, Bounds.OuterHeight, _r, _g, _b);
     }
 }
+

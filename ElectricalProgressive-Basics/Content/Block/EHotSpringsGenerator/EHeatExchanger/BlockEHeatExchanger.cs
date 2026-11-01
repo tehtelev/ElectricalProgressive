@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
@@ -79,3 +79,4 @@ public class BlockEHeatExchanger : Vintagestory.API.Common.Block
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:heatexchanger-placement-hint"));
     }
 }
+

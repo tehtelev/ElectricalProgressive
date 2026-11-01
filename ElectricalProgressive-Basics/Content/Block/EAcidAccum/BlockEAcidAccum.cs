@@ -125,10 +125,11 @@ public class BlockEAcidAccum : ImmersiveWireBlock, ILiquidSink, ILiquidSource, I
         var liquidSel = blockSel.Clone();
         liquidSel.Position = controllerPos;
 
-        if (MachineConstructAccess.TryConstructInteract(world, byPlayer, controllerPos))
-            return true;
 
         if (IsHoldingEKit(byPlayer))
+            return true;
+
+        if (MachineConstructAccess.TryConstructInteract(world, byPlayer, controllerPos))
             return true;
 
         var construct = world.BlockAccessor.GetBlockEntity(controllerPos)?.GetBehavior<MachineConstruct>();
@@ -137,7 +138,7 @@ public class BlockEAcidAccum : ImmersiveWireBlock, ILiquidSink, ILiquidSource, I
             if (world.Api is ICoreClientAPI capi)
             {
                 capi.TriggerIngameError(this, "incomplete",
-                    Lang.Get("electricalprogressivebasics:eacidaccum-structure-incomplete"));
+                    Lang.Get("electricalprogressivebasics:structure-incomplete"));
             }
             return true;
         }
@@ -415,7 +416,6 @@ public class BlockEAcidAccum : ImmersiveWireBlock, ILiquidSink, ILiquidSource, I
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:eacidaccum-tank") + ": 100 " +
                        Lang.Get("electricalprogressivebasics:litres") + " (" +
                        Lang.Get("electricalprogressivebasics:eacidaccum-acid") + ")");
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:eacidaccum-structure-hint"));
     }
 
     public override WorldInteraction[] GetPlacedBlockInteractionHelp(IWorldAccessor world, BlockSelection selection, IPlayer forPlayer)
@@ -431,3 +431,4 @@ public class BlockEAcidAccum : ImmersiveWireBlock, ILiquidSink, ILiquidSource, I
         return _interactions.Append(base.GetPlacedBlockInteractionHelp(world, selection, forPlayer));
     }
 }
+

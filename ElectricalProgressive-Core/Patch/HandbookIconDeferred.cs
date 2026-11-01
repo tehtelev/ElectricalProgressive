@@ -295,3 +295,4 @@ public static class HandbookIconDeferred
         dlg is GuiDialogHandbook
         || dlg.GetType().Name.Contains("Handbook", StringComparison.OrdinalIgnoreCase);
 }
+

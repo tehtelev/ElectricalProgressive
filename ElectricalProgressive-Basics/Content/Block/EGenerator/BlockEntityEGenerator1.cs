@@ -1,4 +1,4 @@
-﻿// запаска пример использования с иммерсивными проводами
+// запаска пример использования с иммерсивными проводами
 using ElectricalProgressive.Utils;
 using System;
 using Vintagestory.API.Common;
@@ -38,3 +38,4 @@ public class BlockEntityEGenerator1 : BlockEntityEIBase
 
 
 }
+

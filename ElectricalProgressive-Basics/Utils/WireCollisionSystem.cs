@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Content.Block;
+using ElectricalProgressive.Content.Block;
 using System;
 using System.Collections.Generic;
 using System.Linq;

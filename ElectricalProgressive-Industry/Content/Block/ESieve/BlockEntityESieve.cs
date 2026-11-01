@@ -1,4 +1,4 @@
-﻿// BlockEntityESieve.cs (с 25 выходными слотами)
+// BlockEntityESieve.cs (с 25 выходными слотами)
 using ElectricalProgressive.RecipeSystem;
 using ElectricalProgressive.RecipeSystem.Recipe;
 using ElectricalProgressive.Utils;

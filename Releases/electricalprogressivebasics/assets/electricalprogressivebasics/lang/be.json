@@ -1,4 +1,4 @@
-﻿{
+{
   // ==================== Электрычныя машыны і прылады ====================
 
   // ----- Рухавікі -----
@@ -232,12 +232,7 @@
   "eacidaccum-acid": "Серная кіслата",
   "eacidaccum-no-acid": "Няма сернай кіслаты — зарад і разрад немагчымыя",
   "eacidaccum-tank": "Бак",
-  "eacidaccum-structure-incomplete": "Акумулятар не сабраны",
-  "eacidaccum-structure-hint": "Пастаўце кнігай чарцяжоў, затым ПКМ: 6 сталёвых пласцін і 8 шпулек → друкаваная плата і ізалятар (падлога) → акумулятар 128 В.",
   "eacidaccum-handbook-place-controller": "Паставіць blueprint",
-  "eacidaccum-construct-frame": "Каркас: 6 сталёвых пласцін і 8 шпулек",
-  "eacidaccum-construct-board": "Плата і ізалятар (падлога): друкаваная плата і ізалятар (падлога)",
-  "eacidaccum-construct-finish": "Акумулятар (128В)",
 
   "block-hvstreetlamp-*": "Вулічнае асвятленне",
   "block-handbooktitle-hvstreetlamp": "Выкарыстанне",

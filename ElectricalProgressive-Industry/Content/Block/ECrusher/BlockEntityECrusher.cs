@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.RecipeSystem;
+using ElectricalProgressive.RecipeSystem;
 using ElectricalProgressive.RecipeSystem.Recipe;
 using ElectricalProgressive.Utils;
 using System;

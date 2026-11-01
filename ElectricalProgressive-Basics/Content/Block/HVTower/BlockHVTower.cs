@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Utils;
+using ElectricalProgressive.Utils;
 using System.Text;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -90,3 +90,4 @@ namespace ElectricalProgressive.Content.Block.HVTower
       
     }
 }
+

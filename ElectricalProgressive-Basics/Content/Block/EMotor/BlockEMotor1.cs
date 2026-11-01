@@ -1,4 +1,4 @@
-﻿// запаска пример использования с иммерсивными проводами
+// запаска пример использования с иммерсивными проводами
 using ElectricalProgressive.Utils;
 using System.Collections.Generic;
 using System.Linq;
@@ -343,3 +343,4 @@ public class BlockEMotor1 : ImmersiveWireBlock, IMechanicalPowerBlock
         return face == powerOutFacing;
     }
 }
+

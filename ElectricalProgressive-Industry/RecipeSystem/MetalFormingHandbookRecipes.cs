@@ -84,3 +84,4 @@ public static class MetalFormingHandbookRecipes
         return result;
     }
 }
+

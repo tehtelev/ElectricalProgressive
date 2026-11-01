@@ -691,3 +691,4 @@ public static class CraftPlan
         }
     }
 }
+

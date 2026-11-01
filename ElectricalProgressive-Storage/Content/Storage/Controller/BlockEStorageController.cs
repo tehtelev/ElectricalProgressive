@@ -74,3 +74,4 @@ public class BlockEStorageController : BlockEBase
         base.OnJsonTesselation(ref sourceMesh, ref lightRgbsByCorner, pos, chunkExtBlocks, extIndex3d);
     }
 }
+

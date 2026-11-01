@@ -1,4 +1,4 @@
-﻿{
+{
   "game:tabname-electricalprogressivetransport": "Транспартныя трубы",
 
   "block-pipe-normal": "Транспартная труба",
@@ -61,3 +61,4 @@
   "block-handbooktitle-pipe-liquid-insertion": "Выкарыстанне",
   "block-handbooktext-pipe-liquid-insertion": "Дазваляе ўстаўляць вадкасці ў суседнія кантэйнеры. Адкрыйце GUI і клікайце па вадкасцях у спісе, каб дадаць іх у фільтр. Калі фільтр пусты — перамяшчаюцца ўсе вадкасці."
 }
+

@@ -275,3 +275,4 @@ public class BEBehaviorEStorageController : BlockEntityBehavior, IElectricConsum
     {
     }
 }
+

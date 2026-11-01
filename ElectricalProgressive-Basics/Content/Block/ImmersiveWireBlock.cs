@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Content.Block.ECable;
+using ElectricalProgressive.Content.Block.ECable;
 using ElectricalProgressive.Utils;
 using ProtoBuf;
 using System;

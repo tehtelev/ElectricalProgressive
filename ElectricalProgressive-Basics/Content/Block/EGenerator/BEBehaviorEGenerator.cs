@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Content.Block.EAccumulator;
+using ElectricalProgressive.Content.Block.EAccumulator;
 using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
 using System;
@@ -440,3 +440,4 @@ public class BEBehaviorEGenerator : BEBehaviorMPBase, IElectricProducer
         // Логика при установке блока (если нужна)
     }
 }
+

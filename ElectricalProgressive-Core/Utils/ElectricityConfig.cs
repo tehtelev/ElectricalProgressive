@@ -1,4 +1,4 @@
-﻿
+
 namespace ElectricalProgressive.Utils
 {
     /// <summary>
@@ -18,3 +18,4 @@ namespace ElectricalProgressive.Utils
         public int GliderDurabilityLossAmount = 15;
     }
 }
+

@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Utils;
+using ElectricalProgressive.Utils;
 using System;
 using System.Reflection;
 using System.Text;
@@ -900,3 +900,4 @@ public class BlockEntityEOven : BlockEntityDisplay, IHeatSource
     }
 
 }
+

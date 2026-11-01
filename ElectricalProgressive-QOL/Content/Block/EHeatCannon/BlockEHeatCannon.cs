@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Patch;
+using ElectricalProgressive.Patch;
 using ElectricalProgressive.Utils;
 using System;
 using System.Collections.Generic;

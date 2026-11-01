@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Content.ItemInsertionPipe;
+using ElectricalProgressive.Content.ItemInsertionPipe;
 using ElectricalProgressive.Content.LiquidInsertionPipe;
 using System.Collections.Generic;
 using Vintagestory.API.Client;

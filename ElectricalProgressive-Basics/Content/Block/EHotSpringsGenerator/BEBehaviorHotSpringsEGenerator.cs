@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Interface;
+using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
 using System;
 using System.Text;
@@ -145,3 +145,4 @@ public class BEBehaviorHotSpringsEGenerator : BlockEntityBehavior, IElectricProd
         _powerGive = tree.GetFloat(PowerGiveKey);
     }
 }
+

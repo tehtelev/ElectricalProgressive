@@ -12,3 +12,4 @@ public interface IPanelHost
     int[] CableLines { get; }
     string CableCode { get; set; }
 }
+

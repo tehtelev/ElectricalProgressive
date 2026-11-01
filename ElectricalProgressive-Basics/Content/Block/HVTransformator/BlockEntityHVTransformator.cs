@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Utils;
+using ElectricalProgressive.Utils;
 using System.Collections.Generic;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -225,4 +225,5 @@ namespace ElectricalProgressive.Content.Block.HVTransformator
 
     }
 }
+
 

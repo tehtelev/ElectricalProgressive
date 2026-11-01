@@ -1,4 +1,4 @@
-﻿// InventorySieve.cs
+// InventorySieve.cs
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 

@@ -67,3 +67,4 @@ public static class StackSizeTextPatch
         return rounded.ToString("0.0", CultureInfo.InvariantCulture);
     }
 }
+

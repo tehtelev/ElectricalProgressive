@@ -1,4 +1,4 @@
-﻿{
+{
   "game:tabname-electricalprogressivetransport": "Tubos de transporte",
 
   "block-pipe-normal": "Tubo de transporte",
@@ -61,3 +61,4 @@
   "block-handbooktitle-pipe-liquid-insertion": "Uso",
   "block-handbooktext-pipe-liquid-insertion": "Permite insertar fluidos en contenedores adyacentes. Abra la interfaz y haga clic en fluidos de la lista para configurar filtros. Si el filtro queda vacío, transferirá todos los fluidos sin filtrar."
 }
+

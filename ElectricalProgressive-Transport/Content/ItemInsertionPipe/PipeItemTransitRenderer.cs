@@ -404,3 +404,4 @@ public class PipeItemTransitRenderer : IRenderer, ITexPositionSource
         public Vec3f Center { get; } = center;
     }
 }
+

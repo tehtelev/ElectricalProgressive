@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
@@ -477,3 +477,4 @@ public class PathFinder
         return (_neighborsFast, _neighborsFace, _nowProcessed, processFaces);
     }
 }
+

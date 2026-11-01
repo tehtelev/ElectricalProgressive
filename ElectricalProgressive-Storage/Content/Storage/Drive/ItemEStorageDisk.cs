@@ -30,3 +30,4 @@ public class ItemEStorageDisk : Vintagestory.API.Common.Item
         return base.MatchesForCrafting(inputStack, recipe, ingredient);
     }
 }
+

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
@@ -63,4 +63,5 @@ public class InventoryTermoGenerator : InventoryBase, ISlotProvider
         return this.slots[0];
     }
 }
+
 

@@ -1,4 +1,4 @@
-﻿namespace ElectricalProgressive.Utils;
+namespace ElectricalProgressive.Utils;
 
 
 public static class StringHelper
@@ -22,3 +22,4 @@ public static class StringHelper
         return temp.Insert(8, " " + ((int)percentage).ToString().PadLeft(3, ' ') + "% ");
     }
 }
+

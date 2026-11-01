@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Content.Block;
+using ElectricalProgressive.Content.Block;
 using ElectricalProgressive.Content.Block.CableDot;
 using ElectricalProgressive.Content.Block.CableSwitch;
 using ElectricalProgressive.Content.Block.EAccumulator;
@@ -2223,4 +2223,5 @@ namespace ElectricalProgressive
 
 
 }
+
 

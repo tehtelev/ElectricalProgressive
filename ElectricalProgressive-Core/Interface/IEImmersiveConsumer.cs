@@ -1,4 +1,4 @@
-﻿using Vintagestory.API.MathTools;
+using Vintagestory.API.MathTools;
 
 namespace ElectricalProgressive.Interface;
 
@@ -42,3 +42,4 @@ public interface IEImmersiveConsumer
     public float getPowerRequest();
 
 }
+

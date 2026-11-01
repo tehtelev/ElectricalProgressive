@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Net;
+using ElectricalProgressive.Net;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.Util;
 

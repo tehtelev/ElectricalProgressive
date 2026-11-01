@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Linq;
@@ -32,3 +32,4 @@ class P {
     }
   }
 }
+

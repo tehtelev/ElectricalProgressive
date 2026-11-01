@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using ElectricalProgressive.Content.LiquidInsertionPipe;
 using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
@@ -173,3 +173,4 @@ public static class PipeSecurity
         return stack;
     }
 }
+

@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Interface;
+using ElectricalProgressive.Interface;
 using System.Collections.Generic;
 using Vintagestory.API.MathTools;
 

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Text;
 using ElectricalProgressive.Utils;
 using Vintagestory.API.Client;

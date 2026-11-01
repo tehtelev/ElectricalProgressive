@@ -85,3 +85,4 @@ public class BlastFurnaceCoilRenderer : IRenderer
         _capi.Event.UnregisterRenderer(this, EnumRenderStage.Opaque);
     }
 }
+

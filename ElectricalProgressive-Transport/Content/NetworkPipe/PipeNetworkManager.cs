@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 
@@ -377,3 +377,4 @@ public class PipeNetworkManager
         return 0;
     }
 }
+

@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Content.Block.ECable;
+using ElectricalProgressive.Content.Block.ECable;
 using System;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -77,3 +77,4 @@ public class BlockVariants
 
 
 }
+

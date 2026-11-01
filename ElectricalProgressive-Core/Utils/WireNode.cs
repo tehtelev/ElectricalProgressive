@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Vintagestory.API.MathTools;
@@ -16,3 +16,4 @@ namespace ElectricalProgressive.Utils
         public float Radius { get; set; }         // Радиус области подключения (для размеров рамки выделения вокрг точки)
     }
 }
+

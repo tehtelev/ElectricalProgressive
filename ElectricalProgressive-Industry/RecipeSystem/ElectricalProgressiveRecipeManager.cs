@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.RecipeSystem.Recipe;
+using ElectricalProgressive.RecipeSystem.Recipe;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;

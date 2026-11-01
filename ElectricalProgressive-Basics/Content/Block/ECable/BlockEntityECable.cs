@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Utils;
+using ElectricalProgressive.Utils;
 using System;
 using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
@@ -70,3 +70,4 @@ namespace ElectricalProgressive.Content.Block.ECable
         }
     }
 }
+

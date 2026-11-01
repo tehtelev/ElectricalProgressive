@@ -1,4 +1,4 @@
-﻿namespace ElectricalProgressive.Utils;
+namespace ElectricalProgressive.Utils;
 
 public static class FloatHelper
 {
@@ -16,3 +16,4 @@ public static class FloatHelper
         return (self - fromSource) / (toSource - fromSource) * (toTarget - fromTarget) + fromTarget;
     }
 }
+

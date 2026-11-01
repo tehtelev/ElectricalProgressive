@@ -302,3 +302,4 @@ public class ItemEStoragePattern : Vintagestory.API.Common.Item
         return false;
     }
 }
+

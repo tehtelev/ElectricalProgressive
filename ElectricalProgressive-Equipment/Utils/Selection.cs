@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 
@@ -147,3 +147,4 @@ public class Selection
         throw new Exception();
     }
 }
+

@@ -961,3 +961,4 @@ public class BlockEntityEStorageAssembler : BlockEntityOpenableContainer, ITexPo
         return inserted ?? capi.BlockTextureAtlas.UnknownTexturePosition;
     }
 }
+

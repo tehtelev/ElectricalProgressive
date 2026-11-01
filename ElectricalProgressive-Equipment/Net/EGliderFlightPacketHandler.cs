@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Content.Item.Armor;
+using ElectricalProgressive.Content.Item.Armor;
 using ElectricalProgressive.Patch;
 using System;
 using System.Collections.Generic;
@@ -645,4 +645,5 @@ public class EGliderFlightPacketHandler : ModSystem
 
     #endregion
 }
+
 

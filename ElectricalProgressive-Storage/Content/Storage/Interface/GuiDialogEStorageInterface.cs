@@ -150,3 +150,4 @@ public class GuiDialogEStorageInterface : GuiDialogEStoragePanel
         compo.AddSlots(capi, Inventory, Send, Cols, ids, Ae2Gui.Slots(Ae2Gui.Margin, y, Cols, 1), key, mark);
     }
 }
+

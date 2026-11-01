@@ -1,4 +1,4 @@
-﻿{
+{
   "game:tabname-electricalprogressivetransport": "Transport Pipes",
 
   "block-pipe-normal": "Transport Pipe",
@@ -61,3 +61,4 @@
   "block-handbooktitle-pipe-liquid-insertion": "Usage",
   "block-handbooktext-pipe-liquid-insertion": "Allows inserting liquids into adjacent containers. Open the GUI and click liquids from the list to set filters. If all filter slots are empty, all liquids will be moved without filtering."
 }
+

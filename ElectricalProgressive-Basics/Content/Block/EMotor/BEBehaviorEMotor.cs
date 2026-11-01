@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Interface;
+using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
 using System;
 using System.Linq;
@@ -334,3 +334,4 @@ public class BEBehaviorEMotor : BEBehaviorMPBase, IElectricConsumer
 
     public override void WasPlaced(BlockFacing connectedOnFacing) { /* Логика при установке блока */ }
 }
+

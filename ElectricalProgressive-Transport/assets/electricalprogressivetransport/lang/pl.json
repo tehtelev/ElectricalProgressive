@@ -1,4 +1,4 @@
-﻿{
+{
   "game:tabname-electricalprogressivetransport": "Rury transportowe",
 
   "block-pipe-normal": "Rura transportowa",
@@ -61,3 +61,4 @@
   "block-handbooktitle-pipe-liquid-insertion": "Użycie",
   "block-handbooktext-pipe-liquid-insertion": "Umożliwia wkładanie cieczy do sąsiednich pojemników. Otwórz GUI i klikaj ciecze na liście, aby dodać je do filtra. Jeśli filtr jest pusty, przenoszone są wszystkie ciecze."
 }
+

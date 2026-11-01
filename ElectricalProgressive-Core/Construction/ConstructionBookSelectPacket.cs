@@ -7,3 +7,4 @@ public class ConstructionBookSelectPacket
 {
     public string? Code { get; set; }
 }
+

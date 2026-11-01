@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Content.Block.EBlastFurnace;
+using ElectricalProgressive.Content.Block.EBlastFurnace;
 using ElectricalProgressive.Content.Block.ECrusher;
 using ElectricalProgressive.Content.Block.ERecycler;
 using ElectricalProgressive.Content.Block.EExtruder;
@@ -100,6 +100,7 @@ public class ElectricalProgressiveIndustry : ModSystem
     }
 
 }
+
 
 
 

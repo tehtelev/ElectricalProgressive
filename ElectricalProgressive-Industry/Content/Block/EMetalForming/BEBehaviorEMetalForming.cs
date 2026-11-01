@@ -214,3 +214,4 @@ public class BEBehaviorEMetalForming : BlockEntityBehavior, IElectricConsumer
 
     #endregion
 }
+

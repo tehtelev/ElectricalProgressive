@@ -1,4 +1,4 @@
-﻿using Vintagestory.API.MathTools;
+using Vintagestory.API.MathTools;
 
 namespace ElectricalProgressive.Interface;
 
@@ -20,3 +20,4 @@ public interface IEImmersiveConductor
     /// </summary>
     bool IsOpen { get; set; }
 }
+

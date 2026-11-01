@@ -284,3 +284,4 @@ public class MetalFormingCrateRenderer : IRenderer
         _meshRef = null;
     }
 }
+

@@ -1541,3 +1541,4 @@ public class BlockEStorageCable : BlockEStoragePart
         return along <= slack && along >= -slack && u >= -slack && u <= 1f + slack && v >= -slack && v <= 1f + slack;
     }
 }
+

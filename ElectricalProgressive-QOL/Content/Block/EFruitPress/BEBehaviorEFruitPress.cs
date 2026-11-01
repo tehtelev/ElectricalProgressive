@@ -1,4 +1,4 @@
-﻿﻿using ElectricalProgressive.Interface;
+﻿using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
 using System.Linq;
 using System.Text;

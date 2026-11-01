@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
@@ -351,3 +351,4 @@ public class InventoryInsertionPipe : InventoryGeneric
         }
     }
 }
+

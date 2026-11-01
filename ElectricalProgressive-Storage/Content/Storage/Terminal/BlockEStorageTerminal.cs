@@ -1220,3 +1220,4 @@ public class BlockEntityEStorageLiquidTerminal : BlockEntityEStorageTerminal
 
     protected override bool Liquid => true;
 }
+

@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Interface;
+using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
 using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
@@ -115,3 +115,4 @@ namespace ElectricalProgressive.Content.Block.HVTower
         }
     }
 }
+

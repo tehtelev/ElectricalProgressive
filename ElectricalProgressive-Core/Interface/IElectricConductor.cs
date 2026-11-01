@@ -1,4 +1,4 @@
-﻿using Vintagestory.API.MathTools;
+using Vintagestory.API.MathTools;
 
 namespace ElectricalProgressive.Interface;
 
@@ -16,3 +16,4 @@ public interface IElectricConductor
     /// </summary>
     public void Update();
 }
+

@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Content.Block.ECable;
+using ElectricalProgressive.Content.Block.ECable;
 using ElectricalProgressive.Content.Block.EConnector;
 using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;

@@ -553,3 +553,4 @@ public sealed class GuiDialogEStorageOrder : GuiDialog
         order.CalcWorldBounds();
     }
 }
+

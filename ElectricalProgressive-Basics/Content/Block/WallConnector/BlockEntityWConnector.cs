@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Utils;
+using ElectricalProgressive.Utils;
 using Vintagestory.API.Common;
 
 namespace ElectricalProgressive.Content.Block.WallConnector
@@ -21,4 +21,5 @@ namespace ElectricalProgressive.Content.Block.WallConnector
         
     }
 }
+
 

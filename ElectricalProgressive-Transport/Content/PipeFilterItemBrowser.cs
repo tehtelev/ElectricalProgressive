@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -708,3 +708,4 @@ public class PipeFilterItemBrowser : InventoryGeneric
         public override bool TryFlipWith(ItemSlot itemSlot) => false;
     }
 }
+

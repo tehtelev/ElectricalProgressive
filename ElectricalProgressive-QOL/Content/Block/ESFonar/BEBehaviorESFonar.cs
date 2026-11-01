@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Interface;
+using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
 using System;
 using System.Text;
@@ -209,3 +209,4 @@ namespace ElectricalProgressive.Content.Block.ESFonar
         #endregion
     }
 }
+

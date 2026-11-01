@@ -107,3 +107,4 @@ public class SmithingWorkItemRenderer : IRenderer
         _capi.Event.UnregisterRenderer(this, EnumRenderStage.Opaque);
     }
 }
+

@@ -384,3 +384,4 @@ public sealed class GuiElementMeterPlate : GuiElement
         TermChrome.Raised(ctx, Bounds.drawX, Bounds.drawY, Bounds.InnerWidth, Bounds.InnerHeight, false);
     }
 }
+

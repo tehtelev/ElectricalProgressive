@@ -160,3 +160,4 @@ public class LinkKeyTests
         Assert.Equal(key, BlockEStorageTerminal.LinkKey(link));
     }
 }
+

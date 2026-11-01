@@ -383,23 +383,13 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource, IMult
 
         var be = world.BlockAccessor.GetBlockEntity(controllerPos) as BlockEntityEFuelGenerator;
         var construct = be?.GetBehavior<MachineConstruct>();
-        if (construct != null && construct.HasConstruction && !construct.IsReady)
+        if ((construct != null && construct.HasConstruction && !construct.IsReady) ||
+            (be != null && !be.StructureComplete))
         {
             if (world.Api is ICoreClientAPI capi)
             {
                 capi.TriggerIngameError(this, "incomplete",
-                    Lang.Get("electricalprogressivebasics:efuelgenerator-structure-incomplete"));
-            }
-
-            return true;
-        }
-
-        if (be != null && !be.StructureComplete)
-        {
-            if (world.Api is ICoreClientAPI capi)
-            {
-                capi.TriggerIngameError(this, "incomplete",
-                    Lang.Get("electricalprogressivebasics:efuelgenerator-structure-incomplete"));
+                    Lang.Get("electricalprogressivebasics:structure-incomplete"));
             }
 
             return true;
@@ -499,7 +489,6 @@ public class BlockEFuelGenerator : BlockEBase, ILiquidSink, ILiquidSource, IMult
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:Voltage") + ": " + MyMiniLib.GetAttributeInt(inSlot.Itemstack.Block, "voltage", 0) + " " + Lang.Get("electricalprogressivebasics:V"));
         dsc.AppendLine(Lang.Get("electricalprogressivebasics:WResistance") + ": " + (MyMiniLib.GetAttributeBool(inSlot.Itemstack.Block, "isolatedEnvironment", false) ? Lang.Get("electricalprogressivebasics:Yes") : Lang.Get("electricalprogressivebasics:No")));
         dsc.AppendLine();
-        dsc.AppendLine(Lang.Get("electricalprogressivebasics:efuelgenerator-structure-hint"));
         
         // Информация о жидкости
         float capacity = CapacityLitres;

@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Interface;
+using ElectricalProgressive.Interface;
 using ElectricalProgressive.Utils;
 using System;
 using System.Collections.Generic;
@@ -591,4 +591,5 @@ public class BlockEntityECharger : BlockEntityContainer, ITexPositionSource
         }
     }
 }
+
 

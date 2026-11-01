@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Content.Block.EHammer;
+using ElectricalProgressive.Content.Block.EHammer;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 

@@ -55,23 +55,13 @@ public class BlockEMetalForming : Vintagestory.API.Common.Block, IMultiBlockInte
             return true;
 
         var construct = blockEntity.GetBehavior<MachineConstruct>();
-        if (construct != null && construct.HasConstruction && !construct.IsReady)
+        if ((construct != null && construct.HasConstruction && !construct.IsReady) ||
+            (blockEntity is BlockEntityEMetalForming former && !former.StructureComplete))
         {
             if (world.Api is ICoreClientAPI capi)
             {
                 capi.TriggerIngameError(this, "incomplete",
-                    Lang.Get("electricalprogressiveindustry:emetalforming-structure-incomplete"));
-            }
-
-            return true;
-        }
-
-        if (blockEntity is BlockEntityEMetalForming former && !former.StructureComplete)
-        {
-            if (world.Api is ICoreClientAPI capi)
-            {
-                capi.TriggerIngameError(this, "incomplete",
-                    Lang.Get("electricalprogressiveindustry:emetalforming-structure-incomplete"));
+                    Lang.Get("electricalprogressivebasics:structure-incomplete"));
             }
 
             return true;
@@ -116,7 +106,6 @@ public class BlockEMetalForming : Vintagestory.API.Common.Block, IMultiBlockInte
                            ? Lang.Get("electricalprogressivebasics:Yes")
                            : Lang.Get("electricalprogressivebasics:No")));
         dsc.AppendLine();
-        dsc.AppendLine(Lang.Get("electricalprogressiveindustry:emetalforming-structure-hint"));
     }
 
     public override void OnLoaded(ICoreAPI coreApi)
@@ -193,3 +182,4 @@ public class BlockEMetalForming : Vintagestory.API.Common.Block, IMultiBlockInte
 
     #endregion
 }
+

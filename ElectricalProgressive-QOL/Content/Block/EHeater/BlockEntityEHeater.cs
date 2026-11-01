@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using ElectricalProgressive.Utils;
 using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
@@ -57,3 +57,4 @@ namespace ElectricalProgressive.Content.Block.EHeater
         }
     }
 }
+

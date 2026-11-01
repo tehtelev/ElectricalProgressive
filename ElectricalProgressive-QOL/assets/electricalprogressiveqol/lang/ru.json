@@ -124,8 +124,6 @@
   "block-efruitpress-*": "Электрический пресс для фруктов",
   "block-handbooktitle-efruitpress": "Используется",
   "block-handbooktext-efruitpress": "Электрический пресс для фруктов, 32 В. Многоблок 2×2×2. Синий blueprint ставится книгой чертежей, затем ПКМ по призраку с материалами (4 железные пластины, затем 2 медные). Отжимает сок. Поддерживает желоба.",
-  "efruitpress-structure-incomplete": "Пресс не собран",
-  "efruitpress-structure-hint": "Поставьте книгой чертежей, затем ПКМ: 4 железные пластины → 2 медные.",
   "efruitpress-handbook-place-controller": "Поставить blueprint",
   "efruitpress-title-gui": "Электрический пресс для фруктов",
   "efruitpress-slot-fruit": "Фрукты",

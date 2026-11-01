@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Utils;
+using ElectricalProgressive.Utils;
 using Vintagestory.API.Common;
 
 namespace ElectricalProgressive.Content.Block.ETransformator;
@@ -16,3 +16,4 @@ public class BlockEntityETransformator : BlockEntityEBase
         LoadEProperties.Load(this.Block, this);
     }
 }
+

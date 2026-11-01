@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Content.Block.EFreezer;
+using ElectricalProgressive.Content.Block.EFreezer;
 using ElectricalProgressive.Content.Block.EStove;
 using ElectricalProgressive.Utils;
 using System;
