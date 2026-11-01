@@ -238,15 +238,29 @@ public class BlockEntityEFuelGenerator : BlockEntityGenericTypedContainer, IHeat
 
     private void PrepareAnimUtil(ICoreAPI api, string cacheDictKey)
     {
-        if (_mesh == null || _resultingShape == null)
+        if (_mesh != null && _resultingShape != null)
+            return;
+
+        // Полная formed-модель (анимация work-on).
+        // Incomplete ходит по stage-shapes (core/core2/core3) — у них нет корректных
+        // анимационных частей, а static-кэш _mesh иначе залипает на core после установки контроллера.
+        var shapePath = new AssetLocation(Block.Code.Domain,
+            "shapes/block/fuelgenerator/fuelgenerator.json");
+        var _shape = Shape.TryGet(api, shapePath);
+
+        // Fallback: текущий Block.Shape (если ассет переименован)
+        if (_shape == null && Block.Shape?.Base != null)
         {
-            AssetLocation shapePath = Block.Shape.Base.Clone().WithPathPrefixOnce("shapes/")
+            shapePath = Block.Shape.Base.Clone()
+                .WithPathPrefixOnce("shapes/")
                 .WithPathAppendixOnce(".json");
-
-            Shape _shape = Shape.TryGet(api, shapePath);
-
-            _mesh = AnimUtil.CreateMesh(cacheDictKey, _shape, out _resultingShape, null);
+            _shape = Shape.TryGet(api, shapePath);
         }
+
+        if (_shape == null)
+            return;
+
+        _mesh = AnimUtil.CreateMesh(cacheDictKey, _shape, out _resultingShape, null);
     }
 
     public int GetRotation()

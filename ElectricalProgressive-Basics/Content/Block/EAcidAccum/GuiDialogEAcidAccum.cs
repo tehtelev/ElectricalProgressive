@@ -48,7 +48,9 @@ public class GuiDialogEAcidAccum : GuiDialogBlockEntity
         _acidCapacity = be.LiquidCapacity;
         var accum = be.AccumBehavior;
         _energy = accum?.GetCapacity() ?? 0;
-        _energyMax = accum?.GetMaxCapacity() ?? 0;
+        // Ёмкость отображаем относительно полной ёмкости (при полном резертуаре),
+        // тогда заряд в процентах никогда не превышает заполнение кислотой.
+        _energyMax = accum?.GetNominalMaxCapacity() ?? 0;
     }
 
     public void OnInventorySlotModified(int slotid)
@@ -224,20 +226,20 @@ public class GuiDialogEAcidAccum : GuiDialogBlockEntity
     {
         string litre = Lang.Get("electricalprogressivebasics:unit-litre");
         if (amount >= 100)
-            return $"{amount:F0}{litre}";
+            return $"{amount:F0} {litre}";
         if (amount > 0)
-            return $"{amount:F1}{litre}";
-        return $"0{litre}";
+            return $"{amount:F1} {litre}";
+        return $"0 {litre}";
     }
 
     private static string FormatEnergy(float energy)
     {
         string joule = Lang.Get("electricalprogressivebasics:J");
         if (energy >= 1000000)
-            return $"{energy / 1000000f:F1}{Lang.Get("electricalprogressivebasics:unit-mjoule")}";
+            return $"{energy / 1000000f:F1} {Lang.Get("electricalprogressivebasics:unit-mjoule")}";
         if (energy >= 1000)
-            return $"{energy / 1000f:F0}{Lang.Get("electricalprogressivebasics:unit-kjoule")}";
-        return $"{(int)energy}{joule}";
+            return $"{energy / 1000f:F0} {Lang.Get("electricalprogressivebasics:unit-kjoule")}";
+        return $"{(int)energy} {joule}";
     }
 
     private void OnTitleBarClose() => TryClose();

@@ -50,6 +50,16 @@ public class BEBehaviorEAcidAccum : BlockEntityBehavior, IEImmersiveAccumulator
         return MaxCapacity * AcidFill * multFromDurab;
     }
 
+    /// <summary>
+    /// Максимальная ёмкость при полном резертуаре с кислотой (без учёта текущего заполнения кислотой).
+    /// Используется для отображения заряда в процентах от полной ёмкости — тогда заряд
+    /// никогда не превышает текущий процент заполнения кислотой.
+    /// </summary>
+    public float GetNominalMaxCapacity()
+    {
+        return MaxCapacity * multFromDurab;
+    }
+
     public float GetCapacity() => Capacity;
 
     public float GetLastCapacity() => LastCapacity;
@@ -189,7 +199,7 @@ public class BEBehaviorEAcidAccum : BlockEntityBehavior, IEImmersiveAccumulator
             return;
         }
 
-        var max = GetMaxCapacity();
+        var max = GetNominalMaxCapacity();
         stringBuilder.AppendLine(StringHelper.Progressbar(max > 0 ? GetCapacity() * 100.0f / max : 0));
         stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Capacity") + ": " +
                                  ((int)GetCapacity()).ToString() + "/" + ((int)max).ToString() + " " +

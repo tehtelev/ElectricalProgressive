@@ -463,6 +463,27 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
         _meshStage = int.MinValue;
     }
 
+    // Invalidate the cached mesh (and the static blueprint texture position) when the
+    // chunk unloads or the block is removed. The cached mesh carries a texture atlas id
+    // and the static _flatTexPos a GL atlas texture id that become stale after a world
+    // reload / reconnect (same client process). With a stale id, JsonTesselator throws
+    // RetryTesselationException ("textureid did not yet match an atlas pool") and, because
+    // EnsureMesh() reuses the stale cached mesh on every re-tesselation, the chunk never
+    // renders. Clearing them forces a rebuild against the fresh atlas pool.
+    public override void OnBlockUnloaded()
+    {
+        base.OnBlockUnloaded();
+        InvalidateMesh();
+        _flatTexPos = null;
+    }
+
+    public override void OnBlockRemoved()
+    {
+        base.OnBlockRemoved();
+        InvalidateMesh();
+        _flatTexPos = null;
+    }
+
     private string? GetStageShapePath()
     {
         if (_levels == null || _levels.Length == 0)

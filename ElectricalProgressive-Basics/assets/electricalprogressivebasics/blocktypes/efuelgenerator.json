@@ -100,12 +100,12 @@
             {
               "type": "item",
               "code": "game:metalplate-iron",
-              "quantity": 8
+              "quantity": 3
             },
             {
               "type": "item",
               "code": "game:metalplate-copper",
-              "quantity": 4
+              "quantity": 3
             }
           ]
         },
@@ -116,12 +116,12 @@
             {
               "type": "item",
               "code": "electricalprogressivebasics:coil",
-              "quantity": 4
+              "quantity": 3
             },
             {
-              "type": "item",
-              "code": "electricalprogressivebasics:engineshaft",
-              "quantity": 2
+              "type": "block",
+              "code": "electricalprogressivebasics:egenerator-tier3-stator",
+              "quantity": 1
             }
           ]
         },
@@ -131,13 +131,8 @@
           "requireStacks": [
             {
               "type": "block",
-              "code": "electricalprogressivebasics:egenerator-tier3-stator",
-              "quantity": 1
-            },
-            {
-              "type": "block",
               "code": "electricalprogressivebasics:ecable-128v-copper-single-part",
-              "quantity": 16
+              "quantity": 8
             }
           ],
           "formMachine": true
