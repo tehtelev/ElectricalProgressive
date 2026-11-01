@@ -116,29 +116,13 @@
           "actionLangCode": "game:rollers-construct"
         },
         {
-          "shape": "block/termoplastini/termoplastini_base",
-          "actionLangCode": "game:rollers-construct",
-          "requireStacks": [
-            {
-              "type": "item",
-              "code": "game:metalplate-iron",
-              "quantity": 4
-            },
-            {
-              "type": "block",
-              "code": "game:metalblock-new-riveted-copper",
-              "quantity": 1
-            }
-          ]
-        },
-        {
           "shape": "block/termoplastini/termoplastini",
           "actionLangCode": "game:rollers-construct",
           "requireStacks": [
             {
               "type": "item",
-              "code": "game:metalplate-zinc",
-              "quantity": 2
+              "code": "game:metalplate-lead",
+              "quantity": 1
             },
             {
               "type": "item",
@@ -148,7 +132,7 @@
             {
               "type": "block",
               "code": "electricalprogressivebasics:ecable-32v-copper-single-part",
-              "quantity": 4
+              "quantity": 2
             }
           ],
           "formMachine": true

@@ -137,18 +137,20 @@
   // ==================== Термогенератор и термопластины ====================
   "termogen": "Термогенератор",
   "block-etermogenerator-*": "Термоэлектрический генератор",
+  "block-etermogenerator-incomplete-*": "Термоэлектрический генератор  (не собрано)",
+  "block-etermogenerator-formed-*": "Термоэлектрический генератор",
   "block-handbooktitle-etermogenerator": "Использование",
-  "block-handbooktext-etermogenerator": "Многоблочный термогенератор (3×3×3), 32 В. Преобразует тепло в электричество; сзади — <a href=\"handbook://block-electricalprogressivebasics:termoplastini-south\">термоэлектрические пластины</a> (до 10). Топливо — вручную или желобами.",
+  "block-handbooktext-etermogenerator": "Многоблочный термогенератор (3×3×3), 32 В. Преобразует тепло в электричество; сзади ставятся <a href=\"handbook://block-electricalprogressivebasics:termoplastini-formed-south\">термоэлектрические пластины</a> (до 10). Топливо загружается вручную или желобами.",
 
   "structure-incomplete": "Устройство не собрано",
   "etermogenerator-handbook-place-controller": "Поставить контроллер",
 
   "termoplastini": "Термоэлектрические пластины",
   "block-termoplastini-*": "Термоэлектрические пластины",
-  "block-termoplastini-incomplete-*": "Термоэлектрические пластины (не собраны)",
+  "block-termoplastini-incomplete-*": "Термоэлектрические пластины (не собрано)",
   "block-termoplastini-formed-*": "Термоэлектрические пластины",
   "block-handbooktitle-termoplastini": "Использование",
-  "block-handbooktext-termoplastini": "Пластины преобразуют тепло в электричество для <a href=\"handbook://block-electricalprogressivebasics:etermogenerator-incomplete-south\">термогенератора</a>. Скрафть incomplete-каркас, поставь на медную площадку сзади генератора, затем дособери ПКМ: 4 железные пластины + клёпаный медный блок, затем 2 цинковые + 2 медные + 4 кабеля 32В.<br><br>До 10 секций. Только к медной площадке теплообменника. Каждая следующая секция даёт меньший прирост; 10 пластин ≈ 100%. Два генератора могут работать на одном наборе пластин.",
+  "block-handbooktext-termoplastini": "Пластины преобразуют тепло в электричество для <a href=\"handbook://block-electricalprogressivebasics:etermogenerator-formed-south\">термогенератора</a>. Установи blueprint-каркас впритык к медной площадке сзади термогенератора, затем дособери ПКМ.<br>Можно установить подряд до 10 секций. Каждая следующая секция даёт меньший прирост; 10 пластин ≈ 100%. Два генератора могут работать на одном наборе пластин.",
   "termoplastini-handbook-place-controller": "Установить каркас пластин",
 
   // ==================== Солнечный генератор ====================
@@ -376,10 +378,10 @@
   "OmLine": "Ом/линию",
   "Units": "у.е.",
   "Pcs": "шт.",
-   "unit-litre": "л",
-   "unit-mjoule": "Мдж",
-   "unit-kjoule": "Кдж",
-   "unit-celsius": "°C",
+  "unit-litre": "л",
+  "unit-mjoule": "Мдж",
+  "unit-kjoule": "Кдж",
+  "unit-celsius": "°C",
   "GeneratorsShort": "Генераторов",
   "ConsumersShort": "Потребителей",
   "BatteriesShort": "Аккумуляторов",

@@ -114,12 +114,7 @@
             {
               "type": "block",
               "code": "electricalprogressivebasics:ecable-32v-copper-single-part",
-              "quantity": 2
-            },
-            {
-              "type": "item",
-              "code": "electricalprogressivebasics:coil",
-              "quantity": 2
+              "quantity": 4
             }
           ],
           "formMachine": true
