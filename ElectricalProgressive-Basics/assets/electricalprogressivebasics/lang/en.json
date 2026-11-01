@@ -140,7 +140,6 @@
   "block-handbooktitle-etermogenerator": "Usage",
   "block-handbooktext-etermogenerator": "Multiblock thermoelectric generator (3×3×3), 32 V. Converts heat to electricity; needs <a href=\"handbook://block-electricalprogressivebasics:termoplastini-south\">thermoelectric plates</a> at the back (up to 10). Fuel manually or via hoppers.",
 
-  "etermogenerator-handbook-place-controller": "Place the controller",
 
   "termoplastini": "Thermoelectric Plates",
   "block-termoplastini-*": "Thermoelectric Plates",
@@ -148,7 +147,6 @@
   "block-termoplastini-formed-*": "Thermoelectric Plates",
   "block-handbooktitle-termoplastini": "Usage",
   "block-handbooktext-termoplastini": "Thermoelectric plates convert heat to electricity for the <a href=\"handbook://block-electricalprogressivebasics:etermogenerator-incomplete-south\">thermoelectric generator</a>. Craft the incomplete frame, place it on the copper pad behind the generator, then assemble with RMB: 4 iron plates + riveted copper block, then 2 zinc + 2 copper plates + 4× 32V copper cables.<br><br>Up to 10 sections. Only attach to the heat-exchanger copper pad. Each extra section adds less power; 10 plates ≈ 100%. Two generators can share one plate stack.",
-  "termoplastini-handbook-place-controller": "Place the plate frame",
 
   // ==================== Solar Generator ====================
   "block-esolargenerator-*": "Solar Panel Generator",
@@ -237,7 +235,6 @@
   "eacidaccum-acid": "Sulfuric acid",
   "eacidaccum-no-acid": "No sulfuric acid — cannot charge or discharge",
   "eacidaccum-tank": "Tank",
-  "eacidaccum-handbook-place-controller": "Place the blueprint",
 
   "block-hvstreetlamp-*": "Street Light",
   "block-handbooktitle-hvstreetlamp": "Usage",
@@ -433,7 +430,6 @@
   "block-handbooktitle-efuelgenerator": "Usage",
   "block-handbooktext-efuelgenerator": "Multiblock steam generator (2×2×3), 128 V. Generates power from burning fuel; needs water. Fill manually or via liquid pipes.",
 
-  "efuelgenerator-handbook-place-controller": "Place the controller",
 
   "electricalprogressivebasics:empty": "Empty",
   "electricalprogressivebasics:liquid": "Liquid: ",

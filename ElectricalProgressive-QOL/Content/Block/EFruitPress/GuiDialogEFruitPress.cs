@@ -309,17 +309,18 @@ public class GuiDialogEFruitPress : GuiDialogBlockEntity
         ctx.Save();
         ctx.SelectFontFace("sans-serif", FontSlant.Normal, FontWeight.Bold);
         
+        string unit = Lang.Get("electricalprogressiveqol:efruitpress-unit-liters");
         string amountText;
         if (waterAmount >= 1000)
-            amountText = $"{waterAmount / 1000:F1}L";
+            amountText = $"{waterAmount / 1000:F1} {unit}";
         else if (waterAmount >= 100)
-            amountText = $"{waterAmount:F0}L";
+            amountText = $"{waterAmount:F0} {unit}";
         else if (waterAmount >= 10)
-            amountText = $"{waterAmount:F1}L";
+            amountText = $"{waterAmount:F1} {unit}";
         else if (waterAmount > 0)
-            amountText = $"{waterAmount:F1}L";
+            amountText = $"{waterAmount:F1} {unit}";
         else
-            amountText = "0L";
+            amountText = $"0 {unit}";
         
         // Автоматический размер шрифта
         double fontSize = Math.Min(11, currentBounds.InnerWidth / 4.5);
@@ -396,7 +397,7 @@ public class GuiDialogEFruitPress : GuiDialogBlockEntity
         ctx.SelectFontFace("sans-serif", FontSlant.Normal, FontWeight.Normal);
         ctx.SetFontSize(9);
         
-        string emptyText = "Empty";
+        string emptyText = Lang.Get("electricalprogressiveqol:efruitpress-empty");
         var extents = ctx.TextExtents(emptyText);
         
         ctx.SetSourceRGB(0.5, 0.5, 0.5);

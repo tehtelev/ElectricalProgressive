@@ -7,7 +7,6 @@
   "block-handbooktitle-erecycler": "Используется",
   "block-handbooktext-erecycler": "Многоблочный переработчик (2×2×2), 32 В. Перерабатывает портящиеся продукты в компост и кастомные рецепты; поддерживает желоба.",
 
-  "erecycler-handbook-place-controller": "Поставить контроллер",
 
   "construction-handbook-assembly": "Сборка",
   "construction-handbook-assembly-hint": "ПКМ по установленному контроллеру, держа ресурсы в руке (как водяное колесо):",
@@ -20,14 +19,12 @@
   "block-handbooktext-ehammer": "Позволяет упростить и автоматизировать работу на наковальне. Многоблок 3×4×2, 128 В. Сборка: стальные пластины, медные катушки, железные и медные пластины (ПКМ по контроллеру). Есть шанс получить дополнительные материалы. Поддерживает желоба.",
   "ehammer-structure-complete": "Автомолот собран",
   "ehammer-formed-hint": "Собранный автомолот.",
-  "ehammer-handbook-place-controller": "Поставить контроллер",
 
   "block-emetalforming-*": "Формовщик металла",
   "block-handbooktitle-emetalforming": "Используется",
   "block-handbooktext-emetalforming": "Автоматически куёт всё, что можно выковать на наковальне. Сначала выбираете изделие (полный список наковальни), выбор запоминается. Как только во вход попадает нужный слиток или пластина, машина греет и куёт. Считает воксели рецепта, забирает нужное число слитков, излишки выдаёт кусочками металла. Многоблок 2×2×2, 128 В. Сборка: стальные пластины, медные катушки, железные и медные пластины (ПКМ по контроллеру). Поддерживает желоба.",
   "emetalforming-structure-complete": "Формовщик металла собран",
   "emetalforming-formed-hint": "Собранный формовщик металла.",
-  "emetalforming-handbook-place-controller": "Поставить контроллер",
   "emetalforming-select": "Выбрать изделие",
   "emetalforming-no-selection": "Изделие не выбрано",
   "emetalforming-need-ingot": "Положите слиток во вход",
@@ -43,19 +40,16 @@
   "block-handbooktext-esieve": "Электрический просеиватель для сортировки измельчённых материалов. Многоблок 5×3×3, 128 В. Сборка: стальные пластины, медные катушки, железные и медные пластины (ПКМ по контроллеру). Поддерживает желоба.",
   "esieve-structure-complete": "Просеиватель собран",
   "esieve-formed-hint": "Собранный электрический просеиватель.",
-  "esieve-handbook-place-controller": "Поставить контроллер",
   "block-handbooktitle-epress": "Используется",
   "block-handbooktext-epress": "Позволяет создавать некоторые предметы путем выдавливания в пресс-форме. Многоблок 2×2×2, 128 В. Сборка: стальные пластины, медные катушки, железные и медные пластины (ПКМ по контроллеру). Поддерживает желоба.",
   "epress-structure-complete": "Автопресс собран",
   "epress-formed-hint": "Собранный автопресс.",
-  "epress-handbook-place-controller": "Поставить контроллер",
 
   "block-eextruder-*": "Экструдер",
   "block-handbooktitle-eextruder": "Используется",
   "block-handbooktext-eextruder": "Позволяет создавать некоторые предметы продолговатой формы путем выдавливания металла. Многоблок 3×4×3, 128 В. Сборка: стальные пластины, медные катушки, железные и медные пластины (ПКМ по контроллеру). Поддерживает желоба.",
   "eextruder-structure-complete": "Экструдер собран",
   "eextruder-formed-hint": "Собранный экструдер.",
-  "eextruder-handbook-place-controller": "Поставить контроллер",
 
   "block-ecrusher-*": "Электрическая дробилка",
   "block-handbooktitle-ecrusher": "Используется",
@@ -66,12 +60,10 @@
   "block-handbooktext-eaquaaccum": "Электрический аквааккумулятор, конденсирующий воду из влаги воздуха. Многоблок 2×2×2, 32 В. Сборка: железные пластины, медные катушки и медные пластины (ПКМ по контроллеру). Ёмкость: 100 л.",
   "eaquaaccum-structure-complete": "Аквааккумулятор собран",
   "eaquaaccum-formed-hint": "Собранный электрический аквааккумулятор.",
-  "eaquaaccum-handbook-place-controller": "Поставить контроллер",
   "block-handbooktitle-eblastfurnace": "Используется",
   "block-handbooktext-eblastfurnace": "Электрическая доменная печь для плавки руды с флюсом. Многоблок 3×3×2, 512 В. Подключается иммерсивным проводом к клемме CableDot. Сборка: стальные пластины, медные катушки и огнеупорный кирпич 3 уровня (ПКМ по контроллеру). Поддерживает желоба.",
   "eblastfurnace-structure-complete": "Доменная печь собрана",
   "eblastfurnace-formed-hint": "Собранная электрическая доменная печь.",
-  "eblastfurnace-handbook-place-controller": "Поставить контроллер",
 
   "ecrusher-structure-complete": "Дробилка собрана",
   "ecrusher-formed-hint": "Собранная дробилка 2×2×2.",
@@ -79,7 +71,6 @@
   "ecrusher-handbook-assembly": "Сборка",
   "ecrusher-handbook-assembly-hint": "ПКМ по установленному контроллеру, держа ресурсы в руке (как водяное колесо):",
   "ecrusher-handbook-step": "Шаг {0}",
-  "ecrusher-handbook-place-controller": "Поставить контроллер",
   "ecrusher-handbook-result": "готовая дробилка",
 
   "game:ewoodcutter-title-gui": "Электрический лесоруб",

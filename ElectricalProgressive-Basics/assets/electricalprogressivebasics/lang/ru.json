@@ -143,7 +143,6 @@
   "block-handbooktext-etermogenerator": "Многоблочный термогенератор (3×3×3), 32 В. Преобразует тепло в электричество; сзади ставятся <a href=\"handbook://block-electricalprogressivebasics:termoplastini-formed-south\">термоэлектрические пластины</a> (до 10). Топливо загружается вручную или желобами.",
 
   "structure-incomplete": "Устройство не собрано",
-  "etermogenerator-handbook-place-controller": "Поставить контроллер",
 
   "termoplastini": "Термоэлектрические пластины",
   "block-termoplastini-*": "Термоэлектрические пластины",
@@ -151,7 +150,6 @@
   "block-termoplastini-formed-*": "Термоэлектрические пластины",
   "block-handbooktitle-termoplastini": "Использование",
   "block-handbooktext-termoplastini": "Пластины преобразуют тепло в электричество для <a href=\"handbook://block-electricalprogressivebasics:etermogenerator-formed-south\">термогенератора</a>. Установи blueprint-каркас впритык к медной площадке сзади термогенератора, затем дособери ПКМ.<br>Можно установить подряд до 10 секций. Каждая следующая секция даёт меньший прирост; 10 пластин ≈ 100%. Два генератора могут работать на одном наборе пластин.",
-  "termoplastini-handbook-place-controller": "Установить каркас пластин",
 
   // ==================== Солнечный генератор ====================
   "block-esolargenerator-*": "Генератор на солнечных батареях",
@@ -240,7 +238,6 @@
   "eacidaccum-acid": "Серная кислота",
   "eacidaccum-no-acid": "Нет серной кислоты — заряд и разряд невозможны",
   "eacidaccum-tank": "Бак",
-  "eacidaccum-handbook-place-controller": "Поставить blueprint",
 
   "block-hvstreetlamp-*": "Уличное освещение",
   "block-handbooktitle-hvstreetlamp": "Использование",
@@ -435,7 +432,6 @@
   "block-handbooktitle-efuelgenerator": "Использование",
   "block-handbooktext-efuelgenerator": "Многоблочный паровой генератор (2×2×3), 128 В. Вырабатывает электричество от сжигания топлива; нужна вода. Заливать можно вручную или трубами.",
 
-  "efuelgenerator-handbook-place-controller": "Поставить контроллер",
 
   "electricalprogressivebasics:empty": "Пусто",
   "electricalprogressivebasics:liquid": "Жидкость: ",

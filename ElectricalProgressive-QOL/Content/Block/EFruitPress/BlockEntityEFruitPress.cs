@@ -1,4 +1,4 @@
-﻿using ElectricalProgressive.Utils;
+using ElectricalProgressive.Utils;
 using System;
 using System.Text;
 using Vintagestory.API.Client;
@@ -302,6 +302,7 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
                 _accumulatedEnergyForPress = 0;
                 SqueezeProgress = 0;
                 StopAnimation();
+                StopSound();
             }
             else if (_currentJuiceStack != null)
             {
@@ -312,6 +313,7 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
                     _accumulatedEnergyForPress = 0;
                     SqueezeProgress = 0;
                     StopAnimation();
+                    StopSound();
                 }
                 else
                 {
@@ -367,6 +369,7 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
             _accumulatedEnergyForPress = 0;
             SqueezeProgress = 0;
             StopAnimation();
+            StopSound();
             return;
         }
         
@@ -405,6 +408,7 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
                 _accumulatedEnergyForPress = 0;
                 SqueezeProgress = 0;
                 StopAnimation();
+                StopSound();
             }
         }
         else
@@ -415,6 +419,7 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
             _accumulatedEnergyForPress = 0;
             SqueezeProgress = 0;
             StopAnimation();
+            StopSound();
         }
     }
 
@@ -466,12 +471,14 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         if (PowerBehavior == null || ElectricalProgressive == null)
         {
             StopAnimation();
+            StopSound();
             return;
         }
         
         if (FruitSlot.Empty || _totalJuiceAvailable <= 0)
         {
             StopAnimation();
+            StopSound();
             _wasPressingLastTick = false;
             return;
         }
@@ -479,6 +486,7 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
         if (!IsJuiceCompatible())
         {
             StopAnimation();
+            StopSound();
             _wasPressingLastTick = false;
             return;
         }
@@ -1002,42 +1010,40 @@ public class BlockEntityEFruitPress : BlockEntityGenericTypedContainer
                 
                 if (!IsJuiceCompatible())
                 {
-                    dsc.AppendLine(Lang.Get("Cannot press: different liquid in tank"));
-                    dsc.AppendLine(Lang.Get("Tank contains: {0}", LiquidSlot.Itemstack?.GetName() ?? "Empty"));
-                    dsc.AppendLine(Lang.Get("Fruit produces: {0}", juiceName));
+                    dsc.AppendLine(Lang.Get("electricalprogressiveqol:efruitpress-warn-different-liquid"));
+                    dsc.AppendLine(Lang.Get("electricalprogressiveqol:efruitpress-tank-contains", LiquidSlot.Itemstack?.GetName() ?? "Empty"));
+                    dsc.AppendLine(Lang.Get("electricalprogressiveqol:efruitpress-fruit-produces", juiceName));
                 }
                 else
                 {
-                    dsc.AppendLine(Lang.Get("Produces {0:0.##}L of {1}", _totalJuiceAvailable, juiceName));
+                    dsc.AppendLine(Lang.Get("electricalprogressiveqol:efruitpress-produces", _totalJuiceAvailable, juiceName));
                 }
             }
         }
         
         if (PowerBehavior != null)
         {
-            dsc.AppendLine(Lang.Get("Power: {0}/{1} W", PowerBehavior.PowerSetting, _maxConsumption));
-            
             if (PowerBehavior.PowerSetting >= _maxConsumption * 0.1f && _totalJuiceAvailable > 0 && IsJuiceCompatible() && !IsFull())
             {
                 var energyPerLitre = MyMiniLib.GetAttributeFloat(Block, "energyPerLitre", 1000f);
                 double litresPerSecond = PowerBehavior.PowerSetting / energyPerLitre;
                 double timeLeft = (_totalJuiceAvailable - _pressingProgress) / litresPerSecond;
                 
-                dsc.AppendLine(Lang.Get("Speed: {0:0.##} L/s", litresPerSecond));
-                dsc.AppendLine(Lang.Get("Time left: {0:0.#}s", timeLeft));
+                dsc.AppendLine(Lang.Get("electricalprogressiveqol:efruitpress-speed", litresPerSecond));
+                dsc.AppendLine(Lang.Get("electricalprogressiveqol:efruitpress-time-left", timeLeft));
             }
         }
         
         if (SqueezeProgress > 0 && IsJuiceCompatible())
         {
-            dsc.AppendLine(Lang.Get("Progress: {0:0%}", SqueezeProgress));
+            dsc.AppendLine(Lang.Get("electricalprogressiveqol:progress", SqueezeProgress));
         }
         
-        dsc.AppendLine(Lang.Get("Liquid: {0:0.##}/{1} L", LiquidAmount, LiquidCapacity));
+        dsc.AppendLine(Lang.Get("electricalprogressiveqol:efruitpress-liquid", LiquidAmount, LiquidCapacity));
         
         if (!FruitSlot.Empty && !IsJuiceCompatible())
         {
-            dsc.AppendLine(Lang.Get("Warning: Incompatible liquid in tank"));
+            dsc.AppendLine(Lang.Get("electricalprogressiveqol:efruitpress-warn-incompatible"));
         }
     }
     

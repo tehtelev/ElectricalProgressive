@@ -40,12 +40,6 @@ public class BlockEFruitPress : BlockEBase, ILiquidSink, ILiquidSource, IMultiBl
             {
                 new()
                 {
-                    ActionLangCode = "blockhelp-firepit-refuel",
-                    MouseButton = EnumMouseButton.Right,
-                    HotKeyCode = "ctrl"
-                },
-                new()
-                {
                     ActionLangCode = "electricalprogressivebasics:blockhelp-open-gui",
                     MouseButton = EnumMouseButton.Right
                 }

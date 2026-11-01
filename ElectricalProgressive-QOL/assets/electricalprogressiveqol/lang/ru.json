@@ -123,9 +123,18 @@
 
   "block-efruitpress-*": "Электрический пресс для фруктов",
   "block-handbooktitle-efruitpress": "Используется",
-  "block-handbooktext-efruitpress": "Электрический пресс для фруктов, 32 В. Многоблок 2×2×2. Синий blueprint ставится книгой чертежей, затем ПКМ по призраку с материалами (4 железные пластины, затем 2 медные). Отжимает сок. Поддерживает желоба.",
-  "efruitpress-handbook-place-controller": "Поставить blueprint",
+  "block-handbooktext-efruitpress": "Электрический пресс для фруктов, 32 В. Многоблок 2×2×2. Отжимает сок. Поддерживает ручную загрузку и желобами.",
   "efruitpress-title-gui": "Электрический пресс для фруктов",
   "efruitpress-slot-fruit": "Фрукты",
-  "efruitpress-slot-mash": "Жмых"
+  "efruitpress-slot-mash": "Жмых",
+  "efruitpress-warn-different-liquid": "Не отжимает: в баке другая жидкость",
+  "efruitpress-tank-contains": "Бак содержит: {0}",
+  "efruitpress-fruit-produces": "Фрукты дают: {0}",
+  "efruitpress-produces": "Отжимает {0:0.##} л. {1}",
+  "efruitpress-speed": "Скорость: {0:0.##} л/с",
+  "efruitpress-time-left": "Осталось времени: {0:0.#} с",
+  "efruitpress-liquid": "Жидкость: {0:0.##}/{1} л",
+  "efruitpress-warn-incompatible": "Предупреждение: несовместимая жидкость в баке",
+  "efruitpress-unit-liters": "л.",
+  "efruitpress-empty": "Пусто"
 }

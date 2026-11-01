@@ -10,7 +10,6 @@
   "block-handbooktitle-erecycler": "Usage",
   "block-handbooktext-erecycler": "Multiblock recycler (2×2×2), 32 V. Processes perishables into compost and custom recipes; hoppers supported.",
 
-  "erecycler-handbook-place-controller": "Place the controller",
 
   "construction-handbook-assembly": "Assembly",
   "construction-handbook-assembly-hint": "Right-click the placed controller while holding materials (like the water wheel):",
@@ -22,14 +21,12 @@
   "block-handbooktext-ehammer": "Simplifies and automates work on the anvil. Multiblock 3×4×2, 128 V. Assemble with steel plates, copper coils, iron and copper plates (RMB on controller). Chance of bonus materials. Supports hoppers.",
   "ehammer-structure-complete": "Auto-Hammer assembled",
   "ehammer-formed-hint": "Assembled Auto-Hammer.",
-  "ehammer-handbook-place-controller": "Place the controller",
 
   "block-emetalforming-*": "Metal Former",
   "block-handbooktitle-emetalforming": "Usage",
   "block-handbooktext-emetalforming": "Automatically forges anything that can be smithied on an anvil. Pick the product first (full anvil list); the choice is remembered. As soon as the matching ingot or plate is in the input, the machine heats and forges. It counts recipe voxels, consumes the required number of ingots, and returns leftover voxels as metal bits. Multiblock 2×2×2, 128 V. Assemble with steel plates, copper coils, iron and copper plates (RMB on controller). Supports hoppers.",
   "emetalforming-structure-complete": "Metal Former assembled",
   "emetalforming-formed-hint": "Assembled Metal Former.",
-  "emetalforming-handbook-place-controller": "Place the controller",
   "emetalforming-select": "Select product",
   "emetalforming-no-selection": "No product selected",
   "emetalforming-need-ingot": "Put an ingot in the input",
@@ -45,19 +42,16 @@
   "block-handbooktext-esieve": "Electric sieve for sorting crushed materials. Multiblock 5×3×3, 128 V. Assemble with steel plates, copper coils, iron and copper plates (RMB on controller). Supports hoppers.",
   "esieve-structure-complete": "Sieve assembled",
   "esieve-formed-hint": "Assembled electric sieve.",
-  "esieve-handbook-place-controller": "Place the controller",
   "block-handbooktitle-epress": "Usage",
   "block-handbooktext-epress": "Allows creating certain items by pressing with a mold. Multiblock 2×2×2, 128 V. Assemble with steel plates, copper coils, iron and copper plates (RMB on controller). Supports hoppers.",
   "epress-structure-complete": "Auto-Press assembled",
   "epress-formed-hint": "Assembled Auto-Press.",
-  "epress-handbook-place-controller": "Place the controller",
 
   "block-edrawing-*": "Drawing Machine",
   "block-handbooktitle-edrawing": "Usage",
   "block-handbooktext-edrawing": "Allows creating elongated items by extruding metal. Multiblock 3×4×3, 128 V. Assemble with steel plates, copper coils, iron and copper plates (RMB on controller). Supports hoppers.",
   "eextruder-structure-complete": "Extruder assembled",
   "eextruder-formed-hint": "Assembled extruder.",
-  "eextruder-handbook-place-controller": "Place the controller",
 
   "block-ecrusher-*": "Electric Crusher",
   "block-handbooktitle-ecrusher": "Usage",
@@ -68,12 +62,10 @@
   "block-handbooktext-eaquaaccum": "Electric aqua accumulator that condenses water from air moisture. Multiblock 2×2×2, 32 V. Assemble with iron plates, copper coils and copper plates (RMB on controller). Capacity: 100 L.",
   "eaquaaccum-structure-complete": "Aqua accumulator assembled",
   "eaquaaccum-formed-hint": "Assembled electric aqua accumulator.",
-  "eaquaaccum-handbook-place-controller": "Place the controller",
   "block-handbooktitle-eblastfurnace": "Usage",
   "block-handbooktext-eblastfurnace": "Electric blast furnace for smelting ore with flux. Multiblock 3×3×2, 512 V. Connect an immersive wire to the CableDot terminal. Assemble with steel plates, copper coils and tier 3 refractory bricks (RMB on controller). Supports hoppers.",
   "eblastfurnace-structure-complete": "Blast furnace assembled",
   "eblastfurnace-formed-hint": "Assembled electric blast furnace.",
-  "eblastfurnace-handbook-place-controller": "Place the controller",
 
   "ecrusher-structure-complete": "Crusher assembled",
   "ecrusher-formed-hint": "Assembled 2×2×2 crusher.",
@@ -81,7 +73,6 @@
   "ecrusher-handbook-assembly": "Assembly",
   "ecrusher-handbook-assembly-hint": "Right-click the placed controller while holding materials (like the water wheel):",
   "ecrusher-handbook-step": "Step {0}",
-  "ecrusher-handbook-place-controller": "Place the controller",
   "ecrusher-handbook-result": "finished crusher",
 
   "game:ewoodcutter-title-gui": "Electric Woodcutter",
