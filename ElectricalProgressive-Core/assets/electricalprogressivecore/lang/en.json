@@ -1,5 +1,5 @@
 {
-  "AltPressForNetworkName": "Display detailed electrical circuit info",
+  "game:AltPressForNetworkName": "Display detailed electrical circuit info",
 
   "construction-incomplete": "Machine is not assembled (blueprint)",
   "construction-hint": "Right-click with materials in hand to assemble (see block hints)",
@@ -8,6 +8,7 @@
   "construction-handbook-assembly-hint": "Blueprints are not crafted. Place a blue ghost with the schematic book, then right-click the ghost while holding materials. Breaking the machine returns only the spent materials.",
   "construction-handbook-place-with-book": "place blueprint (right-click with the book)",
   "construction-handbook-step": "Step {0}",
+  "construction-progress": "Assembly: {0}/{1}",
   "construction-handbook-result": "finished machine",
 
   "item-econstructionbook": "Schematic book",

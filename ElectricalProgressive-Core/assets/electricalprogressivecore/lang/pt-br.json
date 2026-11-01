@@ -1,15 +1,24 @@
 {
-  "AltPressForNetworkName": "Exibir informações detalhadas do circuito elétrico",
+  "game:AltPressForNetworkName": "Exibir informações detalhadas do circuito elétrico",
+
+  "construction-incomplete": "A máquina não está montada (blueprint)",
+  "construction-hint": "Clique direito com materiais na mão para montar (veja as dicas do bloco)",
+
+  "construction-handbook-assembly": "Montagem",
+  "construction-handbook-assembly-hint": "Esquemas não são fabricados. Coloque um blueprint azul com o livro de esquemas e depois clique com o botão direito no fantasma segurando materiais. Ao quebrar a máquina, apenas os materiais gastos são devolvidos.",
+  "construction-handbook-place-with-book": "colocar blueprint (clique direito com o livro)",
+  "construction-handbook-step": "Etapa {0}",
+  "construction-progress": "Montagem: {0}/{1}",
+  "construction-handbook-result": "máquina pronta",
 
   "item-econstructionbook": "Livro de esquemas",
   "item-handbooktitle-econstructionbook": "Uso",
-  "item-handbooktext-econstructionbook": "Clique direito: escolher um esquema. Clique direito em um bloco: colocar o blueprint. Agachar + clique direito: mudar o esquema.",
+  "item-handbooktext-econstructionbook": "Clique direito no ar: escolher um esquema de máquina. Clique direito em um bloco: colocar o blueprint. Agachar + clique direito coloca contra o bloco mirado (placas termoelétricas no gerador). Monte o fantasma com clique direito e materiais na mão.",
   "construction-book-title": "Esquemas",
   "construction-book-empty": "Nenhuma máquina construível carregada.",
   "construction-book-selected": "Selecionado: {0}",
-  "construction-book-hint": "Clique direito para escolher um esquema, depois clique direito para colocá-lo.",
+  "construction-book-hint": "Clique direito no ar para escolher um esquema, depois clique direito em um bloco para colocá-lo.",
   "construction-book-placefail": "Não é possível colocar o esquema aqui.",
   "construction-book-help-open": "Escolher esquema",
   "construction-book-help-place": "Colocar esquema selecionado"
 }
-

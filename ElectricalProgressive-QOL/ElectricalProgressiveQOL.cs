@@ -22,22 +22,6 @@ using Vintagestory.API.Server;
 
 
 
-[assembly: ModDependency("game", "1.22.0")]
-[assembly: ModDependency("electricalprogressivecore", "3.3.0")]
-[assembly: ModDependency("electricalprogressivebasics", "3.3.0")]
-[assembly: ModInfo(
-    "Electrical Progressive: QoL",
-    "electricalprogressiveqol",
-    Website = "https://github.com/tehtelev/ElectricalProgressive",
-    Description = "Additional electrical devices.",
-    Version = "3.3.1",
-    Authors =
-    [
-        "Tehtelev",
-        "Kotl"
-    ]
-)]
-
 namespace ElectricalProgressive;
 
 public class ElectricalProgressiveQOL : ModSystem

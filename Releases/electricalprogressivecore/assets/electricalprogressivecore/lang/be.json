@@ -1,13 +1,23 @@
 {
-  "AltPressForNetworkName": "Паказаць падрабязную інфармацыю пра эл. ланцуг",
+  "game:AltPressForNetworkName": "Паказаць падрабязную інфармацыю пра эл. ланцуг",
+
+  "construction-incomplete": "Машына не сабрана (blueprint)",
+  "construction-hint": "ПКМ з матэрыяламі ў руцэ — сабраць (падказкі на блоку)",
+
+  "construction-handbook-assembly": "Зборка",
+  "construction-handbook-assembly-hint": "Чарцяжы не крафцяцца. Сіні blueprint ставіцца кнігай чарцяжоў, затым ПКМ па здані з матэрыяламі ў руцэ. Пры паломцы машыны вяртаюцца толькі выдаткаваныя матэрыялы.",
+  "construction-handbook-place-with-book": "паставіць blueprint (ПКМ кнігай)",
+  "construction-handbook-step": "Крок {0}",
+  "construction-progress": "Зборка: {0}/{1}",
+  "construction-handbook-result": "гатовая машына",
 
   "item-econstructionbook": "Кніга чарцяжоў",
   "item-handbooktitle-econstructionbook": "Прымяненне",
-  "item-handbooktext-econstructionbook": "ПКМ — выбраць схему. ПКМ па блоку — паставіць blueprint. Shift+ПКМ — змяніць схему.",
+  "item-handbooktext-econstructionbook": "ПКМ у паветры — выбраць схему машыны. ПКМ па блоку — паставіць blueprint. Shift+ПКМ ставіць да ўказанага блока (тэрмапласціны на генератар). Збірайце здань ПКМ з матэрыяламі ў руцэ.",
   "construction-book-title": "Чарцяжы",
   "construction-book-empty": "Няма машын са зборкай.",
   "construction-book-selected": "Выбрана: {0}",
-  "construction-book-hint": "ПКМ — выбраць схему, затым ПКМ па блоку — паставіць.",
+  "construction-book-hint": "ПКМ у паветры — выбраць схему, ПКМ па блоку — паставіць.",
   "construction-book-placefail": "Тут нельга паставіць чарцёж.",
   "construction-book-help-open": "Выбраць схему",
   "construction-book-help-place": "Паставіць выбраную схему"

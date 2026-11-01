@@ -86,9 +86,19 @@
   "progress": "Pokrok: {0:P0}",
   "update_heater_info": "Aktualizovat informace o ohřívačích",
   "block-efruitpress-*": "Elektrický lis na ovoce",
-  "block-handbooktitle-efruitpress": "Usage",
-  "block-handbooktext-efruitpress": "Electric fruit press, 32 V, 2×2×2. Place with the schematic book, then assemble with 4 iron plates and 2 copper plates.",
+  "block-handbooktitle-efruitpress": "Použití",
+  "block-handbooktext-efruitpress": "Elektrický lis na ovoce, 32 V. Vícebloková konstrukce 2×2×2. Lisuje šťávu. Podporuje ruční plnění i žlaby.",
   "efruitpress-title-gui": "Elektrický lis na ovoce",
   "efruitpress-slot-fruit": "Ovoce",
-  "efruitpress-slot-mash": "Výlisky"
+  "efruitpress-slot-mash": "Výlisky",
+  "efruitpress-warn-different-liquid": "Nelisuje: v nádrži je jiná kapalina",
+  "efruitpress-tank-contains": "Nádrž obsahuje: {0}",
+  "efruitpress-fruit-produces": "Ovoce dává: {0}",
+  "efruitpress-produces": "Vylisuje {0:0.##} l: {1}",
+  "efruitpress-speed": "Rychlost: {0:0.##} l/s",
+  "efruitpress-time-left": "Zbývající čas: {0:0.#} s",
+  "efruitpress-liquid": "Kapalina: {0:0.##}/{1} l",
+  "efruitpress-warn-incompatible": "Upozornění: v nádrži je nekompatibilní kapalina",
+  "efruitpress-unit-liters": "l",
+  "efruitpress-empty": "Prázdné"
 }

@@ -1,10 +1,7 @@
 using ElectricalProgressive.Content.Block;
 using ElectricalProgressive.Content.Block.CableDot;
 using ElectricalProgressive.Content.Block.CableSwitch;
-using ElectricalProgressive.Content.Block.EAccumulator;
 using ElectricalProgressive.Content.Block.EAcidAccum;
-using ElectricalProgressive.Content.Block.EGenerator;
-using ElectricalProgressive.Content.Block.EMotor;
 using ElectricalProgressive.Content.Block.HVSFonar;
 using ElectricalProgressive.Content.Block.HVTower;
 using ElectricalProgressive.Content.Block.HVTransformator;

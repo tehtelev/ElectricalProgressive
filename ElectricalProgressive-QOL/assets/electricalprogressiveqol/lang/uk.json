@@ -87,8 +87,18 @@
   "update_heater_info": "Оновити інформацію на обігрівачах",
   "block-efruitpress-*": "Електричний прес для фруктів",
   "block-handbooktitle-efruitpress": "Використання",
-  "block-handbooktext-efruitpress": "Електричний прес, 32 В, 2×2×2. Blueprint ставиться книгою креслень, збірка: 4 залізні пластини, потім 2 мідні.",
+  "block-handbooktext-efruitpress": "Електричний прес для фруктів, 32 В. Багатоблок 2×2×2. Віджимає сік. Підтримує ручне завантаження та жолобами.",
   "efruitpress-title-gui": "Електричний прес для фруктів",
   "efruitpress-slot-fruit": "Фрукти",
-  "efruitpress-slot-mash": "Жмих"
+  "efruitpress-slot-mash": "Жмих",
+  "efruitpress-warn-different-liquid": "Не віджимає: у баку інша рідина",
+  "efruitpress-tank-contains": "Бак містить: {0}",
+  "efruitpress-fruit-produces": "Фрукти дають: {0}",
+  "efruitpress-produces": "Віджимає {0:0.##} л {1}",
+  "efruitpress-speed": "Швидкість: {0:0.##} л/с",
+  "efruitpress-time-left": "Залишилося часу: {0:0.#} с",
+  "efruitpress-liquid": "Рідина: {0:0.##}/{1} л",
+  "efruitpress-warn-incompatible": "Попередження: несумісна рідина в баку",
+  "efruitpress-unit-liters": "л",
+  "efruitpress-empty": "Порожньо"
 }

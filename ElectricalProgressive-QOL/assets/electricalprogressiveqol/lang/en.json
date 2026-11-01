@@ -88,7 +88,7 @@
 
   "block-efruitpress-*": "Electric Fruit Press",
   "block-handbooktitle-efruitpress": "Usage",
-  "block-handbooktext-efruitpress": "Electric fruit press, 32 V. Multiblock 2×2×2. Place a blue blueprint with the schematic book, then right-click the ghost with materials (4 iron plates, then 2 copper plates). Presses fruit into juice. Hoppers supported.",
+  "block-handbooktext-efruitpress": "Electric fruit press, 32 V. Multiblock 2×2×2. Presses juice. Supports manual loading and chutes.",
   "efruitpress-title-gui": "Electric Fruit Press",
   "efruitpress-slot-fruit": "Fruit",
   "efruitpress-slot-mash": "Mash",

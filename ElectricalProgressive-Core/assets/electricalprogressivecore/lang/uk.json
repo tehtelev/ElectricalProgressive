@@ -1,13 +1,23 @@
 {
-  "AltPressForNetworkName": "Показати детальну інформацію про електричний ланцюг",
+  "game:AltPressForNetworkName": "Показати детальну інформацію про електричний ланцюг",
+
+  "construction-incomplete": "Машину не зібрано (blueprint)",
+  "construction-hint": "ПКМ із ресурсами в руці — зібрати (підказки на блоці)",
+
+  "construction-handbook-assembly": "Збірка",
+  "construction-handbook-assembly-hint": "Креслення не крафтяться. Синій blueprint ставиться книгою креслень, потім ПКМ по привиду з матеріалами в руці. Під час поломки машини повертаються лише витрачені матеріали.",
+  "construction-handbook-place-with-book": "поставити blueprint (ПКМ книгою)",
+  "construction-handbook-step": "Крок {0}",
+  "construction-progress": "Збірка: {0}/{1}",
+  "construction-handbook-result": "готова машина",
 
   "item-econstructionbook": "Книга креслень",
   "item-handbooktitle-econstructionbook": "Застосування",
-  "item-handbooktext-econstructionbook": "ПКМ — вибрати схему машини. ПКМ по блоку — поставити blueprint. Shift+ПКМ — змінити схему.",
+  "item-handbooktext-econstructionbook": "ПКМ у повітрі — вибрати схему машини. ПКМ по блоку — поставити blueprint. Shift+ПКМ ставить до вказаного блока (термопластини на генератор). Збирайте привид ПКМ із матеріалами в руці.",
   "construction-book-title": "Креслення",
   "construction-book-empty": "Немає машин зі збіркою.",
   "construction-book-selected": "Обрано: {0}",
-  "construction-book-hint": "ПКМ — вибрати схему, потім ПКМ по блоку — поставити.",
+  "construction-book-hint": "ПКМ у повітрі — вибрати схему, ПКМ по блоку — поставити.",
   "construction-book-placefail": "Тут не можна поставити креслення.",
   "construction-book-help-open": "Вибрати схему",
   "construction-book-help-place": "Поставити обрану схему"

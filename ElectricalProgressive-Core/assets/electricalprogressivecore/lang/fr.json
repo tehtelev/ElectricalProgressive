@@ -1,13 +1,23 @@
 {
-  "AltPressForNetworkName": "Afficher les informations détaillées sur le circuit électrique",
+  "game:AltPressForNetworkName": "Afficher les informations détaillées sur le circuit électrique",
+
+  "construction-incomplete": "La machine n'est pas assemblée (blueprint)",
+  "construction-hint": "Clic droit avec des matériaux en main pour assembler (voir les indications du bloc)",
+
+  "construction-handbook-assembly": "Assemblage",
+  "construction-handbook-assembly-hint": "Les plans ne se fabriquent pas. Placez un blueprint bleu avec le livre de plans, puis faites un clic droit sur le fantôme avec des matériaux en main. En cassant la machine, seuls les matériaux dépensés sont rendus.",
+  "construction-handbook-place-with-book": "placer le blueprint (clic droit avec le livre)",
+  "construction-handbook-step": "Étape {0}",
+  "construction-progress": "Assemblage : {0}/{1}",
+  "construction-handbook-result": "machine terminée",
 
   "item-econstructionbook": "Livre de plans",
   "item-handbooktitle-econstructionbook": "Utilisation",
-  "item-handbooktext-econstructionbook": "Clic droit : choisir un plan. Clic droit sur un bloc : placer le blueprint. Sneak + clic droit : changer de plan.",
+  "item-handbooktext-econstructionbook": "Clic droit dans le vide : choisir un plan de machine. Clic droit sur un bloc : placer le blueprint. Sneak + clic droit place contre le bloc visé (plaques thermoélectriques sur le générateur). Assemblez le fantôme par clic droit avec les matériaux en main.",
   "construction-book-title": "Plans",
   "construction-book-empty": "Aucune machine constructible chargée.",
   "construction-book-selected": "Sélection : {0}",
-  "construction-book-hint": "Clic droit pour choisir un plan, puis clic droit pour le placer.",
+  "construction-book-hint": "Clic droit dans le vide pour choisir un plan, puis clic droit sur un bloc pour le placer.",
   "construction-book-placefail": "Impossible de placer le plan ici.",
   "construction-book-help-open": "Choisir un plan",
   "construction-book-help-place": "Placer le plan sélectionné"

@@ -19,17 +19,6 @@ using Vintagestory.GameContent;
 using static ElectricalProgressive.ElectricalProgressive;
 
 
-[assembly: ModDependency("game", "1.22.0")]
-[assembly: ModInfo(
-    "Electrical Progressive: Core",
-    "electricalprogressivecore",
-    Website = "https://github.com/tehtelev/ElectricalProgressive",
-    Description = "Electrical logic library.",
-    Version = "3.3.0",
-    Authors = ["Tehtelev", "Kotl"]
-)]
-
-
 
 namespace ElectricalProgressive
 {

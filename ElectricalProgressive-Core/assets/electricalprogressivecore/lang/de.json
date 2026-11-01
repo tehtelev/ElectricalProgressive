@@ -1,13 +1,23 @@
 {
-  "AltPressForNetworkName": "Detaillierte Informationen zur elektrischen Schaltung anzeigen",
+  "game:AltPressForNetworkName": "Detaillierte Informationen zur elektrischen Schaltung anzeigen",
+
+  "construction-incomplete": "Maschine ist nicht zusammengebaut (Blueprint)",
+  "construction-hint": "Rechtsklick mit Materialien in der Hand: zusammenbauen (siehe Blockhinweise)",
+
+  "construction-handbook-assembly": "Zusammenbau",
+  "construction-handbook-assembly-hint": "Baupläne werden nicht hergestellt. Ein blauer Blueprint wird mit dem Bauplanbuch platziert, danach Rechtsklick auf den Geist mit Materialien in der Hand. Beim Abbau der Maschine werden nur die verbrauchten Materialien zurückgegeben.",
+  "construction-handbook-place-with-book": "Blueprint platzieren (Rechtsklick mit dem Buch)",
+  "construction-handbook-step": "Schritt {0}",
+  "construction-progress": "Zusammenbau: {0}/{1}",
+  "construction-handbook-result": "fertige Maschine",
 
   "item-econstructionbook": "Bauplanbuch",
   "item-handbooktitle-econstructionbook": "Verwendung",
-  "item-handbooktext-econstructionbook": "Rechtsklick: Bauplan wählen. Rechtsklick auf einen Block: Blueprint platzieren. Schleichen + Rechtsklick: Auswahl ändern.",
+  "item-handbooktext-econstructionbook": "Rechtsklick in die Luft: Maschinenbauplan wählen. Rechtsklick auf einen Block: Blueprint platzieren. Schleichen + Rechtsklick platziert am anvisierten Block (Thermoplatten am Generator). Den Geist mit Rechtsklick und Materialien in der Hand zusammenbauen.",
   "construction-book-title": "Baupläne",
   "construction-book-empty": "Keine montierbaren Maschinen geladen.",
   "construction-book-selected": "Ausgewählt: {0}",
-  "construction-book-hint": "Rechtsklick: Bauplan wählen, dann mit Rechtsklick platzieren.",
+  "construction-book-hint": "Rechtsklick in die Luft: Bauplan wählen, dann mit Rechtsklick auf einen Block platzieren.",
   "construction-book-placefail": "Bauplan kann hier nicht platziert werden.",
   "construction-book-help-open": "Bauplan wählen",
   "construction-book-help-place": "Gewählten Bauplan platzieren"

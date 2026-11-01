@@ -86,9 +86,19 @@
   "progress": "Progresso: {0:P0}",
   "update_heater_info": "Atualizar informações do aquecedor",
   "block-efruitpress-*": "Prensa de frutas elétrica",
-  "block-handbooktitle-efruitpress": "Usage",
-  "block-handbooktext-efruitpress": "Electric fruit press, 32 V, 2×2×2. Place with the schematic book, then assemble with 4 iron plates and 2 copper plates.",
+  "block-handbooktitle-efruitpress": "Uso",
+  "block-handbooktext-efruitpress": "Prensa de frutas elétrica, 32 V. Multibloco 2×2×2. Extrai suco. Suporta carga manual e por calhas.",
   "efruitpress-title-gui": "Prensa de frutas elétrica",
   "efruitpress-slot-fruit": "Frutas",
-  "efruitpress-slot-mash": "Bagaço"
+  "efruitpress-slot-mash": "Bagaço",
+  "efruitpress-warn-different-liquid": "Não prensa: há outro líquido no tanque",
+  "efruitpress-tank-contains": "O tanque contém: {0}",
+  "efruitpress-fruit-produces": "A fruta produz: {0}",
+  "efruitpress-produces": "Produz {0:0.##} l de {1}",
+  "efruitpress-speed": "Velocidade: {0:0.##} l/s",
+  "efruitpress-time-left": "Tempo restante: {0:0.#} s",
+  "efruitpress-liquid": "Líquido: {0:0.##}/{1} l",
+  "efruitpress-warn-incompatible": "Aviso: líquido incompatível no tanque",
+  "efruitpress-unit-liters": "l",
+  "efruitpress-empty": "Vazio"
 }

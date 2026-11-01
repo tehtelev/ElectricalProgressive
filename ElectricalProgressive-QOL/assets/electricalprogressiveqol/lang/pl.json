@@ -86,9 +86,19 @@
   "progress": "Postęp: {0:P0}",
   "update_heater_info": "Aktualizuj informacje o grzejnikach",
   "block-efruitpress-*": "Elektryczna prasa do owoców",
-  "block-handbooktitle-efruitpress": "Usage",
-  "block-handbooktext-efruitpress": "Electric fruit press, 32 V, 2×2×2. Place with the schematic book, then assemble with 4 iron plates and 2 copper plates.",
+  "block-handbooktitle-efruitpress": "Użycie",
+  "block-handbooktext-efruitpress": "Elektryczna prasa do owoców, 32 V. Wieloblok 2×2×2. Wyciska sok. Obsługuje ręczne ładowanie i rynnami.",
   "efruitpress-title-gui": "Elektryczna prasa do owoców",
   "efruitpress-slot-fruit": "Owoce",
-  "efruitpress-slot-mash": "Wytłoki"
+  "efruitpress-slot-mash": "Wytłoki",
+  "efruitpress-warn-different-liquid": "Nie wyciska: w zbiorniku jest inny płyn",
+  "efruitpress-tank-contains": "Zbiornik zawiera: {0}",
+  "efruitpress-fruit-produces": "Owoce dają: {0}",
+  "efruitpress-produces": "Wyciska {0:0.##} l: {1}",
+  "efruitpress-speed": "Prędkość: {0:0.##} l/s",
+  "efruitpress-time-left": "Pozostały czas: {0:0.#} s",
+  "efruitpress-liquid": "Płyn: {0:0.##}/{1} l",
+  "efruitpress-warn-incompatible": "Ostrzeżenie: niekompatybilny płyn w zbiorniku",
+  "efruitpress-unit-liters": "l",
+  "efruitpress-empty": "Pusto"
 }

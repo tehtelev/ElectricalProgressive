@@ -1,13 +1,23 @@
 {
-  "AltPressForNetworkName": "Wyświetlaj szczegółowe informacje o obwodzie elektrycznym",
+  "game:AltPressForNetworkName": "Wyświetlaj szczegółowe informacje o obwodzie elektrycznym",
+
+  "construction-incomplete": "Maszyna nie jest złożona (blueprint)",
+  "construction-hint": "PPM z materiałami w ręku — złóż (podpowiedzi na bloku)",
+
+  "construction-handbook-assembly": "Montaż",
+  "construction-handbook-assembly-hint": "Schematy nie są wytwarzane. Niebieski blueprint stawia się księgą schematów, potem PPM na duchu z materiałami w ręku. Po zniszczeniu maszyny zwracane są tylko zużyte materiały.",
+  "construction-handbook-place-with-book": "postaw blueprint (PPM księgą)",
+  "construction-handbook-step": "Krok {0}",
+  "construction-progress": "Montaż: {0}/{1}",
+  "construction-handbook-result": "gotowa maszyna",
 
   "item-econstructionbook": "Księga schematów",
   "item-handbooktitle-econstructionbook": "Użycie",
-  "item-handbooktext-econstructionbook": "PPM: wybierz schemat. PPM na bloku: postaw blueprint. Skradanie + PPM: zmień schemat.",
+  "item-handbooktext-econstructionbook": "PPM w powietrze: wybierz schemat maszyny. PPM na bloku: postaw blueprint. Skradanie + PPM stawia przy wskazanym bloku (płyty termoelektryczne na generatorze). Złóż ducha, klikając go PPM z materiałami w ręku.",
   "construction-book-title": "Schematy",
   "construction-book-empty": "Brak maszyn do złożenia.",
   "construction-book-selected": "Wybrano: {0}",
-  "construction-book-hint": "PPM — wybierz schemat, potem PPM na bloku — postaw.",
+  "construction-book-hint": "PPM w powietrze — wybierz schemat, potem PPM na bloku — postaw.",
   "construction-book-placefail": "Nie można tu postawić schematu.",
   "construction-book-help-open": "Wybierz schemat",
   "construction-book-help-place": "Postaw wybrany schemat"
