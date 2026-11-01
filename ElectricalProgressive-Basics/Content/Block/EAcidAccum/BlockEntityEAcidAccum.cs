@@ -124,6 +124,28 @@ public class BlockEntityEAcidAccum : BlockEntityGenericTypedContainer
         LoadImmersiveEProperties.Load(Block, this);
     }
 
+    public override void OnReceivedClientPacket(IPlayer fromPlayer, int packetid, byte[] data)
+    {
+        if (packetid == BEBehaviorEPImmersive.PacketIdRequestNetworkInfo)
+        {
+            EPImmersive?.OnReceivedClientPacket(fromPlayer, packetid, data);
+            return;
+        }
+
+        base.OnReceivedClientPacket(fromPlayer, packetid, data);
+    }
+
+    public override void OnReceivedServerPacket(int packetid, byte[] data)
+    {
+        if (packetid == BEBehaviorEPImmersive.PacketIdResponseNetworkInfo)
+        {
+            EPImmersive?.OnReceivedServerPacket(packetid, data);
+            return;
+        }
+
+        base.OnReceivedServerPacket(packetid, data);
+    }
+
     public override bool OnPlayerRightClick(IPlayer byPlayer, BlockSelection blockSel)
     {
         if (Api.Side == EnumAppSide.Client)

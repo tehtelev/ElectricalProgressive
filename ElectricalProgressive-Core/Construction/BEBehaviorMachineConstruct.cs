@@ -486,20 +486,24 @@ public class BEBehaviorMachineConstruct : BlockEntityBehavior
 
     private string? GetStageShapePath()
     {
-        if (_levels == null || _levels.Length == 0)
+        if (_levels is not { Length: > 0 })
             return GetFullShapePath();
 
-        var idx = RenderStageIndex;
+        var idx = Math.Clamp(RenderStageIndex, 0, _levels.Length - 1);
+
+        // Ищем ближайший непустой Shape сначала "назад", потом "вперёд"
         for (var i = idx; i >= 0; i--)
         {
-            if (!string.IsNullOrEmpty(_levels[i]?.Shape))
-                return _levels[i]!.Shape;
+            var shape = _levels[i]?.Shape;
+            if (!string.IsNullOrEmpty(shape))
+                return shape;
         }
 
         for (var i = idx + 1; i < _levels.Length; i++)
         {
-            if (!string.IsNullOrEmpty(_levels[i]?.Shape))
-                return _levels[i]!.Shape;
+            var shape = _levels[i]?.Shape;
+            if (!string.IsNullOrEmpty(shape))
+                return shape;
         }
 
         return GetFullShapePath();
