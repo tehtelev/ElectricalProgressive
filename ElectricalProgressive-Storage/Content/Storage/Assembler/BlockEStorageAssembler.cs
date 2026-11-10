@@ -498,6 +498,7 @@ public class BlockEntityEStorageAssembler : BlockEntityOpenableContainer, ITexPo
         {
             product = expect.Clone();
             product.StackSize = Math.Max(1, expect.StackSize);
+            ItemEStoragePattern.ForgetSpoil(product);
             if (!OutputFits(world, product))
                 return false;
         }
@@ -525,6 +526,7 @@ public class BlockEntityEStorageAssembler : BlockEntityOpenableContainer, ITexPo
         {
             product = matched.Output.ResolvedItemStack.Clone();
             product.StackSize = Math.Max(1, matched.Output.StackSize);
+            ItemEStoragePattern.ForgetSpoil(product);
             if (!OutputFits(world, product))
             {
                 LiquidCraft.ClearShells(world, reserve, network, _inventory, filled);

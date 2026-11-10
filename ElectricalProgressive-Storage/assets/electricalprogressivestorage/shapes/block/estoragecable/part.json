@@ -7,7 +7,7 @@
       "from": [ 7.0, -1.0, -0.5 ],
       "to": [ 9.0, 1.0, 7.5 ],
       "rotationOrigin": [ 8.0, 8.0, 8.0 ],
-      "renderPass": 3,
+      "renderPass": 1,
       "zOffset": 2,
       "faces": {
         "north": { "texture": "#cable", "uv": [ 9.0, 5.5, 10.0, 6.5 ], "enabled": false, "glow": 32 },

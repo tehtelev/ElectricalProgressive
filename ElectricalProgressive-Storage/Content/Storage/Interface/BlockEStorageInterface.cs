@@ -1254,6 +1254,12 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer, IPanel
             return;
 
         ClaimArrivals();
+        for (var slot = ItemSlotInterface.PatternAt; slot < ItemSlotInterface.ConfigAt; slot++)
+        {
+            if (ItemEStoragePattern.ForgetSpoilIn(_inventory[slot].Itemstack))
+                _inventory[slot].MarkDirty();
+        }
+
         if (_jobs.Count > 0)
         {
             ReturnExports();
@@ -1449,6 +1455,8 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer, IPanel
             if (!AttachCpu(job, pattern!, 0))
                 continue;
 
+            if (mounted && ItemEStoragePattern.IsProcessing(pattern) && StaleDelivery(job, pattern!, target, face))
+                changed = true;
             if (Stock(job, pattern!))
                 changed = true;
             if (ItemEStoragePattern.IsProcessing(pattern))
@@ -1470,38 +1478,34 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer, IPanel
     }
 
     /// <summary>
-    /// У жерновов автозабор не объявлен: вход — слот, куда кладётся предмет, выход — второй.
-    /// Пока заказ идёт, забирается всё из выхода, чтобы слот не встал.
+    /// Желоб забирает только слот, который машина сама отдаёт.
+    /// У жерновов такого слота нет: выход — второй, вход — тот, куда желоб кладёт.
     /// </summary>
     private bool PullOutputs(InventoryBase target, BlockFacing face)
     {
+        var changed = false;
+        for (var n = 0; n < target.Count; n++)
+        {
+            var pulled = target.GetAutoPullFromSlot(face);
+            if (pulled == null || pulled.Empty || pulled.Itemstack == null)
+                break;
+            if (!TakeOutput(pulled))
+                break;
+            changed = true;
+        }
+
+        if (changed || target.Count != 2)
+            return changed;
+
         var probe = NextIngredient();
         ItemSlot? input = probe == null ? null : target.GetAutoPushIntoSlot(face, new DummySlot(probe));
-        if (input == null && target.Count == 2)
+        if (input == null)
             input = target[0];
 
-        var pulled = target.GetAutoPullFromSlot(face);
-        var changed = false;
-        if (pulled != null && pulled != input)
-            changed |= TakeOutput(pulled);
-        else if (target.Count == 2 && input != null)
+        for (var i = 0; i < target.Count; i++)
         {
-            for (var i = 0; i < target.Count; i++)
-            {
-                if (target[i] != input)
-                    changed |= TakeOutput(target[i]);
-            }
-        }
-        else
-        {
-            for (var i = 0; i < target.Count; i++)
-            {
-                var slot = target[i];
-                if (slot == null || slot == input || slot.Empty || slot.Itemstack == null)
-                    continue;
-                if (MatchesOutput(slot.Itemstack))
-                    changed |= TakeOutput(slot);
-            }
+            if (target[i] != input)
+                changed |= TakeOutput(target[i]);
         }
 
         return changed;
@@ -1575,18 +1579,33 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer, IPanel
         }
     }
 
-    private bool MatchesOutput(ItemStack stack)
+    /// <summary>
+    /// Машина снова дала первый слот загрузки. Значит, желоб положил бы предмет, старая сдача не держится.
+    /// </summary>
+    private bool StaleDelivery(CraftJob job, ItemStack pattern, InventoryBase target, BlockFacing face)
     {
-        if (Api?.World == null)
+        var world = Api?.World;
+        if (world == null || target.Count == 0)
             return false;
 
-        foreach (var job in _jobs)
-        {
-            if (job.Result != null && StorageAccess.Same(Api.World, job.Result, stack))
-                return true;
-        }
+        ItemEStoragePattern.Inputs(world, pattern, _inputs);
+        if (_inputs.Count == 0)
+            return false;
 
-        return false;
+        var index = job.Index >= 0 && job.Index < _inputs.Count ? job.Index : 0;
+        var dest = target.GetAutoPushIntoSlot(face, new DummySlot(_inputs[index].Clone()));
+        if (dest == null || dest != target[0])
+            return false;
+
+        var per = ItemEStoragePattern.Yield(world, pattern, job.Result);
+        var done = job.Got / per;
+        if (job.Fed == done && job.Index == 0 && job.Pushed == 0)
+            return false;
+
+        job.Fed = done;
+        job.Index = 0;
+        job.Pushed = 0;
+        return true;
     }
 
     private ItemStack? NextIngredient()
@@ -1944,13 +1963,10 @@ public class BlockEntityEStorageInterface : BlockEntityOpenableContainer, IPanel
 
         var per = ItemEStoragePattern.Yield(world, pattern, job.Result);
         var crafts = (job.Wanted + per - 1) / per;
-        if (job.Fed >= crafts)
-            return false;
-
-        if (FindCpu(job) is not { } cpu)
-            return false;
-
         var changed = false;
+        if (FindCpu(job) is not { } cpu)
+            return changed;
+
         for (var step = 0; step < 32 && job.Fed < crafts; step++)
         {
             while (job.Index < _inputs.Count && job.Pushed >= Math.Max(1, _inputs[job.Index].StackSize))

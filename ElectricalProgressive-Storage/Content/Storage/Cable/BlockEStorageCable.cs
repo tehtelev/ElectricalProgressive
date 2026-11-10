@@ -54,6 +54,41 @@ public class BlockEntityEStorageCable : BlockEntity
         return packed;
     }
 
+    private static readonly Dictionary<string, (Facing Connection, int Lines)> RestorePending = new();
+
+    private static string RestoreKey(BlockPos pos, EnumAppSide side)
+        => pos.X + "/" + pos.Y + "/" + pos.Z + "/" + pos.dimension + "/" + (int)side;
+
+    /// <summary>
+    /// Панель снята, жилы остаются. Соединение пишется в Initialize, до проверки соседей.
+    /// </summary>
+    public static void QueueRestore(BlockPos pos, EnumAppSide side, Facing connection, int packedLines)
+        => RestorePending[RestoreKey(pos, side)] = (connection, packedLines);
+
+    public static void ForgetRestore(BlockPos pos, EnumAppSide side)
+        => RestorePending.Remove(RestoreKey(pos, side));
+
+    public override void Initialize(ICoreAPI api)
+    {
+        base.Initialize(api);
+        ApplyRestore();
+    }
+
+    internal void ApplyRestore()
+    {
+        if (Api?.World == null || Pos == null)
+            return;
+        if (!ReferenceEquals(Api.World.BlockAccessor.GetBlockEntity(Pos), this))
+            return;
+        if (!RestorePending.Remove(RestoreKey(Pos, Api.Side), out var held))
+            return;
+
+        Connection = held.Connection;
+        for (var i = 0; i < Lines.Length; i++)
+            Lines[i] = (held.Lines >> (i * 3)) & 7;
+        StorageAccess.DirtyTopology();
+    }
+
     public override void ToTreeAttributes(ITreeAttribute tree)
     {
         base.ToTreeAttributes(tree);
@@ -195,7 +230,14 @@ public class BlockEStorageCable : BlockEStoragePart
     }
 
     public override bool IsReplacableBy(Vintagestory.API.Common.Block block)
-        => base.IsReplacableBy(block) || (block is BlockEStorageCable && block.Code?.Path == Code?.Path);
+        => base.IsReplacableBy(block)
+            || (block is BlockEStorageCable && block.Code?.Path == Code?.Path)
+            || block is BlockEStorageTerminal;
+
+    /// <summary>
+    /// Иначе номер хитбокса всегда нулевой: в узле выбирается первая жила, а торец к сборщику не прицеливается.
+    /// </summary>
+    public override bool DoPartialSelection(IWorldAccessor world, BlockPos pos) => true;
 
     public override bool DoPlaceBlock(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel, ItemStack byItemStack)
     {
@@ -313,6 +355,47 @@ public class BlockEStorageCable : BlockEStoragePart
         entity.MarkDirty(true);
         StorageAccess.DirtyTopology();
         if (count > 0)
+            world.SpawnItemEntity(new ItemStack(this, count), pos.ToVec3d().Add(0.5, 0.5, 0.5));
+    }
+
+    public override bool OnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel)
+    {
+        if (blockSel?.Position == null || byPlayer == null || !HoldingWrench(byPlayer))
+            return false;
+        if (!world.Claims.TryAccess(byPlayer, blockSel.Position, EnumBlockAccessFlags.BuildOrBreak))
+            return false;
+        if (world.Side == EnumAppSide.Server)
+            UnclipStrand(world, blockSel.Position, byPlayer, blockSel.SelectionBoxIndex, BreakDrop(byPlayer));
+        return true;
+    }
+
+    /// <summary>Ключ снимает жилу под прицелом. Последняя жила убирает клетку.</summary>
+    private void UnclipStrand(IWorldAccessor world, BlockPos pos, IPlayer byPlayer, int index, float dropQuantityMultiplier)
+    {
+        if (world.BlockAccessor.GetBlockEntity(pos) is not BlockEntityEStorageCable entity || entity.Connection == Facing.None)
+        {
+            base.OnBlockBroken(world, pos, byPlayer, dropQuantityMultiplier);
+            return;
+        }
+
+        var selected = BoxFacing(entity.Connection, entity.Lines, Id, index);
+        var removed = entity.Connection & selected;
+        if (selected == Facing.None || removed == Facing.None)
+            return;
+
+        var remain = entity.Connection & ~selected;
+        if (remain == Facing.None)
+        {
+            base.OnBlockBroken(world, pos, byPlayer, dropQuantityMultiplier);
+            return;
+        }
+
+        var count = StrandCount(removed, entity.Lines);
+        entity.Connection = remain;
+        ClearEmptyFaces(entity, removed);
+        entity.MarkDirty(true);
+        StorageAccess.DirtyTopology();
+        if (dropQuantityMultiplier > 0 && count > 0)
             world.SpawnItemEntity(new ItemStack(this, count), pos.ToVec3d().Add(0.5, 0.5, 0.5));
     }
 
@@ -646,9 +729,29 @@ public class BlockEStorageCable : BlockEStoragePart
 
     private WorldInteraction[] _clip = [];
 
+    private static ItemStack[]? _wrench;
+
+    internal static bool HoldingWrench(IPlayer? player)
+        => player?.InventoryManager?.ActiveHotbarSlot?.Itemstack?.Item?.Tool == EnumTool.Wrench;
+
+    internal static float BreakDrop(IPlayer? player)
+        => player?.WorldData?.CurrentGameMode == EnumGameMode.Creative ? 0f : 1f;
+
+    internal static ItemStack[] WrenchStacks(IWorldAccessor world)
+    {
+        if (_wrench != null)
+            return _wrench;
+        var item = world.GetItem(new AssetLocation("game:wrench-adjustable"));
+        if (item == null || item.Id == 0)
+            return [];
+        _wrench = [new ItemStack(item)];
+        return _wrench;
+    }
+
     public override void OnLoaded(ICoreAPI api)
     {
         base.OnLoaded(api);
+        PlacedPriorityInteract = true;
         if (api.Side != EnumAppSide.Client || FirstCodePart() != "estoragecable")
             return;
 
@@ -692,6 +795,16 @@ public class BlockEStorageCable : BlockEStoragePart
             HotKeyCode = "shift",
             MouseButton = EnumMouseButton.Right
         });
+        var wrench = WrenchStacks(world);
+        if (wrench.Length > 0)
+        {
+            list.Add(new WorldInteraction
+            {
+                ActionLangCode = "electricalprogressivestorage:estorage-unclip",
+                MouseButton = EnumMouseButton.Right,
+                Itemstacks = wrench
+            });
+        }
         var inherited = base.GetPlacedBlockInteractionHelp(world, selection, forPlayer);
         if (inherited != null)
             list.AddRange(inherited);
@@ -1239,6 +1352,36 @@ public class BlockEStorageCable : BlockEStoragePart
         => cable == null || hit == null || connection == Facing.None
             ? Facing.None
             : Hit(connection, lines, cable.Id, hit);
+
+    /// <summary>
+    /// Грань одного хитбокса. Пересечение коробок в узле не подмешивает соседнюю жилу.
+    /// </summary>
+    public static Facing BoxFacing(Facing connection, int[] lines, int blockId, int index, int seats = 0, bool reveal = false)
+    {
+        if (index < 0 || connection == Facing.None || lines == null)
+            return Facing.None;
+
+        var cursor = 0;
+        foreach (var pair in HitMap(new CableKey(blockId, (int)connection, Pack(lines), seats), connection, lines))
+        {
+            if (!reveal && Covered(pair.Key, seats))
+                continue;
+            var count = pair.Value.Length;
+            if (index < cursor + count)
+                return pair.Key;
+            cursor += count;
+        }
+
+        return Facing.None;
+    }
+
+    public static Facing HostBoxFacing(IWorldAccessor world, IPanelHost panel, int index, bool reveal = false)
+    {
+        var cable = HostBlock(world, panel.CableCode);
+        if (cable == null || panel is not BlockEntity entity || entity.Pos == null)
+            return Facing.None;
+        return BoxFacing(panel.Cable, panel.CableLines, cable.Id, index, SeatPack(world, entity.Pos), reveal);
+    }
 
     public static int HostStrands(Facing bits, int[] lines) => StrandCount(bits, lines);
 

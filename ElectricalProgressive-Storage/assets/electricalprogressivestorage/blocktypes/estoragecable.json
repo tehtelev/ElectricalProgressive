@@ -31,7 +31,7 @@
   "blockmaterial": "Metal",
   "resistance": 1.5,
   "lightAbsorption": 0,
-  "renderPass": "Transparent",
+  "renderPass": "OpaqueNoCull",
   "faceCullMode": "NeverCull",
   "vertexFlags": { "zOffset": 2 },
   "sideopaque": { "all": false },

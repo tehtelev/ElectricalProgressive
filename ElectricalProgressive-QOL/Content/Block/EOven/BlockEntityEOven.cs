@@ -561,6 +561,10 @@ public class BlockEntityEOven : BlockEntityDisplay, IHeatSource
             var resultCode = bakingProperties?.ResultCode;
             if (resultCode != null)
             {
+                var type = itemSlot.Itemstack?.Collectible?.Variant["type"];
+                if (!string.IsNullOrEmpty(type))
+                    resultCode = resultCode.Replace("{type}", type);
+
                 var itemStack = (ItemStack)null;
                 // на выходе рецепта блок?
                 var block = this.Api.World.GetBlock(new AssetLocation(resultCode));
@@ -575,6 +579,19 @@ public class BlockEntityEOven : BlockEntityDisplay, IHeatSource
 
                 if (itemStack != null)
                 {
+                    // Новый стак без срока годности игра считает созданным в нулевой час, и хлеб сразу почти гнилой.
+                    var props = itemStack.Collectible.GetTransitionableProperties(this.Api.World, itemSlot.Itemstack, null);
+                    if (props != null)
+                    {
+                        for (var p = 0; p < props.Length; p++)
+                        {
+                            if (props[p].Type != EnumTransitionType.Perish)
+                                continue;
+                            CollectibleObject.CarryOverFreshness(this.Api, itemSlot, itemStack, props[p]);
+                            break;
+                        }
+                    }
+
                     (this.OvenInv[slotIndex].Itemstack.Collectible as IBakeableCallback)?.OnBaked(this.OvenInv[slotIndex].Itemstack, itemStack);
                     this.OvenInv[slotIndex].Itemstack = itemStack;
                     this.BakingData[slotIndex] = new OvenItemData(itemStack) { temp = temp };

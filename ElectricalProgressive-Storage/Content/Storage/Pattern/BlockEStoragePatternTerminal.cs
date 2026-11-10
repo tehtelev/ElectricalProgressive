@@ -95,6 +95,7 @@ public class ItemSlotPatternSample : ItemSlot
             size = 999;
         copy.StackSize = size;
         copy.Attributes.SetBool(SampleKey, true);
+        ItemEStoragePattern.ForgetSpoil(copy);
         Itemstack = copy;
         MarkDirty();
     }
@@ -140,6 +141,7 @@ public class BlockEntityEStoragePatternTerminal : BlockEntityEStorageTerminal
     public BlockEntityEStoragePatternTerminal()
     {
         _bench = new InventoryGeneric(BenchSlots, "estoragepatternbench", "0", null, NewBenchSlot);
+        _bench.OnAcquireTransitionSpeed += (_, _, _) => 0f;
     }
 
     public InventoryBase Bench => _bench;
@@ -408,6 +410,7 @@ public class BlockEntityEStoragePatternTerminal : BlockEntityEStorageTerminal
             return null;
         var copy = stack.Clone();
         copy.Attributes.RemoveAttribute(ItemSlotPatternSample.SampleKey);
+        ItemEStoragePattern.ForgetSpoil(copy);
         return copy;
     }
 

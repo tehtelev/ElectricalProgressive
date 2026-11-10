@@ -147,6 +147,20 @@ public class CablePackTests
     }
 }
 
+public class CableBoxFacingTests
+{
+    [Fact]
+    public void Overlapping_joint_keeps_the_box_face()
+    {
+        var connection = Facing.NorthEast | Facing.WestNorth;
+        var lines = new int[6];
+        Assert.Equal(Facing.NorthAll, BlockEStorageCable.BoxFacing(connection, lines, 1, 0));
+        Assert.Equal(Facing.NorthEast, BlockEStorageCable.BoxFacing(connection, lines, 1, 1));
+        Assert.Equal(Facing.WestAll, BlockEStorageCable.BoxFacing(connection, lines, 1, 2));
+        Assert.Equal(Facing.WestNorth, BlockEStorageCable.BoxFacing(connection, lines, 1, 3));
+    }
+}
+
 public class LinkKeyTests
 {
     [Theory]

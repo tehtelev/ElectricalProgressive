@@ -65,6 +65,7 @@ public class ItemEStoragePattern : Vintagestory.API.Common.Item
 
         var shown = output.Clone();
         shown.StackSize = 1;
+        ForgetSpoil(shown);
         _iconDepth++;
         try
         {
@@ -262,7 +263,53 @@ public class ItemEStoragePattern : Vintagestory.API.Common.Item
             made.Attributes["in" + i] = new ItemstackAttribute(grid[i]!.Clone());
         }
 
+        ForgetSpoilIn(made);
         return made;
+    }
+
+    /// <summary>
+    /// Образец в шаблоне — тип предмета, не живая еда. Старый срок годности при крафте сразу догоняет время и даёт гниль.
+    /// </summary>
+    public static void ForgetSpoil(ItemStack? stack)
+    {
+        if (stack?.Attributes == null || !stack.Attributes.HasAttribute("transitionstate"))
+            return;
+        stack.Attributes.RemoveAttribute("transitionstate");
+    }
+
+    public static bool ForgetSpoilIn(ItemStack? pattern)
+    {
+        if (!IsEncoded(pattern))
+            return false;
+
+        var changed = ForgetSpoilKey(pattern!, "in", 9);
+        changed |= ForgetSpoilKey(pattern!, "out", 3);
+        if (pattern!.Attributes[OutKey] is ItemstackAttribute { value: { } single })
+        {
+            if (single.Attributes?.HasAttribute("transitionstate") == true)
+            {
+                ForgetSpoil(single);
+                changed = true;
+            }
+        }
+
+        return changed;
+    }
+
+    private static bool ForgetSpoilKey(ItemStack pattern, string prefix, int count)
+    {
+        var changed = false;
+        for (var i = 0; i < count; i++)
+        {
+            if (pattern.Attributes[prefix + i] is not ItemstackAttribute { value: { } sample })
+                continue;
+            if (sample.Attributes?.HasAttribute("transitionstate") != true)
+                continue;
+            ForgetSpoil(sample);
+            changed = true;
+        }
+
+        return changed;
     }
 
     public static ItemStack? ResolveCraft(IWorldAccessor world, IPlayer? player, ItemStack?[] grid)
