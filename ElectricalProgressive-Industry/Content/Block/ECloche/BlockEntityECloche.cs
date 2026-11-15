@@ -169,9 +169,9 @@ public class BlockEntityECloche : BlockEntityOpenableContainer
 
     public override void OnReceivedClientPacket(IPlayer fromPlayer, int packetid, byte[] data)
     {
-        if (packetid == 1001)
+        if (packetid == 17001)
         {
-            AutoReplant = !AutoReplant;
+            AutoReplant = data is { Length: > 0 } && data[0] != 0;
             MarkDirty(true);
             return;
         }

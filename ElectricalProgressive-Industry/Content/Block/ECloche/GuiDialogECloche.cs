@@ -12,6 +12,7 @@ public class GuiDialogECloche : GuiDialogBlockEntity
 {
     private long _lastRedrawMs;
     private BlockEntityECloche _be;
+    private bool _auto;
 
     public GuiDialogECloche(string dialogTitle, InventoryBase inventory, BlockPos blockEntityPosition, ICoreClientAPI capi)
         : base(dialogTitle, inventory, blockEntityPosition, capi)
@@ -20,6 +21,7 @@ public class GuiDialogECloche : GuiDialogBlockEntity
             return;
 
         _be = capi.World.BlockAccessor.GetBlockEntity(blockEntityPosition) as BlockEntityECloche;
+        _auto = _be?.AutoReplant == true;
         capi.World.Player.InventoryManager.OpenInventory(inventory);
         SetupDialog();
     }
@@ -35,7 +37,6 @@ public class GuiDialogECloche : GuiDialogBlockEntity
         SingleComposer?.GetCustomDraw("fertHint")?.Redraw();
         SingleComposer?.GetCustomDraw("outHint")?.Redraw();
         SingleComposer?.GetDynamicText("statusText")?.SetNewText(StatusText());
-        UpdateAutoButton();
         _lastRedrawMs = capi.ElapsedMilliseconds;
     }
 
@@ -211,20 +212,13 @@ public class GuiDialogECloche : GuiDialogBlockEntity
     }
 
     private string AutoLabel()
-        => Lang.Get(_be?.AutoReplant == true ? "ecloche-auto-on" : "ecloche-auto-off");
-
-    private void UpdateAutoButton()
-    {
-        var btn = SingleComposer?.GetButton("autoBtn");
-        if (btn == null)
-            return;
-
-        btn.Text = AutoLabel();
-    }
+        => Lang.Get(_auto ? "ecloche-auto-on" : "ecloche-auto-off");
 
     private bool OnToggleAuto()
     {
-        capi.Network.SendBlockEntityPacket(BlockEntityPosition, 1001, []);
+        _auto = !_auto;
+        capi.Network.SendBlockEntityPacket(BlockEntityPosition, 17001, [_auto ? (byte)1 : (byte)0]);
+        SetupDialog();
         return true;
     }
 
