@@ -15,11 +15,6 @@
         <Private>false</Private>
       </ProjectReference>
     </ItemGroup>
-    <ItemGroup>
-      <!-- Какие моды копировать рядом в bin/.../Mods/ для запуска -->
-      <DependentMod Include="ElectricalProgressive-Core" FolderName="core" />
-      <DependentMod Include="ElectricalProgressive-Basics" FolderName="basics" />
-    </ItemGroup>
     <Import Project="..\build\CopyDependentMods.targets" />
     <ItemGroup>
         <Reference Include="protobuf-net">

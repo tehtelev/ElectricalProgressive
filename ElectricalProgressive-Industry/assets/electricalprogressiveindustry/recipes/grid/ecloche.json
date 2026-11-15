@@ -1,0 +1,16 @@
+{
+  "ingredientPattern": "GCG,PKP,GSG",
+  "ingredients": {
+    "G": { "type": "block", "code": "game:glass-plain" },
+    "C": { "type": "block", "code": "game:soil-compost-*" },
+    "P": { "type": "item", "code": "game:metalplate-copper" },
+    "K": { "type": "item", "code": "electricalprogressivebasics:coil" },
+    "S": { "type": "item", "code": "game:metalplate-steel" }
+  },
+  "width": 3,
+  "height": 3,
+  "output": {
+    "type": "block",
+    "code": "electricalprogressiveindustry:ecloche-north"
+  }
+}

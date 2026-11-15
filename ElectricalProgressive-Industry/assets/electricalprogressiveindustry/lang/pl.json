@@ -1,17 +1,14 @@
 {
   "electricalprogressiveindustry:recipeloading": "Przepis został pomyślnie załadowany",
   "electricalprogressiveindustry:blockhelp-pickup": "Podnieś",
-
   "block-ecentrifuge-*": "Przetwornik",
   "block-handbooktitle-ecentrifuge": "Zastosowanie",
   "block-handbooktext-ecentrifuge": "Umożliwia mielenie i przetwarzanie wszystkich przedmiotów/żywności ulegających zepsuciu bezpośrednio na kompost. Ilość uzyskanego kompostu jest o połowę mniejsza niż w metodzie standardowej. Obsługuje również niestandardowe receptury przetwarzania, które będą wyświetlane w opisie przetwornika i samego przedmiotu.<br>Obsługuje automatyczne ładowanie i rozładowywanie za pomocą lejów.",
-
   "block-ehammer-*": "Młot automatyczny",
   "block-handbooktitle-ehammer": "Zastosowanie",
   "block-handbooktext-ehammer": "Upraszcza i automatyzuje pracę na kowadle. Multiblok 3×4×2, 128 V. Montaż: płyty stalowe, miedziane cewki, płyty żelazne i miedziane (PPM na kontroler). Szansa na dodatkowe materiały. Obsługuje leje.",
   "ehammer-structure-complete": "Automatyczny młot zmontowany",
   "ehammer-formed-hint": "Zmontowany automatyczny młot.",
-
   "block-emetalforming-*": "Formowarka metalu",
   "block-handbooktitle-emetalforming": "Użycie",
   "block-handbooktext-emetalforming": "Automatycznie kuje wszystko, co można wykuć na kowadle. Włóż sztabkę i wybierz wyrób jak na kowadle. Maszyna liczy woksele receptury, zabiera potrzebną liczbę sztabek, resztę oddaje jako kawałki metalu.",
@@ -23,7 +20,6 @@
   "emetalforming-recipe": "Receptura",
   "emetalforming-ingots": "Sztabek",
   "game:emetalforming-title-gui": "Formowarka metalu",
-
   "block-epress-*": "Prasa automatyczna",
   "block-esieve-*": "Elektryczne sito",
   "block-handbooktitle-esieve": "Użycie",
@@ -34,13 +30,11 @@
   "block-handbooktext-epress": "Pozwala tworzyć niektóre przedmioty przez tłoczenie w formie. Multiblok 2×2×2, 128 V. Montaż: płyty stalowe, miedziane cewki, płyty żelazne i miedziane (PPM na kontroler). Obsługuje leje.",
   "epress-structure-complete": "Autoprasa zmontowana",
   "epress-formed-hint": "Zmontowana autoprasa.",
-
   "block-edrawing-*": "Ciągadło",
   "block-handbooktitle-edrawing": "Zastosowanie",
   "block-handbooktext-edrawing": "Pozwala tworzyć wydłużone przedmioty przez wyciskanie metalu. Multiblok 3×4×3, 128 V. Montaż: płyty stalowe, miedziane cewki, płyty żelazne i miedziane (PPM na kontroler). Obsługuje leje.",
   "eextruder-structure-complete": "Wytłaczarka zmontowana",
   "eextruder-formed-hint": "Zmontowana wytłaczarka.",
-
   "block-ecrusher-*": "Elektryczna kruszarka",
   "block-handbooktitle-ecrusher": "Zastosowanie",
   "block-handbooktext-ecrusher": "Maszyna wieloblokowa 2×2×2. Rozdrabnia rudę i inne materiały, dając więcej bryłek niż przy ręcznej obróbce. Obsługuje dodatkowe wyjścia według receptur.<br>Obsługuje automatyczne ładowanie i rozładowywanie za pomocą lejów. Zasilanie: 128 V.",
@@ -54,7 +48,6 @@
   "block-handbooktext-eblastfurnace": "Elektryczny wielki piec do wytopu rudy z topnikiem. Multiblok 3×2×2, 128 V. Montaż: płyty stalowe, miedziane cewki i cegły ogniotrwałe poziomu 3 (PPM na kontroler). Obsługuje leje.",
   "eblastfurnace-structure-complete": "Wielki piec zmontowany",
   "eblastfurnace-formed-hint": "Zmontowany elektryczny wielki piec.",
-
   "game:ewoodcutter-title-gui": "Elektryczny drwal",
   "block-ewoodcutter-normal": "Elektryczny drwal",
   "block-ewoodcutter-normal-burned": "Elektryczny drwal (spalony)",
@@ -66,7 +59,6 @@
   "game:ecrusher-title-gui": "Elektryczna kruszarka",
   "game:eblastfurnace-title-gui": "Elektryczny wielki piec",
   "game:eaquaaccum-title-gui": "Elektryczny akumulator wodny",
-
   "block-pressform-axe": "Forma tłoczenia topora",
   "block-pressform-pickaxe": "Forma tłoczenia kilofa",
   "block-pressform-shovel": "Forma tłoczenia łopaty",
@@ -76,16 +68,35 @@
   "block-pressform-prospectingpick": "Forma tłoczenia kilofa poszukiwacza",
   "block-pressform-nails": "Forma tłoczenia gwoździ i pasków",
   "block-pressform-rod": "Forma tłoczenia metalowego pręta",
-
   "block-gauge-32v": "Ciągadło na kable 32V",
   "block-gauge-128v": "Ciągadło na kable 128V",
-
   "electricalprogressive:input": "Wejście",
   "electricalprogressive:output": "Wyjście",
-
   "electricalprogressive:produced-in": "Przetwarzane w:",
   "electricalprogressive:energy-required": "Wymagana energia",
   "electricalprogressive:energy-unit": "J",
   "electricalprogressive:recipe-chance": "~{0}%",
-  "electricalprogressive:chance": "szansa"
+  "electricalprogressive:chance": "szansa",
+  "block-ecloche-*": "Ogrodowy klosz",
+  "block-handbooktitle-ecloche": "Użycie",
+  "block-handbooktext-ecloche": "Wieża 1×3, 32 V. Wytwarzana z ziemi kompostowej — wewnętrzne pole (N/P/K 65).",
+  "game:ecloche-title-gui": "Ogrodowy klosz",
+  "game:ecloche-slot-seed": "Nasiono",
+  "game:ecloche-slot-fert": "Nawóz",
+  "game:ecloche-slot-output": "Plon",
+  "game:ecloche-growth": "Wzrost: {0}%",
+  "game:ecloche-water": "Woda: {0}/{1} L",
+  "game:ecloche-need-water": "Napełnij wiadrem (PPM)",
+  "game:ecloche-need-seed": "Włóż nasiono do GUI",
+  "game:ecloche-need-power": "Brak zasilania 32 V",
+  "game:ecloche-output-full": "Wyjście pełne",
+  "game:ecloche-idle": "Brak uprawy",
+  "game:ecloche-stage": "Etap {0}/{1} ({2}%)",
+  "game:ecloche-temp": "t {0}°C  opt {1}°C  zewn. {2}°C",
+  "game:ecloche-moist": "Wilgotność {0}%",
+  "game:ecloche-npk": "N {0}  P {1}  K {2}",
+  "game:ecloche-lamp-on": "Lampa wzrostu",
+  "game:ecloche-watering": "Podlewanie",
+  "game:ecloche-fertilizing": "Nawożenie",
+  "game:ecloche-empty": "Pusto"
 }

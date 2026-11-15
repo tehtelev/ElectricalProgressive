@@ -1,17 +1,14 @@
 {
   "electricalprogressiveindustry:recipeloading": "Рэцэпт паспяхова загружаны",
   "electricalprogressiveindustry:blockhelp-pickup": "Падняць",
-
   "block-ecentrifuge-*": "Перапрацоўшчык",
   "block-handbooktitle-ecentrifuge": "Выкарыстанне",
   "block-handbooktext-ecentrifuge": "Дазваляе здрабняць і перапрацоўваць усю ежу і прадукты, што псуюцца, наўпрост у кампост. Колькасць атрыманага кампосту ў два разы меншая за ванільны спосаб. Таксама падтрымлівае карыстальніцкія рэцэпты перапрацоўкі, якія будуць адлюстроўвацца ў апісанні прылады і самога прадмета.<br>Падтрымлівае аўтаматычную загрузку і выгрузку праз жалабы.",
-
   "block-ehammer-*": "Аўтамалат",
   "block-handbooktitle-ehammer": "Выкарыстанне",
   "block-handbooktext-ehammer": "Дазваляе спрасціць і аўтаматызаваць працу на кавадле. Шматблок 3×4×2, 128 В. Зборка: сталёвыя пласціны, медныя катушкі, жалезныя і медныя пласціны (ПКМ па кантролеру). Ёсць шанец атрымаць дадатковыя матэрыялы. Падтрымлівае жолабы.",
   "ehammer-structure-complete": "Аўтамолат сабраны",
   "ehammer-formed-hint": "Сабраны аўтамолат.",
-
   "block-emetalforming-*": "Фармоўшчык металу",
   "block-handbooktitle-emetalforming": "Выкарыстанне",
   "block-handbooktext-emetalforming": "Аўтаматычна куе ўсё, што можна выкаваць на кавадле. Кладуць злітак, выбіраюць выраб як на кавадле. Машына лічыць вакселі рэцэпту, забірае патрэбную колькасць зліткаў, лішкі выдае кавалкамі металу.",
@@ -23,7 +20,6 @@
   "emetalforming-recipe": "Рэцэпт",
   "emetalforming-ingots": "Зліткаў",
   "game:emetalforming-title-gui": "Фармоўшчык металу",
-
   "block-epress-*": "Аўтапрэс",
   "block-esieve-*": "Электрычны прасейвальнік",
   "block-handbooktitle-esieve": "Выкарыстанне",
@@ -34,13 +30,11 @@
   "block-handbooktext-epress": "Дазваляе ствараць некаторыя прадметы шляхам выціскання ў прэс-форме. Шматблок 2×2×2, 128 В. Зборка: сталёвыя пласціны, медныя катушкі, жалезныя і медныя пласціны (ПКМ па кантролеру). Падтрымлівае жолабы.",
   "epress-structure-complete": "Аўтапрэс сабраны",
   "epress-formed-hint": "Сабраны аўтапрэс.",
-
   "block-edrawing-*": "Валачыльны стан",
   "block-handbooktitle-edrawing": "Выкарыстанне",
   "block-handbooktext-edrawing": "Дазваляе ствараць прадметы падоўжанай формы шляхам выціскання металу. Шматблок 3×4×3, 128 В. Зборка: сталёвыя пласціны, медныя катушкі, жалезныя і медныя пласціны (ПКМ па кантролеру). Падтрымлівае жолабы.",
   "eextruder-structure-complete": "Экструдар сабраны",
   "eextruder-formed-hint": "Сабраны экструдар.",
-
   "block-ecrusher-*": "Электрычная драбiлка",
   "block-handbooktitle-ecrusher": "Выкарыстанне",
   "block-handbooktext-ecrusher": "Шматблочная машына 2×2×2. Драбніць руду і іншыя матэрыялы, даючы больш самародкаў, чым пры ручной апрацоўцы. Падтрымлівае бонусны выхад па рэцэптах.<br>Падтрымлівае аўтаматычную загрузку і выгрузку праз жалабы. Сілкаванне: 128 В.",
@@ -54,7 +48,6 @@
   "block-handbooktext-eblastfurnace": "Электрычная домна для плаўкі руды з флюсам. Шматблок 3×2×2, 128 В. Зборка: сталёвыя пласціны, медныя катушкі і вогнетрывалая цэгла 3 узроўню (ПКМ па кантролеру). Падтрымлівае жолабы.",
   "eblastfurnace-structure-complete": "Домна сабрана",
   "eblastfurnace-formed-hint": "Сабраная электрычная домна.",
-
   "game:ewoodcutter-title-gui": "Электрычны дрэвасек",
   "block-ewoodcutter-normal": "Электрычны дрэвасек",
   "block-ewoodcutter-normal-burned": "Электрычны дрэвасек (згарэлы)",
@@ -66,7 +59,6 @@
   "game:ecrusher-title-gui": "Электрычная драбiлка",
   "game:eblastfurnace-title-gui": "Электрычная домна",
   "game:eaquaaccum-title-gui": "Электрычны акваакумулятар",
-
   "block-pressform-axe": "Форма для прэсавання сякеры",
   "block-pressform-pickaxe": "Форма для прэсавання кірхі",
   "block-pressform-shovel": "Форма для прэсавання рыдлёўкі",
@@ -76,16 +68,35 @@
   "block-pressform-prospectingpick": "Форма для прэсавання геалагічнай кірхі",
   "block-pressform-nails": "Форма для прэсавання цвікоў і палос",
   "block-pressform-rod": "Форма для прэсавання металічнага прутка",
-
   "block-gauge-32v": "Валака для кабеля 32В",
   "block-gauge-128v": "Валака для кабеля 128В",
-
   "electricalprogressive:input": "Уваход",
   "electricalprogressive:output": "Выхад",
-
   "electricalprogressive:produced-in": "Перапрацоўваецца ў:",
   "electricalprogressive:energy-required": "Патрабуецца энергіі",
   "electricalprogressive:energy-unit": "Дж",
   "electricalprogressive:recipe-chance": "~{0}%",
-  "electricalprogressive:chance": "шанец"
+  "electricalprogressive:chance": "шанец",
+  "block-ecloche-*": "Садовы клошэ",
+  "block-handbooktitle-ecloche": "Выкарыстанне",
+  "block-handbooktext-ecloche": "Вежа 1×3, 32 В. У крафце чарназём — унутраная ралля (N/P/K 65).",
+  "game:ecloche-title-gui": "Садовы клошэ",
+  "game:ecloche-slot-seed": "Насенне",
+  "game:ecloche-slot-fert": "Угнаенне",
+  "game:ecloche-slot-output": "Ураджай",
+  "game:ecloche-growth": "Рост: {0}%",
+  "game:ecloche-water": "Вада: {0}/{1} л",
+  "game:ecloche-need-water": "Залі ваду вядром (ПКМ)",
+  "game:ecloche-need-seed": "Пакладзі насенне ў GUI",
+  "game:ecloche-need-power": "Няма сілкавання 32 В",
+  "game:ecloche-output-full": "Выхад забіты",
+  "game:ecloche-idle": "Няма культуры",
+  "game:ecloche-stage": "Стадыя {0}/{1} ({2}%)",
+  "game:ecloche-temp": "t {0}°C  апт {1}°C  вуліца {2}°C",
+  "game:ecloche-moist": "Вільготнасць {0}%",
+  "game:ecloche-npk": "N {0}  P {1}  K {2}",
+  "game:ecloche-lamp-on": "Фіталампа",
+  "game:ecloche-watering": "Паліў",
+  "game:ecloche-fertilizing": "Унясенне ўгнаення",
+  "game:ecloche-empty": "Пуста"
 }

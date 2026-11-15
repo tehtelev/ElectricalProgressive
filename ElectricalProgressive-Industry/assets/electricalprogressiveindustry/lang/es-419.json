@@ -1,17 +1,14 @@
 {
   "electricalprogressiveindustry:recipeloading": "Receta cargada exitosamente",
   "electricalprogressiveindustry:blockhelp-pickup": "Recoger",
-
   "block-ecentrifuge-*": "Procesador",
   "block-handbooktitle-ecentrifuge": "Uso",
   "block-handbooktext-ecentrifuge": "Permite moler y procesar todos los objetos/alimentos perecederos directamente en composta. La cantidad de composta obtenida es la mitad que con el método normal. También admite recetas de procesamiento personalizadas, que se mostrarán en la descripción del procesador y del objeto mismo.<br>Admite carga y descarga automática mediante tolvas.",
-
   "block-ehammer-*": "Martillo Automático",
   "block-handbooktitle-ehammer": "Uso",
   "block-handbooktext-ehammer": "Simplifica y automatiza el trabajo en el yunque. Multibloque 3×4×2, 128 V. Ensamblar con placas de acero, bobinas de cobre, placas de hierro y cobre (clic derecho en el controlador). Probabilidad de materiales extra. Admite tolvas.",
   "ehammer-structure-complete": "Auto-martillo ensamblado",
   "ehammer-formed-hint": "Auto-martillo ensamblado.",
-
   "block-emetalforming-*": "Formadora de metal",
   "block-handbooktitle-emetalforming": "Uso",
   "block-handbooktext-emetalforming": "Forja automáticamente todo lo que se puede forjar en el yunque. Coloca un lingote y elige el producto como en el yunque. La máquina cuenta los vóxeles de la receta, consume los lingotes necesarios y devuelve el sobrante como trozos de metal.",
@@ -23,7 +20,6 @@
   "emetalforming-recipe": "Receta",
   "emetalforming-ingots": "Lingotes",
   "game:emetalforming-title-gui": "Formadora de metal",
-
   "block-epress-*": "Prensa Automática",
   "block-esieve-*": "Tamiz eléctrico",
   "block-handbooktitle-esieve": "Uso",
@@ -34,13 +30,11 @@
   "block-handbooktext-epress": "Permite crear ciertos objetos prensando con un molde. Multibloque 2×2×2, 128 V. Ensamblar con placas de acero, bobinas de cobre, placas de hierro y cobre (clic derecho en el controlador). Admite tolvas.",
   "epress-structure-complete": "Auto-prensa ensamblada",
   "epress-formed-hint": "Auto-prensa ensamblada.",
-
   "block-edrawing-*": "Máquina de Estirado",
   "block-handbooktitle-edrawing": "Uso",
   "block-handbooktext-edrawing": "Permite crear objetos alargados extruyendo metal. Multibloque 3×4×3, 128 V. Ensamblar con placas de acero, bobinas de cobre, placas de hierro y cobre (clic derecho en el controlador). Admite tolvas.",
   "eextruder-structure-complete": "Extrusora ensamblada",
   "eextruder-formed-hint": "Extrusora ensamblada.",
-
   "block-ecrusher-*": "Trituradora eléctrica",
   "block-handbooktitle-ecrusher": "Uso",
   "block-handbooktext-ecrusher": "Máquina multibloque 2×2×2. Tritura mineral y otros materiales, produciendo más pepitas que el procesado manual. Admite salidas extra según las recetas.<br>Admite carga y descarga automática mediante tolvas. Alimentación: 128 V.",
@@ -54,7 +48,6 @@
   "block-handbooktext-eblastfurnace": "Alto horno eléctrico para fundir mineral con fundente. Multibloque 3×2×2, 128 V. Ensamblar con placas de acero, bobinas de cobre y ladrillos refractarios nivel 3 (clic derecho en el controlador). Admite tolvas.",
   "eblastfurnace-structure-complete": "Alto horno ensamblado",
   "eblastfurnace-formed-hint": "Alto horno eléctrico ensamblado.",
-
   "game:ewoodcutter-title-gui": "Cortador de Madera Eléctrico",
   "block-ewoodcutter-normal": "Cortador de Madera Eléctrico",
   "block-ewoodcutter-normal-burned": "Cortador de Madera Eléctrico (Quemado)",
@@ -66,7 +59,6 @@
   "game:ecrusher-title-gui": "Trituradora eléctrica",
   "game:eblastfurnace-title-gui": "Alto horno eléctrico",
   "game:eaquaaccum-title-gui": "Acumulador acuático eléctrico",
-
   "block-pressform-axe": "Molde de Prensa para Hacha",
   "block-pressform-pickaxe": "Molde de Prensa para Pico",
   "block-pressform-shovel": "Molde de Prensa para Pala",
@@ -76,16 +68,35 @@
   "block-pressform-prospectingpick": "Molde de Prensa para Pico de Prospección",
   "block-pressform-nails": "Molde de Prensa para Clavos y Tiras",
   "block-pressform-rod": "Molde de Prensa para Varilla de Metal",
-
   "block-gauge-32v": "Troquel para Cable 32V",
   "block-gauge-128v": "Troquel para Cable 128V",
-
   "electricalprogressive:input": "Entrada",
   "electricalprogressive:output": "Salida",
-
   "electricalprogressive:produced-in": "Procesado en:",
   "electricalprogressive:energy-required": "Energía requerida",
   "electricalprogressive:energy-unit": "J",
   "electricalprogressive:recipe-chance": "~{0}%",
-  "electricalprogressive:chance": "probabilidad"
+  "electricalprogressive:chance": "probabilidad",
+  "block-ecloche-*": "Campana de jardín",
+  "block-handbooktitle-ecloche": "Uso",
+  "block-handbooktext-ecloche": "Torre 1×3, 32 V. Fabricada con tierra de compost — tierra interna (N/P/K 65).",
+  "game:ecloche-title-gui": "Campana de jardín",
+  "game:ecloche-slot-seed": "Semilla",
+  "game:ecloche-slot-fert": "Fertilizante",
+  "game:ecloche-slot-output": "Cosecha",
+  "game:ecloche-growth": "Crecimiento: {0}%",
+  "game:ecloche-water": "Agua: {0}/{1} L",
+  "game:ecloche-need-water": "Llena con un cubo (clic derecho)",
+  "game:ecloche-need-seed": "Pon una semilla en el GUI",
+  "game:ecloche-need-power": "Sin energía 32 V",
+  "game:ecloche-output-full": "Salida llena",
+  "game:ecloche-idle": "Sin cultivo",
+  "game:ecloche-stage": "Etapa {0}/{1} ({2}%)",
+  "game:ecloche-temp": "t {0}°C  ópt {1}°C  ext {2}°C",
+  "game:ecloche-moist": "Humedad {0}%",
+  "game:ecloche-npk": "N {0}  P {1}  K {2}",
+  "game:ecloche-lamp-on": "Lámpara de cultivo",
+  "game:ecloche-watering": "Riego",
+  "game:ecloche-fertilizing": "Fertilización",
+  "game:ecloche-empty": "Vacío"
 }

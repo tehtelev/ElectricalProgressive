@@ -1,17 +1,14 @@
 {
   "electricalprogressiveindustry:recipeloading": "Rezept erfolgreich geladen",
   "electricalprogressiveindustry:blockhelp-pickup": "Aufheben",
-
   "block-ecentrifuge-*": "Verarbeiter",
   "block-handbooktitle-ecentrifuge": "Verwendung",
   "block-handbooktext-ecentrifuge": "Ermöglicht das Zerkleinern und Verarbeiten aller verderblichen Gegenstände/Lebensmittel direkt zu Kompost. Die erhaltene Kompostmenge ist halb so groß wie bei der Vanille-Methode. Unterstützt auch benutzerdefinierte Verarbeitungsrezepte, die in der Beschreibung des Verarbeiters und des Gegenstands selbst angezeigt werden.<br>Unterstützt automatisches Laden und Entladen über Trichter.",
-
   "block-ehammer-*": "Auto-Hammer",
   "block-handbooktitle-ehammer": "Verwendung",
   "block-handbooktext-ehammer": "Vereinfacht und automatisiert die Arbeit am Amboss. Multiblock 3×4×2, 128 V. Zusammenbau mit Stahlplatten, Kupferspulen, Eisen- und Kupferplatten (RMB auf Controller). Chance auf Bonusmaterialien. Unterstützt Trichter.",
   "ehammer-structure-complete": "Auto-Hammer zusammengebaut",
   "ehammer-formed-hint": "Zusammengebauter Auto-Hammer.",
-
   "block-emetalforming-*": "Metallformer",
   "block-handbooktitle-emetalforming": "Verwendung",
   "block-handbooktext-emetalforming": "Schmiedet automatisch alles, was auf dem Amboss geschmiedet werden kann. Barren einlegen, Produkt wie am Amboss wählen. Die Maschine zählt Rezeptvoxel, verbraucht die nötigen Barren und gibt Reste als Metallstücke aus.",
@@ -23,7 +20,6 @@
   "emetalforming-recipe": "Rezept",
   "emetalforming-ingots": "Barren",
   "game:emetalforming-title-gui": "Metallformer",
-
   "block-epress-*": "Auto-Presse",
   "block-esieve-*": "Elektrisches Sieb",
   "block-handbooktitle-esieve": "Verwendung",
@@ -34,13 +30,11 @@
   "block-handbooktext-epress": "Ermöglicht das Herstellen bestimmter Gegenstände durch Pressen mit einer Form. Multiblock 2×2×2, 128 V. Zusammenbau mit Stahlplatten, Kupferspulen, Eisen- und Kupferplatten (RMB auf Controller). Unterstützt Trichter.",
   "epress-structure-complete": "Auto-Presse zusammengebaut",
   "epress-formed-hint": "Zusammengebaute Auto-Presse.",
-
   "block-edrawing-*": "Ziehmaschine",
   "block-handbooktitle-edrawing": "Verwendung",
   "block-handbooktext-edrawing": "Ermöglicht das Herstellen länglicher Gegenstände durch Extrudieren von Metall. Multiblock 3×4×3, 128 V. Zusammenbau mit Stahlplatten, Kupferspulen, Eisen- und Kupferplatten (RMB auf Controller). Unterstützt Trichter.",
   "eextruder-structure-complete": "Extruder zusammengebaut",
   "eextruder-formed-hint": "Zusammengebauter Extruder.",
-
   "block-ecrusher-*": "Elektrischer Brecher (Controller)",
   "block-handbooktitle-ecrusher": "Verwendung",
   "block-handbooktext-ecrusher": "Controller für den Brecher-Multiblock (Aufbau wie der Zementierofen). 2×2×2: Controller + 5 Eisen-Metallblöcke + 2 Kupfer-Metallblöcke (Platzhalter statt Rotoren). Shift+RMB = Schema. Funktioniert nur vollständig gebaut.",
@@ -54,9 +48,7 @@
   "block-handbooktext-eblastfurnace": "Elektrischer Hochofen zum Schmelzen von Erz mit Flussmittel. Multiblock 3×2×2, 128 V. Zusammenbau mit Stahlplatten, Kupferspulen und feuerfesten Ziegeln Stufe 3 (RMB auf Controller). Unterstützt Trichter.",
   "eblastfurnace-structure-complete": "Hochofen zusammengebaut",
   "eblastfurnace-formed-hint": "Zusammengebauter elektrischer Hochofen.",
-
   "ecrusher-structure-complete": "Brecherstruktur vollständig",
-
   "game:ewoodcutter-title-gui": "Elektro-Holzfäller",
   "block-ewoodcutter-normal": "Elektro-Holzfäller",
   "block-ewoodcutter-normal-burned": "Elektro-Holzfäller (Verbrannt)",
@@ -68,7 +60,6 @@
   "game:ecrusher-title-gui": "Elektrischer Brecher",
   "game:eblastfurnace-title-gui": "Elektrischer Hochofen",
   "game:eaquaaccum-title-gui": "Elektrischer Wasserakkumulator",
-
   "block-pressform-axe": "Axt Pressform",
   "block-pressform-pickaxe": "Spitzhacken Pressform",
   "block-pressform-shovel": "Schaufel Pressform",
@@ -78,16 +69,35 @@
   "block-pressform-prospectingpick": "Schürfhammer Pressform",
   "block-pressform-nails": "Nägel- und Streifen Pressform",
   "block-pressform-rod": "Metallstab Pressform",
-
   "block-gauge-32v": "32V Kabelziehstein",
   "block-gauge-128v": "128V Kabelziehstein",
-
   "electricalprogressive:input": "Eingang",
   "electricalprogressive:output": "Ausgang",
-
   "electricalprogressive:produced-in": "Verarbeitet in:",
   "electricalprogressive:energy-required": "Benötigte Energie",
   "electricalprogressive:energy-unit": "J",
   "electricalprogressive:recipe-chance": "~{0}%",
-  "electricalprogressive:chance": "Chance"
+  "electricalprogressive:chance": "Chance",
+  "block-ecloche-*": "Gartenglocke",
+  "block-handbooktitle-ecloche": "Verwendung",
+  "block-handbooktext-ecloche": "Turm 1×3, 32 V. Mit Komposterde gefertigt (innere Ackerfläche N/P/K 65). Samen einlegen.",
+  "game:ecloche-title-gui": "Gartenglocke",
+  "game:ecloche-slot-seed": "Samen",
+  "game:ecloche-slot-fert": "Dünger",
+  "game:ecloche-slot-output": "Ernte",
+  "game:ecloche-growth": "Wachstum: {0}%",
+  "game:ecloche-water": "Wasser: {0}/{1} L",
+  "game:ecloche-need-water": "Mit Wassereimer füllen (RMB)",
+  "game:ecloche-need-seed": "Samen ins GUI legen",
+  "game:ecloche-need-power": "Kein 32-V-Strom",
+  "game:ecloche-output-full": "Ausgang voll",
+  "game:ecloche-idle": "Keine Pflanze",
+  "game:ecloche-stage": "Stadium {0}/{1} ({2}%)",
+  "game:ecloche-temp": "t {0}°C  opt {1}°C  außen {2}°C",
+  "game:ecloche-moist": "Feuchte {0}%",
+  "game:ecloche-npk": "N {0}  P {1}  K {2}",
+  "game:ecloche-lamp-on": "Grow-Lampe an",
+  "game:ecloche-watering": "Bewässerung",
+  "game:ecloche-fertilizing": "Düngung",
+  "game:ecloche-empty": "Leer"
 }

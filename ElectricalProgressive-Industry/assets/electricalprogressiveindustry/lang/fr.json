@@ -1,17 +1,14 @@
 {
   "electricalprogressiveindustry:recipeloading": "Recette chargée avec succès",
   "electricalprogressiveindustry:blockhelp-pickup": "Ramasser",
-
   "block-ecentrifuge-*": "Processor",
   "block-handbooktitle-ecentrifuge": "Utilisation",
   "block-handbooktext-ecentrifuge": "Permet de broyer et de transformer tous les objets/aliments périssables directement en compost. La quantité de compost obtenue est deux fois moins importante qu'avec la méthode vanilla. Prend également en charge les recettes de traitement personnalisées, qui seront affichées dans la description du processor et de l'objet lui-même.<br>Prend en charge le chargement et le déchargement automatiques via des entonnoirs.",
-
   "block-ehammer-*": "Marteau automatique",
   "block-handbooktitle-ehammer": "Utilisation",
   "block-handbooktext-ehammer": "Simplifie et automatise le travail sur l'enclume. Multibloc 3×4×2, 128 V. Assemblage avec plaques d'acier, bobines de cuivre, plaques de fer et de cuivre (clic droit sur le contrôleur). Chance de matériaux bonus. Prend en charge les trémies.",
   "ehammer-structure-complete": "Marteau automatique assemblé",
   "ehammer-formed-hint": "Marteau automatique assemblé.",
-
   "block-emetalforming-*": "Formeuse de métal",
   "block-handbooktitle-emetalforming": "Utilisation",
   "block-handbooktext-emetalforming": "Forge automatiquement tout ce qui peut être forgé sur l'enclume. Placez un lingot, choisissez le produit comme sur l'enclume. La machine compte les voxels de la recette, consomme le nombre de lingots requis et rend le surplus en morceaux de métal.",
@@ -23,7 +20,6 @@
   "emetalforming-recipe": "Recette",
   "emetalforming-ingots": "Lingots",
   "game:emetalforming-title-gui": "Formeuse de métal",
-
   "block-epress-*": "Presse automatique",
   "block-esieve-*": "Tamis électrique",
   "block-handbooktitle-esieve": "Utilisation",
@@ -34,13 +30,11 @@
   "block-handbooktext-epress": "Permet de créer certains objets par pressage avec un moule. Multibloc 2×2×2, 128 V. Assemblage avec plaques d'acier, bobines de cuivre, plaques de fer et de cuivre (clic droit sur le contrôleur). Prend en charge les trémies.",
   "epress-structure-complete": "Presse automatique assemblée",
   "epress-formed-hint": "Presse automatique assemblée.",
-
   "block-edrawing-*": "Machine à étirer",
   "block-handbooktitle-edrawing": "Utilisation",
   "block-handbooktext-edrawing": "Permet de créer des objets allongés par extrusion du métal. Multibloc 3×4×3, 128 V. Assemblage avec plaques d'acier, bobines de cuivre, plaques de fer et de cuivre (clic droit sur le contrôleur). Prend en charge les trémies.",
   "eextruder-structure-complete": "Extrudeuse assemblée",
   "eextruder-formed-hint": "Extrudeuse assemblée.",
-
   "block-ecrusher-*": "Concasseur électrique",
   "block-handbooktitle-ecrusher": "Utilisation",
   "block-handbooktext-ecrusher": "Machine multibloc 2×2×2. Broie le minerai et d'autres matériaux, produisant plus de pépites qu'un traitement manuel. Prend en charge les sorties bonus via les recettes.<br>Prend en charge le chargement et le déchargement automatiques via des entonnoirs. Alimentation : 128 V.",
@@ -54,7 +48,6 @@
   "block-handbooktext-eblastfurnace": "Haut fourneau électrique pour fondre le minerai avec un fondant. Multibloc 3×2×2, 128 V. Assemblage avec plaques d'acier, bobines de cuivre et briques réfractaires niveau 3 (clic droit sur le contrôleur). Prend en charge les trémies.",
   "eblastfurnace-structure-complete": "Haut fourneau assemblé",
   "eblastfurnace-formed-hint": "Haut fourneau électrique assemblé.",
-
   "game:ewoodcutter-title-gui": "Bûcheron électrique",
   "block-ewoodcutter-normal": "Bûcheron électrique",
   "block-ewoodcutter-normal-burned": "Bûcheron électrique (Brûlé)",
@@ -66,7 +59,6 @@
   "game:ecrusher-title-gui": "Concasseur électrique",
   "game:eblastfurnace-title-gui": "Haut fourneau électrique",
   "game:eaquaaccum-title-gui": "Accumulateur aquatique électrique",
-
   "block-pressform-axe": "Moule de presse pour hache",
   "block-pressform-pickaxe": "Moule de presse pour pioche",
   "block-pressform-shovel": "Moule de presse pour pelle",
@@ -76,16 +68,35 @@
   "block-pressform-prospectingpick": "Moule de presse pour pioche de prospecteur",
   "block-pressform-nails": "Moule de presse pour clous et bandes",
   "block-pressform-rod": "Moule de presse pour tige métallique",
-
   "block-gauge-32v": "Filière pour câble 32V",
   "block-gauge-128v": "Filière pour câble 128V",
-
   "electricalprogressive:input": "Entrée",
   "electricalprogressive:output": "Sortie",
-
   "electricalprogressive:produced-in": "Traité dans :",
   "electricalprogressive:energy-required": "Énergie requise",
   "electricalprogressive:energy-unit": "J",
   "electricalprogressive:recipe-chance": "~{0}%",
-  "electricalprogressive:chance": "chance"
+  "electricalprogressive:chance": "chance",
+  "block-ecloche-*": "Cloche de jardin",
+  "block-handbooktitle-ecloche": "Utilisation",
+  "block-handbooktext-ecloche": "Tour 1×3, 32 V. Fabriquée avec de la terre compost (chernozem) — terre agricole interne (N/P/K 65).",
+  "game:ecloche-title-gui": "Cloche de jardin",
+  "game:ecloche-slot-seed": "Graine",
+  "game:ecloche-slot-fert": "Engrais",
+  "game:ecloche-slot-output": "Récolte",
+  "game:ecloche-growth": "Croissance : {0}%",
+  "game:ecloche-water": "Eau : {0}/{1} L",
+  "game:ecloche-need-water": "Remplir au seau (clic droit)",
+  "game:ecloche-need-seed": "Mettre une graine dans le GUI",
+  "game:ecloche-need-power": "Pas d'alimentation 32 V",
+  "game:ecloche-output-full": "Sortie pleine",
+  "game:ecloche-idle": "Pas de culture",
+  "game:ecloche-stage": "Stade {0}/{1} ({2}%)",
+  "game:ecloche-temp": "t {0}°C  opt {1}°C  ext {2}°C",
+  "game:ecloche-moist": "Humidité {0}%",
+  "game:ecloche-npk": "N {0}  P {1}  K {2}",
+  "game:ecloche-lamp-on": "Lampe horticole",
+  "game:ecloche-watering": "Arrosage",
+  "game:ecloche-fertilizing": "Fertilisation",
+  "game:ecloche-empty": "Vide"
 }

@@ -1,0 +1,90 @@
+{
+  "code": "ecloche",
+  "class": "BlockECloche",
+  "entityClass": "BlockEntityECloche",
+  "behaviors": [
+    {
+      "name": "HorizontalOrientable",
+      "properties": { "handleDrop": false }
+    },
+    { "name": "Container" },
+    {
+      "name": "Multiblock",
+      "properties": {
+        "sizex": 1,
+        "sizey": 3,
+        "sizez": 1,
+        "cposition": { "x": 0, "y": 0, "z": 0 }
+      }
+    }
+  ],
+  "storageFlags": 3,
+  "entityBehaviors": [
+    { "name": "BEBehaviorECloche" },
+    { "name": "ElectricalProgressive" }
+  ],
+  "creativeinventory": {
+    "general": [ "*-north" ],
+    "electricity": [ "*-north" ]
+  },
+  "variantgroups": [
+    {
+      "code": "side",
+      "loadFromProperties": "abstract/horizontalorientation"
+    }
+  ],
+  "attributes": {
+    "blockEProperties": "all",
+    "facesEProperties": [ "north", "east", "south", "west", "up", "down" ],
+    "maxConsumption": 40,
+    "voltage": 32,
+    "maxCurrent": 5.0,
+    "isolated": true,
+    "isolatedEnvironment": true,
+    "capacityLitres": 10,
+    "transitionSpeedMul": {
+      "perish": 0.5
+    },
+    "spoilSpeedMulByFoodCat": {
+      "vegetable": 0.5,
+      "grain": 0.5
+    },
+    "handbook": {
+      "groupBy": [ "ecloche" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressiveindustry:block-handbooktitle-ecloche",
+          "text": "electricalprogressiveindustry:block-handbooktext-ecloche"
+        }
+      ]
+    }
+  },
+  "shapebytype": {
+    "*-north": { "base": "block/ecloche/ecloche", "rotateY": 0 },
+    "*-east": { "base": "block/ecloche/ecloche", "rotateY": 270 },
+    "*-south": { "base": "block/ecloche/ecloche", "rotateY": 180 },
+    "*-west": { "base": "block/ecloche/ecloche", "rotateY": 90 }
+  },
+  "shapeInventory": { "base": "block/ecloche/ecloche", "rotateY": 0 },
+  "textures": {
+    "farmdry": { "base": "block/ecloche/farm-dry" },
+    "farmmoist": { "base": "block/ecloche/farm-moist" },
+    "glassoct": { "base": "block/ecloche/glass-oct" }
+  },
+  "blockmaterial": "Metal",
+  "renderPass": "Opaque",
+  "faceCullMode": "NeverCull",
+  "sideopaque": { "all": false },
+  "sidesolid": { "all": false },
+  "lightAbsorption": 0,
+  "lightHsv": [36, 4, 3],
+  "resistance": 3.5,
+  "sounds": {
+    "place": "game:block/metal",
+    "break": "game:block/metal",
+    "hit": "game:block/metal",
+    "walk": "game:walk/stone"
+  },
+  "heldTpIdleAnimation": "holdbothhandslarge",
+  "heldTpUseAnimation": "twohandplaceblock"
+}

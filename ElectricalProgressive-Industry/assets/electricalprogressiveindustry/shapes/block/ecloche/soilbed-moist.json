@@ -1,0 +1,17 @@
+{
+	"textureWidth": 16,
+	"textureHeight": 16,
+	"textures": {
+		"farmmoist": "block/ecloche/farm-moist"
+	},
+	"elements": [
+		{
+			"name": "bed",
+			"from": [2.7, 6.92, 2.7],
+			"to": [13.3, 7.06, 13.3],
+			"faces": {
+				"up": { "texture": "#farmmoist", "uv": [0, 0, 16, 16] }
+			}
+		}
+	]
+}
