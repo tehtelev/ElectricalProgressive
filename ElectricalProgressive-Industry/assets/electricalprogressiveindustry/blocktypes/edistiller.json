@@ -1,0 +1,268 @@
+{
+  "code": "edistiller",
+  "class": "BlockEDistiller",
+  "entityClass": "BlockEntityEDistiller",
+  "attributes": {
+    "blockEProperties": "all",
+    "facesEProperties": [ "north", "east", "south", "west", "up", "down" ],
+    "particlesOffsetPos": [ [ 0.1, 1.0, 0.1 ] ],
+    "maxConsumption": 100,
+    "voltage": 32,
+    "maxCurrent": 100.0,
+    "isolated": true,
+    "isolatedEnvironment": true,
+    "mashCapacityLitres": 100,
+    "waterCapacityLitres": 50,
+    "productCapacityLitres": 50,
+    "waterPerMashLitre": 0.25,
+    "energyPerMashLitre": 4000,
+    "boilTempMin": 70,
+    "boilTempMax": 100,
+    "handbook": {
+      "groupBy": [ "edistiller-*" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressiveindustry:block-handbooktitle-edistiller",
+          "text": "electricalprogressiveindustry:block-handbooktext-edistiller"
+        }
+      ]
+    },
+    "construction": {
+      "brokenDropsRatio": 1,
+      "levels": [
+        {
+          "shape": "block/erecycler/eRecycler_base",
+          "actionLangCode": "game:rollers-construct"
+        },
+        {
+          "shape": "block/erecycler/eRecycler_base2",
+          "actionLangCode": "game:rollers-construct",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "game:metalplate-copper",
+              "quantity": 8
+            },
+            {
+              "type": "item",
+              "code": "game:metalplate-iron",
+              "quantity": 4
+            }
+          ]
+        },
+        {
+          "shape": "block/erecycler/eRecycler_base3",
+          "actionLangCode": "game:rollers-construct",
+          "requireStacks": [
+            {
+              "type": "block",
+              "code": "electricalprogressivebasics:switch-enabled",
+              "quantity": 1
+            },
+            {
+              "type": "item",
+              "code": "electricalprogressivebasics:coil",
+              "quantity": 4
+            }
+          ]
+        },
+        {
+          "shape": "block/edistiller/edistiller",
+          "actionLangCode": "game:rollers-construct",
+          "requireStacks": [
+            {
+              "type": "item",
+              "code": "electricalprogressivebasics:engineshaft",
+              "quantity": 2
+            },
+            {
+              "type": "block",
+              "code": "electricalprogressivebasics:ecable-128v-copper-single-part",
+              "quantity": 16
+            }
+          ],
+          "formMachine": true
+        }
+      ]
+    }
+  },
+
+  "entityBehaviors": [
+    { "name": "Animatable" },
+    { "name": "BEBehaviorEDistiller" },
+    { "name": "ElectricalProgressive" }
+  ],
+
+  "creativeinventory": {
+    "general": [ "*-formed-north" ],
+    "electricity": [ "*-formed-north" ]
+  },
+
+  "behaviors": [
+    {
+      "name": "HorizontalOrientable",
+      "properties": { "handleDrop": false }
+    },
+    { "name": "BlockEntityInteract" },
+    {
+      "name": "Multiblock",
+      "propertiesByType": {
+        "*-north": {
+          "sizex": 2,
+          "sizey": 2,
+          "sizez": 2,
+          "cposition": { "x": 0, "y": 0, "z": 1 }
+        },
+        "*-east": {
+          "sizex": 2,
+          "sizey": 2,
+          "sizez": 2,
+          "cposition": { "x": 0, "y": 0, "z": 0 }
+        },
+        "*-south": {
+          "sizex": 2,
+          "sizey": 2,
+          "sizez": 2,
+          "cposition": { "x": 1, "y": 0, "z": 0 }
+        },
+        "*-west": {
+          "sizex": 2,
+          "sizey": 2,
+          "sizez": 2,
+          "cposition": { "x": 1, "y": 0, "z": 1 }
+        }
+      }
+    }
+  ],
+
+  "blockmaterial": "Metal",
+
+  "variantgroups": [
+    {
+      "code": "state",
+      "states": [ "incomplete", "formed" ]
+    },
+    {
+      "code": "side",
+      "loadFromProperties": "abstract/horizontalorientation"
+    }
+  ],
+
+  "shapebytype": {
+    "*-incomplete-north": {
+      "base": "block/erecycler/eRecycler_base",
+      "rotateY": 0
+    },
+    "*-incomplete-east": {
+      "base": "block/erecycler/eRecycler_base",
+      "rotateY": 270
+    },
+    "*-incomplete-south": {
+      "base": "block/erecycler/eRecycler_base",
+      "rotateY": 180
+    },
+    "*-incomplete-west": {
+      "base": "block/erecycler/eRecycler_base",
+      "rotateY": 90
+    },
+    "*-formed-north": {
+      "base": "block/edistiller/edistiller",
+      "rotateY": 0
+    },
+    "*-formed-east": {
+      "base": "block/edistiller/edistiller",
+      "rotateY": 270
+    },
+    "*-formed-south": {
+      "base": "block/edistiller/edistiller",
+      "rotateY": 180
+    },
+    "*-formed-west": {
+      "base": "block/edistiller/edistiller",
+      "rotateY": 90
+    }
+  },
+
+  "shapeInventoryByType": {
+    "*-incomplete-*": {
+      "base": "block/edistiller/edistiller",
+      "rotateY": 0
+    },
+    "*-formed-*": {
+      "base": "block/edistiller/edistiller",
+      "rotateY": 0
+    }
+  },
+
+  "lightAbsorptionByType": {
+    "*-incomplete-*": 0,
+    "*-formed-*": 120
+  },
+
+  "sidesolidByType": {
+    "*-north": {
+      "all": false,
+      "east": true,
+      "west": true,
+      "north": true
+    },
+    "*-east": {
+      "all": false,
+      "east": true,
+      "south": true,
+      "north": true
+    },
+    "*-south": {
+      "all": false,
+      "east": true,
+      "west": true,
+      "south": true
+    },
+    "*-west": {
+      "all": false,
+      "south": true,
+      "west": true,
+      "north": true
+    }
+  },
+
+  "sideopaque": {
+    "all": false
+  },
+  "emitSideAo": {
+    "all": false
+  },
+  "sideAo": {
+    "all": true
+  },
+  "resistance": 3.5,
+
+  "sounds": {
+    "place": "game:block/anvil",
+    "walk": "game:walk/metal"
+  },
+
+  "guiTransform": {
+    "translation": { "x": -0.5, "y": -0.1, "z": 0.5 },
+    "rotation": { "x": -22.6, "y": -145, "z": 0 },
+    "origin": { "x": 1.0, "y": 1.0, "z": 0.0 },
+    "scale": 0.5
+  },
+
+  "groundTransform": {
+    "translation": { "x": 0, "y": 0.1, "z": 0 },
+    "rotation": { "x": 0, "y": -45, "z": 0 },
+    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
+    "scale": 1.6
+  },
+
+  "heldTpIdleAnimation": "holdbothhandslarge",
+  "heldRightReadyAnimation": "heldblockready",
+  "heldTpUseAnimation": "twohandplaceblock",
+
+  "tpHandTransform": {
+    "translation": { "x": -0.6, "y": -0.91, "z": -0.8 },
+    "rotation": { "x": -2, "y": 25, "z": -78 },
+    "scale": 0.4
+  }
+}

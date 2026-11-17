@@ -17,7 +17,8 @@ public class ElectricalProgressiveRecipeManager : ModSystem
     public static List<ExtruderRecipe> ExtruderRecipes;
     public static List<CrusherRecipe> CrusherRecipes;
     public static List<BlastFurnaceRecipe> BlastFurnaceRecipes;
-    public static List<SieveRecipe> SieveRecipes;  // НОВОЕ
+    public static List<SieveRecipe> SieveRecipes;
+    public static List<DistillerRecipe> DistillerRecipes;
 
     public static Dictionary<string, (string code, IEnumerable<IRecipeMultyBase> recipes)> machines;
 
@@ -33,7 +34,8 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         api.Event.SaveGameLoaded += LoadExtruderRecipes;
         api.Event.SaveGameLoaded += LoadCrusherRecipes;
         api.Event.SaveGameLoaded += LoadBlastFurnaceRecipes;
-        api.Event.SaveGameLoaded += LoadSieveRecipes;  // НОВОЕ
+        api.Event.SaveGameLoaded += LoadSieveRecipes;
+        api.Event.SaveGameLoaded += LoadDistillerRecipes;
         api.Event.SaveGameLoaded += () => RegisterMetalFormingRecipes(api);
 
         machines = new Dictionary<string, (string, IEnumerable<IRecipeMultyBase>)>(4);
@@ -104,13 +106,20 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         machines.Add("eblastfurnace-", ("electricalprogressiveindustry:eblastfurnace-incomplete-north", BlastFurnaceRecipes));
     }
 
-    // НОВЫЙ МЕТОД
     private void LoadSieveRecipes()
     {
         SieveRecipes = [];
         LoadRecipes<SieveRecipe>("Sieve Recipe", "recipes/electric/sieverecipe", SieveRecipes.Add);
         api.World.Logger.Debug(Lang.Get("electricalprogressiveindustry:recipeloading"));
         machines.Add("esieve-", ("electricalprogressiveindustry:esieve-incomplete-north", SieveRecipes));
+    }
+
+    private void LoadDistillerRecipes()
+    {
+        DistillerRecipes = [];
+        LoadRecipes<DistillerRecipe>("Distiller Recipe", "recipes/electric/distillerrecipe", DistillerRecipes.Add);
+        api.World.Logger.Debug(Lang.Get("electricalprogressiveindustry:recipeloading"));
+        machines.Add("edistiller-", ("electricalprogressiveindustry:edistiller-incomplete-north", DistillerRecipes));
     }
 
     private void LoadRecipes<T>(string name, string path, Action<T> registerMethod)
@@ -245,7 +254,8 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         ExtruderRecipes?.Clear();
         CrusherRecipes?.Clear();
         BlastFurnaceRecipes?.Clear();
-        SieveRecipes?.Clear();  // НОВОЕ
+        SieveRecipes?.Clear();
+        DistillerRecipes?.Clear();
         machines?.Clear();
 
         RecyclerRecipes = null;
@@ -254,7 +264,8 @@ public class ElectricalProgressiveRecipeManager : ModSystem
         ExtruderRecipes = null;
         CrusherRecipes = null;
         BlastFurnaceRecipes = null;
-        SieveRecipes = null;  // НОВОЕ
+        SieveRecipes = null;
+        DistillerRecipes = null;
         machines = null;
     }
 }

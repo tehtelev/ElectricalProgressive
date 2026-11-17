@@ -1,0 +1,46 @@
+[
+  {
+    "code": "cider-to-spirit",
+    "EnergyOperation": 4000,
+    "mashLitres": 1,
+    "waterLitres": 0.25,
+    "productLitres": 0.1,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:ciderportion-*",
+        "name": "fruit",
+        "quantity": 1
+      }
+    ],
+    "outputs": [
+      {
+        "type": "item",
+        "code": "game:spiritportion-{fruit}",
+        "stackSize": 1
+      }
+    ]
+  },
+  {
+    "code": "spirit-to-alcohol",
+    "EnergyOperation": 4000,
+    "mashLitres": 1,
+    "waterLitres": 0.25,
+    "productLitres": 0.5,
+    "ingredients": [
+      {
+        "type": "item",
+        "code": "game:spiritportion-*",
+        "name": "fruit",
+        "quantity": 1
+      }
+    ],
+    "outputs": [
+      {
+        "type": "item",
+        "code": "game:alcoholportion",
+        "stackSize": 1
+      }
+    ]
+  }
+]
