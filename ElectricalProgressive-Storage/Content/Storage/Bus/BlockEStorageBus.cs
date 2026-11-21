@@ -103,6 +103,7 @@ public class BlockEntityEStorageBus : BlockEntityOpenableContainer, IPanelHost, 
     private readonly InventoryEStorageBus _inventory;
     private readonly List<ItemStack> _filters = [];
     private int _cursor;
+    private int _watch;
     public Facing Facing = Facing.UpNorth;
     public Facing Cable = Facing.None;
     public readonly int[] CableLines = new int[6];
@@ -127,6 +128,10 @@ public class BlockEntityEStorageBus : BlockEntityOpenableContainer, IPanelHost, 
     public bool Holds(string inventoryId) => inventoryId == _inventory.InventoryID;
 
     public bool Importing => Block?.FirstCodePart() == "estorageimport";
+
+    public bool Storing => Block?.FirstCodePart() == "estoragestorage";
+
+    public bool Exporting => Block?.FirstCodePart() == "estorageexport";
 
     public override void Initialize(ICoreAPI api)
     {
@@ -205,12 +210,24 @@ public class BlockEntityEStorageBus : BlockEntityOpenableContainer, IPanelHost, 
             return true;
         }
 
-        var title = Importing
-            ? "electricalprogressivestorage:estorage-import-title"
-            : "electricalprogressivestorage:estorage-export-title";
-        var hint = Importing
-            ? "electricalprogressivestorage:estorage-import-hint"
-            : "electricalprogressivestorage:estorage-export-hint";
+        string title;
+        string hint;
+        if (Storing)
+        {
+            title = "electricalprogressivestorage:estorage-storage-title";
+            hint = "electricalprogressivestorage:estorage-storage-hint";
+        }
+        else if (Importing)
+        {
+            title = "electricalprogressivestorage:estorage-import-title";
+            hint = "electricalprogressivestorage:estorage-import-hint";
+        }
+        else
+        {
+            title = "electricalprogressivestorage:estorage-export-title";
+            hint = "electricalprogressivestorage:estorage-export-hint";
+        }
+
         var dialog = new GuiDialogEStorageBus(Lang.Get(title), Lang.Get(hint), Inventory, Pos, capi, Facing);
         dialog.OnClosed += () =>
         {
@@ -236,6 +253,14 @@ public class BlockEntityEStorageBus : BlockEntityOpenableContainer, IPanelHost, 
             return;
 
         dsc.AppendLine(Lang.Get(BlockEStorageTerminal.LinkKey(StorageAccess.Link(Api.World, Pos))));
+        if (Storing)
+        {
+            var key = Mounted(out _, out _)
+                ? "electricalprogressivestorage:estorage-bus-linked"
+                : "electricalprogressivestorage:estorage-bus-nolink";
+            dsc.AppendLine(Lang.Get(key));
+        }
+
         foreach (var (used, capacity) in StorageAccess.CableLoads(Api.World, Pos))
             dsc.AppendLine(Lang.Get("electricalprogressivestorage:estorage-channels", used, capacity));
     }
@@ -264,6 +289,13 @@ public class BlockEntityEStorageBus : BlockEntityOpenableContainer, IPanelHost, 
             return;
         if (StorageAccess.Link(world, Pos) != StorageLink.Online)
             return;
+
+        if (Storing)
+        {
+            WatchExternal();
+            return;
+        }
+
         if (!Mounted(out var target, out var face))
             return;
 
@@ -271,6 +303,211 @@ public class BlockEntityEStorageBus : BlockEntityOpenableContainer, IPanelHost, 
             Pull(world, target);
         else
             Push(world, target, face);
+    }
+
+    /// <summary>
+    /// Сундук напротив виден в терминале: типы из фильтра (или все, если фильтр пуст).
+    /// </summary>
+    public void Contribute(IWorldAccessor world, List<ItemStack> result)
+    {
+        if (!Storing || !Mounted(out var target, out _))
+            return;
+
+        ReadFilters();
+        for (var i = 0; i < target.Count; i++)
+        {
+            var stack = target[i]?.Itemstack;
+            if (stack?.Collectible == null || stack.StackSize <= 0 || stack.Collectible.IsLiquid())
+                continue;
+            if (!Wanted(stack))
+                continue;
+
+            var found = false;
+            foreach (var have in result)
+            {
+                if (!StorageAccess.Same(world, have, stack))
+                    continue;
+                var sum = (long)have.StackSize + stack.StackSize;
+                have.StackSize = sum > int.MaxValue ? int.MaxValue : (int)sum;
+                found = true;
+                break;
+            }
+
+            if (!found)
+                result.Add(stack.Clone());
+        }
+    }
+
+    public int CountOf(IWorldAccessor world, ItemStack proto)
+    {
+        if (!Storing || proto.Collectible == null || proto.Collectible.IsLiquid())
+            return 0;
+        if (!Mounted(out var target, out _))
+            return 0;
+
+        ReadFilters();
+        if (!Wanted(proto))
+            return 0;
+
+        var count = 0;
+        for (var i = 0; i < target.Count; i++)
+        {
+            var stack = target[i]?.Itemstack;
+            if (stack?.Collectible == null || stack.StackSize <= 0)
+                continue;
+            if (StorageAccess.Same(world, stack, proto))
+                count += stack.StackSize;
+        }
+
+        return count;
+    }
+
+    public int RoomOf(IWorldAccessor world, ItemStack proto)
+    {
+        if (!Storing || proto.Collectible == null || proto.Collectible.IsLiquid())
+            return 0;
+        if (!Mounted(out var target, out var face))
+            return 0;
+
+        ReadFilters();
+        if (!Wanted(proto))
+            return 0;
+
+        long room = 0;
+        var probe = proto.Clone();
+        probe.StackSize = 1;
+        var holder = new DummySlot(probe);
+        var auto = target.GetAutoPushIntoSlot(face, holder);
+        if (auto != null)
+            room += RoomIn(world, auto, proto);
+
+        for (var i = 0; i < target.Count; i++)
+        {
+            var slot = target[i];
+            if (slot == null || ReferenceEquals(slot, auto))
+                continue;
+            if (!slot.CanTakeFrom(holder))
+                continue;
+            room += RoomIn(world, slot, proto);
+            if (room >= int.MaxValue)
+                return int.MaxValue;
+        }
+
+        return room > int.MaxValue ? int.MaxValue : (int)room;
+    }
+
+    public int Put(IWorldAccessor world, ItemStack proto, int count)
+    {
+        if (!Storing || count <= 0 || proto.Collectible == null || proto.Collectible.IsLiquid())
+            return 0;
+        if (!Mounted(out var target, out var face))
+            return 0;
+
+        ReadFilters();
+        if (!Wanted(proto))
+            return 0;
+
+        var left = count;
+        while (left > 0)
+        {
+            var dest = Destination(world, target, face, proto);
+            if (dest == null)
+                break;
+
+            var room = RoomIn(world, dest, proto);
+            var want = Math.Min(left, room);
+            if (want <= 0)
+                break;
+
+            var piece = proto.Clone();
+            piece.StackSize = want;
+            var holder = new DummySlot(piece);
+            var op = new ItemStackMoveOperation(world, EnumMouseButton.Left, 0, EnumMergePriority.DirectMerge, want);
+            holder.TryPutInto(dest, ref op);
+            dest.MarkDirty();
+            var moved = want - piece.StackSize;
+            if (moved <= 0)
+                break;
+            left -= moved;
+        }
+
+        return count - left;
+    }
+
+    public ItemStack? Take(IWorldAccessor world, ItemStack proto, int count)
+    {
+        if (!Storing || count <= 0 || proto.Collectible == null || proto.Collectible.IsLiquid())
+            return null;
+        if (!Mounted(out var target, out _))
+            return null;
+
+        ReadFilters();
+        if (!Wanted(proto))
+            return null;
+
+        var left = count;
+        var taken = proto.Clone();
+        taken.StackSize = 0;
+        for (var i = 0; i < target.Count && left > 0; i++)
+        {
+            var slot = target[i];
+            var stack = slot?.Itemstack;
+            if (slot == null || stack?.Collectible == null || stack.StackSize <= 0 || !slot.CanTake())
+                continue;
+            if (!StorageAccess.Same(world, stack, proto))
+                continue;
+
+            var want = Math.Min(left, stack.StackSize);
+            var piece = slot.TakeOut(want);
+            slot.MarkDirty();
+            if (piece == null || piece.StackSize <= 0)
+                continue;
+            taken.StackSize += piece.StackSize;
+            left -= piece.StackSize;
+        }
+
+        return taken.StackSize > 0 ? taken : null;
+    }
+
+    private void WatchExternal()
+    {
+        if (!Mounted(out var target, out _))
+        {
+            if (_watch == 0)
+                return;
+            _watch = 0;
+            StorageAccess.TouchContents();
+            return;
+        }
+
+        var hash = 17;
+        unchecked
+        {
+            for (var i = 0; i < target.Count; i++)
+            {
+                var stack = target[i]?.Itemstack;
+                if (stack?.Collectible == null || stack.StackSize <= 0)
+                {
+                    hash = hash * 31;
+                    continue;
+                }
+
+                hash = hash * 31 + stack.Id;
+                hash = hash * 31 + stack.StackSize;
+                hash = hash * 31 + (stack.Collectible.GetHashCode());
+            }
+
+            for (var i = 0; i < _inventory.Count; i++)
+            {
+                var stack = _inventory[i].Itemstack;
+                hash = hash * 31 + (stack?.Id ?? 0);
+            }
+        }
+
+        if (hash == _watch)
+            return;
+        _watch = hash;
+        StorageAccess.TouchContents();
     }
 
     private void Pull(IWorldAccessor world, InventoryBase target)

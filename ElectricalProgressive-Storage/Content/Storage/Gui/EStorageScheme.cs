@@ -350,7 +350,7 @@ public static class EStorageScheme
             new Node(288, 8, h, "escheme-drive", Domain + "estoragedrive-south"),
             new Node(16, 84, h, "escheme-terminals", Domain + "estorageterminal", Domain + "estorageliquidterminal", Domain + "estoragepatternterminal", Domain + "estoragecraftterminal"),
             new Node(152, 84, h, "escheme-interface", Domain + "estorageinterface"),
-            new Node(288, 84, h, "escheme-buses", Domain + "estorageimport", Domain + "estorageexport")
+            new Node(288, 84, h, "escheme-buses", Domain + "estorageimport", Domain + "estorageexport", Domain + "estoragestorage")
         ];
     }
 

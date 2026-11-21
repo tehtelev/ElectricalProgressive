@@ -142,6 +142,20 @@
     "output": { "type": "block", "code": "electricalprogressivestorage:estorageexport" }
   },
   {
+    "ingredientPattern": "CQC,ALA,RSR",
+    "width": 3,
+    "height": 3,
+    "ingredients": {
+      "C": { "type": "block", "code": "electricalprogressivestorage:estoragecable" },
+      "Q": { "type": "item", "code": "game:clearquartz" },
+      "A": { "type": "item", "code": "electricalprogressivebasics:eanode" },
+      "L": { "type": "item", "code": "electricalprogressivebasics:coil" },
+      "R": { "type": "item", "code": "electricalprogressivebasics:eresistor" },
+      "S": { "type": "item", "code": "electricalprogressivebasics:eschematic" }
+    },
+    "output": { "type": "block", "code": "electricalprogressivestorage:estoragestorage" }
+  },
+  {
     "ingredientPattern": "CQC,ASA,LLL",
     "width": 3,
     "height": 3,

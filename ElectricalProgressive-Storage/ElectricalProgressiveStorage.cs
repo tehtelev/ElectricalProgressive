@@ -10,7 +10,7 @@ using Vintagestory.API.Common;
     "Electrical Progressive: Storage",
     "electricalprogressivestorage",
     Website = "https://github.com/tehtelev/ElectricalProgressive",
-    Description = "Network storage: controller, drive, disks, liquid cells, terminals, a crafting terminal, a pattern encoder, an interface, an assembler, import and export buses, an exchange port, and crafting processors.",
+    Description = "Network storage: controller, drive, disks, liquid cells, terminals, a crafting terminal, a pattern encoder, an interface, an assembler, import, export and storage buses, an exchange port, and crafting processors.",
     Version = "1.0.0",
     Authors = ["Tehtelev", "Kotl"]
 )]

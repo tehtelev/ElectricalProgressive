@@ -370,6 +370,20 @@ public sealed class PanelStack
         return count;
     }
 
+    public static IEnumerable<BlockEntityEStorageBus> AllBuses(IWorldAccessor world, BlockPos pos)
+    {
+        if (world.BlockAccessor.GetBlockEntity(pos) is not IPanelStack stack || stack is not BlockEntity host)
+            yield break;
+
+        if (host is BlockEntityEStorageBus root)
+            yield return root;
+        foreach (var guest in stack.Stack.Guests)
+        {
+            if (guest is BlockEntityEStorageBus bus && !ReferenceEquals(bus, host))
+                yield return bus;
+        }
+    }
+
     public static IEnumerable<BlockEntityEStorageInterface> Interfaces(IWorldAccessor world, BlockPos pos)
     {
         var host = world.BlockAccessor.GetBlockEntity(pos) as BlockEntityEStorageInterface;

@@ -1,0 +1,53 @@
+{
+  "code": "estoragestorage",
+  "class": "BlockEStorageBus",
+  "entityClass": "BlockEntityEStorageBus",
+  "attributes": {
+    "handbook": {
+      "groupBy": [ "estoragestorage" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressivestorage:block-handbooktitle-estoragestorage",
+          "text": "electricalprogressivestorage:block-handbooktext-estoragestorage"
+        }
+      ]
+    }
+  },
+  "creativeinventory": {
+    "general": [ "*" ],
+    "estorage": [ "*" ]
+  },
+  "shape": { "base": "block/estoragestorage" },
+  "textures": {
+    "sides": { "base": "block/ae2/storage_bus_sides" },
+    "sidesStatus": { "base": "block/ae2/monitor_sides_status" },
+    "back": { "base": "block/ae2/storage_bus_back" },
+    "front": { "base": "block/ae2/storage_bus" }
+  },
+  "blockmaterial": "Metal",
+  "resistance": 3.5,
+  "lightAbsorption": 0,
+  "faceCullMode": "NeverCull",
+  "renderPass": "OpaqueNoCull",
+  "emitSideAo": { "all": false },
+  "sideAo": { "all": true },
+  "sidesolid": { "all": false },
+  "sideopaque": { "all": false },
+  "collisionbox": { "x1": 0.125, "y1": 0, "z1": 0.125, "x2": 0.875, "y2": 0.25, "z2": 0.875 },
+  "selectionbox": { "x1": 0.125, "y1": 0, "z1": 0.125, "x2": 0.875, "y2": 0.25, "z2": 0.875 },
+  "guiTransform": {
+    "translation": { "x": 0, "y": 3, "z": 0 },
+    "rotation": { "x": -51, "y": -63, "z": 0 },
+    "origin": { "x": 0.5, "y": 0, "z": 0.5 }
+  },
+  "groundTransform": {
+    "origin": { "x": 0.5, "y": 0, "z": 0.5 },
+    "scale": 2
+  },
+  "sounds": {
+    "place": "game:block/anvil",
+    "walk": "game:wearable/plate*",
+    "hit": "game:block/heavymetal-hit*",
+    "break": "game:block/heavymetal-hit*"
+  }
+}

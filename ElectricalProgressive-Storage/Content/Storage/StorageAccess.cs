@@ -113,7 +113,7 @@ public static class StorageAccess
         return block.FirstCodePart() is "estoragecable"
             or "estoragedrive" or "estorageterminal" or "estorageliquidterminal"
             or "estoragepatternterminal" or "estoragecraftterminal" or "estorageinterface"
-            or "estorageimport" or "estorageexport" or "estorageprocessor"
+            or "estorageimport" or "estorageexport" or "estoragestorage" or "estorageprocessor"
             or "estorageioport" or "estoragecontroller";
     }
 
@@ -176,7 +176,7 @@ public static class StorageAccess
 
     // Интерфейс и шина проводят каналы по жилам. Терминал остаётся на восьми.
     private static bool StrandsCarry(Vintagestory.API.Common.Block? block)
-        => block?.FirstCodePart() is "estorageinterface" or "estorageimport" or "estorageexport";
+        => block?.FirstCodePart() is "estorageinterface" or "estorageimport" or "estorageexport" or "estoragestorage";
 
     /// <summary>Сколько жил уже есть у провода, в который входит эта грань.</summary>
     public static int HostWireFloor(Facing connection, int[] lines, BlockFacing face)
@@ -413,7 +413,7 @@ public static class StorageAccess
     private static bool IsPanel(Vintagestory.API.Common.Block block)
         => block.FirstCodePart() is "estorageterminal" or "estorageliquidterminal"
             or "estoragepatternterminal" or "estoragecraftterminal"
-            or "estorageinterface" or "estorageimport" or "estorageexport";
+            or "estorageinterface" or "estorageimport" or "estorageexport" or "estoragestorage";
 
     private static bool PanelMeets(IWorldAccessor world, BlockPos cablePos, Facing component, BlockPos panelPos)
         => component != Facing.None && PanelStack.Meets(world, cablePos, component, panelPos);
@@ -669,6 +669,7 @@ public static class StorageAccess
                 case "estorageinterface":
                 case "estorageimport":
                 case "estorageexport":
+                case "estoragestorage":
                     var terminals = PanelStack.Kind(world, pos, false);
                     var interfaces = PanelStack.Kind(world, pos, true);
                     var buses = PanelStack.Buses(world, pos);
@@ -681,6 +682,7 @@ public static class StorageAccess
                                 break;
                             case "estorageimport":
                             case "estorageexport":
+                            case "estoragestorage":
                                 buses = 1;
                                 break;
                             default:
@@ -1125,6 +1127,9 @@ public static class StorageAccess
             }
         }
 
+        foreach (var bus in EnumerateStorageBuses(world, from))
+            count += bus.CountOf(world, proto);
+
         return count;
     }
 
@@ -1269,10 +1274,17 @@ public static class StorageAccess
         if (Link(world, from) != StorageLink.Online || proto.Collectible == null)
             return 0;
 
-        var room = 0;
+        long room = 0;
         foreach (var disk in EnumerateDisks(world, from))
             room += RoomOnDisk(world, disk.Stack, proto);
-        return room;
+        foreach (var bus in EnumerateStorageBuses(world, from))
+        {
+            room += bus.RoomOf(world, proto);
+            if (room >= int.MaxValue)
+                return int.MaxValue;
+        }
+
+        return room > int.MaxValue ? int.MaxValue : (int)room;
     }
 
     public static int Insert(IWorldAccessor world, BlockPos from, ItemStack proto, int count)
@@ -1330,6 +1342,18 @@ public static class StorageAccess
             }
         }
 
+        // Остаток после дисков — в сундуки шин хранения.
+        if (left > 0)
+        {
+            foreach (var bus in EnumerateStorageBuses(world, from))
+            {
+                if (left <= 0)
+                    break;
+                var moved = bus.Put(world, proto, left);
+                left -= moved;
+            }
+        }
+
         if (left != count)
             TouchContents();
         return count - left;
@@ -1370,6 +1394,20 @@ public static class StorageAccess
             disk.Drive.MarkDirty();
         }
 
+        if (left > 0)
+        {
+            foreach (var bus in EnumerateStorageBuses(world, from))
+            {
+                if (left <= 0)
+                    break;
+                var piece = bus.Take(world, proto, left);
+                if (piece == null || piece.StackSize <= 0)
+                    continue;
+                taken.StackSize += piece.StackSize;
+                left -= piece.StackSize;
+            }
+        }
+
         if (taken.StackSize <= 0)
             return null;
 
@@ -1401,6 +1439,9 @@ public static class StorageAccess
                     result.Add(entry.Clone());
             }
         }
+
+        foreach (var bus in EnumerateStorageBuses(world, from))
+            bus.Contribute(world, result);
 
         result.Sort((a, b) => string.Compare(SortName(a), SortName(b), StringComparison.OrdinalIgnoreCase));
         return result;
@@ -1907,6 +1948,19 @@ public static class StorageAccess
 
         public BlockEntity Drive { get; }
         public ItemStack Stack { get; }
+    }
+
+    private static IEnumerable<BlockEntityEStorageBus> EnumerateStorageBuses(IWorldAccessor world, BlockPos from)
+    {
+        var scan = GetScan(world, from);
+        foreach (var pos in scan.Buses)
+        {
+            foreach (var bus in PanelStack.AllBuses(world, pos))
+            {
+                if (bus.Storing)
+                    yield return bus;
+            }
+        }
     }
 
     private static IEnumerable<DiskRef> EnumerateDisks(IWorldAccessor world, BlockPos from)

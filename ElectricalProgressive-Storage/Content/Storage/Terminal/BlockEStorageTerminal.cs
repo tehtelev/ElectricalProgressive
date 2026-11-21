@@ -492,7 +492,7 @@ public class BlockEStorageTerminal : BlockEStoragePart
 
     private static void AddOpen(BlockEntity panel, List<Cuboidf> list)
     {
-        if (panel.Block?.FirstCodePart() is "estorageinterface" or "estorageimport" or "estorageexport")
+        if (panel.Block?.FirstCodePart() is "estorageinterface" or "estorageimport" or "estorageexport" or "estoragestorage")
             return;
         if (panel.Block is not BlockEStorageTerminal block)
             return;

@@ -7,6 +7,7 @@ using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
+using Vintagestory.GameContent;
 
 namespace ElectricalProgressive.Content.Storage.Cable;
 
@@ -157,14 +158,14 @@ public class BlockEStorageCable : BlockEStoragePart
     private static readonly (float X, float Y, bool Half)[][] Strands =
     [
         [(0f, 0f, false)],
-        [(1.2f / 16f, 0f, false), (-1.2f / 16f, 0f, false)],
-        [(1.2f / 16f, 0f, false), (-1.2f / 16f, 0f, false), (0f, 1.6f / 16f, true)],
-        [(1.2f / 16f, 0f, false), (-1.2f / 16f, 0f, false), (1.2f / 16f, 1.6f / 16f, true), (-1.2f / 16f, 1.6f / 16f, true)]
+        [(0.6f / 16f, 0f, false), (-0.6f / 16f, 0f, false)],
+        [(0.6f / 16f, 0f, false), (-0.6f / 16f, 0f, false), (0f, 0.95f / 16f, true)],
+        [(0.6f / 16f, 0f, false), (-0.6f / 16f, 0f, false), (0.6f / 16f, 0.95f / 16f, true), (-0.6f / 16f, 0.95f / 16f, true)]
     ];
 
     // Жила и шестерня сидят на плоскости грани и наполовину выходят в соседнюю клетку.
-    private static readonly Cuboidf PartBox = new(0.43125f, -0.08125f, -0.05f, 0.56875f, 0.08125f, 0.46875f);
-    private static readonly Cuboidf FixBox = new(0.419f, -0.085f, 0.419f, 0.581f, 0.085f, 0.581f);
+    private static readonly Cuboidf PartBox = new(0.4625f, -0.05f, -0.05f, 0.5375f, 0.05f, 0.46875f);
+    private static readonly Cuboidf FixBox = new(0.45625f, -0.05f, 0.45625f, 0.54375f, 0.05f, 0.54375f);
     private static readonly Vec3d BoxOrigin = new(0.5, 0.5, 0.5);
     private static readonly Vec3f MeshOrigin = new(0.5f, 0.5f, 0.5f);
 
@@ -721,6 +722,7 @@ public class BlockEStorageCable : BlockEStoragePart
         "estorageinterface",
         "estorageimport",
         "estorageexport",
+        "estoragestorage",
         "estorageterminal",
         "estorageliquidterminal",
         "estoragepatternterminal",
@@ -875,16 +877,16 @@ public class BlockEStorageCable : BlockEStoragePart
     {
         if (lines <= 1)
             return PartBox.Clone();
-        var y2 = lines >= 3 ? 0.15f : 0.08125f;
-        return new Cuboidf(0.356f, -0.08125f, -0.05f, 0.644f, y2, 0.46875f);
+        var y2 = lines >= 3 ? 0.09f : 0.05f;
+        return new Cuboidf(0.425f, -0.05f, -0.05f, 0.575f, y2, 0.46875f);
     }
 
     private static Cuboidf FixBoxFor(int lines)
     {
         if (lines <= 1)
             return FixBox.Clone();
-        var y2 = lines >= 3 ? 0.16f : 0.085f;
-        return new Cuboidf(0.35f, -0.085f, 0.35f, 0.65f, y2, 0.65f);
+        var y2 = lines >= 3 ? 0.095f : 0.05f;
+        return new Cuboidf(0.41875f, -0.05f, 0.41875f, 0.58125f, y2, 0.58125f);
     }
 
     /// <summary>
@@ -1224,7 +1226,8 @@ public class BlockEStorageCable : BlockEStoragePart
     private static float RearOf(int kind) => kind switch
     {
         1 => 3f / 16f,
-        2 or 3 => 5f / 16f,
+        2 => 4f / 16f,
+        3 => 5f / 16f,
         _ => 0f
     };
 
@@ -1250,7 +1253,8 @@ public class BlockEStorageCable : BlockEStoragePart
         var kind = entity.Block?.FirstCodePart() switch
         {
             "estorageinterface" => 1,
-            "estorageimport" => 2,
+            "estoragestorage" => 2,
+            "estorageimport" => 3,
             "estorageexport" => 3,
             _ => 0
         };
@@ -1515,7 +1519,8 @@ public class BlockEStorageCable : BlockEStoragePart
     }
 
     /// <summary>
-    /// Сплошная грань или коллизия соседа, которая доходит до этой грани. Жернова держатся вторым путём.
+    /// Сплошная грань, инвентарь (сундук, бочка, ящик, сосуд, жернова) или коллизия,
+    /// которая подходит к этой грани ближе чем на 4 вокселя. Крышка обычного сундука на 0.8125.
     /// </summary>
     internal static bool Supported(IBlockAccessor accessor, BlockPos pos, Facing facing)
     {
@@ -1533,38 +1538,47 @@ public class BlockEStorageCable : BlockEStoragePart
             return false;
 
         var neighborPos = pos.AddCopy(support);
-        var boxes = accessor.GetBlock(neighborPos)?.GetCollisionBoxes(accessor, neighborPos);
+        var neighbor = accessor.GetBlock(neighborPos);
+        if (neighbor == null || neighbor.Id == 0)
+            return false;
+
+        if (!StorageAccess.IsPart(neighbor)
+            && accessor.GetBlockEntity(neighborPos) is BlockEntityContainer or IBlockEntityContainer)
+            return true;
+
+        var boxes = neighbor.GetCollisionBoxes(accessor, neighborPos);
         if (boxes == null)
             return false;
 
         var touched = support.Opposite;
-        const float edge = 0.001f;
+        const float gap = 0.25f;
         foreach (var box in boxes)
         {
-            if (box != null && Reaches(box, touched, edge))
+            if (box != null && Reaches(box, touched, gap))
                 return true;
         }
 
         return false;
     }
 
-    private static bool Reaches(Cuboidf box, BlockFacing side, float edge)
+    private static bool Reaches(Cuboidf box, BlockFacing side, float gap)
     {
-        var overlapsX = box.X2 > edge && box.X1 < 1f - edge;
-        var overlapsY = box.Y2 > edge && box.Y1 < 1f - edge;
-        var overlapsZ = box.Z2 > edge && box.Z1 < 1f - edge;
+        const float inset = 0.001f;
+        var overlapsX = box.X2 > inset && box.X1 < 1f - inset;
+        var overlapsY = box.Y2 > inset && box.Y1 < 1f - inset;
+        var overlapsZ = box.Z2 > inset && box.Z1 < 1f - inset;
         if (side == BlockFacing.UP)
-            return box.Y2 >= 1f - edge && overlapsX && overlapsZ;
+            return box.Y2 >= 1f - gap && overlapsX && overlapsZ;
         if (side == BlockFacing.DOWN)
-            return box.Y1 <= edge && overlapsX && overlapsZ;
+            return box.Y1 <= gap && overlapsX && overlapsZ;
         if (side == BlockFacing.NORTH)
-            return box.Z1 <= edge && overlapsX && overlapsY;
+            return box.Z1 <= gap && overlapsX && overlapsY;
         if (side == BlockFacing.SOUTH)
-            return box.Z2 >= 1f - edge && overlapsX && overlapsY;
+            return box.Z2 >= 1f - gap && overlapsX && overlapsY;
         if (side == BlockFacing.EAST)
-            return box.X2 >= 1f - edge && overlapsY && overlapsZ;
+            return box.X2 >= 1f - gap && overlapsY && overlapsZ;
         if (side == BlockFacing.WEST)
-            return box.X1 <= edge && overlapsY && overlapsZ;
+            return box.X1 <= gap && overlapsY && overlapsZ;
         return false;
     }
 
