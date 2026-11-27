@@ -1,0 +1,26 @@
+{
+  "code": "esolenoidhead",
+  "class": "BlockESolenoidHead",
+  "entityClass": "BlockEntityESolenoidHead",
+  "creativeinventory": {},
+  "drops": [],
+  "shape": { "base": "block/esolenoid/esolenoid-head" },
+  "blockmaterial": "Metal",
+  "drawType": "JSON",
+  "renderPass": "OpaqueNoCull",
+  "faceCullMode": "NeverCull",
+  "sideopaque": { "all": false },
+  "sidesolid": { "all": false },
+  "lightAbsorption": 0,
+  "resistance": 3.5,
+  "sounds": {
+    "place": "game:block/metal",
+    "break": "game:block/metal",
+    "hit": "game:block/metal",
+    "walk": "game:walk/stone"
+  },
+  "collisionSelectionBoxes": [
+    { "x1": 0.411, "y1": 0.458, "z1": 0.0, "x2": 0.589, "y2": 0.636, "z2": 1.0 },
+    { "x1": 0.241, "y1": 0.287, "z1": 0.0, "x2": 0.759, "y2": 0.806, "z2": 0.125 }
+  ]
+}

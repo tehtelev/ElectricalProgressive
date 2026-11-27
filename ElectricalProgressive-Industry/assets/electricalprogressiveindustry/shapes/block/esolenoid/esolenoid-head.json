@@ -1,0 +1,161 @@
+{
+	"textureWidth": 16,
+	"textureHeight": 16,
+	"textures": {
+		"steel": "game:block/metal/plate/steel",
+		"copper": "game:block/metal/plate/copper",
+		"iron": "game:block/metal/plate/iron"
+	},
+	"elements": [
+		{
+			"name": "arm",
+			"from": [
+				6.5,
+				0,
+				6.5
+			],
+			"to": [
+				9.5,
+				13,
+				9.5
+			],
+			"faces": {
+				"north": {
+					"texture": "#iron",
+					"uv": [
+						0,
+						0,
+						16,
+						16
+					],
+					"autoUv": true
+				},
+				"east": {
+					"texture": "#iron",
+					"uv": [
+						0,
+						0,
+						16,
+						16
+					],
+					"autoUv": true
+				},
+				"south": {
+					"texture": "#iron",
+					"uv": [
+						0,
+						0,
+						16,
+						16
+					],
+					"autoUv": true
+				},
+				"west": {
+					"texture": "#iron",
+					"uv": [
+						0,
+						0,
+						16,
+						16
+					],
+					"autoUv": true
+				},
+				"up": {
+					"texture": "#iron",
+					"uv": [
+						0,
+						0,
+						16,
+						16
+					],
+					"autoUv": true
+				},
+				"down": {
+					"texture": "#iron",
+					"uv": [
+						0,
+						0,
+						16,
+						16
+					],
+					"autoUv": true
+				}
+			}
+		},
+		{
+			"name": "plate",
+			"from": [
+				4,
+				13,
+				4
+			],
+			"to": [
+				12,
+				16,
+				12
+			],
+			"faces": {
+				"north": {
+					"texture": "#steel",
+					"uv": [
+						0,
+						0,
+						16,
+						16
+					],
+					"autoUv": true
+				},
+				"east": {
+					"texture": "#steel",
+					"uv": [
+						0,
+						0,
+						16,
+						16
+					],
+					"autoUv": true
+				},
+				"south": {
+					"texture": "#steel",
+					"uv": [
+						0,
+						0,
+						16,
+						16
+					],
+					"autoUv": true
+				},
+				"west": {
+					"texture": "#steel",
+					"uv": [
+						0,
+						0,
+						16,
+						16
+					],
+					"autoUv": true
+				},
+				"up": {
+					"texture": "#steel",
+					"uv": [
+						0,
+						0,
+						16,
+						16
+					],
+					"autoUv": true
+				},
+				"down": {
+					"texture": "#steel",
+					"uv": [
+						0,
+						0,
+						16,
+						16
+					],
+					"autoUv": true
+				}
+			}
+		}
+	]
+}

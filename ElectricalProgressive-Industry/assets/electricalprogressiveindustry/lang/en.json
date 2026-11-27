@@ -47,6 +47,14 @@
   "construction-handbook-step": "Step {0}",
   "construction-handbook-result": "finished machine",
 
+  "block-esolenoid": "Solenoid",
+  "block-esolenoidhead": "Solenoid head",
+  "block-handbooktitle-esolenoid": "Usage",
+  "block-handbooktext-esolenoid": "Electric piston. Placed like a motor: the base sits on the face you click, and the rod points where you look. While powered it pushes up to 12 blocks one step and holds the rod. Without power the rod retracts and does not pull blocks back. The cable connects to the base. 32 V, 32 W.",
+  "esolenoid-out": "Rod extended",
+  "esolenoid-in": "Rod retracted",
+  "esolenoid-blocked": "Path blocked",
+
   "block-ehammer-*": "Auto-Hammer",
   "block-handbooktitle-ehammer": "Usage",
   "block-handbooktext-ehammer": "Forges any anvil product. Put an ingot in, pick a product of that metal, and the hammer heats the blank and shapes it one hit at a time, like a helve hammer. Spare metal comes back as bits. Iron blooms are still worked on their own. Multiblock 3×4×2, 128 V. Assemble with steel plates, copper coils, iron and copper plates (RMB on controller). Supports hoppers.",

@@ -7,6 +7,7 @@ using ElectricalProgressive.Content.Block.EHammer;
 using ElectricalProgressive.Content.Block.EMetalForming;
 using ElectricalProgressive.Content.Block.EPress;
 using ElectricalProgressive.Content.Block.ESieve;
+using ElectricalProgressive.Content.Block.ESolenoid;
 using ElectricalProgressive.Content.Block.ECloche;
 using ElectricalProgressive.Content.Block.EWoodcutter;
 using ElectricalProgressive.Content.Block.Gauge;
@@ -94,6 +95,12 @@ public class ElectricalProgressiveIndustry : ModSystem
         api.RegisterBlockClass("BlockESieve", typeof(BlockESieve));
         api.RegisterBlockEntityClass("BlockEntityESieve", typeof(BlockEntityESieve));
         api.RegisterBlockEntityBehaviorClass("BEBehaviorESieve", typeof(BEBehaviorESieve));
+
+        api.RegisterBlockClass("BlockESolenoid", typeof(BlockESolenoid));
+        api.RegisterBlockEntityClass("BlockEntityESolenoid", typeof(BlockEntityESolenoid));
+        api.RegisterBlockEntityBehaviorClass("BEBehaviorESolenoid", typeof(BEBehaviorESolenoid));
+        api.RegisterBlockClass("BlockESolenoidHead", typeof(BlockESolenoidHead));
+        api.RegisterBlockEntityClass("BlockEntityESolenoidHead", typeof(BlockEntityESolenoidHead));
 
         api.RegisterBlockClass("BlockPressForm", typeof(BlockPressForm));
 

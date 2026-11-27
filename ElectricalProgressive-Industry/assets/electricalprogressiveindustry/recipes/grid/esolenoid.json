@@ -1,0 +1,13 @@
+{
+  "ingredientPattern": "S S,SCS,S S",
+  "ingredients": {
+    "S": { "type": "item", "code": "game:metalplate-steel" },
+    "C": { "type": "item", "code": "electricalprogressivebasics:coil" }
+  },
+  "width": 3,
+  "height": 3,
+  "output": {
+    "type": "block",
+    "code": "electricalprogressiveindustry:esolenoid"
+  }
+}

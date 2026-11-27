@@ -1,0 +1,50 @@
+{
+  "code": "esolenoid",
+  "class": "BlockESolenoid",
+  "entityClass": "BlockEntityESolenoid",
+  "entityBehaviors": [
+    { "name": "BEBehaviorESolenoid" },
+    { "name": "Animatable" },
+    { "name": "ElectricalProgressive" }
+  ],
+  "creativeinventory": {
+    "general": [ "*" ],
+    "electricity": [ "*" ]
+  },
+  "attributes": {
+    "blockEProperties": "main",
+    "maxConsumption": 32,
+    "voltage": 32,
+    "maxCurrent": 10.0,
+    "isolated": true,
+    "isolatedEnvironment": true,
+    "handbook": {
+      "groupBy": [ "esolenoid" ],
+      "extraSections": [
+        {
+          "title": "electricalprogressiveindustry:block-handbooktitle-esolenoid",
+          "text": "electricalprogressiveindustry:block-handbooktext-esolenoid"
+        }
+      ]
+    }
+  },
+  "shape": { "base": "block/esolenoid/esolenoid" },
+  "blockmaterial": "Metal",
+  "drawType": "JSON",
+  "renderPass": "OpaqueNoCull",
+  "faceCullMode": "NeverCull",
+  "sideopaque": { "all": false },
+  "sidesolid": { "all": true },
+  "lightAbsorption": 0,
+  "resistance": 3.5,
+  "sounds": {
+    "place": "game:block/metal",
+    "break": "game:block/metal",
+    "hit": "game:block/metal",
+    "walk": "game:walk/stone"
+  },
+  "collisionbox": { "x1": 0.0, "y1": 0.0, "z1": 0.0, "x2": 1.0, "y2": 1.0, "z2": 1.0 },
+  "selectionbox": { "x1": 0.0, "y1": 0.0, "z1": 0.0, "x2": 1.0, "y2": 1.0, "z2": 1.0 },
+  "heldTpIdleAnimation": "holdbothhandslarge",
+  "heldTpUseAnimation": "twohandplaceblock"
+}
