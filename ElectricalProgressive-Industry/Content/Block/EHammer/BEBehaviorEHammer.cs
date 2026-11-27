@@ -61,6 +61,9 @@ public class BEBehaviorEHammer : BlockEntityBehavior, IElectricConsumer
                     entity.ElectricalProgressive.AllEparams.Any(e => e.burnout))
                     return false;
 
+                if (entity.AcceptsSmithingPower())
+                    return true;
+
                 var entityStack = entity.Inventory[0]?.Itemstack;
 
                 // со стаком что - то не так?
@@ -98,17 +101,20 @@ public class BEBehaviorEHammer : BlockEntityBehavior, IElectricConsumer
         stringBuilder.AppendLine(StringHelper.Progressbar(PowerSetting * 100.0f / _maxConsumption));
         stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Consumption") + ": " + PowerSetting + "/" + _maxConsumption + " " + Lang.Get("electricalprogressivebasics:W"));
 
-        if (entity.InputSlot?.Itemstack != null)
+        if (entity.InputSlot?.Itemstack != null || entity.WorkpieceActive)
         {
-            float currentTemp = entity.GetInputTemperature();
+            float currentTemp = entity.WorkTemperature;
             stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Temperature") + ": " + (int)currentTemp + "°C / " + (int)BlockEntityEHammer.CraftStartTemp + "°C");
 
             if (currentTemp < BlockEntityEHammer.CraftStartTemp)
             {
                 stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:State") + ": " + Lang.Get("electricalprogressivebasics:Heating"));
             }
-            else if (entity.CurrentRecipe != null && entity.CurrentRecipe.EnergyOperation > 0)
+            else if (!string.IsNullOrEmpty(entity.SelectedProductKey) ||
+                     (entity.CurrentRecipe != null && entity.CurrentRecipe.EnergyOperation > 0))
             {
+                if (!string.IsNullOrEmpty(entity.CurrentRecipeName))
+                    stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressiveindustry:emetalforming-recipe") + ": " + entity.CurrentRecipeName);
                 int percent = (int)(entity.RecipeProgress * 100);
                 stringBuilder.AppendLine("└ " + Lang.Get("electricalprogressivebasics:Progress") + ": " + percent + "%");
             }

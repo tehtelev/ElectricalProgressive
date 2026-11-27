@@ -49,13 +49,13 @@
 
   "block-ehammer-*": "Auto-Hammer",
   "block-handbooktitle-ehammer": "Usage",
-  "block-handbooktext-ehammer": "Simplifies and automates work on the anvil. Multiblock 3×4×2, 128 V. Assemble with steel plates, copper coils, iron and copper plates (RMB on controller). Chance of bonus materials. Supports hoppers.",
+  "block-handbooktext-ehammer": "Forges any anvil product. Put an ingot in, pick a product of that metal, and the hammer heats the blank and shapes it one hit at a time, like a helve hammer. Spare metal comes back as bits. Iron blooms are still worked on their own. Multiblock 3×4×2, 128 V. Assemble with steel plates, copper coils, iron and copper plates (RMB on controller). Supports hoppers.",
   "ehammer-structure-complete": "Auto-Hammer assembled",
   "ehammer-formed-hint": "Assembled Auto-Hammer.",
 
   "block-emetalforming-*": "Metal Former",
   "block-handbooktitle-emetalforming": "Usage",
-  "block-handbooktext-emetalforming": "Automatically forges anything that can be smithied on an anvil. Pick the product first (full anvil list); the choice is remembered. As soon as the matching ingot or plate is in the input, the machine heats and forges. It counts recipe voxels, consumes the required number of ingots, and returns leftover voxels as metal bits. Multiblock 2×2×2, 128 V. Assemble with steel plates, copper coils, iron and copper plates (RMB on controller). Supports hoppers.",
+  "block-handbooktext-emetalforming": "Automatically forges anything that can be smithied on an anvil. Put an ingot in the input, then pick a product made from that metal. The choice is remembered. As soon as the matching ingot or plate is in the input, the machine heats and forges. It counts recipe voxels, consumes the required number of ingots, and returns leftover voxels as metal bits. Multiblock 2×2×2, 128 V. Assemble with steel plates, copper coils, iron and copper plates (RMB on controller). Supports hoppers.",
   "emetalforming-structure-complete": "Metal Former assembled",
   "emetalforming-formed-hint": "Assembled Metal Former.",
   "emetalforming-select": "Select product",

@@ -412,10 +412,17 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
         if (Api is not ICoreClientAPI capi)
             return;
 
-        var groups = GetAllSmithingRecipes()
+        if (!IsWorkableInput(InputSlot?.Itemstack))
+        {
+            capi.TriggerIngameError(this, "noinput",
+                Lang.Get("electricalprogressiveindustry:emetalforming-need-ingot"));
+            return;
+        }
+
+        var groups = GetRecipesForInput()
             .GroupBy(ProductKey)
             .Where(g => !string.IsNullOrEmpty(g.Key))
-            .OrderBy(g => GenericCollectibleName(g.Select(r => r.Output?.ResolvedItemstack)))
+            .OrderBy(g => g.First().Output?.ResolvedItemstack?.GetName() ?? "")
             .ToList();
 
         if (groups.Count == 0)
@@ -442,8 +449,7 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
             var ingred = GetRecipeIngredientPreview(groups[i].First());
             if (ingred == null)
                 continue;
-            var material = GenericCollectibleName(groups[i].Select(r => r.Ingredient?.ResolvedItemStack));
-            selector.SetIngredientCounts(i, ingred.StackSize, material);
+            selector.SetIngredientCounts(i, ingred.StackSize, ingred.GetName());
         }
         _recipeSelector = selector;
 
@@ -530,6 +536,9 @@ public class BlockEntityEMetalForming : BlockEntityGenericTypedContainer
         {
             SelectedRecipe = hit;
             SelectedRecipeId = hit.RecipeId;
+            var variantName = hit.Output?.ResolvedItemstack?.GetName();
+            if (!string.IsNullOrWhiteSpace(variantName))
+                CurrentRecipeName = variantName;
         }
         else
         {

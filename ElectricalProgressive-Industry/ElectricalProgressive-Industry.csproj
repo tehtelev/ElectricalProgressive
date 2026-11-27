@@ -14,6 +14,8 @@
       <ProjectReference Include="..\ElectricalProgressive-Basics\ElectricalProgressive-Basics.csproj">
         <Private>false</Private>
       </ProjectReference>
+      <DependentMod Include="ElectricalProgressive-Core" FolderName="core" />
+      <DependentMod Include="ElectricalProgressive-Basics" FolderName="basics" />
     </ItemGroup>
     <Import Project="..\build\CopyDependentMods.targets" />
     <ItemGroup>

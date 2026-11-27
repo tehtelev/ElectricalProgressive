@@ -10,7 +10,7 @@ using Vintagestory.GameContent;
 namespace ElectricalProgressive.Content.Block.EMetalForming;
 
 /// <summary>
-/// Выбор изделия. Иконка всегда оловянная, название без металла.
+/// Выбор изделия из металла, который лежит во входном слоте.
 /// </summary>
 public class GuiDialogMetalFormingRecipes : GuiDialogGeneric
 {
@@ -33,7 +33,7 @@ public class GuiDialogMetalFormingRecipes : GuiDialogGeneric
         var slot = GuiElementPassiveItemSlot.unscaledSlotSize + GuiElementItemSlotGridBase.unscaledSlotPadding;
         foreach (var group in groups)
         {
-            var output = TinVariant(group) ?? group.FirstOrDefault()?.Output?.ResolvedItemstack;
+            var output = group.FirstOrDefault()?.Output?.ResolvedItemstack;
             if (output?.Collectible == null)
                 continue;
 
@@ -43,7 +43,7 @@ public class GuiDialogMetalFormingRecipes : GuiDialogGeneric
             _items.Add(new SkillItem
             {
                 Code = stack.Collectible.Code.Clone(),
-                Name = BlockEntityEMetalForming.GenericCollectibleName(group.Select(r => r.Output?.ResolvedItemstack)),
+                Name = stack.GetName(),
                 Description = "",
                 RenderHandler = (_, _, x, y) =>
                 {
@@ -100,18 +100,6 @@ public class GuiDialogMetalFormingRecipes : GuiDialogGeneric
             .Compose();
 
         SingleComposer.GetSkillItemGrid("skillitemgrid").OnSlotOver = OnSlotOver;
-    }
-
-    private static ItemStack? TinVariant(IReadOnlyList<SmithingRecipe> group)
-    {
-        foreach (var recipe in group)
-        {
-            var stack = recipe.Output?.ResolvedItemstack;
-            if (stack?.Collectible?.LastCodePart() == "tin")
-                return stack;
-        }
-
-        return null;
     }
 
     private void OnSlotOver(int index)

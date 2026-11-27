@@ -16736,6 +16736,361 @@
 					}
 				}
 			]
+		},
+				{
+			"name": "work-lever",
+			"code": "work-lever",
+			"quantityframes": 41,
+			"onActivityStopped": "Stop",
+			"onAnimationEnd": "Hold",
+			"keyframes": [
+				{
+					"frame": 0,
+					"elements": {
+						"Lever": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 }
+					}
+				},
+				{
+					"frame": 25,
+					"elements": {
+						"Lever": { "rotationX": -39.0, "rotationY": 0.0, "rotationZ": 0.0 }
+					}
+				},
+				{
+					"frame": 27,
+					"elements": {
+						"Lever": { "rotationX": -37.0, "rotationY": 0.0, "rotationZ": 0.0 }
+					}
+				},
+				{
+					"frame": 40,
+					"elements": {
+						"Lever": { "rotationX": -37.0, "rotationY": 0.0, "rotationZ": 0.0 }
+					}
+				}
+			]
+		},
+		{
+			"name": "work-load",
+			"code": "work-load",
+			"quantityframes": 88,
+			"onActivityStopped": "Stop",
+			"onAnimationEnd": "Hold",
+			"keyframes": [
+				{
+					"frame": 0,
+					"elements": {
+						"PressBase": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"pump2": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"CartridgeBase": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0, "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis2": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis3": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis4": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis5": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis11": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 }
+					}
+				},
+				{
+					"frame": 25,
+					"elements": {
+						"PressBase": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"pump2": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"CartridgeBase": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": -24.0, "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis2": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis3": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis4": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis5": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis11": { "rotationX": 0.0, "rotationY": 180.0, "rotationZ": 0.0 }
+					}
+				},
+				{
+					"frame": 27,
+					"elements": {
+						"PressBase": { "offsetX": 0.0, "offsetY": 0.3, "offsetZ": 0.0 },
+						"pump2": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"CartridgeBase": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": -24.0, "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis2": { "rotationX": 0.0, "rotationY": 6.0, "rotationZ": 0.0 },
+						"GearAxis3": { "rotationX": 0.0, "rotationY": -6.0, "rotationZ": 0.0 },
+						"GearAxis4": { "rotationX": 0.0, "rotationY": 6.0, "rotationZ": 0.0 },
+						"GearAxis5": { "rotationX": 0.0, "rotationY": -6.0, "rotationZ": 0.0 },
+						"GearAxis11": { "rotationX": 0.0, "rotationY": 180.0, "rotationZ": 0.0 }
+					}
+				},
+				{
+					"frame": 80,
+					"elements": {
+						"PressBase": { "offsetX": 0.0, "offsetY": -12.0, "offsetZ": 0.0 },
+						"pump2": { "offsetX": 0.0, "offsetY": -5.0, "offsetZ": 0.0 },
+						"CartridgeBase": { "offsetX": 0.0, "offsetY": -17.0, "offsetZ": -24.0, "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis2": { "rotationX": 0.0, "rotationY": -180.0, "rotationZ": 0.0 },
+						"GearAxis3": { "rotationX": 0.0, "rotationY": 180.0, "rotationZ": 0.0 },
+						"GearAxis4": { "rotationX": 0.0, "rotationY": -180.0, "rotationZ": 0.0 },
+						"GearAxis5": { "rotationX": 0.0, "rotationY": 180.0, "rotationZ": 0.0 },
+						"GearAxis11": { "rotationX": 0.0, "rotationY": 180.0, "rotationZ": 0.0 }
+					}
+				},
+				{
+					"frame": 87,
+					"elements": {
+						"PressBase": { "offsetX": 0.0, "offsetY": -12.0, "offsetZ": 0.0 },
+						"pump2": { "offsetX": 0.0, "offsetY": -5.0, "offsetZ": 0.0 },
+						"CartridgeBase": { "offsetX": 0.0, "offsetY": -17.0, "offsetZ": -24.0, "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis2": { "rotationX": 0.0, "rotationY": -180.0, "rotationZ": 0.0 },
+						"GearAxis3": { "rotationX": 0.0, "rotationY": 180.0, "rotationZ": 0.0 },
+						"GearAxis4": { "rotationX": 0.0, "rotationY": -180.0, "rotationZ": 0.0 },
+						"GearAxis5": { "rotationX": 0.0, "rotationY": 180.0, "rotationZ": 0.0 },
+						"GearAxis11": { "rotationX": 0.0, "rotationY": 180.0, "rotationZ": 0.0 }
+					}
+				}
+			]
+		},
+		{
+			"name": "work-press",
+			"code": "work-press",
+			"quantityframes": 101,
+			"onActivityStopped": "Stop",
+			"onAnimationEnd": "Hold",
+			"keyframes": [
+				{
+					"frame": 0,
+					"elements": {
+						"pump": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"GearAxis6": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis7": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis8": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis9": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 }
+					}
+				},
+				{
+					"frame": 100,
+					"elements": {
+						"pump": { "offsetX": 0.0, "offsetY": -7.5, "offsetZ": 0.0 },
+						"GearAxis6": { "rotationX": -180.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis7": { "rotationX": 180.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis8": { "rotationX": -180.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis9": { "rotationX": 180.0, "rotationY": 0.0, "rotationZ": 0.0 }
+					}
+				}
+			]
+		},
+		{
+			"name": "work-unload",
+			"code": "work-unload",
+			"quantityframes": 261,
+			"onActivityStopped": "Stop",
+			"onAnimationEnd": "Hold",
+			"keyframes": [
+				{
+					"frame": 0,
+					"elements": {
+						"Lever": { "rotationX": -37.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"PressBase": { "offsetX": 0.0, "offsetY": -12.0, "offsetZ": 0.0 },
+						"pump": { "offsetX": 0.0, "offsetY": -7.5, "offsetZ": 0.0 },
+						"pump2": { "offsetX": 0.0, "offsetY": -5.0, "offsetZ": 0.0 },
+						"CartridgeBase": { "offsetX": 0.0, "offsetY": -17.0, "offsetZ": -24.0, "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"Cube671": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis2": { "rotationX": 0.0, "rotationY": -180.0, "rotationZ": 0.0 },
+						"GearAxis3": { "rotationX": 0.0, "rotationY": 180.0, "rotationZ": 0.0 },
+						"GearAxis4": { "rotationX": 0.0, "rotationY": -180.0, "rotationZ": 0.0 },
+						"GearAxis5": { "rotationX": 0.0, "rotationY": 180.0, "rotationZ": 0.0 },
+						"GearAxis6": { "rotationX": -180.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis7": { "rotationX": 180.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis8": { "rotationX": -180.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis9": { "rotationX": 180.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis10": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis11": { "rotationX": 0.0, "rotationY": 180.0, "rotationZ": 0.0 }
+					}
+				},
+				{
+					"frame": 90,
+					"elements": {
+						"Lever": { "rotationX": -37.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"PressBase": { "offsetX": 0.0, "offsetY": -12.0, "offsetZ": 0.0 },
+						"pump": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"pump2": { "offsetX": 0.0, "offsetY": -5.0, "offsetZ": 0.0 },
+						"CartridgeBase": { "offsetX": 0.0, "offsetY": -17.0, "offsetZ": -24.0, "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"Cube671": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis2": { "rotationX": 0.0, "rotationY": -180.0, "rotationZ": 0.0 },
+						"GearAxis3": { "rotationX": 0.0, "rotationY": 180.0, "rotationZ": 0.0 },
+						"GearAxis4": { "rotationX": 0.0, "rotationY": -180.0, "rotationZ": 0.0 },
+						"GearAxis5": { "rotationX": 0.0, "rotationY": 180.0, "rotationZ": 0.0 },
+						"GearAxis6": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis7": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis8": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis9": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis10": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis11": { "rotationX": 0.0, "rotationY": 180.0, "rotationZ": 0.0 }
+					}
+				},
+				{
+					"frame": 190,
+					"elements": {
+						"Lever": { "rotationX": -37.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"PressBase": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"pump": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"pump2": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"CartridgeBase": { "offsetX": 0.0, "offsetY": -17.0, "offsetZ": -24.0, "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"Cube671": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis2": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis3": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis4": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis5": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis6": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis7": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis8": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis9": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis10": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis11": { "rotationX": 0.0, "rotationY": 180.0, "rotationZ": 0.0 }
+					}
+				},
+				{
+					"frame": 191,
+					"elements": {
+						"Lever": { "rotationX": -37.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"PressBase": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"pump": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"pump2": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"CartridgeBase": { "offsetX": 0.0, "offsetY": -17.0, "offsetZ": -24.0, "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"Cube671": { "rotationX": 36.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis2": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis3": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis4": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis5": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis6": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis7": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis8": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis9": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis10": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis11": { "rotationX": 0.0, "rotationY": 180.0, "rotationZ": 0.0 }
+					}
+				},
+				{
+					"frame": 192,
+					"elements": {
+						"Lever": { "rotationX": -37.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"PressBase": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"pump": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"pump2": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"CartridgeBase": { "offsetX": 3.0, "offsetY": -16.8, "offsetZ": -23.6, "rotationX": 0.0, "rotationY": 6.0, "rotationZ": 0.0 },
+						"Cube671": { "rotationX": 22.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis2": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis3": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis4": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis5": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis6": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis7": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis8": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis9": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis10": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis11": { "rotationX": 0.0, "rotationY": 180.0, "rotationZ": 0.0 }
+					}
+				},
+				{
+					"frame": 196,
+					"elements": {
+						"Lever": { "rotationX": -37.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"PressBase": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"pump": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"pump2": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"CartridgeBase": { "offsetX": 2.3, "offsetY": -16.3, "offsetZ": -19.6, "rotationX": 0.0, "rotationY": 4.0, "rotationZ": 0.0 },
+						"Cube671": { "rotationX": 22.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis2": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis3": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis4": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis5": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis6": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis7": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis8": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis9": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis10": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis11": { "rotationX": 0.0, "rotationY": 180.0, "rotationZ": 0.0 }
+					}
+				},
+				{
+					"frame": 200,
+					"elements": {
+						"Lever": { "rotationX": -37.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"PressBase": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"pump": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"pump2": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"CartridgeBase": { "offsetX": -2.2, "offsetY": -21.5, "offsetZ": -1.7, "rotationX": 14.0, "rotationY": -4.0, "rotationZ": 0.0 },
+						"Cube671": { "rotationX": 22.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis2": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis3": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis4": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis5": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis6": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis7": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis8": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis9": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis10": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis11": { "rotationX": 0.0, "rotationY": 180.0, "rotationZ": 0.0 }
+					}
+				},
+				{
+					"frame": 203,
+					"elements": {
+						"Lever": { "rotationX": -37.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"PressBase": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"pump": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"pump2": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"CartridgeBase": { "offsetX": 2.2, "offsetY": -23.5, "offsetZ": -0.7, "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"Cube671": { "rotationX": 22.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis2": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis3": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis4": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis5": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis6": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis7": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis8": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis9": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis10": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis11": { "rotationX": 0.0, "rotationY": 180.0, "rotationZ": 0.0 }
+					}
+				},
+				{
+					"frame": 229,
+					"elements": {
+						"Lever": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"PressBase": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"pump": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"pump2": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"CartridgeBase": { "offsetX": 2.2, "offsetY": -23.5, "offsetZ": -0.7, "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"Cube671": { "rotationX": 22.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis2": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis3": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis4": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis5": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis6": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis7": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis8": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis9": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis10": { "rotationX": 0.0, "rotationY": -180.0, "rotationZ": 0.0 },
+						"GearAxis11": { "rotationX": 0.0, "rotationY": 180.0, "rotationZ": 0.0 }
+					}
+				},
+				{
+					"frame": 260,
+					"elements": {
+						"Lever": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"PressBase": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"pump": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"pump2": { "offsetX": 0.0, "offsetY": 0.0, "offsetZ": 0.0 },
+						"CartridgeBase": { "offsetX": 2.2, "offsetY": -23.5, "offsetZ": -0.7, "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"Cube671": { "rotationX": 22.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis2": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis3": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis4": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis5": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis6": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis7": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis8": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis9": { "rotationX": 0.0, "rotationY": 0.0, "rotationZ": 0.0 },
+						"GearAxis10": { "rotationX": 0.0, "rotationY": -180.0, "rotationZ": 0.0 },
+						"GearAxis11": { "rotationX": 0.0, "rotationY": 180.0, "rotationZ": 0.0 }
+					}
+				}
+			]
 		}
-	]
+]
 }

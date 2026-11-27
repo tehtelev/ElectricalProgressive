@@ -1,8 +1,11 @@
 using ElectricalProgressive.Content.Block;
+using ElectricalProgressive.Content.Block.EMetalForming;
 using ElectricalProgressive.RecipeSystem;
 using ElectricalProgressive.RecipeSystem.Recipe;
 using ElectricalProgressive.Utils;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -31,8 +34,22 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
     public ItemSlot OutputSlot => this.inventory[1];
     public ItemSlot SecondaryOutputSlot => this.inventory[2];
 
+    public const int PacketSelectRecipe = 1500;
+    public const int EnergyPerHit = 50;
+
+    private const string AnimLower = "work-lower";
+    private const string AnimHit = "work-hit";
+    private const int HitFrames = 30;
+    private const int HitImpactFrame = 7;
+    private const float LowerSpeed = 2f;
+
+    public string SelectedProductKey = "";
     public string CurrentRecipeName;
     public float RecipeProgress;
+    private readonly HammerWorkpiece _work = new();
+    private bool _internalSlotChange;
+    private float _workTemperature;
+    private GuiDialogMetalFormingRecipes? _recipeSelector;
     
     /// <summary>
     /// Накопленная энергия для текущего рецепта (целые единицы)
@@ -115,6 +132,12 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
     {
         if (!StructureComplete)
             return;
+
+        if (!string.IsNullOrEmpty(SelectedProductKey))
+        {
+            AddSmithingEnergy(amount);
+            return;
+        }
 
         if (CurrentRecipe == null || InputSlot.Empty)
             return;
@@ -214,8 +237,12 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
                 UpdateMeshes();
             };
 
-            _workItemRenderer = new SmithingWorkItemRenderer(_capi, () => Pos, () => InputSlot?.Itemstack);
+            _workItemRenderer = new SmithingWorkItemRenderer(_capi, () => Pos, () => WorkTemperature)
+            {
+                VoxelWorkItem = true
+            };
             _capi.Event.RegisterRenderer(_workItemRenderer, EnumRenderStage.Opaque, "ehammer-workitem");
+            _capi.Event.RegisterRenderer(_workItemRenderer, EnumRenderStage.AfterFinalComposition, "ehammer-workitem");
 
             // Первоначальное создание мешей
             UpdateMeshes();
@@ -239,12 +266,26 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             return;
 
         PrepareAnimUtil(Api, InventoryClassName);
+        int rotationDeg = GetRotation();
         AnimUtil.InitializeAnimator(
             InventoryClassName,
             _mesh,
             _resultingShape,
-            new Vec3f(0, GetRotation(), 0f));
+            new Vec3f(0, rotationDeg, 0f));
+        if (AnimUtil.renderer != null)
+            AnimUtil.renderer.CustomTransform = FormedPlacement(rotationDeg);
         _animatorReadyForFormed = true;
+    }
+
+    // Сдвиг -1 по X снаружи сустава. В вершинах он крутит шестерни вокруг блока.
+    private static float[] FormedPlacement(float rotationDegY)
+    {
+        float[] m = Mat4f.Create();
+        Mat4f.Translate(m, m, 0.5f, 0f, 0.5f);
+        Mat4f.RotateY(m, m, rotationDegY * GameMath.DEG2RAD);
+        Mat4f.Translate(m, m, -0.5f, 0f, -0.5f);
+        Mat4f.Translate(m, m, -1f, 0f, 0f);
+        return m;
     }
 
     private Vintagestory.API.Common.Block? GetFormedBlockForAnim(ICoreAPI api)
@@ -272,10 +313,9 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         if (shape == null)
             return;
 
-        // CreateMesh кэширует локальный меш — клонируем, иначе Translate уедет повторно
+        // CreateMesh кэширует меш. Клон не даёт чужому молоту перезаписать уже залитые вершины.
         var src = AnimUtil.CreateMesh(cacheDictKey + "-formed", shape, out _resultingShape, null);
         _mesh = src?.Clone();
-        _mesh?.Translate(-1f, 0f, 0f);
     }
 
     public int GetRotation()
@@ -290,24 +330,33 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
             return;
 
-        const int startFrame = 27;
-        if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on") && AnimUtil.animator != null)
-        {
-            var currentTime = Api.World.ElapsedMilliseconds;
-            _lastAnimationCheckTime = currentTime;
+        if (AnimUtil.animator == null)
+            return;
 
-            var currentFrame = AnimUtil.animator.Animations[0].CurrentFrame;
-            if (currentFrame >= startFrame && _lastSoundFrame != startFrame)
-            {
-                PlayHammerSound();
-                _lastSoundFrame = startFrame;
-            }
-            else if ((int)currentFrame < startFrame)
-            {
-                _lastSoundFrame = -1;
-            }
+        var lower = AnimUtil.animator.GetAnimationState(AnimLower);
+        if (lower is { Active: true } && lower.CurrentFrame >= 99f &&
+            !AnimUtil.activeAnimationsByAnimCode.ContainsKey(AnimHit))
+        {
+            StartHitAnimation();
         }
-        else
+
+        var hit = AnimUtil.animator.GetAnimationState(AnimHit);
+        if (hit is not { Active: true })
+        {
+            _lastSoundFrame = -1;
+            return;
+        }
+
+        if (AnimUtil.activeAnimationsByAnimCode.TryGetValue(AnimHit, out var hitMeta))
+            hitMeta.AnimationSpeed = HitAnimationSpeed();
+
+        var currentFrame = hit.CurrentFrame;
+        if (currentFrame >= HitImpactFrame && _lastSoundFrame != HitImpactFrame)
+        {
+            PlayHammerSound();
+            _lastSoundFrame = HitImpactFrame;
+        }
+        else if (currentFrame < HitImpactFrame)
         {
             _lastSoundFrame = -1;
         }
@@ -413,10 +462,25 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             return;
         }
 
+        if (_work.Active)
+        {
+            var workMesh = GenWorkpieceMesh();
+            var outline = GenOutlineMesh();
+            if (workMesh != null)
+                PlaceOnSeat(workMesh, outline);
+            _meshes[slotid] = workMesh;
+            _workItemRenderer?.SetMesh(workMesh);
+            _workItemRenderer?.SetOutline(outline);
+            UpdateItemParticleOffset(workMesh);
+            return;
+        }
+
         if (inventory[slotid].Empty)
         {
             _meshes[slotid] = null;
             UpdateItemParticleOffset(null);
+            _workItemRenderer?.SetMesh(null);
+            _workItemRenderer?.SetOutline(null);
             return;
         }
 
@@ -432,6 +496,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         }
 
         _workItemRenderer?.SetMesh(_meshes[slotid]);
+        _workItemRenderer?.SetOutline(null);
         UpdateItemParticleOffset(_meshes[slotid]);
     }
 
@@ -441,8 +506,16 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             return;
 
         var stack = this.inventory[slotId].Itemstack;
+        if (stack == null)
+            return;
+
+        ApplySeat(meshData, stack);
+    }
+
+    private void ApplySeat(MeshData meshData, ItemStack stack)
+    {
         var origin = new Vec3f(0.5f, 0, 0.5f);
-        var orientationRotate = Block.Shape.rotateY;
+        var orientationRotate = Block?.Shape?.rotateY ?? 0;
 
         if (stack.Class == EnumItemClass.Item)
         {
@@ -582,11 +655,19 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         if (this.Api is ICoreClientAPI && this._clientDialog != null)
             this._clientDialog.Update(RecipeProgress);
 
-        if (slotid != 0)
+        if (slotid != 0 || _internalSlotChange)
             return;
 
-        // защита от горячей смены стака
-        if (slotid == 0 && RecipeProgress < 1f)
+        if (_work.Active && !InputIsWorkMetal() && !InputSlot.Empty)
+        {
+            if (Api?.Side == EnumAppSide.Server)
+                RefundWorkpiece();
+            else
+                _work.Clear();
+            RecipeProgress = 0f;
+            AccumulatedEnergy = 0;
+        }
+        else if (!_work.Active && RecipeProgress < 1f)
         {
             RecipeProgress = 0f;
             AccumulatedEnergy = 0;
@@ -621,6 +702,11 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
 
         foreach (var recipe in ElectricalProgressiveRecipeManager.HammerRecipes)
         {
+            var ingredientPath = recipe.Ingredients?[0]?.Code?.Path;
+            if (!string.IsNullOrEmpty(ingredientPath) &&
+                ingredientPath.StartsWith("ingot", StringComparison.OrdinalIgnoreCase))
+                continue;
+
             if (recipe.Matches(inputSlots, out _))
             {
                 currentRecipe = recipe;
@@ -643,8 +729,33 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
             return;
         }
 
-        var stack = InputSlot?.Itemstack;
+        if (!string.IsNullOrEmpty(SelectedProductKey))
+        {
+            var smithing = ResolveSmithingRecipe();
+            var hasSmithPower = beh.PowerSetting >= _maxConsumption * 0.1F;
+            if (Api.Side == EnumAppSide.Server)
+            {
+                var hot = WorkTemperature >= CraftStartTemp;
+                SetForging(hasSmithPower && smithing != null && AcceptsSmithingPower() && hot);
+            }
 
+            var smithingNow = smithing != null && IsForging;
+            if (smithingNow)
+            {
+                if (!_wasCraftingLastTick)
+                    StartAnimation();
+            }
+            else if (_wasCraftingLastTick)
+            {
+                StopAnimation();
+                MarkDirty(true);
+            }
+
+            _wasCraftingLastTick = smithingNow;
+            return;
+        }
+
+        var stack = InputSlot?.Itemstack;
         if (stack is null ||
             stack.StackSize == 0 ||
             stack.Collectible == null)
@@ -798,7 +909,7 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
 
     private void StartAnimation()
     {
-        if (Api?.Side != EnumAppSide.Client || CurrentRecipe == null)
+        if (Api?.Side != EnumAppSide.Client || (CurrentRecipe == null && string.IsNullOrEmpty(SelectedProductKey)))
             return;
 
         EnsureAnimatorReady();
@@ -807,17 +918,44 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         var beh = GetBehavior<BEBehaviorEHammer>();
         if (beh == null) return;
 
-        if (!AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
+        if (AnimUtil.activeAnimationsByAnimCode.ContainsKey(AnimLower) ||
+            AnimUtil.activeAnimationsByAnimCode.ContainsKey(AnimHit))
+            return;
+
+        AnimUtil.StartAnimation(new AnimationMetaData()
         {
-            AnimUtil.StartAnimation(new AnimationMetaData()
-            {
-                Animation = "work-on",
-                Code = "work-on",
-                AnimationSpeed = 2f,
-                EaseOutSpeed = 2.0f,
-                EaseInSpeed = 1f
-            });
-        }
+            Animation = AnimLower,
+            Code = AnimLower,
+            AnimationSpeed = LowerSpeed,
+            EaseOutSpeed = 3f,
+            EaseInSpeed = 4f
+        });
+    }
+
+    private void StartHitAnimation()
+    {
+        if (AnimUtil == null || AnimUtil.activeAnimationsByAnimCode.ContainsKey(AnimHit))
+            return;
+
+        AnimUtil.StartAnimation(new AnimationMetaData()
+        {
+            Animation = AnimHit,
+            Code = AnimHit,
+            AnimationSpeed = HitAnimationSpeed(),
+            EaseOutSpeed = 10f,
+            EaseInSpeed = 10f
+        });
+    }
+
+    /// <summary>
+    /// Один цикл work-hit длится столько же, сколько один воксель.
+    /// Энергия удара копится порциями Power/20 на тик сети.
+    /// </summary>
+    private float HitAnimationSpeed()
+    {
+        var power = Math.Max(1, GetBehavior<BEBehaviorEHammer>()?.PowerSetting ?? 1);
+        var ticksPerSecond = Math.Max(1, global::ElectricalProgressive.ElectricalProgressive.speedOfElectricity);
+        return HitFrames * power * ticksPerSecond / 30000f;
     }
 
     private void StopAnimation()
@@ -825,10 +963,29 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
             return;
 
-        if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
-        {
-            AnimUtil.StopAnimation("work-on");
-        }
+        if (AnimUtil.activeAnimationsByAnimCode.ContainsKey(AnimHit))
+            AnimUtil.StopAnimation(AnimHit);
+
+        if (AnimUtil.activeAnimationsByAnimCode.ContainsKey(AnimLower))
+            AnimUtil.StopAnimation(AnimLower);
+
+        _lastSoundFrame = -1;
+    }
+
+    private bool MachineAnimRunning()
+    {
+        if (AnimUtil?.activeAnimationsByAnimCode != null &&
+            (AnimUtil.activeAnimationsByAnimCode.ContainsKey(AnimLower) ||
+             AnimUtil.activeAnimationsByAnimCode.ContainsKey(AnimHit)))
+            return true;
+
+        var animator = AnimUtil?.animator;
+        if (animator == null)
+            return false;
+
+        var lower = animator.GetAnimationState(AnimLower);
+        var hit = animator.GetAnimationState(AnimHit);
+        return lower is { Running: true } || hit is { Running: true };
     }
 
     protected virtual void UpdateState(float recipeProgress)
@@ -860,6 +1017,18 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
     {
         base.OnReceivedClientPacket(player, packetid, data);
         ElectricalProgressive?.OnReceivedClientPacket(player, packetid, data);
+
+        if (packetid == PacketSelectRecipe && data != null)
+        {
+            try
+            {
+                SelectProduct(SerializerUtil.Deserialize<string>(data));
+            }
+            catch
+            {
+                // Пакет не строка ключа изделия.
+            }
+        }
     }
 
     public override void OnReceivedServerPacket(int packetid, byte[] data)
@@ -886,22 +1055,24 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
 
         base.OnTesselation(mesher, tesselator);
 
-        if (AnimUtil?.activeAnimationsByAnimCode == null ||
-            !AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
-        {
-            return false;
-        }
-
-        return true;
+        return MachineAnimRunning();
     }
 
     public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldForResolving)
     {
         base.FromTreeAttributes(tree, worldForResolving);
+        // Раньше инвентаря: слот пустеет в том же пакете, и обработчик слота
+        // не должен стереть заготовку, которую ещё не прочитали.
+        SelectedProductKey = tree.GetString("selectedProductKey") ?? "";
+        _workTemperature = tree.GetFloat("workTemperature");
+        _work.Read(tree);
         this.Inventory.FromTreeAttributes(tree.GetTreeAttribute("_inventory"));
         this.RecipeProgress = tree.GetFloat("PowerCurrent");
         this.AccumulatedEnergy = tree.GetInt("accumulatedEnergy");
         this.IsForging = tree.GetBool("isForging");
+        if (!string.IsNullOrEmpty(SelectedProductKey))
+            CurrentRecipeName = ResolveSmithingRecipe()?.Output?.ResolvedItemstack?.GetName()
+                                ?? CurrentRecipeName;
 
         if (this.Api != null)
             this.Inventory.AfterBlocksLoaded(this.Api.World);
@@ -932,6 +1103,9 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         tree.SetInt("accumulatedEnergy", this.AccumulatedEnergy);
         tree.SetBool("isForging", IsForging);
         tree.SetBool("structureComplete", StructureComplete);
+        tree.SetString("selectedProductKey", SelectedProductKey ?? "");
+        tree.SetFloat("workTemperature", _workTemperature);
+        _work.Write(tree);
     }
 
     public override void OnBlockPlaced(ItemStack? byItemStack = null)
@@ -973,6 +1147,430 @@ public class BlockEntityEHammer : BlockEntityGenericTypedContainer, ITexPosition
         _meshes = null;
         _nowTesselatingShape = null;
         _nowTesselatingObj = null;
+    }
+
+    public bool WorkpieceActive => _work.Active;
+
+    public float WorkTemperature => _work.Active ? _workTemperature : GetInputTemperature();
+
+    public bool AcceptsSmithingPower()
+    {
+        if (string.IsNullOrEmpty(SelectedProductKey) || !StructureComplete)
+            return false;
+
+        var recipe = ResolveSmithingRecipe();
+        if (recipe == null)
+            return false;
+
+        if (!_work.Active)
+            return BlockEntityEMetalForming.IsWorkableInput(InputSlot?.Itemstack);
+
+        if (_work.MetalCount >= BlockEntityEMetalForming.CountRecipeVoxels(recipe))
+            return true;
+
+        return InputIsWorkMetal();
+    }
+
+    public void OpenRecipeSelector()
+    {
+        if (Api is not ICoreClientAPI capi)
+            return;
+
+        if (!BlockEntityEMetalForming.IsWorkableInput(InputSlot?.Itemstack))
+        {
+            capi.TriggerIngameError(this, "noinput",
+                Lang.Get("electricalprogressiveindustry:emetalforming-need-ingot"));
+            return;
+        }
+
+        var groups = SmithingRecipesForInput()
+            .GroupBy(BlockEntityEMetalForming.ProductKey)
+            .Where(g => !string.IsNullOrEmpty(g.Key))
+            .OrderBy(g => g.First().Output?.ResolvedItemstack?.GetName() ?? "")
+            .ToList();
+
+        if (groups.Count == 0)
+        {
+            capi.TriggerIngameError(this, "norecipe",
+                Lang.Get("electricalprogressiveindustry:emetalforming-no-recipes"));
+            return;
+        }
+
+        _recipeSelector?.Dispose();
+        var selector = new GuiDialogMetalFormingRecipes(
+            Lang.Get("electricalprogressiveindustry:emetalforming-select"),
+            groups.Select(g => (IReadOnlyList<SmithingRecipe>)g.ToList()).ToList(),
+            selectedIndex =>
+            {
+                var key = groups[selectedIndex].Key;
+                SelectProduct(key);
+                capi.Network.SendBlockEntityPacket(Pos, PacketSelectRecipe, SerializerUtil.Serialize(key));
+            },
+            Pos,
+            capi);
+        _recipeSelector = selector;
+        capi.Gui.RegisterDialog(_recipeSelector);
+        _recipeSelector.TryOpen();
+    }
+
+    public void SelectProduct(string? productKey)
+    {
+        var key = productKey ?? "";
+        if (!string.Equals(SelectedProductKey, key, StringComparison.Ordinal))
+        {
+            if (Api?.Side == EnumAppSide.Server)
+                RefundWorkpiece();
+            else
+                _work.Clear();
+
+            AccumulatedEnergy = 0;
+            RecipeProgress = 0f;
+            SetForging(false);
+        }
+
+        SelectedProductKey = key;
+        CurrentRecipe = null;
+        var recipe = ResolveSmithingRecipe();
+        CurrentRecipeName = recipe?.Output?.ResolvedItemstack?.GetName() ?? "";
+        MarkDirty(true);
+        if (Api is ICoreClientAPI)
+            _clientDialog?.Update(RecipeProgress, CurrentRecipeName);
+    }
+
+    public SmithingRecipe? ResolveSmithingRecipe()
+    {
+        if (string.IsNullOrEmpty(SelectedProductKey) || Api == null)
+            return null;
+
+        var all = Api.GetSmithingRecipes();
+        if (all == null)
+            return null;
+
+        if (_work.Active && _work.RecipeId >= 0)
+        {
+            var byId = all.FirstOrDefault(r => r.RecipeId == _work.RecipeId);
+            if (byId != null && BlockEntityEMetalForming.ProductKey(byId) == SelectedProductKey)
+                return byId;
+        }
+
+        var stack = InputSlot?.Itemstack;
+        if (!BlockEntityEMetalForming.IsWorkableInput(stack))
+            return null;
+
+        var workable = stack!.Collectible.GetCollectibleInterface<IAnvilWorkable>();
+        return workable?.GetMatchingRecipes(stack)?
+            .FirstOrDefault(r => BlockEntityEMetalForming.IsIngotRecipe(r) &&
+                                 BlockEntityEMetalForming.ProductKey(r) == SelectedProductKey);
+    }
+
+    private void AddSmithingEnergy(int amount)
+    {
+        if (Api?.Side != EnumAppSide.Server || !StructureComplete || amount <= 0)
+            return;
+
+        var recipe = ResolveSmithingRecipe();
+        if (recipe == null)
+            return;
+
+        var beh = GetBehavior<BEBehaviorEHammer>();
+        if (beh == null || beh.PowerSetting <= 0)
+            return;
+
+        var safeAmount = Math.Min(amount, Math.Max(1, (int)(beh.PowerSetting / 20f)));
+        var temp = WorkTemperature;
+        if (temp < CraftStartTemp)
+        {
+            SetWorkTemperature(Math.Min(temp + safeAmount * HeatPerEnergy, CraftStartTemp));
+            RecipeProgress = _work.Active ? _work.MatchRatio(recipe) : 0f;
+            SetForging(false);
+            UpdateState(RecipeProgress);
+            MarkDirty();
+            return;
+        }
+
+        SetWorkTemperature(Math.Min(Math.Max(temp, CraftStartTemp), _maxTargetTemp));
+        SetForging(true);
+        AccumulatedEnergy += safeAmount;
+        if (AccumulatedEnergy < EnergyPerHit)
+        {
+            MarkDirty();
+            return;
+        }
+
+        AccumulatedEnergy -= EnergyPerHit;
+        if (!StepWorkpiece(recipe))
+            SetForging(false);
+
+        MarkDirty();
+    }
+
+    private bool StepWorkpiece(SmithingRecipe recipe)
+    {
+        if (!_work.Active)
+        {
+            if (!BlockEntityEMetalForming.IsWorkableInput(InputSlot?.Itemstack))
+                return false;
+
+            var metal = InputSlot.Itemstack.Collectible.LastCodePart();
+            _workTemperature = GetInputTemperature();
+            ConsumeOneIngot();
+            _work.Begin(Api, metal, recipe);
+        }
+
+        if (_work.Matches(recipe))
+        {
+            FinishWorkpiece(recipe);
+            return true;
+        }
+
+        // Один удар — один воксель. Следующий слиток берём только когда
+        // двигать уже нечего, а рецепту ещё не хватает металла.
+        if (!_work.Hit(recipe))
+        {
+            var needsMetal = _work.MetalCount < BlockEntityEMetalForming.CountRecipeVoxels(recipe);
+            if (!needsMetal || !InputIsWorkMetal() || _work.TryAddIngot() <= 0)
+                return false;
+
+            _workTemperature = Math.Max(_workTemperature, GetInputTemperature());
+            ConsumeOneIngot();
+        }
+
+        if (_work.Matches(recipe))
+        {
+            FinishWorkpiece(recipe);
+            return true;
+        }
+
+        RecipeProgress = _work.MatchRatio(recipe);
+        UpdateState(RecipeProgress);
+        return true;
+    }
+
+    private void FinishWorkpiece(SmithingRecipe recipe)
+    {
+        var output = recipe.Output?.ResolvedItemstack?.Clone();
+        if (output != null)
+        {
+            output.Collectible.SetTemperature(Api.World, output, _workTemperature);
+            TryMergeOrSpawn(output, OutputSlot);
+        }
+
+        var bits = _work.LeftoverMetal(recipe) * BlockEntityEMetalForming.BitsPerIngot / BlockEntityEMetalForming.VoxelsPerIngot;
+        var bitStack = MakeMetalBits(_work.Metal, bits);
+        if (bitStack != null)
+        {
+            bitStack.Collectible.SetTemperature(Api.World, bitStack, _workTemperature);
+            TryMergeOrSpawn(bitStack, SecondaryOutputSlot);
+        }
+
+        _work.Clear();
+        AccumulatedEnergy = 0;
+        RecipeProgress = 0f;
+        if (InputSlot.Empty || ResolveSmithingRecipe() == null)
+            SetForging(false);
+        UpdateState(RecipeProgress);
+    }
+
+    private void RefundWorkpiece()
+    {
+        if (!_work.Active)
+            return;
+
+        var bits = _work.MetalCount * BlockEntityEMetalForming.BitsPerIngot / BlockEntityEMetalForming.VoxelsPerIngot;
+        var bitStack = MakeMetalBits(_work.Metal, bits);
+        if (bitStack != null)
+            Api.World.SpawnItemEntity(bitStack, Pos.ToVec3d().Add(0.5, 0.5, 0.5));
+
+        _work.Clear();
+        _workTemperature = 0f;
+    }
+
+    private ItemStack? MakeMetalBits(string metal, int count)
+    {
+        if (count <= 0 || string.IsNullOrEmpty(metal) || Api?.World == null)
+            return null;
+
+        var item = Api.World.GetItem(new AssetLocation("game:metalbit-" + metal));
+        return item == null ? null : new ItemStack(item, count);
+    }
+
+    private void ConsumeOneIngot()
+    {
+        _internalSlotChange = true;
+        var temp = GetInputTemperature();
+        InputSlot.TakeOut(1);
+        if (!InputSlot.Empty)
+            SetInputTemperature(temp);
+        InputSlot.MarkDirty();
+        _internalSlotChange = false;
+    }
+
+    private void SetWorkTemperature(float temperature)
+    {
+        _workTemperature = temperature;
+        if (!InputSlot.Empty)
+            SetInputTemperature(temperature);
+    }
+
+    private bool InputIsWorkMetal()
+    {
+        var stack = InputSlot?.Itemstack;
+        return BlockEntityEMetalForming.IsIngot(stack) &&
+               string.Equals(stack!.Collectible.LastCodePart(), _work.Metal, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private List<SmithingRecipe> SmithingRecipesForInput()
+    {
+        var stack = InputSlot?.Itemstack;
+        if (!BlockEntityEMetalForming.IsWorkableInput(stack))
+            return [];
+
+        var workable = stack!.Collectible.GetCollectibleInterface<IAnvilWorkable>();
+        var list = workable?.GetMatchingRecipes(stack);
+        if (list == null || list.Count == 0)
+            return [];
+
+        return list.Where(BlockEntityEMetalForming.IsIngotRecipe).ToList();
+    }
+
+    private MeshData? GenWorkpieceMesh()
+    {
+        if (_capi == null || string.IsNullOrEmpty(_work.Metal))
+            return null;
+
+        var item = Api.World.GetItem(new AssetLocation("game:workitem-" + _work.Metal));
+        if (item == null)
+            return null;
+
+        MeshData? mesh;
+        try
+        {
+            mesh = ItemWorkItem.GenMesh(_capi, new ItemStack(item), _work.Voxels);
+        }
+        catch (Exception e)
+        {
+            Api.World.Logger.Error("Не удалось собрать меш заготовки {0}: {1}", _work.Metal, e.Message);
+            return null;
+        }
+
+        if (mesh == null || mesh.VerticesCount == 0)
+            return null;
+
+        return mesh;
+    }
+
+    private string? _seatKey;
+    private Vec3d? _seatCenter;
+
+    /// <summary>
+    /// Центр слитка на столе. Заготовка наковальни уже стоит на высоте наковальни,
+    /// поэтому её центр переносим сюда, а не прибавляем сдвиг слитка ещё раз.
+    /// </summary>
+    private Vec3d? IngotSeatCenter()
+    {
+        if (_capi == null || string.IsNullOrEmpty(_work.Metal))
+            return null;
+
+        var key = _work.Metal + ":" + (Block?.Shape?.rotateY ?? 0);
+        if (_seatCenter != null && _seatKey == key)
+            return _seatCenter;
+
+        var item = Api.World.GetItem(new AssetLocation("game:ingot-" + _work.Metal));
+        if (item == null)
+            return null;
+
+        var mesh = GenMesh(new DummySlot(new ItemStack(item)));
+        if (mesh == null || mesh.VerticesCount == 0)
+            return null;
+
+        ApplySeat(mesh, new ItemStack(item));
+        _seatKey = key;
+        _seatCenter = GetMeshCenter(mesh);
+        return _seatCenter;
+    }
+
+    private void PlaceOnSeat(MeshData solid, MeshData? outline)
+    {
+        var origin = new Vec3f(0.5f, 0f, 0.5f);
+        var yaw = (Block?.Shape?.rotateY ?? 0) * GameMath.DEG2RAD;
+        solid.Rotate(origin, 0f, yaw, 0f);
+        outline?.Rotate(origin, 0f, yaw, 0f);
+
+        var seat = IngotSeatCenter();
+        var here = GetMeshCenter(solid);
+        if (seat == null || here == null)
+            return;
+
+        var dx = (float)(seat.X - here.X);
+        var dy = (float)(seat.Y - here.Y);
+        var dz = (float)(seat.Z - here.Z);
+        solid.Translate(dx, dy, dz);
+        outline?.Translate(dx, dy, dz);
+    }
+
+    /// <summary>
+    /// Зелёный — клетка рецепта пустая, оранжевый — в клетке лишний металл.
+    /// Контур обновляется вместе с вокселями на каждый удар.
+    /// </summary>
+    private MeshData? GenOutlineMesh()
+    {
+        if (_capi == null)
+            return null;
+
+        var recipe = ResolveSmithingRecipe();
+        var voxels = recipe?.Voxels;
+        if (voxels == null)
+            return null;
+
+        var outline = new MeshData(24, 36, false, false, true, false);
+        outline.SetMode(EnumDrawMode.Lines);
+
+        var green = _capi.ColorPreset.GetColor("anvilColorGreen");
+        var orange = _capi.ColorPreset.GetColor("anvilColorRed");
+        var greenCube = LineMeshUtil.GetCube(green);
+        var orangeCube = LineMeshUtil.GetCube(orange);
+        for (var i = 0; i < greenCube.xyz.Length; i++)
+        {
+            greenCube.xyz[i] = greenCube.xyz[i] / 32f + 1f / 32f;
+            orangeCube.xyz[i] = orangeCube.xyz[i] / 32f + 1f / 32f;
+        }
+
+        var offset = greenCube.Clone();
+        var yMax = voxels.GetLength(1);
+
+        for (var x = 0; x < 16; x++)
+        {
+            for (var y = 0; y < 6; y++)
+            {
+                for (var z = 0; z < 16; z++)
+                {
+                    var require = y < yMax && voxels[x, y, z];
+                    var mat = (EnumVoxelMaterial)_work.Voxels[x, y, z];
+                    if (require && mat == EnumVoxelMaterial.Metal)
+                        continue;
+                    if (!require && mat == EnumVoxelMaterial.Empty)
+                        continue;
+
+                    var px = x / 16f;
+                    var py = 10f / 16f + y / 16f;
+                    var pz = z / 16f;
+                    for (var i = 0; i < greenCube.xyz.Length; i += 3)
+                    {
+                        offset.xyz[i] = px + greenCube.xyz[i];
+                        offset.xyz[i + 1] = py + greenCube.xyz[i + 1];
+                        offset.xyz[i + 2] = pz + greenCube.xyz[i + 2];
+                    }
+
+                    offset.Rgba = require && mat == EnumVoxelMaterial.Empty ? greenCube.Rgba : orangeCube.Rgba;
+                    outline.AddMeshData(offset);
+                }
+            }
+        }
+
+        if (outline.VerticesCount == 0)
+            return null;
+
+        return outline;
     }
 
     public ItemStack InputStack

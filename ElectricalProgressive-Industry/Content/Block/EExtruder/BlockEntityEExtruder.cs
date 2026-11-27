@@ -43,6 +43,26 @@ namespace ElectricalProgressive.Content.Block.EExtruder
         private static float _maxTargetTemp = 1350f;
         public const float CraftStartTemp = 900f;
         private const float HeatPerEnergy = 0.5f;
+        private enum ExtruderAnimPhase
+        {
+            Idle,
+            Lever,
+            Load,
+            Press,
+            Unload
+        }
+
+        private const string AnimLever = "work-lever";
+        private const string AnimLoad = "work-load";
+        private const string AnimPress = "work-press";
+        private const string AnimUnload = "work-unload";
+        private const int PressFrames = 100;
+        private const float PressImpactFrame = 90f;
+        private const float OneShotSpeed = 2f;
+        private const float LeverDoneFrame = 36f;
+        private const float LoadDoneFrame = 80f;
+        private const float UnloadDoneFrame = 259f;
+        private const float PressCompletePeak = 0.8f;
 
         /// <summary>
         /// Машина готова к работе (сборка Core MachineConstruct завершена / formed).
@@ -73,7 +93,8 @@ namespace ElectricalProgressive.Content.Block.EExtruder
         private BlockEntityAnimationUtil? AnimUtil => GetBehavior<BEBehaviorAnimatable>()?.animUtil;
         private bool _animatorReadyForFormed;
         private int _lastSoundFrame = -1;
-        private long _lastAnimationCheckTime;
+        private ExtruderAnimPhase _phase;
+        private float _pressPeak;
 
         // Новые поля для системы мешей (как в холодильнике)
         private MeshData?[] _meshes;
@@ -273,12 +294,26 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 return;
 
             PrepareAnimUtil(Api, InventoryClassName);
+            int rotationDeg = GetRotation();
             AnimUtil.InitializeAnimator(
                 InventoryClassName,
                 _mesh,
                 _resultingShape,
-                new Vec3f(0, GetRotation(), 0f));
+                new Vec3f(0, rotationDeg, 0f));
+            if (AnimUtil.renderer != null)
+                AnimUtil.renderer.CustomTransform = FormedPlacement(rotationDeg);
             _animatorReadyForFormed = true;
+        }
+
+        // Сдвиг -1, 0, 1 снаружи сустава. В вершинах он крутит шестерни вокруг блока.
+        private static float[] FormedPlacement(float rotationDegY)
+        {
+            float[] m = Mat4f.Create();
+            Mat4f.Translate(m, m, 0.5f, 0f, 0.5f);
+            Mat4f.RotateY(m, m, rotationDegY * GameMath.DEG2RAD);
+            Mat4f.Translate(m, m, -0.5f, 0f, -0.5f);
+            Mat4f.Translate(m, m, -1f, 0f, 1f);
+            return m;
         }
 
         private Vintagestory.API.Common.Block? GetFormedBlockForAnim(ICoreAPI api)
@@ -306,10 +341,9 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             if (shape == null)
                 return;
 
-            // CreateMesh кэширует локальный меш — клонируем, иначе Translate уедет повторно
+            // CreateMesh кэширует меш. Клон не даёт чужому экструдеру перезаписать уже залитые вершины.
             var src = AnimUtil.CreateMesh(cacheDictKey + "-formed", shape, out _resultingShape, null);
             _mesh = src?.Clone();
-            _mesh?.Translate(-1f, 0f, 1f);
         }
 
         public int GetRotation()
@@ -814,7 +848,7 @@ namespace ElectricalProgressive.Content.Block.EExtruder
             }
             else if (_wasCraftingLastTick)
             {
-                StopAnimation();
+                RequestStop();
                 MarkDirty(true);
             }
 
@@ -839,64 +873,233 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 return;
 
             EnsureAnimatorReady();
-            if (AnimUtil == null) return;
+            if (AnimUtil == null || _phase != ExtruderAnimPhase.Idle)
+                return;
 
-            var beh = GetBehavior<BEBehaviorEExtruder>();
-            if (beh == null) return;
+            if (ClipActive(AnimLever) || ClipActive(AnimLoad) || ClipActive(AnimPress) || ClipActive(AnimUnload))
+                return;
 
-            if (!AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
+            _phase = ExtruderAnimPhase.Lever;
+            _pressPeak = 0f;
+            _lastSoundFrame = -1;
+            StartClip(AnimLever, OneShotSpeed);
+        }
+
+        /// <summary>
+        /// Ход поршня длится столько же, сколько набор энергии рецепта.
+        /// Энергия копится порциями Power/20 на тик сети.
+        /// </summary>
+        private float PressAnimationSpeed()
+        {
+            var energy = CurrentRecipe?.EnergyOperation ?? 0;
+            if (energy <= 0)
+                return 1f;
+
+            var power = Math.Max(1, GetBehavior<BEBehaviorEExtruder>()?.PowerSetting ?? 1);
+            var ticksPerSecond = Math.Max(1, global::ElectricalProgressive.ElectricalProgressive.speedOfElectricity);
+            return (float)(PressFrames * power * ticksPerSecond / (20.0 * energy * 30.0));
+        }
+
+        private void RequestStop()
+        {
+            if (Api?.Side != EnumAppSide.Client || _phase == ExtruderAnimPhase.Unload)
+                return;
+
+            if (_phase == ExtruderAnimPhase.Press && CraftFinished())
             {
-                float powerRatio = Math.Max(0.1f, Math.Min(1f, beh.PowerSetting / (float)CurrentRecipe.EnergyOperation));
-                float animationSpeed = powerRatio * 17.706f;
-                
-                AnimUtil.StartAnimation(new AnimationMetaData()
-                {
-                    Animation = "work-on",
-                    Code = "work-on",
-                    AnimationSpeed = animationSpeed,
-                    EaseOutSpeed = 2.0f,
-                    EaseInSpeed = 1f
-                });
+                BeginUnload();
+                return;
             }
+
+            StopAnimation();
+        }
+
+        private bool CraftFinished()
+        {
+            return _pressPeak >= PressCompletePeak && RecipeProgress <= _pressPeak - 0.5f;
+        }
+
+        private void BeginUnload()
+        {
+            if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
+                return;
+
+            if (_phase == ExtruderAnimPhase.Unload || ClipActive(AnimUnload))
+                return;
+
+            StopClip(AnimLever);
+            StopClip(AnimLoad);
+            StopClip(AnimPress);
+            _phase = ExtruderAnimPhase.Unload;
+            _pressPeak = 0f;
+            _lastSoundFrame = -1;
+            StartClip(AnimUnload, OneShotSpeed);
         }
 
         private void StopAnimation()
         {
             if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
-                return;
-
-            if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
             {
-                AnimUtil.StopAnimation("work-on");
+                _phase = ExtruderAnimPhase.Idle;
+                _pressPeak = 0f;
+                _lastSoundFrame = -1;
+                return;
             }
+
+            StopClip(AnimUnload);
+            StopClip(AnimPress);
+            StopClip(AnimLoad);
+            StopClip(AnimLever);
+            _phase = ExtruderAnimPhase.Idle;
+            _pressPeak = 0f;
+            _lastSoundFrame = -1;
         }
-        
+
+        private bool MachineAnimRunning()
+        {
+            if (ClipActive(AnimLever) || ClipActive(AnimLoad) || ClipActive(AnimPress) || ClipActive(AnimUnload))
+                return true;
+
+            var animator = AnimUtil?.animator;
+            if (animator == null)
+                return false;
+
+            var lever = animator.GetAnimationState(AnimLever);
+            var load = animator.GetAnimationState(AnimLoad);
+            var press = animator.GetAnimationState(AnimPress);
+            var unload = animator.GetAnimationState(AnimUnload);
+            return lever is { Running: true } || load is { Running: true }
+                || press is { Running: true } || unload is { Running: true };
+        }
+
         private void CheckAnimationFrame(float dt)
         {
-            if (Api?.Side != EnumAppSide.Client || AnimUtil == null)
+            var animator = AnimUtil?.animator;
+            if (Api?.Side != EnumAppSide.Client || animator == null || _phase == ExtruderAnimPhase.Idle)
                 return;
 
-            const int startFrame = 280;
-            if (AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on") && AnimUtil.animator != null)
+            if (!IsForging && _phase != ExtruderAnimPhase.Unload)
             {
-                var currentTime = Api.World.ElapsedMilliseconds;
-                _lastAnimationCheckTime = currentTime;
-
-                var currentFrame = AnimUtil.animator.Animations[0].CurrentFrame;
-                if (currentFrame >= startFrame && _lastSoundFrame != startFrame)
-                {
-                    PlayPressSound();
-                    _lastSoundFrame = startFrame;
-                }
-                else if ((int)currentFrame < startFrame)
-                {
-                    _lastSoundFrame = -1;
-                }
+                RequestStop();
+                return;
             }
-            else
+
+            switch (_phase)
+            {
+                case ExtruderAnimPhase.Lever:
+                    var lever = animator.GetAnimationState(AnimLever);
+                    if (lever is { Active: true } && lever.CurrentFrame >= LeverDoneFrame)
+                        StartLoad();
+                    break;
+                case ExtruderAnimPhase.Load:
+                    var load = animator.GetAnimationState(AnimLoad);
+                    if (load is { Active: true } && load.CurrentFrame >= LoadDoneFrame)
+                        StartPress();
+                    break;
+                case ExtruderAnimPhase.Press:
+                    AdvancePress();
+                    break;
+                case ExtruderAnimPhase.Unload:
+                    FinishUnloadIfDone();
+                    break;
+            }
+        }
+
+        private void StartLoad()
+        {
+            if (_phase == ExtruderAnimPhase.Load || ClipActive(AnimLoad))
+                return;
+
+            _phase = ExtruderAnimPhase.Load;
+            StartClip(AnimLoad, OneShotSpeed);
+        }
+
+        private void StartPress()
+        {
+            if (_phase == ExtruderAnimPhase.Press || ClipActive(AnimPress))
+                return;
+
+            _phase = ExtruderAnimPhase.Press;
+            _pressPeak = Math.Max(0f, RecipeProgress);
+            _lastSoundFrame = -1;
+            StartClip(AnimPress, PressAnimationSpeed());
+        }
+
+        private void AdvancePress()
+        {
+            _pressPeak = Math.Max(_pressPeak, RecipeProgress);
+            if (CraftFinished())
+            {
+                BeginUnload();
+                return;
+            }
+
+            var util = AnimUtil;
+            var press = util?.animator?.GetAnimationState(AnimPress);
+            if (util == null || press is not { Active: true })
+            {
+                _lastSoundFrame = -1;
+                return;
+            }
+
+            if (util.activeAnimationsByAnimCode.TryGetValue(AnimPress, out var meta))
+                meta.AnimationSpeed = PressAnimationSpeed();
+
+            var frame = Math.Clamp(RecipeProgress, 0f, 1f) * PressFrames;
+            press.CurrentFrame = frame;
+
+            if (frame >= PressImpactFrame && _lastSoundFrame < 0)
+            {
+                PlayPressSound();
+                _lastSoundFrame = (int)PressImpactFrame;
+            }
+            else if (frame < PressImpactFrame)
             {
                 _lastSoundFrame = -1;
             }
+        }
+
+        private void FinishUnloadIfDone()
+        {
+            if (!ClipActive(AnimUnload))
+            {
+                _phase = ExtruderAnimPhase.Idle;
+                if (IsForging && CurrentRecipe != null)
+                    StartAnimation();
+                return;
+            }
+
+            var unload = AnimUtil?.animator?.GetAnimationState(AnimUnload);
+            if (unload is not { Active: true } || unload.CurrentFrame < UnloadDoneFrame)
+                return;
+
+            StopClip(AnimUnload);
+            _phase = ExtruderAnimPhase.Idle;
+            if (IsForging && CurrentRecipe != null)
+                StartAnimation();
+        }
+
+        private bool ClipActive(string code)
+        {
+            return AnimUtil?.activeAnimationsByAnimCode?.ContainsKey(code) == true;
+        }
+
+        private void StartClip(string code, float speed)
+        {
+            AnimUtil?.StartAnimation(new AnimationMetaData()
+            {
+                Animation = code,
+                Code = code,
+                AnimationSpeed = speed,
+                EaseOutSpeed = 10f,
+                EaseInSpeed = 10f
+            });
+        }
+
+        private void StopClip(string code)
+        {
+            if (ClipActive(code))
+                AnimUtil?.StopAnimation(code);
         }
 
         private void PlayPressSound()
@@ -977,7 +1180,7 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 if (IsForging)
                     StartAnimation();
                 else
-                    StopAnimation();
+                    RequestStop();
             }
 
             if (Api?.Side == EnumAppSide.Client && _clientDialog != null)
@@ -1030,13 +1233,7 @@ namespace ElectricalProgressive.Content.Block.EExtruder
                 }
             }
 
-            if (AnimUtil?.activeAnimationsByAnimCode == null ||
-                !AnimUtil.activeAnimationsByAnimCode.ContainsKey("work-on"))
-            {
-                return false;
-            }
-
-            return true;
+            return MachineAnimRunning();
         }
 
         public override void OnBlockRemoved()

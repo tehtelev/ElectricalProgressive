@@ -2,6 +2,7 @@ using System;
 using Cairo;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 
 namespace ElectricalProgressive.Content.Block.EHammer;
@@ -10,6 +11,7 @@ public class GuiDialogHammer : GuiDialogBlockEntity
 {
     private long lastRedrawMs;
     private float _recipeprogress;
+    private string _recipeName = "";
     private BlockEntityEHammer _beHammer;
     private BlockPos _blockEntityPos;
     private ICoreClientAPI _capi;
@@ -35,6 +37,7 @@ public class GuiDialogHammer : GuiDialogBlockEntity
         {
             _beHammer = be;
             _recipeprogress = be.RecipeProgress;
+            _recipeName = be.CurrentRecipeName ?? "";
         }
 
         capi.World.Player.InventoryManager.OpenInventory((IInventory)Inventory);
@@ -54,12 +57,24 @@ public class GuiDialogHammer : GuiDialogBlockEntity
         else
             itemSlot = (ItemSlot)null;
 
-        var bounds1 = ElementBounds.Fixed(0.0, 0.0, 250.0, 110.0);
+        var be = capi.World.BlockAccessor.GetBlockEntity(_blockEntityPos) as BlockEntityEHammer;
+        if (be != null)
+        {
+            _beHammer = be;
+            _recipeName = be.CurrentRecipeName ?? "";
+        }
+
+        var bounds1 = ElementBounds.Fixed(0.0, 0.0, 280.0, 175.0);
         var bounds2 = ElementStdBounds.SlotGrid(EnumDialogArea.None, 10.0, 55.0, 1, 1); // Input slot
-        var bounds3 = ElementStdBounds.SlotGrid(EnumDialogArea.None, 210.0, 30.0, 1, 2); // Main output slot
+        var bounds3 = ElementStdBounds.SlotGrid(EnumDialogArea.None, 230.0, 30.0, 1, 2); // Main output slot
 
         // Прогресс-бар (шире и выше)
-        var progressBounds = ElementBounds.Fixed(65, 67, 140, 25);
+        var progressBounds = ElementBounds.Fixed(65, 67, 155, 25);
+        var recipeTextBounds = ElementBounds.Fixed(10, 112, 260, 20);
+        var buttonBounds = ElementBounds.Fixed(10, 136, 170, 26);
+        var recipeLabel = string.IsNullOrEmpty(_recipeName)
+            ? Lang.Get("electricalprogressiveindustry:emetalforming-no-selection")
+            : _recipeName;
 
         var bounds4 = ElementBounds.Fill.WithFixedPadding(GuiStyle.ElementToDialogPadding);
         bounds4.BothSizing = ElementSizing.FitToChildren;
@@ -81,10 +96,9 @@ public class GuiDialogHammer : GuiDialogBlockEntity
             // Слоты
             .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 1, new int[1] { 0 }, bounds2, "inputSlot")
             .AddItemSlotGrid((IInventory)this.Inventory, new Action<object>(this.SendInvPacket), 1, new int[2] { 1,2 }, bounds3, "outputslot")
-
-            // Подписи
-            .AddStaticText("Вход", CairoFont.WhiteDetailText(), ElementBounds.Fixed(17, 105, 40, 20))
-            .AddStaticText("Выход", CairoFont.WhiteDetailText(), ElementBounds.Fixed(212, 135, 45, 20))
+            .AddDynamicText(recipeLabel, CairoFont.WhiteDetailText(), recipeTextBounds, "recipename")
+            .AddSmallButton(Lang.Get("electricalprogressiveindustry:emetalforming-select"),
+                OnSelectRecipe, buttonBounds)
 
             .EndChildElements()
             .Compose();
@@ -96,10 +110,18 @@ public class GuiDialogHammer : GuiDialogBlockEntity
         this.SingleComposer.OnMouseMove(new MouseEvent(this.capi.Input.MouseX, this.capi.Input.MouseY));
     }
 
-    public void Update(float RecipeProgress)
+    private bool OnSelectRecipe()
+    {
+        _beHammer?.OpenRecipeSelector();
+        return true;
+    }
+
+    public void Update(float RecipeProgress, string? recipeName = null)
     {
         // Гарантируем что прогресс в диапазоне 0-1
         _recipeprogress = Math.Min(Math.Max(RecipeProgress, 0f), 1f);
+        if (recipeName != null)
+            _recipeName = recipeName;
 
         if (!this.IsOpened())
             return;
@@ -111,6 +133,10 @@ public class GuiDialogHammer : GuiDialogBlockEntity
         if (this.SingleComposer != null)
         {
             this.SingleComposer.GetCustomDraw("progressDrawer")?.Redraw();
+            var label = string.IsNullOrEmpty(_recipeName)
+                ? Lang.Get("electricalprogressiveindustry:emetalforming-no-selection")
+                : _recipeName;
+            this.SingleComposer.GetDynamicText("recipename")?.SetNewText(label);
         }
         this.lastRedrawMs = this.capi.ElapsedMilliseconds;
     }

@@ -1,3 +1,4 @@
+using ElectricalProgressive.Content.Block.EMetalForming;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 
@@ -58,6 +59,18 @@ public class InventoryHammer : InventoryGeneric
         {
             lastSlot0Count = currentCount;
             lastSlot0UpdateTime = _entity.Api.World.ElapsedMilliseconds; // запоминаем время
+        }
+
+        if (_entity.WorkpieceActive || _entity.AcceptsSmithingPower() ||
+            BlockEntityEMetalForming.IsWorkableInput(this[0].Itemstack))
+        {
+            for (var i = 1; i < this.Count; i++)
+            {
+                if (!this[i].Empty)
+                    return this[i];
+            }
+
+            return null!;
         }
 
         // есть рецепт?
